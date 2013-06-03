@@ -1,4 +1,4 @@
 FandianPF
 =========
 
-[FandianPF Scientific Publishing Framework](wiki/home)
+[FandianPF Scientific Publishing Framework](/fandianpf/fandianpf/wiki/home)
