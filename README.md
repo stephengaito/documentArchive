@@ -1,4 +1,4 @@
-fandianpf
+FandianPF
 =========
 
-FandianPF Scientific/Technical Publishing Framework
+[FandianPF Scientific Publishing Framework](wiki/home)
