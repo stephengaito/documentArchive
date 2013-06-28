@@ -1,3 +1,28 @@
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [FandianPF high-level goals](#fandianpf-high-level-goals)
+	- [Problem](#problem)
+		- [Goal](#goal)
+			- [Requirements](#requirements)
+	- [Problem](#problem-1)
+		- [Goal](#goal-1)
+			- [Requirements](#requirements-1)
+	- [Problem](#problem-2)
+		- [Goal](#goal-2)
+			- [Requirements](#requirements-2)
+	- [Problem](#problem-3)
+		- [Goal](#goal-3)
+			- [Requirements](#requirements-3)
+	- [Problem](#problem-4)
+		- [Goal](#goal-4)
+			- [Requirements](#requirements-4)
+	- [Problem](#problem-5)
+		- [Goal](#goal-5)
+			- [Requirements](#requirements-5)
+	- [Problem](#problem-6)
+		- [Goal](#goal-6)
+			- [Requirements](#requirements-6)
+
 # FandianPF high-level goals
 
 ## Problem

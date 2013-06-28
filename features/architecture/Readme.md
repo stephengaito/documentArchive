@@ -1,3 +1,16 @@
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [FandianPF (integration) architecture](#fandianpf-integration-architecture)
+	- [Problem](#problem)
+		- [Goals](#goals)
+			- [Requirements](#requirements)
+	- [Problem](#problem-1)
+		- [Goals](#goals-1)
+			- [Requirements](#requirements-1)
+	- [Problem](#problem-2)
+		- [Goals](#goals-2)
+			- [Requirements](#requirements-2)
+
 # FandianPF (integration) architecture
 
 ## Problem

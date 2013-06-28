@@ -1,3 +1,9 @@
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [FandianPF](#fandianpf)
+	- [Usage](#usage)
+	- [Development](#development)
+
 # FandianPF
 
 [FandianPF Scientific Publishing Framework](wiki/home), a 

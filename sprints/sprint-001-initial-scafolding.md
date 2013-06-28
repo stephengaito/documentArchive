@@ -1,3 +1,21 @@
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [Sprint 001 building initial scaffolding](#sprint-001-building-initial-scaffolding)
+	- [Tasks](#tasks)
+	- [Cucumber features](#cucumber-features)
+	- [RSpec specifications](#rspec-specifications)
+	- [Questions/Risks](#questionsrisks)
+		- [DRY Cucumber Scenerioes?](#dry-cucumber-scenerioes)
+		- [RESTful development:](#restful-development)
+			- [Browser support](#browser-support)
+			- [Test integration](#test-integration)
+			- [Command line support](#command-line-support)
+			- [Browser in-place-editing](#browser-in-place-editing)
+		- [HTML testing](#html-testing)
+		- [Markdown tools](#markdown-tools)
+	- [Reflections](#reflections)
+		- [Learning curves](#learning-curves)
+
 # Sprint 001 building initial scaffolding
 
  * Started: 2013/06/20 Thursday
@@ -12,6 +30,7 @@
  1. create *initial* *crude* fandianpf script
  1. run cucumber/rspec loop.... 
  1. create simple (mass) upload/download script (**postponed**)
+ 1. setup simple markdown documentation tools
 
 ## Cucumber features
 
@@ -115,3 +134,31 @@ headless webkit browser.
  1. [Capybara DSL](https://github.com/jnicklas/capybara#the-dsl)
 
  1. [Capybara Drivers](https://github.com/jnicklas/capybara#drivers)
+
+### Markdown tools
+
+ 1. We use 
+[redcarpet](https://github.com/vmg/redcarpet#redcarpet-2-is-written-with-sugar-spice-and-everything-nice) 
+to preview our Markdown documentation as it seems to be the closest to 
+that used by GitHub. *However* its :with_toc_data does *not* behave in 
+the same way that GitHub does ;-(
+
+    To use redcarpet type:
+
+    > redcarpet \<-markdown-file-\> > \<-html-file-\>
+
+ 1. We use [DocToc](https://github.com/thlorenz/doctoc#doctoc-) to 
+create tables of contents at the top of all of our Markdown 
+documentation files.
+
+    To use DocToc cd to the root of the project and then type:
+
+    > doctoc .
+
+## Reflections
+
+### Learning curves
+
+Most of this sprint has been taken up learning about the various tools 
+used, and/or tripping over "features" which where documented but poorly 
+understood by me ;-(

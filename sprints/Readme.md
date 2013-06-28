@@ -1,3 +1,7 @@
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [Overview of sprint planning process.](#overview-of-sprint-planning-process)
+
 # Overview of sprint planning process.
 
 We work in 

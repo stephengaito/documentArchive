@@ -1,3 +1,7 @@
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [FandianPF Cucumber feature backlog](#fandianpf-cucumber-feature-backlog)
+
 # FandianPF Cucumber feature backlog
 
 This directory contains a collection of Cucumber features which have 
