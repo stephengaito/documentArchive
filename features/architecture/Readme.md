@@ -14,10 +14,10 @@
 		- [Goals](#goals-3)
 			- [Requirements](#requirements-3)
 	- [Problem: Secure access](#problem-secure-access)
-		- [Goal](#goal)
+		- [Goals](#goals-4)
 			- [Requirements](#requirements-4)
 	- [Problem: Agile open source development](#problem-agile-open-source-development)
-		- [Goals](#goals-4)
+		- [Goals](#goals-5)
 			- [Requirements](#requirements-5)
 
 # FandianPF (integration) architecture
@@ -229,9 +229,10 @@ For our purposes the most secure communication technologies are HTTPS
 (HTTP over SSL/TLS).  HTTPS can, today, optionally require clients to 
 supply a client certificate.  By requiring both the standard server and 
 the rarely used client certificates in the HTTPS protocol, we ensure 
-there is a very low probability of a man in the middle attack (that is, 
-there is no agent in the middle who is listening to the communication). 
-We also raise the confidence that the client is who they say they are.
+there is a very low probability of a "agent in the middle attack" (that 
+is, there is no agent in the middle who is listening to the 
+communication). We also raise the confidence that the client is who 
+they say they are.
 
 Again, for our purposes, another secure communication technology is VPN 
 (virtual private networks).  If a FandianPF instance is bound 
@@ -242,7 +243,7 @@ Finally for easy use by one user (a very typical use case), we should
 assume that a FandianPF instance which is bound exclusively to the 
 localhost loopback interface (127.0.0.1) is secure (enough).
 
-### Goal
+### Goals
 
 Allow a range of secure (enough) communication channels.
 
