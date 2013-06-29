@@ -1,31 +1,31 @@
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 - [FandianPF high-level goals](#fandianpf-high-level-goals)
-	- [Problem](#problem)
+	- [Problem: Facilitating technical discussion](#problem-facilitating-technical-discussion)
 		- [Goal](#goal)
 			- [Requirements](#requirements)
-	- [Problem](#problem-1)
+	- [Problem: Publishing summaries of extended discussion](#problem-publishing-summaries-of-extended-discussion)
 		- [Goal](#goal-1)
 			- [Requirements](#requirements-1)
-	- [Problem](#problem-2)
+	- [Problem: Peer review](#problem-peer-review)
 		- [Goal](#goal-2)
 			- [Requirements](#requirements-2)
-	- [Problem](#problem-3)
+	- [Problem: Engendering high quality discussion](#problem-engendering-high-quality-discussion)
 		- [Goal](#goal-3)
 			- [Requirements](#requirements-3)
-	- [Problem](#problem-4)
+	- [Problem: Linking private work with public discussion](#problem-linking-private-work-with-public-discussion)
 		- [Goal](#goal-4)
 			- [Requirements](#requirements-4)
-	- [Problem](#problem-5)
+	- [Problem: Interworking with external tools and repositories](#problem-interworking-with-external-tools-and-repositories)
 		- [Goal](#goal-5)
 			- [Requirements](#requirements-5)
-	- [Problem](#problem-6)
+	- [Problem: Making mathematical and diagrammatic writing easy](#problem-making-mathematical-and-diagrammatic-writing-easy)
 		- [Goal](#goal-6)
 			- [Requirements](#requirements-6)
 
 # FandianPF high-level goals
 
-## Problem
+## Problem: Facilitating technical discussion
 
 Communicating extended Scientific, Engineering or Mathematical 
 (Technical) arguments to an audience with a wide range of skills 
@@ -91,7 +91,7 @@ differing levels of skill.
 > note in this "cloud" for its contribution to the "definition" of 
 > given term.
 
-## Problem
+## Problem: Publishing summaries of extended discussion
 
 At some point, a researcher will decide that they understand an idea 
 well enough that they wish to publish an extended discussion/exposition 
@@ -122,7 +122,7 @@ seamlessly into "published documents".
 > "discussions" (related collections of "notes") on key points 
 > contained in the "published document".
 
-## Problem
+## Problem: Peer review
 
 Current scientific practice is to submit all papers for “peer review” 
 before the papers are published in reputable journals.  Without the 
@@ -145,7 +145,7 @@ part of the FandianPF system.
 
 > There SHOULD be NO restriction on who may make comments.
 
-## Problem
+## Problem: Engendering high quality discussion
 
 Allowing anyone to comment opens a researcher and their "surrounding" 
 community open to all sorts of "spam", and/or, argumentation of 
@@ -178,13 +178,7 @@ The management of the quality of on-going discussion should be easy.
 > It SHOULD be possible to suspend all new "comments" on a given 
 > "note".
 
-> There SHOULD be different levels of "users" consisting (but not 
-> necessarily limited to): "Administrators", "Editors", "Authors", 
-> "Readers" ("Spammers"?). These different "users" WILL have differing 
-> levels of access to access or alter content or otherwise control the 
-> contents of the system.
-
-## Problem
+## Problem: Linking private work with public discussion
 
 The writing and reading of technical ideas is at one and the same time, 
 both intensely private (we usually write up our ideas hunched over our 
@@ -222,7 +216,7 @@ fully public discussions.
 > It SHOULD be possible to provide automatic "rules" to help limit this 
 > flow of "notes"/"documents".
 
-## Problem
+## Problem: Interworking with external tools and repositories
 
 The FandianPF system will never "exist" on its own. There are numerous 
 research tools with which it would be useful for a given researcher's 
@@ -258,7 +252,7 @@ tools.
 > It SHOULD be possible to secure the transfer of content via any 
 > RESTful interface using SSL/TSL/SSH.
 
-## Problem
+## Problem: Making mathematical and diagrammatic writing easy
 
 Of necessity, technical discussions often make use of mathematical 
 arguments, equations and symbols. While there are a few exceptional 

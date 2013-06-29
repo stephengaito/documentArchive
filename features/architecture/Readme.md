@@ -1,19 +1,28 @@
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 - [FandianPF (integration) architecture](#fandianpf-integration-architecture)
-	- [Problem](#problem)
+	- [Problem: Scalable deployment](#problem-scalable-deployment)
 		- [Goals](#goals)
 			- [Requirements](#requirements)
-	- [Problem](#problem-1)
+	- [Problem: Semi-structured datastore](#problem-semi-structured-datastore)
 		- [Goals](#goals-1)
 			- [Requirements](#requirements-1)
-	- [Problem](#problem-2)
+	- [Problem: User authentication](#problem-user-authentication)
 		- [Goals](#goals-2)
 			- [Requirements](#requirements-2)
+	- [Problem: Administrative interfaces.](#problem-administrative-interfaces)
+		- [Goals](#goals-3)
+			- [Requirements](#requirements-3)
+	- [Problem: Secure access](#problem-secure-access)
+		- [Goal](#goal)
+			- [Requirements](#requirements-4)
+	- [Problem: Agile open source development](#problem-agile-open-source-development)
+		- [Goals](#goals-4)
+			- [Requirements](#requirements-5)
 
 # FandianPF (integration) architecture
 
-## Problem
+## Problem: Scalable deployment
 
 We have a requirement to provide RESTful interfaces between a cloud of 
 FandianPF systems.
@@ -65,7 +74,11 @@ I know (and love) Ruby...
 
 > Cloud installations SHOULD use Java WAR file distribution.
 
-## Problem
+> It SHOULD be possible to deploy on Heroku
+
+> It MIGHT be possible to deploy as a Google App.
+
+## Problem: Semi-structured datastore
 
 The structure of references in standard reference databases (such as 
 BibTeX and/or Zotero) do not have a fixed structure, since different 
@@ -77,9 +90,8 @@ data which can usefully be semi-structured is really quite large:
 issues, ...
 
 Some of the data we want to be able to capture, such as "decorations" 
-on existing content, can usefully have fairly rigid structure.  
-Examples of such decorations are, versions, draft-quality, 
-level-of-detail, ...
+on existing content, can usefully have fairly rigid structure. Examples 
+of such decorations are, versions, draft-quality, level-of-detail, ...
 
 So there is a need to mix structured and semi-structured data in a 
 single data management system.  We take ideas from [Goat 
@@ -110,7 +122,161 @@ the personal tablet to the cloud.
 
 > Structured data should be storable in standard database tables.
 
-## Problem
+## Problem: User authentication
+
+In any long lived system which will accumulate a large amount of 
+valuable data, there is a need for various different users to maintain 
+different aspects of the system.
+
+We need to ensure different users, with differing roles, have 
+appropriate levels of access to modify the system.
+
+### Goals
+
+Provide flexible user accounts based upon the OpenID standard.
+
+#### Requirements
+
+> There SHOULD be different levels of "users" consisting (but not 
+> necessarily limited to): "Administrators", "Editors", "Authors", 
+> "Commenters", "Readers", "Spammers"(!?). 
+
+> These different "users" WILL have differing levels of access to 
+> access or alter content or otherwise control the contents of the 
+> system.
+
+> Administrators, Editors, and Authors MUST be identified to the system 
+> with an "account".
+
+> Commenters MIGHT be allowed to leave a comment by only using an (one 
+> off) OpenID to identify themselves.
+
+> Commenters NEED NOT have an account on a given FandianPF instance.
+
+> Readers MIGHT not need to identify themselves.
+
+> There MIGHT be a list of blocked Spammers.
+
+> It MUST be possible to link accounts between different instances of 
+> FandianPF.
+
+> Local accounts MIGHT be "externalised" to other FandianPF instances 
+> by making FandianPF an OpenID provider.
+
+> Users on one instance of FandianPF need not have the same privileges 
+> on a linked instance of FandianPF.
+
+> The quality of an OpenID provider known to a FandianPF instance 
+> SHOULD be ranked. 
+
+> This OpenID provider ranking MIGHT be used in filtering spam.
+
+> This OpenID provider ranking MIGHT be used in user authentication.
+
+## Problem: Administrative interfaces.
+
+Balancing the twin goals of making administration of a FandianPF 
+instance both easy and secure will be an interesting challenge.
+
+Web-interfaces will probably be the most natural admin interface for 
+private FandianPF instances used by either a single researcher or a 
+small team on a secure VPN.
+
+Configuration files or command line interfaces would probably be the 
+most secure way to administer a highly public FandianPF interface.
+
+### Goals
+
+Provide a set of flexible *and* secure administrative interfaces.
+
+#### Requirements
+
+> Administration of an individual FandianPF instance SHOULD be easy.
+
+> The administration of highly public FandianPF instances MUST be 
+> secure.
+
+> The administrator SHOULD have the ability to turn on or off web-based 
+> administration.
+
+> There MIGHT be command line tools to effect administration.  
+> *Question:* How will administrators administer Heroku-like 
+> instances without a web-interface?
+
+> The administrator MUST be able to configure, initialise, dump, clear, 
+> and upgrade the (contents of the) datastore.
+
+> The administrator MUST be able to add users and assign them various 
+> roles.
+
+> The administrator MUST be able to configure (user) trust 
+> relationships between FandianPF instances.
+
+> The administrator MUST be able to configure (data) trust 
+> relationships between FandianPF instances.
+
+> Use of configuration files (if any) MUST not prohibit a Heroku or 
+> Google App type of deployment.
+
+> Use of command line tools (if any) MUST not prohibit a Heroku or 
+> Google App type of deployment.
+
+## Problem: Secure access
+
+Current secure communication technologies vary in their ease of use.
+
+For our purposes the most secure communication technologies are HTTPS 
+(HTTP over SSL/TLS).  HTTPS can, today, optionally require clients to 
+supply a client certificate.  By requiring both the standard server and 
+the rarely used client certificates in the HTTPS protocol, we ensure 
+there is a very low probability of a man in the middle attack (that is, 
+there is no agent in the middle who is listening to the communication). 
+We also raise the confidence that the client is who they say they are.
+
+Again, for our purposes, another secure communication technology is VPN 
+(virtual private networks).  If a FandianPF instance is bound 
+exclusively to VPN interfaces, then it should be assumed that all 
+communication is secure (enough).
+
+Finally for easy use by one user (a very typical use case), we should 
+assume that a FandianPF instance which is bound exclusively to the 
+localhost loopback interface (127.0.0.1) is secure (enough).
+
+### Goal
+
+Allow a range of secure (enough) communication channels.
+
+Allow different user roles to use communication channels with different 
+levels of security.
+
+#### Requirements
+
+> It MUST be possible to use HTTPS (with server certificates) (HTTPS).
+
+> It MUST be possible to use HTTPS with BOTH client and server 
+> certificates (HTTPSC).
+
+> It MUST be possible to configure an instance to allow the use of any 
+> of HTTP, HTTPS, or HTTPSC on any particular route.
+
+> User roles who are "just" reading the content, SHOULD not need to use 
+> HTTPSC or VPN communication channels.
+
+> It SHOULD be possible to run "our own" highly secure (HTTPSC) OpenID 
+> server.
+
+> It MIGHT be possible to have "our own" highly secure OpenID server 
+> require multiple types of credentials.
+
+> It MUST be possible to override all HTTPS or HTTPSC requirements IF 
+> the FandianPF instance is bound exclusively to the 127.0.0.1 
+> (localhost loopback) interface.
+
+> It MUST be possible to override all HTTPS or HTTPSC requirements IF 
+> the FandianPF instance is bound exclusively to VPN secured 
+> interfaces.
+
+## Problem: Agile open source development
 
 I need to keep the development of this project simple, lightweight and 
 fast.
