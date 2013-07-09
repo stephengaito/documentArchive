@@ -21,7 +21,7 @@
 
  * Started: 2013/06/28 Friday
  * Paused: 2013/07/01 Monday (to review VPS providers)
- * Re-started: 2013/0709 Tuesday
+ * Paused: 2013/0709 Tuesday (to complete accounts and review travel plans)
  * Ends: 2013/07/012 Friday
 
 ## Tasks
