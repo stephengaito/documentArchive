@@ -16,9 +16,12 @@
 	- [Problem: Secure access](#problem-secure-access)
 		- [Goals](#goals-4)
 			- [Requirements](#requirements-4)
-	- [Problem: Agile open source development](#problem-agile-open-source-development)
+	- [Problem: WebApp security](#problem-webapp-security)
 		- [Goals](#goals-5)
 			- [Requirements](#requirements-5)
+	- [Problem: Agile open source development](#problem-agile-open-source-development)
+		- [Goals](#goals-6)
+			- [Requirements](#requirements-6)
 
 # FandianPF (integration) architecture
 
@@ -276,6 +279,29 @@ levels of security.
 > It MUST be possible to override all HTTPS or HTTPSC requirements IF 
 > the FandianPF instance is bound exclusively to VPN secured 
 > interfaces.
+
+## Problem: WebApp security
+
+Like it or not, there are people out there who will try to break any 
+security systems we might put in place to control access to a FandianPF 
+instance. This will be a significant problem for any highly public web 
+application.
+
+While we do not want to become so paranoid that the application becomes 
+impossible for normal use, we *do* want to ensure all of the obvious 
+vulnerabilities are protected against.
+
+### Goals
+
+Ensure any FandianPF instance is as difficult to hack as feasibly 
+possible.
+
+#### Requirements
+
+> ALL user input MUST be scanned for malicious intent.
+
+> Consider using Rack middleware to scan all inbound requests for 
+> security violations.
 
 ## Problem: Agile open source development
 
