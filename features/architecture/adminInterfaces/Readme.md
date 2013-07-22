@@ -1,10 +1,13 @@
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
-- [Problem: Administrative interfaces.](#problem-administrative-interfaces)
-- [Goals](#goals)
-- [Requirements](#requirements)
+- [Administrative interfaces.](#administrative-interfaces)
+	- [Problem](#problem)
+	- [Goals](#goals)
+	- [Requirements](#requirements)
 
-## Problem: Administrative interfaces.
+# Administrative interfaces.
+
+## Problem
 
 Balancing the twin goals of making administration of a FandianPF
 instance both easy and secure will be an interesting challenge.

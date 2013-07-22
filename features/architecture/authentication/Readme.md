@@ -1,14 +1,17 @@
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
-- [Problem: User authentication](#problem-user-authentication)
-- [Goals](#goals)
-- [Research](#research)
-	- [Authentication options](#authentication-options)
-		- [OpenID](#openid)
-		- [OAuth](#oauth)
-- [Requirements](#requirements)
+- [User authentication](#user-authentication)
+	- [Problem](#problem)
+	- [Goals](#goals)
+	- [Research](#research)
+		- [Authentication options](#authentication-options)
+			- [OpenID](#openid)
+			- [OAuth](#oauth)
+	- [Requirements](#requirements)
 
-## Problem: User authentication
+# User authentication
+
+## Problem
 
 In any long lived system which will accumulate a large amount of
 valuable data, there is a need for various different users to maintain

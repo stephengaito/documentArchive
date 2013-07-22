@@ -1,11 +1,14 @@
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
-- [Problem: WebApp security and User input sanitisation](#problem-webapp-security-and-user-input-sanitisation)
-- [Goals](#goals)
-- [Research](#research)
-- [Requirements](#requirements)
+- [WebApp security and User input sanitisation](#webapp-security-and-user-input-sanitisation)
+	- [Problem](#problem)
+	- [Goals](#goals)
+	- [Research](#research)
+	- [Requirements](#requirements)
 
-## Problem: WebApp security and User input sanitisation
+# WebApp security and User input sanitisation
+
+## Problem
 
 Like it or not, there are people out there who will try to break any 
 security systems we might put in place to control access to a FandianPF 

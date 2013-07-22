@@ -1,13 +1,16 @@
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
-- [Problem: Secure access](#problem-secure-access)
-- [Goals](#goals)
-- [Research](#research)
-		- [HTTPSC (two way HTTPS)](#httpsc-two-way-https)
-		- [VPN](#vpn)
-- [Requirements](#requirements)
+- [Secure access](#secure-access)
+	- [Problem](#problem)
+	- [Goals](#goals)
+	- [Research](#research)
+			- [HTTPSC (two way HTTPS)](#httpsc-two-way-https)
+			- [VPN](#vpn)
+	- [Requirements](#requirements)
 
-## Problem: Secure access
+# Secure access
+
+## Problem
 
 Current secure communication technologies vary in their ease of use.
 

@@ -1,10 +1,13 @@
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
-- [Problem: Semi-structured datastore](#problem-semi-structured-datastore)
-	- [Goals](#goals)
-		- [Requirements](#requirements)
+- [Semi-structured datastore](#semi-structured-datastore)
+	- [Problem](#problem)
+		- [Goals](#goals)
+			- [Requirements](#requirements)
 
-## Problem: Semi-structured datastore
+# Semi-structured datastore
+
+## Problem
 
 The structure of references in standard reference databases (such as
 BibTeX and/or Zotero) do not have a fixed structure, since different

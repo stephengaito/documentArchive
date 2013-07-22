@@ -1,16 +1,19 @@
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
-- [Problem: Scalable deployment](#problem-scalable-deployment)
-- [Goals](#goals)
-- [Research](#research)
-	- [Deployment options](#deployment-options)
-		- [Tablet](#tablet)
-		- [Standard desktop, Amazon, or VPS instances](#standard-desktop-amazon-or-vps-instances)
-		- [Heroku](#heroku)
-		- [Google Apps](#google-apps)
-- [Requirements](#requirements)
+- [Scalable deployment](#scalable-deployment)
+	- [Problem](#problem)
+	- [Goals](#goals)
+	- [Research](#research)
+		- [Deployment options](#deployment-options)
+			- [Tablet](#tablet)
+			- [Standard desktop, Amazon, or VPS instances](#standard-desktop-amazon-or-vps-instances)
+			- [Heroku](#heroku)
+			- [Google Apps](#google-apps)
+	- [Requirements](#requirements)
 
-## Problem: Scalable deployment
+# Scalable deployment
+
+## Problem
 
 We have a requirement to provide RESTful interfaces between a cloud of
 FandianPF systems.
