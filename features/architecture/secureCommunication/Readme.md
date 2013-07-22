@@ -55,9 +55,11 @@ happens.
 
 See:
 
- * [How to validate SSL certificate chain in ruby with net/http](http://stacko$
+ * [How to validate SSL certificate chain in ruby with 
+net/http](http://stackoverflow.com/questions/2507902/how-to-validate-ssl-certificate-chain-in-ruby-with-net-http)
 
- * [Ruby 1.8.7 and Net::HTTP: Making an SSL GET request with client cert?](htt$
+ * [Ruby 1.8.7 and Net::HTTP: Making an SSL GET request with client 
+cert?](http://stackoverflow.com/questions/8991036/ruby-1-8-7-and-nethttp-making-an-ssl-get-request-with-client-cert)
 
  * in the http.rb code, there is a discussion about the cert and
 cert_store options in the documentation above the HTTP.start function

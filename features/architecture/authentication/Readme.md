@@ -44,7 +44,7 @@ be the standard
 recently created and worked upon but has fewer forks. See both
 [nov/openid_connect_sample](https://github.com/nov/openid_connect_sample)
 and
-[nov/openid_connect_sample_rp](https://github.com/nov/openid_connect_sample_rp$
+[nov/openid_connect_sample_rp](https://github.com/nov/openid_connect_sample_rp)
 for examples of how to use this library. nov also has an OAuth library.
 
  * [josh/rack-openid](https://github.com/josh/rack-openid) is Rack
@@ -75,11 +75,11 @@ v3.0](http://tav.espians.com/oauth-3.0-the-sane-and-simple-way-to-do-it.html)?
 **Discussion on OAuth alternatives**
 
  * [Alternatives to
-OAuth?](http://programmers.stackexchange.com/questions/86115/alternatives-to-o$
+OAuth?](http://programmers.stackexchange.com/questions/86115/alternatives-to-oauth)
 which contains a number of links to the security discussion.
 
  * [Weakness in oAuth 2.0 - what are the
-alternatives?](http://stackoverflow.com/questions/10947586/weakness-in-oauth-2$
+alternatives?](http://stackoverflow.com/questions/10947586/weakness-in-oauth-2-0-what-are-the-alternatives).
 
 > **It is safe to use OAuth2 if you are not using SSL?** No. Right now
 > bearer tokens are the only mature standards out there for access
@@ -90,7 +90,7 @@ alternatives?](http://stackoverflow.com/questions/10947586/weakness-in-oauth-2$
 
 The is from [OAuth 2.0: Don’t Throw the Baby Out with the Bathwater
 (Webcast
-Q&A)](https://blog.apigee.com/detail/oauth_20_don_t_throw_the_baby_out_with_th$
+Q&A)](https://blog.apigee.com/detail/oauth_20_don_t_throw_the_baby_out_with_the_bathwater_webcast_qa),
 which is very important to read.
 
 I guess the best alternative is to very very carefully cherry pick the
@@ -101,14 +101,15 @@ Have a look at
  * [OAuth 2
 Simplified](http://aaronparecki.com/articles/2012/07/29/1/oauth2-simplified)
 
- * [Google Accounts Authentication and Authorization: Choosing an Auth Mechani$
+ * [Google Accounts Authentication and Authorization: Choosing an Auth 
+Mechanism](https://developers.google.com/accounts/docs/GettingStarted)
 
  * [OAuth - A great way to cripple your API
-](http://insanecoding.blogspot.co.uk/2013/03/oauth-great-way-to-cripple-your-a$
+](http://insanecoding.blogspot.co.uk/2013/03/oauth-great-way-to-cripple-your-api.html)
 is a **VERY** **GOOD** summary of the problems with current OAuth.
 
  * [More API Security Choices - OAuth, SSL, SAML, and rolling your
-own](https://blog.apigee.com/detail/more_api_security_choices_oauth_ssl_saml_a$
+own](https://blog.apigee.com/detail/more_api_security_choices_oauth_ssl_saml_and_rolling_your_own).
 
 **Ruby**
 

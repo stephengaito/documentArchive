@@ -66,7 +66,7 @@ It looks like anything that we could run locally can be deployed (one
 way or another) to Heroku:
 
  * Using Java you can run [one-off
-processe](https://devcenter.heroku.com/articles/run-non-web-java-processes-on-$
+processe](https://devcenter.heroku.com/articles/run-non-web-java-processes-on-heroku) 
 so it is potentially possible to make use of command line tools in a
 Heroku environment.  Presumably we could use similar techniques using
 JRuby.
