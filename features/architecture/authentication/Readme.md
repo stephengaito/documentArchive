@@ -4,6 +4,7 @@
 	- [Problem](#problem)
 	- [Goals](#goals)
 	- [Research](#research)
+		- [OWASP](#owasp)
 		- [Authentication options](#authentication-options)
 			- [OpenID](#openid)
 			- [OAuth](#oauth)
@@ -25,6 +26,34 @@ appropriate levels of access to modify the system.
 Provide flexible user accounts based upon the OpenID standard.
 
 ## Research
+
+In reality we have two very different authentications needs. Firstly we 
+need to authenticate individual humans as they make active use of a 
+FandianPF instance. Secondly we need to authenticate semi-autonomous 
+remote processes as they interact with a given FandianPF instance.
+
+It would make the code base considerably simpler if the authenticated 
+access_tokens were the same.  That is, while the authentication flow 
+might be different in the above two cases, the result of authentication 
+in both cases is the same authentication access_token (with suitable 
+identificaitons embedded in the token).
+
+Review: [SO's Guide to website 
+Authentication](http://stackoverflow.com/questions/549/the-definitive-guide-to-forms-based-website-authentication)
+
+### OWASP
+
+ * [OWASP](https://www.owasp.org/index.php/Main_Page) a good "Wikipedia 
+of security".
+
+ * [How To 
+Guides](https://www.owasp.org/index.php/Category:How_To)
+
+ * [Top Ten 
+problems/solutions](https://www.owasp.org/index.php/Category:OWASP_Top_Ten_Project)
+
+ * [Authentication Cheat 
+Sheet](https://www.owasp.org/index.php/Authentication_Cheat_Sheet)
 
 ### Authentication options
 
@@ -120,6 +149,13 @@ own](https://blog.apigee.com/detail/more_api_security_choices_oauth_ssl_saml_and
 to be the standard OAuth library for Ruby. It seems to use OAuth v1.0
 (does it have the fix for OAuth v1.0a?). Is this the rubyGems oauth? It
 seems to be from the list of developers. Check the version numbers.
+
+ * [intridea/oauth2](https://github.com/intridea/oauth2) is a more 
+recent implementation of OAuth v2.0 along the lines of FaceBook's 
+implementation.  Seems to implement ONLY Bearer access_tokens
+
+ * [nov/rack-oauth2](http://github.com/nov/rack-oauth2) implements both 
+Bearer and MAC access_tokens
 
 ## Requirements
 
