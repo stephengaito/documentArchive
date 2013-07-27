@@ -70,7 +70,17 @@ The project should be developed using Behaviour Driven Development techniques.
 
 #### Cucumber
 
-##### Aruda step definitions
+##### Aruda 
+
+We use [cucumber/aruda](https://github.com/cucumber/aruba) to provide 
+integration testing of external files, directory structures or command 
+line process output.
+
+To [use aruda](https://github.com/cucumber/aruba#usage) put
+
+ > require 'aruba/cucumber'
+
+in support/env.rb
 
 There is a selection of standard [aruda step 
 definitions](https://github.com/cucumber/aruba/blob/master/lib/aruba/cucumber.rb) 
