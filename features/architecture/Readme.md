@@ -1,13 +1,37 @@
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 - [FandianPF (integration) architecture](#fandianpf-integration-architecture)
-	- [Problem: Agile open source development](#problem-agile-open-source-development)
+	- [Overview](#overview)
+	- [Agile open source development](#agile-open-source-development)
+		- [Problem](#problem)
 		- [Goals](#goals)
-			- [Requirements](#requirements)
+		- [Requirements](#requirements)
+		- [Solution aspects](#solution-aspects)
+			- [Cucumber](#cucumber)
+				- [Aruda step definitions](#aruda-step-definitions)
+				- [Tags](#tags)
 
 # FandianPF (integration) architecture
 
-## Problem: Agile open source development
+## Overview
+
+We split the description of the integration architecture and the 
+associated cucumber features into the following areas (one directory 
+for each area):
+
+ 1. [Administrative interfaces](adminInterfaces)
+ 1. [Authentication](authentication)
+ 1. [Data Store](dataStore)
+ 1. [Deployment](deployment)
+ 1. [Secure Communication](secureCommunication)
+ 1. [Web Application Security](webAppSecurity)
+
+The rest of this architectural readme looks at the more general problem 
+of organising the development of the project.
+ 
+## Agile open source development
+
+### Problem
 
 I need to keep the development of this project simple, lightweight and 
 fast.
@@ -18,7 +42,7 @@ The source code should be open and of continuous high quality.
 
 The project should be developed using Behaviour Driven Development techniques.
 
-#### Requirements
+### Requirements
 
 > The source code for the FandianPF system WILL be accessible via GitHub.
 
@@ -41,4 +65,31 @@ The project should be developed using Behaviour Driven Development techniques.
 
 > Each sprint WILL develop a small number of related (Cucumber 
 > specified) features.
+
+### Solution aspects
+
+#### Cucumber
+
+##### Aruda step definitions
+
+There is a selection of standard [aruda step 
+definitions](https://github.com/cucumber/aruba/blob/master/lib/aruba/cucumber.rb) 
+which should be used for most integration testing tasks.
+
+##### Tags
+
+The following [cucumber 
+tags](https://github.com/cucumber/cucumber/wiki/Tags) are used to 
+organise the integration feature testing:
+
+ 1. @tbt "To be tested" Any feature tagged with @tbt is currently under 
+active development and testing. This tag is meant to be temporary, only 
+to be used while active development of this aspect of the project is 
+being done.  
+
+ 1. [@wip "Work in 
+progress"](https://github.com/cucumber/cucumber/wiki/Tags#tag-limits-and-wip) 
+Any feature tagged with @wip is currently pending development.  This is 
+a standard Cucumber tag which is by default used to ignore any feature 
+with this tag.
 

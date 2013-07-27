@@ -76,12 +76,16 @@ group :test do
   # the Poltergist Capybara driver to test the JavaScript/AJAX 
   # interfaces).
   #
-  gem 'capybara'  
+  gem 'capybara'
   # 
   # We use cucumber for (external/integration) Behavioural Driven 
   # Design
   #
   gem 'cucumber'
+  #
+  # We use cucumber/aruba to test external command line properties
+  #
+  gem 'aruba'
   #
   # Rack::Test is used by the capybara rack-test driver for testing 
   # HTML/CSS interfaces, as well as directly by our cucumber steps to 
