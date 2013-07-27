@@ -8,7 +8,7 @@
 		- [Requirements](#requirements)
 		- [Solution aspects](#solution-aspects)
 			- [Cucumber](#cucumber)
-				- [Aruda step definitions](#aruda-step-definitions)
+				- [Aruba](#aruba)
 				- [Tags](#tags)
 
 # FandianPF (integration) architecture
@@ -70,7 +70,7 @@ The project should be developed using Behaviour Driven Development techniques.
 
 #### Cucumber
 
-##### Aruda 
+##### Aruba 
 
 We use [cucumber/aruda](https://github.com/cucumber/aruba) to provide 
 integration testing of external files, directory structures or command 
@@ -82,7 +82,7 @@ To [use aruda](https://github.com/cucumber/aruba#usage) put
 
 in support/env.rb
 
-There is a selection of standard [aruda step 
+There is a selection of standard [aruba step 
 definitions](https://github.com/cucumber/aruba/blob/master/lib/aruba/cucumber.rb) 
 which should be used for most integration testing tasks.
 
