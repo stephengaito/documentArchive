@@ -12,7 +12,8 @@
  * Paused: 2013/07/01 Monday (to review VPS providers, do administrivia 
 and travel)
  * Restarted: 2013/07/21 Sunday
- * Ends: 2013/07/27 Friday
+ * Progress slowed while sitting with papa
+ * Ends: 2013/08/02 Friday
 
 ## Tasks
 
@@ -27,7 +28,7 @@ OAuth authentication.
 
 ## Cucumber features
 
- 1. none at the moment...
+ 1. architecture/adminInterface/configDataStore
 
 ## RSpec specifications
 
@@ -35,4 +36,4 @@ OAuth authentication.
 
 ## Questions and Risks
 
-See the refactored feature Readmes
+See the refactored feature/architecture Readmes
