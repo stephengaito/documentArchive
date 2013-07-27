@@ -28,7 +28,8 @@ OAuth authentication.
 
 ## Cucumber features
 
- 1. architecture/adminInterface/configDataStore
+ 1. 
+[architecture/adminInterface/configDataStore](../features/architecture/adminInterfaces/configDataStore.feature)
 
 ## RSpec specifications
 
