@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# This bash script automates the running of the FandianPF server.
+
+# CURRENTLY... we MUST be in the fandianph directory... from there...
+#
+# ...we can use either (development?):
+#
+exec padrino start $*
+#
+# OR (production?)
+#
+# exec rackup config.ru $*
+
