@@ -30,6 +30,7 @@ Padrino.configure_apps do
   set :session_secret, '10a17c1b4628fcb0fcd1ec00f255162b3bf03a15b6e05eb750fb19c98869981b'
   set :protection, true
   set :protect_from_csrf, true
+  set $padrinoSettings;
 end
 
 # Mounts the core application for this project

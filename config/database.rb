@@ -26,9 +26,12 @@ DataMapper::Property::String.length(255)
 # this behaviour... if not then we need to system("sqlite 
 # #{sqliteDbFile}");
 #
-sqliteDbFileBase = "fandianpf_#{Padrino.env}.sqlite";
-sqliteDbFile = Padrino.root('db', sqliteDbFileBase);
+sqliteDbFileBase = "db/fandianpf_#{Padrino.env}.sqlite";
+sqliteDbFile = Dir.getwd + '/' + sqliteDbFileBase;
 logger.info "using database: SQLite3://#{sqliteDbFileBase}";
+logger.info sqliteDbFile;
+
+FileUtils.mkpath(File.dirname(sqliteDbFile)) unless File.directory?(File.dirname(sqliteDbFile));
 
 DataMapper.setup(:default, "sqlite3://" + sqliteDbFile)
 

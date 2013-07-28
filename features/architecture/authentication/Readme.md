@@ -36,7 +36,7 @@ It would make the code base considerably simpler if the authenticated
 access_tokens were the same.  That is, while the authentication flow 
 might be different in the above two cases, the result of authentication 
 in both cases is the same authentication access_token (with suitable 
-identificaitons embedded in the token).
+identifications embedded in the token).
 
 Review: [SO's Guide to website 
 Authentication](http://stackoverflow.com/questions/549/the-definitive-guide-to-forms-based-website-authentication)
@@ -56,6 +56,12 @@ problems/solutions](https://www.owasp.org/index.php/Category:OWASP_Top_Ten_Proje
 Sheet](https://www.owasp.org/index.php/Authentication_Cheat_Sheet)
 
 ### Authentication options
+
+Consider:
+
+ * [Rack-Warden](https://github.com/hassox/warden)
+
+ * [Padrino-Warden](https://github.com/jondot/padrino-warden)
 
 #### OpenID
 
@@ -151,7 +157,7 @@ to be the standard OAuth library for Ruby. It seems to use OAuth v1.0
 seems to be from the list of developers. Check the version numbers.
 
  * [intridea/oauth2](https://github.com/intridea/oauth2) is a more 
-recent implementation of OAuth v2.0 along the lines of FaceBook's 
+recent implementation of OAuth v2.0 along the lines of Facebook's 
 implementation.  Seems to implement ONLY Bearer access_tokens
 
  * [nov/rack-oauth2](http://github.com/nov/rack-oauth2) implements both 

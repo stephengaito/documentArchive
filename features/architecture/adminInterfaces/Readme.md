@@ -4,6 +4,7 @@
 	- [Problem](#problem)
 	- [Goals](#goals)
 	- [Requirements](#requirements)
+	- [Solution](#solution)
 
 # Administrative interfaces.
 
@@ -55,4 +56,17 @@ Provide a set of flexible *and* secure administrative interfaces.
 > Use of command line tools (if any) MUST not prohibit a Heroku or
 > Google App type of deployment.
 
+## Solution
 
+We use the [Sinatra configuration 
+settings](http://www.sinatrarb.com/configuration.html) to set 
+application wide options. This [system is used by 
+Pardino](http://www.padrinorb.com/blog/padrino-0-9-27-project-settings-routing-compatibility-and-bug-fixes) 
+to set both application specific and application global settings.
+
+We load the config/settings.yml file via the config/boot.rb file so 
+that the settings are loaded before all other Padrino setup.
+
+The :server, :host, :port, :daemonize, :pid and :debug settings are 
+extracted from the config/settings.yml file and merged with the 
+fandianpf command line options to be passed Padrino.run! command.

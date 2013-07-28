@@ -30,10 +30,7 @@ end
 
 World(Fandianpf::World, Rack::Test::Methods) 
 
-Before do
-  @dirs = ["."]
-  @aruba_timeout_seconds = 5
-end
+# Additional cucumber/aruba standard steps
 
 When(/^I kill all processes$/) do 
   terminate_processes!

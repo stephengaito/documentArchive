@@ -6,9 +6,7 @@ require 'optparse';
 
 # Initialize the required (default) options
 #
-options = Hash.new();
-options[:host] = '127.0.0.1';
-options[:port] = 3000;
+$cmdLineOptions = Hash.new();
 
 # Now scan the command line for options
 #
@@ -16,32 +14,38 @@ OptionParser.new do | opts |
 
   opts.banner = "Usage: fandianpf [options]";
 
+  opts.on("-s", "--settings PATH", "PATH to YAML server settings file") do | opt |
+    $cmdLineOptions[:settings] = opt;
+  end
+
   opts.on("-a", "--server SERVER", "Rack Handler (default autodetect)") do | opt |
-    options[:server] = opt;
+    $cmdLineOptions[:server] = opt;
   end
 
   opts.on("-h", "--host HOST", "Bind to HOST address") do | opt |
-    options[:host] = opt;
+    $cmdLineOptions[:host] = opt;
   end
 
   opts.on("-p", "--port PORT", "Use PORT") do | opt |
-    options[:port] = opt.to_i;
+    $cmdLineOptions[:port] = opt.to_i;
   end
 
   opts.on("-d", "--[no]-daemonize", "Run as a daemonized process in the background") do | opt |
-    options[:daemonize] = opt;
+    $cmdLineOptions[:daemonize] = opt;
   end
 
   opts.on("-i", "--pid PID_FILE", "File in which to store the process PID") do | opt |
-    options[:pid] = opt;
+    $cmdLineOptions[:pid] = opt;
   end
 
   opts.on("-D", "--[no]-debug", "Set debugging flags") do | opt |
-    options[:debug] = opt;
+    $cmdLineOptions[:debug] = opt;
   end
 
 end.parse!(ARGV);
 
 require File.expand_path("../../config/boot.rb", __FILE__);
 
-Padrino.run!(options);
+pp $padrinoOptions;
+
+Padrino.run!($padrinoOptions);
