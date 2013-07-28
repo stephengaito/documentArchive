@@ -29,3 +29,12 @@ module Fandianpf
 end
 
 World(Fandianpf::World, Rack::Test::Methods) 
+
+Before do
+  @dirs = ["."]
+  @aruba_timeout_seconds = 5
+end
+
+When(/^I kill all processes$/) do 
+  terminate_processes!
+end

@@ -1,14 +1,47 @@
-#!/bin/bash
+#!/usr/bin/env ruby
 
-# This bash script automates the running of the FandianPF server.
+# This ruby script automates the running of the FandianPF server.
 
-# CURRENTLY... we MUST be in the fandianph directory... from there...
-#
-# ...we can use either (development?):
-#
-exec padrino start $*
-#
-# OR (production?)
-#
-# exec rackup config.ru $*
+require 'optparse';
 
+# Initialize the required (default) options
+#
+options = Hash.new();
+options[:host] = '127.0.0.1';
+options[:port] = 3000;
+
+# Now scan the command line for options
+#
+OptionParser.new do | opts |
+
+  opts.banner = "Usage: fandianpf [options]";
+
+  opts.on("-a", "--server SERVER", "Rack Handler (default autodetect)") do | opt |
+    options[:server] = opt;
+  end
+
+  opts.on("-h", "--host HOST", "Bind to HOST address") do | opt |
+    options[:host] = opt;
+  end
+
+  opts.on("-p", "--port PORT", "Use PORT") do | opt |
+    options[:port] = opt.to_i;
+  end
+
+  opts.on("-d", "--[no]-daemonize", "Run as a daemonized process in the background") do | opt |
+    options[:daemonize] = opt;
+  end
+
+  opts.on("-i", "--pid PID_FILE", "File in which to store the process PID") do | opt |
+    options[:pid] = opt;
+  end
+
+  opts.on("-D", "--[no]-debug", "Set debugging flags") do | opt |
+    options[:debug] = opt;
+  end
+
+end.parse!(ARGV);
+
+require File.expand_path("../../config/boot.rb", __FILE__);
+
+Padrino.run!(options);
