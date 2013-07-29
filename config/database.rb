@@ -26,14 +26,23 @@ DataMapper::Property::String.length(255)
 # this behaviour... if not then we need to system("sqlite 
 # #{sqliteDbFile}");
 #
-sqliteDbFileBase = "db/fandianpf_#{Padrino.env}.sqlite";
-sqliteDbFile = Dir.getwd + '/' + sqliteDbFileBase;
-logger.info "using database: SQLite3://#{sqliteDbFileBase}";
-logger.info sqliteDbFile;
+dataMapperURI  = "sqlite3:///./db/fandianpf_#{Padrino.env}.sqlite";
+settingsKey = ('dataMapper'+Padrino.env.to_s.capitalize+'URI').to_sym;
+dataMapperURI  = $padrinoSettings[settingsKey] if $padrinoSettings.has_key?(settingsKey);
 
-FileUtils.mkpath(File.dirname(sqliteDbFile)) unless File.directory?(File.dirname(sqliteDbFile));
+if dataMapperURI.downcase =~ /^sqlite/ then
+  sqliteDbURI = Addressable::URI.parse(dataMapperURI);
+  sqliteDbPath     = sqliteDbURI.path;
+  if sqliteDbPath =~ /^\/\.\// then
+    sqliteDbURI.path = Dir.getwd + '/' + sqliteDbPath.sub(/^\/\.\//,'');
+    FileUtils.mkpath(File.dirname(sqliteDbURI.path)) unless File.directory?(File.dirname(sqliteDbURI.path));
+    dataMapperURI = sqliteDbURI.to_s;
+  end
+end
 
-DataMapper.setup(:default, "sqlite3://" + sqliteDbFile)
+logger.info "using database: #{dataMapperURI}";
+
+DataMapper.setup(:default, dataMapperURI)
 
 if Padrino.env == :development then
   DataMapper::Model.raise_on_save_failure = true  # globally across all models
@@ -48,7 +57,7 @@ Padrino.after_load do
   # is a DataMapper.auto_upgrade! safe ?!?!?!?
   #
   DataMapper.auto_upgrade!
-  Fandianpf::SecurityEvent.create(:description => "(re)Started FandianPF",
+  Fandianpf::SecurityEvent.create(:description => "(re)Started FandianPF (#{Padrino.env})",
                                   :timeStamp => Time.now).save;
 end
 

@@ -14,38 +14,57 @@ OptionParser.new do | opts |
 
   opts.banner = "Usage: fandianpf [options]";
 
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+
+  opts.on("-e", "--environment TYPE", "Run Padrino in one of the following environment TYPEs {production, test, development}") do | opt |
+    case opt 
+    when /^[Pp]/ then
+      $cmdLineOptions[:environment] = :production;
+    when /^[Tt]/ then
+      $cmdLineOptions[:environment] = :test;
+    when /^[Dd]/ then
+      $cmdLineOptions[:environment] = :development;
+    end
+    ENV['PADRINO_ENV'] = ENV['RACK_ENV'] = $cmdLineOptions[:environment].to_s;
+  end
+
+  opts.on("-c", "--chdir PATH", "Change directory to PATH before starting FandianPF") do | opt |
+    $cmdLineOptions[:chdir] = opt;
+  end
+
   opts.on("-s", "--settings PATH", "PATH to YAML server settings file") do | opt |
     $cmdLineOptions[:settings] = opt;
   end
 
-  opts.on("-a", "--server SERVER", "Rack Handler (default autodetect)") do | opt |
+  opts.on("-S", "--server SERVER", "Rack Handler (default autodetect)") do | opt |
     $cmdLineOptions[:server] = opt;
   end
 
-  opts.on("-h", "--host HOST", "Bind to HOST address") do | opt |
+  opts.on("-H", "--host HOST", "Bind to HOST address") do | opt |
     $cmdLineOptions[:host] = opt;
   end
 
-  opts.on("-p", "--port PORT", "Use PORT") do | opt |
+  opts.on("-P", "--port PORT", "Use PORT") do | opt |
     $cmdLineOptions[:port] = opt.to_i;
   end
 
-  opts.on("-d", "--[no]-daemonize", "Run as a daemonized process in the background") do | opt |
+  opts.on("-D", "--[no]-daemonize", "Run as a daemonized process in the background") do | opt |
     $cmdLineOptions[:daemonize] = opt;
   end
 
-  opts.on("-i", "--pid PID_FILE", "File in which to store the process PID") do | opt |
+  opts.on("-p", "--pid PID_FILE", "File in which to store the process PID") do | opt |
     $cmdLineOptions[:pid] = opt;
   end
 
-  opts.on("-D", "--[no]-debug", "Set debugging flags") do | opt |
+  opts.on("-d", "--[no]-debug", "Set debugging flags") do | opt |
     $cmdLineOptions[:debug] = opt;
   end
 
 end.parse!(ARGV);
 
 require File.expand_path("../../config/boot.rb", __FILE__);
-
-pp $padrinoOptions;
 
 Padrino.run!($padrinoOptions);

@@ -9,3 +9,4 @@ vendor/gems/*
 .sass-cache/*
 db/*.db
 db/*.sqlite
+*.log

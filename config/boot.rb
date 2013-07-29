@@ -67,13 +67,15 @@ $cmdLineOptions    = Hash.new()  unless defined?($cmdLineOptions);
 $cmdLineOptions[:host] = '127.0.0.1' unless $cmdLineOptions.has_key?(:host);
 $cmdLineOptions[:port] = 3000        unless $cmdLineOptions.has_key?(:port);
 $cmdLineOptionKeys = [ 
-  :server,    # Rack handler if this key is not set then will autodetect
-  :host,      # numeric interface on which to bind http server
-  :port,      # port at which to listen for http requests
-  :daemonize, # boolean flag to run server process in background
-  :pid,       # path to the file to contain the server proces PID
-  :debug,     # boolean flag to produce debug output if true
-  :settings   # path to the settings file
+  :environment, # The type of Padrino environment to run {production, test, development}
+  :chdir,       # Change directory to the specified path
+  :server,      # Rack handler if this key is not set then will autodetect
+  :host,        # numeric interface on which to bind http server
+  :port,        # port at which to listen for http requests
+  :daemonize,   # boolean flag to run server process in background
+  :pid,         # path to the file to contain the server proces PID
+  :debug,       # boolean flag to produce debug output if true
+  :settings     # path to the settings file
 ];
 #
 # Now find and load the settings YAML file
@@ -101,10 +103,6 @@ end
 #
 $padrinoOptions.merge!($cmdLineOptions);
 
-require 'pp';
-pp $cmdLineOptions
-pp $cmdLineOptionKeys;
-pp $padrinoOptions
-pp $padrinoSettings;
+Dir.chdir($padrinoOptions[:chdir]) if $padrinoOptions.has_key?(:chdir);
 
 Padrino.load!

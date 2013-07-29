@@ -1,0 +1,24 @@
+# This is an example FandianPF settings YAML file
+#
+# This YAML file provides a collection of global application settings 
+# which will be set using the Sinatra set command in the 
+# Padrino.configure_apps block in config/apps.rb
+
+# DataMapper database settings
+#
+# We use
+#
+#  [DataMapper's URI syntax](http://rubydoc.info/gems/dm-core/1.1.0/DataMapper#setup-class_method) 
+#
+# See also the various adaptors at
+#
+#  [DM's gitHub](https://github.com/datamapper/)
+# 
+# Note that sqlite URIs should have an empty host:port and if the path 
+# begins with '/./' then the path is remapped relative to the absolute 
+# path of the current working directory.  (Sqlite uris should start 
+# with 'sqlite3:///' )
+#
+dataMapperProductionURI:  sqlite3:///./db/fandianpf_prod.sqlite
+dataMapperTestURI:        sqlite3:///./db/fandianpf_test.sqlite
+dataMapperDevelopmentURI: sqlite3:///./db/fandianpf_dev.sqlite

@@ -35,3 +35,12 @@ World(Fandianpf::World, Rack::Test::Methods)
 When(/^I kill all processes$/) do 
   terminate_processes!
 end
+
+When(/^I run fandianpf$/) do
+  steps %Q{
+    Given The default aruba timeout is 10 seconds
+    And I run `fandianpf` interactively
+    And I wait for stdout to contain "Listening on tcp"
+    And I kill all processes
+  }
+end
