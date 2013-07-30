@@ -5,11 +5,15 @@ require 'yaml';
 
 module Fandianpf
 
+  # The Fandianpf::Utils module collects the various utility type 
+  # methods used by the FandianPF system.
   module Utils
 
     # The toSymbolHash function is used to ensure all the settings (Hash) 
     # keys are symbols (see below).
     #
+    # @param [Hash] aHash the Hash whose symbols will be changed (in place) from strings to symbols.
+    # @return nothing
     def self.toSymbolHash(aHash)
       aHash.keys.each do | anOldKey |
         next if anOldKey.is_a?(Symbol);
@@ -21,10 +25,17 @@ module Fandianpf
       end
     end
 
-    # Deal with the command line options, load the configuration settings 
-    # YAML file and merge the options and create the padrionSettings to be 
-    # used by the config/apps.rb code later in the loading process.
+    # The managePadrinoOptionsAndSettings method will deal with the 
+    # command line options, load the configuration settings YAML file 
+    # and merge the options and create the padrionSettings to be used 
+    # by the config/apps.rb code later in the loading process.
     #
+    # @note All keys in both padrinoOptions and padrinoSettings will be symbolized. 
+    #
+    # @note SIDE-EFFECTS this method will load the settings, if possible, from a YAML file located in the filesystem.  By default the settings file will be located in the config/settings.yml file.  The default path to the settings file can be over-ridden by the :settings command line option.
+    #
+    # @param [Hash] cmdLineOptions the hash of command line options with symbolized keys.
+    # @return [Array of Hash] an array containing the pardinoOptions followed by the padrinoSettings
     def self.managePadrinoOptionsAndSettings(cmdLineOptions = {}) 
       #
       # Start by ensuring that the command line options exist even if we are 

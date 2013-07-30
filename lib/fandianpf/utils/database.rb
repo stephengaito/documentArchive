@@ -15,8 +15,7 @@ module Fandianpf
     #  located in the db directory 
     #  named fandianpf_<<Padrino.env>>.sqlite
     #
-    # SIDE-EFFECT: IF we are using sqlite we also ensure that the full path 
-    # to the database file exists.
+    # @note SIDE-EFFECT: IF we are using sqlite we also ensure that the full path to the database file exists.
     #
     # @param [Symbol] padrinoEnv The current value of Padrino.env
     # @param [Hash]   padrinoSettings The current value of the global $padrinoSettings

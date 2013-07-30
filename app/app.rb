@@ -1,4 +1,7 @@
 module Fandianpf
+
+  # Fandianpf::App provides the base Padrino::Application for the 
+  # FandianPF system.
   class App < Padrino::Application
     register SassInitializer
     register Padrino::Rendering

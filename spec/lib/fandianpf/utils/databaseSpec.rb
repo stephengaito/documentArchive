@@ -25,7 +25,11 @@ module Fandianpf; module Spec
       end
 
       it "#getDataMapperURI should ensure all filesystem paths exist for SQLite databases" do
-        # This will be tested by Cucumber features
+        # This is currently tested by Cucumber features
+        #
+        # This should be tested with an RSpec-Mock of FileUtils which 
+        # is made difficult due to the fact that FileUtils is a system 
+        # constant.
       end
     end
   end

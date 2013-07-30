@@ -98,6 +98,8 @@ group :documentation do
   #
   # We use YARDoc documentation
   #
+  gem 'yard-padrino'
+  gem 'yard-sinatra'
   gem 'yard-rspec'
   gem 'redcarpet'
 end

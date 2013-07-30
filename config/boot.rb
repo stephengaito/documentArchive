@@ -8,7 +8,14 @@
 ############################################################################
 
 # Defines our constants
+
+# The PADRINO_ENV constant is a global constant which is used to 
+# determine which type of FandianPF (Padrino) webserver { 'production', 
+# 'test', 'development' } is being created.
 PADRINO_ENV  = ENV['PADRINO_ENV'] ||= ENV['RACK_ENV'] ||= 'development'  unless defined?(PADRINO_ENV)
+
+# The PADRINO_ROOT constant is a global constant which specifies the 
+# root directory of the FandianPF (Padrino) code base.
 PADRINO_ROOT = File.expand_path('../..', __FILE__) unless defined?(PADRINO_ROOT)
 
 # Load our dependencies

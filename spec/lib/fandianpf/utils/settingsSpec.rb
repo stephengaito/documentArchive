@@ -1,6 +1,13 @@
 require 'fandianpf/utils/settings';
 
-module Fandianpf; module Spec
+module Fandianpf; 
+  
+  # The Fandianpf::Spec module collects the specifications for the 
+  # FandianPF system.
+  module Spec
+
+  # The Fandianpf::Spec::Utils module collects the specifications of 
+  # the various utility type methods used by the FandianPF system.
   module Utils
 
     describe Fandianpf::Utils do
@@ -25,6 +32,31 @@ module Fandianpf; module Spec
         padrinoOptions[:port].should eql 3000
         padrinoSettings.should be_kind_of Hash
         padrinoSettings.should be_empty
+      end
+
+      it "#managePadrinoOptionsAndSettings with cmdLineOptions should return required padrinoOptions merged with cmdLineOptions and an empty padrinoSettings" do 
+        padrinoOptions, padrinoSettings = Fandianpf::Utils.managePadrinoOptionsAndSettings({ :host => '127.0.0.2', :debug => true });
+        padrinoOptions.should be_kind_of Hash
+        padrinoOptions.should have_key :host
+        padrinoOptions[:host].should eql '127.0.0.2'
+        padrinoOptions.should have_key :port
+        padrinoOptions[:port].should eql 3000
+        padrinoOptions.should have_key :debug
+        padrinoOptions[:debug].should be_true
+        padrinoSettings.should be_kind_of Hash
+        padrinoSettings.should be_empty
+      end
+
+      it "#managePadrinoOptionsAndSettings with cmdLineOptions and config/settings.yml file should return non empty padrinoOptions and padrinoSettings" do 
+        # This is currently tested by Cucumber features
+        #
+        # This should be tested with an RSpec-Mock of YAML which is 
+        # made difficult due to the fact that YAML is a system 
+        # constant.
+        #
+        # In particular we need to ensure that cmdLineOptionKeys 
+        # defined in condfig/settings.yml are removed from 
+        # padrinoSettings and put in padrinoOptions.
       end
     end
   end
