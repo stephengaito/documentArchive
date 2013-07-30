@@ -4,7 +4,7 @@ Feature: configure data store
   The administrator
   Wants to configure how and where the data is stored in a RDBMS
 
-  @tbt @aruba @announce
+  @aruba @announce
   Scenario: create Sqlite database when no configuration file found
     When a file named "config/settings.yml" should not exist
      And a file named "db/fandianpf_test.sqlite" should not exist
@@ -16,7 +16,7 @@ Feature: configure data store
     When I run `sqlite3 db/fandianpf_test.sqlite "select * from fandianpf_security_events;"` interactively
      And I wait for stdout to contain "Started FandianPF"
 
-  @tbt @aruba @announce
+  @aruba @announce
   Scenario: create Sqlite database when configuration file found
     When I write to "config/settings.yml" with:
       """
