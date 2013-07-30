@@ -20,9 +20,20 @@ small team on a secure VPN.
 Configuration files or command line interfaces would probably be the
 most secure way to administer a highly public FandianPF interface.
 
+The Padrino "way" is to do configuration via Ruby in the three 
+config/apps.rb, config/boot.rb and config/databases.rb files.  Since 
+one of the typical deployments will be via a Gem install, these three 
+files will not usually be editable, so we will need to allow most 
+configuration parameters to be specified by non-rubists via a simpler 
+YAML settings file which could potentially be located anywhere in the 
+file system.
+
 ## Goals
 
 Provide a set of flexible *and* secure administrative interfaces.
+
+Provide a simple collection of textural settings which will cover most 
+of the required administration.
 
 ## Requirements
 
@@ -55,6 +66,9 @@ Provide a set of flexible *and* secure administrative interfaces.
 
 > Use of command line tools (if any) MUST not prohibit a Heroku or
 > Google App type of deployment.
+
+> The administrator MUST be able to make most configurational settings 
+> via a YAML settings file.
 
 ## Solution
 

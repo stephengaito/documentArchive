@@ -25,5 +25,5 @@ FandianPF Scientific Publishing Framework, a Padrino gem, designed to make parti
   gem.require_paths = ["lib", "app"]
   gem.version       = Fandianpf::VERSION
 
-  gem.add_dependency "padrino-core"
+#  gem.add_dependency "padrino-core"
 end

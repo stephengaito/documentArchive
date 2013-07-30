@@ -28,6 +28,8 @@ filter is ANTLR4.  At the moment, ANTLR4, which is based on Java, does
 not yet have a C++ target, hence in the short to medium term we need to
 use infrastructure based on the Java JVM.
 
+Most deployments will be for an indiviadual using a simple gem install.
+
 ## Goals
 
 We would ideally like an architecture which scales *from* an
@@ -136,4 +138,8 @@ It looks like there is NO provision for client certificates.
 
 > It MIGHT be possible to deploy as a Google App.
 
+> A simple single machine Gem install MUST, at most, require system 
+> level configuration via a YAML settings.yml file and allow the SQLite 
+> database to be located outside of the gem install directories.
 
+> It MUST detect if it has been installed via gem.

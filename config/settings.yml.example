@@ -6,7 +6,23 @@
 
 # DataMapper database settings
 #
-# We use
+# Example settings are: 
+#
+# A MySQL connection:
+# dataMapperProductionURI: mysql://user:password@localhost/the_database_name
+#
+# A Postgres connection:
+# dataMapperProductionURI: postgres://user:password@localhost/the_database_name
+#
+# An Sqlite3 connection
+# dataMapperProductionURI: sqlite3:///./db/fandianpf_production.sqlite
+#
+# Note that sqlite URIs should have an empty host:port and if the path 
+# begins with '/./' then the path is remapped relative to the absolute 
+# path of the current working directory.  (Sqlite URIs should start 
+# with 'sqlite3:///' )
+#
+# For more detail note that we use
 #
 #  [DataMapper's URI syntax](http://rubydoc.info/gems/dm-core/1.1.0/DataMapper#setup-class_method) 
 #
@@ -14,11 +30,6 @@
 #
 #  [DM's gitHub](https://github.com/datamapper/)
 # 
-# Note that sqlite URIs should have an empty host:port and if the path 
-# begins with '/./' then the path is remapped relative to the absolute 
-# path of the current working directory.  (Sqlite uris should start 
-# with 'sqlite3:///' )
-#
 dataMapperProductionURI:  sqlite3:///./db/fandianpf_prod.sqlite
 dataMapperTestURI:        sqlite3:///./db/fandianpf_test.sqlite
 dataMapperDevelopmentURI: sqlite3:///./db/fandianpf_dev.sqlite

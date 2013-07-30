@@ -4,9 +4,12 @@ log/**/*
 tmp/**/*
 tmp/*
 bin/*
+doc/*
 vendor/gems/*
 !vendor/gems/cache/
 .sass-cache/*
 db/*.db
 db/*.sqlite
 *.log
+.yardoc/*
+

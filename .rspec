@@ -1,0 +1,5 @@
+-I app
+-I lib
+--pattern spec/**/*Spec.rb
+--color
+

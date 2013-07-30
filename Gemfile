@@ -94,8 +94,17 @@ group :test do
   gem 'rack-test', :require => 'rack/test'
 end
 
+group :documentation do
+  #
+  # We use YARDoc documentation
+  #
+  gem 'yard-rspec'
+  gem 'redcarpet'
+end
+
 # Padrino Stable Gem
-gem 'padrino', '0.11.2'
+gem 'padrino'
+gem 'padrino-core'
 #
 # Or Padrino Edge
 # gem 'padrino', :github => 'padrino/padrino-framework'
