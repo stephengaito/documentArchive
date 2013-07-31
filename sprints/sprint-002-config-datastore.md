@@ -5,6 +5,7 @@
 	- [Cucumber features](#cucumber-features)
 	- [RSpec specifications](#rspec-specifications)
 	- [Questions and Risks](#questions-and-risks)
+	- [Wrap-up](#wrap-up)
 
 # Sprint 002 Configuration and Simple Datastore
 
@@ -63,7 +64,7 @@ files, and or hard-coded defaults.
  1. Likely options for authentication.
  1. How good or bad Padrino's own authentication system might be
  1. The Padrino's boot processes.
- 1. And, simply writting a simple "standard" RDBMS record to an SQLite 
+ 1. And, simply writing a simple "standard" RDBMS record to an SQLite 
 file based database.
 
 In all these results are sufficient to close this sprint and open a new 
