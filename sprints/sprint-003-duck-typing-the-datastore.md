@@ -48,6 +48,21 @@ simple heaps of things.
 
 How do we manage this overlapping hierarchical structure?
 
+We could have a database table which is indexed by any json key in any 
+json object, whose value is an array of any registered json structures 
+(e.g. "bibtex book") known to contain that key.
+
+We could then return a page with tabs for all registered json 
+structures whose default selected tab is most common registered json 
+structure for that collection of keys.
+
+At some point in the future we could use Bayesian keyword analysis (see 
+spam tools) to learn what individual and or the "default" user prefers 
+to see the given collection of keys as.
+
+For each registered json structure we could/should have a call back 
+which provides any required JavaScript/CSS.
+
 ### Search
 
 Search will be indistinguishable from normal urls. If a URL is 
@@ -55,6 +70,8 @@ incomplete, then the server should just return a list of the matching
 entities.
 
 ### Base hierarchy
+
+basic search areas?
 
  * title/%title%
  * date/%yyyy%/%mm%/%dd%/%title%
@@ -75,9 +92,34 @@ entities.
  * task/????
  * issue/????
 
+other areas?
+
  * admin/????
  * user/????
  * Zotero/?????
+
+life cycle areas?
+
+ * show/%title%
+ * edit/%title%
+ * save/%title%
+
+if we http-get on a node that does not exist, we return edit on the 
+same node with the given default title.
+
+if we http-post on a node that does not exist, we do a save on that 
+node.
+
+if we http-get on edit a node and we request (x)HTML then we return a 
+form with the existing contents of this node.  The corresponding form 
+with http-post to save on the same node.
+
+if we http-get a node and we request json then we simply return json.
+
+if we http-post a node and we request json then we simple save that json.
+
+if we http-delete a node then we delete the corresponding json object 
+(or create an empty version).
 
 ### Ajax
 
