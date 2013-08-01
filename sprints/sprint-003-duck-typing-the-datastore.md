@@ -6,6 +6,9 @@
 	- [RSpec specifications](#rspec-specifications)
 	- [Questions and Risks](#questions-and-risks)
 		- [Duck-typing vs Rigid-typing](#duck-typing-vs-rigid-typing)
+		- [Search](#search)
+		- [Base hierarchy](#base-hierarchy)
+		- [Ajax](#ajax)
 		- [SEO URLs](#seo-urls)
 	- [Wrap-up](#wrap-up)
 
@@ -44,6 +47,41 @@ classifications, so that we can manage the cognitive overload of
 simple heaps of things.
 
 How do we manage this overlapping hierarchical structure?
+
+### Search
+
+Search will be indistinguishable from normal urls. If a URL is 
+incomplete, then the server should just return a list of the matching 
+entities.
+
+### Base hierarchy
+
+ * title/%title%
+ * date/%yyyy%/%mm%/%dd%/%title%
+ * author/%name%
+ * reference/%refID%
+ * reference/%yyyy%/%refID%
+ * reference/%authors%/%yyyy%/%refTag%
+ * reference/%type%/%yyyy%/%refID%
+ * reference/%type%/%authors%/%yyyy%/%refTag%
+ * review/????
+ * blog/????
+ * glossary/%tag%
+ * tag/%tag%
+ * keyword/%tag%
+ * paper/%authors%/%yyyy%/%mm%/%title%
+ * wiki/????
+ * version/????
+ * task/????
+ * issue/????
+
+ * admin/????
+ * user/????
+ * Zotero/?????
+
+### Ajax
+
+ 1. [Padrino-pjax example](https://github.com/nesquena/padrino-pjax) 
 
 ### SEO URLs
 
