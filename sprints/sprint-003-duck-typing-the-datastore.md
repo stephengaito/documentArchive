@@ -15,7 +15,8 @@
 # Sprint 003 Semi-structured JSON content and duck-typing the Datastore
 
  * Started: 2013/07/30 Tuesday
- * Ends: 2013/08/09 Friday
+ * Paused while holding Papa's hand, and celebrating his life.
+ * Ends: 2013/08/30 Friday
 
 ## Tasks
 
