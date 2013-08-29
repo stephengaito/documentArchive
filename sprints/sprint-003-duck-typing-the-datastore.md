@@ -16,7 +16,8 @@
 
  * Started: 2013/07/30 Tuesday
  * Paused while holding Papa's hand, and celebrating his life.
- * Ends: 2013/08/30 Friday
+ * Paused while packing/unpacking and travelling back home.
+ * Ends: 2013/09/27 Friday
 
 ## Tasks
 
