@@ -6,5 +6,5 @@ Feature: provide default behaviour module
 
   @tbt
   Scenario: load and use default module
-    When we get /show/test
+    When we get "/show/test"
     Then the result should contain default content class

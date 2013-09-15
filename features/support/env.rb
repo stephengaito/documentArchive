@@ -44,3 +44,10 @@ When(/^I run fandianpf$/) do
     And I kill all processes
   }
 end
+
+# Additional capybara/cucumber "standard" steps
+
+When(/^we get "([^"]*)"$/) do | pageUrl |
+  get(pageUrl);
+end
+
