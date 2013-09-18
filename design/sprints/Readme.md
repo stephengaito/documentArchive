@@ -19,13 +19,16 @@ For each sprint we have one file (in Markdown format) which records the
 feature titles to be tackled in that sprint, together with some 
 overview of the difficulty or risks anticipated or observed.
 
-Since we are using Behaviour Driven Development using Cucumber/RSpec, 
-each story is developed into one or more Cucumber features (located in 
-the features directory). Each sprint file records the Cucumber features 
-worked on during that sprint.
+Since we are using Behaviour Driven Development using RSpec, each story 
+is developed into one or more RSpec specifications of the "features" 
+(located in the design/features directory) representing the external 
+model's behaviour . Each sprint file records the features worked on 
+during that sprint.
 
-While working on a given Cucumber feature we will need to write a 
-number of RSpec specifications (located in the specs directory).  Each 
-sprint file will also record the RSpec specifications worked on during 
-that sprint.
+While working on a given feature we will need to write a number of 
+RSpec specifications for the behaviour of various parts of the 
+implementation. These implementation level RSpec specifications will be 
+located in an appropriate subdirectory of the design directory.  Each 
+sprint file will also record the implementation level RSpec 
+specifications worked on during that sprint.
 

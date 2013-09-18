@@ -1,3 +1,10 @@
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [Duck type modules](#duck-type-modules)
+	- [Problem](#problem)
+	- [Goals](#goals)
+	- [Requirements](#requirements)
+
 # Duck type modules
 
 ## Problem
