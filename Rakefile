@@ -25,9 +25,16 @@ task :ctbt do
   sh "cucumber --tags @tbt"
 end
 #
+task :features do
+  sh "rspec -fs --pattern features/**/*Feature.rb"
+end
+#
 # RSpect tests library function specifications
 #
 task :rtbt do
   sh "rspec --tag tbt"
 end
-
+#
+task :specs do
+  sh "rspec -fs --pattern spec/**/*Spec.rb"
+end
