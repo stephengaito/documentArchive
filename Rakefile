@@ -17,24 +17,44 @@ task :yardStats do
 end
 task :htmlDocs => :yardocs;
 
-# Helper tasks for Cucumber/RSpec testing
+# Helper tasks for RSpec testing
 #
-# Cucumber tests "customer" facing integration features
+# Integration tests against a stable running application instance
 #
-task :ctbt do
-  sh "cucumber --tags @tbt"
+task :ispecs do
+  # TODO: startup application
+  sh "rspec -fs --pattern design/**/*ISpec.rb"
+  # TODO: tear down application
 end
 #
-task :features do
-  sh "rspec -fs --pattern features/**/*Feature.rb"
+task 'ls:ispecs' do
+  sh "find design -name \"*ISpec*\""
 end
 #
-# RSpect tests library function specifications
+# Integration tests against possible unstable running application 
+# instances.  Each RSpec specification (file) is responsible for 
+# starting their copy of the application using Aruba.
 #
-task :rtbt do
-  sh "rspec --tag tbt"
+task :aspecs do
+  sh "rspec -fs --pattern design/**/*ASpec.rb"
 end
 #
-task :specs do
-  sh "rspec -fs --pattern spec/**/*Spec.rb"
+task 'ls:aspecs' do
+  sh "find design -name \"*ASpec*\""
 end
+#
+# Unit tests against individual parts of the application implementation
+# 
+task :uspecs do
+  sh "rspec -fs --pattern design/**/*USpec.rb"
+end
+#
+task 'ls:uspecs' do
+  sh "find design -name \"*USpec*\""
+end
+#
+# All RSpec specification tests
+#
+task :specs => [ :ispecs, :aspecs, :uspecs ]
+#
+task 'ls:specs' => [ 'ls:ispecs', 'ls:aspecs', 'ls:uspecs' ]

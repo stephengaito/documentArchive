@@ -1,4 +1,4 @@
 -I app
 -I lib
 --color
-
+--default-path design
