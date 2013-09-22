@@ -99,7 +99,7 @@ specifications end in *ASpec.rb
 
 Any given RSpec specification may or may not have [ordered example 
 groups or 
-examples[(http://mettadore.com/analysis/using-rspec-with-mixed-random-and-ordered-tests/). 
+examples](http://mettadore.com/analysis/using-rspec-with-mixed-random-and-ordered-tests/). 
 The (potentially) unstable application (integration) tests are almost 
 certainly going to have ordered example groups as well as ordered 
 examples.
