@@ -76,12 +76,12 @@ group :test do
   # the Poltergist Capybara driver to test the JavaScript/AJAX 
   # interfaces).
   #
-  gem 'capybara'
+  gem 'capybara', :require => 'capybara/rspec'
   # 
   # We use cucumber for (external/integration) Behavioural Driven 
   # Design
   #
-  gem 'cucumber'
+  #gem 'cucumber'
   #
   # We use cucumber/aruba to test external command line properties
   #
