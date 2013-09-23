@@ -23,7 +23,12 @@ gemspec
 gem 'puma'
 
 # Optional JSON codec (faster performance)
-# gem 'oj'
+#
+# Used only for MRI ruby (see: http://flori.github.io/json/ )
+gem 'json'
+#
+# Used only for JRuby (see: http://json-jruby.rubyforge.org/ )
+# gem 'json-jruby'
 
 # Project requirements
 gem 'rake'

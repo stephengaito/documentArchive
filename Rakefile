@@ -43,6 +43,17 @@ task 'ls:aspecs' do
   sh "find design -name \"*ASpec*\""
 end
 #
+# Unit tests against the application's implementational use of the Rack 
+# stack
+# 
+task :rspecs do
+  sh "rspec -fs --pattern design/**/*RSpec.rb"
+end
+#
+task 'ls:rspecs' do
+  sh "find design -name \"*RSpec*\""
+end
+#
 # Unit tests against individual parts of the application implementation
 # 
 task :uspecs do
@@ -55,6 +66,6 @@ end
 #
 # All RSpec specification tests
 #
-task :specs => [ :ispecs, :aspecs, :uspecs ]
+task :specs => [ :uspecs, :rspecs, :aspecs, :ispecs ]
 #
-task 'ls:specs' => [ 'ls:ispecs', 'ls:aspecs', 'ls:uspecs' ]
+task 'ls:specs' => [ 'ls:uspecs', 'ls:rspecs', 'ls:aspecs', 'ls:ispecs' ]

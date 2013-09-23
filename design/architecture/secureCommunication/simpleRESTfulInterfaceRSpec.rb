@@ -15,10 +15,10 @@ module Fandianpf; module Architecture; module SecureCommunication
       #     When we get json from '/testJson'
       #     Then testJson.json is downloaded
       #
-#      scenario "download json content" do
-#        get('/testJson', {}, { 'HTTP_ACCEPT' => "application/json" });
-#        expect(last_response.header['Content-type']).to match /application\/json/
-#      end
+      scenario "download json content" do
+        get('/testJson', {}, { 'HTTP_ACCEPT' => "application/json" });
+        expect(last_response.header['Content-type']).to match /application\/json/
+      end
 
       #   Scenario: upload json content
       #     When we post test2Json.json to '/test2Json' with body

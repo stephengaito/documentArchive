@@ -58,13 +58,12 @@ end
 Padrino.after_load do
 end
 
-# Deal with the command line options, load the configuration settings 
-# YAML file and merge the options and create the padrionSettings to be 
-# used by the config/apps.rb code later in the loading process.
+# Load the configuration settings YAML file and merge the options and 
+# create the padrionSettings to be used by the config/apps.rb code 
+# later in the loading process.
 #
 require 'fandianpf/utils/options';
 
-Fandianpf::Utils::Options.parseCommandLineArguments();
 Fandianpf::Utils::Options.loadSettings();
 
 Dir.chdir(Fandianpf::Utils::Options[:chdir]) if Fandianpf::Utils::Options.has_key?(:chdir);
