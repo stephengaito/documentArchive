@@ -3,9 +3,11 @@
 
 require "addressable/uri"
 
-module Fandianpf
+module Fandianpf; module Utils
 
-  module Utils
+  # The Fandianpf::Utils::Database module collects the methods used to 
+  # manage FandianPF's use of persistent storage.
+  module Database
 
     # Get the DataMapper URI so we can configure database
     #
@@ -21,7 +23,7 @@ module Fandianpf
     # @param [Hash]   padrinoSettings The current value of the global $padrinoSettings
     # @return [String]
     #
-    def self.getDataMapperURI(padrinoEnv, padrinoSettings = {} )
+    def self.getDataMapperURI(padrinoEnv, padrinoSettings = {}, fileUtilsClass = FileUtils, fileClass = File )
       dataMapperURI  = "sqlite3:///./db/fandianpf_#{padrinoEnv}.sqlite";
       settingsKey = ('dataMapper'+padrinoEnv.to_s.capitalize+'URI').to_sym;
       dataMapperURI  = padrinoSettings[settingsKey] if padrinoSettings.has_key?(settingsKey);
@@ -33,11 +35,11 @@ module Fandianpf
           sqliteDbURI.path = Dir.getwd + '/' + sqliteDbPath.sub(/^\/\.\//,'');
           dataMapperURI = sqliteDbURI.to_s;
         end
-        FileUtils.mkpath(File.dirname(sqliteDbURI.path)) unless File.directory?(File.dirname(sqliteDbURI.path));
+        fileUtilsClass.mkpath(File.dirname(sqliteDbURI.path)) unless fileClass.directory?(File.dirname(sqliteDbURI.path));
       end
       return dataMapperURI;
     end
 
   end
-end
+end; end
 
