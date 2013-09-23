@@ -22,7 +22,7 @@ DataMapper.logger = logger
 DataMapper::Property::String.length(255)
 
 require 'fandianpf/utils/database';
-dataMapperURI = Fandianpf::Utils.getDataMapperURI(Padrino.env, $padrinoSettings);
+dataMapperURI = Fandianpf::Utils.getDataMapperURI(Padrino.env, Fandianpf::Utils::Options.getSettings);
 
 logger.info "using database: #{dataMapperURI}";
 

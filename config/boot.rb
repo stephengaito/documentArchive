@@ -62,14 +62,11 @@ end
 # YAML file and merge the options and create the padrionSettings to be 
 # used by the config/apps.rb code later in the loading process.
 #
-require 'fandianpf/utils/settings';
+require 'fandianpf/utils/options';
 
-# Some entry points to config/boot.rb do not initialize $cmdLineOptions
-# so as a fall back do it here.
-#
-$cmdLineOptions = Hash.new() unless defined?($cmdLineOptions);
-$padrinoOptions, $padrinoSettings = Fandianpf::Utils.managePadrinoOptionsAndSettings($cmdLineOptions);
+Fandianpf::Utils::Options.parseCommandLineArguments();
+Fandianpf::Utils::Options.loadSettings();
 
-Dir.chdir($padrinoOptions[:chdir]) if $padrinoOptions.has_key?(:chdir);
+Dir.chdir(Fandianpf::Utils::Options[:chdir]) if Fandianpf::Utils::Options.has_key?(:chdir);
 
 Padrino.load!

@@ -48,7 +48,7 @@ Padrino.configure_apps do
   # add the global Padrino settings from the config/settings.yml file 
   # which was loaded by config/boot.rb.
   #
-  set $padrinoSettings;
+  set Fandianpf::Utils::Options.getSettings;
 end
 
 # Mounts the core application for this project
