@@ -1,3 +1,6 @@
+# This is the spec_helper used for RSpec specifications which use the 
+# Rack stack.
+
 PADRINO_ENV = 'test' unless defined?(PADRINO_ENV)
 require File.expand_path(File.dirname(__FILE__) + "/../../config/boot")
 

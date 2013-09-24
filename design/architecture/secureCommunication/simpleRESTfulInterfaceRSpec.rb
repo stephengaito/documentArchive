@@ -1,4 +1,4 @@
-require 'support/spec_helper';
+require 'support/rspec_helper';
 
 module Fandianpf; module Architecture; module SecureCommunication
   module SimpleRESTfulInterface
