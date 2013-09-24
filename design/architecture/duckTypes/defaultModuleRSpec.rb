@@ -1,7 +1,14 @@
 require 'support/rspec_helper';
 
-module Fandianpf; module Architecture; module DuckTypes
+module Fandianpf; module Architecture
 
+# The Fandianpf::Architecture::DuckTypes module collects the 
+# specifications for the flexible use of "duck typed" content (AKA 
+# plugins and friends).
+module DuckTypes
+
+  # The Fandianpf::Architecture::DuckTypes::DefaultModule module 
+  # collects the specification for the default content type.
   module DefaultModule
 
     # Feature: provide default behaviour module

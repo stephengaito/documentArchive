@@ -6,7 +6,7 @@ PadrinoTasks.use(:datamapper)
 PadrinoTasks.init
 
 # Maintain the YARDoc documentation
-fandianpfFileNames = FileList['Rakefile', '**/Rakefile', 'app/**/*.rb', 'config/**/*.rb', 'lib/**/*.rb', 'spec/**/*.rb'];
+fandianpfFileNames = FileList['Rakefile', '**/Rakefile', 'app/**/*.rb', 'lib/**/*.rb', 'design/**/*.rb'];
 yardPlugins = "--plugin yard-rspec --plugin yard-sinatra --plugin yard-padrino"
 task :yardocs do
   sh "yardoc #{yardPlugins} -o doc/html/fandianpf #{fandianpfFileNames}"

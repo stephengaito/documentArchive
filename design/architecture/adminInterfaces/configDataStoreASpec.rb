@@ -1,6 +1,14 @@
 require 'support/aspec_helper';
 
-module Fandianpf; module Architecture; module AdminInterfaces
+module Fandianpf
+
+# The Fandianpf::Architecture module collects the specifications of 
+# architectural components of the FandianPF system.
+module Architecture
+
+# The Fandianpf::Architecture::AdminInterfaces module collects the 
+# specifications of the AdminInterfaces.
+module AdminInterfaces
 
   # The Fandianpf::Architecture::AdminInterfaces::ConfigDataStore 
   # module collects the integration specifications for the 

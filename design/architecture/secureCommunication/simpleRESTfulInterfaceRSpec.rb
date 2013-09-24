@@ -1,6 +1,16 @@
 require 'support/rspec_helper';
 
-module Fandianpf; module Architecture; module SecureCommunication
+module Fandianpf; module Architecture
+
+# The Fandianpf::Architecture::SecureCommunitcation module collects the 
+# specifications for the use of secure inter-communication between 
+# external applications and/or other FandianPF systems.
+module SecureCommunication
+
+  # The 
+  # Fandianpf::Architecture::SecureCommunication::SimpleRESTfulInterface 
+  # collects the specifications for the REST interfaces for FandianPF 
+  # system.
   module SimpleRESTfulInterface
 
     # Feature: simple RESTful interface

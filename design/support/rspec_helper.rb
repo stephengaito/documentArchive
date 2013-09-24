@@ -1,7 +1,13 @@
 # This is the spec_helper used for RSpec specifications which use the 
 # Rack stack.
 
-PADRINO_ENV = 'test' unless defined?(PADRINO_ENV)
+if not defined?(PADRINO_ENV) then
+  # specifies to the system which type of environment is being run: 
+  # development, test or production.
+  #
+  PADRINO_ENV = 'test' 
+end
+
 require File.expand_path(File.dirname(__FILE__) + "/../../config/boot")
 
 RSpec.configure do |conf|

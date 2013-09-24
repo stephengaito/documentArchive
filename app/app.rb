@@ -62,6 +62,7 @@ module Fandianpf
     #   end
     #
 
+    # A route used to test JSON
     get "/testJson", :provides => [ :html, :json ] do
       @testJson = [ 'test1', 'test2']
       render 'testJson'
