@@ -68,5 +68,9 @@ module Fandianpf
       render 'testJson'
     end
 
+    get "/show/test", :provides => [ :html ] do
+      render 'duckTypeTest'
+    end
+
   end
 end

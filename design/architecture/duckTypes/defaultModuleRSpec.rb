@@ -25,13 +25,9 @@ module DuckTypes
       scenario "load and use default module" do
         visit "/show/test";
         puts page.body;
-        expect(page).to have_xpath("//a[@class='content']");
+        expect(page).to have_xpath("//div[@class='content']");
       end
 
-# Then(/^the result should contain default content class$/) do
-#   puts last_response.body;
-#   expect(last_response).to have_xpath("//a[@class='content']");
-# end
     end
   end
 end; end; end
