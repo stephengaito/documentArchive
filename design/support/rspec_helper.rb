@@ -52,3 +52,10 @@ def app(app = nil, &blk)
   @app ||= block_given? ? app.instance_eval(&blk) : app
   @app ||= Padrino.application
 end
+
+Capybara.run_server = false;
+Capybara.app = app;
+Capybara.register_driver :rack_test do |app|
+  Capybara::RackTest::Driver.new(app, :browser => :chrome)
+end
+
