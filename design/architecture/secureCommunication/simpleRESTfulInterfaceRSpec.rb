@@ -26,7 +26,7 @@ module SecureCommunication
       #     Then testJson.json is downloaded
       #
       scenario "download json content" do
-        get('/testJson', {}, { 'HTTP_ACCEPT' => "application/json" });
+        getJson('/testJson');
         expect(last_response.header['Content-type']).to match /application\/json/
       end
 

@@ -65,3 +65,20 @@ Capybara.register_driver :rack_test do |app|
   Capybara::RackTest::Driver.new(app, :browser => :chrome)
 end
 
+def getJson(url)
+  get(url, 
+      {}, 
+      { 'HTTP_ACCEPT' => "application/json" });
+end
+
+def postJson(url, jsonContent)
+  post(url, 
+       jsonContent.to_json, 
+       { 'Content-type' => 'application/json'});
+end
+
+def putJson(url, jsonContent)
+  put(url, 
+      jsonContent.to_json, 
+      { 'Content-type' => 'application/json'});
+end
