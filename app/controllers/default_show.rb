@@ -1,7 +1,5 @@
 Fandianpf::App.controller do
 
-  @persistantData ||= {};
-  @persistantData[:test] = { someKey: 'some thing' };
 
 #  get '/show/:contentTitle', :provides => [ :html, :json ] do | contentTitle |
   get '/show/test', :provides => [ :html, :json ] do
