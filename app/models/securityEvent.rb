@@ -7,11 +7,6 @@ module Fandianpf
   # All of these events will be stored in the default database 
   # associated with the current DataMapper, in the 
   # fandianpf_security_event table.
-  class SecurityEvent
-    include DataMapper::Resource
-
-    property :id,          Serial
-    property :description, Text
-    property :timeStamp,   DateTime
+  class SecurityEvent < Sequel::Model
   end
 end

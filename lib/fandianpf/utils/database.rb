@@ -1,5 +1,5 @@
 # This is a self contained library of utilities for use with managing 
-# the initial setup of the FandianPF DataMapper library.
+# the initial setup of the FandianPF Sequel library.
 
 require "addressable/uri"
 
@@ -9,7 +9,7 @@ module Fandianpf; module Utils
   # manage FandianPF's use of persistent storage.
   module Database
 
-    # Get the DataMapper URI so we can configure database
+    # Get the Sequel URI so we can configure database
     #
     # IF there are no database configuration directives set
     # THEN we 
@@ -23,21 +23,21 @@ module Fandianpf; module Utils
     # @param [Hash]   padrinoSettings The current value of the global $padrinoSettings
     # @return [String]
     #
-    def self.getDataMapperURI(padrinoEnv, padrinoSettings = {}, fileUtilsClass = FileUtils, fileClass = File )
-      dataMapperURI  = "sqlite3:///./db/fandianpf_#{padrinoEnv}.sqlite";
-      settingsKey = ('dataMapper'+padrinoEnv.to_s.capitalize+'URI').to_sym;
-      dataMapperURI  = padrinoSettings[settingsKey] if padrinoSettings.has_key?(settingsKey);
+    def self.getSequelURI(padrinoEnv, padrinoSettings = {}, fileUtilsClass = FileUtils, fileClass = File )
+      sequelURI  = "sqlite:///./db/fandianpf_#{padrinoEnv}.sqlite";
+      settingsKey = ('sequel'+padrinoEnv.to_s.capitalize+'URI').to_sym;
+      sequelURI  = padrinoSettings[settingsKey] if padrinoSettings.has_key?(settingsKey);
 
-      if dataMapperURI.downcase =~ /^sqlite/ then
-        sqliteDbURI = Addressable::URI.parse(dataMapperURI);
+      if sequelURI.downcase =~ /^sqlite/ then
+        sqliteDbURI = Addressable::URI.parse(sequelURI);
         sqliteDbPath = sqliteDbURI.path;
         if sqliteDbPath =~ /^\/\.\// then
           sqliteDbURI.path = Dir.getwd + '/' + sqliteDbPath.sub(/^\/\.\//,'');
-          dataMapperURI = sqliteDbURI.to_s;
+          sequelURI = sqliteDbURI.to_s;
         end
         fileUtilsClass.mkpath(File.dirname(sqliteDbURI.path)) unless fileClass.directory?(File.dirname(sqliteDbURI.path));
       end
-      return dataMapperURI;
+      return sequelURI;
     end
 
   end

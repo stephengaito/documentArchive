@@ -65,18 +65,35 @@ Capybara.register_driver :rack_test do |app|
   Capybara::RackTest::Driver.new(app, :browser => :chrome)
 end
 
+# Rack based DSL helper to issue the http request to 'get' a JSON 
+# object.
+#
+# @param [String] url The requested url
+# @return not specified
 def getJson(url)
   get(url, 
       {}, 
       { 'HTTP_ACCEPT' => "application/json" });
 end
 
+# Rack based DSL helper to issue the http request to 'post' a JSON 
+# object.
+#
+# @param [String] url The requested url
+# @param [Object] jsonContent The JSON object
+# @return not specified
 def postJson(url, jsonContent)
   post(url, 
        jsonContent.to_json, 
        { 'Content-type' => 'application/json'});
 end
 
+# Rack based DSL helper to issue the http request to 'put' a JSON 
+# object.
+#
+# @param [String] url The requested url
+# @param [Object] jsonContent The JSON object
+# @return not specified
 def putJson(url, jsonContent)
   put(url, 
       jsonContent.to_json, 

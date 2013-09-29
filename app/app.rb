@@ -7,6 +7,7 @@ module Fandianpf
     register Padrino::Rendering
     register Padrino::Mailer
     register Padrino::Helpers
+    register Fandianpf::PersistentStore
 
     enable :sessions
 

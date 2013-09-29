@@ -36,14 +36,9 @@ gem 'rake'
 # Component requirements
 gem 'sass'
 gem 'haml'
-gem 'dm-sqlite-adapter'
-gem 'dm-validations'
-gem 'dm-timestamps'
-gem 'dm-migrations'
-gem 'dm-constraints'
-gem 'dm-aggregates'
-gem 'dm-types'
-gem 'dm-core'
+gem 'sqlite3'
+gem 'sequel'
+gem 'addressable'
 
 # Test requirements
 group :test do

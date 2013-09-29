@@ -12,7 +12,7 @@ module AdminInterfaces
 
   # The Fandianpf::Architecture::AdminInterfaces::ConfigDataStore 
   # module collects the integration specifications for the 
-  # configuration of the persistant data store.
+  # configuration of the persistent data store.
   module ConfigDataStore
 
     # Feature: configure data store
@@ -40,8 +40,11 @@ module AdminInterfaces
         runFandianpf;
         # Then a file named "db/fandianpf_test.sqlite" should exist
         check_file_presence(["db/fandianpf_test.sqlite"], true);
-        # When I run `sqlite3 db/fandianpf_test.sqlite "select * from fandianpf_security_events;"`
-        run_simple(unescape('sqlite3 db/fandianpf_test.sqlite "select * from fandianpf_security_events;"'), true);
+        #
+        # NOW check that the most important ("base") database tables exist
+        #
+        # When I run `sqlite3 db/fandianpf_test.sqlite "select * from security_events;"`
+        run_simple(unescape('sqlite3 db/fandianpf_test.sqlite "select * from security_events;"'), true);
         # Then the stdout should contain "Started FandianPF"
         assert_partial_output("Started FandianPF", all_stdout);
       end
@@ -49,7 +52,7 @@ module AdminInterfaces
       it "create Sqlite database when configuration file found" do
         announceArubaSteps;
         # When I write to "config/settings.yml" with:
-        settingsYaml = "dataMapperTestURI: sqlite3:///./database/fpf_test.sql";
+        settingsYaml = "sequelTestURI: sqlite:///./database/fpf_test.sql";
         write_file("config/settings.yml", settingsYaml);
         # And a file named "database/fpf_test.sql" should not exist
         check_file_presence(["database/fpf_test.sql"], false);
@@ -57,8 +60,11 @@ module AdminInterfaces
         runFandianpf;
         # Then a file named "database/fpf_test.sql" should exist
         check_file_presence(["database/fpf_test.sql"], true);
+        #
+        # NOW check that the most important ("base") database tables exist
+        #
         # When I run `sqlite3 database/fpf_test.sql "select * from fandianpf_security_events;"`
-        run_simple(unescape('sqlite3 database/fpf_test.sql "select * from fandianpf_security_events;"'), true);
+        run_simple(unescape('sqlite3 database/fpf_test.sql "select * from security_events;"'), true);
         # Then the stdout should contain "Started FandianPF"
         assert_partial_output("Started FandianPF", all_stdout);
       end
