@@ -1,4 +1,3 @@
 .post
-  .title This is a default post
-  .date= time_ago_in_words(Time.now) + ' ago'
-  .content This is a very simple default post
+  - @jsonContent[:jsonObject].each_pair do | jsonKey, jsonObject |
+    %div{ field: jsonKey }= jsonObject

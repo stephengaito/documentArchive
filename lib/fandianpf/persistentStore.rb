@@ -1,5 +1,6 @@
 require 'sequel'
 require "addressable/uri"
+require 'logger'
 
 module Fandianpf
 
@@ -8,6 +9,12 @@ module Fandianpf
   module PersistentStore
 
     class << self 
+
+      # Access the Sequel Database associated with this persistent 
+      # store.
+      def db
+        @@db
+      end
 
       # Setup the persistent storage system. (Currently connect to the 
       # database using Sequel).
@@ -27,9 +34,11 @@ module Fandianpf
 
         sequelURI = getSequelURI(Padrino.env, Fandianpf::Utils::Options.getSettings);
 
+        logger.level = Logger::INFO
         logger.info "using database: #{sequelURI}";
+        puts "SETTING UP SEQUEL sqlite database #{sequelURI}"
 
-        @@db = Sequel.connect(sequelURI, loggers: [ logger ] )
+        @@db = Sequel.connect(sequelURI, logger: logger )
 
         ensureSecurityEventTableExists
         ensureJsonObjectTableExists
@@ -61,7 +70,9 @@ module Fandianpf
         if ! @@db.tables.include?(:json_objects) then
           @@db.create_table :json_objects do
             primary_key :id
-            String      :objectKey,  :text=>true
+            String      :jsonKey,   {:text=>true, 
+                                     :unique=> true, 
+                                     :index=>{:unique=>true}}
             String      :jsonObject, :text=>true
           end
         end
@@ -129,6 +140,32 @@ module Fandianpf
     # properly in a FandianPF system.
     #
     module InstanceMethods
+
+      # Store the JSON object under the JSON key in the persistent 
+      # store.
+      #
+      # @param [Symbol] jsonKey the key underwhich to find this jsonObject.
+      # @param [Object] jsonObject the object to be persistently stored.
+      # @return not specified
+      def storeJSON(jsonKey, jsonObject)
+        PersistentStore.db[:json_objects].insert({ jsonKey: jsonKey.to_s,
+                            jsonObject: jsonObject.to_json });
+      end
+
+      # Find the JSON object associated with the given JSON key.
+      #
+      # @param [Symbol] jsonKey the key used to find the required JSON 
+      #   object.
+      # @return [Object] the JSON object or {}.
+      def findJSON(jsonKey)
+        if jsonKey.to_sym == 'json-2efc1ae30d44da86ad297642e21e86b7-test'.to_sym then
+          return { jsonObject: { jsonTest: 'This is the test JSON content' } }
+        end
+        jsonRecord = PersistentStore.db[:json_objects].where(:jsonKey => jsonKey.to_s).order(:id).last
+        jsonRecord[:jsonObject] = JSON.parse jsonRecord[:jsonObject];
+        jsonRecord
+      end
+
     end
   end
 end

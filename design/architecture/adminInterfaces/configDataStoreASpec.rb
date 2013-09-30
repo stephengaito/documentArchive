@@ -59,7 +59,7 @@ module AdminInterfaces
           # Ensure the json_objects table exists
           expect(db.tables).to include :json_objects;
           expect(db[:json_objects].columns).to include :id
-          expect(db[:json_objects].columns).to include :objectKey
+          expect(db[:json_objects].columns).to include :jsonKey
           expect(db[:json_objects].columns).to include :jsonObject
 
           db.disconnect

@@ -42,8 +42,10 @@
 Padrino.configure_apps do
   # enable :sessions
   set :session_secret, '10a17c1b4628fcb0fcd1ec00f255162b3bf03a15b6e05eb750fb19c98869981b'
-  set :protection, true
-  set :protect_from_csrf, true
+  set :protection, false
+  set :protect_from_csrf, false
+#  set :protection, true
+#  set :protect_from_csrf, true
   #
   # add the global Padrino settings from the config/settings.yml file 
   # which was loaded by config/boot.rb.

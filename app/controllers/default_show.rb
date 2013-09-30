@@ -1,22 +1,17 @@
 Fandianpf::App.controller do
 
-
-#  get '/show/:contentTitle', :provides => [ :html, :json ] do | contentTitle |
-  get '/show/test', :provides => [ :html, :json ] do
-    contentTitle = 'test';
-  @persistentData ||= {};
-  @persistentData[:test] = { someKey: 'some thing' };
-    contentTitleSym = contentTitle.to_sym;
-    @contentJson = { error: "content(/show/#{contentTitle}) has not been found" };
-    @contentJson = @persistentData[contentTitleSym].merge({ contentTitle: contentTitle }) if @persistentData.has_key? contentTitleSym;
+  get '/show/:content_title', :provides => [ :html, :json ] do | contentTitle |
+    @jsonContent = findJSON(contentTitle);
+    @jsonContent.merge!({ error: "content(/show/#{contentTitle}) has not been found" }) if @jsonContent.empty?;
+    @jsonContent.merge!({ contentTitle: contentTitle });
     render 'default_show'
   end
 
-#  put '/show/:contentTitle' do | contentTitle |
-  put '/show/test' do
-    contentTitle = 'test';
+  put '/show/:content_title', { :provides => [ :json ], 
+                                :csrf_protection => false } do | contentTitle |
     request.body.rewind  # in case someone already read it
-    @persistentData[contentTitle.to_sym] = JSON.parse request.body.read
+    jsonObject = JSON.parse request.body.read 
+    storeJSON contentTitle, jsonObject
   end
 
 end

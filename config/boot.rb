@@ -46,6 +46,10 @@ Bundler.require(:default, PADRINO_ENV)
 #   include Padrino::Helpers::TranslationHelpers
 # end
 
+Padrino::Logger::Config[:test][:log_level]  = :info
+Padrino::Logger::Config[:test][:log_static] = true
+
+
 ##
 # Add your before (RE)load hooks here
 #

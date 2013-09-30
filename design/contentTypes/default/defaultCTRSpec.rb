@@ -16,39 +16,35 @@ module ContentTypes
 
       # The user, Wants to view the default content type
 
-      # Scenario: show default content type
-      #   When we get "/show/test"
-      #   Then the result should contain default content class
       scenario "show default content type (as html)" do
-        visit "/show/test";
+        visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-test";
         puts page.body;
-        expect(page).to have_xpath("//div[@class='content']");
+        expect(page).to have_xpath("//div[@field='jsonTest']");
       end
 
       # The user, wants to get the default content type as json
 
-      # Scenario: get content as json
-      #   When we get "/show/test" as JSON
-      #   Then the content-type should be 'application/json'
       scenario "get content as json" do
-        getJson('show/test');
+        getJson('show/json-2efc1ae30d44da86ad297642e21e86b7-test');
         expect(last_response.header['Content-type']).to match /application\/json/
+        jsonContent = lastResponseAsJsonObj
+        puts jsonContent;
+        expect(jsonContent).to be_kind_of(Hash);
+        expect(jsonContent[:jsonTest]).to match /This is the test JSON content/;
       end
 
       # The user, Wants to add a new item of content using the default 
       # content type
 
-      # Scenario: add new content
-      #   When we post some json to "/show/test"
-      #   Then
-      #   When we visit "/show/test"
-      #   Then the result should contain elements from the post
       scenario "add new content" do
-        jsonContent = { someKey: "some thing" };
-        putJson( '/show/test', jsonContent);
-        visit "/show/test";
-        puts page.body;
-        expect(page).to have_xpath("//div[@field='someKey']");
+        PersistentStore.db.transaction(:rollback => :always) do
+          jsonContent = { someKey: "some thing" };
+          putJson( '/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent);
+          puts "lastResponse: [#{last_response.body}]"
+          visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
+          puts page.body;
+          expect(page).to have_xpath("//div[@field='someKey']");
+        end # ROLLBACK
       end
      
     end

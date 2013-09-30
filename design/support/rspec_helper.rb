@@ -12,6 +12,7 @@ end
 # do not Padrino.run! the server
 #
 require File.expand_path(File.dirname(__FILE__) + "/../../config/boot")
+require 'fandianpf/utils/options';
 
 RSpec.configure do |conf|
   conf.mock_with :rspec
@@ -79,6 +80,17 @@ def getJson(url)
   get(url, 
       {}, 
       { 'HTTP_ACCEPT' => "application/json" });
+end
+
+# Rack based DSL helper to return the last response as a ruby object.
+#
+# @param [String] url The requested url
+# @return [Object] the JSON content as a Ruby object 
+#   (Hashes will have their keys symbolized).
+def lastResponseAsJsonObj
+  jsonContent = JSON.parse( last_response.body )
+  Fandianpf::Utils::Options.toSymbolHash(jsonContent);
+  jsonContent
 end
 
 # Rack based DSL helper to issue the http request to 'post' a JSON 
