@@ -8,6 +8,9 @@ if not defined?(PADRINO_ENV) then
   PADRINO_ENV = 'test' 
 end
 
+# We boot the sytem (including starting the database connection) BUT we 
+# do not Padrino.run! the server
+#
 require File.expand_path(File.dirname(__FILE__) + "/../../config/boot")
 
 RSpec.configure do |conf|
@@ -59,6 +62,8 @@ def app(app = nil, &blk)
   @app ||= Padrino.application
 end
 
+# Ensure we setup Capybara...
+#
 Capybara.run_server = false;
 Capybara.app = app;
 Capybara.register_driver :rack_test do |app|

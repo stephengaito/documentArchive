@@ -15,7 +15,7 @@ Fandianpf::PersistentStore.setup
 #
 Padrino.after_load do
   Fandianpf::SecurityEvent.create(:description => "(re)Started FandianPF (#{Padrino.env})",
-                                  :timeStamp => Time.now).save;
+                                  :timeStamp => Time.now);
 end
 
 

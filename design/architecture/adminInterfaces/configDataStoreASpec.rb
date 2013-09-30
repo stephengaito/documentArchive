@@ -1,4 +1,6 @@
 require 'support/aspec_helper';
+require 'sequel';
+require 'logger';
 
 module Fandianpf
 
@@ -43,10 +45,25 @@ module AdminInterfaces
         #
         # NOW check that the most important ("base") database tables exist
         #
-        # When I run `sqlite3 db/fandianpf_test.sqlite "select * from security_events;"`
-        run_simple(unescape('sqlite3 db/fandianpf_test.sqlite "select * from security_events;"'), true);
-        # Then the stdout should contain "Started FandianPF"
-        assert_partial_output("Started FandianPF", all_stdout);
+        # Connect to the database
+        Dir.chdir('tmp/aruba') do
+          db = Sequel.connect('sqlite://db/fandianpf_test.sqlite', 
+                              logger: Logger.new(STDOUT) );
+          # Ensure the security_events table exists
+          expect(db.tables).to include :security_events;
+          expect(db[:security_events].columns).to include :id
+          expect(db[:security_events].columns).to include :description
+          expect(db[:security_events].columns).to include :timeStamp
+          expect(db[:security_events].order(:id).last[:description]).to match /Started FandianPF/
+
+          # Ensure the json_objects table exists
+          expect(db.tables).to include :json_objects;
+          expect(db[:json_objects].columns).to include :id
+          expect(db[:json_objects].columns).to include :objectKey
+          expect(db[:json_objects].columns).to include :jsonObject
+
+          db.disconnect
+        end
       end
 
       it "create Sqlite database when configuration file found" do
@@ -63,10 +80,14 @@ module AdminInterfaces
         #
         # NOW check that the most important ("base") database tables exist
         #
-        # When I run `sqlite3 database/fpf_test.sql "select * from fandianpf_security_events;"`
-        run_simple(unescape('sqlite3 database/fpf_test.sql "select * from security_events;"'), true);
-        # Then the stdout should contain "Started FandianPF"
-        assert_partial_output("Started FandianPF", all_stdout);
+        # Connect to the database
+        Dir.chdir('tmp/aruba') do
+          db = Sequel.connect('sqlite://database/fpf_test.sql', 
+                              logger: Logger.new(STDOUT) );
+          expect(db.tables).to include :security_events;
+          expect(db.tables).to include :json_objects;
+          db.disconnect
+        end
       end
 
     end
