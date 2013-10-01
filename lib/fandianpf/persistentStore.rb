@@ -34,18 +34,18 @@ module Fandianpf
 
         sequelURI = getSequelURI(Padrino.env, Fandianpf::Utils::Options.getSettings);
 
-        logger.level = Logger::INFO
         logger.info "using database: #{sequelURI}";
-        puts "SETTING UP SEQUEL sqlite database #{sequelURI}"
 
         @@db = Sequel.connect(sequelURI, logger: logger )
 
         ensureSecurityEventTableExists
         ensureJsonObjectTableExists
 
-        if Padrino.env == :development then
-          Sequel::Model.raise_on_save_failure = true  # globally across all models
-        end
+        # Raise error on save failures globally across all models for 
+        # non-production environments
+        #
+        Sequel::Model.raise_on_save_failure = true  unless Padrino.env == :production;
+
       end
 
       # Ensure that the SecurityEvent (:security_events) table exists 
@@ -109,6 +109,32 @@ module Fandianpf
           fileUtilsClass.mkpath(File.dirname(sqliteDbURI.path)) unless fileClass.directory?(File.dirname(sqliteDbURI.path));
         end
         return sequelURI;
+      end
+
+      # Do the required housekeeping if we know that the web server 
+      # forks worker threads.
+      #
+      # This should ONLY be called *after* all application classes (and 
+      # in particular models) have been loaded.  It is typically used 
+      # in the Padrino.after_load block.
+      # 
+      # @return not specified
+      def webServerForks!
+        # Taken from the Sequel code order documentation:
+        #
+        # Disconnect If Using Forking Webserver with Code Preloading
+        #
+        # If you are using a forking webserver such as unicorn or 
+        # passenger, with a feature that loads your Sequel code before 
+        # forking connections (code preloading), then you must 
+        # disconnect your database connections before forking. If you 
+        # don't do this, you can end up with child processes sharing 
+        # database connections and all sorts of weird behavior. Sequel 
+        # will automatically reconnect on an as needed basis in the 
+        # child processes, so you only need to do the following in the 
+        # parent process:
+        #
+        @@db.disconnect
       end
 
       # When using the Rails/Sinatra/Padrino registration system, this 

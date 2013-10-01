@@ -16,6 +16,9 @@ Fandianpf::PersistentStore.setup
 Padrino.after_load do
   Fandianpf::SecurityEvent.create(:description => "(re)Started FandianPF (#{Padrino.env})",
                                   :timeStamp => Time.now);
+
+  # Do the required housekeeping if the webServerForks.
+  Fandianpf::PersistentStore.webServerForks!;
 end
 
 

@@ -46,8 +46,15 @@ Bundler.require(:default, PADRINO_ENV)
 #   include Padrino::Helpers::TranslationHelpers
 # end
 
+# Note that the Padrino::Logger configuration is different from the 
+# standard Sinatra/Padrino 'set' based configuration. More over the 
+# logger is configured to swallow all messages in the test environment 
+# (which is unhelpful to say the least in a test first environment).  
+# SO we configure the logger for the :test environment here.
+#
 Padrino::Logger::Config[:test][:log_level]  = :info
 Padrino::Logger::Config[:test][:log_static] = true
+Padrino::Logger::Config[:test][:stream]     = :to_file
 
 
 ##
