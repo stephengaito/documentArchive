@@ -51,16 +51,21 @@ module AdminInterfaces
                               logger: Logger.new(STDOUT) );
           # Ensure the security_events table exists
           expect(db.tables).to include :security_events;
-          expect(db[:security_events].columns).to include :id
-          expect(db[:security_events].columns).to include :description
-          expect(db[:security_events].columns).to include :timeStamp
+          columns = db[:security_events].columns;
+          expect(columns).to include :id
+          expect(columns).to include :description
+          expect(columns).to include :timeStamp
           expect(db[:security_events].order(:id).last[:description]).to match /Started FandianPF/
 
           # Ensure the json_objects table exists
           expect(db.tables).to include :json_objects;
-          expect(db[:json_objects].columns).to include :id
-          expect(db[:json_objects].columns).to include :jsonKey
-          expect(db[:json_objects].columns).to include :jsonObject
+          columns = db[:json_objects].columns;
+          expect(columns).to include :id
+          expect(columns).to include :jsonKey
+          expect(columns).to include :jsonObject
+          indexes = db.indexes(:json_objects)
+          expect(indexes).to have_key :json_objects_jsonKey_index;
+          expect(indexes[:json_objects_jsonKey_index][:columns]).to include :jsonKey;
 
           db.disconnect
         end

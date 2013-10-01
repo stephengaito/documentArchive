@@ -42,10 +42,26 @@
 Padrino.configure_apps do
   # enable :sessions
   set :session_secret, '10a17c1b4628fcb0fcd1ec00f255162b3bf03a15b6e05eb750fb19c98869981b'
-  set :protection, false
-  set :protect_from_csrf, false
-#  set :protection, true
-#  set :protect_from_csrf, true
+
+  # Configure Sinatra/Padrino's use of Rack::Protection.
+  #
+  # Setup all of the (Rack::Protection) standard attack components 
+  # (See: <<rack-protection>>/lib/rack/protection.rb )
+  #
+  set :protection, true
+  #
+  # Now setup Padrino specific Rack::Protection::AuthenticityToken 
+  # attach protection.  This is a two step configuration...
+  #
+  # Turn on AuthenticityToken globally...
+  #
+  set :protect_from_csrf, true
+  #
+  # BUT allow specific routes to disable AuthenticityToken checking on 
+  # a route by route basis by adding the ':csrf_protection => false' 
+  # option to the route DSL command.
+  #
+  set :allow_disabled_csrf, true
   #
   # add the global Padrino settings from the config/settings.yml file 
   # which was loaded by config/boot.rb.
