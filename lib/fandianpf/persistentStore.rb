@@ -16,6 +16,12 @@ module Fandianpf
         @@db
       end
 
+      # Access the Padrino Cache devoted to json objects associated 
+      # with this persistent store.
+      def jsonCache
+        @@jsonCache
+      end
+
       # Setup the persistent storage system. (Currently connect to the 
       # database using Sequel).
       #
@@ -36,7 +42,9 @@ module Fandianpf
 
         logger.info "using database: #{sequelURI}";
 
-        @@db = Sequel.connect(sequelURI, logger: logger )
+        @@db = Sequel.connect(sequelURI, logger: logger );
+
+        @@jsonCache = Padrino::Cache::Store::Memory.new(10000);
 
         ensureSecurityEventTableExists
         ensureJsonObjectTableExists
@@ -70,10 +78,11 @@ module Fandianpf
         if ! @@db.tables.include?(:json_objects) then
           @@db.create_table :json_objects do
             primary_key :id
-            String      :jsonKey,   {:text=>true, 
-                                     :unique=> true, 
-                                     :index=>{:unique=>true}}
+            String      :jsonKey,    :text=>true, 
+                                     :index=>true
             String      :jsonObject, :text=>true
+            DateTime    :timeStamp
+            String      :digest,     :fixed=>true, :size=>44
           end
         end
       end
@@ -172,10 +181,23 @@ module Fandianpf
       #
       # @param [Symbol] jsonKey the key underwhich to find this jsonObject.
       # @param [Object] jsonObject the object to be persistently stored.
+      # @param [Hash]   jsonOptions options used to control the persistent
+      #   store: :version can be one of :update, :new, :error
       # @return not specified
-      def storeJSON(jsonKey, jsonObject)
-        PersistentStore.db[:json_objects].insert({ jsonKey: jsonKey.to_s,
-                            jsonObject: jsonObject.to_json });
+      def storeJSON(jsonKey, jsonObject, jsonOptions = { version: :new })
+        jsonKeySym = jsonKey.to_sym;
+        jsonStr    = jsonObject.to_json;
+        jsonDigest = Digest::SHA256.base64digest(jsonStr);
+        puts "             12345678901234567890123456789012345678901234"
+        puts "jsonDigest: [#{jsonDigest}]";
+        jsonRecord = { 
+          jsonKey:    jsonKey.to_s,
+          jsonObject: jsonStr,
+          timeStamp:  Time.now,
+          digest:     jsonDigest
+        }
+        PersistentStore.jsonCache.set(jsonKeySym, jsonRecord);
+        PersistentStore.db[:json_objects].insert(jsonRecord);
       end
 
       # Find the JSON object associated with the given JSON key.
@@ -184,10 +206,22 @@ module Fandianpf
       #   object.
       # @return [Object] the JSON object or {}.
       def findJSON(jsonKey)
-        if jsonKey.to_sym == 'json-2efc1ae30d44da86ad297642e21e86b7-test'.to_sym then
+        jsonKeySym = jsonKey.to_sym;
+
+        if jsonKeySym == 'json-2efc1ae30d44da86ad297642e21e86b7-test'.to_sym then
           return { jsonObject: { jsonTest: 'This is the test JSON content' } }
         end
-        jsonRecord = PersistentStore.db[:json_objects].where(:jsonKey => jsonKey.to_s).order(:id).last
+        # start by checking the cache
+        jsonRecord = PersistentStore.jsonCache.get(jsonKeySym);
+        require 'pp';
+        pp jsonRecord unless jsonRecord.nil?;
+
+        # if jsonRecord is nil then hit the database instead
+        if jsonRecord.nil? then
+          jsonRecord = PersistentStore.db[:json_objects].where(:jsonKey => jsonKey.to_s).order(:id).last;
+          PersistentStore.jsonCache.set(jsonKeySym, jsonRecord);
+        end
+
         jsonRecord[:jsonObject] = JSON.parse jsonRecord[:jsonObject];
         jsonRecord
       end
