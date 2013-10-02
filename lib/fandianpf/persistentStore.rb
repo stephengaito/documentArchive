@@ -33,6 +33,9 @@ module Fandianpf
   #
   module PersistentStore
 
+    class UpdateError < StandardError
+    end
+
     class << self 
 
       # Access the Sequel Database associated with this persistent 
@@ -190,6 +193,71 @@ module Fandianpf
         @@db.disconnect
       end
 
+      # Find the JSON object associated with the given JSON key.
+      #
+      # @param [Symbol] jsonKey the key used to find the required JSON 
+      #   object.
+      # @return [Object] the JSON object or {}.
+      def findJSON(jsonKey)
+        jsonKeySym = jsonKey.to_sym;
+
+        # start by checking the cache
+        jsonRecord = PersistentStore.jsonCache.get(jsonKeySym);
+
+        # if jsonRecord is nil then hit the database instead
+        if jsonRecord.nil? then
+          jsonRecord = @@db[:json_objects].where(:jsonKey => jsonKey.to_s).order(:id).last;
+          @@jsonCache.set(jsonKeySym, jsonRecord) unless jsonRecord.nil?;
+        end
+
+        jsonRecord = Hash.new if jsonRecord.nil?;
+        if jsonRecord.has_key?(:jsonObject) then
+          jsonRecord[:jsonObject] = JSON.parse(jsonRecord[:jsonObject]) if jsonRecord[:jsonObject].kind_of?(String);
+        end
+
+        require 'pp';
+        pp jsonRecord;
+
+        jsonRecord
+      end
+
+      # Store the JSON object under the JSON key in the persistent 
+      # store.
+      #
+      # @param [Symbol] jsonKey the key underwhich to find this jsonObject.
+      # @param [Object] jsonObject the object to be persistently stored.
+      # @return not specified
+      def storeJSON(jsonKey, jsonObject)
+        jsonRecord = { 
+          jsonKey:    jsonKey.to_s,
+          jsonObject: jsonObject.to_json,
+          timeStamp:  Time.now,
+        }
+        insert_id = @@db[:json_objects].insert(jsonRecord);
+        jsonRecord[:id] = insert_id;
+        @@jsonCache.set(jsonKey.to_sym, jsonRecord);
+      end
+
+      # Update the last matching JSON object under the JSON key in the 
+      # persistent store.
+      #
+      # @param [Symbol] jsonKey the key underwhich to find this jsonObject.
+      # @param [Object] jsonObject the object to be persistently stored.
+      # @return not specified
+      def updateJSON(jsonKey, jsonObject)
+        jsonRecord = @@db[:json_objects].where(:jsonKey => jsonKey.to_s).order(:id).last
+        if jsonRecord.empty? then
+          # If there is no record to update... simply store it
+          storeJSON(jsonKey, jsonObject);
+        else
+          # There is a record to update so update just it...
+          @@db[:json_objects].where(:id => jsonRecord[:id]).update(:jsonObject => jsonObject.to_json, :timeStamp => Time.now);
+          jsonRecord[:jsonObject] = jsonObject.to_json;
+          jsonRecord[:timeStamp]  = Time.now;
+          @@jsonCache.set(jsonKey.to_sym, jsonRecord);
+        end
+      end
+
       # When using the Rails/Sinatra/Padrino registration system, this 
       # registered callback is used complete the registration.
       #
@@ -226,16 +294,25 @@ module Fandianpf
       # @param [Symbol] jsonKey the key underwhich to find this jsonObject.
       # @param [Object] jsonObject the object to be persistently stored.
       # @param [Hash]   jsonOptions options used to control the persistent
-      #   store: :version can be one of :update, :new, :error
+      #   store: :version can be one of :updateLast, :addNew, :raiseError
       # @return not specified
-      def storeJSON(jsonKey, jsonObject, jsonOptions = { version: :new })
-        jsonRecord = { 
-          jsonKey:    jsonKey.to_s,
-          jsonObject: jsonObject.to_json,
-          timeStamp:  Time.now,
-        }
-        PersistentStore.jsonCache.set(jsonKey.to_sym, jsonRecord);
-        PersistentStore.db[:json_objects].insert(jsonRecord);
+      def storeJSON(jsonKey, jsonObject, jsonOptions = { version: :addNew }, store = PersistentStore)
+
+        # If :version => :new then simply store this jsonObject
+        return store.storeJSON(jsonKey, jsonObject) if jsonOptions[:version] == :addNew;
+
+        oldJsonRecord = store.findJSON(jsonKey);
+
+        # If this json has never been stored... simply store it!
+        return store.storeJSON(jsonKey, jsonObject) if oldJsonRecord.empty?
+
+        # If this jsonObject is the same as the oldJsonObject do nothing!
+        return if oldJsonRecord[:jsonObject].eql?(jsonObject);
+
+        # If :version => :update then update this version
+        return store.updateJSON(jsonKey, jsonObject) if jsonOptions[:version] == :updateLast;
+
+        raise PersistentStore::UpdateError, "JSON object has changed and no versioning is allowed";
       end
 
       # Find the JSON object associated with the given JSON key.
@@ -244,27 +321,12 @@ module Fandianpf
       #   object.
       # @return [Object] the JSON object or {}.
       def findJSON(jsonKey)
-        jsonKeySym = jsonKey.to_sym;
 
-        if jsonKeySym == 'json-2efc1ae30d44da86ad297642e21e86b7-test'.to_sym then
+        if jsonKey.to_sym == 'json-2efc1ae30d44da86ad297642e21e86b7-test'.to_sym then
           return { jsonObject: { jsonTest: 'This is the test JSON content' } }
         end
 
-        # start by checking the cache
-        jsonRecord = PersistentStore.jsonCache.get(jsonKeySym);
-
-        # if jsonRecord is nil then hit the database instead
-        if jsonRecord.nil? then
-          jsonRecord = PersistentStore.db[:json_objects].where(:jsonKey => jsonKey.to_s).order(:id).last;
-          PersistentStore.jsonCache.set(jsonKeySym, jsonRecord) unless jsonRecord.nil?;
-        end
-
-        jsonRecord = Hash.new if jsonRecord.nil?;
-        if jsonRecord.has_key?(:jsonObject) then
-          jsonRecord[:jsonObject] = JSON.parse(jsonRecord[:jsonObject]) if jsonRecord[:jsonObject].kind_of?(String);
-        end
-
-        jsonRecord
+        PersistentStore.findJSON(jsonKey);
       end
 
     end

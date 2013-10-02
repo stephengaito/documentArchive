@@ -7,11 +7,18 @@ Fandianpf::App.controller do
     render 'default_show'
   end
 
-  put '/show/:content_title', { :provides => [ :json ], 
+  put '/add/:content_title', { :provides => [ :json ], 
                                 :csrf_protection => false } do | contentTitle |
     request.body.rewind  # in case someone already read it
     jsonObject = JSON.parse request.body.read 
-    storeJSON contentTitle, jsonObject
+    storeJSON contentTitle, jsonObject, { version: :addNew };
+  end
+
+  put '/update/:content_title', { :provides => [ :json ], 
+                                :csrf_protection => false } do | contentTitle |
+    request.body.rewind  # in case someone already read it
+    jsonObject = JSON.parse request.body.read 
+    storeJSON contentTitle, jsonObject, { version: :updateLast };
   end
 
 end

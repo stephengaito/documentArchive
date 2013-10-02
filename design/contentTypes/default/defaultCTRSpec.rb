@@ -39,11 +39,50 @@ module ContentTypes
       scenario "add new content" do
         PersistentStore.db.transaction(:rollback => :always) do
           jsonContent = { someKey: "some thing" };
-          putJson( '/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent);
+          putJson( '/add/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent);
           puts "lastResponse: [#{last_response.body}]"
           visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
           puts page.body;
+          expect(page).to have_xpath("//div[@db_id='1']");
           expect(page).to have_xpath("//div[@field='someKey']");
+        end # ROLLBACK
+      end
+
+      scenario "add new content twice" do
+        PersistentStore.db.transaction(:rollback => :always) do
+          jsonContent1 = { firstKey: "some thing" };
+          jsonContent2 = { secondKey: "another thing" };
+          putJson( '/add/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent1);
+          puts "lastResponse: [#{last_response.body}]"
+          visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
+          puts page.body;
+          expect(page).to have_xpath("//div[@field='firstKey']");
+          expect(page).to have_xpath("//div[@db_id='1']");
+          putJson( '/add/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent2);
+          puts "lastResponse: [#{last_response.body}]"
+          visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
+          puts page.body;
+          expect(page).to have_xpath("//div[@field='secondKey']");
+          expect(page).to have_xpath("//div[@db_id='2']");
+        end # ROLLBACK
+      end
+     
+      scenario "add new content and then update it" do
+        PersistentStore.db.transaction(:rollback => :always) do
+          jsonContent1 = { firstKey: "some thing" };
+          jsonContent2 = { secondKey: "another thing" };
+          putJson( '/add/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent1);
+          puts "lastResponse: [#{last_response.body}]"
+          visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
+          puts page.body;
+          expect(page).to have_xpath("//div[@field='firstKey']");
+          expect(page).to have_xpath("//div[@db_id='1']");
+          putJson( '/update/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent2);
+          puts "lastResponse: [#{last_response.body}]"
+          visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
+          puts page.body;
+          expect(page).to have_xpath("//div[@field='secondKey']");
+          expect(page).to have_xpath("//div[@db_id='1']");
         end # ROLLBACK
       end
      
