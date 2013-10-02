@@ -1,6 +1,31 @@
+require 'padrino'
 require 'sequel'
 require "addressable/uri"
 require 'logger'
+require 'json'
+
+module Padrino
+  module Cache
+    module Store
+      class Memeory
+
+        ##
+        # Reinitialize your cache.
+        #
+        # @example
+        #   MyApp.cache.flush
+        #   MyApp.cache.get('records') # => nil
+        #
+        # Fixed in Fandainpf::PersistentStore to clear the entries as 
+        # well as the index.
+        def flush
+          @index = Hash.new;
+          @entries = Array.new;
+        end
+      end
+    end
+  end
+end
 
 module Fandianpf
 
@@ -22,11 +47,32 @@ module Fandianpf
         @@jsonCache
       end
 
+      # Mock the database and jsonCache to allow for testing of this 
+      # singleton pattern.
+      #
+      # @param [RSpecMock] databaseMock a double of the database
+      # @param [RSpecMock] cacheMock a doulbe of the cache
+      # @param [Block] &block the block to perform while mocked.
+      # @return not specified
+      def mockStore(databaseMock, cacheMock, &block)
+        oldDB    = defined?(@@db)        ? @@db : nil;
+        oldCache = defined?(@@jsonCache) ? @@jsonCache : nil;
+        @@db        = databaseMock;
+        @@jsonCache = cacheMock;
+        begin
+          block.call
+        ensure 
+          @@db        = oldDB;
+          @@jsonCache = oldCache;
+        end
+      end
+
       # Setup the persistent storage system. (Currently connect to the 
       # database using Sequel).
       #
       # @return not specified
-      def setup 
+      def setup
+
         ##
         # A MySQL connection:
         # DB = Sequel.connect('mysql://user:password@localhost/the_database_name', loggers: [ logger ] )
@@ -37,7 +83,6 @@ module Fandianpf
         # # A Sqlite3 connection
         # DB = Sequel.connect("sqlite://" + Padrino.root('db', "development.db", loggers: [ logger ] ))
         #
-
         sequelURI = getSequelURI(Padrino.env, Fandianpf::Utils::Options.getSettings);
 
         logger.info "using database: #{sequelURI}";
@@ -82,7 +127,6 @@ module Fandianpf
                                      :index=>true
             String      :jsonObject, :text=>true
             DateTime    :timeStamp
-            String      :digest,     :fixed=>true, :size=>44
           end
         end
       end
@@ -185,18 +229,12 @@ module Fandianpf
       #   store: :version can be one of :update, :new, :error
       # @return not specified
       def storeJSON(jsonKey, jsonObject, jsonOptions = { version: :new })
-        jsonKeySym = jsonKey.to_sym;
-        jsonStr    = jsonObject.to_json;
-        jsonDigest = Digest::SHA256.base64digest(jsonStr);
-        puts "             12345678901234567890123456789012345678901234"
-        puts "jsonDigest: [#{jsonDigest}]";
         jsonRecord = { 
           jsonKey:    jsonKey.to_s,
-          jsonObject: jsonStr,
+          jsonObject: jsonObject.to_json,
           timeStamp:  Time.now,
-          digest:     jsonDigest
         }
-        PersistentStore.jsonCache.set(jsonKeySym, jsonRecord);
+        PersistentStore.jsonCache.set(jsonKey.to_sym, jsonRecord);
         PersistentStore.db[:json_objects].insert(jsonRecord);
       end
 
@@ -211,18 +249,21 @@ module Fandianpf
         if jsonKeySym == 'json-2efc1ae30d44da86ad297642e21e86b7-test'.to_sym then
           return { jsonObject: { jsonTest: 'This is the test JSON content' } }
         end
+
         # start by checking the cache
         jsonRecord = PersistentStore.jsonCache.get(jsonKeySym);
-        require 'pp';
-        pp jsonRecord unless jsonRecord.nil?;
 
         # if jsonRecord is nil then hit the database instead
         if jsonRecord.nil? then
           jsonRecord = PersistentStore.db[:json_objects].where(:jsonKey => jsonKey.to_s).order(:id).last;
-          PersistentStore.jsonCache.set(jsonKeySym, jsonRecord);
+          PersistentStore.jsonCache.set(jsonKeySym, jsonRecord) unless jsonRecord.nil?;
         end
 
-        jsonRecord[:jsonObject] = JSON.parse jsonRecord[:jsonObject];
+        jsonRecord = Hash.new if jsonRecord.nil?;
+        if jsonRecord.has_key?(:jsonObject) then
+          jsonRecord[:jsonObject] = JSON.parse(jsonRecord[:jsonObject]) if jsonRecord[:jsonObject].kind_of?(String);
+        end
+
         jsonRecord
       end
 
