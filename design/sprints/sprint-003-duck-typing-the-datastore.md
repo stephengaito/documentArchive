@@ -152,6 +152,73 @@ authority](http://www.quicksprout.com/2012/09/17/author-rank-a-step-by-step-guid
 
  1. [SEO checklist](http://www.orbitmedia.com/blog/seo-best-practices)
 
+### Bibliographic references
+
+See [bibJSON](http://www.bibjson.org/), 
+[CSL](http://citationstyles.org/) and the datamodel to CSL's 
+[citeproc-js](https://bitbucket.org/fbennett/citeproc-js/wiki/Home).  
+See also [citeproc-ruby](https://github.com/inukshuk/citeproc-ruby).
+
+HOWEVER, as an internal model we will use the BibLaTeX model (as loaded 
+by [bibtex-ruby](https://github.com/inukshuk/bibtex-ruby)) and possibly 
+in a JSON variant for storage in the database.  See: [BibLaTeX 
+manual](http://mirrors.ctan.org/macros/latex/contrib/biblatex/doc/biblatex.pdf) 
+[blx-dm.def -- basic field 
+definitions](http://mirrors.ctan.org/macros/latex/contrib/biblatex/latex/blx-dm.def), 
+[does bibtex-ruby provide biblatex 
+support?](https://github.com/inukshuk/bibtex-ruby/issues/44)
+
+[Here is a brief justification of why BibLaTeX is better then 
+CSL](http://tex.stackexchange.com/questions/69267/citation-style-language-csl/69284#69284)
+
+### Interworking with Zotero and Docear
+
+Zotero will be use primarily as a referenc *capture* tool for getting, 
+reading and annotating (using Okular) PDF files as references.
+
+I *might* keep a fair number of references in Zotero, however Zotero's 
+CSL internal model is (reputedly) not up BibLaTeX's internal reference 
+model. AND I like to keep notes about authors, institutions, and more 
+extensive blog entries... all of which suggests that my prefered 
+reference tool will be FandianPF.
+
+I think I might use Docear to mind map and explore literature for 
+specifice projects. At the moment I do not see it as capable of keeping 
+my nearly 3000 references in any comprehensive way (the "database" is a 
+simple flat biblatex file ;-(
+
+SO, at this point, FandianPF will be my main reference "database".  
+Zotero will be used to crop references from the web (and may end up 
+storing most of these). Docear will be used to explore a specific 
+topic/paper.  Zotero will inter-communicate with FandianPF using 
+biblatex (needs a pluging to be developed) and webdav. Docear will 
+inter-communicate with FandianPF using biblatex (via exports to the 
+file system) and webdav (to download specific documents).
+
+Implications for FandianPF.
+
+1. We need to provide and configure a WebDav based "file system" for 
+(local) document storage.
+
+1. We need to provide get and put of biblatex formated content, of 
+either single entries or bulk collections.
+
+1. We need to provide get and put of extended biblatex to allow notes 
+associated to an individual paper.
+
+1. We need to provide get and put of extended biblatex to allow for 
+authors and institutions to have "paper" like entries.
+
+1. We need to cross link entries using textual (as opposed to 
+traditional foriegn key) associations.
+
+1. We should provide Zotero friendly RDF on all appropriate FandianPF 
+pages.
+
+1. We might consider a Zotero plugin to allow author and insitution 
+enties in the internal model.
+
+
 ## Wrap-up
 
 Nothing at the moment.
