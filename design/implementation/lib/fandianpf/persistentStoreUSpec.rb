@@ -53,6 +53,10 @@ module Fandianpf; module Spec;
         cacheMock    = double();
         cacheMock.stub(:set) do | jsonKey, jsonObject |
           expect(jsonObject).to have_key :id
+          expect(jsonObject).to have_key :isSymbolicLink
+          expect(jsonObject[:isSymbolicLink]).to be_false;
+          expect(jsonObject).to have_key :jsonObject
+          expect(jsonObject[:jsonObject]).to eql "{\"jsonTest\":\"This is the test JSON content\"}"
         end
         databaseMock.stub(:[]).and_return(datasetMock);
         datasetMock.stub(:insert);
@@ -60,6 +64,24 @@ module Fandianpf; module Spec;
           PersistentStore.storeJSON(@jsonKeySym, @jsonObject);
         end
       end 
+
+      it "::storeJSON stores a symbolic link if isSymbolicLink is true" do
+        databaseMock = double();
+        datasetMock  = double();
+        cacheMock    = double();
+        cacheMock.stub(:set) do | jsonKey, jsonObject |
+          expect(jsonObject).to have_key :id
+          expect(jsonObject).to have_key :isSymbolicLink
+          expect(jsonObject[:isSymbolicLink]).to be_true;
+          expect(jsonObject).to have_key :jsonObject;
+          expect(jsonObject[:jsonObject]).to eql "a symbolic link"
+        end
+        databaseMock.stub(:[]).and_return(datasetMock);
+        datasetMock.stub(:insert);
+        PersistentStore.mockStore(databaseMock, cacheMock) do
+          PersistentStore.storeJSON(@jsonKeySym, "a symbolic link", true);
+        end
+      end
 
       it "::updateJSON updates an existing json object into both cache and database" do
         databaseMock = double();
@@ -143,6 +165,88 @@ module Fandianpf; module Spec;
           expect(jsonRecord).to be_empty;
         end
       end
+
+      it "::findJSON will follow a number of symbolic links in the database" do
+        databaseMock = double();
+        datasetMock  = double();
+        cacheMock    = double();
+        cacheMock.stub(:get).and_return(nil);
+        cacheMock.stub(:set).with(:"json-test", {:isSymbolicLink=>true, :jsonObject=>"first symbolic link"}).ordered;
+        cacheMock.stub(:set).with(:"first symbolic link", {:isSymbolicLink=>true, :jsonObject=>"second symbolic link"}).ordered;
+        cacheMock.stub(:set).with(:"second symbolic link", {:jsonObject=>{:jsonTest=>"This is the test JSON content"}}).ordered;
+        databaseMock.stub(:[]).and_return(datasetMock);
+        datasetMock.stub(:where).and_return(datasetMock);
+        datasetMock.stub(:order).and_return(datasetMock);
+        datasetMock.stub(:last).and_return(
+          { isSymbolicLink: true, jsonObject: "first symbolic link" },
+          { isSymbolicLink: true, jsonObject: "second symbolic link" },
+          @jsonRecord
+        );
+        PersistentStore.mockStore(databaseMock, cacheMock) do
+          jsonRecord = PersistentStore.findJSON(@jsonKeySym);
+          #
+          # check to make sure the JSON object has been parsed into a 
+          # Ruby object.
+          #
+          expect(jsonRecord).to be_kind_of Hash;
+          expect(jsonRecord).to have_key :jsonObject;
+          expect(jsonRecord[:jsonObject]).to be_kind_of Hash
+        end
+      end
+
+      it "::findJSON will follow a number of symbolic links in the database and cache" do
+        databaseMock = double();
+        datasetMock  = double();
+        cacheMock    = double();
+        cacheMock.stub(:get).and_return(
+          nil,
+          {:isSymbolicLink=>true, :jsonObject=>"second symbolic link"},
+          nil
+        );
+        cacheMock.stub(:set).with(:"json-test", {:isSymbolicLink=>true, :jsonObject=>"first symbolic link"}).ordered;
+        cacheMock.stub(:set).with(:"second symbolic link", {:jsonObject=>{:jsonTest=>"This is the test JSON content"}}).ordered;
+        databaseMock.stub(:[]).and_return(datasetMock);
+        datasetMock.stub(:where).and_return(datasetMock);
+        datasetMock.stub(:order).and_return(datasetMock);
+        datasetMock.stub(:last).and_return(
+          { isSymbolicLink: true, jsonObject: "first symbolic link" },
+          @jsonRecord
+        );
+        PersistentStore.mockStore(databaseMock, cacheMock) do
+          jsonRecord = PersistentStore.findJSON(@jsonKeySym);
+          #
+          # check to make sure the JSON object has been parsed into a 
+          # Ruby object.
+          #
+          expect(jsonRecord).to be_kind_of Hash;
+          expect(jsonRecord).to have_key :jsonObject;
+          expect(jsonRecord[:jsonObject]).to be_kind_of Hash
+        end
+      end
+
+      it "::findJSON will detect loops of symbolic links" do
+        databaseMock = double();
+        datasetMock  = double();
+        cacheMock    = double();
+        cacheMock.stub(:get).and_return(nil);
+        cacheMock.stub(:set).with(:"json-test", {:isSymbolicLink=>true, :jsonObject=>"first symbolic link"}).ordered;
+        cacheMock.stub(:set).with(:"first symbolic link", {:isSymbolicLink=>true, :jsonObject=>"second symbolic link"}).ordered;
+        cacheMock.stub(:set).with(:"second symbolic link", {:isSymbolicLink=>true, :jsonObject=>"first symbolic link"}).ordered;
+        databaseMock.stub(:[]).and_return(datasetMock);
+        datasetMock.stub(:where).and_return(datasetMock);
+        datasetMock.stub(:order).and_return(datasetMock);
+        datasetMock.stub(:last).and_return(
+          { isSymbolicLink: true, jsonObject: "first symbolic link" },
+          { isSymbolicLink: true, jsonObject: "second symbolic link" },
+          { isSymbolicLink: true, jsonObject: "first symbolic link" },
+        );
+        PersistentStore.mockStore(databaseMock, cacheMock) do
+          jsonRecord = PersistentStore.findJSON(@jsonKeySym);
+          expect(jsonRecord).to be_kind_of Hash;
+          expect(jsonRecord).to be_empty;
+        end
+      end
+
 
     end
   end

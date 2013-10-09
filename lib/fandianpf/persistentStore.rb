@@ -126,9 +126,10 @@ module Fandianpf
         if ! @@db.tables.include?(:json_objects) then
           @@db.create_table :json_objects do
             primary_key :id
-            String      :jsonKey,    :text=>true, 
-                                     :index=>true
-            String      :jsonObject, :text=>true
+            String      :jsonKey,        :text=>true, 
+                                         :index=>true
+            String      :jsonObject,     :text=>true
+            TrueClass	:isSymbolicLink, :default=>false
             DateTime    :timeStamp
           end
         end
@@ -199,24 +200,47 @@ module Fandianpf
       #   object.
       # @return [Object] the JSON object or {}.
       def findJSON(jsonKey)
+        require 'pp';
+
         jsonKeySym = jsonKey.to_sym;
 
-        # start by checking the cache
-        jsonRecord = PersistentStore.jsonCache.get(jsonKeySym);
+        # create a list of existing symbolic links we have traversed
+        linkRefs = Hash.new
 
-        # if jsonRecord is nil then hit the database instead
-        if jsonRecord.nil? then
-          jsonRecord = @@db[:json_objects].where(:jsonKey => jsonKey.to_s).order(:id).last;
-          @@jsonCache.set(jsonKeySym, jsonRecord) unless jsonRecord.nil?;
+        jsonRecord = { isSymbolicLink: true };
+        while jsonRecord[:isSymbolicLink] do 
+
+          # start by checking the cache
+          jsonRecord = PersistentStore.jsonCache.get(jsonKeySym);
+
+          # if jsonRecord is nil then hit the database instead
+          if jsonRecord.nil? then
+            jsonRecord = @@db[:json_objects].where(:jsonKey => jsonKey.to_s).order(:id).last;
+            @@jsonCache.set(jsonKeySym, jsonRecord) unless jsonRecord.nil?;
+          end
+#          puts "jsonKey: [#{jsonKey}]";
+#          pp jsonRecord;
+          jsonRecord = { isSymbolicLink: false } if jsonRecord.nil?;
+          if jsonRecord[:isSymbolicLink] then
+            if linkRefs.has_key?(jsonRecord[:jsonObject]) then
+              # we have hit a cirular loop ;-(
+              jsonRecord = { isSymbolicLink: false };
+            else
+              # we have not seen this link yet... so follow it.
+              jsonKey = jsonRecord[:jsonObject];
+              jsonKeySym = jsonKey.to_sym;
+              linkRefs[jsonRecord[:jsonObject]] = true;
+            end
+          end
         end
 
-        jsonRecord = Hash.new if jsonRecord.nil?;
         if jsonRecord.has_key?(:jsonObject) then
           jsonRecord[:jsonObject] = JSON.parse(jsonRecord[:jsonObject]) if jsonRecord[:jsonObject].kind_of?(String);
         end
 
-        require 'pp';
-        pp jsonRecord;
+        jsonRecord.delete(:isSymbolicLink);
+
+#        pp jsonRecord;
 
         jsonRecord
       end
@@ -227,11 +251,13 @@ module Fandianpf
       # @param [Symbol] jsonKey the key underwhich to find this jsonObject.
       # @param [Object] jsonObject the object to be persistently stored.
       # @return not specified
-      def storeJSON(jsonKey, jsonObject)
+      def storeJSON(jsonKey, jsonObject, isSymbolicLink = false)
+        jsonObject = jsonObject.to_json unless isSymbolicLink;
         jsonRecord = { 
-          jsonKey:    jsonKey.to_s,
-          jsonObject: jsonObject.to_json,
-          timeStamp:  Time.now,
+          jsonKey:        jsonKey.to_s,
+          jsonObject:     jsonObject,
+          isSymbolicLink: isSymbolicLink,
+          timeStamp:      Time.now,
         }
         insert_id = @@db[:json_objects].insert(jsonRecord);
         jsonRecord[:id] = insert_id;
