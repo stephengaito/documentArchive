@@ -245,6 +245,10 @@ module Fandianpf
         jsonRecord
       end
 
+      def searchJSON(jsonSearch)
+        []
+      end
+
       # Store the JSON object under the JSON key in the persistent 
       # store.
       #
@@ -353,6 +357,15 @@ module Fandianpf
         end
 
         PersistentStore.findJSON(jsonKey);
+      end
+
+      # Search for the JSON objects which satisfy the given JSON search 
+      # structure.
+      #
+      # @param [Array] jsonSearch the JSON structure used to define the search 
+      # @return [Object] the JSON object or {}.
+      def searchJSON(jsonSearch)
+        PersistentStore.searchJSON(jsonSearch);
       end
 
     end

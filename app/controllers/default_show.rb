@@ -1,5 +1,7 @@
 Fandianpf::App.controller do
 
+# NOTE CamelCase is NOT allowed in URL keys.
+
   get '/show/:content_title', :provides => [ :html, :json ] do | contentTitle |
     @jsonContent = findJSON(contentTitle);
     @jsonContent.merge!({ error: "content(/show/#{contentTitle}) has not been found" }) if @jsonContent.empty?;

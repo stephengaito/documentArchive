@@ -1,0 +1,5 @@
+.post
+  .searchPattern= @searchPattern
+  .searchKeywords= @searchKeywords.to_json
+  - @searchResults.each do | aResult |
+    .result= aResult

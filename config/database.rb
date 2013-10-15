@@ -7,7 +7,6 @@
 # settings.yml file.  See: config/settings.yml.example
 ############################################################################
 
-require 'fandianpf/persistentStore';
 Fandianpf::PersistentStore.setup
 
 ##

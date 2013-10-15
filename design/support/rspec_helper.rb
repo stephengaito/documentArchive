@@ -12,6 +12,9 @@ end
 # do not Padrino.run! the server
 #
 require File.expand_path(File.dirname(__FILE__) + "/../../config/boot")
+
+require 'fandianpf';
+
 require 'fandianpf/utils/options';
 
 RSpec.configure do |conf|
