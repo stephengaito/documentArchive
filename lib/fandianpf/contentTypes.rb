@@ -19,7 +19,16 @@ module Fandianpf
       # @param [String] aPossibleContentType the name of the content type to check. 
       # @return Boolean whether or not the name is a recognized content type.
       def isContentType(aPossibleContentType)
-        true;
+        @@type2table.has_key?(aPossibleContentType);
+      end
+
+      # getFields returns the fields associated with this content type.
+      #
+      # @param [Symbol] ctKlassName the name of the content type
+      # @return [Array] the array of field names (possibly empty)
+      def getFields(ctKlassName)
+        return [] unless @@type2fields.has_key?(ctKlassName);
+        @@type2fields[ctKlassName];
       end
 
       # isField checks the registry of content type fields to see if 
@@ -28,7 +37,93 @@ module Fandianpf
       # @param [String] aPossibleField the name of the field to check. 
       # @return Boolean whether or not the name is a recognized field.
       def isField(aPossibleField)
-        true;
+        @@field2table.has_key?(aPossibleField);
+      end
+
+      # getContentTypes returns the content types associated with this field.
+      #
+      # @param [Symbol] fieldName the name of the field
+      # @return [Array] the array of content types (possibly empty)
+      def getContentTypes(fieldName)
+        return [] unless @@field2table.has_key?(fieldName);
+        @@field2table[fieldName];
+      end
+
+      # registerContentType registers a new content type. It does this 
+      # by requiring all **/*.rb files in the content type's directory, 
+      # by copying all view templates from the views subdirectory to a 
+      # subdirectory of the application's views directory whose name is 
+      # the name of the contentType, and by recording the fields 
+      # managed by this content type into the fields listing.
+      #
+      # @param [String] contentType the name of the content type 
+      # @return not specified
+      def registerContentType(contentType,
+                              kernelKlass = Kernel,
+                              fileKlass = File,
+                              fileUtilsKlass = FileUtils,
+                              fandianpfKlass = Fandianpf)
+
+        # build all of the required klass names and paths
+        contentType   = contentType.to_s;
+        ctKlassName   = contentType.camelize;
+        ctSnakeName   = contentType.underscore;
+        ctBasePath    = "contentTypes/"+ctSnakeName;
+        ctViewsPath   = ctBasePath+"/views";
+        appViewsPath  = "app/views/"+ctSnakeName;
+        ctRequirePath = ctBasePath+"/"+ctSnakeName;
+
+        # install the views into the application's views directory
+        fileUtilsKlass.cp_r(ctViewsPath, appViewsPath) if fileKlass.directory?(ctViewsPath);
+
+        # load the content type class
+        $LOAD_PATH.unshift(ctBasePath);
+        kernelKlass.require(ctSnakeName);
+        ctKlass = fandianpfKlass.const_get(ctKlassName);
+
+        # now call the install method on the content type class
+        ctKlass.install
+        
+        ctKlass.listMigrations
+
+        ctKlass.doMigrations
+      end
+
+      # setup the ContentTypes class.
+      def setup
+        @@type2table  = Hash.new unless defined?(@@type2table);
+        @@type2fields = Hash.new unless defined?(@@type2fields);
+        @@field2table = Hash.new unless defined?(@@field2table);
+      end
+
+      # ::registerFields registers both the database name and the JSON 
+      # object fields which this database indexes.
+      #
+      # @param [Symbol] ctKlassName the name of the subclass 
+      #   registering these fields.
+      # @param [Symbol] tableName the name of this table in the 
+      #   persistent store 
+      # @param [Array of Symbols] fieldNames the names of the fields in 
+      #   this table.
+      # @return not specified
+      def registerFields(ctKlassName, tableName, fieldNames)
+        @@type2table[ctKlassName] = tableName;
+        @@type2fields[ctKlassName] = fieldNames;
+        fieldNames.each do | aFieldName |
+          @@field2table[aFieldName] = Array.new unless @@field2table.has_key?(aFieldName);
+          @@field2table[aFieldName].push(tableName);
+        end
+      end
+
+      # ::registerDescription registers a description for this content 
+      # type suitable for showing to the user.
+      #
+      # @param [Symbol] ctKlassName the name of the subclass 
+      #   registering this description.
+      # @param [String] description the description for this content type
+      # @return not specified
+      def self.registerDescription(ctKlassName, description)
+        # not yet used
       end
 
       # When using the Rails/Sinatra/Padrino registration system, this 
@@ -79,6 +174,82 @@ module Fandianpf
         ContentTypes.isField(aPossibleField);
       end
 
+      # registerContentType registers a new content type. It does this 
+      # by requiring all **/*.rb files in the content type's directory, 
+      # by copying all view templates from the views subdirectory to a 
+      # subdirectory of the application's views directory whose name is 
+      # the name of the contentType, and by recording the fields 
+      # managed by this content type into the fields listing.
+      #
+      # @param [Symbol] contentType the name of the content type 
+      # @return not specified
+      def registerContentType(contentType)
+        ContentTypes.registerContentType(contentType);
+      end
+
     end
   end
+
+  ContentTypes.setup;
+
+  # The Fandianpf::ContentType class provides the base class for all 
+  # content types used in the FandianPF system.
+  #
+  class ContentType
+
+    # ::install installs this content type.
+    #
+    def self.install
+      raise NotImplementedError, "The ::install method must be implemented by the subclass";
+    end
+
+    # ::doMigrations performs any and all migrations which have not yet 
+    # been applied to the persitent store.
+    #
+    def self.listMigrations
+      raise NotImplementedError, "The ::doMigrations method must be implemented by the subclass";
+    end
+
+    # ::registerFields registers both the database name and the JSON 
+    # object fields which this database indexes.
+    #
+    # @param [Symbol] tableName the name of this table in the 
+    #   persistent store 
+    # @param [Array of Symbols] fieldNames the names of the fields in 
+    #   this table.
+    # @return not specified
+    def self.registerFields(tableName, fieldNames)
+      ContentTypes.registerFields(self.classname, tableName, fieldNames);
+    end
+
+    # ::registerDescription registers a description for this content 
+    # type suitable for showing to the user.
+    #
+    # @param [String] description the description for this content type
+    # @return not specified
+    def self.registerDescription(description)
+      ContentTypes.registerDescription(self.classname, description);
+    end
+
+    # ::migration conditionally performs one migration on the persitent
+    # store.
+    #
+    # @param [Integer] versionNumber the sequential version number of 
+    #   this migration.
+    # @param [Block] &block the block with implements the migration
+    # @return not specified
+    def self.migration(versionNumber = 0, &block)
+      PersistentStore.migration(self.classname, versionNumber, &block);
+    end
+
+    # ::doMigrations performs all required migrations associated with 
+    # this content type.
+    #
+    # @return not specified
+    def self.doMigrations
+      PersistentStore.doMigrationsFor(self.classname);
+    end
+
+  end
+
 end

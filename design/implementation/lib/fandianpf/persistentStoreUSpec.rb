@@ -247,6 +247,87 @@ module Fandianpf; module Spec;
         end
       end
 
+      it "::migration registers one conditional migration of the tables in the persistent store associated with this content type" do
+        PersistentStore.mockStore(double(), double()) do
+          PersistentStore.migration(:AuthorType, 1) do 
+            # nothing to do
+          end
+          PersistentStore.migration(:AuthorType, 2) do 
+            # nothing to do
+          end
+          migrations = PersistentStore.migrations;
+          expect(migrations).to be_kind_of Hash;
+          expect(migrations).to have_key :AuthorType;
+          expect(migrations[:AuthorType]).to be_kind_of Hash;
+          expect(migrations[:AuthorType]).to have_key 1;
+          expect(migrations[:AuthorType][1]).to be_kind_of Proc;
+          expect(migrations[:AuthorType]).to have_key 2;
+          expect(migrations[:AuthorType][2]).to be_kind_of Proc;
+        end
+      end
+
+      it "::migration raises MigrationError if multiple migrations are registered for the same version number" do
+        PersistentStore.mockStore(double(), double()) do
+          PersistentStore.migration(:AuthorType, 1) do 
+            # nothing to do
+          end
+          expect {
+            PersistentStore.migration(:AuthorType, 1) do 
+              # nothing to do
+            end
+          }.to raise_error(Fandianpf::PersistentStore::MigrationError);
+        end
+      end
+
+      it "::getMigrationVersion gets the last migration version associated with this content type" do
+        databaseMock = double();
+        datasetMock  = double();
+        databaseMock.stub(:[]).and_return(datasetMock);
+        datasetMock.stub(:where).with({:contentTypeName=>'AuthorType'}).and_return(datasetMock);
+        datasetMock.stub(:order).with(:id).and_return(datasetMock);
+        datasetMock.stub(:last).and_return({ :contentTypeName=>'AuthorType', :migrationVersion=>1});
+        PersistentStore.mockStore(databaseMock, double()) do
+          expect(PersistentStore.getMigrationVersion(:AuthorType)).to eql 1;
+        end
+      end
+
+      it "::getMigrationVersion sets the last migration version to zero if no migration version has ever been associated with this content type" do
+        databaseMock = double();
+        datasetMock  = double();
+        databaseMock.stub(:[]).and_return(datasetMock);
+        datasetMock.stub(:where).with({:contentTypeName=>'AuthorType'}).and_return(datasetMock);
+        datasetMock.stub(:order).with(:id).and_return(datasetMock);
+        datasetMock.stub(:last).and_return(nil);
+        datasetMock.stub(:insert).with({:contentTypeName=>'AuthorType', :migrationVersion=>0}).and_return(0);
+        PersistentStore.mockStore(databaseMock, double()) do
+          expect(PersistentStore.getMigrationVersion(:AuthorType)).to eql 0;
+        end
+      end
+
+      it "::doMigrations performs all required migrations associated with a given content type" do
+        databaseMock = double();
+        datasetMock  = double();
+        sequelMock   = double();
+        databaseMock.stub(:[]).and_return(datasetMock);
+        datasetMock.stub(:where).with({:contentTypeName=>'AuthorType'}).and_return(datasetMock);
+        datasetMock.stub(:order).with(:id).and_return(datasetMock);
+        datasetMock.stub(:last).and_return({ :contentTypeName=>'AuthorType', :migrationVersion=>1});
+        sequelMock.stub(:migration) do | aBlock |
+          expect(aBlock).to be_kind_of Proc
+          expect { 
+            aBlock.call
+          }.to raise_error(Fandianpf::PersistentStore::MigrationError);
+        end
+        PersistentStore.mockStore(databaseMock, double()) do
+          PersistentStore.migration(:AuthorType, 1) do 
+            raise Fandianpf::PersistentStore::UpdateError, "this block should NOT be called";
+          end
+          PersistentStore.migration(:AuthorType, 2) do 
+            raise Fandianpf::PersistentStore::MigrationError, "this block SHOULD be called";
+          end
+          PersistentStore.doMigrations(:AuthorType, sequelMock) 
+        end
+      end
 
     end
   end

@@ -36,6 +36,9 @@ module Fandianpf
     class UpdateError < StandardError
     end
 
+    class MigrationError < StandardError
+    end
+
     class << self 
 
       # Access the Sequel Database associated with this persistent 
@@ -50,6 +53,12 @@ module Fandianpf
         @@jsonCache
       end
 
+      # Access the Hash devoted to the collection of content type 
+      # Sequel database migrations.
+      def migrations
+        @@migrations
+      end
+
       # Mock the database and jsonCache to allow for testing of this 
       # singleton pattern.
       #
@@ -58,15 +67,18 @@ module Fandianpf
       # @param [Block] &block the block to perform while mocked.
       # @return not specified
       def mockStore(databaseMock, cacheMock, &block)
-        oldDB    = defined?(@@db)        ? @@db : nil;
-        oldCache = defined?(@@jsonCache) ? @@jsonCache : nil;
+        oldDB         = defined?(@@db)         ? @@db : nil;
+        oldCache      = defined?(@@jsonCache)  ? @@jsonCache : nil;
+        oldMigrations = defined?(@@migrations) ? @@migrations : nil;
         @@db        = databaseMock;
         @@jsonCache = cacheMock;
+        @@migrations = Hash.new;
         begin
           block.call
         ensure 
-          @@db        = oldDB;
-          @@jsonCache = oldCache;
+          @@db         = oldDB;
+          @@jsonCache  = oldCache;
+          @@migrations = oldMigrations;
         end
       end
 
@@ -94,8 +106,11 @@ module Fandianpf
 
         @@jsonCache = Padrino::Cache::Store::Memory.new(10000);
 
+        @@migrations = Hash.new;
+
         ensureSecurityEventTableExists
         ensureJsonObjectTableExists
+        ensureContentTypeTableExists
 
         # Raise error on save failures globally across all models for 
         # non-production environments
@@ -132,6 +147,72 @@ module Fandianpf
             TrueClass	:isSymbolicLink, :default=>false
             DateTime    :timeStamp
           end
+        end
+      end
+
+      # Ensure that the content types table exists in the persistent 
+      # storage database.
+      #
+      # @return not specified
+      def ensureContentTypeTableExists
+        if ! @@db.tables.include?(:content_types) then
+          @@db.create_table :content_types do
+            primary_key :id
+            String      :contentTypeName,  :text=>true, 
+                                           :index=>true
+            Integer     :migrationVersion, :default=>0
+          end
+        end
+      end
+
+      # ::getMigrationVersion returns the last migration performed or 
+      # zero if none have ever been performed.
+      #
+      # @param [Symbol] ctKlassName the name of the content type for 
+      #   this migration. 
+      # @return [Integer] the version of the last migration performed.
+      def getMigrationVersion(ctKlassName)
+        contentTypeItem = @@db[:content_types].where(:contentTypeName => ctKlassName.to_s).order(:id).last;
+        if contentTypeItem.nil? then
+          @@db[:content_types].insert({ contentTypeName:ctKlassName.to_s, 
+                                        migrationVersion:0 });
+          return 0;
+        end
+        contentTypeItem[:migrationVersion];
+      end
+
+      # ::migration conditionally performs one migration on the persitent
+      # store.
+      #
+      # @param [Symbol] ctKlassName the name of the subclass 
+      #   registering these fields.
+      # @param [Integer] versionNumber the sequential version number of 
+      #   this migration.
+      # @param [Block] &block the block with implements the migration
+      # @return not specified
+      def migration(ctKlassName, versionNumber = 0, &block)
+        @@migrations[ctKlassName] = Hash.new unless @@migrations.has_key? ctKlassName;
+        if @@migrations[ctKlassName].has_key?(versionNumber) then
+          raise MigrationError, "a migration for the versionNumber #{versionNumber} has already been defined";
+        end
+        @@migrations[ctKlassName][versionNumber] = block;
+      end
+
+      # ::doMigrations performs all required migrations associated with 
+      # the given content type.
+      #
+      # @note At the moment we ONLY to upwards migrations.
+      #
+      # @param [Symbol] ctKlassName the class name of the content type
+      # @return not specified
+      def doMigrations(ctKlassName, sequelKlass = Sequel)
+        return unless @@migrations.has_key?(ctKlassName);
+
+        lastMigrationVersion = getMigrationVersion(ctKlassName);
+        ctMigrations = @@migrations[ctKlassName];
+        ctMigrations.keys.sort.each do | versionNumber |
+          next if versionNumber <= lastMigrationVersion;
+          sequelKlass.migration(ctMigrations[versionNumber]);
         end
       end
 
