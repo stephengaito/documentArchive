@@ -291,33 +291,41 @@ module Fandianpf; module Spec;
         end
       end
 
-      it "::getMigrationVersion sets the last migration version to zero if no migration version has ever been associated with this content type" do
+      it "::getMigrationVersion sets the last migration version to -1 if no migration version has ever been associated with this content type" do
         databaseMock = double();
         datasetMock  = double();
         databaseMock.stub(:[]).and_return(datasetMock);
         datasetMock.stub(:where).with({:contentTypeName=>'AuthorType'}).and_return(datasetMock);
         datasetMock.stub(:order).with(:id).and_return(datasetMock);
         datasetMock.stub(:last).and_return(nil);
-        datasetMock.stub(:insert).with({:contentTypeName=>'AuthorType', :migrationVersion=>0}).and_return(0);
+        datasetMock.stub(:insert).with({:contentTypeName=>'AuthorType', :migrationVersion=>-1}).and_return(-1);
         PersistentStore.mockStore(databaseMock, double()) do
-          expect(PersistentStore.getMigrationVersion(:AuthorType)).to eql 0;
+          expect(PersistentStore.getMigrationVersion(:AuthorType)).to eql -1;
         end
       end
 
       it "::doMigrations performs all required migrations associated with a given content type" do
-        databaseMock = double();
-        datasetMock  = double();
-        sequelMock   = double();
+        databaseMock  = double();
+        datasetMock   = double();
+        sequelMock    = double();
+        migrationMock = double();
         databaseMock.stub(:[]).and_return(datasetMock);
+        databaseMock.stub(:transaction) do | &aBlock |
+          aBlock.call
+        end
         datasetMock.stub(:where).with({:contentTypeName=>'AuthorType'}).and_return(datasetMock);
+        datasetMock.stub(:where).with({:id=>1}).and_return(datasetMock);
         datasetMock.stub(:order).with(:id).and_return(datasetMock);
-        datasetMock.stub(:last).and_return({ :contentTypeName=>'AuthorType', :migrationVersion=>1});
-        sequelMock.stub(:migration) do | aBlock |
-          expect(aBlock).to be_kind_of Proc
+        datasetMock.stub(:last).and_return({ :id=>1, :contentTypeName=>'AuthorType', :migrationVersion=>1});
+        datasetMock.stub(:update).with({:migrationVersion=>2});
+        sequelMock.stub(:migration) do | &aBlock |
+          expect(&aBlock).to be_kind_of Proc
           expect { 
             aBlock.call
           }.to raise_error(Fandianpf::PersistentStore::MigrationError);
+          migrationMock
         end
+        migrationMock.stub(:apply).with(databaseMock, :up);
         PersistentStore.mockStore(databaseMock, double()) do
           PersistentStore.migration(:AuthorType, 1) do 
             raise Fandianpf::PersistentStore::UpdateError, "this block should NOT be called";

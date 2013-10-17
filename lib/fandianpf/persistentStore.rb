@@ -108,9 +108,16 @@ module Fandianpf
 
         @@migrations = Hash.new;
 
+        # Ensure the base most important DB tables exist
         ensureSecurityEventTableExists
-        ensureJsonObjectTableExists
         ensureContentTypeTableExists
+
+        # Load the Sequel migration subsystem
+        Sequel.extension :migration
+
+        # now do any required JsonObject table migrations.
+        listJsonObjectTableMigrations
+        doMigrations(:JsonObject);
 
         # Raise error on save failures globally across all models for 
         # non-production environments
@@ -121,6 +128,8 @@ module Fandianpf
 
       # Ensure that the SecurityEvent (:security_events) table exists 
       # in the persistent storage database.
+      #
+      # @note This table is hard to change in a production envrionment
       #
       # @return not specified
       def ensureSecurityEventTableExists
@@ -133,25 +142,10 @@ module Fandianpf
         end
       end
 
-      # Ensure that the JsonObject (:json_objects) table exists in the 
-      # persistent storage database.
-      #
-      # @return not specified
-      def ensureJsonObjectTableExists
-        if ! @@db.tables.include?(:json_objects) then
-          @@db.create_table :json_objects do
-            primary_key :id
-            String      :jsonKey,        :text=>true, 
-                                         :index=>true
-            String      :jsonObject,     :text=>true
-            TrueClass	:isSymbolicLink, :default=>false
-            DateTime    :timeStamp
-          end
-        end
-      end
-
       # Ensure that the content types table exists in the persistent 
       # storage database.
+      #
+      # @note This table is hard to change in a production envrionment
       #
       # @return not specified
       def ensureContentTypeTableExists
@@ -165,8 +159,30 @@ module Fandianpf
         end
       end
 
+      # Ensure that the JsonObject (:json_objects) table exists in the 
+      # persistent storage database.
+      #
+      # @note The JsonObject table is likely to evolve over time so we 
+      #   manage it useing the PersistentStore migrations subsystem.
+      #
+      # @return not specified
+      def listJsonObjectTableMigrations
+        migration(:JsonObject,1) do
+          up do
+            create_table :json_objects do
+              primary_key :id
+              String      :jsonKey,        :text=>true, 
+                                           :index=>true
+              String      :jsonObject,     :text=>true
+              TrueClass	:isSymbolicLink, :default=>false
+              DateTime    :timeStamp
+            end
+          end
+        end
+      end
+
       # ::getMigrationVersion returns the last migration performed or 
-      # zero if none have ever been performed.
+      # -1 if none have ever been performed.
       #
       # @param [Symbol] ctKlassName the name of the content type for 
       #   this migration. 
@@ -175,10 +191,25 @@ module Fandianpf
         contentTypeItem = @@db[:content_types].where(:contentTypeName => ctKlassName.to_s).order(:id).last;
         if contentTypeItem.nil? then
           @@db[:content_types].insert({ contentTypeName:ctKlassName.to_s, 
-                                        migrationVersion:0 });
-          return 0;
+                                        migrationVersion:-1 });
+          return -1;
         end
         contentTypeItem[:migrationVersion];
+      end
+
+      # ::setMigrationVersion records the last migration performed.
+      #
+      # @param [Symbol] ctKlassName the name of the content type for 
+      #   this migration. 
+      # @param [Integer] the version of the last migration performed.
+      # @return not specified
+      def setMigrationVersion(ctKlassName, lastMigrationVersion)
+        contentTypeItem = @@db[:content_types].where(:contentTypeName => ctKlassName.to_s).order(:id).last;
+        if contentTypeItem.nil? then
+          @@db[:content_types].insert({ contentTypeName:ctKlassName.to_s, 
+                                        migrationVersion:-1 });
+        end
+        @@db[:content_types].where(:id=>contentTypeItem[:id]).update(:migrationVersion=>lastMigrationVersion);
       end
 
       # ::migration conditionally performs one migration on the persitent
@@ -208,12 +239,17 @@ module Fandianpf
       def doMigrations(ctKlassName, sequelKlass = Sequel)
         return unless @@migrations.has_key?(ctKlassName);
 
-        lastMigrationVersion = getMigrationVersion(ctKlassName);
+        currentMigrationVersion = getMigrationVersion(ctKlassName);
+        lastMigrationVersion    = -1;
         ctMigrations = @@migrations[ctKlassName];
-        ctMigrations.keys.sort.each do | versionNumber |
-          next if versionNumber <= lastMigrationVersion;
-          sequelKlass.migration(ctMigrations[versionNumber]);
-        end
+        @@db.transaction do
+          ctMigrations.keys.sort.each do | versionNumber |
+            next if versionNumber <= currentMigrationVersion;
+            sequelKlass.migration(&ctMigrations[versionNumber]).apply(@@db,:up);
+            lastMigrationVersion = versionNumber;
+          end
+          setMigrationVersion(ctKlassName, lastMigrationVersion) unless lastMigrationVersion < 0;
+        end # commit migrations and setMigrationVersion as a single transaction.
       end
 
       # Get the Sequel URI so we can configure database
