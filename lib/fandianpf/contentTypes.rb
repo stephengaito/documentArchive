@@ -99,9 +99,10 @@ module Fandianpf
 
       # clear (setup) the ContentTypes class.
       def clear
-        @@type2table  = Hash.new unless defined?(@@type2table);
-        @@type2fields = Hash.new unless defined?(@@type2fields);
-        @@field2table = Hash.new unless defined?(@@field2table);
+        @@type2table       = Hash.new unless defined?(@@type2table);
+        @@type2fields      = Hash.new unless defined?(@@type2fields);
+        @@type2description = Hash.new unless defined?(@@type2description);
+        @@field2table      = Hash.new unless defined?(@@field2table);
       end
 
       # ::registerFields registers both the database name and the JSON 
@@ -130,8 +131,21 @@ module Fandianpf
       #   registering this description.
       # @param [String] description the description for this content type
       # @return not specified
-      def self.registerDescription(ctKlassName, description)
-        # not yet used
+      def registerDescription(ctKlassName, description)
+        @@type2description[ctKlassName] = description
+      end
+
+      # getDescription returns a structured description of a given 
+      # content type including the fields it knows about.
+      #
+      # @param [Symbol] ctKlassName the name of the content type.
+      # @return [Hash] the structured description of the content type.
+      def getDescription(ctKlassName)
+        description = Hash.new;
+        description[:description] = @@type2description[ctKlassName] if @@type2description.has_key?(ctKlassName);
+        description[:table]       = @@type2table[ctKlassName]       if @@type2table.has_key?(ctKlassName);
+        description[:fields]      = @@type2fields[ctKlassName]      if @@type2fields.has_key?(ctKlassName);
+        description
       end
 
       # When using the Rails/Sinatra/Padrino registration system, this 
@@ -201,6 +215,15 @@ module Fandianpf
       # @return [Array of Symbols] the currently known content types
       def getContentTypes
         ContentTypes.getContentTypes
+      end
+
+      # getDescription returns a structured description of a given 
+      # content type including the fields it knows about.
+      #
+      # @param [Symbol] ctKlassName the name of the content type.
+      # @return [Hash] the structured description of the content type.
+      def getDescription(ctKlassName)
+        ContentTypes.getDescription(ctKlassName);
       end
 
     end

@@ -104,6 +104,44 @@ module Fandianpf; module Specs;
         expect(jsonContent[0]).to eql "AuthorType";
       end
 
+      scenario "show the description of a specific content type as html" do
+        ContentTypes.clear;
+        ContentTypes.registerFields(:AuthorType, :author_type, [ :surname ]);
+        ContentTypes.registerDescription :AuthorType, <<END_DESCRIPTION 
+Authors allow you to keep notes, as well as contact details about 
+authors you are interested in.
+END_DESCRIPTION
+        visit "/contentTypes/AuthorType"
+        puts page.body
+        expect(page).to have_xpath("//div[@class='description']")
+        expect(page).to have_xpath("//div[@class='table']")
+        expect(page).to have_xpath("//div[@class='fieldsList']")
+        fieldsList = page.all(:xpath, "//div[@class='fieldsList']/div/a");
+        expect(fieldsList.length).to eql 1
+        expect(fieldsList[0].text).to eql "surname";
+      end
+
+      scenario "show the description of a specific content type as json" do
+        ContentTypes.clear;
+        ContentTypes.registerFields(:AuthorType, :author_type, [ :surname ]);
+        ContentTypes.registerDescription :AuthorType, <<END_DESCRIPTION 
+Authors allow you to keep notes, as well as contact details about 
+authors you are interested in.
+END_DESCRIPTION
+        getJson("contentTypes/AuthorType");
+        expect(last_response.header['Content-type']).to match /application\/json/
+        jsonContent = lastResponseAsJsonObj
+        pp jsonContent;
+        expect(jsonContent).to be_kind_of(Hash);
+        expect(jsonContent).to have_key :description
+        expect(jsonContent[:description]).to match /authors/
+        expect(jsonContent).to have_key :table
+        expect(jsonContent[:table]).to eql "author_type";
+        expect(jsonContent).to have_key :fields
+        expect(jsonContent[:fields]).to be_kind_of Array;
+        expect(jsonContent[:fields]).to include "surname"
+      end
+
     end
   end
 end; end
