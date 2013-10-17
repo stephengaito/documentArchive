@@ -22,11 +22,19 @@ module Fandianpf
         @@type2table.has_key?(aPossibleContentType);
       end
 
+      # getContentTypes returns an array of the currently known content 
+      # types.
+      #
+      # @return [Array of Symbols] the currently known content types
+      def getContentTypes
+        @@type2table.keys.sort
+      end
+
       # getFields returns the fields associated with this content type.
       #
       # @param [Symbol] ctKlassName the name of the content type
       # @return [Array] the array of field names (possibly empty)
-      def getFields(ctKlassName)
+      def getFields4class(ctKlassName)
         return [] unless @@type2fields.has_key?(ctKlassName);
         @@type2fields[ctKlassName];
       end
@@ -44,7 +52,7 @@ module Fandianpf
       #
       # @param [Symbol] fieldName the name of the field
       # @return [Array] the array of content types (possibly empty)
-      def getContentTypes(fieldName)
+      def getTables4field(fieldName)
         return [] unless @@field2table.has_key?(fieldName);
         @@field2table[fieldName];
       end
@@ -89,8 +97,8 @@ module Fandianpf
         ctKlass.doMigrations
       end
 
-      # setup the ContentTypes class.
-      def setup
+      # clear (setup) the ContentTypes class.
+      def clear
         @@type2table  = Hash.new unless defined?(@@type2table);
         @@type2fields = Hash.new unless defined?(@@type2fields);
         @@field2table = Hash.new unless defined?(@@field2table);
@@ -187,10 +195,18 @@ module Fandianpf
         ContentTypes.registerContentType(contentType);
       end
 
+      # getContentTypes returns an array of the currently known content 
+      # types.
+      #
+      # @return [Array of Symbols] the currently known content types
+      def getContentTypes
+        ContentTypes.getContentTypes
+      end
+
     end
   end
 
-  ContentTypes.setup;
+  ContentTypes.clear;
 
   # The Fandianpf::ContentType class provides the base class for all 
   # content types used in the FandianPF system.

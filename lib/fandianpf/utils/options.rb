@@ -22,6 +22,7 @@ module Fandianpf
       # @param [Hash] aHash the Hash whose symbols will be changed (in place) from strings to symbols.
       # @return nothing
       def self.toSymbolHash(aHash)
+        return unless aHash.is_a? Hash;
         aHash.keys.each do | anOldKey |
           next if anOldKey.is_a?(Symbol);
           if anOldKey.is_a?(String) then

@@ -1,18 +1,14 @@
 require 'support/rspec_helper';
 
-module Fandianpf; 
+module Fandianpf; module Specs;
 
-# The Fandianpf::ContentTypes module collects the specifications for 
-# the various different content types used by the FandianPF system.
-module ContentTypes
-
-  # The Fandianpf::ContentTypes::Default module collects the 
-  # specification for the default content type.
-  module Default
+  # The Fandianpf::ContentTypes module collects the specifications for 
+  # the various different content types used by the FandianPF system.
+  module ContentTypesSpecs
 
     # Feature: provide default content type
     #
-    feature Default do
+    feature Fandianpf::ContentTypes do
 
       # The user, Wants to view the default content type
 
@@ -85,7 +81,29 @@ module ContentTypes
           expect(page).to have_xpath("//div[@db_id='1']");
         end # ROLLBACK
       end
+
+      scenario "list the currently known content types as html" do
+        ContentTypes.clear;
+        ContentTypes.registerFields(:AuthorType, :author_type, [ :surname ]);
+        visit "/contentTypes"
+        puts page.body
+        listItems = page.all(:xpath, "//div[@class='listItem']/a");
+        expect(listItems.length).to eql 1
+        expect(listItems.at(0).text).to eql "AuthorType"
+      end
      
+      scenario "list the currently known content types as json" do
+        ContentTypes.clear;
+        ContentTypes.registerFields(:AuthorType, :author_type, [ :surname ]);
+        getJson('contentTypes');
+        expect(last_response.header['Content-type']).to match /application\/json/
+        jsonContent = lastResponseAsJsonObj
+        pp jsonContent;
+        expect(jsonContent).to be_kind_of(Array);
+        expect(jsonContent.length).to eql 1;
+        expect(jsonContent[0]).to eql "AuthorType";
+      end
+
     end
   end
 end; end

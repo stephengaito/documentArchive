@@ -23,4 +23,9 @@ Fandianpf::App.controller do
     storeJSON contentTitle, jsonObject, { version: :updateLast };
   end
 
+  get '/contentTypes', :provides => [ :html, :json ] do
+    @contentTypesList = getContentTypes;
+    render 'contentTypesList'
+  end
+
 end

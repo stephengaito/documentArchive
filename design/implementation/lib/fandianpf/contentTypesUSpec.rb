@@ -41,7 +41,7 @@ module Fandianpf; module Spec;
 
         expect(ContentTypes.isContentType(:AuthorType)).to be_true;
 
-        theFields = ContentTypes.getFields(:AuthorType);
+        theFields = ContentTypes.getFields4class(:AuthorType);
         expect(theFields).to be_kind_of Array
         expect(theFields).to include :surname;
       end
