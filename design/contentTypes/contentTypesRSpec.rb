@@ -82,64 +82,107 @@ module Fandianpf; module Specs;
         end # ROLLBACK
       end
 
-      scenario "list the currently known content types as html" do
-        ContentTypes.clear;
-        ContentTypes.registerFields(:AuthorType, :author_type, [ :surname ]);
-        visit "/contentTypes"
-        puts page.body
-        listItems = page.all(:xpath, "//div[@class='listItem']/a");
-        expect(listItems.length).to eql 1
-        expect(listItems.at(0).text).to eql "AuthorType"
-      end
+      context 'listing content types' do
+
+        before(:each) do
+          ContentTypes.clear;
+          ContentTypes.registerFields(:AuthorType, :author_type, [ :surname ]);
+          ContentTypes.registerDescription :AuthorType, <<END_DESCRIPTION 
+Authors allow you to keep notes, as well as contact details about 
+authors you are interested in.
+END_DESCRIPTION
+        end
+
+        scenario "list the currently known content types as html" do
+          visit "/contentTypes"
+          puts page.body
+          listItems = page.all(:xpath, "//div[@class='listItem']/a");
+          expect(listItems.length).to eql 1
+          expect(listItems.at(0).text).to eql "AuthorType"
+        end
      
-      scenario "list the currently known content types as json" do
-        ContentTypes.clear;
-        ContentTypes.registerFields(:AuthorType, :author_type, [ :surname ]);
-        getJson('contentTypes');
-        expect(last_response.header['Content-type']).to match /application\/json/
-        jsonContent = lastResponseAsJsonObj
-        pp jsonContent;
-        expect(jsonContent).to be_kind_of(Array);
-        expect(jsonContent.length).to eql 1;
-        expect(jsonContent[0]).to eql "AuthorType";
-      end
+        scenario "list the currently known content types as json" do
+          getJson('contentTypes');
+          expect(last_response.header['Content-type']).to match /application\/json/
+          jsonContent = lastResponseAsJsonObj
+          pp jsonContent;
+          expect(jsonContent).to be_kind_of(Array);
+          expect(jsonContent.length).to eql 1;
+          expect(jsonContent[0]).to eql "AuthorType";
+        end
 
-      scenario "show the description of a specific content type as html" do
-        ContentTypes.clear;
-        ContentTypes.registerFields(:AuthorType, :author_type, [ :surname ]);
-        ContentTypes.registerDescription :AuthorType, <<END_DESCRIPTION 
-Authors allow you to keep notes, as well as contact details about 
-authors you are interested in.
-END_DESCRIPTION
-        visit "/contentTypes/AuthorType"
-        puts page.body
-        expect(page).to have_xpath("//div[@class='description']")
-        expect(page).to have_xpath("//div[@class='table']")
-        expect(page).to have_xpath("//div[@class='fieldsList']")
-        fieldsList = page.all(:xpath, "//div[@class='fieldsList']/div/a");
-        expect(fieldsList.length).to eql 1
-        expect(fieldsList[0].text).to eql "surname";
-      end
+        scenario "show the description of a specific content type as html" do
+          visit "/contentTypes/AuthorType"
+          puts page.body
+          expect(page).to have_xpath("//div[@class='description']")
+          expect(page).to have_xpath("//div[@class='table']")
+          expect(page).to have_xpath("//div[@class='fieldsList']")
+          fieldsList = page.all(:xpath, "//div[@class='fieldsList']/div/a");
+          expect(fieldsList.length).to eql 1
+          expect(fieldsList[0].text).to eql "surname";
+        end
 
-      scenario "show the description of a specific content type as json" do
-        ContentTypes.clear;
-        ContentTypes.registerFields(:AuthorType, :author_type, [ :surname ]);
-        ContentTypes.registerDescription :AuthorType, <<END_DESCRIPTION 
-Authors allow you to keep notes, as well as contact details about 
-authors you are interested in.
-END_DESCRIPTION
-        getJson("contentTypes/AuthorType");
-        expect(last_response.header['Content-type']).to match /application\/json/
-        jsonContent = lastResponseAsJsonObj
-        pp jsonContent;
-        expect(jsonContent).to be_kind_of(Hash);
-        expect(jsonContent).to have_key :description
-        expect(jsonContent[:description]).to match /authors/
-        expect(jsonContent).to have_key :table
-        expect(jsonContent[:table]).to eql "author_type";
-        expect(jsonContent).to have_key :fields
-        expect(jsonContent[:fields]).to be_kind_of Array;
-        expect(jsonContent[:fields]).to include "surname"
+        scenario "show the description of a specific content type as json" do
+          getJson("contentTypes/AuthorType");
+          expect(last_response.header['Content-type']).to match /application\/json/
+          jsonContent = lastResponseAsJsonObj
+          pp jsonContent;
+          expect(jsonContent).to be_kind_of(Hash);
+          expect(jsonContent).to have_key :description
+          expect(jsonContent[:description]).to match /authors/
+          expect(jsonContent).to have_key :table
+          expect(jsonContent[:table]).to eql "author_type";
+          expect(jsonContent).to have_key :fields
+          expect(jsonContent[:fields]).to be_kind_of Array;
+          expect(jsonContent[:fields]).to include "surname"
+        end
+
+        scenario "list the currently known content fields as html" do
+          visit "/contentFields"
+          puts page.body
+          listItems = page.all(:xpath, "//div[@class='listItem']/a");
+          expect(listItems.length).to eql 1
+          expect(listItems.at(0).text).to eql "surname"
+        end
+     
+        scenario "list the currently known content fields as json" do
+          getJson('contentFields');
+          expect(last_response.header['Content-type']).to match /application\/json/
+          jsonContent = lastResponseAsJsonObj
+          pp jsonContent;
+          expect(jsonContent).to be_kind_of(Array);
+          expect(jsonContent.length).to eql 1;
+          expect(jsonContent[0]).to eql "surname";
+        end
+
+        scenario "show the description of a specific content field as html" do
+          visit "/contentFields/surname"
+          puts page.body
+#          expect(page).to have_xpath("//div[@class='description']")
+#          expect(page).to have_xpath("//div[@class='table']")
+          expect(page).to have_xpath("//div[@class='typesList']")
+          typesList = page.all(:xpath, "//div[@class='typesList']/div/a");
+          expect(typesList.length).to eql 1
+          expect(typesList[0].text).to eql "AuthorType";
+        end
+
+        scenario "show the description of a specific content field as json" do
+          getJson("contentFields/surname");
+          expect(last_response.header['Content-type']).to match /application\/json/
+          jsonContent = lastResponseAsJsonObj
+          pp jsonContent;
+          expect(jsonContent).to be_kind_of(Hash);
+#          expect(jsonContent).to have_key :description
+#          expect(jsonContent[:description]).to match /authors/
+#          expect(jsonContent).to have_key :table
+#          expect(jsonContent[:table]).to eql "author_type";
+          expect(jsonContent).to have_key :types
+          expect(jsonContent[:types]).to be_kind_of Array;
+          expect(jsonContent[:types]).to include "AuthorType"
+        end
+
+
+
       end
 
     end

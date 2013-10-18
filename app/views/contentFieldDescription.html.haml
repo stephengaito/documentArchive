@@ -1,0 +1,5 @@
+.contentField
+  .typesList
+    - @contentFieldDescription[:types].each do | aType |
+      .typeItem
+        %a{ html:"/contentTypes/#{aType}" }= aType

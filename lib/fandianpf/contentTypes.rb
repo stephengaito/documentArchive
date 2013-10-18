@@ -48,13 +48,21 @@ module Fandianpf
         @@field2table.has_key?(aPossibleField);
       end
 
+      # getContentFields returns an array of the currently known fields 
+      # in all content types.
+      #
+      # @return [Array of Symbols] the currently known content fields
+      def getContentFields
+        @@field2tables.keys.sort
+      end
+
       # getContentTypes returns the content types associated with this field.
       #
       # @param [Symbol] fieldName the name of the field
       # @return [Array] the array of content types (possibly empty)
       def getTables4field(fieldName)
-        return [] unless @@field2table.has_key?(fieldName);
-        @@field2table[fieldName];
+        return [] unless @@field2tables.has_key?(fieldName);
+        @@field2tables[fieldName];
       end
 
       # registerContentType registers a new content type. It does this 
@@ -99,10 +107,11 @@ module Fandianpf
 
       # clear (setup) the ContentTypes class.
       def clear
-        @@type2table       = Hash.new unless defined?(@@type2table);
-        @@type2fields      = Hash.new unless defined?(@@type2fields);
-        @@type2description = Hash.new unless defined?(@@type2description);
-        @@field2table      = Hash.new unless defined?(@@field2table);
+        @@type2table       = Hash.new
+        @@type2fields      = Hash.new
+        @@type2description = Hash.new
+        @@field2tables     = Hash.new
+        @@field2types      = Hash.new
       end
 
       # ::registerFields registers both the database name and the JSON 
@@ -119,8 +128,10 @@ module Fandianpf
         @@type2table[ctKlassName] = tableName;
         @@type2fields[ctKlassName] = fieldNames;
         fieldNames.each do | aFieldName |
-          @@field2table[aFieldName] = Array.new unless @@field2table.has_key?(aFieldName);
-          @@field2table[aFieldName].push(tableName);
+          @@field2tables[aFieldName] = Array.new unless @@field2tables.has_key?(aFieldName);
+          @@field2tables[aFieldName].push(tableName);
+          @@field2types[aFieldName]  = Array.new unless @@field2types.has_key?(aFieldName);
+          @@field2types[aFieldName].push(ctKlassName);
         end
       end
 
@@ -135,16 +146,27 @@ module Fandianpf
         @@type2description[ctKlassName] = description
       end
 
-      # getDescription returns a structured description of a given 
-      # content type including the fields it knows about.
+      # getContentTypeDescription returns a structured description of a 
+      # given content type including the fields it knows about.
       #
       # @param [Symbol] ctKlassName the name of the content type.
       # @return [Hash] the structured description of the content type.
-      def getDescription(ctKlassName)
+      def getContentTypeDescription(ctKlassName)
         description = Hash.new;
         description[:description] = @@type2description[ctKlassName] if @@type2description.has_key?(ctKlassName);
         description[:table]       = @@type2table[ctKlassName]       if @@type2table.has_key?(ctKlassName);
         description[:fields]      = @@type2fields[ctKlassName]      if @@type2fields.has_key?(ctKlassName);
+        description
+      end
+
+      # getContentFieldDescription returns a structured description of a 
+      # given content field including the types the use it.
+      #
+      # @param [Symbol] fieldName the name of the content field.
+      # @return [Hash] the structured description of the content type.
+      def getContentFieldDescription(fieldName)
+        description = Hash.new;
+        description[:types] = @@field2types[fieldName] if @@field2types.has_key? fieldName;
         description
       end
 
@@ -217,13 +239,30 @@ module Fandianpf
         ContentTypes.getContentTypes
       end
 
-      # getDescription returns a structured description of a given 
-      # content type including the fields it knows about.
+      # getContentFields returns an array of the currently known fields 
+      # in all content types.
+      #
+      # @return [Array of Symbols] the currently known content fields
+      def getContentFields
+        ContentTypes.getContentFields
+      end
+
+      # getContentTypeDescription returns a structured description of a 
+      # given content type including the fields it knows about.
       #
       # @param [Symbol] ctKlassName the name of the content type.
       # @return [Hash] the structured description of the content type.
-      def getDescription(ctKlassName)
-        ContentTypes.getDescription(ctKlassName);
+      def getContentTypeDescription(ctKlassName)
+        ContentTypes.getContentTypeDescription(ctKlassName);
+      end
+
+      # getContentFieldDescription returns a structured description of a 
+      # given content field including the types the use it.
+      #
+      # @param [Symbol] fieldName the name of the content field.
+      # @return [Hash] the structured description of the content type.
+      def getContentFieldDescription(fieldName)
+        ContentTypes.getContentFieldDescription(fieldName);
       end
 
     end

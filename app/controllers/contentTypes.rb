@@ -24,13 +24,23 @@ Fandianpf::App.controller do
   end
 
   get '/contentTypes/:content_type', { :provides => [ :html, :json ] } do | contentType |
-    @contentTypeDescription = getDescription(contentType.to_sym);
+    @contentTypeDescription = getContentTypeDescription(contentType.to_sym);
     render 'contentTypeDescription'
   end
 
   get '/contentTypes', :provides => [ :html, :json ] do
     @contentTypesList = getContentTypes;
     render 'contentTypesList'
+  end
+
+  get '/contentFields/:content_field', { :provides => [ :html, :json ] } do | contentField |
+    @contentFieldDescription = getContentFieldDescription(contentField.to_sym);
+    render 'contentFieldDescription'
+  end
+
+  get '/contentFields', :provides => [ :html, :json ] do
+    @contentFieldsList = getContentFields;
+    render 'contentFieldsList'
   end
 
 end
