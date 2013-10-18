@@ -4,6 +4,8 @@ require "addressable/uri"
 require 'logger'
 require 'json'
 
+require 'fandianpf/utils/search';
+
 module Padrino
   module Cache
     module Store
@@ -40,6 +42,7 @@ module Fandianpf
     end
 
     class << self 
+      include Fandianpf::Utils::Search;
 
       # Access the Sequel Database associated with this persistent 
       # store.
@@ -362,7 +365,13 @@ module Fandianpf
         jsonRecord
       end
 
+      def getJoinTables(searchStructure)
+        []
+      end
+
       def searchJSON(jsonSearch)
+        jsonSearch = normalizeJsonSearch(jsonSearch);
+        joinTables = getJoinTables(jsonSearch);
         []
       end
 

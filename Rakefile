@@ -21,47 +21,51 @@ task :htmlDocs => :yardocs;
 #
 # Integration tests against a stable running application instance
 #
+iSpecs = FileList.new('design/**/*ISpec.rb');
 task :ispecs do
   # TODO: startup application
-  sh "rspec -fs --pattern design/**/*ISpec.rb"
+  sh "rspec -fs #{iSpecs}"
   # TODO: tear down application
 end
 #
 task 'ls:ispecs' do
-  sh "find design -name \"*ISpec*\""
+  puts iSpecs
 end
 #
 # Integration tests against possible unstable running application 
 # instances.  Each RSpec specification (file) is responsible for 
 # starting their copy of the application using Aruba.
 #
+aSpecs = FileList.new('design/**/*ASpec.rb');
 task :aspecs do
-  sh "rspec -fs --pattern design/**/*ASpec.rb"
+  sh "rspec -fs #{aSpecs}"
 end
 #
 task 'ls:aspecs' do
-  sh "find design -name \"*ASpec*\""
+  puts aSpecs
 end
 #
 # Unit tests against the application's implementational use of the Rack 
 # stack
 # 
+rSpecs = FileList.new('design/**/*RSpec.rb');
 task :rspecs do
-  sh "rspec -fs --pattern design/**/*RSpec.rb"
+  sh "rspec -fs #{rSpecs}"
 end
 #
 task 'ls:rspecs' do
-  sh "find design -name \"*RSpec*\""
+  puts rSpecs
 end
 #
 # Unit tests against individual parts of the application implementation
 # 
+uSpecs = FileList.new('design/**/*USpec.rb');
 task :uspecs do
-  sh "rspec -fs --pattern design/**/*USpec.rb"
+  sh "rspec -fs #{uSpecs}"
 end
 #
 task 'ls:uspecs' do
-  sh "find design -name \"*USpec*\""
+  puts uSpecs
 end
 #
 # All RSpec specification tests

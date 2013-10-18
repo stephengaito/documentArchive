@@ -1,3 +1,5 @@
+require 'support/uspec_helper';
+
 require 'fandianpf/utils/options';
 
 module Fandianpf; 

@@ -1,6 +1,6 @@
 Fandianpf::App.controller do
 
-# NOTE CamelCase is NOT allowed in URL keys.
+  # NOTE CamelCase is NOT allowed in URL keys.
 
   get '/show/:content_title', :provides => [ :html, :json ] do | contentTitle |
     @jsonContent = findJSON(contentTitle);
@@ -23,6 +23,12 @@ Fandianpf::App.controller do
     storeJSON contentTitle, jsonObject, { version: :updateLast };
   end
 
+  #
+  # Allow the user to understand the structure of the various installed 
+  # content types, so that they can more easily conduct advanced 
+  # serarches.
+  #
+
   get '/contentTypes/:content_type', { :provides => [ :html, :json ] } do | contentType |
     @contentTypeDescription = getContentTypeDescription(contentType.to_sym);
     render 'contentTypeDescription'
@@ -42,5 +48,9 @@ Fandianpf::App.controller do
     @contentFieldsList = getContentFields;
     render 'contentFieldsList'
   end
+
+  #
+  # Simple url based searches.
+  #
 
 end

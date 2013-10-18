@@ -1,5 +1,7 @@
 require 'support/rspec_helper';
 
+setRSpecLogging false;
+
 module Fandianpf; module Specs;
 
   # The Fandianpf::ContentTypes module collects the specifications for 
@@ -14,7 +16,7 @@ module Fandianpf; module Specs;
 
       scenario "show default content type (as html)" do
         visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-test";
-        puts page.body;
+        puts page.body if rSpecLogging;
         expect(page).to have_xpath("//div[@field='jsonTest']");
       end
 
@@ -24,7 +26,7 @@ module Fandianpf; module Specs;
         getJson('show/json-2efc1ae30d44da86ad297642e21e86b7-test');
         expect(last_response.header['Content-type']).to match /application\/json/
         jsonContent = lastResponseAsJsonObj
-        puts jsonContent;
+        puts jsonContent if rSpecLogging;
         expect(jsonContent).to be_kind_of(Hash);
         expect(jsonContent[:jsonTest]).to match /This is the test JSON content/;
       end
@@ -36,9 +38,9 @@ module Fandianpf; module Specs;
         PersistentStore.db.transaction(:rollback => :always) do
           jsonContent = { someKey: "some thing" };
           putJson( '/add/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent);
-          puts "lastResponse: [#{last_response.body}]"
+          puts "lastResponse: [#{last_response.body}]" if rSpecLogging;
           visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
-          puts page.body;
+          puts page.body if rSpecLogging;
           expect(page).to have_xpath("//div[@db_id='1']");
           expect(page).to have_xpath("//div[@field='someKey']");
         end # ROLLBACK
@@ -49,15 +51,15 @@ module Fandianpf; module Specs;
           jsonContent1 = { firstKey: "some thing" };
           jsonContent2 = { secondKey: "another thing" };
           putJson( '/add/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent1);
-          puts "lastResponse: [#{last_response.body}]"
+          puts "lastResponse: [#{last_response.body}]" if rSpecLogging;
           visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
-          puts page.body;
+          puts page.body if rSpecLogging;
           expect(page).to have_xpath("//div[@field='firstKey']");
           expect(page).to have_xpath("//div[@db_id='1']");
           putJson( '/add/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent2);
-          puts "lastResponse: [#{last_response.body}]"
+          puts "lastResponse: [#{last_response.body}]" if rSpecLogging;
           visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
-          puts page.body;
+          puts page.body if rSpecLogging;
           expect(page).to have_xpath("//div[@field='secondKey']");
           expect(page).to have_xpath("//div[@db_id='2']");
         end # ROLLBACK
@@ -68,15 +70,15 @@ module Fandianpf; module Specs;
           jsonContent1 = { firstKey: "some thing" };
           jsonContent2 = { secondKey: "another thing" };
           putJson( '/add/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent1);
-          puts "lastResponse: [#{last_response.body}]"
+          puts "lastResponse: [#{last_response.body}]" if rSpecLogging;
           visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
-          puts page.body;
+          puts page.body if rSpecLogging;
           expect(page).to have_xpath("//div[@field='firstKey']");
           expect(page).to have_xpath("//div[@db_id='1']");
           putJson( '/update/json-2efc1ae30d44da86ad297642e21e86b7-puts-test', jsonContent2);
-          puts "lastResponse: [#{last_response.body}]"
+          puts "lastResponse: [#{last_response.body}]" if rSpecLogging;
           visit "/show/json-2efc1ae30d44da86ad297642e21e86b7-puts-test";
-          puts page.body;
+          puts page.body if rSpecLogging;
           expect(page).to have_xpath("//div[@field='secondKey']");
           expect(page).to have_xpath("//div[@db_id='1']");
         end # ROLLBACK
@@ -95,7 +97,7 @@ END_DESCRIPTION
 
         scenario "list the currently known content types as html" do
           visit "/contentTypes"
-          puts page.body
+          puts page.body if rSpecLogging;
           listItems = page.all(:xpath, "//div[@class='listItem']/a");
           expect(listItems.length).to eql 1
           expect(listItems.at(0).text).to eql "AuthorType"
@@ -105,7 +107,7 @@ END_DESCRIPTION
           getJson('contentTypes');
           expect(last_response.header['Content-type']).to match /application\/json/
           jsonContent = lastResponseAsJsonObj
-          pp jsonContent;
+          pp jsonContent if rSpecLogging;
           expect(jsonContent).to be_kind_of(Array);
           expect(jsonContent.length).to eql 1;
           expect(jsonContent[0]).to eql "AuthorType";
@@ -113,7 +115,7 @@ END_DESCRIPTION
 
         scenario "show the description of a specific content type as html" do
           visit "/contentTypes/AuthorType"
-          puts page.body
+          puts page.body if rSpecLogging;
           expect(page).to have_xpath("//div[@class='description']")
           expect(page).to have_xpath("//div[@class='table']")
           expect(page).to have_xpath("//div[@class='fieldsList']")
@@ -126,7 +128,7 @@ END_DESCRIPTION
           getJson("contentTypes/AuthorType");
           expect(last_response.header['Content-type']).to match /application\/json/
           jsonContent = lastResponseAsJsonObj
-          pp jsonContent;
+          pp jsonContent if rSpecLogging;
           expect(jsonContent).to be_kind_of(Hash);
           expect(jsonContent).to have_key :description
           expect(jsonContent[:description]).to match /authors/
@@ -139,7 +141,7 @@ END_DESCRIPTION
 
         scenario "list the currently known content fields as html" do
           visit "/contentFields"
-          puts page.body
+          puts page.body if rSpecLogging;
           listItems = page.all(:xpath, "//div[@class='listItem']/a");
           expect(listItems.length).to eql 1
           expect(listItems.at(0).text).to eql "surname"
@@ -149,7 +151,7 @@ END_DESCRIPTION
           getJson('contentFields');
           expect(last_response.header['Content-type']).to match /application\/json/
           jsonContent = lastResponseAsJsonObj
-          pp jsonContent;
+          pp jsonContent if rSpecLogging;
           expect(jsonContent).to be_kind_of(Array);
           expect(jsonContent.length).to eql 1;
           expect(jsonContent[0]).to eql "surname";
@@ -157,7 +159,7 @@ END_DESCRIPTION
 
         scenario "show the description of a specific content field as html" do
           visit "/contentFields/surname"
-          puts page.body
+          puts page.body if rSpecLogging;
 #          expect(page).to have_xpath("//div[@class='description']")
 #          expect(page).to have_xpath("//div[@class='table']")
           expect(page).to have_xpath("//div[@class='typesList']")
@@ -170,7 +172,7 @@ END_DESCRIPTION
           getJson("contentFields/surname");
           expect(last_response.header['Content-type']).to match /application\/json/
           jsonContent = lastResponseAsJsonObj
-          pp jsonContent;
+          pp jsonContent if rSpecLogging;
           expect(jsonContent).to be_kind_of(Hash);
 #          expect(jsonContent).to have_key :description
 #          expect(jsonContent[:description]).to match /authors/

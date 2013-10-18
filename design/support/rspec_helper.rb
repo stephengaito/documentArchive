@@ -119,3 +119,24 @@ def putJson(url, jsonContent)
       jsonContent.to_json, 
       { 'Content-type' => 'application/json'});
 end
+
+
+# Turn of or off RSpec logging
+#
+# @param [Boolean] loggingOn whether or not to log rspec information
+# @return not specified
+def setRSpecLogging(loggingOn, fileName = nil)
+  $rSpecLogging = loggingOn;
+#  unless fileName.nil? then
+#    fileName.sub!(/^.*fandianpf\//,'') 
+#    puts "RSpecLogging: #{loggingOn} in #{fileName}";
+#  end
+end
+
+# Returns the current state of RSpecLogging.
+#
+# @return [Boolean] the current state of RSpecLogging
+def rSpecLogging
+  $rSpecLogging
+end
+  

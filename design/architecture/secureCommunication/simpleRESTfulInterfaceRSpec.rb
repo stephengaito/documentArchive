@@ -1,5 +1,7 @@
 require 'support/rspec_helper';
 
+setRSpecLogging false
+
 module Fandianpf; module Architecture
 
 # The Fandianpf::Architecture::SecureCommunitcation module collects the 

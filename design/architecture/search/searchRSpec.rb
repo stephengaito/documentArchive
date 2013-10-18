@@ -1,5 +1,7 @@
 require 'support/rspec_helper';
 
+setRSpecLogging false;
+
 module Fandianpf; module Architecture
 
   # The Fandianpf::Architecture::Search module collects the 
@@ -11,6 +13,16 @@ module Fandianpf; module Architecture
     feature Search, 'simple' do
 
       before(:each) do
+
+        # add a simple content type
+        ContentTypes.clear;
+        ContentTypes.registerFields(:AuthorType, :author_type, [ :surname ]);
+        ContentTypes.registerDescription :AuthorType, <<END_DESCRIPTION 
+Authors allow you to keep notes, as well as contact details about 
+authors you are interested in.
+END_DESCRIPTION
+
+        # now create some simple content
         @jsonAuthorContent = {
           :surname=>"Surname",
           :von=>"von",
@@ -30,9 +42,9 @@ module Fandianpf; module Architecture
       scenario "search by field surname" do
         PersistentStore.db.transaction(:rollback => :always) do
           putJson( '/add/FirstnameVonSurnameJR', @jsonAuthorContent);
-          puts "lastResponse: [#{last_response.body}]"
+          puts "lastResponse: [#{last_response.body}]" if rSpecLogging;
           visit "/search/surname/Surname";
-          puts page.body;
+          puts page.body if rSpecLogging;
         end
       end
 

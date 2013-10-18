@@ -1,3 +1,4 @@
+require 'support/uspec_helper';
 require 'fandianpf';
 
 module Fandianpf; module Spec;

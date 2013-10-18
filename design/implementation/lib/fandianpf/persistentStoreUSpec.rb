@@ -1,3 +1,5 @@
+require 'support/uspec_helper';
+
 require 'fandianpf/persistentStore';
 
 module Fandianpf; module Spec;  

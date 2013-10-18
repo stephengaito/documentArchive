@@ -1,5 +1,7 @@
 require 'support/rspec_helper';
 
+setRSpecLogging false;
+
 module Fandianpf; module ContentTypes
 
   # The Fandianpf::ContentTypes::Author module collects the 
@@ -30,9 +32,9 @@ module Fandianpf; module ContentTypes
       scenario "add a new author (as JSON)" do
         PersistentStore.db.transaction(:rollback => :always) do
           putJson( '/add/FirstnameVonSurnameJR', @jsonAuthorContent);
-          puts "lastResponse: [#{last_response.body}]"
+          puts "lastResponse: [#{last_response.body}]" if rSpecLogging;
           visit "/show/FirstnameVonSurnameJR";
-          puts page.body;
+          puts page.body if rSpecLogging;
           expect(page).to have_xpath("//div[@db_id='1']");
           expect(page).to have_xpath("//div[@field='surname']");
         end # ROLLBACK

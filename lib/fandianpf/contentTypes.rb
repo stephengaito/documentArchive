@@ -45,7 +45,7 @@ module Fandianpf
       # @param [String] aPossibleField the name of the field to check. 
       # @return Boolean whether or not the name is a recognized field.
       def isField(aPossibleField)
-        @@field2table.has_key?(aPossibleField);
+        @@field2tables.has_key?(aPossibleField);
       end
 
       # getContentFields returns an array of the currently known fields 
