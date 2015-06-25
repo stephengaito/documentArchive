@@ -14,7 +14,7 @@
 \sloppy
 
 \title[Constructive Foundations]{Reimplementing Raymond Turner's ``Constructive Foundations 
-for Funcational Languages'' in diSimplicial Theory}
+for Functional Languages'' in diSimplicial Theory}
 \input{frontMatter}
 \subjclass[2010]{Primary unknown; Secondary unknown} %
 \keywords{Keyword one, keyword two etc.}%
@@ -28,6 +28,73 @@ Languages} in diSimplicial Theory.
 \mainmatter
 
 \section{Introduction}
+
+The objective of this paper is to work through Dr Raymond Turner's book,
+\cite{turner1991constructiveFoundations}, \emph{Constructive Foundations for
+Functional Languages}. In particular, our goal is to implement the tools and
+theory required to state and check the proof of the well-founded inductive
+version of the quick sort algorithm (Theorem 13.5 in section 13.3 on page 244)
+in the context of diSimplicial theory.
+
+Our objective goal is to take the proof of the quick sort algorithm and compile
+an executable suitable for us on a Linux machine which can load a finite
+diSimplicial structure which represents a List of orderable ``things'' and
+returns a diSimplicial structure which represents the order List of these
+``things''.
+
+To reach this goal there are a number of important subtasks. Firstly we need to
+develop enough of the theory to provide the predicate calculus required to state
+the sepcification of the quick sort algorithm itself. We also need to define
+Lists, as well as orderable objects. Finally, we need to provide tools to assist
+in the management of the conceptual complexity of the proof.
+
+\section{End goal}
+
+We begin by reproducing Dr Turner's Theorem 13.5.
+
+%\newcommand{\and}{\ensuremath{\wedge}}
+%\newcommand{\or}{\ensuremath{\vee}}
+
+\begin{theorem}
+$ \forall x \in List [N] \exists y \in List [N] {O(y) \and P(x,y)} $
+\end{theorem}
+
+\begin{proof}
+
+By well-founded induction with induction formual set to $\delta[x] = \exists y \in List[N]{O(y) \nd P(x,y)}.$ We have to prove that $$ \forall x \in List[N]{\forall z(z<<x \implies \delta[z]) \implies \delta[x]}. $$
+
+\begin{flalign*}
+%
+[x \in L]                                           &\quad (1)  & \text{assumption} \\
+x = [ ] or \exists n \in N \exists u in L (x = n:u) &\quad (2)  & \text{theorem} \\
+[x = [ ]]                                           &\quad (3)  & \text{assumption} \\
+O([ ]) \and P([ ], [ ])                             &\quad (4)  & \text{P and O} \\
+\exists y \in L {O(y) and P(x,y)}                   &\quad (5)  & (4), \exists i \\
+\forall z(z<<x \implies \delta[x]) \implies \delta[x] &\quad (6) & \forall i, (5), \implies i \\
+[\exists n \in N \exists u \in L (x = n:u)]         &\quad (7)  & \text{assumption} \\
+[\forall z(z << x \implies \delta[z])]              &\quad (8)  & \text{assumption} \\
+[ x = n:u ]                                         &\quad (9)  & \text{assumption} \\
+Lnu << x                                            &\quad (10) & \gamma \\
+Lnu << x \implies \delta[Lnu]                       &\quad (11) & \forall e, (8) \\
+\delta[Lnu]                                         &\quad (12) & \implies e, (11), (10) \\
+Rnu << x                                            &\quad (13) & \gamma \\
+Rnu << x \implies \delta[Rnu]                       &\quad (14) & \forall e, (8) \\
+\delta[Rnu]                                         &\quad (15) & \implies e, (13), (14) \\
+[O[w] and P(Lnu, w)]                                &\quad (16) & \text{assumption} \\
+[O[w] and P(Rnu, v)]                                &\quad (17) & \text{assumption} \\
+O(w *[n]*v) and P(w*[n]*v,x)                        &\quad (18) & P and O, \theta, \gamma, \phi \\
+\delta[x]                                           &\quad (19) & \exists i, (18) \\
+\delta[x]                                           &\quad (20) & \exists e, (19), (17), (15) \\
+\delta[x]                                           &\quad (21) & \exists e, (20), (16), (12) \\
+\delta[x]                                           &\quad (22) & \exists e (\text{twice}), (7), (9) \\
+\forall z(z<<x \implies \delta[z]) \implies \delta[x] &\quad (23) & \implies i, (8), (22) \\
+\forall z(z<<x \implies \delta[z]) \implies \delta[x] &\quad (24) & or e, (3), (7), (2) \\
+x \in L \implies \forall z(z<<x \implies \delta[z]) \implies \delta[x] &\quad (25) & \implies i, (1), (24) \\
+\forall x \in L(\forall z(z<<x \implies \delta[z]) \implies \delta[x]) &\quad (26) & \forall i, (25)
+%
+\end{flalign*}
+
+\end{proof}
 
 \bibliographystyle{amsalpha}
 \bibliography{constructiveFoundations}
