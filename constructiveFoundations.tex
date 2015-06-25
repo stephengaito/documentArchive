@@ -1,0 +1,36 @@
+% LaTeX source for the constructiveFoundations document
+%
+
+\documentclass[a4paper,openany]{amsbook}
+\usepackage{disitt}
+\usepackage{disitt-symbols}
+\usepackage{mdframed}
+\newmdenv[linecolor=white,backgroundcolor=gray!10]{infobox}
+\newenvironment{myQuote}{\begin{quotation}}{\end{quotation}}
+\surroundwithmdframed[linecolor=white,backgroundcolor=gray!10]{myQuote}
+
+\begin{document}
+\frontmatter
+\sloppy
+
+\title[Constructive Foundations]{Reimplementing Raymond Turner's ``Constructive Foundations 
+for Funcational Languages'' in diSimplicial Theory}
+\input{frontMatter}
+\subjclass[2010]{Primary unknown; Secondary unknown} %
+\keywords{Keyword one, keyword two etc.}%
+
+\begin{abstract}
+We ``reimplement'' Raymond Turner's \emph{Constructive Foundations for Functional
+Languages} in diSimplicial Theory.
+\end{abstract} 
+\maketitle 
+\tableofcontents 
+\mainmatter
+
+\section{Introduction}
+
+\bibliographystyle{amsalpha}
+\bibliography{constructiveFoundations}
+
+\end{document}
+
