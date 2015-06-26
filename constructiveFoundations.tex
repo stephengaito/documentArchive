@@ -50,6 +50,8 @@ in the management of the conceptual complexity of the proof.
 
 \section{End goal}
 
+\subsection{Explicit logics based proof theory proof}
+
 We begin by reproducing Dr Turner's Theorem 13.5.
 
 %\newcommand{\and}{\ensuremath{\wedge}}
@@ -93,6 +95,38 @@ x \in L \implies \forall z(z<<x \implies \delta[z]) \implies \delta[x] &\quad (2
 \forall x \in L(\forall z(z<<x \implies \delta[z]) \implies \delta[x]) &\quad (26) & \forall i, (25)
 %
 \end{flalign*}
+
+\end{proof}
+
+The problem with this proof, for the average mathematician, is that, 
+while the proof is correct, its essential structure is hidden by far too 
+much ``extraneous'' detail.
+
+\subsection{More traditional social proof}
+
+Both mathematicians and computer programmers, are adept at managing this 
+``extraneous'' detail. Unfortunately the tools either group use, are 
+very very different.
+
+\begin{theorem}
+%
+Given a List of natural numbers, $x \in List[N]$, the quick sort algorithm:
+%
+\begin{code}
+  
+\end{code} 
+%
+produces a List, $y \in List[N]$, which is ordered, $O(y)$, 
+and is a permutation of $x$, that is $P(x,y)$.
+%
+\end{theorem}
+
+\begin{proof}
+The proof proceeds via well-founded induction using the induction ...
+
+\textbf{base case}
+
+\textbf{induction step}
 
 \end{proof}
 
