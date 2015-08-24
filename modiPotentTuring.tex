@@ -1,0 +1,65 @@
+% LaTeX source for the modiPotent Turing document
+%
+
+\documentclass[a4paper,openany]{amsbook}
+\usepackage{disitt}
+\usepackage{disitt-symbols}
+\usepackage{mdframed}
+\newmdenv[linecolor=white,backgroundcolor=gray!10]{infobox}
+\newenvironment{myQuote}{\begin{quotation}}{\end{quotation}}
+\surroundwithmdframed[linecolor=white,backgroundcolor=gray!10]{myQuote}
+
+\begin{document}
+\frontmatter
+\sloppy
+
+\title[Modi-Potent-Turing]{Turing Machines for Modi-Potent beings}
+\input{frontMatter}
+\subjclass[2010]{Primary unknown; Secondary unknown} %
+\keywords{Keyword one, keyword two etc.}%
+
+\begin{abstract}
+We provide a ``classical'' description of the Modi-Potent Turing Machine.
+\end{abstract} 
+\maketitle 
+\tableofcontents 
+\mainmatter
+
+
+\section{Introduction}
+
+In this paper we explore a more uniform definition of Turing machine which will
+differ simply in the power of the maximal ordinal used by the Turing machine. In
+this paper we do this using ``classical'' socially checked proofs using
+``classical'' set theory. You are welcome to choose your favourite axiomization
+using first order predicate logic. In subsequent papers we will found
+mathematics using the non-``classical'' computation which is equivilant to our
+current definition of Modi-potent Turing Machine.
+
+Of particular importance in either definition, is the power of the Axiom of
+Choice(s) used. For our purposes there are three versions of the Axiom of
+Choice, in increasing power:
+%
+\begin{enumerate}
+\item Prime Ideal Theorem (PIT)
+\item Axiom of Choice (AoC)
+\item Global Axiom of Choice (GAoC)
+\end{enumerate}
+
+The Prime Ideal Theorem (PIT) is used to define the ``result'' of computation at
+limit ordinals, which corresponds to creation of limit points or alternatively
+the closure, via ``ideal points'' of any computation.
+
+The Axiom of Choice (AoC) itself, is used to define sequential computation, or
+equivalently, to ensure the existence of lists of any required ordinal size.
+
+While we will not use the Global Axiom of Choice (GAoC) in any essential way in
+our work, we will see that the GAoC is required to ensure the existence of
+co-algebraic lists, when we work, in subsequent papers, with Co-Algebraic
+structures.
+
+\bibliographystyle{amsalpha}
+\bibliography{modiPotentTuring}
+
+\end{document}
+
