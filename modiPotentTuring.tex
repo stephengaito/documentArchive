@@ -1,7 +1,8 @@
-% LaTeX source for the modiPotent Turing document
+% LaTeX source for the trans-finite Turing document
 %
 
-\documentclass[a4paper,openany]{amsbook}
+%\documentclass[a4paper,openany]{amsbook}
+\documentclass[a4paper,openany]{amsart}
 \usepackage{disitt}
 \usepackage{disitt-symbols}
 \usepackage{mdframed}
@@ -10,36 +11,68 @@
 \surroundwithmdframed[linecolor=white,backgroundcolor=gray!10]{myQuote}
 
 \begin{document}
-\frontmatter
+%\frontmatter
 \sloppy
 
-\title[Modi-Potent-Turing]{Turing Machines for Modi-Potent beings}
+\title[Modi-Potent-Turing]{Trans-finite Turing Machines for Modi-Potent beings}
 \input{frontMatter}
 \subjclass[2010]{Primary unknown; Secondary unknown} %
 \keywords{Keyword one, keyword two etc.}%
 
 \begin{abstract}
-We provide a ``classical'' description of the Modi-Potent Turing Machine.
+We provide a ``classical'' description of the hierarchy of Modi-Potent Turing Machines.
 \end{abstract} 
 \maketitle 
 \tableofcontents 
-\mainmatter
+%\mainmatter
 
 
 \section{Introduction}
 
-In this paper we explore a more uniform definition of Turing machine which will
-differ simply in the power of the maximal ordinal used by the Turing machine. In
-this paper we do this using ``classical'' socially checked proofs using
-``classical'' set theory. You are welcome to choose your favourite axiomization
-using first order predicate logic. In subsequent papers we will found
-mathematics using the non-``classical'' computation which is equivilant to our
-current definition of Modi-potent Turing Machine.
+This paper is a prequel to our cycle of papers aiming to provide a rigorous mathematical
+theory of what limited, ``Modi-potent'', beings can understand of Reality. One of the
+central tenets of this ``Theory of Reality'' is that the correct foundations of
+Mathematics is not first order logic but rather computation. However to recover all of
+classical mathematics inside these computational foundations, we need a theory of
+computation which is more powerful than classical (non oracle) Turing machines allow. This
+paper provides definitions of these more powerful, trans-finite Turing machines in a
+classical Set Theory setting. Subsequent papers will redo these definitions in the context
+of computational foundations.
 
-Of particular importance in either definition, is the power of the Axiom of
-Choice(s) used. For our purposes there are three versions of the Axiom of
-Choice, in increasing power:
-%
+There have been numerous previous attempts to define ``more powerful'' Turing machines,
+some of which, for example, oracle or ``o-machines'', date back to Turing's original work.
+More recently the area of ``hypercomputation'' has attracted some interest, some of which
+is rather controversial. Ord, \cite{ord2006hyperComputation}, provides a good review of
+much of this work\footnote{For a high-level overview with some additional citations, see
+the Wikipedia articles, \cite{wikipedia2015hyperComputation} and
+\cite{wikipedia2015superRecursiveAlgorithm}, as well as the nLab article,
+\cite{nLab2015hyperComputation}}. Some authors claim that there (may) exist physical
+implementations of hypercomputational devices, \emph{we make \emph{no} such claims}.
+Davis, \cite{davis2004hyperComputation}, provides a summary of some of the arguments
+against these claims. Instead, our interest comes from our desire to capture
+non-constructive classical mathematics in a computational setting.
+
+\TODO{\cite{hamkinsLewis1998inifiniteTimeTuringMachines}}
+
+Our aim in this paper is to explicitly explore a more uniform definition of Turing machine
+which will differ simply in the power of the maximal ordinal used by the Turing machine.
+We do this using ``classical'' socially checked proofs using ``classical'' set theory. You
+are welcome to choose your favourite axiomization using first order predicate logic. In
+subsequent papers we will found mathematics using a form of trans-finite computation which
+is equivalent to our current definition of trans-finite Turing Machine. 
+
+Classically, the interest and hence the definitions of both computation and set theory,
+have been focused upon computations which \emph{halt} and sets which are
+\emph{well-founded}. Our computational foundations will admit that there are some
+interesting computations and structures which do not halt or are non-well-founded. In
+categorical terms the halting computations and well-founded sets are \emph{algebraic},
+while the non-halting processes and non-well-founded structures are \emph{co-algebraic}. 
+While we will not make any use of co-algebraic structures in this paper, our subsequent 
+papers will make essential use of these co-algebraic structures.
+
+Of particular importance for either the classical or compuatational definitions of
+trans-finite compuatation, is the power of the Axiom of Choice(s) used. For our purposes
+there are three versions of the Axiom of Choice, in increasing power: %
 \begin{enumerate}
 \item Prime Ideal Theorem (PIT)
 \item Axiom of Choice (AoC)
