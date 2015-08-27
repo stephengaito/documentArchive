@@ -1,6 +1,6 @@
 # Objectives
 
-* Define modi-potent Turing machines
+* Define trans-finite Turing machines
 * Show that they are equivalent to Turing's Oracle machines
 * Define standard computational classes
  * Reduction
