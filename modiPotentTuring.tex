@@ -91,7 +91,89 @@ our work, we will see that the GAoC is required to ensure the existence of
 co-algebraic lists, when we work, in subsequent papers, with Co-Algebraic
 structures.
 
-\section{Classical definitions}
+\section{Graphs, paths and similarities}
+
+In anticipation of our future work, we take a slightly non-standard route towards defining
+(trans-finite) Turing machines. We leave it to the reader to understand both why we take
+this route, and that we have, in fact, provided the same structures.
+
+One of the central themes of this cycle of papers is the importance of graphs, paths and
+(co-)algebraic similarities. We start by defining (trans-finite) graphs.
+
+There are essentially two distinct ways to define a mathematical structure: logically, by
+explicitly assuming the existence of a set with specific (logically expressed) properties,
+or computationally, in categorical language, as the fixed point of an endofunctor. From a
+non-categorical inductive point of view, an early expression of this dichotomy can be
+found in \cite[page 1]{moschovakis1974induction}. In this paper we follow the logical
+approach. In subsequent papers in this cycle, we will use the computational approach.
+
+There are relatively few discussions of non-finite graphs from which we mention Reinhard
+Diestel's work, \cite{diestel2006graphTheory, diestel1990infiniteGraphTheory}.
+Unfortunately, for trans-finite graphs, we must go, more or less, ``on beyond
+zebra''\footnote{Growing up, one of my favourite books was \cite{seuss1955onBeyondZebra}.
+\emph{Be warned}: One of my greatest faults is that I seem congenitally incapable of
+staying within ``known'' bounds... Another of my greatest faults is that my mind is a web
+of snippets of ideas. Linearizing this web into single narrative, is \emph{very} hard for
+me to do.}.
+
+Our definition of graph is inspired by the definition of metagraph in
+\cite{macLane1971categoriesWorkingMathematician} section I.1. Note that our definition is
+a generalisation of most typical definitions, for example \cite[section
+1.1]{diestel2006graphTheory}. Categorically, a graph is simply a presheaf on the category
+$ \bullet \substack{\mathbf{\longrightarrow} \\[-0.7ex] \mathbf{\longrightarrow}} \bullet $
+
+\begin{definition}
+
+A \define{(directed) graph}{}, $G(E, V, \pi_0, \pi_1)$, is a set, $E$, of
+\define{edges}{}, and a set, $V$, of \define{verticies}{}, together with two maps, $\pi_0
+: E \rightarrow V$ and $\pi_1 : E \rightarrow V$, called the source and target maps.
+
+A \define{labeled graph}{}, $lG(E, V, L_E, L_V, \pi_0, \pi_1, l_E, l_V)$, is a graph $G(E, 
+V, \pi_0, \pi_1)$ together with a set, $L_E$, of \define{edge labels}{}, and a set, $L_V$, 
+of \define{vertex labels}{}, and maps, $l_E : E \rightarrow L_E$, and $l_V : V \rightarrow 
+L_V$. Often the set of vertex labels, $L_V$, and vertex label map, $l_V$, are omitted (or 
+alternatively the the set of vertex labels is assumed to be the trivial one point set).
+
+\end{definition}
+
+Our next goal is to provide a definition of ``path''. Intuitively a (directed) ``path''
+\emph{in} a graph is an embedding of a ``linearly'' directed graph. For at most countable
+graphs, defining ``linearity'' is relatively easily done by ``following'' single edges
+corresponding to the ``successor'' or ``next'' operation. For trans-finite graphs we must
+add something more to be able to deal with ``limit points''. Rather surprisingly, to deal
+with these ``limit points'' it is convenient to define 1-Categories, since a Category
+which is, sequentially complete as well as sequentially cocomplete, is a graph which
+explicitly includes all of its ``paths''. Categorically, a category is a presheaf on the
+category $ \bullet \substack{\mathbf{\longrightarrow} \\[-0.7ex] \mathbf{\longleftarrow} 
+\\[-0.7ex] \mathbf{\longrightarrow} } \bullet $ equipped with a consistent collection of
+2-simplicies which are declared ``thin''\footnote{This way of looking at 1-categories is
+inspired by the work of Dominic Verity, see, for example, \cite{verity2005complicialSets},
+\cite{verity2006complicialSimplicialHomotopy} and
+\cite{verity2006simplicialComplicialCategories}.}.
+
+\begin{definition}
+
+A \define{1-category}{}, $C(E, V, \pi_0, \pi_1, i)$, is a graph with the addition of an 
+\define{identity map}{} $i : V \rightarrow E$ for which $\pi_0 \circ i$ and $\pi_1 
+\circ i$ are both the identity of the set $V$, and for which 
+
+\end{definition}
+
+\begin{definition}
+
+An at most countable \define{path}{} is a graph $G$ whose edge set is at most countable, 
+
+\end{definition}
+
+\TODO{similarities}
+
+\section{State machines}
+
+\begin{definition}
+
+A state machine... A finite state machine is a state machine ...
+
+\end{definition}
 
 \subsection{$\aleph_0$-non-deterministic Turing Machine}
 
@@ -115,6 +197,10 @@ Given a trans-finite Turing machine, $T$, there exists a set, $\gamma$, and a
 $\gamma$-o-machine, $O$, that simulates $T$.
 
 \end{theorem}
+
+\begin{proof}
+something proving the previous theorem.
+\end{proof}
 
 \section{Trans-finite computability theory}
 
