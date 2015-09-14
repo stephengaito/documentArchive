@@ -230,9 +230,16 @@ Then \emph{exactly one} of the following is true.
 
 \end{lemma}
 
-\begin{proof}
+\begin{proof} \par \par
 
-\TODO{We need transitivity!}
+\textbf{Case 1:} If $(z,x) \in E$ then $\pi_1(z,x) = x = \pi_0(x, y)$ we have
+$(z,x)\compose(x,y) \in E$. Since $\pi_0((z,x)\compose(x,y)) = z$ and
+$\pi_1((z,x)\compose(x,y)) = y$ we know that $(z,x)\compose(x,y)$ is an edge in $P$ but
+$P$ has only one edge between $z$ and $y$, hence $(z,x)\compose(x,y) = (z,y)$.
+
+\textbf{Case 2:} If $(y,z) \in E$ then by an argument similar to case 1, we have $(x,z) \in E$.
+
+\textbf{Case 3:} Since neither of the above two cases apply, we know that $(z,x) \notin E$ and $(y,z) \notin E$. Since $P$ is a 1-path, this means that $(x,z) \in E$ and $(z,y) \in E$.
 
 \end{proof}
 
