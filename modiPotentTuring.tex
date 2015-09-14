@@ -127,45 +127,114 @@ $ \cdot \substack{\mathbf{\longrightarrow} \\[-0.7ex] \mathbf{\longrightarrow}} 
 \begin{definition}
 
 A \define{(directed) graph}{}, $G(E, V, \pi_0, \pi_1)$, is a set, $E$, of
-\define{edges}{}, and a set, $V$, of \define{verticies}{}, together with two maps, $\pi_0
-: E \rightarrow V$ and $\pi_1 : E \rightarrow V$, called the source and target maps.
+\define{edges}{}, and a set, $V$, of \define{verticies}{}, together with two maps, 
+\map{\pi_0}{E}{V} and \map{\pi_1}{E}{V}, called the source and target maps.
 
 A \define{labeled graph}{}, $lG(E, V, L_E, L_V, \pi_0, \pi_1, l_E, l_V)$, is a graph $G(E, 
 V, \pi_0, \pi_1)$ together with a set, $L_E$, of \define{edge labels}{}, and a set, $L_V$, 
-of \define{vertex labels}{}, and maps, $l_E : E \rightarrow L_E$, and $l_V : V \rightarrow 
-L_V$. Often the set of vertex labels, $L_V$, and vertex label map, $l_V$, are omitted (or 
+of \define{vertex labels}{}, and maps, \map{l_E}{E}{L_E}, and \map{l_V}{V}{L_V}. Often the 
+set of vertex labels, $L_V$, and vertex label map, $l_V$, are omitted (or 
 alternatively the the set of vertex labels is assumed to be the trivial one point set).
 
 \end{definition}
 
 Our next goal is to provide a definition of ``path''. Intuitively a (directed) ``path''
-\emph{in} a graph is an embedding of a ``linearly'' directed graph. For at most countable
-graphs, defining ``linearity'' is relatively easily done by ``following'' single edges
-corresponding to the ``successor'' or ``next'' operation. For trans-finite graphs we must
-add something more to be able to deal with ``limit points''. Rather surprisingly, to deal
-with these ``limit points'' it is convenient to define 1-Categories, since a Category
-which is, sequentially complete as well as sequentially cocomplete, is a graph which
-explicitly includes all of its ``paths''. Categorically, a category is a presheaf on the
-category $ \bullet \substack{\mathbf{\longrightarrow} \\[-0.7ex] \mathbf{\longleftarrow} 
-\\[-0.7ex] \mathbf{\longrightarrow} } \bullet $ equipped with a consistent collection of
-2-simplicies which are declared ``thin''\footnote{This way of looking at 1-categories is
-inspired by the work of Dominic Verity, see, for example, \cite{verity2005complicialSets},
+\emph{in} a graph is an embedding of a ``linearly'' directed graph.
+
+\begin{definition}
+
+A \define{(directed) 1-path}{}, $P(E, V, \pi_0, \pi_1)$, is a graph for which for any
+\emph{distinct} pair of vertices, $x$ and $y$, then \emph{exactly one} of the following is
+true:
+
+\begin{enumerate}
+\item $(x,y) \in E$, 
+\item $(y,x) \in E$.
+\end{enumerate}
+
+\end{definition}
+
+For at most countable graphs, defining ``linearity'' is relatively easily done by
+``following'' single edges corresponding to the ``successor'' or ``next'' operation. For
+trans-finite graphs we must add something more to be able to deal with ``limit points''.
+Rather surprisingly, to deal with these ``limit points'' it is convenient to define
+1-Categories, since a Category which is, sequentially complete as well as sequentially
+cocomplete, is a graph which explicitly includes all of its ``paths''. Categorically, a
+category is a presheaf on the category
+$ \bullet \substack{\mathbf{\longrightarrow} \\[-0.7ex] \mathbf{\longleftarrow} 
+\\[-0.7ex] \mathbf{\longrightarrow} } \bullet $
+equipped with a consistent collection of 2-simplicies which are declared
+``thin''\footnote{This way of looking at 1-categories is inspired by the work of Dominic
+Verity, see, for example, \cite{verity2005complicialSets},
 \cite{verity2006complicialSimplicialHomotopy} and
 \cite{verity2006simplicialComplicialCategories}.}.
 
 \begin{definition}
 
 A \define{1-category}{}, $C(E, V, \pi_0, \pi_1, i)$, is a graph with the addition of an 
-\define{identity map}{} $i : V \rightarrow E$ for which $\pi_0 \circ i$ and $\pi_1 
-\circ i$ are both the identity of the set $V$, and for which 
+\define{identity map}{} \map{i}{V}{E} for which $\pi_0 \compose i$ and $\pi_1 
+\compose i$ are both the identity of the set $V$, and for which 
+
+\begin{itemize}
+
+\item If $f, g \in E$ and $\pi_1(f) = \pi_0(g)$ then there exists $f \compose g \in E$ for 
+which $ \pi_0(f) = \pi_0(f \compose g)$ and $ \pi_1(f \compose g) = \pi_1(g)$
+
+\item If $f \in E$ then $ f \compose i(\pi_0(f)) = f$ and $i(\pi_1(f)) \compose f = f$
+
+\item If \map{f}{w}{x}, \map{g}{x}{y} and \map{h}{y}{z} then the graph, $hgf(\set{f,
+g, h}, \set{w, x, y, z}, \pi_0, \pi_1)$ can be extended to a 1-path embedded in $C$ in only 
+one way
+
+\end{itemize}
 
 \end{definition}
 
-\begin{definition}
+\begin{lemma}
 
-An at most countable \define{path}{} is a graph $G$ whose edge set is at most countable, 
+Consider a 1-path, $P(E, V, \pi_0, \pi_1)$, and three \emph{distinct} vertices, $x$, $y$, 
+$z$. Without loss of generality, assume that $(x, y)$ is a directed edge in $P$, that is 
+$(x,y) \in E$.
 
-\end{definition}
+\begin{cTikzPictureWorking}
+
+\coordinate (X) at (-1,0);
+\coordinate (Y) at (1,0);
+\coordinate (Z) at (0,1);
+
+\fill (X) circle[radius=1pt];
+\fill (Y) circle[radius=1pt];
+\fill (Z) circle[radius=1pt];
+
+\begin{scope}[shorten >=4pt, shorten <=4pt]
+\path (X) edge[->]     node (XY) {} (Y);
+\path (Y) edge[dashed] node (YZ) {} (Z);
+\path (X) edge[dashed] node (XZ) {} (Z);
+\end{scope}
+
+\node[below left]  at (X) {x};
+\node[below right] at (Y) {y};
+\node[above]       at (Z) {z};
+
+\end{cTikzPictureWorking}
+
+Then \emph{exactly one} of the following is true.
+
+\begin{enumerate}
+
+\item If $(z,x) \in E$, then $(z,y) \in E$
+\item If $(y,z) \in E$, then $(x,z) \in E$
+\item $(x,z) \in E$ and $(z,y) \in E$,
+
+\end{enumerate}
+
+\end{lemma}
+
+\begin{proof}
+
+\TODO{We need transitivity!}
+
+\end{proof}
 
 \TODO{similarities}
 
