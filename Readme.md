@@ -1,4 +1,4 @@
-# Modi-Potent Turing machines
+# TransFinite Computation
 
 ## Overview
 
