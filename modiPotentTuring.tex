@@ -14,13 +14,14 @@
 %\frontmatter
 \sloppy
 
-\title[Modi-Potent-Turing]{Trans-finite Turing Machines for Modi-Potent beings}
+\title[Computation: Classical version]{Trans-finite Computation: The classical version}
 \input{frontMatter}
 \subjclass[2010]{Primary unknown; Secondary unknown} %
 \keywords{Keyword one, keyword two etc.}%
 
 \begin{abstract}
-We provide a ``classical'' description of the hierarchy of Modi-Potent Turing Machines.
+We investigate what it means for a finite being to verify trans-finite computational
+algorithms.
 \end{abstract} 
 \maketitle 
 \tableofcontents 
@@ -28,6 +29,58 @@ We provide a ``classical'' description of the hierarchy of Modi-Potent Turing Ma
 
 
 \section{Introduction}
+
+What is a computation? Turing, \cite{turing1936computableNumbersMachines}, is cited by
+G\"odel, \cite{godel}, as providing the first convincing \emph{mechanistic} mathematical
+definition of a computational process as performed by a human. Turing's student, Gandy,
+\cite{gandy1980churchsThesisMechanisms}, provided a similar \emph{mechanistic}
+mathematical definition of a computational process as performed by a \emph{finite
+machine}. Both Turing and Gandy focused upon providing arguments justifying why particular
+mathematical structures provided reasonable definitions of computation. In order to
+understand potentially trans-finite computation, we will take an essentially dual
+approach. We will look at mathematical structures which represent \emph{traces} of a
+(trans-finite) computation, and then work back to mathematical structures which could have
+produced these traces. Rather surprisingly, to capture \emph{trans-finite} computational
+traces, we are forced investigate the \emph{categorical} structures of labelled graphs.
+
+What is a computation? Any \emph{description} of a computational process made by a finite
+being, will inevitably consist of a collection of ``marks in the sand'', ink-marks on
+paper, or bit-patterns in the memory of a computer. Theoretical Computer Science has three
+ways of verifying properties of the computational processes represented by these
+collections of symbols. 
+%
+\begin{itemize}
+%
+\item \define{Operational Semantics}{},
+\cite{plotkin1981structuralOperationalSemantics}, provides a description of a transition 
+system which models a program.
+%
+\item \define{Denotational
+Semantics}{}, \cite{scott1970theoryComputation, stoy1981scottStracheyTheory}, provides
+mathematical structures which represent the underlying \emph{state} of a compuation.
+%
+\item \define{Axiomatic Semantics}{}, \cite{floyd1967programSemantics, 
+hoare1969axiomaticSemantics} provides an axiomatic system of natural deduction rules with 
+which to \emph{prove} that a program meets a specific \emph{logical} specification.
+%
+\end{itemize}
+%
+Winskel, \cite{winskel1993formalSemanticsProgrammingLanguages}, provides a good
+introduction to these three types of computational semantics\footnote{Not surprisingly the
+ideas contained in this article were originally inspired by Winskel's study of
+computational traces using event structures and bisimulation, see, for example,
+\cite{winskel2007eventStructures}, and \cite{joyalNielsenWinskel1996bisimulation}}. Gries,
+\cite{gries1981scienceProgramming}, provides a particularly detailed account of building
+programs via their axiomatic semantical proofs of correctness.
+
+What is a computation? A \define{computation}{} is the transformation of one mathematical
+structure representing an un-transformed \define{state}{} into a correspondingly modified
+mathematical structure representing the transformed state. Essentially the genius of
+Turing and Gandy was to define those transformations which a finite human, or machine
+could perform. What happens if we place no such restrictions? If there are no
+restrictions, how do we know what a computation computes?
+
+\TODO{merge these different introductions}
 
 This paper is a prequel to our cycle of papers aiming to provide a rigorous mathematical
 theory of what limited, ``Modi-potent'', beings can understand of Reality. One of the
