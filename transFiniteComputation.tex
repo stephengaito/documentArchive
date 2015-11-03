@@ -145,11 +145,28 @@ our work, we will see that the GAoC is required to ensure the existence of
 co-algebraic lists, when we work, in subsequent papers, with Co-Algebraic
 structures.
 
-\section{Graphs, refinements, and paths}
+\section{Time: Graphs, refinements, and paths}
 
 In anticipation of our future work, we take a slightly non-standard route towards defining
 (trans-finite) computation. We leave it to the reader to understand both why we take
 this route, and that we have, in fact, provided the same structures.
+
+The classical theory of computation, with its (almost exclusive) focus on
+\emph{terminating} computational processes, is largely focused on \emph{time} to the
+exclusion of \emph{space}. For \emph{terminating} processes, any parallel (spacial)
+process can be serialized. This serialisability \emph{is} equivalent to set theory's
+Well-ordering Theorem and hence the Axiom of Choice. As we will see below,
+\emph{non-terminating} processes need not be globally serializable. This is, again,
+equivalent to the lack of global time in relativistic space-time.
+
+Since we are not omni-potent beings, while we can prove theorems about non-terminating 
+processes, we can not directly experience them. We can only access non-terminating processes 
+via (terminating) ordinal approximations to the full non-terminating process. This means 
+that, in a sense, all computation can \emph{effectively} be reduced to serializable 
+terminating processes. 
+
+In this section we explore the \emph{time} focused foundations of computations. In the next 
+section we explore the addition of \emph{space-time} (and hence parallelism).
 
 One of the central themes of this cycle of papers is the importance of graphs, paths and
 (co-)algebraic refinements. We start by defining (trans-finite) graphs.
@@ -189,7 +206,7 @@ E, \pi_0, \pi_1)$ together with a set, $L_V$, of \define{vertex labels}{}, and a
 $L_E$, of \define{edge labels}{}, and maps, \map{l_V}{V}{L_V}, and \map{l_E}{E}{L_E}.
 Often the set of vertex labels, $L_V$, and vertex label map, $l_V$, are omitted (or
 alternatively the set of vertex labels is assumed to be the trivial one point set).
-
+ 
 Given a labeled graph, $lG(V, E, L_V, L_E, \pi_0, \pi_1, l_v, lE)$ its \define{underlying
 graph}{}, is the graph, $G(V, E, \pi_0, \pi_1)$.
 
@@ -231,30 +248,61 @@ underlying graphs, $G_0$ and $G_1$ for which
 \end{definition}
 
 \begin{definition}
-
-A graph morphism, \map{\phi}{G_0}{G_1}, respectively, a labeled graph morphism, 
-\map{\phi}{lG_0}{lG_1}, which is $1$-to-$1$
-
+A \define{graph embedding}{} is a graph morphism, \map{\phi}{G_0}{G_1}, respectively, a
+labelled graph morphism, \map{\phi}{lG_0}{lG_1}, which is, categorically, a monomorphism.
 \end{definition}
 
-Our next goal is to provide a definition of ``path''. Intuitively a (directed) ``path''
-\emph{in} a graph is an embedding of a ``totally ordered'' directed graph.
+Our next goal is to provide a definition of $1$-dimensional (time) ``$1$-path''.
+Intuitively a (directed) ``$1$-path'' \emph{in} a graph is an embedding of a ``totally
+ordered'' directed graph.
 
 \begin{definition}
-
-A \define{(directed) 1-path}{}, $P(E, V, \pi_0, \pi_1)$, is a graph for which for any
-\emph{distinct} pair of vertices, $x$ and $y$, then \emph{exactly one} of the following is
-true:
+A \define{(directed) 1-path}{}, $P(V, E, \pi_0, \pi_1)$, is a graph for which:
 
 \begin{enumerate}
-\item $(x,y) \in E$, 
-\item $(y,x) \in E$.
+\item \textbf{Anti-symmetry:} for any pair of vertices, $x, y \in V$, if $(x,y) \in E$ and
+$(y,x) \in E$ then $x = y$.
+
+\item \textbf{Transitivity:} for any triple of verticies, $x, y, z \in V$, 
+if $(x,y) \in E$ and $(y,z) \in E$ then $(x,z) \in E$.
+
+\item \textbf{Total order:} for any pair of vertices, $x, y \in V$, if $x \neq y$ then
+either $(x,y) \in E$ or $(y,x) \in E$ but not both.
 \end{enumerate}
+\end{definition}
+
+\begin{definition}
+A path, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, is a \define{subpath}{} of a
+path, $P_1(V^{P_1}, E^{P_1}, \pi^{P_1}_0, \pi^{P_1}_1)$, if there exists an embedding,
+\map{\phi}{P_0}{P_1}.
+
+A path, $P_1(V^{P_1}, E^{P_1}, \pi^{P_1}_0, \pi^{P_1}_1)$, \define{extends}{} a path,
+$P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, if there exists an embedding,
+\map{\phi}{P_0}{P_1}.
 
 \end{definition}
 
+\begin{definition}
+Given paths, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$ and $P_1(V^{P_1}, E^{P_1},
+\pi^{P_1}_0, \pi^{P_1}_1)$, an edge, $e_0 \in E^{P_0}$ \define{covers}{} an edge, $e_1 \in
+E^{P_1}$, if there exists an subpath, $\hat{P_1}$ in $P_1$ which is an extension of $e_1$
+(as a path of $P_1$) for which $\hat{P_1}$ is a refinement of $e_0$ (as a subpath of
+$P_0$).
+\end{definition}
 
+\begin{definition}
+A path, $P_1(V^{P_1}, E^{P_1}, \pi^{P_1}_0, \pi^{P_1}_1)$, is a \define{refinement}{} of a
+path, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, if there exists an graph
+embedding, \map{\phi}{P_0}{P_1} for which for any pair of distinct vertices, $x_1, y_1
+\in V_1$, there exists verticies $\hat{x_1}, \hat{y_1} \in \phi(V^{P_0})$ for which either 
+$y_1 = \hat{y_1}$ or $(y_1, \hat{y_1}) \in E^{P_1}$ and either $\hat{x_1} = x_1$ or 
+$(\hat{x_1}, x_1) \in E^{P_1}$.
+\end{definition}
 
+Note that by the transitivity of paths, $P_1$ is a refinement of $P_0$ if and only if for 
+every edge in $P_1$ there exists an 
+
+Having defined what a $1$-path is, we now need to explore the collection of $1$-paths.
 
 For at most countable graphs, defining ``linearity'' is relatively easily done by
 ``following'' single edges corresponding to the ``successor'' or ``next'' operation. For
@@ -348,6 +396,12 @@ $P$ has only one edge between $z$ and $y$, hence $(z,x)\compose(x,y) = (z,y)$.
 \begin{definition}
 A \define{refinement}{} is 
 \end{definition}
+
+\section{Space-time: directed simplicies, refinements and space-time paths}
+
+In the previous section we explored the structures required to provide a \emph{time} focused 
+foundations of computation. In this section we expand these time focused structures into 
+their corresponding fully space-time structures.
 
 \section{State machines}
 
