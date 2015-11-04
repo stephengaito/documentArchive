@@ -2,7 +2,7 @@
 %
 
 %\documentclass[a4paper,openany]{amsbook}
-\documentclass[a4paper,openany]{amsart}
+\documentclass[a4paper]{amsart}
 \usepackage{disitt}
 \usepackage{disitt-symbols}
 \usepackage{mdframed}
@@ -13,6 +13,11 @@
 \begin{document}
 %\frontmatter
 \sloppy
+% see: http://tex.stackexchange.com/a/50850
+%\hfuzz=20pt
+%\vfuzz=20pt
+%\hbadness=10000
+%\vbadness=\maxdimen
 
 \title[Computation: Classical version]{Trans-finite Computation: The classical version}
 \input{frontMatter}
@@ -145,7 +150,7 @@ our work, we will see that the GAoC is required to ensure the existence of
 co-algebraic lists, when we work, in subsequent papers, with Co-Algebraic
 structures.
 
-\section{Time: Graphs, refinements, and paths}
+\section{Time: Graphs, paths and refinements}
 
 In anticipation of our future work, we take a slightly non-standard route towards defining
 (trans-finite) computation. We leave it to the reader to understand both why we take
@@ -162,7 +167,7 @@ equivalent to the lack of global time in relativistic space-time.
 Since we are not omni-potent beings, while we can prove theorems about non-terminating 
 processes, we can not directly experience them. We can only access non-terminating processes 
 via (terminating) ordinal approximations to the full non-terminating process. This means 
-that, in a sense, all computation can \emph{effectively} be reduced to serializable 
+that, in a sense, ``all'' computation can \emph{effectively} be reduced to serializable 
 terminating processes. 
 
 In this section we explore the \emph{time} focused foundations of computations. In the next 
@@ -252,7 +257,7 @@ A \define{graph embedding}{} is a graph morphism, \map{\phi}{G_0}{G_1}, respecti
 labelled graph morphism, \map{\phi}{lG_0}{lG_1}, which is, categorically, a monomorphism.
 \end{definition}
 
-Our next goal is to provide a definition of $1$-dimensional (time) ``$1$-path''.
+Our next goal is to provide a definition of $1$-dimensional (time) ``$1$-paths''.
 Intuitively a (directed) ``$1$-path'' \emph{in} a graph is an embedding of a ``totally
 ordered'' directed graph.
 
@@ -260,49 +265,72 @@ ordered'' directed graph.
 A \define{(directed) 1-path}{}, $P(V, E, \pi_0, \pi_1)$, is a graph for which:
 
 \begin{enumerate}
-\item \textbf{Anti-symmetry:} for any pair of vertices, $x, y \in V$, if $(x,y) \in E$ and
+\item \define{Anti-symmetry:}{} for any pair of vertices, $x, y \in V$, if $(x,y) \in E$ and
 $(y,x) \in E$ then $x = y$.
 
-\item \textbf{Transitivity:} for any triple of verticies, $x, y, z \in V$, 
+\item \define{Transitivity:}{} for any triple of verticies, $x, y, z \in V$, 
 if $(x,y) \in E$ and $(y,z) \in E$ then $(x,z) \in E$.
 
-\item \textbf{Total order:} for any pair of vertices, $x, y \in V$, if $x \neq y$ then
+\item \define{Total order:}{} for any pair of vertices, $x, y \in V$, if $x \neq y$ then
 either $(x,y) \in E$ or $(y,x) \in E$ but not both.
 \end{enumerate}
 \end{definition}
+
+Given that $1$-paths are total orders (and hence are posets), we \emph{could} use the more
+traditional, ``$\leq$'', notation for the edges in $1$-paths. However to ensure a more
+obvious generalisation to $\lambda$-paths (for any ordinal, $\lambda$), we retain the edge
+notation, ``$(x,y)$'', throughout.
+
+\begin{definition}
+For a path, $P(V, E, \pi_0, \pi_1)$, a \define{maximal}{} (respectively
+\define{minimal}{}) element is a vertex, $\top \in V$ ($\bottom \in V$), for which for
+every vertex, $x \in V$, there exists an edge $(x,\top) \in E$ ($(\bottom, x) \in E$).
+
+A \define{$1$-interval}{} is a $1$-path which has both maximal and minimal elements. Given 
+verticies, $x, y \in V$ which are minimal and maximal (respectively), we often denote the 
+interval as, $[x,y]$.
+\end{definition}
+
+Note that by anti-symmetry, any maximal (minimal) elements of a path are unique.
 
 \begin{definition}
 A path, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, is a \define{subpath}{} of a
 path, $P_1(V^{P_1}, E^{P_1}, \pi^{P_1}_0, \pi^{P_1}_1)$, if there exists an embedding,
 \map{\phi}{P_0}{P_1}.
 
-A path, $P_1(V^{P_1}, E^{P_1}, \pi^{P_1}_0, \pi^{P_1}_1)$, \define{extends}{} a path,
-$P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, if there exists an embedding,
+Conversely, a path, $P_1(V^{P_1}, E^{P_1}, \pi^{P_1}_0, \pi^{P_1}_1)$, \define{extends}{}
+a path, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, if there exists an embedding,
 \map{\phi}{P_0}{P_1}.
-
 \end{definition}
+
+Note that every edge in any path is trivially a subpath of the path. Conversely, a path
+extends each of its edges. By abuse of notation, the edge, $(x,y)$, will often also denote
+its corresponding sub\emph{path}, $P(\set{x,y}, \set{(x,y)}, \pi_0((x,y)):=x,
+\pi_1((x,y)):=y)$.
 
 \begin{definition}
 Given paths, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$ and $P_1(V^{P_1}, E^{P_1},
-\pi^{P_1}_0, \pi^{P_1}_1)$, an edge, $e_0 \in E^{P_0}$ \define{covers}{} an edge, $e_1 \in
-E^{P_1}$, if there exists an subpath, $\hat{P_1}$ in $P_1$ which is an extension of $e_1$
-(as a path of $P_1$) for which $\hat{P_1}$ is a refinement of $e_0$ (as a subpath of
-$P_0$).
+\pi^{P_1}_0, \pi^{P_1}_1)$, an edge, $(x^{P_0}, y^{P_0}) \in E^{P_0}$ \define{covers}{} an
+edge, $(x^{P_1}, y^{P_1}) \in E^{P_1}$, if there exists an subpath, $\hat{P_1}$ in $P_1$
+which is both an interval, $[\hat{x^{P_1}}, \hat{y^{P_1}}]$, and an extension of
+$(x^{P_1}, y^{P_1})$ for which there exists an embedding, \map{\phi}{(x^{P_0},
+y^{P_0})}{\hat{P_1}} for which:
+\begin{itemize}
+\item $\phi(x^{P_0}) = \hat{x^{P_1}}$
+\item $\phi(y^{P_0}) = \hat{y^{P_1}}$
+\item $\phi( (x^{P_0}, y^{P_0}) ) = (\hat{x^{P_1}}, \hat{y^{P_1}})$
+\end{itemize}
 \end{definition}
 
 \begin{definition}
 A path, $P_1(V^{P_1}, E^{P_1}, \pi^{P_1}_0, \pi^{P_1}_1)$, is a \define{refinement}{} of a
-path, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, if there exists an graph
-embedding, \map{\phi}{P_0}{P_1} for which for any pair of distinct vertices, $x_1, y_1
-\in V_1$, there exists verticies $\hat{x_1}, \hat{y_1} \in \phi(V^{P_0})$ for which either 
-$y_1 = \hat{y_1}$ or $(y_1, \hat{y_1}) \in E^{P_1}$ and either $\hat{x_1} = x_1$ or 
-$(\hat{x_1}, x_1) \in E^{P_1}$.
+path, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, if every edge, $e^{P_1} \in 
+E^{P_1}$ is covered by an edge $e^{P_0} \in E^{P_0}$.
 \end{definition}
 
-Note that by the transitivity of paths, $P_1$ is a refinement of $P_0$ if and only if for 
-every edge in $P_1$ there exists an 
-
 Having defined what a $1$-path is, we now need to explore the collection of $1$-paths.
+
+
 
 For at most countable graphs, defining ``linearity'' is relatively easily done by
 ``following'' single edges corresponding to the ``successor'' or ``next'' operation. For
@@ -338,63 +366,6 @@ one way
 
 \end{itemize}
 
-\end{definition}
-
-\begin{lemma}
-
-Consider a 1-path, $P(E, V, \pi_0, \pi_1)$, and three \emph{distinct} vertices, $x$, $y$, 
-$z$. Without loss of generality, assume that $(x, y)$ is a directed edge in $P$, that is 
-$(x,y) \in E$.
-
-\begin{cTikzPictureWorking}
-
-\coordinate (X) at (-1,0);
-\coordinate (Y) at (1,0);
-\coordinate (Z) at (0,1);
-
-\fill (X) circle[radius=1pt];
-\fill (Y) circle[radius=1pt];
-\fill (Z) circle[radius=1pt];
-
-\begin{scope}[shorten >=4pt, shorten <=4pt]
-\path (X) edge[->]     node (XY) {} (Y);
-\path (Y) edge[dashed] node (YZ) {} (Z);
-\path (X) edge[dashed] node (XZ) {} (Z);
-\end{scope}
-
-\node[below left]  at (X) {x};
-\node[below right] at (Y) {y};
-\node[above]       at (Z) {z};
-
-\end{cTikzPictureWorking}
-
-Then \emph{exactly one} of the following is true.
-
-\begin{enumerate}
-
-\item If $(z,x) \in E$, then $(z,y) \in E$
-\item If $(y,z) \in E$, then $(x,z) \in E$
-\item $(x,z) \in E$ and $(z,y) \in E$,
-
-\end{enumerate}
-
-\end{lemma}
-
-\begin{proof} \par \par
-
-\textbf{Case 1:} If $(z,x) \in E$ then $\pi_1(z,x) = x = \pi_0(x, y)$ we have
-$(z,x)\compose(x,y) \in E$. Since $\pi_0((z,x)\compose(x,y)) = z$ and
-$\pi_1((z,x)\compose(x,y)) = y$ we know that $(z,x)\compose(x,y)$ is an edge in $P$ but
-$P$ has only one edge between $z$ and $y$, hence $(z,x)\compose(x,y) = (z,y)$.
-
-\textbf{Case 2:} If $(y,z) \in E$ then by an argument similar to case 1, we have $(x,z) \in E$.
-
-\textbf{Case 3:} Since neither of the above two cases apply, we know that $(z,x) \notin E$ and $(y,z) \notin E$. Since $P$ is a 1-path, this means that $(x,z) \in E$ and $(z,y) \in E$.
-
-\end{proof}
-
-\begin{definition}
-A \define{refinement}{} is 
 \end{definition}
 
 \section{Space-time: directed simplicies, refinements and space-time paths}
