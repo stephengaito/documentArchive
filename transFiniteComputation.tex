@@ -282,16 +282,20 @@ obvious generalisation to $\lambda$-paths (for any ordinal, $\lambda$), we retai
 notation, ``$(x,y)$'', throughout.
 
 \begin{definition}
-For a path, $P(V, E, \pi_0, \pi_1)$, a \define{maximal}{} (respectively
-\define{minimal}{}) element is a vertex, $\top \in V$ ($\bottom \in V$), for which for
-every vertex, $x \in V$, there exists an edge $(x,\top) \in E$ ($(\bottom, x) \in E$).
+For a path, $P(V, E, \pi_0, \pi_1)$, a vertex, $v \in V$, is \define{maximal}{} or
+\define{final}{} (respectively \define{minimal}{} or \define{initial}{}) if for every
+vertex, $x \in V$, there exists an edge $(x,v) \in E$ ($(v, x) \in E$).
 
-A \define{$1$-interval}{} is a $1$-path which has both maximal and minimal elements. Given 
+A vertex is \define{internal}{} if it is neither initial or final.
+
+A \define{$1$-interval}{} is a $1$-path which has both maximal and minimal vertices. Given 
 verticies, $x, y \in V$ which are minimal and maximal (respectively), we often denote the 
 interval as, $[x,y]$.
 \end{definition}
 
-Note that by anti-symmetry, any maximal (minimal) elements of a path are unique.
+Note that by anti-symmetry, any maximal (minimal) elements of a path are unique. By total
+order, if there exists two distinct vertices, $x,y \in V$, for which $(x,y) \in E$, then
+the vertex $x$ can not be maximal, and conversely, the vertex $y$ can not be minimal.
 
 \begin{definition}
 A path, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, is a \define{subpath}{} of a
