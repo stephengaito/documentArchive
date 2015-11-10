@@ -201,7 +201,6 @@ a generalisation of most typical definitions, for example \cite[section
 $ \cdot \substack{\mathbf{\longrightarrow} \\[-0.7ex] \mathbf{\longrightarrow}} \cdot $
 
 \begin{definition}
-
 A \define{graph}{}, $G(V, E, \pi_0, \pi_1)$, is a set, $V$, of \define{verticies}{}, and a
 set, $E$, of \define{edges}{}, together with two maps, \map{\pi_0}{E}{V} and
 \map{\pi_1}{E}{V}, called the source and target maps.
@@ -214,22 +213,16 @@ alternatively the set of vertex labels is assumed to be the trivial one point se
  
 Given a labeled graph, $lG(V, E, L_V, L_E, \pi_0, \pi_1, l_v, lE)$ its \define{underlying
 graph}{}, is the graph, $G(V, E, \pi_0, \pi_1)$.
-
 \end{definition}
 
 \begin{definition}
 A \define{graph morphism}{}, \map{\phi}{G_0}{G_1}, is a map between the graphs,
 $G_0(V^{G_0}, E^{G_0}, \pi^{G_0}_0, \pi^{G_0}_1)$ and $G_1(V^{G_1}, E^{G_1}, \pi^{G_1}_0,
 \pi^{G_1}_0)$ for which
-
 \begin{enumerate}
-
 \item $\phi(V^{G_0}) \subset V^{G_1}$
-
 \item $\phi(E^{G_0}) \subset E^{G_1}$
-
 \item $\phi \compose \pi^{G_0}_i = \pi^{G_1}_i \compose \phi$ for $i \in {0, 1}$
-
 \end{enumerate}
 
 A \define{labeled graph morphism}{}, \map{\phi}{lG_0}{lG_1}, between a pair of labeled
@@ -237,25 +230,32 @@ graphs, $lG_0(V^{lG_0}, E^{lG_0}, L^{lG_0}_V, L^{lG_0}_E, \pi^{lG_0}_0, \pi^{lG_
 l^{lG_0}_V, l^{lG_0}_V)$ and $lG_1(V^{lG_1}, E^{lG_1}, L^{lG_1}_V, L^{lG_1}_E,
 \pi^{lG_1}_0, \pi^{lG_1}_1, l^{lG_1}_V, l^{lG_1}_V)$, is a graph morphism between the
 underlying graphs, $G_0$ and $G_1$ for which
-
 \begin{enumerate}
-
 \item $\phi(L^{lG_0}_V) \subset L^{lG_1}_V$
-
 \item $\phi(L^{lG_0}_E) \subset L^{lG_1}_E$
-
 \item $\phi \compose l^{lG_0}_V = l^{lG_1}_V \compose \phi$
-
 \item $\phi \compose l^{lG_0}_E = l^{lG_1}_E \compose \phi$
-
 \end{enumerate}
-
 \end{definition}
 
 \begin{definition}
 A \define{graph embedding}{} is a graph morphism, \map{\phi}{G_0}{G_1}, respectively, a
 labelled graph morphism, \map{\phi}{lG_0}{lG_1}, which is, categorically, a monomorphism.
 \end{definition}
+
+\begin{lemma}
+Given a graph, $G(V, E, \pi_0, \pi_1)$, there exists a \define{dual graph}{},
+$\tilde{G}(\tilde{V}, \tilde{E}, \tilde{\pi}_0, \tilde{\pi}_1)$, unique up to graph 
+isomorphism, for which
+\begin{enumerate}
+\item $\tilde{V} = V$,
+\item $\tilde{E} = \set{(v, u) \suchThat (u, v) \in E}$
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+\TODO{PROVE THIS!}
+\end{proof}
 
 Our next goal is to provide a definition of $1$-dimensional (time) ``$1$-paths''.
 Intuitively a (directed) ``$1$-path'' \emph{in} a graph is an embedding of a ``totally
@@ -267,10 +267,8 @@ A \define{(directed) 1-path}{}, $P(V, E, \pi_0, \pi_1)$, is a graph for which:
 \begin{enumerate}
 \item \define{Anti-symmetry:}{} for any pair of vertices, $x, y \in V$, if $(x,y) \in E$ and
 $(y,x) \in E$ then $x = y$.
-
 \item \define{Transitivity:}{} for any triple of verticies, $x, y, z \in V$, 
 if $(x,y) \in E$ and $(y,z) \in E$ then $(x,z) \in E$.
-
 \item \define{Total order:}{} for any pair of vertices, $x, y \in V$, if $x \neq y$ then
 either $(x,y) \in E$ or $(y,x) \in E$ but not both.
 \end{enumerate}
@@ -286,7 +284,8 @@ For a path, $P(V, E, \pi_0, \pi_1)$, a vertex, $v \in V$, is \define{maximal}{} 
 \define{final}{} (respectively \define{minimal}{} or \define{initial}{}) if for every
 vertex, $x \in V$, there exists an edge $(x,v) \in E$ ($(v, x) \in E$).
 
-A vertex is \define{internal}{} if it is neither initial or final.
+A vertex is \define{internal}{} if it is neither initial or final. A vertex is on the  
+\define{boundary}{} if it is either initial or final.
 
 A \define{$1$-interval}{} is a $1$-path which has both maximal and minimal vertices. Given 
 verticies, $x, y \in V$ which are minimal and maximal (respectively), we often denote the 
@@ -334,7 +333,68 @@ E^{P_1}$ is covered by an edge $e^{P_0} \in E^{P_0}$.
 
 Having defined what a $1$-path is, we now need to explore the collection of $1$-paths.
 
+\begin{theorem}\label{path:addFinal}
+Given a path, $P(V, E, \pi_0, \pi_1)$, there exists a path, $P^+(V^+, E^+, \pi^+_0,
+\pi^+_1)$,  unique up to graph isomorphism, for which
+\begin{enumerate}
+\item there exist a graph embedding, \map{\phi^+}{P}{P^+}
+\item $V^+ = \phi^+(V) \union \set{V}$
+\item for each $v \in V$ there exists an edge, $(\phi^+(v), \set{V}) \in E^+$.
+\end{enumerate}
+\end{theorem}
 
+\begin{proof}
+\TODO{PROVE THIS!}
+\end{proof}
+
+\begin{corollary}\label{path:addInitial}
+Given a path, $P(V, E, \pi_0, \pi_1)$, there exists a path, $P^-(V^-, E^-, \pi^-_0,
+\pi^-_1)$,  unique up to graph isomorphism, for which
+\begin{enumerate}
+\item there exist a graph embedding, \map{\phi^-}{P}{P^-}
+\item $V^- = \phi^-(V) \union \set{V}$
+\item for each $v \in V$ there exists an edge, $(\set{V}, \phi^-(v)) \in E^-$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+Apply Theorem, \ref{path:addFinal}, to the dual path of $P$.
+\end{proof}
+
+\begin{corollary}
+Given a path, $P(V, E, \pi_0, \pi_1)$, there exists a path, $P^{+-}(V^{+-}, E^{+-},
+\pi^{+-}_0, \pi^{+-}_1)$,  unique up to graph isomorphism, for which
+\begin{enumerate}
+\item there exist a graph embedding, \map{\phi^{+-}}{P}{P^{+-}}
+\item $V^{+-} = \phi^{+-}(V) \union \set{V} \union \set{V^+}$
+\item for each $v \in V$ there exists an edge, $(\phi^{+-}(v), \set{V}) \in E^{+-}$,
+\item for each $v \in V$ there exists an edge, $(\set{V^+}, \phi^{+-}(v)) \in E^{+-}$,
+\item $(\set{V^+}, \set{V}) \in E^{+-}$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+Apply Theorem, \ref{path:addFinal}, to obtain the path $P^+(V^+, E^+, \pi^+_0, \pi^+_1)$
+which has a unique final vertex, and then Corollary, \ref{path:addInitial}, to obtain
+$P^{+-}$.
+\end{proof}
+
+\begin{theorem}
+Given a pair of paths, $P^-(V^-, E^-, \pi^-_0, \pi^-_0)$ and $P^+(V^+, E^+, \pi^+_0,
+\pi^+_1)$, for which $P^-$ has a final vertex, $p^-$ and $P^+$ has an initial vertex,
+$p^+$, there exists a path $P(V, E, \pi_0, \pi_1)$, unique up to graph isomorphism, for
+which
+\begin{enumerate}
+\item there exists a graph embeddings, \map{\phi^-}{P^-}{P} and \map{\phi^+}{P^+}{P},
+\item $\phi^-(p^-) = \phi^+(p^+)$,
+\item for each $v^+ \in V^+$ and $v^+ \in V^+$ there exists an edge $(\phi^-(v^-), 
+\phi^+(v^+)) \in E$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\TODO{PROVE THIS!}
+\end{proof}
 
 For at most countable graphs, defining ``linearity'' is relatively easily done by
 ``following'' single edges corresponding to the ``successor'' or ``next'' operation. For
