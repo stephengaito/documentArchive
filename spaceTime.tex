@@ -2,6 +2,8 @@
 
 \chapter{Space-time: directed simplicies, refinements and space-time paths}
 
+\section{Introduction}
+
 In the previous section we explored the structures required to provide a \emph{time} focused 
 foundations of computation. In this section we expand these time focused structures into 
 their corresponding fully space-time structures.
@@ -21,3 +23,1591 @@ the ubiquitously used concept of ``matrix'' outside of explicitly ``Euclidean ve
 spaces''. Essentially a groupoid (that is a un-directed 1-category) \emph{is} a sparse
 matrix. This analogy is critical when we want to study higher dimensional analogues of
 ``Markov Matrices'' and their corresponding ``Markov Chains''.
+
+\TODO{word-smith these introductions together}
+
+We are interested in \ndDeltaC{a}{b}, \sNdDeltaC{a}{b}, \DeltaC{a}{b}, \sDeltaC{a}{b}.
+
+In this chapter, our aim is to define the discrete structures we will use to \emph{model}
+our differential topologies.  These are simplicial \emph{structures} which are related to
+the simplicial sets used by algebraic topologists.  However we \emph{explicitly} do not
+limit ourselves to either finite dimensions \emph{or} to, potentially, assuming that these
+structures are \emph{sets}.  With wild abandon, we will allow simplicial structures which
+\emph{might} entail Russell's paradox.  Instead we will, essentially, use techniques from
+Algebraic Set Theory (AST), to delineate those appropriately ``tame'' simplicial
+sub-structures which prohibit Russell's paradox.  \TODO{DO we really need/mean this?
+Doesn't category theory (see nLab discussion of set theory and ETCS) essentially
+automatically tame Russell's paradox? Or does it just push his paradox into a slightly
+more complex environment?  I suspect we could state everything as ``presheaves'' not into
+\setC{} but into some larger category of classes/collections which \emph{should} be a
+topos but I am unsure how that would change the overall theoretical tools that I want to
+use. SO we will really only work with small categories and leave the full YACT theory for
+later generations to finalize in all of its glory.}
+
+\section{The small categories of \texorpdfstring{$\kappa$}{kappa}-Simplexes} 
+
+In a Categorical setting, such as we are using, the most appropriate way to define
+simplicial sets is via the Topos of functor presheaves, \opFuncCat{\DeltaC{}{}}{\setC{}}
+(alternatively \altOpFuncCat{\DeltaC{}{}}{\setC{}}), see for example \cite[Chapter
+1]{goerssJardin1999SimplicialHomotopyTh}, \cite[Section VII.5]{maclane1971a},
+\cite[section 2.1]{arxiv2005math0410412v2}, \cite[Section
+I.2]{may1967simplicialObjectsInAlgTopo}, \cite[Chapter 2]{gabrielZisman1967homotopyTh}
+\TODO{add the numerous papers}.
+
+We will actually base our transfinite generalization on Dominic Verity's exposition,
+\cite[section 2.1]{arxiv2005math0410412v2}. The essential difference between the
+expositions of Goerss and Jardin's versus that of Verity is that Goerss and Jardin's
+exposition uses a more purely Categorical notation (which avoids the use of internal set
+theoretic notation), while Verity's exposition uses a more classical notation by
+essentially working in the internal set theory of \setC{}.  For those who are not familiar
+with simplicial topology, Friedman's expository account of simplicial sets,
+\cite{arxiv2008math0809.4221v1}, provides a highly recommended introduction to this theory
+with a good number of visual explanations of what is going on both combinatorially as well
+as geometrically.
+
+It is significant that Goerss and Jardin's exposition makes frequent, mainly illustrative,
+use of the adjunction between the categories of Simplicial Sets, \simpC{}, and Topology,
+\topologyC{} (and in particular the topological space of ``Euclidean space'', $\Reals^{n}$
+for some $n$).  At this point in our exposition (construction?) we have not defined
+``Euclidean space''.  From our point of view, Euclidean spaces are particular types of
+approximation structures in the category of Simplicity Sets, \simpC{}.  This is
+\emph{because} we are primarily interested in how space-time is ``constructed'' for the
+experience of a beastie, and do not assume its existence\footnote{We will however make use
+of Euclidean spaces when we come to prove the \emph{existence} of sufficiently complex
+simplicial sets}.
+
+As stated in the introduction we are actually interested in including, at least, countably
+infinite dimensional simplicies. To do this we need to generalize the usual definitions of
+simplicial sets to that of \emph{transfinite} simplicial sets.  We do this by essentially
+simply re-interpreting Dominc Verity's definition of \emph{finite} dimensional simplicial
+sets in a transfinite setting.  Essentially all of the additional work is done by
+generalizing the simplicial face and degeneracy maps to include these maps to and from
+limit ordinals as well as ``just'' finite ordinals.
+
+\section{Ordinals}
+
+\begin{definition}
+A pograph, \gC{}, is \define{totally ordered} if there is exactly one morphism between any
+two objects. If \gC{} is a pograph, then any initial or terminal objects it might have are
+unique. An initial object of \gC{} is the \define{least element} of \gC{}. A terminal
+object of \gC{} is the \define{greatest element} of \gC{}.  A totally ordered graph,
+\gC{}, is \define{well-ordered} if every non-empty full subgraph of \gC{}, has a least
+element.  Given a totally-ordered graph, \gC{}, and an object $a \in \objects{\gC{}}$, the
+\define{section}, $\gC{}_a$, is the full subgraph of \gC{}, who's objects are defined by
+$\gC{}_a = \set{x \in \objects{\gC{}} \suchThat x \leq a \AND x \neq a}$.
+\end{definition}
+
+\TODO{We should probably be careful with our definition of totally ordered here.  We might
+define totally ordered to be a pograph for which any \emph{distinct unordered} pair of
+objects has a morphism.  If we drop the distinctness, then we essentially get a pocat. 
+The critical distinction here is which types of graph maps are "natural"... if we disallow
+morphisms between the same object, then we force all graph maps to be \emph{strict}, if we
+allow morphisms between the same object, then we allow non-strict graph maps.  Which
+definition do we really want?}
+
+Category theory is all about relationships, in the form of morphisms, between objects.  In
+categorical \emph{theory}, the objects themselves have no explicit structure other than
+that detectable from the morphisms between the objects.  In \emph{applications} of
+category theory, the objects of a category often have considerable explicit structure, for
+example, the category of Groups, or the category of Topological Spaces.  One of the
+recurring themes in our work is the interplay between relationships \emph{inside}
+structured objects and the relationships \emph{between} these structured objects.  Our
+first primary example of this is in our definition of ordinal graphs in the graph of all
+totally ordered graphs.
+\begin{definition}
+The \define{graph of totally ordered graphs}, \totalOrderedC{}, is defined by
+\begin{description}
+\item[objects] are totally ordered graphs
+\item[morphisms] are graph maps between totally ordered graphs.
+\end{description}
+\end{definition}
+Note that graph maps between totally ordered graphs are the graphical form of the order
+preserving maps of (set based) posets. We will study them in depth in the next section.
+
+Before we can define the ordinals, we need to understand co-limits of objects in
+\totalOrderedC{}.  This would be simpler if we already had the whole structure of Category
+and Topos theory, something we won't have until much later in this mathematical narrative.
+ However the actual construction is fairly simple and moreover adds to our understanding
+of Category theory. The co-limits in \graphC{} are simply the ``disjoint union'' of an
+appropriate indexing set of the component graphs.  Unfortunately, in \totalOrderedC{},
+there is \emph{exactly} one morphism between any pair of objects, so the simple ``disjoint
+union'' construction is insufficient for our needs.  Instead we can define ordinals if we
+understood the successor construction, the order relation between ordinals, and the union
+(directed co-limit) of predecessor ordinals.  \TODO{Point out that this is really the
+definition of the von Neumann ordinals in a graphical context.}
+
+\begin{definition}
+Consider a totally ordered graph, \tC{}. The \define{successor graph}, \successor{\tC{}},
+of \tC{}, is
+\begin{description}
+\item[objects] the objects of \tC{}, \objects{\tC{}}, together with \tC{},
+\item[morphisms] the morphisms of \tC{} between any two objects of \tC{} , together with
+the morphism $a \leq \tC{}$  for each object, $a \in \objects{\tC{}}$.
+\end{description}
+\end{definition}
+By construction, \successor{\tC{}} is a totally ordered graph.
+
+\begin{definition}
+Consider a pair of graphs, \gC{} and \mathCategory{G'}.  Then \define{\gC{} is a
+predecessor of \mathCategory{G'}}, denoted $\gC \leq \mathCategory{G'}$ iff \gC{} is a
+full subgraph of \mathCategory{G'}.
+\end{definition}
+Again, by construction, we know that $\tC{} \leq \successor{\tC}$.  More importantly since
+a full subgraph of a full subgraph is a full subgraph (via the composition of graph maps),
+we know that $\tC{} \leq \successor{\successor{\cdots \successor{\tC{}}}}$.
+
+\begin{definition}
+Consider a totally ordered collection of totally ordered graphs. Then, (not surprisingly)
+it is a totally ordered graph. \TODO{Is this not just a tautology? FIX THIS!  What we
+really want to do here is to give an explicit construction of the directed co-limit.}
+\end{definition}
+
+\begin{definition}
+The \define{graph of countable ordinals}, \omegaC{}, is defined by
+\begin{description}
+\item[objects] the totally ordered graphs, \successor{\successor{\cdots
+\successor{\zeroC{}}}}, \item[morphisms] $a \leq b$ iff $a$ is a full subgraph of $b$ for
+$a, b \in \objects{\omegaC{}}$.
+\end{description}
+\TODO{We really have not given a good description of the collection of objects (how many
+s's are allowed?).}
+\end{definition}
+We can picture \omegaC{} as the following totally ordered graph:
+\begin{cTikzPicture}
+\coordinate (v0) at (0,0);
+\coordinate (v1) at (2,0);
+\coordinate (v2) at (4,0);
+\coordinate (v-n-1) at (6,0);
+\coordinate (v-n) at (8,0);
+%
+\node[above] at (v0)    {\zeroC{}};
+\node[above] at (v1)    {\successor{\zeroC{}}};
+\node[above] at (v2)    {\successor{\successor{\zeroC{}}}};
+\node[above] at (v-n-1) {\successor{\successor{\cdots\successor{\zeroC{}}}}};
+%\node[above] at (v-n)   {};
+%
+\fill (v0) circle[radius=1pt];
+\fill (v1) circle[radius=1pt];
+\fill (v2) circle[radius=1pt];
+\fill (v-n-1) circle[radius=1pt];
+%\fill (v-n) circle[radius=1pt];
+%
+\begin{scope}[->,shorten <=4pt,shorten >=4pt]
+\path (v0) edge (v1);
+\path (v1) edge (v2);
+\path (v2) edge[dotted] (v-n-1);
+\path (v-n-1) edge[dotted] (v-n);
+\end{scope}
+\end{cTikzPicture}
+
+The following is a highly impredicative definition of the ordinals.  We could easily use
+the ideas in \cite{joyalMoerdijk1995algSetTh} or even Martin-L\"{o}f's type theory, see
+for example \cite{dybjer1991inductiveSets}, to provide a fully predicative definition for
+at least the countable ordinals that we require.
+\begin{definition}
+(\cite{cameron1999a})  An \define{ordinal} is a well-ordered graph, \gC{}, for which
+$\gC{}_a = a$ for all $a \in \objects{\gC{}}$.  \TODO{We need a better symbol for section
+which we really should name tosection (total ordered section) so that we don't conflict
+with the categorical notion of a section.} In other words each object in an ordinal,
+\gC{}, is the totally ordered graph of all of its predecessors. \define{Zero}, \zeroC{},
+which is defined to be the graph with one object, is the smallest ordinal.  An ordinal
+which is the union (directed co-limit in \totalOrderedC{}) of all of its predecessors
+$\lambda = \underset{\alpha < \lambda}{\union} \alpha$ is a \define{limit ordinal}. A
+non-zero ordinal that is not a limit ordinal is a \define{successor ordinal}. A
+\define{cardinal} is an ordinal $\alpha$ with the property that there is no bijective
+graph map between $\alpha$ and any section of $\alpha$. \TODO{Need to define bijective
+graph maps! Do we really need the definition of cardinal?!}
+\end{definition}
+
+\begin{definition}
+For any pair of ordinals, $\alpha$ and $\beta$, \define{ordinal addition}, $\alpha +
+\beta$, is recursively defined as follows:
+\begin{enumerate}
+\item $\alpha + \zeroC{} = \alpha$,
+\item if $\beta$ is a successor ordinal, then $\alpha + \successor{\beta} =
+\successor{\alpha + \beta}$,
+\item if $\beta$ is a limit ordinal, then $\alpha + \beta = \underset{\eta <
+\beta}{\union} \; \alpha + \eta$.
+\end{enumerate}
+\end{definition}
+It is important to realize that ordinal addition is not commutative, in particular, note
+that $n + \omegaC{} = \omegaC{}$ but that $\omegaC{} + n \neq \omegaC{}$. \TODO{We really
+need to show that $\underset{\eta < \omegaC}{\union} \; n + \eta$ is isomorphic to
+\omegaC{}. }
+
+\TODO{ We need to show all of the following: ( \cite[Chapter 2: Ordinal
+Numbers]{jech2003setTheory})
+\begin{enumerate}
+\item Any full subgraph of a well-ordered graph is well-ordered.
+\item Any well-ordered graph, $X$, is isomorphic to a unique ordinal, $\ordinal{X}$.
+\item For any pair of ordinals, $\alpha < \beta$ if and only if $\alpha \in \objects{\beta}$.
+\item For any ordinal, $\objects{\alpha} = \set{ \beta \suchThat \beta < \alpha}$.
+\item The successor of an ordinal, $\alpha$, is $\successor{\alpha} = \alpha + 1 = \alpha
+\union \set{ \alpha }$. \TODO{This notation needs explaining or changing!}
+\item If an ordinal $\alpha = \successor{\beta} = \beta + 1$ for some ordinal $\beta$ then
+$\alpha$ is a \define{successor ordinal}.
+\item If an ordinal $\lambda$ is not a successor ordinal for any $\beta < \lambda$, then
+$\lambda$ is a \define{limit ordinal}.   (Note that it is convenient for us to define $0$
+as a limit ordinal).
+\item For any pair of ordinals, $\alpha$ and $\beta$, \define{ordinal addition} is defined 
+as follows:
+\begin{enumerate}
+\item $\alpha + 0 = \alpha$
+\item $\alpha + \successor{\beta} = \successor{\alpha + \beta}$
+\item if $\beta$ is a limit ordinal, then $\alpha + \beta = \union_{\eta < \beta} \alpha +
+\eta$
+\TODO{use Jech's limit definitions -- actually we need to define our own graphical versions!}
+\end{enumerate}
+\end{enumerate}
+}
+
+Throughout this section we work with ordinals inside the Topos, \setC{}.  We note that
+every surjection in \setC{} is a split epimorphism. This is equivalent to the internal set
+theory of \setC{} allowing the Axiom of Choice, which similarly is equivalent to the
+ordinals begin well ordered.  Since we are working in \setC{}, we may phrase our arguments
+using classical set theory.
+
+\begin{definition} (\cite[Definition 1, Section 2.1]{arxiv2005math0410412v2})
+In \setC{}, fix $\kappa$ as a fixed \emph{small} cardinal, such as $\omega$.  
+The \define{Category of symmetric $\kappa$-simplexes}, denoted \sDeltaC{}{}, is 
+\begin{enumerate}
+\item \textbf{objects} the set of ordinals, $0 \leq \alpha \leq \kappa$, (in \setC{})
+considered as well-ordered sets, $\woSet{ \alpha } = \set{ 0 < 1 < \cdots < \alpha} =
+s(\alpha)$,
+\item \textbf{morphisms} the set of maps $\gamma : \woSet{ \alpha } \mapsTo \woSet{ \beta
+}$ (in \setC{}), from the well-ordered set \woSet{\alpha} to the well-ordered set
+\woSet{\beta}.
+\end{enumerate}
+The \define{Category of non-degenerate symmetric $\kappa$-simplexes}, denoted
+\sNdDeltaC{}{}, is the subcategory of \sDeltaC{}{} consisting of all objects of
+\sDeltaC{}{} together with only the monomorphisms of \sDeltaC{}{}.
+
+The \define{Category of $\kappa$-simplexes}, denoted \DeltaC{}{}, is the subcategory of
+\sDeltaC{}{} consisting of all of the objects of \sDeltaC{}{} together with only the order
+preserving morphisms of \sDeltaC{}{}.
+
+The \define{Category of non-degenerate $\kappa$-simplexes}, denoted \ndDeltaC{}{}, is the
+subcategory of \DeltaC{}{} consisting of all of the objects of \DeltaC{}{} together with
+only the \emph{strictly} order preserving morphisms of \DeltaC{}{}.
+\end{definition}
+
+For finite $n$, the graph \woSet{n} can be depicted as:
+\begin{cTikzPicture}
+\coordinate (v0) at (0,0);
+\coordinate (v1) at (1.5,0);
+\coordinate (v2) at (3,0);
+\coordinate (v-n-1) at (4.5,0);
+\coordinate (v-n) at (6,0);
+%
+\node[above] at (v0)    {$0$};
+\node[above] at (v1)    {$1$};
+\node[above] at (v2)    {$2$};
+\node[above] at (v-n-1) {$n-1$};
+\node[above] at (v-n)   {$n$};
+%
+\fill (v0) circle[radius=1pt];
+\fill (v1) circle[radius=1pt];
+\fill (v2) circle[radius=1pt];
+\fill (v-n-1) circle[radius=1pt];
+\fill (v-n) circle[radius=1pt];
+%
+\begin{scope}[->,shorten <=4pt,shorten >=4pt]
+\path (v0) edge (v1);
+\path (v1) edge (v2);
+\path (v2) edge[dotted] (v-n-1);
+\path (v-n-1) edge (v-n);
+\end{scope}
+\end{cTikzPicture}
+
+
+The first and most important task is to understand the structure and compositional
+decomposition of the hom sets of \sDeltaC{}{}, \DeltaC{}{} and \ndDeltaC{}{}.  We begin by
+essentially following \cite[Notation 3 and Observations 7 and 8]{arxiv2005math0410412v2}. 
+We note that, the usual simplicial face maps are not able to describe face maps which
+``cross'' limit ordinals.  Instead of being able to define all face maps in terms of
+``dropping'' a single vertex, we must work by ``dropping'' sets of verticies.
+
+Before we begin, consider an orientation preserving map $m : \woSet{\alpha} \mapsTo
+\woSet{\beta}$ then:
+\begin{enumerate}
+\item Let \image{m} denote the subset of \woSet{\beta} given by:
+\begin{equation*}
+	\image{m} = \set{ \gamma \in \woSet{\beta} \suchThat \thereExists \delta \in \woSet{\alpha} \forWhich m(\delta) = \gamma }
+\end{equation*}
+\item Let \cImage{m} denote the subset of \woSet{\beta} given by:
+\begin{equation*}
+	\cImage{m} = \woSet{\beta} \withOut \image{m}
+\end{equation*}
+Note that \cImage{m} is the subset of \woSet{\beta} which the morphism $m$ has ``dropped''.
+\item Let \kernel{m} denote the subset of \woSet{\alpha} given by:
+\begin{equation*}
+	\kernel{m} = \set{ s(\gamma) \in \woSet{\alpha} \suchThat m(\gamma) = m(s(\gamma)) }
+\end{equation*}
+\end{enumerate}
+
+\subsection{Properties of maps in \texorpdfstring{\sNdDeltaC{}{}}{sNdDelta} and
+\texorpdfstring{\sDeltaC{}{}}{ndDelta}}
+
+The following lemma is almost certainly in the category theory folklore\footnote{If I
+could read French Mathematics, it is almost certainly to be found in SGA4
+\cite{artinGrothendieckVerdierBourbakiDeligneSaintDonat1963SGA41},
+\cite{artinGrothendieckVerdierDeligneSaintDonat1963SGA42} or
+\cite{artinGrothendieckVerdierDeligneSaintDonat1963SGA43}, since I believe I have seen
+references to Grothendieck making use of the category of symmetric simplexes,
+\sDeltaC{}{}.}. The idea for the definitions of symmetric and non-degenerate symmetric
+simplexes comes from the PhD thesis of John Shrimpton, \cite[Diagram on page
+29]{shrimpton1989graphsSymmetryCatMethods}, elements of which were later published in
+\cite{brownMorrisShrimptonWensley2008graphCat}. The importance of these categories of
+symmetric and non-degenerate symmetric simplexes, other than possible references to their
+use by Grothendieck, is that the ``standard'' Algebraic Topology definitions of
+orientations of simplicial structures is wholly inadequate for our needs.
+
+\begin{lemma} (Combing lemma)
+Every morphism, $m : \woSet{\alpha} \mapsTo \woSet{\beta}$, in \sDeltaC{}{} can be
+factored into an automorphism, $n$ of \woSet{\alpha} followed by an order preserving map,
+$\hat{m} : \woSet{\alpha} \mapsTo \woSet{\beta}$ (i.e. a morphism of \DeltaC{}{}).
+\end{lemma}
+\begin{proof} 
+Essentially we are combing a collection of threads one per element of \woSet{\alpha}.  As
+such we can hold either end fixed and ``comb'' the threads straight. Since the kernel of
+the morphism $m$, \kernel{m}, need not be empty it is prudent to hold the codomain
+(\woSet{\beta}) fixed and comb back to the domain.
+
+We will use (transfinite) induction on the elements of \woSet{\alpha}. The required
+automorphism will be the product of a permutation for each element of \woSet{\alpha}. 
+Since at each step of the induction, all previous ``threads'' have been ordered, each
+subsequent permutation is independent of all previous permutations, so that no cycles are
+longer than a two cycle.  This is important for the induction over any limit ordinals in
+\woSet{\alpha}. the ordered product of the permutations at each induction step.
+
+At each step, $0 \leq \gamma \leq \alpha$, we choose a permutation so that the appropriate
+product of the inverses of the collection of permutations for all $0 \leq \lambda <
+\gamma$ with the original morphism, $m$, is, when restricted to \set{\lambda \suchThat
+\lambda < \gamma} is an order preserving map. We can then choose a permutation which
+permutes $\gamma$ with the origin of the least element of $\tuple[]{m(\lambda)}_{\gamma
+\leq \lambda \leq \alpha}$ (if there are multiple origins for such least elements choose
+one).
+\end{proof}
+
+\begin{corollary}
+Every morphism, $m : \woSet{\alpha} \mapsTo \woSet{\beta}$, in \sNdDeltaC{}{} can be
+factored into an automorphism $n$ of \woSet{\alpha} followed by a \emph{strictly} order
+preserving map, $\hat{m} : \woSet{\alpha} \mapsTo \woSet{\beta}$ (i.e. a morphism of
+\ndDeltaC{}{}).
+\end{corollary}
+\begin{proof}
+Since automorphisms are by definition monomorphisms, if $\hat{m}$ were not a monomorphism,
+then the product, $m = \hat{m} \compose n$ would not be a monomorphism and hence not a
+morphism of \sNdDeltaC{}{}.
+\end{proof}
+
+\begin{corollary}
+Every morphism of either \sDeltaC{}{} or \sNdDeltaC{}{} (respectively) can be decomposed,
+in possibly many ways, as the product of an automorphism of its domain followed by either
+an order preserving or a strictly order preserving (respectively) map from its domain to
+its codomain, followed by an automorphism of its codomain.
+\end{corollary}
+
+\subsection{Properties of coface maps in \texorpdfstring{\DeltaC{}{}}{Delta} and
+\texorpdfstring{\ndDeltaC{}{}}{ndDelta}}
+
+\begin{enumerate}
+\item The injective maps in \DeltaC{}{} are referred to as \define{coface maps}.
+\item Being injective, coface maps are \emph{strictly} order preserving and hence are also
+morphisms in \ndDeltaC{}{}.  Conversely any \emph{strictly} order preserving map is
+injective.  This means that \ndDeltaC{}{} only contains the injective or coface morphisms
+of \DeltaC{}{}.
+\item Consider $\alpha \leq \beta \leq \kappa$, and $U \subset \woSet{\beta}$ for which
+$\woSet{\beta} \withOut U \isomorphic \woSet{\alpha}$. Note that $U$ and all of its
+subsets are well-ordered since they are subsets of \woSet{\beta}, and hence are all
+isomorphic to unique ordinals. We define the simplicial map $\coFace{\alpha}{\beta}{U} :
+\woSet{\alpha} \mapsTo \woSet{\beta}$ by
+	\begin{equation*}
+		\coFace{\alpha}{\beta}{U}(i) = \ordinal{\set{ j \in U \suchThat j \leq i}} + i
+	\end{equation*}
+Note that since ordinal addition in \setC{} is noncommutative, the choice of order in the
+above sum is significant.  We have chosen this order so that
+$\image{\coFace{\alpha}{\beta}{U}} = \woSet{\beta}\withOut U$ (or alternatively,
+$\cImage{\coFace{\alpha}{\beta}{U}} = U$) where the important case to check is, for
+example, $\alpha < \omega \leq \beta$ with $\omega \notin U$.  Equally importantly, we
+know that $\kernel{\coFace{\alpha}{\beta}{U}} = \emptySet{}$.
+\item\label{property:unique.coface} If $D : \woSet{\alpha} \mapsTo \woSet{\beta}$ is an
+injective order-preserving map, then $D = \coFace{\alpha}{\beta}{U}$ where $U = \cImage{D}
+= \woSet{\beta} \withOut \image{D}$ (this generalizes \cite[page
+4]{may1967simplicialObjectsInAlgTopo}).
+\item For all $\alpha \leq \gamma \leq \beta \leq \kappa, \; U \subset \woSet{\beta}, \; W
+\subset \woSet{\beta}$ and $V \subset \woSet{\gamma}$, if $\ordinal{\woSet{\beta} \withOut
+W} = \ordinal{\woSet{\gamma}}, \; \ordinal{\woSet{\gamma} \withOut V} =
+\ordinal{\woSet{\alpha}}$ and $U = \tuple[\coFace{\gamma}{\beta}{W}]{V} \union W$ then
+$\coFace{\alpha}{\beta}{U} = \coFace{\gamma}{\beta}{W} \compose
+\coFace{\alpha}{\gamma}{V}$.
+\item It is instructive to note that, for finite $n$, $\coFace{n}{s(n)}{\set{j}}$ is the
+usual coface map $D^n_j$.
+\item For each ordinal, $\alpha$ and $\beta \in \woSet{\alpha}$ the simplicial map
+$\epsilon^{\alpha}_{\beta} : \woSet{0} \mapsTo \woSet{\alpha}$ given by
+$\epsilon^{\alpha}_{\beta}(0) = \beta$ is the $\beta$-vertex map of \woSet{\alpha}.
+\end{enumerate}
+
+\subsection{Properties of codegeneracy maps in \texorpdfstring{\DeltaC{}{}}{Delta}}
+
+\begin{enumerate}
+\item The surjective maps in \DeltaC{}{} are referred to as \define{codegeneracy maps}.
+
+\item Consider $\beta \leq \alpha \leq \kappa$, and $V \subset \woSet{\alpha}$ for which
+$\woSet{\alpha} \withOut V \isomorphic \woSet{\beta}$. Note that $\woSet{\alpha}\withOut
+V$ and all of its subsets are well-ordered since they are subsets of \woSet{\alpha}, and
+hence they are all isopmorphic to unique ordinals. We define the simplicial map
+$\coDegeneracy{\alpha}{\beta}{V} : \woSet{\alpha} \mapsTo \woSet{\beta}$ by
+	\begin{equation*}
+		\coDegeneracy{\alpha}{\beta}{V}(i) = \ordinal{\set{ j \in \woSet{\alpha}\withOut V
+		\suchThat j < i}}
+	\end{equation*}
+We note that $\kernel{\coDegeneracy{\alpha}{\beta}{V}} = V$ and that
+$\image{\coDegeneracy{\alpha}{\beta}{V}} = \woSet{\beta}$.
+
+\item\label{property:unique.codegeneracy} If $S : \woSet{\alpha} \mapsTo \woSet{\beta}$ is
+a surjective order-preserving map, then $S = \coDegeneracy{\alpha}{\beta}{\kernel{S}}$
+(this generalizes \cite[page 4]{may1967simplicialObjectsInAlgTopo}).
+
+\item For all $\beta \leq \gamma \leq \alpha \leq \kappa, \; U \subset \woSet{\gamma}, \;
+W \subset \woSet{\alpha}$ and $V \subset \woSet{\alpha}$ if $\ordinal{\woSet{\alpha}
+\withOut W} = \ordinal{\woSet{\gamma}}, \; \ordinal{\woSet{\gamma} \withOut U} =
+\ordinal{\woSet{\beta}}$ and $V = \tuple[\tuple{\coDegeneracy{\alpha}{\gamma}{W}}^{-1}]{U}
+\union W$, then $\coDegeneracy{\alpha}{\beta}{V} = \coDegeneracy{\gamma}{\beta}{U}
+\compose \coDegeneracy{\alpha}{\gamma}{W}$.
+
+\item It is instructive to note that, for finite $n$, $\coDegeneracy{n}{s(n)}{\set{j}}$ is
+the usual codegeneracy map $S^n_j$.
+
+\item For each ordinal, $\alpha$ the simplicial map $\eta^{\alpha} : \woSet{\alpha}
+\mapsTo \woSet{0}$ given by $\eta^{\alpha}(\beta) = 0$ is the $\alpha$-degeneracy map of
+\woSet{\alpha}.
+\end{enumerate}
+
+\subsection{Properties of general maps in \texorpdfstring{\DeltaC{}{}}{Delta} and
+\texorpdfstring{\ndDeltaC{}{}}{ndDelta}}
+
+\begin{lemma}\label{lemma:factorization}
+Every order preserving map, $m : \woSet{\alpha} \mapsTo \woSet{\beta}$, factors into a
+unique composite $m = m^f \compose m^d$.
+\end{lemma}
+\begin{proof}
+Let $\gamma = \ordinal{\image{m}} = \ordinal{\woSet{\alpha}\withOut\kernel{m}}$ then
+$\gamma \leq \alpha$ and $\gamma \leq \beta$.  Define the map $m^d : \woSet{\alpha}
+\mapsTo \woSet{\gamma}$ by $m^d = \coDegeneracy{\alpha}{\gamma}{\kernel{m}}$.  Similarly
+define the map $m^f : \woSet{\gamma} \mapsTo \woSet{\beta}$ by $m^f =
+\coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}}$.  Then we have $m = m^f \compose
+m^d$.
+ 
+By properties \ref{property:unique.coface} and \ref{property:unique.codegeneracy} of
+respectively the coface and codegeneracy maps, these are the only maps, $m^f$ and $m^d$
+with the respectively required image, $\image{m}$, and kernel, $\kernel{m}$.  Hence this
+decomposition is unique.
+\end{proof}
+
+\begin{corollary}
+If $\alpha \leq \beta \leq \kappa$, every strictly order preserving map, $m :
+\woSet{\alpha} \mapsTo \woSet{\beta}$ is uniquely $m =
+\coFace{\alpha}{\beta}{\woSet{\beta}\withOut\image{m}}$.
+\end{corollary}
+
+In order to understand the combinatorial structure of
+\homomorphisms{\DeltaC{}{}}{\woSet{\alpha}, \woSet{\beta}}, which is the set of all order
+preserving maps between a pair of objects, \woSet{\alpha} and \woSet{\beta}, in
+\DeltaC{}{}, we need to add a bit more notation. Let \powerSet[c]{\woSet{\alpha}} denote
+the set of complements, with respect to \woSet{\alpha}, of subsets of \woSet{\alpha}. 
+Since we are working in \setC{}, we know that \powerSet[c]{\woSet{\alpha}} is trivially
+isomorphic to \powerSet{\woSet{\alpha}} since every subset in \setC{} is complemented. 
+Note that this is only true in a Boolean Topos such as \setC{}.
+
+Consider $\alpha, \beta \leq \kappa$.  We note that as sets of ordinals, \woSet{\alpha}
+and \woSet{\beta} are subsets of \woSet{\kappa}.  Let
+\kappaPullBackCoPowerSet{\alpha}{\beta} denote the pullback of $\ordinal{\cdot} :
+\powerSet[c]{\woSet{\alpha}} \mapsTo \woSet{\kappa}$ and $\ordinal{\cdot} :
+\powerSet[c]{\woSet{\beta}} \mapsTo \woSet{\kappa}$.  That is,
+\kappaPullBackCoPowerSet{\alpha}{\beta} is the unique object of \setC{} which makes the
+following diagram commute:
+\begin{cTikzPicture}
+\matrix (m) [comDiagM]
+{ \kappaPullBackCoPowerSet{\alpha}{\beta} & \powerSet[c]{\woSet{\alpha}} \\
+  \powerSet[c]{\woSet{\beta}}             & \woSet{\kappa} \\ };
+\path[comDiagP]
+(m-1-1) edge node[above] {$ \pi_{\alpha} $} (m-1-2)
+(m-1-1) edge node[left]      {$ \pi_{\beta} $}   (m-2-1)
+(m-1-2) edge node[right]   { \ordinal{\cdot} } (m-2-2)
+(m-2-1) edge node[below] { \ordinal{\cdot} } (m-2-2);
+\end{cTikzPicture}
+Alternatively in the internal set theory of \setC{} we have
+$$ \kappaPullBackCoPowerSet{\alpha}{\beta} = \set{ (V, U) \in \powerSet{\alpha} \times
+\powerSet{\beta} \suchThat \ordinal{\woSet{\alpha} \withOut V} = \ordinal{\woSet{\beta}
+\withOut U}} $$
+
+\begin{lemma}\label{lemma:combStructDeltaHom}
+$$\homomorphisms{\DeltaC{}{}}{\woSet{\alpha}, \woSet{\beta}} \isomorphic_{\setC}
+\kappaPullBackCoPowerSet{\alpha}{\beta}$$
+\end{lemma}\begin{proof}
+The proof of lemma \ref{lemma:factorization} provides the forward mapping, in \setC{},
+from \homomorphisms{\DeltaC{}{}}{\woSet{\alpha}, \woSet{\beta}} to
+\kappaPullBackCoPowerSet{\alpha}{\beta}.
+
+Conversely, for each pair of ordinals, $\alpha$ and $\beta$, and pairs of sets, $U \subset
+\woSet{\beta}$ and $V \subset \woSet{\alpha}$ for which $\ordinal{\woSet{\beta}\withOut U}
+= \ordinal{\woSet{\alpha}\withOut V} = \gamma$ we have a unique order preserving map $m :
+\woSet{\alpha} \mapsTo \woSet{\beta}$ defined by $m = d^{\gamma,\beta}_U \compose
+s^{\alpha,\gamma}_V$ for which $\image{m} = \woSet{\beta}\withOut U$ and $\kernel{m} = V$.
+\end{proof}
+
+\begin{corollary}
+$$\homomorphisms{\ndDeltaC{}{}}{\woSet{\alpha}, \woSet{\beta}} \isomorphic_{\setC} 
+\tuple[\pi^{-1}_{\alpha}]{\emptySet} \isomorphic_{\setC}
+\ndKappaPullBackCoPowerSet{\alpha}{\beta}$$
+\end{corollary}
+\begin{proof}
+Since any morphism, $m \in \homomorphisms{\ndDeltaC{}{}}{\woSet{\alpha}, \woSet{\beta}}$,
+is strictly order preserving and hence injective, we know that $\kernel{m} = \emptySet$. 
+Tracing through the proof of lemma \ref{lemma:combStructDeltaHom} as well as the commuting
+diagram in the definition of \kappaPullBackCoPowerSet{\alpha}{\beta} with $\kernel{m} = V
+= \emptySet \subset \woSet{\alpha}$ provides that required isomorphisms in \setC{}.
+\end{proof}
+
+If we are given a map which is the composition of a coface followed by a codegeneracy, that 
+is the ``wrong way around'', what is its unique coface/codegeneracy factorization given by 
+lemma \ref{lemma:factorization}?  Consider $\alpha, \beta, \gamma \leq \kappa, \; U \subset 
+\woSet{\gamma}$ and $V \subset \woSet{\gamma}$ for which $\alpha \leq \gamma, \; 
+\ordinal{\woSet{\alpha}} = \ordinal{\woSet{\gamma}\withOut U}$ and $\beta \leq \gamma, \; 
+\ordinal{\woSet{\beta}} = \ordinal{\woSet{\gamma}\withOut V}$, then the morphism 
+$$m^{\alpha,\gamma,\beta}_{U,U} = \coDegeneracy{\gamma}{\beta}{V} \compose 
+\coFace{\alpha}{\gamma}{U} : \woSet{\alpha} \mapsTo \woSet{\beta}$$ is well defined. 
+
+Let $\tilde{U} = \image{m^{\alpha,\gamma,\beta}_{V,U}}$, then:
+\begin{align*}
+\tilde{U} & = \image{m^{\alpha,\gamma,\beta}_{V,U}} \\
+  & = \image{ \coDegeneracy{\gamma}{\beta}{V} \compose \coFace{\alpha}{\gamma}{U}} \\
+  & = \tuple[\coDegeneracy{\gamma}{\beta}{V}]{\image{\coFace{\alpha}{\gamma}{U}}} \\
+  & = \tuple[\coDegeneracy{\gamma}{\beta}{V}]{\woSet{\gamma} \withOut U}
+\end{align*}
+
+Similarly, let $\tilde{V} = \kernel{m^{\alpha,\gamma,\beta}_{V,U}}$, then
+\begin{align*}
+\tilde{V} & = \kernel{m^{\alpha,\gamma,\beta}_{V,U}} \\
+  & = \kernel{ \coDegeneracy{\gamma}{\beta}{V} \compose \coFace{\alpha}{\gamma}{U}} \\
+  & = 
+  \tuple[\tuple{\coFace{\alpha}{\gamma}{U}}^{-1}]{\kernel{\coDegeneracy{\gamma}{\beta}{V}}} 
+  \\
+  & = \tuple[\tuple{\coFace{\alpha}{\gamma}{U}}^{-1}]{V}
+\end{align*}
+
+Finally let, $\tilde{\gamma} = \ordinal{\image{m^{\alpha,\gamma,\beta}_{V,U}}} = 
+\ordinal{\woSet{\alpha}\withOut \kernel{m^{\alpha,\gamma,\beta}_{V,U}}}$, then
+\begin{equation*}
+\coDegeneracy{\gamma}{\beta}{V} \compose \coFace{\alpha}{\gamma}{U} = 
+\coFace{\tilde{\gamma}}{\beta}{\tilde{U}} \compose 
+\coDegeneracy{\alpha}{\tilde{\gamma}}{\tilde{V}}
+\end{equation*}
+
+Consider a morphism, $m : \woSet{\alpha} \mapsTo \woSet{\beta}$, of \DeltaC{}{}.
+\begin{enumerate}
+\item If $\beta < \alpha \leq \kappa$ then \kernel{m} is non empty.  This means that there 
+are no injective order preserving maps from \woSet{\alpha} to \woSet{\beta}, and hence 
+\homomorphisms{\ndDeltaC{}{}}{\woSet{\alpha}, \woSet{\beta}} is empty.
+%
+\item If $\alpha = \beta$ then $m = \identity{\woSet{\alpha}}$ is the only \emph{strictly} 
+order preserving morphism from \woSet{\alpha} to itself, and hence 
+$\homomorphisms{\ndDeltaC{}{}}{\woSet{\alpha},\woSet{\alpha}} = 
+\set{\identity{\woSet{\alpha}}}$
+%
+\item If $\alpha < \beta \leq \kappa$ then \cImage{m} is non empty and hence there are no 
+surjective order preserving maps from \woSet{\alpha} to \woSet{\beta}.
+\end{enumerate}
+
+\subsection{Idempotents of \ndDeltaC{}{}, \DeltaC{}{}, \sDeltaC{}{}}
+
+Following \cite[Chapter 5]{reyesReyesZolfaghari2004presheaves} we are interested in the 
+generic figures of each of \ndDeltaC{}{}, \DeltaC{}{} and \sDeltaC{}{}.  These generic 
+figures are essentially defined by the idempotents of each category. \TODO{The only 
+idempotents of \ndDeltaC{}{} are the identity morphisms of each \woSet{\alpha}.  The 
+idempotents of \DeltaC{}{} are the different ways that simplexes of higher dimension can be 
+(singularly) embedded in simplexes of lower dimension, while those of \sDeltaC{}{} are the 
+symmetrization of the idempotents of \DeltaC{}{}. (See 
+\cite[page90]{reyesReyesZolfaghari2004presheaves}).  For both \DeltaC{}{} and \sDeltaC{}{}, 
+cannonical inclusion of the original category in its respective Cauchy completion is full 
+and faithful and essentially surjective by arguments similar to that given in the discussion 
+to \cite[Propostion 5.2.1]{reyesReyesZolfaghari2004presheaves} and just before \cite[Remark 
+5.2.5]{reyesReyesZolfaghari2004presheaves}.  This means that both categories and their 
+respective Cauchy completions are equivalent as categories.}
+
+\TODO{Introduce and define the Cauchy completion of a small category using ``splitting'' of 
+idempotents as discussed in \cite[Section 5.2]{reyesReyesZolfaghari2004presheaves}.}
+
+\section{The graph of automorphisms of \texorpdfstring{$\Delta$}{Delta}}
+
+Our aim in this section is to follow the work of John Shrimpton (\cite[Chapter 
+5]{shrimpton1989graphsSymmetryCatMethods}, \cite[Sections 3, 
+4]{brownMorrisShrimptonWensley2008graphCat}, see also \cite[Section 2]{brown1994symmetry}) 
+to define the group-graph of automorphisms a graph, in our case the group-graph of 
+automorphisms of \DeltaC{}{}.
+
+\section{The graph of ordinals}
+
+The definition of the collection of test-$1$-paths is fairly straight forward. Fix the
+first (non-zero) limit ordinal $\omega$. For any $0 \leq n \leq \omega$ let \woSet{n}
+denote the totally ordered graph defined as
+\begin{description}
+\item[objects] there is an object for each $0 \leq i < 1+n$,
+\item[morphisms] for each object $0 \leq i < 1+n$ there is the morphism $\hat{m}_i : i 
+\mapsTo i$, if $0 \leq 1+i < 1+n$ then there is  also the morphism $m_i : i \mapsTo i+1$.
+\end{description}
+together with the obvious \domain{\cdot}, \coDomain{\cdot} and \Identity{\cdot} mappings.  
+It is important to note that ordinal addition is not commutative, see Appendix 
+\ref{chap:ordinals}.  In particular $1 + \omega = \omega$.  This means that our choice of 
+order in the condition, $0 \leq i < 1+n$ is significant. For finite $n$, the graph \woSet{n} 
+can be depicted as:
+\begin{cTikzPicture}
+\coordinate (v0) at (0,0);
+\coordinate (v1) at (1.5,0);
+\coordinate (v2) at (3,0);
+\coordinate (v-n-1) at (4.5,0);
+\coordinate (v-n) at (6,0);
+%
+\node[above] at (v0)    {$0$};
+\node[above] at (v1)    {$1$};
+\node[above] at (v2)    {$2$};
+\node[above] at (v-n-1) {$n-1$};
+\node[above] at (v-n)   {$n$};
+%
+\fill (v0) circle[radius=1pt];
+\fill (v1) circle[radius=1pt];
+\fill (v2) circle[radius=1pt];
+\fill (v-n-1) circle[radius=1pt];
+\fill (v-n) circle[radius=1pt];
+%
+\begin{scope}[->,shorten <=4pt,shorten >=4pt]
+\path (v0) edge (v1);
+\path (v1) edge (v2);
+\path (v2) edge[dotted] (v-n-1);
+\path (v-n-1) edge (v-n);
+\end{scope}
+\end{cTikzPicture}
+
+Consider a pair of test paths, \woSet{\alpha} and \woSet{\beta} for $\alpha, \beta \leq 
+\omega$.  With out loss of generality we can assume that $\alpha \leq \beta$. \TODO{There is 
+are $\beta - \alpha + 1$ inclusion graph maps from \woSet{\alpha} into \woSet{\beta}.  Since 
+we have included the degenerate identity morphism, there are also all of the surjections 
+contained in \DeltaC{}{}.  This asymmetry shows that our current definition of Graph is 
+incomplete. The more convenient definition of graph is as a category, or alternatively we 
+are too permissive in our definition of simplicial set and really only want delta sets.  }
+
+\TODO{Show that any two test paths can be combined into a composite test path.  Show that 
+this composition is associative. Show that all test paths can be generated by composition of 
+the test path \woSet{1}.}
+
+The graph, \mathCategory{T1P}, of test-$1$-paths is defined as
+\begin{description}
+\item[objects] for any $0 \leq n \leq \omega$, the graphs \woSet{n} defined above,
+\item[morphisms] any graph map between a pair of objects, \woSet{n} and \woSet{m},
+\end{description}
+with the obvious \domain{\cdot}, \coDomain{\cdot} and \Identity{\cdot} mappings.  
+
+While this is an explicit construction, when we get far enough in our exposition to be able 
+to define the following concepts, we will see that the important properties of 
+\mathCategory{T1P} are
+\begin{enumerate}
+\item for each object, \woSet{n}, considered as a graph, is connected,
+\item for each object, \woSet{n}, considered as a graph, the fundmental groupoid, 
+\fundGroupoid{\woSet{n}}, is trivial,
+\item for each object, \woSet{n}, considered as a graph, is unbranched,
+\item for each object, \woSet{n}, can always be extended (i.e. can be embedded in a 
+``larger'' object \woSet{m}), 
+\item \mathCategory{T1P} is a \emph{poset},  (in fact it is a Domain),
+\item (the located \mathCategory{T1P} is shift invariant \TODO{define this shift map}),
+\item if there is a morphism $f : \woSet{n} \mapsTo \woSet{n}$ then there exists a unique 
+morphism, $f' : \woSet{n} \mapsTo \woSet{m}$ (\woSet{n} factors through ?? (conversely 
+factors through ??) \TODO{this is really not complete but I am not yet sure how best to say 
+it},  \TODO{This effectively show that all objects are ``flat'' --- that is there is only 
+one way to complete/extend them},
+\item if there are morphisms $f : \woSet{n} \mapsTo \woSet{m}$ and $ f' : \woSet{m} \mapsTo 
+\woSet{m'}$ then there is a unique composition \TODO{again I do not (yet) know how to say 
+this correctly.} \TODO{similarly this shows, in some sense, the ``flatness'' of the objects}
+\end{enumerate}
+\TODO{explicitly name this graph, as a Symbolic Dynamics.}
+
+\TODO{QUESTION: how do we define the Symbolic Dynamics notion of overlapping words and or 
+magical words.}
+
+\TODO{We want to stress the collections of paths rather than simply composition.  The 
+example of Symbolic Dynamics non-subshifts of finite type such as minimal shifts, 
+\cite{lindMarcus1995a}, is key here.  There is unlikely to be \emph{any} ``composition'' 
+operator for minimal shifts.... however they \emph{are} interesting collections of paths.  
+Composition operators will be definable for the equivalent of ``subshifts of finite type'' 
+which are essentially algebraic algebras defined by generators (words) and relations 
+(constraints on which words can be composed).}
+
+\section{Introduction: The category of simplicial sets}
+
+\TODO{We need a better intro here!}
+
+\TODO{Discuss the fact that working in \setC{} means we can use the local set theory with 
+\emph{just} points (i.e. \setC{} has enough points). Should also discuss subsets in Topos 
+and \setC{}.}
+
+\section{The category of simplicial sets}
+
+\begin{definition}
+A \define{(transfinite) simplicial set}, $X$, is an object in the functor category, 
+\opFuncCat{\DeltaC{}{}}{\setC{}}, or alternatively a covariant functor $X : 
+\opposite{\DeltaC{}{}} \mapsTo{} \setC{}$ (or a contravariant functor $X : \DeltaC{}{} 
+\mapsTo \setC{}$).  Explicitly it is defined by:
+\begin{enumerate}
+\item For each object, \woSet{\alpha} in \DeltaC{}{}, there is an associated set 
+$\tuple[X]{\woSet{\alpha}} = X_{\woSet{\alpha}} = X_{\alpha}$ in \setC{}.
+\item For each morphism, $m : \woSet{\alpha} \mapsTo \woSet{\beta}$, in \DeltaC{}{}, there 
+is an associated map $\tuple[X]{m} = X_m : X_{\beta} \mapsTo X_{\alpha}$ in \setC{} for 
+which the following diagram commutes:
+%
+\begin{cTikzPicture}
+\matrix (m) [comDiagM]
+{ \woSet{\alpha} & X_{\alpha} \\
+  \woSet{\beta}  & X_{\beta} \\ };
+\path[comDiagP]
+(m-1-1) edge node[above] { $X$ }   (m-1-2)
+(m-1-1) edge node[left]  { $m$ }   (m-2-1)
+(m-2-2) edge node[right] { $X_m$ } (m-1-2)
+(m-2-1) edge node[below] { $X$ }   (m-2-2);
+\end{cTikzPicture}
+%
+\item If $m : \woSet{\alpha} \mapsTo \woSet{\beta}$ and $m' : \woSet{\beta} \mapsTo 
+\woSet{\gamma}$ are composable morphisms in \DeltaC{}{} then $X_m : X_{\beta} \mapsTo 
+X_{\alpha}$ and $X_{m'} : X_{\gamma} \mapsTo X_{\beta}$ are composable maps and 
+$X_{m\compose m'} = X_{m'} \compose X_m$ in \setC{}. This means that the following diagram 
+commutes:
+%
+\begin{cTikzPicture}
+\matrix (m) [comDiagM]
+{ \woSet{\alpha} & X_{\alpha} \\
+  \woSet{\beta}  & X_{\beta}  \\ 
+  \woSet{\gamma} & X_{\gamma} \\ 
+};
+\path[comDiagP]
+(m-1-1) edge node[above] { $X$ }      (m-1-2)
+(m-2-1) edge node[above] { $X$ }      (m-2-2)
+(m-3-1) edge node[below] { $X$ }      (m-3-2)
+%
+(m-1-1) edge                node[right]  { $m$ }             (m-2-1)
+(m-2-1) edge                node[right]  { $m'$ }            (m-3-1)
+(m-1-1) edge[bend right=60] node[left]   { $m' \compose m$ } (m-3-1)
+%
+(m-2-2) edge                node[left]  { $X_m$ }                 (m-1-2)
+(m-3-2) edge                node[left]  { $X_{m'}$ }              (m-2-2)
+(m-3-2) edge[bend right=60] node[right] { $X_m \compose X_{m'}$ } (m-1-2);
+\end{cTikzPicture}
+%
+\item For each coface map, \coFace{\alpha}{\beta}{U} in \DeltaC{}{}, the image via the 
+functor $X$, $\tuple[X]{\coFace{\alpha}{\beta}{U}} = X_{\coFace{\alpha}{\beta}{U}} = 
+\face{\alpha}{\beta}{U}$, is a \define{face} map in $X$.
+\item For each codegeneracy map, \coDegeneracy{\alpha}{\beta}{V} in \DeltaC{}{}, the image 
+via the functor $X$, $\tuple[X]{\coDegeneracy{\alpha}{\beta}{V}} = 
+X_{\coDegeneracy{\alpha}{\beta}{V}} = \degeneracy{\alpha}{\beta}{V}$, is a 
+\define{degeneracy} map in $X$.
+\item For each morphism, $m : \woSet{\alpha} \mapsTo \woSet{\beta}$, with its unique 
+coface/codegeneracy factorization, $m = 
+\coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}} \compose 
+\coDegeneracy{\alpha}{\gamma}{\kernel{m}}$ we have a correspondingly unique degeneracy/face 
+factorization, 
+\begin{align*}
+\tuple[X]{m} & = \tuple[X]{\coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}} \compose 
+\coDegeneracy{\alpha}{\gamma}{\kernel{m}}} \\
+                       & = \tuple[X]{\coDegeneracy{\alpha}{\gamma}{\kernel{m}}} \compose 
+                       \tuple[X]{\coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}}}  \\
+                       
+                       & = \degeneracy{\alpha}{\gamma}{\kernel{m}} \compose 
+                       \face{\gamma}{\beta}{\woSet{\beta}\withOut \image{m}}
+\end{align*}
+\end{enumerate}
+For each $\alpha \leq \kappa$, the elements of $X_{\alpha}$ are 
+\define{$\alpha$-simplicies}. \TODO{Define dimension of a simplex to be the $\alpha$ for 
+which it is contained in $X_{\alpha}$.}
+\end{definition}
+
+\begin{definition} \TODO{Comment on naturality and refer to \cite[Chapter 
+7]{awodey2006catTh}}
+A \define{(transfinite) simplicial map}, $f : X \mapsTo Y$ is defined by:
+\begin{enumerate}
+\item For each object, \woSet{\alpha}, in \DeltaC{}{}, there is an associated map 
+$f_{\woSet{\alpha}} = f_{\alpha} : X_{\alpha} \mapsTo Y_{\alpha}$.
+\item If $m : \woSet{\alpha} \mapsTo \woSet{\beta}$ is a morphism (order preserving map) in 
+\DeltaC{}{} then $f_{\alpha} \compose X_m = Y_m \compose f_{\beta}$, that is the diagram on 
+the right commutes:
+%
+\begin{cTikzPicture}
+\matrix (m) [comDiagM]
+{ \woSet{\alpha} & & X_{\alpha} & Y_{\alpha} \\
+  \woSet{\beta}  & & X_{\beta}  & Y_{\beta}  \\ };
+\begin{scope}[comDiagP]
+\path
+(m-1-1) node (delta)   {} (m-2-1)
+(m-1-3) node (simplex) {} (m-2-3);
+\path
+(m-1-1) edge node (delta)   {}               (m-2-1)
+%
+(m-1-3) edge node[above]    { $f_{\alpha}$ } (m-1-4)
+(m-2-3) edge node (simplex) {}               (m-1-3)
+(m-2-4) edge node[right]    { $Y_m$ }        (m-1-4)
+(m-2-3) edge node[below]    { $f_{\beta}$ }  (m-2-4)
+%
+(delta) edge[densely dotted, shorten <=5pt, shorten >=20pt] (simplex);
+%
+\node[left] at (delta)   { $m$ };
+\node[left] at (simplex) { $X_m$ };
+\end{scope}
+\end{cTikzPicture}
+%
+\end{enumerate}
+\end{definition}
+
+\begin{lemma}
+The composition of two simplicial maps is a simplicial map.
+\end{lemma}
+\begin{proof}
+\TODO{complete this proof! DO WE REALLY NEED THIS?}
+\end{proof}
+
+\TODO{We need to discuss the corresponding functor category of non-degenerate simplicial 
+sets (Freidman calls Delta sets, \cite[Section 2.3]{arxiv2008math0809.4221v1}).  Morphisms 
+of \funcCat{\ndDeltaC{}{}}{\setC{}} are not as ``flexible'' as morphisms of 
+\funcCat{\DeltaC{}{}}{\setC{}}. The map identify ``whole'' simplicies but they may not 
+identify subsimplicies (faces) unless the pair of containing simplicies are also identified. 
+Certainly there is an adjoint pair of functors between the categories of simplicial sets and 
+non-degenerate simplicial sets, and that, on objects, this adjoint pair is an isomorphism, 
+and that every morphism of non-degenerate simplicial sets extends (freely) to a morphism of 
+simplicial sets.  However on morphisms this mapping is injective but not surjective.}
+
+\begin{definition}
+The category of \define{simplicial sets}, \simpC{}, is the functor category, 
+\funcCat{\opposite{\DeltaC{}{}}}{\setC{}}.  Explicitly, the objects of \simpC{} are 
+(covariant) functors $X : \opposite{\DeltaC{}{}} \mapsTo \setC{}$ and the morphisms of 
+\simpC{} are natural transformations between two functors, $X, Y : \opposite{\DeltaC{}{}} 
+\mapsTo \setC{}$.
+\end{definition}
+
+\begin{definition}
+Consider a simplicial map, $f : X \mapsTo Y$.  The \define{image of a simplicial map}, 
+\image{f}, is defined by:
+\begin{enumerate}
+\item For each object, \woSet{\alpha}, in \DeltaC{}{}, there is a set 
+$f_{\alpha}(X_{\alpha}) \subset Y_{\alpha}$.
+\item For each morphism, $m : \woSet{\alpha} \mapsTo \woSet{\beta}$, in \DeltaC{}{}, there 
+is a restriction map, $\restrictedTo{Y_m}{f_{\beta}(X_{\beta})} : f_{\beta}(X_{\beta}) 
+\mapsTo f_{\alpha}\compose X_m (X_{\beta}) \subset f_{\alpha}(X_{\alpha})$ 
+\end{enumerate}
+\end{definition}
+
+\begin{lemma}
+The image of a simplicial map is a simplicial set.
+\end{lemma}
+\begin{proof} Consider a simplicial map, $f : X \mapsTo Y$.
+\begin{enumerate}
+\item For each $0$-simplex, \woSet{\alpha}, in \DeltaC{}{}, let $\image{f}_{\alpha} = 
+f_{\alpha}(X_{\alpha})$.
+\item For each $1$-simplex, $m : \woSet{\alpha} \mapsTo \woSet{\beta}$, in \DeltaC{}{}, let 
+$\image{f}_m = \restrictedTo{Y_m}{f_{\beta}(X_{\beta})}$.
+\end{enumerate}
+All we need to show is that composable $m$ and $m'$ are still composable... \TODO{show this!}
+\end{proof}
+
+\section{The Yoneda embedding: the standard simplicies}
+
+\TODO{We need to define the subset of non-degenerate morphisms between simplicial sets. We 
+need to note that for \DeltaC{\alpha}{} for, $\alpha < \beta \leq \kappa$, \emph{all} 
+morphisms in \homomorphisms{\DeltaC{}{}}{\woSet{\beta}, \woSet{\alpha}} are 
+\emph{degenerate}. For $\alpha \leq \kappa$, a simplicial set is an 
+\define{$\alpha$-simplicial set}, if $X_{\beta} = \emptySet$ for all $\alpha < \beta$.  This 
+last statement is incorrect.  We need to define non-degenerate simplicies and then define an 
+$\alpha$-simplicial set to be one for which all (sub)$\beta$-simplicies for $\alpha < \beta 
+\leq \kappa$ are degenerate. Define dimension of a non-degenerate simplex to be the $\alpha$ 
+for which...}
+
+\TODO{Need to work in Goerss and Jardine's Example 1.7 at this point.  And provide explicit 
+definitions of degenerate and non-degenerate and elemental simplicies.}  \TODO{The concept 
+of collapsing scheme looks useful to our work, see \cite{citterio2001a}} \TODO{Allegretti's 
+work, \cite{allegretti2008simplicialSets} provides an interesting link between Van Kempen's 
+theorem, groupoids and classification in the context of our work.}
+
+Since it is key to most of our subsequent work, we now work through Goerss and Jardine's 
+Example 1.7, \cite[page 6]{goerssJardin1999SimplicialHomotopyTh}, in some detail.  This is 
+essentially a standard application of the Categorical concepts of representable Functors, 
+the Yoneda Lemma, and the Yoneda Embedding.  A good exposition of these ideas can be found 
+in \cite[Section 4.5]{barrWells1995catTh} or \cite[Chapter 8]{awodey2006catTh}.  
+\TODO{Provide other expositions.}
+
+Consider $\alpha \leq \kappa$.  Since \woSet{\alpha} \emph{is} a set in \setC{}, we know 
+that \homomorphisms{\DeltaC{}{}}{\cdot, \woSet{\alpha}} is a (covariant) functor from 
+\opposite{\DeltaC{}{}} to \setC{}, and hence is an object of 
+\opFuncCat{\DeltaC{}{}}{\setC{}}, which in turn means that it is a simplicial set. We define 
+$\DeltaC{\alpha}{} = \homomorphisms{\DeltaC{}{}}{\cdot, \woSet{\alpha}}$ to be the 
+\define{$\alpha$-standard simplex}. 
+
+In Categorical terms $ \DeltaC{\alpha}{} = \tuple[y]{\woSet{\alpha}}= 
+\homomorphisms{\DeltaC{}{}}{\cdot, \woSet{\alpha}} $ is the image of the Yondea 
+\emph{Embedding}, $ y : \DeltaC{}{} \mapsTo \opFuncCat{\DeltaC{}{}}{\setC{}} $.  It is a 
+representable functor which is represented by the object \woSet{\alpha} in \setC{}.  
+Explicitly:
+\begin{enumerate}
+\item For an object, \woSet{\beta} in \DeltaC{}{},  
+$\tuple[\homomorphisms{\DeltaC{}{}}{\cdot, \woSet{\alpha}}]{\woSet{\beta}} = 
+\homomorphisms{\DeltaC{}{}}{\woSet{\beta}, \woSet{\alpha}}$ which since \setC{} is a locally 
+small category, is a set in \setC{}. 
+
+In particular, we know from our work in \DeltaC{}{}, this is the \emph{set} of order 
+preserving morphisms from the \emph{set} \woSet{\beta} to the \emph{set} \woSet{\alpha} 
+which is isomorphic, in \setC{}, to the pullback, \kappaPullBackCoPowerSet{\beta}{\alpha}. 
+
+\item For a morphism, $m : \woSet{\beta} \mapsTo \woSet{\delta}$ in \DeltaC{}{}, 
+$\tuple[\homomorphisms{\DeltaC{}{}}{\cdot, \woSet{\alpha}}]{m} = 
+\homomorphisms{\DeltaC{}{}}{m, \woSet{\alpha}} : \homomorphisms{\DeltaC{}{}}{\woSet{\delta}, 
+\woSet{\alpha}} \mapsTo \homomorphisms{\DeltaC{}{}}{\woSet{\beta}, \woSet{\alpha}}$. 
+
+In particular for a morphism $m' : \woSet{\delta} \mapsTo \woSet{\alpha}$, we have that 
+$\tuple[\homomorphisms{\DeltaC{}{}}{m, \woSet{\alpha}}]{m'} = m' \compose m$ which is a 
+morphism in \homomorphisms{\Delta}{\woSet{\beta}, \woSet{\alpha}} as required.
+
+Combinatorially, we can also consider \homomorphisms{\DeltaC{}{}}{m, \woSet{\alpha}} as a 
+map between the pullbacks, \kappaPullBackCoPowerSet{\delta}{\alpha}, and 
+\kappaPullBackCoPowerSet{\beta}{\alpha}.
+If the above $m$ and $m'$ have their unique coface/codegeneracy factorizations, $$m = 
+\coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}} \compose 
+\coDegeneracy{\delta}{\gamma}{\kernel{m}}$$ and $$m' = 
+\coFace{\gamma'}{\delta}{\woSet{\delta}\withOut\image{m'}} \compose 
+\coDegeneracy{\alpha}{\gamma'}{\kernel{m'}}$$ respectively, then, working in \DeltaC{}{}, we 
+have 
+\begin{align*}
+m'' & = m' \compose m \\
+      & = \coFace{\gamma'}{\delta}{\woSet{\delta}\withOut\image{m'}} \compose 
+      \coDegeneracy{\alpha}{\gamma'}{\kernel{m'}}
+            \compose 
+            \coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}} \compose 
+            \coDegeneracy{\delta}{\gamma}{\kernel{m}}
+\end{align*}
+\TODO{SORT THIS OUT!  -- It should be ``easy'', but my brain is dead!  To do this correctly 
+and to raise the combinatorial profile of this work we need a notation for these pullbacks!}
+\end{enumerate}
+
+Similarly we can define $ \ndDeltaC{\alpha}{} = \homomorphisms{\ndDeltaC{}{}}{\cdot, 
+\woSet{\alpha}}$ to be the \define{$\alpha$-standard non-degenerate simplex}. Again, in 
+Categorical terms $ \ndDeltaC{\alpha}{} = \tuple[y_{nd}]{\woSet{\alpha}}= 
+\homomorphisms{\ndDeltaC{}{}}{\cdot, \woSet{\alpha}} $ is the image of the Yondea 
+\emph{Embedding}, $ y_{nd} : \ndDeltaC{}{} \mapsTo \opFuncCat{\ndDeltaC{}{}}{\setC{}} $.  It 
+is a representable functor which is represented by the object \woSet{\alpha} in \setC{}.  
+Explicitly:
+\begin{enumerate}
+\item For an object, \woSet{\beta} in \ndDeltaC{}{},  
+$\tuple[\homomorphisms{\ndDeltaC{}{}}{\cdot, \woSet{\alpha}}]{\woSet{\beta}} = 
+\homomorphisms{\ndDeltaC{}{}}{\woSet{\beta}, \woSet{\alpha}}$ which since \setC{} is a 
+locally small category, is a set in \setC{}. 
+
+In particular, we know from our work in \ndDeltaC{}{}, this is the \emph{set} of 
+\emph{strictly} order preserving morphisms from the \emph{set} \woSet{\beta} to the 
+\emph{set} \woSet{\alpha} which is isomorphic, in \setC{}, to the pullback, 
+\ndKappaPullBackCoPowerSet{\beta}{\alpha}. 
+\item For a morphism, $m : \woSet{\beta} \mapsTo \woSet{\delta}$ in \ndDeltaC{}{}, 
+$\tuple[\homomorphisms{\ndDeltaC{}{}}{\cdot, \woSet{\alpha}}]{m} = 
+\homomorphisms{\ndDeltaC{}{}}{m, \woSet{\alpha}} : 
+\homomorphisms{\ndDeltaC{}{}}{\woSet{\delta}, \woSet{\alpha}} \mapsTo 
+\homomorphisms{\ndDeltaC{}{}}{\woSet{\beta}, \woSet{\alpha}}$. 
+
+In particular for a morphism $m' : \woSet{\delta} \mapsTo \woSet{\alpha}$,  we have that 
+$\tuple[\homomorphisms{\ndDeltaC{}{}}{m, \woSet{\alpha}}]{m'} = m' \compose m$ which is a 
+morphism in \homomorphisms{\ndDeltaC{}{}}{\woSet{\beta}, \woSet{\alpha}} as required.
+
+Combinatorially, we can also consider \homomorphisms{\ndDeltaC{}{}}{m, \woSet{\alpha}} as a 
+map between the pullbacks, \ndKappaPullBackCoPowerSet{\delta}{\alpha}, and 
+\ndKappaPullBackCoPowerSet{\beta}{\alpha}. If the above $m$ and $m'$ have their unique 
+coface/codegeneracy factorizations, $$m = 
+\coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}}$$ and $$m' = 
+\coFace{\gamma'}{\delta}{\woSet{\delta}\withOut\image{m'}}$$ respectively, then, working in 
+\DeltaC{}{}, we have 
+\begin{align*}
+m'' & = m' \compose m \\
+     & = \coFace{\gamma'}{\delta}{\woSet{\delta}\withOut\image{m'}}
+            \compose 
+            \coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}} \\
+       & = \coFace{?}{?}{?}
+\end{align*}
+\TODO{SORT THIS OUT!  -- It should be ``easy'', but my brain is dead!  To do this correctly 
+and to raise the combinatorial profile of this work we need a notation for these pullbacks!}
+\end{enumerate}
+
+\begin{definition}
+A \define{simplex category} (respectively a \define{non-degenerate simplex category}) is 
+given by
+\begin{enumerate}
+\item Objects: 
+\end{enumerate}
+\end{definition}
+
+\TODO{We need to expand upon Goerss and Jardine's classifying maps example.  Then note 
+define a simplical set to be an $\alpha$-simplicial set if, for $\alpha < \beta \leq 
+\kappa$, the classifying maps, \ndHomomorphisms{\simpC{}}{\DeltaC{\beta}{}, X}, is empty.}
+
+For a given simplicial set, $F$ in \simpC{}, the Yoneda \emph{Lemma} implies that, for each 
+$\alpha \leq \kappa$, the simplicial maps whose domains are the $\alpha$-standard simplex, 
+$\DeltaC{\alpha}{} \mapsTo F$, classifies the $\alpha$-simplicies of $F$ in that there is a 
+natural isomorphism between $$ \homomorphisms{\simpC{}}{\DeltaC{\alpha}{}, F} \isomorphic 
+F_{\alpha} $$ Given its importance to our subsequent work, we explicitly expand out what is 
+essentially the proof of the Yondea Lemma in our specific case as follows. See \cite[Lemma 
+8.2]{awodey2006catTh} for a good detailed general proof of the Yondea Lemma.
+
+We are interested in defining a mapping $\eta_{\woSet{\alpha},F} : 
+\homomorphisms{\DeltaC{}{}}{\woSet{\alpha},F} \mapsTo \tuple[F]{\woSet{\alpha}}$. Fix both a 
+simplicial set $F$ and $\alpha \leq \kappa$. We begin by considering an arbitrary simplicial 
+map, $\theta : \DeltaC{\alpha}{} \mapsTo F$ in \homomorphisms{\simpC{}}{\DeltaC{\alpha}{}, 
+F}. That is, $\theta$ is a natural transformation from the functor $\DeltaC{\alpha}{} = 
+\homomorphisms{\DeltaC{}{}}{\cdot, \woSet{\alpha}} : \opposite{\DeltaC{}{}} \mapsTo 
+\woSet{\alpha}$ \emph{to} the functor $F : \opposite{\DeltaC{}{}} \mapsTo \setC{}$. Since we 
+are interested in showing a mapping into the set $\tuple[F]{\woSet{\alpha}} = F_{\alpha}$ we 
+should consider $\tuple[\DeltaC{\alpha}{}]{\woSet{\alpha}} = 
+\homomorphisms{\DeltaC{}{}}{\woSet{\alpha},\woSet{\alpha}}$ which is the set of order 
+preserving maps from \woSet{\alpha} to itself.  However the identity map, 
+\identity{\woSet{\alpha}}, \emph{is} the only one such order preserving mapping. 
+
+\TODO{Complete this discussion using \cite[Lemma 8.2]{awodey2006catTh}.}
+\TODO{We need to work out in detail the work of \cite[Lemma 
+2.1]{goerssJardin1999SimplicialHomotopyTh} which shows essentially that a simplicial set, 
+$X$, is the ``sum'' of its $\DeltaC{\alpha}{} \mapsTo X$ ``parts'' (see also 
+\cite[Proposition 8.10]{awodey2006catTh}).} \TODO{nLab:subfunctor 
+
+A subfunctor of a functor G:C?D is a pair (F,i) where F:C?D is a functor and i:F?G is a 
+natural transformation such that its components i M:F(M)?G(M) are monic. In fact one often 
+by a subfunctor means just an equivalence class of such monic natural transformations; 
+compare subobject.
+
+In a concrete category with images one can choose a representative of a subfunctor where the 
+components of i are genuine inclusions of the underlying sets; then a subfunctor is just a 
+natural transformation whose components are inclusions. The naturality in terms of concrete 
+inclusions just says that for all f:c?d, F(f)=G(f)? F(c). If the set-theoretic circumstances 
+allow consideration of a category of functors, then a subfunctor is a subobject in such a 
+category.
+
+A subfunctor (F,i) of the identity id C:C?C in a category with images is an often used case: 
+it amounts to a natural assignment c?F(c)?ic of a subobject to each object c in C. For 
+concrete categories with images then F(f)=f? F(c).
+
+A subfunctor of a representable functor Hom(?,x) is precisely a sieve over the representing 
+object x.
+
+  Revised on August 29, 2009 20:32:10 
+  by Toby Bartels}
+  
+\section{A bestiary of simplicial sets}  
+
+With this accumulated knowledge, we can provide the following ``picture'' of \DeltaC{2}{}
+
+\begin{cTikzPicture}
+\coordinate (O) at (0,0);
+
+\coordinate (A0) at (0,2);
+\coordinate (A1) at (0,4);
+\coordinate (A2) at ($ (A0) + (O)!2cm!60:(A0) $);
+\coordinate (A3) at ($ (A0) + (O)!2cm!-60:(A0) $);
+
+\coordinate (B0) at ($ (O)!2cm!120:(A0) $);
+\coordinate (B1) at ($ (O)!4cm!120:(A0) $);
+\coordinate (B2) at ($ (B0) + (O)!2cm!60:(A0) $);
+\coordinate (B3) at ($ (B0) - (O)!2cm!(A0) $);
+
+\coordinate (C0) at ($ (O)!2cm!-120:(A0) $);
+\coordinate (C1) at ($ (O)!4cm!-120:(A0) $);
+\coordinate (C2) at ($ (C0) + (O)!2cm!-60:(A0) $);
+\coordinate (C3) at ($ (C0) - (O)!2cm!(A0) $);
+
+\draw (A0) edge node (AB0) {} (B0);
+\draw (B0) edge node (BC0) {} (C0);
+\draw (C0) edge node (CA0) {} (A0);
+\draw (A2) edge node (AB1) {} (B2);
+\draw (B3) edge node (BC1) {} (C3);
+\draw (C2) edge node (CA1) {} (A3);
+
+\fill[color=black!5] (A0) -- (B0) -- (C0) -- cycle;
+
+\node[above]       at (A1) {\set{a}};
+\node[below left]  at (B1) {\set{b}};
+\node[below right] at (C1) {\set{c}};
+
+\node[above left]  at (AB1) {\set{a,b}};
+\node[above right] at (CA1) {\set{a,c}};
+\node[below]       at (BC1) {\set{b,c}};
+
+\node at (O) {\set{a,b,c}};
+
+\foreach \x in { (A0), (A1), (A2), (A3), (B0), (B1), (B2), (B3), (C0), (C1), (C2), (C3) } {
+  \fill \x circle[radius=1pt];
+}
+
+\begin{scope}[->, shorten >=4pt, shorten <=4pt] 
+\path (A0) edge node[auto]      {\face{0}{2}{\set{b,c}}} (A1);
+\path (B0) edge node[auto]      {\face{0}{2}{\set{a,c}}} (B1);
+\path (C0) edge node[auto,swap] {\face{0}{2}{\set{a,b}}} (C1);
+\path (A2) edge node[auto]      {\face{0}{1}{\set{b}}} (A1);
+\path (A3) edge node[auto,swap] {\face{0}{1}{\set{c}}} (A1);
+\path (B2) edge node[auto,swap] {\face{0}{1}{\set{a}}} (B1);
+\path (B3) edge node[auto]      {\face{0}{1}{\set{c}}} (B1);
+\path (C2) edge node[auto]      {\face{0}{1}{\set{a}}} (C1);
+\path (C3) edge node[auto,swap] {\face{0}{1}{\set{b}}} (C1);
+\end{scope}
+\begin{scope}[<-, shorten >=2pt, shorten <=3pt] 
+\path (AB1) edge node[auto] {\face{1}{2}{\set{c}}} (AB0);
+\path (BC1) edge node[auto] {\face{1}{2}{\set{a}}} (BC0);
+\path (CA1) edge node[auto] {\face{1}{2}{\set{b}}} (CA0);
+\end{scope}
+
+\end{cTikzPicture}
+
+As we will see below the boundary of \DeltaC{2}{}, denoted $\boundary{\DeltaC{2}{}}$, is
+
+\begin{cTikzPicture}
+\coordinate (O) at (0,0);
+
+\coordinate (A0) at (0,2);
+\coordinate (A1) at (0,4);
+
+\coordinate (B0) at ($ (O)!2cm!120:(A0) $);
+\coordinate (B1) at ($ (O)!4cm!120:(A0) $);
+
+\coordinate (C0) at ($ (O)!2cm!-120:(A0) $);
+\coordinate (C1) at ($ (O)!4cm!-120:(A0) $);
+
+\draw (A0) edge node[auto,swap] {\set{a,b}} (B0);
+\draw (B0) edge node[auto,swap] {\set{b,c}} (C0);
+\draw (C0) edge node[auto,swap] {\set{a,c}} (A0);
+
+\node[above]       at (A1) {\set{a}};
+\node[below left]  at (B1) {\set{b}};
+\node[below right] at (C1) {\set{c}};
+
+\foreach \x in { (A0), (A1), (B0), (B1), (C0), (C1) } {
+  \fill \x circle[radius=1pt];
+}
+
+\begin{scope}[->, shorten >=4pt, shorten <=4pt] 
+\path (A0) edge[bend left=30]  node[auto]      {\face{0}{1}{\set{b}}} (A1);
+\path (A0) edge[bend right=30] node[auto,swap] {\face{0}{1}{\set{c}}} (A1);
+\path (B0) edge[bend left=30]  node[auto]      {\face{0}{1}{\set{c}}} (B1);
+\path (B0) edge[bend right=30] node[auto,swap] {\face{0}{1}{\set{a}}} (B1);
+\path (C0) edge[bend left=30]  node[auto]      {\face{0}{1}{\set{a}}} (C1);
+\path (C0) edge[bend right=30] node[auto,swap] {\face{0}{1}{\set{b}}} (C1);
+\end{scope}
+
+\end{cTikzPicture}
+
+Similarly, we will see that, the following simplicial set, whose vertices can be labelled by 
+the integer pairs in $ \Integers{} \times \Integers{}$, has no boundary
+\begin{cTikzPicture}
+
+\foreach \x in {-2, -1, 0, 1} {
+  \foreach \y in {-2, -1, 0, 1} {
+    \fill (\x, \y) circle[radius=1pt];
+    \draw (\x, \y) -- ($ (\x, \y) + (1,0) $);
+    \draw (\x, \y) -- ($ (\x, \y) + (0,1) $);
+    \draw (\x, \y) -- ($ (\x, \y) + (1,1) $);
+  }
+  
+  \fill (\x, 2) circle[radius=1pt];
+  \draw (\x, 2) -- ($ (\x, 2) + (1,0) $);
+  \draw[densely dotted] (\x, 2) -- ($ (\x, 2) + (0,0.5) $);
+  \draw[densely dotted] (\x, 2) -- ($ (\x, 2) + (0.5,0.5) $);
+  \draw[densely dotted] ($ (\x, -2) + (1, -0.5) $) -- ($ (\x, -2) + (1, 0) $);
+  \draw[densely dotted] ($ (\x, -2) + (0.5, -0.5) $) -- ($ (\x, -2) + (1, 0) $);
+}
+
+\foreach \y in {-2, -1, 0, 1} {
+  \fill (2, \y) circle[radius=1pt];
+  \draw (2, \y) -- ($ (2, \y) + (0,1) $);
+  \draw[densely dotted] (2, \y) -- ($ (2, \y) + (0.5,0) $);
+  \draw[densely dotted] (2, \y) -- ($ (2, \y) + (0.5,0.5) $);
+  \draw[densely dotted] ($ (-2, \y) - (0.5, 0) $) -- (-2, \y);
+  \draw[densely dotted] ($ (-2, \y) - (0.5, 0.5) $) -- (-2, \y); 
+}
+
+\fill (2, 2) circle[radius=1pt];
+\draw[densely dotted] (2,2) -- (2.5,2.5);
+\draw[densely dotted] (2,2) -- (2.5,2);
+\draw[densely dotted] (2,2) -- (2,2.5);
+
+\draw[densely dotted] (-2,2) -- (-2.5,2);
+\draw[densely dotted] (-2,2) -- (-2.5,1.5);
+
+\draw[densely dotted] (-2,-2) -- (-2,-2.5);
+\end{cTikzPicture}
+
+Finally, to remind ourselves that simplical sets need \emph{not} be nice regular 
+``manifolds'', consider the following simplicial set formed by joining two copies of 
+\DeltaC{2}{} with one copy of each of \DeltaC{3}{}, \DeltaC{1}{} and \DeltaC{0}{} together 
+with a copy of \boundary{\DeltaC{2}{}} (the boundary of \DeltaC{2}{}).
+
+\begin{cTikzPicture}
+\coordinate (A) at (-0.8, 0);
+\coordinate (B) at (0,-1);
+\coordinate (C) at (0,1);
+\coordinate (D) at (0.8, 0);
+\coordinate (E) at (-1,-1);
+\coordinate (F) at (2,0);
+\coordinate (G) at (-1,1);
+\coordinate (H) at (1,1);
+\coordinate (I) at (-2,1);
+\coordinate (J) at (-1,2);
+
+\foreach \x in { (A), (B), (C), (D), (E), (F), (G), (H), (I), (J) } {
+  \fill \x circle[radius=1pt];
+}
+
+\draw[fill=black!5] (A) -- (B) -- (C) -- cycle;
+\draw[fill=black!5] (B) -- (D) -- (C) -- cycle;
+\draw[densely dotted] (A) -- (D);
+\draw[fill=black!5] (A) -- (E) -- (B) -- cycle;
+\draw (A) -- (G) -- (C);
+\draw (D) -- (F);
+\draw[fill=black!5] (G) -- (I) -- (J) -- cycle;
+\end{cTikzPicture}
+where the tetrahedron in the center, because it is a copy of \DeltaC{3}{}, is ``filled''.
+
+Again we will see that the boundary of this simplicial set is
+
+\begin{cTikzPicture}
+\coordinate (A) at (-0.8, 0);
+\coordinate (B) at (0,-1);
+\coordinate (C) at (0,1);
+\coordinate (D) at (0.8, 0);
+\coordinate (E) at (-1,-1);
+\coordinate (F) at (2,0);
+\coordinate (G) at (-1,1);
+\coordinate (H) at (1,1);
+\coordinate (I) at (-2,1);
+\coordinate (J) at (-1,2);
+
+\foreach \x in { (A), (B), (C), (D), (E), (F), (G), (I), (J) } {
+  \fill \x circle[radius=1pt];
+}
+
+\draw[fill=black!5] (A) -- (B) -- (C) -- cycle;
+\draw[fill=black!5] (B) -- (D) -- (C) -- cycle;
+\draw[densely dotted] (A) -- (D);
+\draw (A) -- (E) -- (B) -- cycle;
+\draw (G) -- (I) -- (J) -- cycle;
+\end{cTikzPicture}
+where the tetrahedron in the center, which is now a copy of \boundary{\DeltaC{3}{}}, is 
+``hollow''.
+
+As another example of a simplicial set consider
+\begin{cTikzPicture}
+\coordinate (A) at (-1,0);
+\coordinate (B) at (1,0);
+\fill (A) circle[radius=1pt];
+\fill (B) circle[radius=1pt];
+\path (A) edge[bend left=30] (B);
+\path (A) edge[bend right=30] (B);
+\end{cTikzPicture}
+This example shows that we can not consider each simplex as a subset of the $0$-simplicies.
+
+\TODO{We now need to define the sets of degenerate and non-degenerate simplicies. Which 
+allows us to define a simplicial set to be an $\alpha$-simplicial set if all simplicies of 
+dimension $\alpha < \beta \leq \kappa$ or greater are degenerate. Define the dimension of a 
+simplical set to be the largest $\alpha$ for which there exists a non-degenerate 
+$\alpha$-simplex.} 
+\begin{remark}
+Not surprisingly, \DeltaC{}{} is a $1$-simplicial set.  Explicitly, \DeltaC{}{0} is the set 
+of $0$-simplicies, \set{\woSet{\alpha} \suchThat \alpha \leq \kappa}.  \DeltaC{}{1} is the 
+set of $1$-simplicies, or order preserving maps, between pairs of $0$-simplicies, 
+\woSet{\alpha} and \woSet{\beta}. Finally $\DeltaC{}{\gamma} = \emptySet$ for all $1 < 
+\gamma \leq \kappa$.  Since there are no $\gamma$-simplicies for $1 < \gamma \leq \kappa$, 
+we only need to exhibit the simplicial maps corresponding to $\coFace{0}{1}{\set{0}}, 
+\coFace{0}{1}{\set{1}}, \coDegeneracy{1}{0}{\set{1}}$.  For which we have:
+\begin{enumerate}
+\item $\DeltaC{}{\coFace{0}{1}{\set{0}}}(m:\woSet{\alpha} \mapsTo \woSet{\beta}) = 
+\woSet{\beta}$ (``domain'')
+\item $\DeltaC{}{\coFace{0}{1}{\set{1}}}(m:\woSet{\alpha} \mapsTo \woSet{\beta}) = 
+\woSet{\alpha}$ (``codomain'')
+\item $\DeltaC{}{\coDegeneracy{1}{0}{\set{1}}}(\woSet{\alpha}) = \identity{\woSet{\alpha}}$ 
+(``identity map'')
+\end{enumerate}
+\TODO{is this complete?!  It is no longer correct... correct this for our current notion of 
+$1$-simplicial set.}
+\end{remark}
+
+\TODO{We want to introduce the fundamental group of a simplical set.  We want to introduce 
+the covering space of a simplicial set.  We eventually want to introduce the (co)homology of 
+a simplicial set.}
+
+\section{Closure operators}
+
+\section{Boundary operators}
+
+\TODO{We need to define the boundary operator $\boundary : \simpC{} \mapsTo \simpC{}$.  
+Really this definition boils down to the question ``how are we going to \emph{use} the 
+boundary operator?''  A simplex is \emph{not} on the boundary of a simplicial set \emph{if} 
+it is surrounded by other simplicies.  If it is internal to a collapsible sub-simplicial 
+set. If it is internal to a locally contractible sub-simplicial set.}
+
+
+
+\TODO{We need to find an (finite) algebra free way of defining the boundary operators.  We 
+can do this by defining subfunctors and faces to be injective and surjective subfunctors.  
+We can then discuss the poset of subfunctors and those subfunctors that are ``shared'' are 
+``internal'' and hence not part of the boundary.  We may be able to define free words as a 
+logic of relationships and all of the different possible models which respect those 
+relationships.}
+\TODO{We really want to get rid of this section entirely!  We really want to define the 
+boundary operator without the use of abelian groups so that we do not need strictly finite 
+sums!  This SHOULD be do able!}
+
+\begin{definition}
+\TODO{Define simplicial abelian group as the free group over X... al la 
+\cite{goerssJardin1999SimplicialHomotopyTh} and then embedd X into this abelian group.  
+Probably really want $\Integers_3$ rather than \Integers{} or $\Integers_2$. Define grade as 
+}.
+The \define{$n$-simplicial boundary operator}, $\partial_n : X_{n+1} \mapsTo X_n$, is 
+\begin{equation}
+\partial = \partial_n = \sum_{i=0}^n (-1)^i d_i
+\end{equation}
+\end{definition}
+
+\begin{definition}
+An $n$-simplex, $x \in X_n$, is a \define{face} if it is the image, $x = d_i(x')$, of an 
+$(n+1)$-simplex, $x' in X_{n+1}$ for some $0 \leq i \leq n+1$.  An $n$-simplex, $x \in X_n$, 
+is \define{degenerate} if it is the image, $x = s_i(x')$, of an $(n-1)$-simplex, $x' \in 
+X_{n-1}$ for some $0 \leq i \leq n+1$. An $n$-simplex, $x \in X_n$, is a \define{boundary} 
+if it is the image, $x = \partial_n(x')$, of an $(n+1)$-simplex, $x' \in X_{n+1}$.
+\end{definition}
+
+\begin{definition}
+Fix a nondegenerate simplex, $x \in X$.  The \define{Hom-set for $\partial x$ with respect 
+to $X$} is $\homomorphisms{X}{\partial x} = \set{ y \in X \suchThat \partial y = \partial 
+x}$.
+\end{definition}
+
+\begin{remark}
+A Hom-set, \homomorphisms{X}{\partial x}, is the set of all ways, within the simplicial set 
+$X$, in which the boundary $\partial x$ can be ``filled in''. The reason for calling this 
+the Hom-set will become clear when we come to consider the simplicial generalization of 
+Category Theory in the next section. Essentially Theorem \TODO{which Theorem} will show that 
+a Category is the ``ghost'' of a completed simplicial set.
+\end{remark}
+
+\TODO{need to define and provide lemmas for intersection, union of simplicies}
+\TODO{need to define proto hom set of simplicies which have the same boundary}
+
+\TODO{show that any $\gamma$-simplicial set can be embedded into a complete free 
+(transfinite) simplicial set.  However what is the free set built out of a simplicial set 
+which has simplicies of all orders?  Should it just be the free simplicial set on the $X_0$? 
+Or should it respect the lack of simplicies at various orders? If we do not respect the lack 
+of simplicies than any free simplicial set is just a free simplicial set on the 
+$0$-simplicies.... is this what we want? The free/completion of a simplicial set is just the 
+adjoint to the forgetful functor which forgets some of the simplicial sets structure (for 
+example above some ``level''). This is in fact incorrect by in principle correct.  We want 
+to define free simplicial sets using the universal algebraic approach and in topos theory 
+this would be done with a monad operator from \simpC{} to itself which is a closure/interior 
+operator.  This is NOT what the boundary operator is ;-( }
+
+\begin{definition}
+Given a set $X_0$, the free complete simplicitial set generated by $X_0$ is....
+\end{definition}
+
+\begin{lemma}
+Given a simplicial set, X, its free completion is....
+\end{lemma}
+
+\begin{example}
+A graph as a simplicial set.... \TODO{there is a minimal and a maximal version given by 
+whether or not a given proto-$n$-simplex is an $n$-simplex for $1 < n$.  This suggests that 
+we should have a ``Free'' functor associated to the forgetful functor which forgets all 
+$n$-simplicies for $1 < n$}.
+\end{example}
+
+\section{Simplicial Approximation Structures}
+
+\TODO{Need to discuss the limit (or is it colimit?) structure in \simpC{}.  In particular we 
+want to understand how one ``simpler'' simplicial set embeds into another more ``detailed'' 
+simplicial set. We are probably leading up to the concept of bisimulation and so will need 
+to define open maps similarly to \cite{joyalNielsenWinskel1996bisimulation} and 
+\cite{joyalMoerdijk1995algSetTh}.  In particular it will be the ideal structures associated 
+to SAS's that will be interesting.}
+
+\TODO{We can define a canonical closure operator (and hence a canonical topology on a given 
+simplicial set) by including all non-degenerate simplicies above the set of verticies of a 
+given simplicial set (and then filling in all requierd degenerate simplicies -- is this just 
+the free completion?).}
+
+\TODO{With SAS's we can define dimensioned interior operators (roughly due to the closure 
+operators discussed above) which map \simpC{} into itself.  However these interior operators 
+are really naturally defined as an operator from  \simpApproxC{} to itself.  At a specific 
+approximation (this is really a Topos concept in the Topos of \symDynC{}), the interior 
+simplical set is a retract of the simplicies which ``touch'' the boundary of the image of 
+the closure operator. Or alternatively a sub-simplicial set is open if its closure is a 
+proper sub-simplicial set (or is it distinct from the boundary operator?)}
+
+\section{Categorical Actions}
+
+\begin{definition}
+A functor, $C \mapsTo S$, is \define{functorial} if for each commutative diagram
+\begin{cTikzPicture}
+\matrix (m) [comDiagM]
+{ \DeltaC{k}{} & S \\
+   \DeltaC{n}{} & C \\ };
+\path[comDiagP, injection]
+(m-1-1) edge (m-1-2)
+             edge (m-2-1)
+(m-2-1) edge (m-2-2)
+(m-2-2) edge[map] node[right] {$w$} (m-1-2);
+\end{cTikzPicture}
+there exists a unique monic functor, $h : \Delta^n \mapsTo S$ which makes the diagram
+\begin{cTikzPicture}
+\matrix (m) [comDiagM]
+{ \DeltaC{k}{} & S \\
+   \DeltaC{n}{} & C \\ };
+\path[comDiagP, injection]
+(m-1-1) edge (m-1-2)
+             edge (m-2-1)
+(m-2-1) edge[densely dotted] node[inFront] {$h$} (m-1-2)
+             edge node[below] {$i$} (m-2-2)
+(m-2-2) edge[map] node[right] {$w$} (m-1-2);
+\end{cTikzPicture}
+commute.  \TODO{This is too strong.  We only want the top triangle to commute and in the 
+bottom triangle for the injection of $h$ to be into the image of $w \compose i$}.
+\end{definition}
+
+\begin{lemma}
+A functor, $C \mapsTo S$, is functorial if it is functorial with respect to $k = 0$ (in the 
+above definition).
+\end{lemma}
+\begin{proof}
+\TODO{prove this!}
+\end{proof}
+
+\begin{conjecture}
+Every functor is functorial.
+\end{conjecture}
+\begin{proof}
+\TODO{prove this!}
+\end{proof}
+
+\begin{definition}
+The \define{action of a category}, $C$, on a set, $S$, is a functorial functor $a : C 
+\mapsTo S$ \cite[Action of a Category on a set, version 2]{nLab}. An \define{action is free} 
+if for each $c \in \objects{C}$, and $f \in \homomorphisms{C}{\partial c}$ then $a(f) = 
+a(\identity{c})$ implies $f = \identity{c}$.
+\end{definition}
+
+\TODO{What we are calling an action should really be called a selection (or something 
+similar).  We \emph{can} define an action as the collection of ``pointed'' simplicies of the 
+selection.  That is for each simplex of the selection there are the $0$-simplicies of the 
+selection simplex which represents the action.  In the $1$-category case we can (and do) 
+identify the $0$-simplicies with the selected $1$-simplex since there is only one ``other'' 
+$0$-simplex.  This then gives us a more traditional action on the $0$-simplicies}
+
+\TODO{provide a more catgorical definition of free -- not so evil}
+
+\TODO{We can actually provide a definition of action which is closer to the current 
+definition of action by considering the ``set of actions'' ``mapping'' from the current 
+$0$-simplex to each of the ``other'' $0$-simplicies of the ``selected'' $n$-simplex. This 
+then gives us an ``action'' on the set of $0$-simplicies which is very similar to the 
+current definition of action.}
+
+\section{Category of Words}
+
+\TODO{We really have to narrow a definition of word.  In reality words need not be free 
+(i.e. homotopic to a point) but rather may have non-trivial homotopy groups.  Do we know 
+that transfinite simplicial sets always have simple covers?  If so then we really have a 
+category of covered words.  We then want to understand how to join words in the cover and 
+obtain an meaningful joined word in the ``base''. }
+
+\TODO{Define cartesian fibration see \cite[Section7.2]{brown2006TopologyGroupoids} and 
+\cite[Definition 2.1]{streicher2008fibredCat}}
+
+\begin{definition} \cite[??]{brown2006TopologyGroupoids} \\
+Fix a pair of (small) categories, $C$ and $W$.  The category $W$ \define{covers} $C$ if 
+there exists a functor $w : W \mapsTo C$ for which $w$ has the right lifting property with 
+respect to the monic inclusion of $\Delta^0$ into $\Delta^n$ for any $n$, given by the 
+diagram:
+\begin{cTikzPicture}
+\matrix (m) [comDiagM]
+{ \DeltaC{0}{} & W \\
+   \DeltaC{n}{} & C \\ };
+\path[comDiagP, injection]
+(m-1-1) edge (m-1-2)
+             edge (m-2-1)
+(m-2-1) edge[map,densely dotted] node[inFront] {$h$} (m-1-2)
+             edge (m-2-2)
+(m-1-2) edge[map] node[right] {$w$} (m-2-2);
+\end{cTikzPicture}
+\TODO{do we want $h$ monic?}
+\end{definition}
+
+\begin{lemma}
+Every cover has an associate action on its domain induced by its image.  Every action on a 
+set has an associated cover by the set on the action's domain.
+\end{lemma}
+\begin{proof}
+\TODO{prove this!}
+\TODO{does this exhibit categorical action of functor image on the domain of a functor}
+\end{proof}
+
+\TODO{Show that every cover is a Kan fibration  -- do this by showing that if you have 
+commuting diagrams (as above) with standard simplicies which intersect then the total 
+diagram commutes}
+
+\begin{lemma}
+Fix a triple of (small) categories, $C$, $W$ and $W'$.  Assume that $W$ covers $C$ via the 
+functor $w : W \mapsTo C$.  If there exists a functor $w' : W' \mapsTo C$, then there exists 
+a functor $h : W' \mapsTo W$ which makes the following diagram commute:
+\begin{cTikzPicture}
+\matrix (m) [comDiagM]
+{      & W \\
+   W' & C \\ };
+\path[comDiagP, map]
+(m-2-1) edge node[above left] {$h$} (m-1-2)
+(m-1-2) edge node[right] {$w$} (m-2-2)
+(m-2-1) edge node[below]  {$w'$} (m-2-2);
+\end{cTikzPicture}
+If $W'$ is connected then \image{w} is connected.
+\end{lemma}
+\begin{proof}
+This follows \cite[Lemma 10.3.1]{brown2006TopologyGroupoids}. \TODO{do we need $W'$ to cover 
+its $w'$-image?} \TODO{can we state that the $h$-image of $W'$ is connected in $W$? -- Is 
+this the reason we need connectedness in $W'$?} \TODO{Do we really want to state that $h$ is 
+monic?}
+\end{proof}
+
+\TODO{Do we need to state and prove lemmas similar to \cite[Lemmas 10.3.2 and 
+10.3.3]{brown2006TopologyGroupoids}?}
+
+\begin{lemma}
+If $W$ is a cover of $C$ via $w : W \mapsTo C$, then there exists an action of $C$ on $W_0$.
+\end{lemma}
+\begin{proof}
+\TODO{we need to show that there exists a functor $a : C \mapsTo \powerSet{W_0}$, in this 
+case we follow \cite[Section 10.4]{brown2006TopologyGroupoids}}
+\end{proof}
+
+\TODO{Do we need to state and prove lemmas similar to \cite[Lemma 
+10.4.2]{brown2006TopologyGroupoids} (which proves the existance of covers and in particular 
+free covers)?}
+
+\begin{definition}
+Fix a (small) category, $C$.  A \define{bare word} over $C$, is a (small) category, $W$, 
+together with a functor, $w : W \mapsTo C$ which is a free cover of the $w$-image of $W$ in 
+$C$.  \TODO{define subword (do I need universality?)}. A \define{specific located word} over 
+$C$, is a triple, \tuple{p, w, w'}, of bare words over $C$ for which $p$ and $w$ are 
+subwords of $w'$ and $p$ is isomorphic to $\Delta^0$.  A \define{located word} is an 
+equivilance class of specific located words where \tuple{p, w, w'} is equivilant to 
+\tuple{\hat{p}, \hat{w}, \hat{w'}} iff $p = \hat{p}, w = \hat{w}$ and there exists a bare 
+word, $w''$ for which $w$ and $\hat{w'}$ are intersecting subwords of $w''$.  \TODO{this is 
+too strict -- we probably only care about $p = p'$ and $w = w'$ up to some equivilance or 
+isomorphism not strict identity!  -- this is realated to the problem that we do not have a 
+nice ``lattice'' structure to the ``points'' underlying this ``space'' so we really do not 
+have a nice ``bundle'' structure.}
+\end{definition}
+
+\TODO{\cite[Section 10.2]{brown2006TopologyGroupoids} defines a groupoid cover as a 
+bijection of the local star at an object.  A cartesian fibration \cite[Definition 
+2.1]{streicher2008fibredCat} is defined in such a way that all compositions in the base lift 
+to compositions in the fiber.  Are these two definitions equivilant in our case?}
+
+\TODO{comment/prove that covers are cartesian fibrations which are unique}.
