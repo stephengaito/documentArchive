@@ -41,12 +41,13 @@ definition of a computational process as performed by a human. Turing's student,
 \cite{gandy1980churchsThesisMechanisms}, provided a similar \emph{mechanistic}
 mathematical definition of a computational process as performed by a \emph{finite
 machine}. Both Turing and Gandy focused upon providing arguments justifying why particular
-mathematical structures provided reasonable definitions of computation. In order to
-understand potentially trans-finite computation, we will take an essentially dual
-approach. We will look at mathematical structures which represent \emph{traces} of a
+mathematical structures provided reasonable definitions of computational \emph{devices}.
+In order to understand potentially trans-finite computation, we will take an essentially
+dual approach. We will look at mathematical structures which represent \emph{traces} of a
 (trans-finite) computation, and then work back to mathematical structures which could have
 produced these traces. Rather surprisingly, to capture \emph{trans-finite} computational
-traces, we are forced investigate the \emph{categorical} structures of labelled graphs.
+traces, we are forced investigate conveniently structured labelled graphs known as
+\emph{categories}.
 
 What is a computation? Any \emph{description} of a computational process made by a finite
 being, will inevitably consist of a collection of ``marks in the sand'', ink-marks on
@@ -108,7 +109,9 @@ the Wikipedia articles, \cite{wikipedia2015hyperComputation} and
 implementations of hypercomputational devices, \emph{we make \emph{no} such claims}.
 Davis, \cite{davis2004hyperComputation}, provides a summary of some of the arguments
 against these claims. Instead, our interest comes from our desire to capture
-non-constructive classical mathematics in a computational setting.
+non-constructive classical mathematics in a computational setting. Indeed the current work
+provides a context in which the various ``hypercomputational'' schemes can be compared and
+understood.
 
 \TODO{\cite{hamkinsLewis1998inifiniteTimeTuringMachines}}
 
@@ -173,8 +176,8 @@ terminating processes.
 In this section we explore the \emph{time} focused foundations of computations. In the next 
 section we explore the addition of \emph{space-time} (and hence parallelism).
 
-One of the central themes of this cycle of papers is the importance of graphs, paths and
-(co-)algebraic refinements. We start by defining (trans-finite) graphs.
+One of the central themes of this cycle of papers is the importance of (combinatorial)
+graphs, paths and (co-)algebraic refinements. We start by defining (trans-finite) graphs.
 
 There are essentially two distinct ways to define a mathematical structure: logically, by
 explicitly assuming the existence of a set with specific (logically expressed) properties,
@@ -238,7 +241,7 @@ underlying graphs, $G_0$ and $G_1$ for which
 \end{enumerate}
 \end{definition}
 
-\begin{definition}
+\begin{definition} \TODO{expand this to include isomorphism, monomorphism, epimorphisms}
 A \define{graph embedding}{} is a graph morphism, \map{\phi}{G_0}{G_1}, respectively, a
 labelled graph morphism, \map{\phi}{lG_0}{lG_1}, which is, categorically, a monomorphism.
 \end{definition}
@@ -257,9 +260,15 @@ isomorphism, for which
 \TODO{PROVE THIS!}
 \end{proof}
 
+\TODO{Do we need the equivilant lemma for dual labeled graphs?}
+
 Our next goal is to provide a definition of $1$-dimensional (time) ``$1$-paths''.
 Intuitively a (directed) ``$1$-path'' \emph{in} a graph is an embedding of a ``totally
 ordered'' directed graph.
+
+\TODO{NOTE: the current use of $(x,y) \in E$ is not general enough for our purposes. It 
+assumes that there is a unique edge between the vertices $x$ and $y$. For paths this is ok, 
+for general graphs it is NOT. We need to rework this notation.}
 
 \begin{definition}
 A \define{(directed) 1-path}{}, $P(V, E, \pi_0, \pi_1)$, is a graph for which:
@@ -272,6 +281,9 @@ if $(x,y) \in E$ and $(y,z) \in E$ then $(x,z) \in E$.
 \item \define{Total order:}{} for any pair of vertices, $x, y \in V$, if $x \neq y$ then
 either $(x,y) \in E$ or $(y,x) \in E$ but not both.
 \end{enumerate}
+
+A \define{labelled 1-path}{}, $lP(V, E, L_V, L_E, \pi_0, \pi_1, l_V, l_E)$, is a labeled 
+graph whose underlying graph is a 1-path.
 \end{definition}
 
 Given that $1$-paths are total orders (and hence are posets), we \emph{could} use the more
@@ -396,6 +408,37 @@ which
 \TODO{PROVE THIS!}
 \end{proof}
 
+\TODO{Add associativity of path joining}
+
+\begin{definition}
+A labelled path, $lP(V, E, L_V, L_E, \pi_0, \pi_1, l_V, l_E)$, is \define{edge
+consistent}{} if the set of edge labels, $L_E$, is equipped with a mapping,
+\map{\compose}{L_E \times L_E}{L_E}, for which if $x, y, z \in V$ are three verticies for 
+which $(x,y), (y,z) \in E$ (and hence $(x,z) \in E$), then $l_E((x,z)) = l_E((x,y)) \compose 
+l_E((y,z))$.
+\end{definition}
+
+\begin{definition}
+An graph embedding, \map{\phi}{P}{lG}, of a path, $P(V^P, E^P, \pi^P_0, \pi^P_1)$ into a 
+labelled graph, $lG(V^{lG}, E,^{lG}, L_{V^{lG}}, L_{E^{lG}}, \pi^{lG}_0, \pi^{lG}_1, 
+l_{V^{lG}}, l_{E^{lG}})$ induces a labelling on the path, $P$, via the pullback along 
+$\phi$. Specifically, the \define{induced labelling}{} is the labelled path, $lP(V^P, E^P, 
+L_{V^{lG}}, L_{E^{lG}}, \pi^P_0, \pi^P_1, l_{V^{lG}} \compose \phi, l_{E^{lG}} \compose 
+\phi)$
+\end{definition}
+
+\begin{definition}
+A labelled graph, $lG(V, E, L_V, L_E, \pi_0, \pi_1, l_V, l_E)$, has an \define{extensional
+edge labelling}{} if two edges, $e_0, e_1 \in E$ are equal, $e_0 =_E e_1$ (as elements of
+the set $E$) if and only if
+\begin{enumerate}
+\item $\pi_0(e_0) =_V \pi_0(e_1)$
+\item $\pi_1(e_0) =_V \pi_1(e_1)$
+\item $l_E(e_0) =_{L_E} l_E(e_1)$
+\end{enumerate}
+as elements of the respective sets.
+\end{definition}
+
 For at most countable graphs, defining ``linearity'' is relatively easily done by
 ``following'' single edges corresponding to the ``successor'' or ``next'' operation. For
 trans-finite graphs we must add something more to be able to deal with ``limit points''.
@@ -412,24 +455,23 @@ Verity, see, for example, \cite{verity2005complicialSets},
 \cite{verity2006simplicialComplicialCategories}.}.
 
 \begin{definition}
+A \define{1-category}{}, $C(V, E, L_V, L_E, \pi_0, \pi_1, l_V, l_E, i)$, is a labelled graph 
+with an extensional edge labelling, \map{l_E}{E}{L_E}, 
+\end{definition}
 
+
+\begin{definition}
 A \define{1-category}{}, $C(E, V, \pi_0, \pi_1, i)$, is a graph with the addition of an 
 \define{identity map}{} \map{i}{V}{E} for which $\pi_0 \compose i$ and $\pi_1 
 \compose i$ are both the identity of the set $V$, and for which 
-
 \begin{itemize}
-
 \item If $f, g \in E$ and $\pi_1(f) = \pi_0(g)$ then there exists $f \compose g \in E$ for 
 which $ \pi_0(f) = \pi_0(f \compose g)$ and $ \pi_1(f \compose g) = \pi_1(g)$
-
 \item If $f \in E$ then $ f \compose i(\pi_0(f)) = f$ and $i(\pi_1(f)) \compose f = f$
-
 \item If \map{f}{w}{x}, \map{g}{x}{y} and \map{h}{y}{z} then the graph, $hgf(\set{f,
 g, h}, \set{w, x, y, z}, \pi_0, \pi_1)$ can be extended to a 1-path embedded in $C$ in only 
 one way
-
 \end{itemize}
-
 \end{definition}
 
 \section{Space-time: directed simplicies, refinements and space-time paths}
