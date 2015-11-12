@@ -1,0 +1,322 @@
+%% Time 
+
+\chapter{Time: Graphs, paths and refinements}
+
+In anticipation of our future work, we take a slightly non-standard route towards defining
+(trans-finite) computation. We leave it to the reader to understand both why we take
+this route, and that we have, in fact, provided the same structures.
+
+The classical theory of computation, with its (almost exclusive) focus on
+\emph{terminating} computational processes, is largely focused on \emph{time} to the
+exclusion of \emph{space}. For \emph{terminating} processes, any parallel (spacial)
+process can be serialized. This serialisability \emph{is} equivalent to set theory's
+Well-ordering Theorem and hence the Axiom of Choice. As we will see below,
+\emph{non-terminating} processes need not be globally serializable. This is, again,
+equivalent to the lack of global time in relativistic space-time.
+
+Since we are not omni-potent beings, while we can prove theorems about non-terminating 
+processes, we can not directly experience them. We can only access non-terminating processes 
+via (terminating) ordinal approximations to the full non-terminating process. This means 
+that, in a sense, ``all'' computation can \emph{effectively} be reduced to serializable 
+terminating processes. 
+
+In this section we explore the \emph{time} focused foundations of computations. In the next 
+section we explore the addition of \emph{space-time} (and hence parallelism).
+
+One of the central themes of this cycle of papers is the importance of (combinatorial)
+graphs, paths and (co-)algebraic refinements. We start by defining (trans-finite) graphs.
+
+There are essentially two distinct ways to define a mathematical structure: logically, by
+explicitly assuming the existence of a set with specific (logically expressed) properties,
+or computationally, in categorical language, as the fixed point of an endofunctor. From a
+non-categorical inductive point of view, an early expression of this dichotomy can be
+found in \cite[page 1]{moschovakis1974induction}. In this paper we follow the logical
+approach. In subsequent papers in this cycle, we will use the computational approach.
+
+There are relatively few discussions of non-finite graphs from which we mention Reinhard
+Diestel's work, \cite{diestel2006graphTheory, diestel1990infiniteGraphTheory}.
+Unfortunately, for trans-finite graphs, we must go, more or less, ``on beyond
+zebra''\footnote{Growing up, one of my favourite books was Dr Seuss' ``On beyond Zebra'',
+\cite{seuss1955onBeyondZebra}. \emph{Be warned}: One of my greatest faults is that I seem
+congenitally incapable of staying within ``obvious'' bounds...}\footnote{Another of my
+greatest faults is that my mind is a web of snippets of ideas. Linearizing this web into
+single narrative, is \emph{very} hard for me to do, and may be hard to fully follow until 
+you have heard ``the whole shaggy-dog story''.}.
+
+Our definition of graph is inspired by the definition of metagraph in
+\cite{macLane1971categoriesWorkingMathematician} section I.1. Note that our definition is
+a generalisation of most typical definitions, for example \cite[section
+1.1]{diestel2006graphTheory}. In particular, all of our graphs are \emph{explicilty}
+\emph{directed}. Categorically, a graph is simply a presheaf on the category
+$ \cdot \substack{\mathbf{\longrightarrow} \\[-0.7ex] \mathbf{\longrightarrow}} \cdot $
+
+\begin{definition}
+A \define{graph}{}, $G(V, E, \pi_0, \pi_1)$, is a set, $V$, of \define{verticies}{}, and a
+set, $E$, of \define{edges}{}, together with two maps, \map{\pi_0}{E}{V} and
+\map{\pi_1}{E}{V}, called the source and target maps.
+
+A \define{labeled graph}{}, $lG(V, E, L_V, L_E, \pi_0, \pi_1, l_V, l_E)$, is a graph $G(V,
+E, \pi_0, \pi_1)$ together with a set, $L_V$, of \define{vertex labels}{}, and a set,
+$L_E$, of \define{edge labels}{}, and maps, \map{l_V}{V}{L_V}, and \map{l_E}{E}{L_E}.
+Often the set of vertex labels, $L_V$, and vertex label map, $l_V$, are omitted (or
+alternatively the set of vertex labels is assumed to be the trivial one point set).
+ 
+Given a labeled graph, $lG(V, E, L_V, L_E, \pi_0, \pi_1, l_v, lE)$ its \define{underlying
+graph}{}, is the graph, $G(V, E, \pi_0, \pi_1)$.
+\end{definition}
+
+\begin{definition}
+A \define{graph morphism}{}, \map{\phi}{G_0}{G_1}, is a map between the graphs,
+$G_0(V^{G_0}, E^{G_0}, \pi^{G_0}_0, \pi^{G_0}_1)$ and $G_1(V^{G_1}, E^{G_1}, \pi^{G_1}_0,
+\pi^{G_1}_0)$ for which
+\begin{enumerate}
+\item $\phi(V^{G_0}) \subset V^{G_1}$
+\item $\phi(E^{G_0}) \subset E^{G_1}$
+\item $\phi \compose \pi^{G_0}_i = \pi^{G_1}_i \compose \phi$ for $i \in {0, 1}$
+\end{enumerate}
+
+A \define{labeled graph morphism}{}, \map{\phi}{lG_0}{lG_1}, between a pair of labeled
+graphs, $lG_0(V^{lG_0}, E^{lG_0}, L^{lG_0}_V, L^{lG_0}_E, \pi^{lG_0}_0, \pi^{lG_0}_1,
+l^{lG_0}_V, l^{lG_0}_V)$ and $lG_1(V^{lG_1}, E^{lG_1}, L^{lG_1}_V, L^{lG_1}_E,
+\pi^{lG_1}_0, \pi^{lG_1}_1, l^{lG_1}_V, l^{lG_1}_V)$, is a graph morphism between the
+underlying graphs, $G_0$ and $G_1$ for which
+\begin{enumerate}
+\item $\phi(L^{lG_0}_V) \subset L^{lG_1}_V$
+\item $\phi(L^{lG_0}_E) \subset L^{lG_1}_E$
+\item $\phi \compose l^{lG_0}_V = l^{lG_1}_V \compose \phi$
+\item $\phi \compose l^{lG_0}_E = l^{lG_1}_E \compose \phi$
+\end{enumerate}
+\end{definition}
+
+\begin{definition} \TODO{expand this to include isomorphism, monomorphism, epimorphisms}
+A \define{graph embedding}{} is a graph morphism, \map{\phi}{G_0}{G_1}, respectively, a
+labelled graph morphism, \map{\phi}{lG_0}{lG_1}, which is, categorically, a monomorphism.
+\end{definition}
+
+\begin{lemma}
+Given a graph, $G(V, E, \pi_0, \pi_1)$, there exists a \define{dual graph}{},
+$\tilde{G}(\tilde{V}, \tilde{E}, \tilde{\pi}_0, \tilde{\pi}_1)$, unique up to graph 
+isomorphism, for which
+\begin{enumerate}
+\item $\tilde{V} = V$,
+\item $\tilde{E} = \set{(v, u) \suchThat (u, v) \in E}$
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+\TODO{PROVE THIS!}
+\end{proof}
+
+\TODO{Do we need the equivilant lemma for dual labeled graphs?}
+
+Our next goal is to provide a definition of $1$-dimensional (time) ``$1$-paths''.
+Intuitively a (directed) ``$1$-path'' \emph{in} a graph is an embedding of a ``totally
+ordered'' directed graph.
+
+\TODO{NOTE: the current use of $(x,y) \in E$ is not general enough for our purposes. It 
+assumes that there is a unique edge between the vertices $x$ and $y$. For paths this is ok, 
+for general graphs it is NOT. We need to rework this notation.}
+
+\begin{definition}
+A \define{(directed) 1-path}{}, $P(V, E, \pi_0, \pi_1)$, is a graph for which:
+
+\begin{enumerate}
+\item \define{Anti-symmetry:}{} for any pair of vertices, $x, y \in V$, if $(x,y) \in E$ and
+$(y,x) \in E$ then $x = y$.
+\item \define{Transitivity:}{} for any triple of verticies, $x, y, z \in V$, 
+if $(x,y) \in E$ and $(y,z) \in E$ then $(x,z) \in E$.
+\item \define{Total order:}{} for any pair of vertices, $x, y \in V$, if $x \neq y$ then
+either $(x,y) \in E$ or $(y,x) \in E$ but not both.
+\end{enumerate}
+
+A \define{labelled 1-path}{}, $lP(V, E, L_V, L_E, \pi_0, \pi_1, l_V, l_E)$, is a labeled 
+graph whose underlying graph is a 1-path.
+\end{definition}
+
+Given that $1$-paths are total orders (and hence are posets), we \emph{could} use the more
+traditional, ``$\leq$'', notation for the edges in $1$-paths. However to ensure a more
+obvious generalisation to $\lambda$-paths (for any ordinal, $\lambda$), we retain the edge
+notation, ``$(x,y)$'', throughout.
+
+\begin{definition}
+For a path, $P(V, E, \pi_0, \pi_1)$, a vertex, $v \in V$, is \define{maximal}{} or
+\define{final}{} (respectively \define{minimal}{} or \define{initial}{}) if for every
+vertex, $x \in V$, there exists an edge $(x,v) \in E$ ($(v, x) \in E$).
+
+A vertex is \define{internal}{} if it is neither initial or final. A vertex is on the  
+\define{boundary}{} if it is either initial or final.
+
+A \define{$1$-interval}{} is a $1$-path which has both maximal and minimal vertices. Given 
+verticies, $x, y \in V$ which are minimal and maximal (respectively), we often denote the 
+interval as, $[x,y]$.
+\end{definition}
+
+Note that by anti-symmetry, any maximal (minimal) elements of a path are unique. By total
+order, if there exists two distinct vertices, $x,y \in V$, for which $(x,y) \in E$, then
+the vertex $x$ can not be maximal, and conversely, the vertex $y$ can not be minimal.
+
+\begin{definition}
+A path, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, is a \define{subpath}{} of a
+path, $P_1(V^{P_1}, E^{P_1}, \pi^{P_1}_0, \pi^{P_1}_1)$, if there exists an embedding,
+\map{\phi}{P_0}{P_1}.
+
+Conversely, a path, $P_1(V^{P_1}, E^{P_1}, \pi^{P_1}_0, \pi^{P_1}_1)$, \define{extends}{}
+a path, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, if there exists an embedding,
+\map{\phi}{P_0}{P_1}.
+\end{definition}
+
+Note that every edge in any path is trivially a subpath of the path. Conversely, a path
+extends each of its edges. By abuse of notation, the edge, $(x,y)$, will often also denote
+its corresponding sub\emph{path}, $P(\set{x,y}, \set{(x,y)}, \pi_0((x,y)):=x,
+\pi_1((x,y)):=y)$.
+
+\begin{definition}
+Given paths, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$ and $P_1(V^{P_1}, E^{P_1},
+\pi^{P_1}_0, \pi^{P_1}_1)$, an edge, $(x^{P_0}, y^{P_0}) \in E^{P_0}$ \define{covers}{} an
+edge, $(x^{P_1}, y^{P_1}) \in E^{P_1}$, if there exists an subpath, $\hat{P_1}$ in $P_1$
+which is both an interval, $[\hat{x^{P_1}}, \hat{y^{P_1}}]$, and an extension of
+$(x^{P_1}, y^{P_1})$ for which there exists an embedding, \map{\phi}{(x^{P_0},
+y^{P_0})}{\hat{P_1}} for which:
+\begin{itemize}
+\item $\phi(x^{P_0}) = \hat{x^{P_1}}$
+\item $\phi(y^{P_0}) = \hat{y^{P_1}}$
+\item $\phi( (x^{P_0}, y^{P_0}) ) = (\hat{x^{P_1}}, \hat{y^{P_1}})$
+\end{itemize}
+\end{definition}
+
+\begin{definition}
+A path, $P_1(V^{P_1}, E^{P_1}, \pi^{P_1}_0, \pi^{P_1}_1)$, is a \define{refinement}{} of a
+path, $P_0(V^{P_0}, E^{P_0}, \pi^{P_0}_0, \pi^{P_0}_1)$, if every edge, $e^{P_1} \in 
+E^{P_1}$ is covered by an edge $e^{P_0} \in E^{P_0}$.
+\end{definition}
+
+Having defined what a $1$-path is, we now need to explore the collection of $1$-paths.
+
+\begin{theorem}\label{path:addFinal}
+Given a path, $P(V, E, \pi_0, \pi_1)$, there exists a path, $P^+(V^+, E^+, \pi^+_0,
+\pi^+_1)$,  unique up to graph isomorphism, for which
+\begin{enumerate}
+\item there exist a graph embedding, \map{\phi^+}{P}{P^+}
+\item $V^+ = \phi^+(V) \union \set{V}$
+\item for each $v \in V$ there exists an edge, $(\phi^+(v), \set{V}) \in E^+$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\TODO{PROVE THIS!}
+\end{proof}
+
+\begin{corollary}\label{path:addInitial}
+Given a path, $P(V, E, \pi_0, \pi_1)$, there exists a path, $P^-(V^-, E^-, \pi^-_0,
+\pi^-_1)$,  unique up to graph isomorphism, for which
+\begin{enumerate}
+\item there exist a graph embedding, \map{\phi^-}{P}{P^-}
+\item $V^- = \phi^-(V) \union \set{V}$
+\item for each $v \in V$ there exists an edge, $(\set{V}, \phi^-(v)) \in E^-$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+Apply Theorem, \ref{path:addFinal}, to the dual path of $P$.
+\end{proof}
+
+\begin{corollary}
+Given a path, $P(V, E, \pi_0, \pi_1)$, there exists a path, $P^{+-}(V^{+-}, E^{+-},
+\pi^{+-}_0, \pi^{+-}_1)$,  unique up to graph isomorphism, for which
+\begin{enumerate}
+\item there exist a graph embedding, \map{\phi^{+-}}{P}{P^{+-}}
+\item $V^{+-} = \phi^{+-}(V) \union \set{V} \union \set{V^+}$
+\item for each $v \in V$ there exists an edge, $(\phi^{+-}(v), \set{V}) \in E^{+-}$,
+\item for each $v \in V$ there exists an edge, $(\set{V^+}, \phi^{+-}(v)) \in E^{+-}$,
+\item $(\set{V^+}, \set{V}) \in E^{+-}$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+Apply Theorem, \ref{path:addFinal}, to obtain the path $P^+(V^+, E^+, \pi^+_0, \pi^+_1)$
+which has a unique final vertex, and then Corollary, \ref{path:addInitial}, to obtain
+$P^{+-}$.
+\end{proof}
+
+\begin{theorem}
+Given a pair of paths, $P^-(V^-, E^-, \pi^-_0, \pi^-_0)$ and $P^+(V^+, E^+, \pi^+_0,
+\pi^+_1)$, for which $P^-$ has a final vertex, $p^-$ and $P^+$ has an initial vertex,
+$p^+$, there exists a path $P(V, E, \pi_0, \pi_1)$, unique up to graph isomorphism, for
+which
+\begin{enumerate}
+\item there exists a graph embeddings, \map{\phi^-}{P^-}{P} and \map{\phi^+}{P^+}{P},
+\item $\phi^-(p^-) = \phi^+(p^+)$,
+\item for each $v^+ \in V^+$ and $v^+ \in V^+$ there exists an edge $(\phi^-(v^-), 
+\phi^+(v^+)) \in E$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\TODO{PROVE THIS!}
+\end{proof}
+
+\TODO{Add associativity of path joining}
+
+\begin{definition}
+A labelled path, $lP(V, E, L_V, L_E, \pi_0, \pi_1, l_V, l_E)$, is \define{edge
+consistent}{} if the set of edge labels, $L_E$, is equipped with a mapping,
+\map{\compose}{L_E \times L_E}{L_E}, for which if $x, y, z \in V$ are three verticies for 
+which $(x,y), (y,z) \in E$ (and hence $(x,z) \in E$), then $l_E((x,z)) = l_E((x,y)) \compose 
+l_E((y,z))$.
+\end{definition}
+
+\begin{definition}
+An graph embedding, \map{\phi}{P}{lG}, of a path, $P(V^P, E^P, \pi^P_0, \pi^P_1)$ into a 
+labelled graph, $lG(V^{lG}, E,^{lG}, L_{V^{lG}}, L_{E^{lG}}, \pi^{lG}_0, \pi^{lG}_1, 
+l_{V^{lG}}, l_{E^{lG}})$ induces a labelling on the path, $P$, via the pullback along 
+$\phi$. Specifically, the \define{induced labelling}{} is the labelled path, $lP(V^P, E^P, 
+L_{V^{lG}}, L_{E^{lG}}, \pi^P_0, \pi^P_1, l_{V^{lG}} \compose \phi, l_{E^{lG}} \compose 
+\phi)$
+\end{definition}
+
+\begin{definition}
+A labelled graph, $lG(V, E, L_V, L_E, \pi_0, \pi_1, l_V, l_E)$, has an \define{extensional
+edge labelling}{} if two edges, $e_0, e_1 \in E$ are equal, $e_0 =_E e_1$ (as elements of
+the set $E$) if and only if
+\begin{enumerate}
+\item $\pi_0(e_0) =_V \pi_0(e_1)$
+\item $\pi_1(e_0) =_V \pi_1(e_1)$
+\item $l_E(e_0) =_{L_E} l_E(e_1)$
+\end{enumerate}
+as elements of the respective sets.
+\end{definition}
+
+For at most countable graphs, defining ``linearity'' is relatively easily done by
+``following'' single edges corresponding to the ``successor'' or ``next'' operation. For
+trans-finite graphs we must add something more to be able to deal with ``limit points''.
+Rather surprisingly, to deal with these ``limit points'' it is convenient to define
+1-Categories, since a Category which is, sequentially complete as well as sequentially
+cocomplete, is a graph which explicitly includes all of its ``paths''. Categorically, a
+category is a presheaf on the category
+$ \bullet \substack{\mathbf{\longrightarrow} \\[-0.7ex] \mathbf{\longleftarrow} 
+\\[-0.7ex] \mathbf{\longrightarrow} } \bullet $
+equipped with a consistent collection of 2-simplicies which are declared
+``thin''\footnote{This way of looking at 1-categories is inspired by the work of Dominic
+Verity, see, for example, \cite{verity2005complicialSets},
+\cite{verity2006complicialSimplicialHomotopy} and
+\cite{verity2006simplicialComplicialCategories}.}.
+
+\begin{definition}
+A \define{1-category}{}, $C(V, E, L_V, L_E, \pi_0, \pi_1, l_V, l_E, i)$, is a labelled graph 
+with an extensional edge labelling, \map{l_E}{E}{L_E}, 
+\end{definition}
+
+
+\begin{definition}
+A \define{1-category}{}, $C(E, V, \pi_0, \pi_1, i)$, is a graph with the addition of an 
+\define{identity map}{} \map{i}{V}{E} for which $\pi_0 \compose i$ and $\pi_1 
+\compose i$ are both the identity of the set $V$, and for which 
+\begin{itemize}
+\item If $f, g \in E$ and $\pi_1(f) = \pi_0(g)$ then there exists $f \compose g \in E$ for 
+which $ \pi_0(f) = \pi_0(f \compose g)$ and $ \pi_1(f \compose g) = \pi_1(g)$
+\item If $f \in E$ then $ f \compose i(\pi_0(f)) = f$ and $i(\pi_1(f)) \compose f = f$
+\item If \map{f}{w}{x}, \map{g}{x}{y} and \map{h}{y}{z} then the graph, $hgf(\set{f,
+g, h}, \set{w, x, y, z}, \pi_0, \pi_1)$ can be extended to a 1-path embedded in $C$ in only 
+one way
+\end{itemize}
+\end{definition}
