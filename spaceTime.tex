@@ -815,12 +815,11 @@ coface/codegeneracy factorization, $m =
 factorization, 
 \begin{align*}
 \tuple[X]{m} & = \tuple[X]{\coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}} \compose 
-\coDegeneracy{\alpha}{\gamma}{\kernel{m}}} \\
-                       & = \tuple[X]{\coDegeneracy{\alpha}{\gamma}{\kernel{m}}} \compose 
-                       \tuple[X]{\coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}}}  \\
-                       
-                       & = \degeneracy{\alpha}{\gamma}{\kernel{m}} \compose 
-                       \face{\gamma}{\beta}{\woSet{\beta}\withOut \image{m}}
+                 \coDegeneracy{\alpha}{\gamma}{\kernel{m}}} \\
+             & = \tuple[X]{\coDegeneracy{\alpha}{\gamma}{\kernel{m}}} \compose 
+                 \tuple[X]{\coFace{\gamma}{\beta}{\woSet{\beta}\withOut\image{m}}}  \\
+             & = \degeneracy{\alpha}{\gamma}{\kernel{m}} \compose 
+                 \face{\gamma}{\beta}{\woSet{\beta}\withOut \image{m}}
 \end{align*}
 \end{enumerate}
 For each $\alpha \leq \kappa$, the elements of $X_{\alpha}$ are 
@@ -1522,7 +1521,7 @@ obtain an meaningful joined word in the ``base''. }
 \cite[Definition 2.1]{streicher2008fibredCat}}
 
 \begin{definition} \cite[??]{brown2006TopologyGroupoids} \\
-Fix a pair of (small) categories, $C$ and $W$.  The category $W$ \define{covers} $C$ if 
+Fix a pair of (small) categories, $C$ and $W$.  The category $W$ \define{covers}{} $C$ if 
 there exists a functor $w : W \mapsTo C$ for which $w$ has the right lifting property with 
 respect to the monic inclusion of $\Delta^0$ into $\Delta^n$ for any $n$, given by the 
 diagram:
