@@ -49,19 +49,20 @@ later generations to finalize in all of its glory.}
 In a Categorical setting, such as we are using, the most appropriate way to define
 simplicial sets is via the Topos of functor presheaves, \opFuncCat{\DeltaC{}{}}{\setC{}}
 (alternatively \altOpFuncCat{\DeltaC{}{}}{\setC{}}), see for example \cite[Chapter
-1]{goerssJardin1999SimplicialHomotopyTh}, \cite[Section VII.5]{maclane1971a},
-\cite[section 2.1]{arxiv2005math0410412v2}, \cite[Section
-I.2]{may1967simplicialObjectsInAlgTopo}, \cite[Chapter 2]{gabrielZisman1967homotopyTh}
-\TODO{add the numerous papers}.
+1]{goerssJardin1999SimplicialHomotopyTh}, \cite[Section
+VII.5]{macLane1971categoriesWorkingMathematician}, \cite[section
+2.1]{verity2005complicialSets}, \cite[Section I.2]{may1967simplicialObjectsInAlgTopo},
+\cite[Chapter 2]{gabrielZisman1967homotopyTh} \TODO{add the numerous papers}.
 
 We will actually base our transfinite generalization on Dominic Verity's exposition,
-\cite[section 2.1]{arxiv2005math0410412v2}. The essential difference between the
+\cite[section 2.1]{verity2005complicialSets}. The essential difference between the
 expositions of Goerss and Jardin's versus that of Verity is that Goerss and Jardin's
 exposition uses a more purely Categorical notation (which avoids the use of internal set
 theoretic notation), while Verity's exposition uses a more classical notation by
 essentially working in the internal set theory of \setC{}.  For those who are not familiar
 with simplicial topology, Friedman's expository account of simplicial sets,
-\cite{arxiv2008math0809.4221v1}, provides a highly recommended introduction to this theory
+\cite{friedman2008illustratedIntroduction}, provides a highly recommended introduction to 
+this theory
 with a good number of visual explanations of what is going on both combinatorially as well
 as geometrically.
 
@@ -267,7 +268,7 @@ theory of \setC{} allowing the Axiom of Choice, which similarly is equivalent to
 ordinals begin well ordered.  Since we are working in \setC{}, we may phrase our arguments
 using classical set theory.
 
-\begin{definition} (\cite[Definition 1, Section 2.1]{arxiv2005math0410412v2})
+\begin{definition} (\cite[Definition 1, Section 2.1]{verity2005complicialSets})
 In \setC{}, fix $\kappa$ as a fixed \emph{small} cardinal, such as $\omega$.  
 The \define{Category of symmetric $\kappa$-simplexes}, denoted \sDeltaC{}{}, is 
 \begin{enumerate}
@@ -322,7 +323,7 @@ For finite $n$, the graph \woSet{n} can be depicted as:
 
 The first and most important task is to understand the structure and compositional
 decomposition of the hom sets of \sDeltaC{}{}, \DeltaC{}{} and \ndDeltaC{}{}.  We begin by
-essentially following \cite[Notation 3 and Observations 7 and 8]{arxiv2005math0410412v2}. 
+essentially following \cite[Notation 3 and Observations 7 and 8]{verity2005complicialSets}. 
 We note that, the usual simplicial face maps are not able to describe face maps which
 ``cross'' limit ordinals.  Instead of being able to define all face maps in terms of
 ``dropping'' a single vertex, we must work by ``dropping'' sets of verticies.
@@ -871,7 +872,8 @@ The composition of two simplicial maps is a simplicial map.
 \end{proof}
 
 \TODO{We need to discuss the corresponding functor category of non-degenerate simplicial 
-sets (Freidman calls Delta sets, \cite[Section 2.3]{arxiv2008math0809.4221v1}).  Morphisms 
+sets (Freidman calls Delta sets, \cite[Section 2.3]{friedman2008illustratedIntroduction}).  
+Morphisms 
 of \funcCat{\ndDeltaC{}{}}{\setC{}} are not as ``flexible'' as morphisms of 
 \funcCat{\DeltaC{}{}}{\setC{}}. The map identify ``whole'' simplicies but they may not 
 identify subsimplicies (faces) unless the pair of containing simplicies are also identified. 
