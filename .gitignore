@@ -36,5 +36,7 @@
 *.bak
 *.bib
 *.pdf
+*.bcf
+*.run.xml
 gitHeadInfo.gin
 

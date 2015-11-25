@@ -2,8 +2,12 @@
 %
 
 \documentclass[a4paper,openany]{amsart}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
 \usepackage{disitt}
 \usepackage{disitt-symbols}
+\usepackage[backend=biber,style=alphabetic,citestyle=alphabetic]{biblatex}
+\addbibresource{transFiniteComputation.bib}
 \usepackage{mdframed}
 \newmdenv[linecolor=white,backgroundcolor=gray!10]{infobox}
 \newenvironment{myQuote}{\begin{quotation}}{\end{quotation}}
@@ -19,18 +23,116 @@
 \keywords{Keyword one, keyword two etc.}%
 
 \begin{abstract}
-... put abstract here ...
+This mini-paper is a place to start ``finger pieces'' for re-use in other papers.
 \end{abstract} 
 \maketitle 
 \tableofcontents 
 
 
-\section{Introduction}
+\section{Defining the Universe using Natural Judgements}
 
+Our primary aim is to begin building the Universe, \Universe{}{}.
 
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{empty-\Universe{}{}}
+\UnaryInfC{\judgement{\emptyset}{\Universe{}{}}}
+\end{prooftree}
 
-\bibliographystyle{amsalpha}
-\bibliography{fingerPieces}
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{\Universe{}{}-\Universe{}{}}
+\UnaryInfC{\judgement{\Universe{}{}}{\Universe{}{}}}
+\end{prooftree}
 
+\begin{prooftree}
+\AxiomC{\judgement{x}{y}}
+\AxiomC{\judgement{y}{z}}
+\RightLabel{transitive-\Universe{}{}}
+\BinaryInfC{\judgement{x}{z}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{\Universe{}{\emptyset}-\Universe{}{}}
+\UnaryInfC{\judgement{\Universe{}{\emptyset}}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{x}{\Universe{}{}}}
+\AxiomC{\judgement{y}{\Universe{}{}}}
+\RightLabel{$(\cdot)^{\emptyset}$-Intro}
+\BinaryInfC{\judgement{\Delta_{\emptyset}(x)}{y^{\emptyset}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{y}{\Universe{}{}}}
+\AxiomC{\judgement{x}{y^{\emptyset}}}
+\RightLabel{\Universe{}{\emptyset}-Elim}
+\BinaryInfC{\judgement{\textbf{Label}(x)}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{x}{\Universe{}{}}}
+\AxiomC{\judgement{y}{\Universe{}{}}}
+\AxiomC{$ x \subSet y$}
+\RightLabel{\Universe{}{\emptyset}-Elim}
+\TrinaryInfC{\judgement{\textbf{Label}(x)}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{x}{\Universe{}{\emptyset}}}
+\RightLabel{\Universe{}{\emptyset}-Elim}
+\UnaryInfC{\judgement{\textbf{Dim}(x)}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{x}{\Universe{}{\emptyset}}}
+\RightLabel{\Universe{}{\emptyset}-Elim}
+\UnaryInfC{$\textbf{Dim}(x) =_{\Universe{}{}} \emptyset$}
+\end{prooftree}
+
+\hrule
+
+\begin{prooftree}
+\AxiomC{$\context{\Gamma} \vdash \judgement{a}{b}$}
+\AxiomC{$\context{\Gamma} \vdash \judgement{b}{a}$}
+\RightLabel{antisymmetry-partOf}
+\BinaryInfC{$\context{\Gamma} \vdash a =_{\Universe{}{}} b$}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$c\mathcal{J}_0$}
+\AxiomC{$\cdots$}
+\AxiomC{$c\mathcal{J}_{\gamma}$}
+\RightLabel{Name}
+\TrinaryInfC{$c\mathcal{J}$}
+\end{prooftree}
+
+\section{Defining the Universe using Programming Language}
+
+\begin{verbatim}
+data Universe = DeltaE Universe
+  | Delta0 Universe DeltaE
+  | Delta1 Universe Delta0 Delta0
+
+empty = ??
+
+zero = DeltaE empty
+
+one = DeltaE zero
+  
+label :: Universe -> Universe
+  DeltaE x = x
+  Delta0 x _ = x
+  Delta1 x _ _ = x
+
+pi0 :: Universe -> Universe
+  Delta0 _ x = x
+  Delta1 _ x _ = x
+  
+\end{verbatim}
+
+\printbibliography
 \end{document}
 
