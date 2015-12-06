@@ -7,7 +7,7 @@
 \usepackage{disitt}
 \usepackage{disitt-symbols}
 \usepackage[backend=biber,style=alphabetic,citestyle=alphabetic]{biblatex}
-\addbibresource{transFiniteComputation.bib}
+\addbibresource{fingerPieces.bib}
 \usepackage{mdframed}
 \newmdenv[linecolor=white,backgroundcolor=gray!10]{infobox}
 \newenvironment{myQuote}{\begin{quotation}}{\end{quotation}}
@@ -41,6 +41,43 @@ the sand'') in a finite amount of time.
 trans-finite amount of time.
 \end{enumerate}
 
+\emph{What can a finite being do?} Again for our purposes it can do two
+important things:
+\begin{enumerate}
+\item It can \emph{construct} finite structures in a finite amount of time.
+\item It can \emph{observe} a finite amount of a potentially non-finite
+structure in a finite amount of time.
+\end{enumerate}
+
+Previous attempts at providing a foundation for Mathematics from the past 200
+years have focused upon providing \emph{logical} arguments for the existence and
+properties of mathematical entities. All existing definitions of set theory, such
+as Zermelo-Fraenklel's set theory with the Axiom of Choice based upon first
+order logic, or type theory, such as the recent Homotopy Type Theory,
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, continue this approach.
+
+Existing (\emph{logical}) foundations of Mathematics focus upon using natural
+deduction (in one form or another) to recursively \emph{compute} the \emph{truth
+value} of a logical \emph{sentence} which is built out of component
+sub-sentences. These logical sentences are semantically construed to be
+\emph{about} the existence or properties of Mathematical structures\footnote{See
+for example the discussion in \cite{hatcher1982logicalFoundationsMath}.}. It is
+the essentially semantic nature of these logical sentences which provide the
+\emph{bite} in the various logical paradoxes which the current foundations of
+mathematics have been designed to avoid.
+
+Unfortunately, the existing \emph{logical} foundations of mathematics avoid
+these paradoxes by forbidding non-well-founded structures, which in turn
+requires the use of what is essentially non-finite computational methods to
+model the observation of physical reality. The primary thesis of the current
+\emph{computational} foundations of mathematics, is that by analysing the
+computational nature of the observational process of the sciences, and
+\emph{explicitly} allowing non-well-founded structures, we obtain a simpler
+mathematics which better reflects the way scientists actually work. Our
+secondary thesis is that trans-finite mathematics is only required to provide an
+understanding of how finitely constructive mathematics ``fits into'' existing
+mathematical practice.
+
 Being finite beings, we must limit ourselves to making a finite number of
 ``marks in the sand'' in a finite amount of time. Since we are assuming \emph{no
 external} mathematical environment to this work, we need to define the whole of
@@ -54,19 +91,12 @@ symbols.
 collection of additional symbols.
 \end{enumerate}
 
-Previous attempts at providing a foundation for Mathematics from the past 150
-years have focused upon providing \emph{logical} arguments for the existence and
-properties of mathematical entities. All current definitions of set theory, such
-as Zermelo-Fraenklel's set theory with the Axiom of Choice based upon first
-order logic, or type theory, such as the recent Homotopy Type Theory,
-\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, continue this approach.
-
-Current foundations of Mathematics focus upon using natural deduction (in one
-form or another) to recursively compute the \emph{truth value} of a logical
-\emph{sentence} which is build out of component sub-sentences. See for example
-the discussion in \cite{hatcher1982logicalFoundationsMath}.
-
-
+We will provide what is essentially a type theoretic foundations for
+mathematics, see, for example, the recent Homotopy Type Theory,
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}. However, instead of
+essentially \emph{logical} judgements that a given logical sentence is ``true'',
+we use \emph{computational} judgements that a structure can be built or dually
+has been observed.
 
 \section{Defining the Universe using Natural Judgements}
 
