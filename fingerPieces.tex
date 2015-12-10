@@ -114,6 +114,68 @@ mathematics}. In fact the Universal Topos will be \emph{extensional} and will
 satisfy the categorical equivalent of the Axiom of Choice, so the internal
 logic, of the Universal Topos, will actually be higher-order classical logic.
 
+In \emph{logical} type theory, such as Homotopy Type Theory,
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, all judgements are
+judgements \emph{in} a \emph{context}. These contexts provide a ``list'' of the
+``free'' variables in the judgement. These contexts provide the objects of the
+classifying category associated with the type theory, see for example,
+\cite{jacobs1999catLogicTypeTh}. In the current \emph{computational} type
+theory, contexts \emph{are} a sequential (``historical'') \emph{record} of how
+an object has been constructed, or dually, observed. In a computational type
+theory, the contexts are the objects being computed, built or observed.
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{empty-ctx}
+\UnaryInfC{\cJudgement{\cdot}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$\context{\mathcal{\hat{J}}} \vdash \mathcal{J}$}
+\RightLabel{next-ctx}
+\UnaryInfC{\cJudgement{\mathcal{\hat{J}}, \mathcal{J}}}
+\end{prooftree}
+
+As any self respecting functional programmer will recognise, this is a twisted,
+\emph{co-algebraic}, definition of a list. Instead of growing to the right, this list
+structure grows to the left. As we will see below, the pair of inference rules, empty-ctx
+and next-ctx together imply that a context is a mapping from the \emph{computable}
+ordinals into the collection of judgements. For omnipotent beings, the computable ordinals
+\emph{are} the ordinals.
+
+\begin{prooftree}
+\AxiomC{$\context{\mathcal{J}_0, \ldots, \mathcal{J}_n} \vdash \mathcal{J}_{n+1}$}
+\RightLabel{successor-ctx}
+\UnaryInfC{\cJudgement{\mathcal{J}_0, \ldots, \mathcal{J}_n, \mathcal{J}_{n+1}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$\context{\mathcal{J}_0, \ldots, \mathcal{J}_n} \vdash 
+\cJudgement{\mathcal{J}_{n+1}, \ldots, \mathcal{J}_{n+m}}$}
+\RightLabel{flatten-1-ctx}
+\UnaryInfC{$\context{\mathcal{J}_0, \ldots, \mathcal{J}_n, \mathcal{J}_{n+1}} \vdash 
+\cJudgement{\mathcal{J}_{n+2}, \ldots, \mathcal{J}_{n+m}}$}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$\context{\mathcal{J}_0, \ldots, \mathcal{J}_n} \vdash 
+\cJudgement{\cJudgement{\mathcal{J}_{n+1,0},\ldots,\mathcal{J}_{n+1,k}}, \ldots, 
+\mathcal{J}_{n+m}}$}
+\RightLabel{flatten-2-ctx}
+\UnaryInfC{$\context{\mathcal{J}_0, \ldots, \mathcal{J}_n, \mathcal{J}_{n+1,0}} \vdash 
+\cJudgement{\cJudgement{\mathcal{J}_{n+1,1},\ldots,\mathcal{J}_{n+1,k}}, \ldots, 
+\mathcal{J}_{n+m}}$}
+\end{prooftree}
+
+\TODO{I now assert that the two flattens above provide sufficient computational power to
+compute the total flattening of any countably structured context.... PROVE THIS.
+Essentially given these rules, a context is a countably infinitely branching countably
+infinitely deep tree. To flatten it we need to follow a weaving breadth first pattern
+continuously revisiting nodes until in the ``countably inifinite time'' it is flattened. 
+This \emph{will} be a typcial problem/solution for diSimplicial structures. Essentially this 
+is nothing more nor less than a \emph{fair} parallel scheduling algorithm for the parallel 
+application of, in this case, the flattening rules on all branches simultaneously. }
+
 \begin{prooftree}
 \AxiomC{}
 \RightLabel{empty-\Universe{}{}}
