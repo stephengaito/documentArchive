@@ -40,3 +40,6 @@
 *.run.xml
 gitHeadInfo.gin
 
+_minted*
+generatedGuileCode
+generatedHaskellCode
