@@ -6,6 +6,7 @@
 \usepackage[english]{babel}
 \usepackage{disitt}
 \usepackage{disitt-symbols}
+\usepackage{disitt-code}
 \usepackage[backend=biber,style=alphabetic,citestyle=alphabetic]{biblatex}
 \addbibresource{zfcIsConsistent.bib}
 \usepackage{mdframed}
@@ -17,7 +18,8 @@
 
 \sloppy
 
-\title[ZFC is absolutely consistent]{A computational proof of the absolute consistency of ZFC}
+\title[ZFC is absolutely consistent]
+{A computational proof of the absolute consistency of ZFC}
 \input{frontMatter}
 \subjclass[2010]{Primary unknown; Secondary unknown} %
 \keywords{Keyword one, keyword two etc.}%
@@ -29,7 +31,6 @@ Choice has a model in a countable computational structure.
 \maketitle 
 \tableofcontents 
 
-
 \section{Introduction}
 
 Assuming Zermelo-Fraenkel set theory with the Axiom of Choice (ZFC), the
@@ -40,6 +41,49 @@ countable model of ZFC using purely computational structures, and hence
 \emph{not} making use of ZFC itself. This provides a non-set-theoretic model of
 ZFC which, given its countable computational structure, could be, in theory,
 computed by any powerful enough computer given sufficient time.
+
+From a computational point of view we intend to build a compiler which compiles
+strings in a suitable dialect of first order logic with equality and the set
+membership relation, $\in$, into a suitable computational data structure. This
+``suitable'' data structure is based upon a ``classical'' list of lists. The
+simplest naive approach would be to map the cumulative hierarchy of sets in ZFC,
+\cite[Lemma 6.3]{jech2003setTheory}, into a similar cumulative hierarchy of
+lists. Given that ``classically'' computational structures are at most
+countable, this naive approach will not work. The next simplest approach, which
+we \emph{do} take, is to index the cumulative computational structures by the
+ordinals using Cantor’s Normal Form, \cite[Theorem 2.26 ]{jech2003setTheory}.
+
+\subsection{Approach}
+
+Few proofs in mathematics are complete in that they rarely map out \emph{every}
+detail of \emph{every} step. The proof contained in this paper will be rather
+more explict than any other current proof, in that it \emph{will} be a
+computation which \emph{can be} computed on \emph{the reader's} computer.
+However to be absolutely complete we should also map this computational process
+back to, for example, an \emph{explicit} Turing machine. We will do the next
+best thing, the computational code contained in this paper will be in the Lisp
+dialect Scheme's sub-dialect Guile, which is, for our purposes, a relatively
+slight, but useable, modification of Church's type free Lambda Calculus. An
+encyclopedic introduction to the syntax and semantics of the type free Lambda
+Calculus can be found in Barendregt's \cite{barendregt2012lambdaCalculus}.
+
+Since our primary computational structure will be lists of lists, Lisp in
+general and Scheme in particular is a good practical choice of computational
+infrastructure. Of the Lisp dialects, Scheme is minimalistic with a clean
+implementation of recursion where functions are first class values. Guile,
+\cite{guile2014online, guile2014reference}, is a comprehensive modern
+open-source implementation of Scheme.
+
+\section{Cumulative computational structures}
+
+\begin{guile}
+(write (command-line))
+(newline)
+(display "Hello, world!")
+(newline)
+\end{guile}
+
+\section{The language of First Order Logic with Equality and $\in$}
 
 \printbibliography
 \end{document}
