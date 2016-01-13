@@ -45,3 +45,4 @@ gitHeadInfo.gin
 _minted*
 generatedGuileCode
 generatedHaskellCode
+generatedRacketCode
