@@ -1,3 +1,33 @@
 % Peano Arithmetic
 
-In this section we count.
+In this section we count. We use a List of Lists form of Cantor's normal form,
+\cite[Theorem 2.26]{jech2003setTheory}, to represent the Ordinals, \Ordinal{}.
+
+\begin{bnf*}
+ \bnfProd{Ordinal}{ ( \bnfSP \bnfKS{\bnfPN{OrdinalSumand}}{*} \bnfSP )}
+ \bnfProd{OrdinalSumand}{ 
+   ( \bnfSP 
+     ( \bnfSP \bnfPN{Ordinal} \bnfSP ) \bnfSP
+     ( \bnfSP \bnfPN{Natural} \bnfSP ) \bnfSP
+   ) }
+ \bnfProd{Natural}{ ( \bnfSP ) }
+ \bnfAlt{ ( \bnfSP \bnfPN{Natural} \bnfSP ( \bnfSP \bnfPN{Natural} \bnfSP ) \bnfSP ) }
+\end{bnf*}
+
+\begin{racket}
+;; Peano Arithmetic
+
+(println "Hello from Peano Arithmetic!")
+
+(define zero (lambda () ( list ) ) )
+
+;;(define omega (lambda () 0))
+
+(define isZero? (lambda (n) (null? n)))
+
+;;(define isOmega? (lambda (n) (zero? n)))
+
+(define suc (lambda (n) ( list* '() n) ) )
+
+(define pred (lambda (n) (cdr n) ) )
+\end{racket}

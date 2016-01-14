@@ -30,6 +30,8 @@ This mini-book containing various chapters which each provide a place to start
 \maketitle 
 \tableofcontents 
 
+\racketRequirePkg{rackunit}
+
 \chapter{Finger Piece 1}
 \input{fingerPiece01.tex}
 
@@ -37,10 +39,15 @@ This mini-book containing various chapters which each provide a place to start
 \input{fingerPiece02.tex}
 
 \chapter{Plato's Universe}
+\racketRequireFile{fingerPiece03.rkt}
 \input{fingerPiece03.tex}
 
 \chapter{Peano Arithmetic}
+\racketRequireFile{fingerPiece04.rkt}
 \input{fingerPiece04.tex}
+
+\chapter{Design considerations}
+\input{fingerPiece05.tex}
 
 \printbibliography
 \end{document}

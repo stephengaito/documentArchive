@@ -6,3 +6,17 @@ Lists.
 
 ``Before the Set, was the List''
 
+\begin{bnf*}
+ \bnfProd{List}{ ( \bnfSP ) }
+ \bnfAlt{ ( \bnfSP \bnfPN{List} \bnfSP \bnfTD{.} \bnfSP \bnfPN{List} \bnfSP )}
+\end{bnf*}
+
+Alternatively in Kleene star format as essentially used in Lisp/Scheme:
+
+\begin{bnf*}
+ \bnfProd{List}{ ( \bnfSP \bnfKS{ \bnfPN{List} }{*} \bnfSP ) }
+\end{bnf*}
+
+\begin{racket}
+(println "Hello from Plato's universe!")
+\end{racket}
