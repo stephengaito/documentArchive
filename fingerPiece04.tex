@@ -10,8 +10,7 @@ In this section we count. We use a List of Lists form of Cantor's normal form,
      ( \bnfSP \bnfPN{Ordinal} \bnfSP ) \bnfSP
      ( \bnfSP \bnfPN{Natural} \bnfSP ) \bnfSP
    ) }
- \bnfProd{Natural}{ ( \bnfSP ) }
- \bnfAlt{ ( \bnfSP \bnfPN{Natural} \bnfSP ( \bnfSP \bnfPN{Natural} \bnfSP ) \bnfSP ) }
+ \bnfProd{Natural}{ ( \bnfSP \bnfKS{( \bnfSP )}{*} \bnfSP ) }
 \end{bnf*}
 
 \begin{racket}
@@ -19,9 +18,10 @@ In this section we count. We use a List of Lists form of Cantor's normal form,
 
 (println "Hello from Peano Arithmetic!")
 
+#|
 (define zero (lambda () ( list ) ) )
 
-;;(define omega (lambda () 0))
+(define omega (lambda () ) )
 
 (define isZero? (lambda (n) (null? n)))
 
@@ -30,4 +30,25 @@ In this section we count. We use a List of Lists form of Cantor's normal form,
 (define suc (lambda (n) ( list* '() n) ) )
 
 (define pred (lambda (n) (cdr n) ) )
+|#
+
+(define zero (lambda () 'zero ) )
+
+(define isZero? (lambda (n) (eq? n 'zero)))
+
+(define suc
+  (lambda (n)
+    ( if (isZero? n)
+      '('zero (()))
+      ( if (isZero? (cdr n))
+        (list (car n) '(()))
+        (list (car n) (list* '() (cadr n)))
+      )
+    )
+  )
+)
+
+(define one (lambda () (suc (zero))))
+
+(define omega (lambda () (list* (one) (zero))))
 \end{racket}
