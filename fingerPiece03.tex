@@ -96,4 +96,36 @@ prove, using finite space-time, that a given finitely defined
 $\beta$-computation, if preformed with $\beta$ sized space-time, would compute
 the correct results, this is the import of Tony Hoare's Axiomatic Semantics.
 
+\begin{cTikzPictureWorking}
 
+\fill[orange!20!white] (0,0) -- (4,0) -- (4,4) -- (0,4)
+  -- (0,3) -- (3,3) -- (3,1) -- (0,1) -- (0,0);
+
+\path (0,0) edge (4,0);
+\path (0,0) edge (0,4);
+\path (4,0) edge (4,4);
+\path (0,4) edge (4,4);
+
+\path (0,1) edge (3,1);
+\path (3,1) edge (3,2);
+\path (0,2) edge (3,2);
+
+\path (0,3) edge (3,3);
+\path (3,2) edge (3,3);
+
+\path (3,1.5) edge[dashed] (4,1.5);
+
+\node at (1.5,1.5) {L-expression};
+\node at (1.5,2.5) {M-expression};
+\node at (2,3.7) {Interpreter - Process};
+\node at (2,3.2) {(Co-algebra)};
+\node at (2,0.7) {Interpreter - Memory};
+\node at (2,0.2) {(Algebra)};
+
+\end{cTikzPictureWorking}
+
+The processor part of the interpreter, could be a human, a computer, or a Lisp
+machine. The memory part of the interpreter, could be sand, paper, an abacus,
+computer RAM, or Lisp machine list memory.
+
+An L-expression is that subset of all Lisp S-exrepssions which have no atoms other than NIL, and hence are pure Lists of Lists.
