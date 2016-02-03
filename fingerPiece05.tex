@@ -1,52 +1,54 @@
-% Design considerations
+% Peano Arithmetic
 
-\section{Goals}
+In this section we count. We use a List of Lists form of Cantor's normal form,
+\cite[Theorem 2.26]{jech2003setTheory}, to represent the Ordinals, \Ordinal{}.
 
-We want to build a very simple language which is based upon the static 
-list of lists.
+\begin{bnf*}
+ \bnfProd{Ordinal}{ ( \bnfSP \bnfKS{\bnfPN{OrdinalSumand}}{*} \bnfSP )}
+ \bnfProd{OrdinalSumand}{ 
+   ( \bnfSP 
+     ( \bnfSP \bnfPN{Ordinal} \bnfSP ) \bnfSP
+     ( \bnfSP \bnfPN{Natural} \bnfSP ) \bnfSP
+   ) }
+ \bnfProd{Natural}{ ( \bnfSP \bnfKS{( \bnfSP )}{*} \bnfSP ) }
+\end{bnf*}
 
-We want this language to be:
-\begin{enumerate}
-\item Functional language
-\item Computational/RunTime as well as CompileTime processes
-  \begin{itemize}
-  \item This will really be implemented as meta-levels
-  \item Type checking will be a meta-process
-  \end{itemize}
-\item Lazy
-\item Have continuations (to allow "lazy processes")
-\item Modules to allow layering of mathematical detail
-\end{enumerate}
+\begin{racket}
+;; Peano Arithmetic
 
-Effectively we are building the universal interpreter.
+(println "Hello from Peano Arithmetic!")
 
-It is of profound importance that we switch out of the normal computational
-theory mode of fascination with halting processes which return a result.  In our
-computational theory, \emph{some} processes \emph{might} terminate and return an
-(more or less) ``interesting'' result, \emph{but} halting must not be critical to the
-\emph{meaning} of computational theory.
+#|
+(define zero (lambda () ( list ) ) )
 
-We have nominally chosen the Lisp/Scheme dialect Racket,
-\cite{racket2016racket}, as the most appropriate target programming language to
-provide a simple base implementation of a List of Lists.
+(define omega (lambda () ) )
 
-Our implementation of an interpreter for mathematics is primarily based upon the
-ideas in \cite{friedmanWand2008essentialsProgrammingLanguages} and
-\cite{krishnamurthi2007programmingLanguagesApplicationInterpretation} (see also
-\cite{krishnamurthi2012programmingLanguagesApplicationInterpretation}).
+(define isZero? (lambda (n) (null? n)))
 
-From a software \emph{engineering} point of view we want to use the procedural
-representation, \cite[section
-2.2.3]{friedmanWand2008essentialsProgrammingLanguages}, rather than the data
-representation, \cite[section
-2.2.2]{friedmanWand2008essentialsProgrammingLanguages}. While both
-representations have essentiall the same code, the data representation forces
-\emph{all} of this code to be located in the same interpreter method which makes
-modularization and layering of new mathematical concepts more difficult. In
-particular, the proceedural representation does not require global changes to be
-made.
+;;(define isOmega? (lambda (n) (zero? n)))
 
-Our definition of computation will be data/trace based however our interpreter
-will likely be based upon the Lambda calculus and/or pattern
-matching/replacement. \TODO{How does the limit operation from the trace
-interpretation map over to the Lambda calculus?}
+(define suc (lambda (n) ( list* '() n) ) )
+
+(define pred (lambda (n) (cdr n) ) )
+|#
+
+(define zero (lambda () 'zero ) )
+
+(define isZero? (lambda (n) (eq? n 'zero)))
+
+(define suc
+  (lambda (n)
+    ( if (isZero? n)
+      '('zero (()))
+      ( if (isZero? (cdr n))
+        (list (car n) '(()))
+        (list (car n) (list* '() (cadr n)))
+      )
+    )
+  )
+)
+
+(define one (lambda () (suc (zero))))
+
+(define omega (lambda () (list* (one) (zero))))
+\end{racket}
