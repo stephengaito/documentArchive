@@ -3,7 +3,12 @@
 (provide interpret)
 
 (define (interpret sExp)
-  (print sExp))
+  (unless (eof-object? sExp)
+    (print sExp)
+  )
+  (printf "\n")
+  sExp
+)
 
 ;(let ([fileName (file-to-interpret)])
 ;  (let ([in (open-input-file fileName)])

@@ -20,11 +20,15 @@
   )
 )
 
+(define (interpret-read aPort)
+  (interpret (read aPort))
+)
+
 (define (interpret-file aFile)
   (if (file-exists? aFile)
     (begin
       (printf "interpreting [~a]\n" aFile)
-      (file->list aFile interpret)
+      (file->list aFile interpret-read)
     )
     (printf "file [~a] not found... skipping\n" aFile)
   )
