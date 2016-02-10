@@ -1,0 +1,10 @@
+#!/usr/bin/env racket
+#lang racket/base
+
+;(require rackunit)
+;(require rackunit/text-ui)
+(require racket/rerequire)
+
+(current-directory "pkgs/diSimp/tests")
+
+(define ignoreValues (map dynamic-rerequire (sort (directory-list) path<? )))
