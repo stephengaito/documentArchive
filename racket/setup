@@ -2,11 +2,12 @@
 
 # This bash script sets up the Racket DiSimp package
 
-diSimpLib=$HOME/.diSimp/lib
+diSimpDir=$HOME/.diSimp/racket
 
-if [ -d $diSimpLib ]; then
-  cp diSimp/diSimpMain.rkt $diSimpLib/main.rkt
-  raco pkg install --link $PWD/diSimp
+if [ -d $diSimpDir ]; then
+  mkdir -p $diSimpDir/pkgs/diSimp/scribblings
+  cp -r pkgs $diSimpDir
+  raco pkg install --link $diSimpDir/pkgs/diSimp
 else
   echo "Please setup the diSimplexLaTeX buildTool first"
 fi
