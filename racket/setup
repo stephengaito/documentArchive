@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# This bash script sets up the Racket DiSimp package
+
+diSimpLib=$HOME/.diSimp/lib
+
+if [ -d $diSimpLib ]; then
+  cp diSimp/diSimpMain.rkt $diSimpLib/main.rkt
+  raco pkg install --link $PWD/diSimp
+else
+  echo "Please setup the diSimplexLaTeX buildTool first"
+fi
+
