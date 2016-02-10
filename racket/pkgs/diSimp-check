@@ -21,7 +21,7 @@
 )
 
 (define (interpret-read aPort)
-  (interpret (read aPort))
+  (interpret verbose-mode (read aPort))
 )
 
 (define (interpret-file aFile)
