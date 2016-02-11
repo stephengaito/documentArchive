@@ -17,12 +17,12 @@ Alternatively in Kleene star format as essentially used in Lisp/Scheme:
  \bnfProd{List}{ ( \bnfSP \bnfKS{ \bnfPN{List} }{*} \bnfSP ) }
 \end{bnf*}
 
-\begin{racket}
-(println "Hello from Plato's engine!")
-\end{racket}
+%\begin{racket}
+%(println "Hello from Plato's engine!")
+%\end{racket}
 
 
-\begin{cTikzPictureWorking}
+\begin{cTikzPicture}
 
 \fill[orange!20!white] (0,0) -- (4,0) -- (4,4) -- (0,4)
   -- (0,3) -- (3,3) -- (3,1) -- (0,1) -- (0,0);
@@ -48,7 +48,7 @@ Alternatively in Kleene star format as essentially used in Lisp/Scheme:
 \node at (2,0.7)   {Interpreter - Memory};
 \node at (2,0.25)  {(Algebra)};
 
-\end{cTikzPictureWorking}
+\end{cTikzPicture}
 
 The processor part of the interpreter, could be a human, a computer, or a Lisp
 machine. The memory part of the interpreter, could be sand, paper, an abacus,
@@ -95,53 +95,95 @@ poskittPlump2010hoareCalculus}.
 We begin by providing the syntax of our diSimplex proof language following the
 standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
 
+\newcommand{\IExp}[1]{& \textnormal{IExp:} & #1 \\}
+\newcommand{\Denotation}[1]{& \textnormal{Den:} & #1 \\}
+\newcommand{\Operational}[1]{& \textnormal{Oper:} & #1 \\}
+\newcommand{\Axiomatic}[1]{& \textnormal{Axiom:} & \begin{minipage}{4cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \\}
+
 \begin{bnf*}
- \bnfProd{Program}{\bnfPN{List}}
+ \bnfProd{Proof}{ \bnfTD{Begin} \bnfSP \bnfPN{Expression} \bnfSP \bnfTD{End} }
+ \IExp{( \bnfSP \bnfTD{proof} \bnfSP \bnfTD{exp1} \bnfSP )}
+ \Denotation{something}
+ \Operational{something}
+ \Axiomatic{
+  \AxiomC{}
+  \RightLabel{empty-ctx}
+  \UnaryInfC{\cJudgement{\cdot}}
+ }
 \end{bnf*}
 
-%@BNF[(list @nonterm{Program} @nonterm{Expression})]
+\begin{bnf*}
+ \bnfProd{Expression}{\bnfPN{List}}
+ \IExp{( \bnfSP \bnfTD{list} \bnfSP \bnfTD{list1} \bnfSP )}
+ \Denotation{something}
+ \Operational{something}
+% \Axiomatic{something}
+\end{bnf*}
 
-%@codeblock[#:indent 15]{(program (exp1))}
+\begin{bnf*}
+ \bnfProd{Expression}{ \bnfTD{cons} \bnfSP \bnfPN{List} \bnfSP \bnfPN{List} }
+ \IExp{( \bnfSP \bnfTD{cons} \bnfSP \bnfTD{list1} \bnfSP \bnfTD{list2} \bnfSP )}
+ \Denotation{something}
+ \Operational{something}
+% \Axiomatic{something}
+\end{bnf*}
 
-%@BNF[(list @nonterm{Expression} @nonterm{List})]
+\begin{bnf*}
+ \bnfProd{Expression}{ \bnfTD{car} \bnfSP \bnfPN{List} }
+ \IExp{( \bnfSP \bnfTD{car} \bnfSP \bnfTD{list1} \bnfSP )}
+ \Denotation{something}
+ \Operational{something}
+% \Axiomatic{something}
+\end{bnf*}
 
-%@codeblock[#:indent 15]{(list (list1))}
+\begin{bnf*}
+ \bnfProd{Expression}{ \bnfTD{cdr} \bnfSP \bnfPN{List} }
+ \IExp{( \bnfSP \bnfTD{cdr} \bnfSP \bnfTD{list1} \bnfSP )}
+ \Denotation{something}
+ \Operational{something}
+% \Axiomatic{something}
+\end{bnf*}
 
-%@BNF[(list @nonterm{Expression}
-%           @BNF-seq[@litchar{cons} @nonterm{List} @nonterm{List}])]
+\begin{bnf*}
+ \bnfProd{Expression}{ \bnfTD{null?} \bnfSP \bnfPN{List} }
+ \IExp{( \bnfSP \bnfTD{null?} \bnfSP \bnfTD{list1} \bnfSP )}
+ \Denotation{something}
+ \Operational{something}
+% \Axiomatic{something}
+\end{bnf*}
 
-%@codeblock[#:indent 15]{(cons list1 list2)}
+\begin{bnf*}
+ \bnfProd{Expression}{ \bnfTD{if}   \bnfSP \bnfPN{Expression} \bnfSP
+                       \bnfTD{then} \bnfSP \bnfPN{Expression} \bnfSP
+                       \bnfTD{else} \bnfSP \bnfPN{Expression} }
+ \IExp{( \bnfSP \bnfTD{if} \bnfSP \bnfTD{exp1} \bnfSP \bnfTD{exp2} \bnfSP \bnfTD{exp3} \bnfSP )}
+ \Denotation{something}
+ \Operational{something}
+% \Axiomatic{something}
+\end{bnf*}
 
-%@BNF[(list @nonterm{Expression} @BNF-seq[@litchar{car} @nonterm{List}])]
+\begin{bnf*}
+ \bnfProd{Expression}{ \bnfPN{Identifier} }
+ \IExp{( \bnfSP \bnfTD{var} \bnfSP \bnfTD{var1} \bnfSP )}
+ \Denotation{something}
+ \Operational{something}
+% \Axiomatic{something}
+\end{bnf*}
 
-%@codeblock[#:indent 15]{(car list1)}
+\begin{bnf*}
+ \bnfProd{Expression}{ \bnfTD{let} \bnfSP \bnfPN{Identifier} \bnfSP
+                       \bnfTD{=}   \bnfSP \bnfPN{Expression} }
+ \IExp{( \bnfSP \bnfTD{let} \bnfSP \bnfTD{var1} \bnfSP \bnfTD{exp1} \bnfSP )}
+ \Denotation{something}
+ \Operational{something}
+% \Axiomatic{something}
+\end{bnf*}
 
-%@BNF[(list @nonterm{Expression} @BNF-seq[@litchar{cdr} @nonterm{List}])]
-
-%@codeblock[#:indent 15]{(cdr list1)}
-
-%@BNF[(list @nonterm{Expression} @BNF-seq[@litchar{null?} @nonterm{List}])]
-
-%@codeblock[#:indent 15]{(null? list1)}
-
-%@BNF[(list @nonterm{Expression}
-%           @BNF-seq[@litchar{if} @nonterm{Expression}
-%                    @litchar{then} @nonterm{Expression}
-%                    @litchar{else} @nonterm{Expression}])]
-
-%@codeblock[#:indent 15]{(if exp1 exp2 exp3)}
-
-%@BNF[(list @nonterm{Expression} @nonterm{Identifier})]
-
-%@codeblock[#:indent 15]{(var var1)}
-
-%@BNF[(list @nonterm{Expression}
-%           @BNF-seq[@litchar{let} @nonterm{Identifier}
-%                    @litchar{=} @nonterm{Expression}])]
-
-%@codeblock[#:indent 15]{(let var exp1)}
-
-%@BNF[(list @nonterm{List} @BNF-seq[@litchar{(} @litchar{)}])]
-
-%@codeblock[#:indent 15]{(null-list)}
+\begin{bnf*}
+ \bnfProd{List}{ \bnfTD{(} \bnfSP \bnfTD{)}}
+ \IExp{( \bnfSP \bnfTD{null} \bnfSP )}
+ \Denotation{something}
+ \Operational{something}
+% \Axiomatic{something}
+\end{bnf*}
 
