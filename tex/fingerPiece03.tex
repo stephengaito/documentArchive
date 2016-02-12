@@ -95,95 +95,146 @@ poskittPlump2010hoareCalculus}.
 We begin by providing the syntax of our diSimplex proof language following the
 standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
 
-\newcommand{\IExp}[1]{& \textnormal{IExp:} & #1 \\}
+\newcommand{\MExp}[1]{& \textnormal{MExp:} & #1  \nonumber \\}
+\newcommand{\denExp}[2]{\ensuremath{ \lbrack \! \lbrack #1 \rbrack \! \rbrack #2}}
+\newcommand{\denEql}[3]{\ensuremath{ \lbrack \! \lbrack #1 \rbrack \! \rbrack #2 = #3}}
 \newcommand{\Denotation}[1]{& \textnormal{Den:} & #1 \\}
-\newcommand{\Operational}[1]{& \textnormal{Oper:} & #1 \\}
-\newcommand{\Axiomatic}[1]{& \textnormal{Axiom:} & \begin{minipage}{4cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \\}
+\newcommand{\opExp}[3]{\ensuremath{\langle #1 , #2 \rangle \rightarrow #3}}
+\newcommand{\Operational}[1]{& \textnormal{Oper:} & %
+ \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \nonumber \\}
+\newcommand{\Axiomatic}[1]{& \textnormal{Axiom:} & %
+ \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \nonumber }
 
-\begin{bnf*}
- \bnfProd{Proof}{ \bnfTD{Begin} \bnfSP \bnfPN{Expression} \bnfSP \bnfTD{End} }
- \IExp{( \bnfSP \bnfTD{proof} \bnfSP \bnfTD{exp1} \bnfSP )}
+\begin{bnf}\label{null-list}
+ \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfTD{)} \nonumber }
+ \MExp{( \bnfSP \bnfTD{null} \bnfSP )}
+ \Denotation{\denEql{\bnfSP(\bnfSP)\bnfSP}{\sigma}{()}}
+ \Operational{
+  \AxiomC{}
+  \RightLabel{$(\bnfSP)$}
+  \UnaryInfC{\opExp{()}{\sigma}{()}}}
+ \Axiomatic{
+  \AxiomC{}
+  \RightLabel{$(\bnfSP)$}
+  \UnaryInfC{()}
+ }
+\end{bnf}
+
+\begin{bnf}\label{cons-list}
+ \bnfProd{ListExp}{ \bnfTD{cons} \bnfSP \bnfPN{ListExp} \bnfSP \bnfPN{ListExp} \nonumber }
+ \MExp{( \bnfSP \bnfTD{cons} \bnfSP \bnfTD{list1} \bnfSP \bnfTD{list2} \bnfSP )}
+ \Denotation{\denEql{\bnfSP\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}\bnfSP}
+  {\sigma}{(\bnfSP \denExp{\bnfTD{list1}}{\sigma} \bnfSP
+   \denExp{\bnfTD{list2}}{\sigma} \bnfSP)}}
+ \Operational{
+  \AxiomC{\opExp{list1}{\sigma}{\lambda_1}}
+  \AxiomC{\opExp{list2}{\sigma}{\lambda_2}}
+  \RightLabel{$\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}$}
+  \BinaryInfC{\opExp{\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}}{\sigma}
+                   {(\bnfSP \lambda_1\bnfSP\lambda_2\bnfSP)}}
+ }
+ \Axiomatic{
+  \AxiomC{$\lambda_1$}
+  \AxiomC{$\lambda_2$}
+  \RightLabel{$\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}$}
+  \BinaryInfC{$(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)$}
+ }
+\end{bnf}
+
+\begin{bnf}\label{car-list}
+ \bnfProd{ListExp}{ \bnfTD{car} \bnfSP \bnfPN{ListExp} \nonumber }
+ \MExp{( \bnfSP \bnfTD{car} \bnfSP \bnfTD{list1} \bnfSP )}
+ \Denotation{\denEql{\bnfSP\bnfTD{car}\bnfSP\bnfTD{list1}\bnfSP}
+  {\sigma}{\begin{cases}
+  \lambda_1 \text{ if } \opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)} \\
+  \bot \text{ otherwise }
+  \end{cases}}}
+ \Operational{
+  \AxiomC{\opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)}}
+  \RightLabel{$\bnfTD{car}\bnfSP\bnfTD{list1}$}
+  \UnaryInfC{\opExp{\bnfSP\bnfTD{car}\bnfSP\bnfTD{list1}}{\sigma}{\lambda_1}}
+ }
+ \Axiomatic{
+  \AxiomC{ $ ( \bnfSP \lambda_1 \bnfSP \lambda_2 \bnfSP ) $ }
+  \RightLabel{$\bnfTD{car}\bnfSP\bnfTD{list1}$}
+  \UnaryInfC{ $ \lambda_1 $ }
+ }
+\end{bnf}
+
+\begin{bnf}\label{cdr-list}
+ \bnfProd{ListExp}{ \bnfTD{cdr} \bnfSP \bnfPN{ListExp} \nonumber }
+ \MExp{( \bnfSP \bnfTD{cdr} \bnfSP \bnfTD{list1} \bnfSP )}
+ \Denotation{\denEql{\bnfSP\bnfTD{cdr}\bnfSP\bnfTD{list1}\bnfSP}
+  {\sigma}{\begin{cases}
+   \lambda_2 \text{ if } \opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)} \\
+   \bot \text{ otherwise }
+  \end{cases}}}
+ \Operational{
+  \AxiomC{\opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)}}
+  \RightLabel{$\bnfTD{cdr}\bnfSP\bnfTD{list1}$}
+  \UnaryInfC{\bnfSP\opExp{\bnfTD{car}\bnfSP\bnfTD{list1}\bnfSP}
+   {\sigma}{\lambda_2}}
+ }
+ \Axiomatic{
+  \AxiomC{$(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)$}
+  \RightLabel{$\bnfTD{cdr}\bnfSP\bnfTD{list1}$}
+  \UnaryInfC{$\lambda_2$}
+ }
+\end{bnf}
+
+\begin{bnf}
+ \bnfProd{Proof}{ \bnfTD{Begin} \bnfSP \bnfPN{Expression} \bnfSP \bnfTD{End} \nonumber }
+ \MExp{( \bnfSP \bnfTD{proof} \bnfSP \bnfTD{exp1} \bnfSP )}
  \Denotation{something}
- \Operational{something}
+% \Operational{something}
  \Axiomatic{
   \AxiomC{}
   \RightLabel{empty-ctx}
   \UnaryInfC{\cJudgement{\cdot}}
  }
-\end{bnf*}
+\end{bnf}
 
-\begin{bnf*}
- \bnfProd{Expression}{\bnfPN{List}}
- \IExp{( \bnfSP \bnfTD{list} \bnfSP \bnfTD{list1} \bnfSP )}
+\begin{bnf}
+ \bnfProd{Expression}{\bnfPN{List} \nonumber }
+ \MExp{( \bnfSP \bnfTD{list} \bnfSP \bnfTD{list1} \bnfSP )}
  \Denotation{something}
- \Operational{something}
+% \Operational{something}
 % \Axiomatic{something}
-\end{bnf*}
+\end{bnf}
 
-\begin{bnf*}
- \bnfProd{Expression}{ \bnfTD{cons} \bnfSP \bnfPN{List} \bnfSP \bnfPN{List} }
- \IExp{( \bnfSP \bnfTD{cons} \bnfSP \bnfTD{list1} \bnfSP \bnfTD{list2} \bnfSP )}
+\begin{bnf}
+ \bnfProd{Expression}{ \bnfTD{null?} \bnfSP \bnfPN{List} \nonumber }
+ \MExp{( \bnfSP \bnfTD{null?} \bnfSP \bnfTD{list1} \bnfSP )}
  \Denotation{something}
- \Operational{something}
+% \Operational{something}
 % \Axiomatic{something}
-\end{bnf*}
+\end{bnf}
 
-\begin{bnf*}
- \bnfProd{Expression}{ \bnfTD{car} \bnfSP \bnfPN{List} }
- \IExp{( \bnfSP \bnfTD{car} \bnfSP \bnfTD{list1} \bnfSP )}
- \Denotation{something}
- \Operational{something}
-% \Axiomatic{something}
-\end{bnf*}
-
-\begin{bnf*}
- \bnfProd{Expression}{ \bnfTD{cdr} \bnfSP \bnfPN{List} }
- \IExp{( \bnfSP \bnfTD{cdr} \bnfSP \bnfTD{list1} \bnfSP )}
- \Denotation{something}
- \Operational{something}
-% \Axiomatic{something}
-\end{bnf*}
-
-\begin{bnf*}
- \bnfProd{Expression}{ \bnfTD{null?} \bnfSP \bnfPN{List} }
- \IExp{( \bnfSP \bnfTD{null?} \bnfSP \bnfTD{list1} \bnfSP )}
- \Denotation{something}
- \Operational{something}
-% \Axiomatic{something}
-\end{bnf*}
-
-\begin{bnf*}
+\begin{bnf}
  \bnfProd{Expression}{ \bnfTD{if}   \bnfSP \bnfPN{Expression} \bnfSP
                        \bnfTD{then} \bnfSP \bnfPN{Expression} \bnfSP
-                       \bnfTD{else} \bnfSP \bnfPN{Expression} }
- \IExp{( \bnfSP \bnfTD{if} \bnfSP \bnfTD{exp1} \bnfSP \bnfTD{exp2} \bnfSP \bnfTD{exp3} \bnfSP )}
+                       \bnfTD{else} \bnfSP \bnfPN{Expression} \nonumber }
+ \MExp{( \bnfSP \bnfTD{if} \bnfSP \bnfTD{exp1} \bnfSP \bnfTD{exp2} \bnfSP \bnfTD{exp3} \bnfSP )}
  \Denotation{something}
- \Operational{something}
+% \Operational{something}
 % \Axiomatic{something}
-\end{bnf*}
+\end{bnf}
 
-\begin{bnf*}
- \bnfProd{Expression}{ \bnfPN{Identifier} }
- \IExp{( \bnfSP \bnfTD{var} \bnfSP \bnfTD{var1} \bnfSP )}
+\begin{bnf}
+ \bnfProd{Expression}{ \bnfPN{Identifier} \nonumber }
+ \MExp{( \bnfSP \bnfTD{var} \bnfSP \bnfTD{var1} \bnfSP )}
  \Denotation{something}
- \Operational{something}
+% \Operational{something}
 % \Axiomatic{something}
-\end{bnf*}
+\end{bnf}
 
-\begin{bnf*}
+\begin{bnf}
  \bnfProd{Expression}{ \bnfTD{let} \bnfSP \bnfPN{Identifier} \bnfSP
-                       \bnfTD{=}   \bnfSP \bnfPN{Expression} }
- \IExp{( \bnfSP \bnfTD{let} \bnfSP \bnfTD{var1} \bnfSP \bnfTD{exp1} \bnfSP )}
+                       \bnfTD{=}   \bnfSP \bnfPN{Expression} \nonumber }
+ \MExp{( \bnfSP \bnfTD{let} \bnfSP \bnfTD{var1} \bnfSP \bnfTD{exp1} \bnfSP )}
  \Denotation{something}
- \Operational{something}
+% \Operational{something}
 % \Axiomatic{something}
-\end{bnf*}
+\end{bnf}
 
-\begin{bnf*}
- \bnfProd{List}{ \bnfTD{(} \bnfSP \bnfTD{)}}
- \IExp{( \bnfSP \bnfTD{null} \bnfSP )}
- \Denotation{something}
- \Operational{something}
-% \Axiomatic{something}
-\end{bnf*}
 
