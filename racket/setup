@@ -4,10 +4,13 @@
 
 diSimpDir=$HOME/.diSimp/racket
 
+raco pkg install doc-coverage
+
 if [ -d $diSimpDir ]; then
   mkdir -p $diSimpDir/pkgs/diSimp/scribblings
   cp -r pkgs $diSimpDir
   raco pkg install --link $diSimpDir/pkgs/diSimp
+  raco setup diSimp
 else
   echo "Please setup the diSimplexLaTeX buildTool first"
 fi
