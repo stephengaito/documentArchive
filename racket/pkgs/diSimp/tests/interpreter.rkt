@@ -3,23 +3,43 @@
 (require rackunit)
 (require rackunit/text-ui)
 
-;(define all-tests
-;  (test-suite
-;   "Tests for interpreter.rkt"
-;    (check-equal? 1 1 "simple test")
-;    (test-case
-;     "List has length 4 and all elements even"
-;      (let ([lst (list 2 4 6 9)])
-;        (check = (length lst) 4)
-;        (for-each
-;          (lambda (elt)
-;            (check-pred even? elt)
-;          )
-;          lst
-;        )
-;      )
-;    )
-;  )
-;)
+(require "../interpreter.rkt")
+(require "../listExps.rkt")
 
-;(run-tests all-tests)
+(define verbose-mode (make-parameter #f))
+
+(define all-tests
+  (test-suite  "Interpreter"
+
+    (test-case "Test intrepretation of list expressions"
+      (let* ([ null-lst (null-list-exp) ]
+             [ cons-lst (cons-list-exp null-lst null-lst) ]
+             [ car-lst  (car-list-exp cons-lst) ]
+             [ bad-car  (car-list-exp null-lst) ]
+             [ cdr-lst  (cdr-list-exp cons-lst) ]
+             [ bad-cdr  (cdr-list-exp null-lst) ]
+            )
+        (check equal? '()
+          (interpret verbose-mode null-lst))
+        (check equal? '( () () )
+          (interpret verbose-mode cons-lst))
+        (check equal? '()
+          (interpret verbose-mode car-lst))
+        (check-exn exn:fail:user?
+          (lambda () (interpret verbose-mode bad-car)))
+        ;;
+        ;; vvvv IS THIS CORRECT?!! vvvv
+        (check equal? '(())
+          (interpret verbose-mode cdr-lst))
+        ;; ^^^^ IS THIS CORRECT?!! ^^^^
+        ;;
+        (check-exn exn:fail:user?
+          (lambda () (interpret verbose-mode bad-cdr)))
+        (check-exn exn:fail:user? 
+          (lambda () (interpret verbose-mode '(silly sillier))))
+      )
+    )
+  )
+)
+
+(define ignore-value (run-tests all-tests 'verbose))

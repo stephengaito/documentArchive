@@ -2,6 +2,7 @@
 
 @(require diSimp/interpreter
           "utils.rkt")
+@(require (for-label racket diSimp/listExps diSimp/interpreter))
 
 @title[#:tag "interpreter"]{diSimplex interpreter}
 @(author-stg)
@@ -14,9 +15,9 @@ interpreter using the Racket dialect of Scheme/Lisp.
 @defproc[
   (interpret 
     [ verbose-mode parameter? ]
-    [ sExp list? ]
+    [ sExp list-exp? ]
   )
-  list?
+  list-exp?
 ]{
 
 Interprets a single s-exp.

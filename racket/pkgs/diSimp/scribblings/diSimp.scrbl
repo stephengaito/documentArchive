@@ -1,10 +1,9 @@
 #lang scribble/manual
 
-@require[@for-label[diSimp]]
+@(require "utils.rkt")
 
 @title[#:tag "top"]{diSimp}
-
-@author{Stephen Gaito}
+@(author-stg)
 
 @defmodule[diSimp]
 
