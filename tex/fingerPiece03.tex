@@ -105,6 +105,104 @@ standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
 \newcommand{\Axiomatic}[1]{& \textnormal{Axiom:} & %
  \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \nonumber }
 
+\subsection{Boolean expressions}
+
+\begin{bnf}\label{false-bool}
+ \bnfProd{BoolExp}{ \bnfTD{\#f} \nonumber }
+ \MExp{ ( \bnfSP \bnfTD{false} \bnfSP ) }
+ \Denotation{\denEql{\bnfSP \bnfTD{\#f}\bnfSP}{\sigma}{()}}
+ \Operational{
+  \AxiomC{}
+  \RightLabel{\#f}
+  \UnaryInfC{\opExp{\#f}{\sigma}{()}}
+ }
+ \Axiomatic{
+  \AxiomC{}
+  \RightLabel{\#f}
+  \UnaryInfC{()}
+ }
+\end{bnf}
+
+\begin{bnf}\label{true-bool}
+ \bnfProd{BoolExp}{ \bnfTD{\#t} \nonumber }
+ \MExp{ ( \bnfSP \bnfTD{true} \bnfSP ) }
+ \Denotation{\denEql{\bnfSP \bnfTD{\#t}\bnfSP}{\sigma}{(())}}
+ \Operational{
+  \AxiomC{}
+  \RightLabel{\#t}
+  \UnaryInfC{\opExp{\#t}{\sigma}{(())}}
+ }
+ \Axiomatic{
+  \AxiomC{}
+  \RightLabel{\#t}
+  \UnaryInfC{(())}
+ }
+\end{bnf}
+
+\begin{bnf}\label{and-bool}
+ \bnfProd{BoolExp}{ \bnfTD{and} \bnfSP \bnfPN{BoolExp} \bnfSP \bnfPN{BoolExp}  \nonumber }
+ \MExp{ ( \bnfSP \bnfTD{and} \bnfSP \bnfTD{bool1} \bnfSP \bnfTD{bool2} \bnfSP ) }
+ \Denotation{\denEql{\bnfSP\bnfTD{and}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}\bnfSP}
+  {\sigma}{\begin{cases}
+   \#t \quad \parbox{4cm}{ if \opExp{bool1}{\sigma}{\#t} and \opExp{bool2}{\sigma}{\#t}} \\
+   \#f \text{ otherwise }
+  \end{cases}}}
+ \Operational{
+  \AxiomC{\opExp{bool1}{\sigma}{\#t} \opExp{bool2}{\sigma}{\#t}}
+  \RightLabel{\bnfTD{and}\bnfSP\bnfTD{bool1}\bnfTD{bool2}}
+  \UnaryInfC{\opExp{\bnfSP\bnfTD{and}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}\bnfSP}{\sigma}{\#t}}
+ }
+ \Axiomatic{
+  \AxiomC{\bnfTD{\#t}}
+  \AxiomC{\bnfTD{\#t}}
+  \RightLabel{\bnfTD{and}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}}
+  \BinaryInfC{\#t}
+ }
+\end{bnf}
+
+\begin{bnf}\label{or-bool}
+ \bnfProd{BoolExp}{ \bnfTD{or} \bnfSP \bnfPN{BoolExp} \bnfSP \bnfPN{BoolExp}  \nonumber }
+ \MExp{ ( \bnfSP \bnfTD{or} \bnfSP \bnfTD{bool1} \bnfSP \bnfTD{bool2} \bnfSP ) }
+ \Denotation{\denEql{\bnfSP\bnfTD{or}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}\bnfSP}
+  {\sigma}{\begin{cases}
+   \#t \quad \parbox{4cm}{ if either \opExp{bool1}{\sigma}{\#t} or \opExp{bool2}{\sigma}{\#t}} \\
+   \#f \text{ otherwise }
+  \end{cases}}}
+ \Operational{
+  \AxiomC{\opExp{bool1}{\sigma}{\#t} \opExp{bool2}{\sigma}{\#t}}
+  \RightLabel{\bnfTD{or}\bnfSP\bnfTD{bool1}\bnfTD{bool2}}
+  \UnaryInfC{\opExp{\bnfSP\bnfTD{or}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}\bnfSP}{\sigma}{\#t}}
+ }
+ \Axiomatic{
+  \AxiomC{\bnfTD{\#t}}
+  \AxiomC{\bnfTD{\#t}}
+  \RightLabel{\bnfTD{or}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}}
+  \BinaryInfC{\#t}
+ }
+\end{bnf}
+
+\begin{bnf}\label{not-bool}
+ \bnfProd{BoolExp}{ \bnfTD{not} \bnfSP \bnfPN{BoolExp}  \nonumber }
+ \MExp{ ( \bnfSP \bnfTD{not} \bnfSP \bnfTD{bool1} \bnfSP ) }
+ \Denotation{\denEql{\bnfSP\bnfTD{not}\bnfSP\bnfTD{bool1}\bnfSP}
+  {\sigma}{\begin{cases}
+   \#t \quad \text{ if } \opExp{bool1}{\sigma}{\#f} \\
+   \#f \text{ otherwise }
+  \end{cases}}}
+ \Operational{
+  \AxiomC{\opExp{bool1}{\sigma}{\#t}}
+  \RightLabel{\bnfTD{not}\bnfSP\bnfTD{bool1}}
+  \UnaryInfC{\opExp{\bnfSP\bnfTD{not}\bnfSP\bnfTD{bool1}\bnfSP}{\sigma}{\#f}}
+ }
+ \Axiomatic{
+  \AxiomC{\bnfTD{\#t}}
+  \RightLabel{\bnfTD{not}\bnfSP\bnfTD{bool1}}
+  \UnaryInfC{\#f}
+ }
+\end{bnf}
+
+\subsection{List expressions}
+
 \begin{bnf}\label{null-list}
  \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfTD{)} \nonumber }
  \MExp{( \bnfSP \bnfTD{null} \bnfSP )}
@@ -181,6 +279,8 @@ standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
   \UnaryInfC{$\lambda_2$}
  }
 \end{bnf}
+
+\subsection{Command expressions}
 
 \begin{bnf}
  \bnfProd{Proof}{ \bnfTD{Begin} \bnfSP \bnfPN{Expression} \bnfSP \bnfTD{End} \nonumber }
