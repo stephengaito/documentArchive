@@ -1,5 +1,53 @@
 % building Plato's engine
 
+While few mathematicians realise it, the primary activity of Mathematics is to
+create (Domain Specific) Computational Languages, otherwise known as Programming
+Languages. Those scientists and engineers who \emph{use} mathematics, use it to
+\emph{compute} useful values given a \emph{mathematical} model and
+various observations. Even ``pure'' mathematicians \emph{compute} the truth of a
+proposition. The (current) foundations of Mathematics are predicated on the
+assumption that the truth of any mathematical statement can be proven using
+first order logic together with the axioms of set theory. Proof theory is really
+the study of how these proofs \emph{compute} the \emph{truth} of a statement.
+
+The \emph{problem} with the current foundations of mathematics is that, given
+the `Liar paradox', \emph{computing truth} is problematic, since the
+\emph{semantic meaning of truth} can be encoded in the syntactic structure of
+any sufficiently interesting theory based on first order logic. This is the
+substance of both Russell's paradox as well as G\"odel's proof that first order
+theories can not be both consistent and complete.
+
+As practised, mathematics is really a \emph{collection} of loosely inter-related
+languages. The ``purpose'' of set theory is to provide a ``universe'' of
+mathematical objects within which ``normal'' mathematics can be understood to
+exist. We accept the existence and (relative) consistency of these languages by
+(ultimately) interpreting them in set theory, which is itself just one of the
+many languages. In fact there are a number of different languages which we
+``accept'' as ``set theory''. Since all of these languages, set theory or not,
+are ultimately based upon logic and the computation of truth we can only ever
+``prove'' relative consistency of one language by interpreting it in another. In
+particular, we ``accept'' the consistency of one set theory by interpreting it
+in another set theory.
+
+Instead of computing the truth of the existence of mathematical objects using
+the axioms of the first order set theory, we show that we can directly
+\emph{compute} these objects using a small collection of intuitively simple
+computational primitives. In fact there are a number of equivalent small
+collections of computational primitives we could choose from. The type-less
+$\lambda$-calculus is certainly one of these.
+
+In order to ``compute'' the \emph{whole} of classical mathematics, at least one
+of these simple computational primitives will have to be as ``powerful'' as the
+Axiom of Choice. We will show that \emph{transfinite} computation is equivalent
+to the Axiom of Choice. The simplest way to define an intuitively meaningful
+notion of transfinite computation, is to use transfinite lists, alternatively
+known as sequences. While the type-less $\lambda$-calculus can certainly define
+both lists and numbers, we prefer to use a variant of Pure Lisp since lists and
+the manipulation of lists are ``first class'' computational primitives in Lisp.
+``Pure (1.5) Lisp'', \cite{mcCarthy1960lisp}, uses recursion in the form of the
+``lambda'' operator and application. We choose to replace recursion with
+iteration in the form of the ``while/do'' operator.
+
 As every self respecting Computer Scientist knows, Plato's universe does not
 consist of a collection of ``Sets'' but rather a ``collection'' of Lists of
 Lists.
