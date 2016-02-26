@@ -48,29 +48,44 @@ the manipulation of lists are ``first class'' computational primitives in Lisp.
 ``lambda'' operator and application. We choose to replace recursion with
 iteration in the form of the ``while/do'' operator.
 
+To define transfinite computation we will need to begin by defining the
+ordinals. For each ordinal there is a corresponding concept of computation up to
+that ordinal. We will define the transfinite ordinals essentially in the same
+way that Cantor did. \TODO{choose correct reference}
+
+Given that it is generally assumed that we, as finite beings, are only capable
+of finite computation, how do we know if a transfinite computation is
+``correct''? Theoretical Computer Science has three answers to this problem:
+denotational, operational and axiomatic semantics, based roughly on Tarski's
+semantic interpretation of truth, Gentzen's proof theory, and Type-theory
+respectively. While the computational versions of semantics ultimately depend
+upon mathematical set theory, we will use these concepts to define a fixed point
+interpretation of our variant of Pure Lisp, and hence a \emph{computational}
+foundation for Mathematics. Essentially we will follow Hilbert's original
+program but replace logic with transfinite computation.
+
+\begin{myQuote}
 As every self respecting Computer Scientist knows, Plato's universe does not
 consist of a collection of ``Sets'' but rather a ``collection'' of Lists of
-Lists.
+Lists. \quad ``Before the Set, was the List''
+\end{myQuote}
 
-``Before the Set, was the List''
+Our objective is to compute a universe of objects, Plato's Wilderness, suitable
+to provide the foundations of Mathematics. We do this by defining Plato's
+Programming Language, (PPL).
 
-\begin{bnf*}
- \bnfProd{List}{ ( \bnfSP ) }
- \bnfAlt{ ( \bnfSP \bnfPN{List} \bnfSP \bnfTD{.} \bnfSP \bnfPN{List} \bnfSP )}
-\end{bnf*}
+\section{Plato's Wilderness: Base Case: The Playground}
 
-Alternatively in Kleene star format as essentially used in Lisp/Scheme:
-
-\begin{bnf*}
- \bnfProd{List}{ ( \bnfSP \bnfKS{ \bnfPN{List} }{*} \bnfSP ) }
-\end{bnf*}
-
-%\begin{racket}
-%(println "Hello from Plato's engine!")
-%\end{racket}
+Before we define transfinite computation, we will begin with the slightly
+``easier'' finite computation.  We loosely follow LISP 1.5's example,
+\cite{mcCarthy1960lisp}, by organising our Plato language as a tower of
+different types of expressions, the bottom layer being the object expressions
+and the top layer being meta-expressions. We also loosely follow Mike Gordon's
+1973 PhD thesis, \cite{gordon1973semanticsPureLisp}, to work through the
+semantics of our form of Plato's language.
 
 
-\begin{cTikzPicture}
+\begin{cTikzPictureWorking}
 
 \fill[orange!20!white] (0,0) -- (4,0) -- (4,4) -- (0,4)
   -- (0,3) -- (3,3) -- (3,1) -- (0,1) -- (0,0);
@@ -96,7 +111,7 @@ Alternatively in Kleene star format as essentially used in Lisp/Scheme:
 \node at (2,0.7)   {Interpreter - Memory};
 \node at (2,0.25)  {(Algebra)};
 
-\end{cTikzPicture}
+\end{cTikzPictureWorking}
 
 The processor part of the interpreter, could be a human, a computer, or a Lisp
 machine. The memory part of the interpreter, could be sand, paper, an abacus,
@@ -133,7 +148,7 @@ Operational, Axiomatic and Weakest Precondition based semantics,
 winskel1993formalSemanticsProgrammingLanguages, gries1981scienceProgramming,
 scott1970theoryComputation, plotkin1981structuralOperationalSemantics,
 hoare1969axiomaticSemantics, dijkstra1975guardedCommandsFormalDerivation}. More
-specifically these ideas have been worked out for Graph Programming 1by Detlef
+specifically these ideas have been worked out for Graph Programming by Detlef
 Plump's group, \cite{steinert2007graphProgramming,
 plumpSteinert2010semanticsGraphProgramming, poskittPlump2010hoareLogic,
 poskittPlump2010hoareCalculus}.
