@@ -74,6 +74,57 @@ Our objective is to compute a universe of objects, Plato's Wilderness, suitable
 to provide the foundations of Mathematics. We do this by defining Plato's
 Programming Language, (PPL).
 
+\section{Criteria for any Foundation of Mathematics}
+
+Following Hatcher, \cite{hatcher1982logicalFoundationsMath}, we posit the
+following list of critera any Foundation of Mathematics must satisfy:
+
+\begin{enumerate}
+\item \textbf{A foundation of mathematics must be adequate for a reasonably large
+portion of mathematics.}
+
+\noindent If we ``assume'' something as powerful as the Axiom of Choice, we will
+be able to recover the whole of current mathematical set theory (smaller than
+the first strongly inaccessible cardinal).
+
+\item \textbf{A foundation must derive from some intuitively natural principles.}
+
+\noindent The foundational (co-)data language \emph{is} the List of Lists. The
+only operations on this language are LISP's car, cdr, cons, together with
+failure and repetition.
+
+\item \textbf{The basic principles and primitive (undefined) notions should be
+as economical as possible.}
+
+\noindent See above.
+
+\item \textbf{The foundation must be consistent.}
+
+\noindent For a computational foundation, consistency is given since we are
+\emph{computing} the (standard) model of the formal theory. What is more
+important is that the formal theory is fully abstract, that is the denotation
+and operational semantics are equivalent, in logical terms, the formal theory is
+both sound and complete.
+
+\item \textbf{The foundation should be expressed (or expressible) as a formal system.}
+
+\noindent In computational terms, each formal system is a (programming) language
+complete with a syntax as well as denotational, operational and axiomatic
+semantics. Every such formal system \emph{must} have (at least) a denotational
+interpretation into the foundational (co-)data language.
+
+\item \textbf{The construction of everyday mathematics in the system should be
+``natural'' and ``orderly''.}
+
+\noindent With the proposed computational foundations of mathematics, there is a
+collection of formal theories each of which have (at least) an interpretation in
+the (co-)data language. Each of these formal theories should be tailored to the
+mathematical field in question, so by definition they should represent
+``natural'' and ``orderly'' systems in which to conduct mathematics in a given
+field.
+
+\end{enumerate}
+
 \section{Plato's Wilderness: Base Case: The Playground}
 
 Before we define transfinite computation, we will begin with the slightly
@@ -153,9 +204,9 @@ Plump's group, \cite{steinert2007graphProgramming,
 plumpSteinert2010semanticsGraphProgramming, poskittPlump2010hoareLogic,
 poskittPlump2010hoareCalculus}.
 
-\section{Syntax}
+\section{(co-)data language}
 
-We begin by providing the syntax of our diSimplex proof language following the
+We begin by providing the syntax of our diSimplex (co-)data language following the
 standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
 
 \newcommand{\MExp}[1]{& \textnormal{MExp:} & #1  \nonumber \\}
@@ -168,107 +219,11 @@ standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
 \newcommand{\Axiomatic}[1]{& \textnormal{Axiom:} & %
  \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \nonumber }
 
-\subsection{Boolean expressions}
-
-\begin{bnf}\label{false-bool}
- \bnfProd{BoolExp}{ \bnfTD{\#f} \nonumber }
- \MExp{ ( \bnfSP \bnfTD{false} \bnfSP ) }
- \Denotation{\denEql{\bnfSP \bnfTD{\#f}\bnfSP}{\sigma}{()}}
- \Operational{
-  \AxiomC{}
-  \RightLabel{\#f}
-  \UnaryInfC{\opExp{\#f}{\sigma}{()}}
- }
- \Axiomatic{
-  \AxiomC{}
-  \RightLabel{\#f}
-  \UnaryInfC{()}
- }
-\end{bnf}
-
-\begin{bnf}\label{true-bool}
- \bnfProd{BoolExp}{ \bnfTD{\#t} \nonumber }
- \MExp{ ( \bnfSP \bnfTD{true} \bnfSP ) }
- \Denotation{\denEql{\bnfSP \bnfTD{\#t}\bnfSP}{\sigma}{(())}}
- \Operational{
-  \AxiomC{}
-  \RightLabel{\#t}
-  \UnaryInfC{\opExp{\#t}{\sigma}{(())}}
- }
- \Axiomatic{
-  \AxiomC{}
-  \RightLabel{\#t}
-  \UnaryInfC{(())}
- }
-\end{bnf}
-
-\begin{bnf}\label{and-bool}
- \bnfProd{BoolExp}{ \bnfTD{and} \bnfSP \bnfPN{BoolExp} \bnfSP \bnfPN{BoolExp}  \nonumber }
- \MExp{ ( \bnfSP \bnfTD{and} \bnfSP \bnfTD{bool1} \bnfSP \bnfTD{bool2} \bnfSP ) }
- \Denotation{\denEql{\bnfSP\bnfTD{and}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}\bnfSP}
-  {\sigma}{\begin{cases}
-   \#t \quad \parbox{4cm}{ if \opExp{bool1}{\sigma}{\#t} and \opExp{bool2}{\sigma}{\#t}} \\
-   \#f \text{ otherwise }
-  \end{cases}}}
- \Operational{
-  \AxiomC{\opExp{bool1}{\sigma}{\#t} \opExp{bool2}{\sigma}{\#t}}
-  \RightLabel{\bnfTD{and}\bnfSP\bnfTD{bool1}\bnfTD{bool2}}
-  \UnaryInfC{\opExp{\bnfSP\bnfTD{and}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}\bnfSP}{\sigma}{\#t}}
- }
- \Axiomatic{
-  \AxiomC{\bnfTD{\#t}}
-  \AxiomC{\bnfTD{\#t}}
-  \RightLabel{\bnfTD{and}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}}
-  \BinaryInfC{\#t}
- }
-\end{bnf}
-
-\begin{bnf}\label{or-bool}
- \bnfProd{BoolExp}{ \bnfTD{or} \bnfSP \bnfPN{BoolExp} \bnfSP \bnfPN{BoolExp}  \nonumber }
- \MExp{ ( \bnfSP \bnfTD{or} \bnfSP \bnfTD{bool1} \bnfSP \bnfTD{bool2} \bnfSP ) }
- \Denotation{\denEql{\bnfSP\bnfTD{or}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}\bnfSP}
-  {\sigma}{\begin{cases}
-   \#t \quad \parbox{4cm}{ if either \opExp{bool1}{\sigma}{\#t} or \opExp{bool2}{\sigma}{\#t}} \\
-   \#f \text{ otherwise }
-  \end{cases}}}
- \Operational{
-  \AxiomC{\opExp{bool1}{\sigma}{\#t} \opExp{bool2}{\sigma}{\#t}}
-  \RightLabel{\bnfTD{or}\bnfSP\bnfTD{bool1}\bnfTD{bool2}}
-  \UnaryInfC{\opExp{\bnfSP\bnfTD{or}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}\bnfSP}{\sigma}{\#t}}
- }
- \Axiomatic{
-  \AxiomC{\bnfTD{\#t}}
-  \AxiomC{\bnfTD{\#t}}
-  \RightLabel{\bnfTD{or}\bnfSP\bnfTD{bool1}\bnfSP\bnfTD{bool2}}
-  \BinaryInfC{\#t}
- }
-\end{bnf}
-
-\begin{bnf}\label{not-bool}
- \bnfProd{BoolExp}{ \bnfTD{not} \bnfSP \bnfPN{BoolExp}  \nonumber }
- \MExp{ ( \bnfSP \bnfTD{not} \bnfSP \bnfTD{bool1} \bnfSP ) }
- \Denotation{\denEql{\bnfSP\bnfTD{not}\bnfSP\bnfTD{bool1}\bnfSP}
-  {\sigma}{\begin{cases}
-   \#t \quad \text{ if } \opExp{bool1}{\sigma}{\#f} \\
-   \#f \text{ otherwise }
-  \end{cases}}}
- \Operational{
-  \AxiomC{\opExp{bool1}{\sigma}{\#t}}
-  \RightLabel{\bnfTD{not}\bnfSP\bnfTD{bool1}}
-  \UnaryInfC{\opExp{\bnfSP\bnfTD{not}\bnfSP\bnfTD{bool1}\bnfSP}{\sigma}{\#f}}
- }
- \Axiomatic{
-  \AxiomC{\bnfTD{\#t}}
-  \RightLabel{\bnfTD{not}\bnfSP\bnfTD{bool1}}
-  \UnaryInfC{\#f}
- }
-\end{bnf}
-
 \subsection{List expressions}
 
 \begin{bnf}\label{null-list}
  \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfTD{)} \nonumber }
- \MExp{( \bnfSP \bnfTD{null} \bnfSP )}
+ \MExp{( \bnfSP \bnfTD{nil} \bnfSP )}
  \Denotation{\denEql{\bnfSP(\bnfSP)\bnfSP}{\sigma}{()}}
  \Operational{
   \AxiomC{}
@@ -282,7 +237,7 @@ standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
 \end{bnf}
 
 \begin{bnf}\label{cons-list}
- \bnfProd{ListExp}{ \bnfTD{cons} \bnfSP \bnfPN{ListExp} \bnfSP \bnfPN{ListExp} \nonumber }
+ \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfPN{ListExp} \bnfSP \bnfPN{ListExp} \bnfSP \bnfTD{)} \nonumber }
  \MExp{( \bnfSP \bnfTD{cons} \bnfSP \bnfTD{list1} \bnfSP \bnfTD{list2} \bnfSP )}
  \Denotation{\denEql{\bnfSP\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}\bnfSP}
   {\sigma}{(\bnfSP \denExp{\bnfTD{list1}}{\sigma} \bnfSP
