@@ -1,5 +1,18 @@
 % building Plato's engine
 
+\TODO{We take Cantor's \emph{improper-infinite} seriously. See
+\cite{cantor1996earlyPapersTransfinite} in among other letters/documents section
+2 (page 884) of Cantor's Grundlangen. NEED to find section where Cantor
+describes what will become known variously as Burali-Forti or Cantor's paradox.
+Note that in this section Cantor clearly considers the proper-infinite as
+well-founded, where as the improper infinite is (by implication)
+non-well-founded.}
+
+\TODO{cite simpson1988hilbertsProg and zach2006hilbertProgram on summary of
+Hilbert's program} \TODO{history of Leibniz's (logic) calculus see endnote 6 in
+sieg1994mechanicalProceeduresMathematics} \TODO{why logic? see page 74
+sieg1994mechanicalProceeduresMathematics}
+
 While few mathematicians realise it, the primary activity of Mathematics is to
 create (Domain Specific) Computational Languages, otherwise known as Programming
 Languages. Those scientists and engineers who \emph{use} mathematics, use it to
@@ -138,29 +151,45 @@ semantics of our form of Plato's language.
 
 \begin{cTikzPictureWorking}
 
-\fill[orange!20!white] (0,0) -- (4,0) -- (4,4) -- (0,4)
-  -- (0,3) -- (3,3) -- (3,1) -- (0,1) -- (0,0);
+\fill[orange!20!white] (0,0) -- (8,0) -- (8,6) -- (0,6)
+  -- (0,5) -- (7,5) -- (7,1) -- (0,1) -- (0,0);
 
-\path (0,0) edge (4,0);
-\path (0,0) edge (0,4);
-\path (4,0) edge (4,4);
-\path (0,4) edge (4,4);
+% outer box
+\path (0,0) edge (8,0);
+\path (0,0) edge (0,6);
+\path (8,0) edge (8,6);
+\path (0,6) edge (8,6);
 
-\path (0,1) edge (3,1);
-\path (3,1) edge (3,2);
-\path (0,2) edge (3,2);
+% L-expression box
+\path (5,1) edge (5,2);
+\path (2,1) edge (2,2);
+\path (2,2) edge (5,2);
 
-\path (0,3) edge (3,3);
-\path (3,2) edge (3,3);
+% S-expression box
+\path (0,1) edge (7,1);
+\path (0,3) edge (7,3);
+\path (7,1) edge (7,3);
 
-\path (3,1.5) edge[dashed] (4,1.5);
+% M-expression box
+\path (2,4) edge (5,4);
+\path (7,3) edge (7,5);
 
-\node at (1.5,1.5) {L-expression};
-\node at (1.5,2.5) {M-expression};
-\node at (2,3.7)   {Interpreter - Process};
-\node at (2,3.25)  {(Co-algebra)};
-\node at (2,0.7)   {Interpreter - Memory};
-\node at (2,0.25)  {(Algebra)};
+% M_F-expression box
+\path (0,5) edge (7,5);
+\path (2,4) edge (2,5);
+\path (5,4) edge (5,5);
+
+% dashed boundary
+\path (7,2) edge[dashed] (8,2);
+
+\node at (4,5.7)   {(Universal) Interpreter - Process};
+\node at (4,5.25)  {(Co-algebra)};
+\node at (3.5,4.5) {M$_F$-expression};
+\node at (3.5,3.5) {M-expression};
+\node at (3.5,2.5) {S-expression};
+\node at (3.5,1.5) {S$_{\emptySet}$-expression};
+\node at (4,0.7)   {(Universal) Interpreter - Memory};
+\node at (4,0.25)  {(Algebra)};
 
 \end{cTikzPictureWorking}
 
