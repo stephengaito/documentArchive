@@ -13,3 +13,10 @@ echo "Setting up [diSimp]"
 echo ""
 raco setup diSimp
 echo ""
+echo "Copying documentation"
+echo ""
+mkdir -p doc
+rsync -av pkgs/racketLayer/doc .
+rsync -av pkgs/diSimp/doc .
+rsync -av pkgs/combined/doc .
+echo ""
