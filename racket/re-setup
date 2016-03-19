@@ -3,4 +3,13 @@
 # This assumes that ~/.diSimp/racket is a symbolic link to 
 #    ExpositionGit/papers/fingerPieces/racket
 
+reset
+echo ""
+echo "Setting up [racketLayer]"
+echo ""
+raco setup racketLayer
+echo ""
+echo "Setting up [diSimp]"
+echo ""
 raco setup diSimp
+echo ""
