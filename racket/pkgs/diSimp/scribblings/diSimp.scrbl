@@ -61,6 +61,11 @@ particular trans-finite cardinal.  This means that these @emph{are}
 ``cross-compilers''. They cross-compile from an $\omega$-Pure LISP 
 program to any other specific cardinal powered Pure LISP.
 
+Since the Racket programming system can itself be considered as an 
+interpreter, we will use EOPL's proceedural representation (section 
+2.2.3) to provide both more performant and more importantly a more 
+extensible system.
+
 The Mathematical and Philosophyical ideas which this interpreter is
 implementing can be found in the companion papers TODO.
 
