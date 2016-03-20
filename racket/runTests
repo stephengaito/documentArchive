@@ -1,11 +1,23 @@
 #!/usr/bin/env racket
-#lang racket/base
+#lang racket
+
+(define ignoreValue0 (system "reset"))
 
 ;; RUN TESTS 
 ;;
 (require racket/rerequire)
 
 (current-directory "pkgs/diSimp/tests")
+
+(define (rackunit-modules)
+  (remove*
+    (map string->path '())
+    (filter 
+      (lambda (aPath) (equal? (filename-extension aPath) #"rkt"))
+      (directory-list)
+    )
+  )
+)
 
 (define (run-tests aPath)
   (begin
@@ -14,7 +26,7 @@
   )
 )
 
-(define ignoreValues (map run-tests (directory-list)))
+(define ignoreValues (map run-tests (rackunit-modules)))
 
 ;; CHECK DOCUMENTATION using doc-coverage
 ;;
@@ -23,7 +35,7 @@
 (require racket/path)
 (require doc-coverage)
 
-(define (racket-modules)
+(define (scribble-modules)
   (remove*
     (map string->path (list "info.rkt" "main.rkt"))
     (filter 
@@ -49,5 +61,4 @@
   )
 )
 
-
-(define ingoreValues2 (map check-module-documentation (racket-modules)))
+(define ingoreValues2 (map check-module-documentation (scribble-modules)))

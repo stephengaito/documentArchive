@@ -22,8 +22,8 @@ raco setup diSimp
 pushd pkgs/diSimp > /dev/null
 raco scribble --latex-section 1 --dest latex scribblings/diSimp.scrbl
 pushd latex > /dev/null
-# rm -rf manual-style.tex racket.tex scribble-load-replace.tex
-# rm -rf scribble-load.tex scribble.tex
+rm -rf manual-style.tex racket.tex scribble-load-replace.tex
+rm -rf scribble-load.tex scribble.tex
 popd > /dev/null
 popd > /dev/null
 echo ""

@@ -24,6 +24,7 @@
   #%app #%datum #%top
   #%require #%provide
   require provide rename-out
+  define
   displayln
 )
 
