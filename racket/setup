@@ -5,7 +5,7 @@
 diSimpDir=$HOME/.diSimp
 racketDir=$diSimpDir/racket
 
-raco pkg install doc-coverage
+raco pkg install doc-coverage   ; used for the tests
 
 if [ -d $diSimpDir ]; then
   mkdir -p $racketDir/pkgs/diSimp/scribblings

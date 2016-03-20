@@ -25,6 +25,12 @@
   #%require #%provide
   require provide rename-out
   define
+  list list? 
+  car cdr cadr caddr
+  quote
+  case else
+  eq?
+  and
   displayln
 )
 
