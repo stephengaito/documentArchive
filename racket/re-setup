@@ -8,10 +8,24 @@ echo ""
 echo "Setting up [racketLayer]"
 echo ""
 raco setup racketLayer
+pushd pkgs/racketLayer > /dev/null
+raco scribble --latex-section 1 --dest latex scribblings/racketLayer.scrbl
+pushd latex > /dev/null
+rm -rf manual-style.tex racket.tex scribble-load-replace.tex
+rm -rf scribble-load.tex scribble.tex
+popd > /dev/null
+popd > /dev/null
 echo ""
 echo "Setting up [diSimp]"
 echo ""
 raco setup diSimp
+pushd pkgs/diSimp > /dev/null
+raco scribble --latex-section 1 --dest latex scribblings/diSimp.scrbl
+pushd latex > /dev/null
+# rm -rf manual-style.tex racket.tex scribble-load-replace.tex
+# rm -rf scribble-load.tex scribble.tex
+popd > /dev/null
+popd > /dev/null
 echo ""
 echo "Copying documentation"
 echo ""
@@ -19,4 +33,8 @@ mkdir -p doc
 rsync -av pkgs/racketLayer/doc .
 rsync -av pkgs/diSimp/doc .
 rsync -av pkgs/combined/doc .
+mkdir -p latex
+rsync -av pkgs/racketLayer/latex .
+rsync -av pkgs/diSimp/latex .
+rsync -av pkgs/combined/latex .
 echo ""
