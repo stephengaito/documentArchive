@@ -1,6 +1,7 @@
 #lang scribble/manual
 
 @(require "utils.rkt")
+@(require (for-label racket/base ))
 
 @title[#:tag "top"]{RacketLayer}
 @(author-stg)

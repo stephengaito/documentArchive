@@ -9,7 +9,7 @@ echo "Setting up [racketLayer]"
 echo ""
 raco setup racketLayer
 pushd pkgs/racketLayer > /dev/null
-raco scribble --latex-section 1 --dest latex scribblings/racketLayer.scrbl
+raco scribble +m --latex-section 1 --dest latex scribblings/racketLayer.scrbl
 pushd latex > /dev/null
 rm -rf manual-style.tex racket.tex scribble-load-replace.tex
 rm -rf scribble-load.tex scribble.tex
@@ -20,7 +20,7 @@ echo "Setting up [diSimp]"
 echo ""
 raco setup diSimp
 pushd pkgs/diSimp > /dev/null
-raco scribble --latex-section 1 --dest latex scribblings/diSimp.scrbl
+raco scribble +m --latex-section 1 --dest latex scribblings/diSimp.scrbl
 pushd latex > /dev/null
 rm -rf manual-style.tex racket.tex scribble-load-replace.tex
 rm -rf scribble-load.tex scribble.tex
