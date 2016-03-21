@@ -9,8 +9,6 @@
   "../terms.rkt"
 )
 
-(define verbose-mode (make-parameter #f))
-
 (define all-tests
   (test-suite  "Terms"
 
