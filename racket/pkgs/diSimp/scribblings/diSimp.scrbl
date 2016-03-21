@@ -76,4 +76,5 @@ implementing can be found in the companion papers TODO.
 @include-section["types.scrbl"]
 @include-section["terms.scrbl"]
 @include-section["values.scrbl"]
+@include-section["contexts.scrbl"]
 
