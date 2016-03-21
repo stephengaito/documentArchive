@@ -8,7 +8,7 @@
 )
 
 (define all-tests
-  (test-suite "Contexts, Kinds, Info"
+  (test-suite "Contexts, Environments, Kinds, Info"
 
     (test-case "Test Kinds"
       (let* (
@@ -41,6 +41,37 @@
         (check-false (type-info? kindInfo))
         (check-false (type-info? 1))
         (check-eq?   (type-info-type typeInfo) aType)
+      )
+    )
+
+    (test-case "Test Environments (Contexts)"
+      (let* (
+        [ emptyEnv  (empty-env) ]
+        [ aTypeName (global-name "aTypeName") ]
+        [ aType     (tfree-type aTypeName) ]
+        [ anInfo    (type-info aType) ]
+        [ aVarName0 (global-name "aVarName0") ]
+        [ aVarName1 (global-name "aVarName1") ]
+        [ extendEnv (extend-env aVarName0 anInfo emptyEnv) ]
+            )
+
+        (check-false (env? 1))
+
+        (check-true  (env? emptyEnv))
+        (check-true  (empty-env? emptyEnv))
+        (check-false (empty-env? 1))
+
+        (check-true  (env? extendEnv))
+        (check-true  (extend-env? extendEnv))
+        (check-false (extend-env? emptyEnv))
+        (check-false (extend-env? 1))
+        (check-eq?   (extend-env-name extendEnv) aVarName0)
+        (check-eq?   (extend-env-info extendEnv) anInfo)
+        (check-eq?   (extend-env-next extendEnv) emptyEnv)
+
+        (check-eq?   (get-info-env extendEnv aVarName0) anInfo)
+        (check-eq?   (get-info-env extendEnv aVarName1) null)
+        (check-eq?   (get-info-env emptyEnv  aVarName0) null)
       )
     )
 

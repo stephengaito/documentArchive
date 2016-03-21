@@ -91,3 +91,84 @@ Returns a type info.
 Returns the type of the type info.
 }
 
+@defproc[
+  (env?
+    [ someThing any ]
+  )
+  boolean?
+]{
+Returns true if someThing is an env.
+}
+
+@defproc[
+  (empty-env?
+    [ someThing any ]
+  )
+  boolean?
+]{
+Returns true if someThing is an empty env.
+}
+
+@defproc[
+  (empty-env)
+  empty-env?
+]{
+Returns an empty env.
+}
+
+@defproc[
+  (extend-env?
+    [ someThing any ]
+  )
+  boolean?
+]{
+Returns true if someThing is an extend env.
+}
+
+@defproc[
+  (extend-env
+    [ aName    name? ]
+    [ someInfo info? ]
+    [ anEnv    env?  ]
+  )
+  extend-env?
+]{
+Returns an extended env.
+}
+
+@defproc[
+  (extend-env-name
+    [ anExtendEnv extend-env? ]
+  )
+  name?
+]{
+Returns the extend env's name.
+}
+
+@defproc[
+  (extend-env-info
+    [ anExtendEnv extend-env? ]
+  )
+  info?
+]{
+Returns the extend env's info.
+}
+
+@defproc[
+  (extend-env-next
+    [ anExtendEnv extend-env? ]
+  )
+  env?
+]{
+Returns the extend env's next env.
+}
+
+@defproc[
+  (get-info-env
+    [ anEnv env? ]
+    [ aName name? ]
+  )
+  info? ]{
+Searches the env for the info corresponding to the name provided. Returns 
+null if not such name have been found.
+}

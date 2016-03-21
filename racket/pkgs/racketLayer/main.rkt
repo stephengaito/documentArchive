@@ -26,11 +26,12 @@
   require provide rename-out
   define
   list list? 
-  car cdr cadr caddr
+  car cdr cadr caddr cadddr
   quote
-  case else
-  eq?
+  if case else
+  equal? eqv? eq?
   and
+  null
   displayln
 )
 
