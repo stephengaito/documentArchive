@@ -19,7 +19,8 @@
         [ baseType      (tfree-type "baseType") ]
         [ aBoundTerm    (bnd-term 1) ]
         [ anAnnotation  (ann-term aBoundTerm baseType) ]
-        [ aFreeTerm     (free-term "varName") ]
+        [ aVarName      (global-name "varName") ]
+        [ aFreeTerm     (free-term aVarName) ]
         [ aLambdaTerm   (lam-term aBoundTerm) ]
         [ anApplication (app-term aLambdaTerm aBoundTerm) ]
             )
@@ -48,7 +49,7 @@
         (check-true   (free-term? aFreeTerm))
         (check-false  (free-term? aBoundTerm))
         (check-false  (free-term? 1))
-        (check-equal? (free-term-name aFreeTerm) "varName")
+        (check-equal? (free-term-name aFreeTerm) aVarName)
 
         (check-true   (term? aLambdaTerm))
         (check-false  (inf-term? aLambdaTerm))

@@ -115,7 +115,7 @@ Returns a true if someThing is a free term.
 
 @defproc[
   (free-term 
-    [ aVarName string? ]
+    [ aVarName name? ]
   )
   free-term?
 ]{
@@ -126,7 +126,7 @@ Returns a free term.
   (free-term-name
     [ aFreeTerm free-term? ]
   )
-  string?
+  name?
 ]{
 Returns the name of this free term.
 }
