@@ -1,0 +1,41 @@
+--- orig/LambdaPi.hs	2016-03-21 15:53:39.606324240 +0000
++++ patched/LambdaPi.hs	2016-03-21 15:55:36.644786229 +0000
+@@ -1,5 +1,14 @@
+ {-# LINE 149 "LP.lhs" #-}
+-  module LP where
++---  module LP where
++--- Required change of LP to Main to allow compilation/linking/output in 
++--- modern Haskell
++  module Main where
++--- catch no longer located in default prelude...
++--- SO we have to explicitly import it
++--- BUT Control.Exception.Base.try conflicts...
++--- ... with Text.ParserCombinators.Parsec.Prim.try
++--- SO we import Exceptions qualified
++  import qualified Control.Exception.Base
+ {-# LINE 152 "LP.lhs" #-}
+   import Prelude hiding (print)
+ {-# LINE 154 "LP.lhs" #-}
+@@ -338,15 +347,20 @@
+     deriving (Show)
+ {-# LINE 13 "Interpreter.lhs" #-}
+   --  read-eval-print loop
++  --- NOTE changes to catch below
++  --- (1) we fully qualify catch
++  --- (2) we are now forced to explicitly catch the base type SomeException
++  ---     to avoid ambiguity errors.
+   readevalprint :: Interpreter i c v t tinf inf -> State v inf -> IO ()
+   readevalprint int state@(inter, out, ve, te) =
+     let rec int state =
+           do
+-            x <- catch
++            x <- Control.Exception.Base.catch
+                    (if inter
+                     then readline (iprompt int) 
+                     else fmap Just getLine)
+-                   (\_ -> return Nothing)
++                   (\e -> let err = show (e :: Control.Exception.Base.SomeException)
++                          in return Nothing)
+             case x of
+               Nothing   ->  return ()
+               Just ""   ->  rec int state

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# This bash script sets up the LambdaPi4Racket packages
+
+raco pkg install doc-coverage   ; used for the tests
+
+raco pkg install --link pkgs/racketLayer
+raco pkg install --link pkgs/STLCAlg
+raco setup racketLayer
+raco setup SLLCAlg
+
