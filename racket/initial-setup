@@ -2,10 +2,30 @@
 
 # This bash script sets up the LambdaPi4Racket packages
 
-raco pkg install doc-coverage   ; used for the tests
+reset 
 
+echo ""
+echo "installing [doc-coverage] for use in the tests"
+echo ""
+raco pkg install doc-coverage
+
+echo ""
+echo "linking [racketLayer]"
+echo ""
 raco pkg install --link pkgs/racketLayer
+
+echo ""
+echo "linking [STLCAlg]"
+echo ""
 raco pkg install --link pkgs/STLCAlg
+
+echo ""
+echo "seting up [racketLayer]"
+echo ""
 raco setup racketLayer
-raco setup SLLCAlg
+
+echo ""
+echo "seting up [STLCAlg]"
+echo ""
+raco setup STLCAlg
 
