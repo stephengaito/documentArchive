@@ -1,15 +1,15 @@
 #lang scribble/manual
 
-@(require STLCAlg/contexts
+@(require STLCAlg/contextsData
           "utils.rkt")
-@(require (for-label racket STLCAlg/contexts))
+@(require (for-label racket STLCAlg/contextsData))
 
-@title[#:tag "contexts"]{STLCAlg contexts}
+@title[#:tag "contexts"]{STLCAlg contextsData}
 @(author-stg)
 
-@defmodule[STLCAlg/contexts]
+@defmodule[STLCAlg/contextsData]
 
-The @racketmodname[STLCAlg/contexts] module implements the STLCAlg 
+The @racketmodname[STLCAlg/contextsData] module implements the STLCAlg 
 contexts data structures using the Racket dialect of Scheme/Lisp.
 
 @defproc[

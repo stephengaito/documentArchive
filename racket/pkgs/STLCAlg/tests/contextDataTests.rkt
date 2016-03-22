@@ -3,8 +3,8 @@
 (require rackunit rackunit/text-ui)
 
 (require
-  "../types.rkt"
-  "../contexts.rkt"
+  "../typesData.rkt"
+  "../contextsData.rkt"
 )
 
 (define all-tests

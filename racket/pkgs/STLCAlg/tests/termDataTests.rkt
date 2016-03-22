@@ -5,8 +5,8 @@
 (require racket/pretty)
 
 (require 
-  "../types.rkt"
-  "../terms.rkt"
+  "../typesData.rkt"
+  "../termsData.rkt"
 )
 
 (define all-tests

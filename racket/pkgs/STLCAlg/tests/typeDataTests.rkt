@@ -4,7 +4,7 @@
 (require rackunit/text-ui)
 
 (require 
-  "../types.rkt"
+  "../typesData.rkt"
 )
 
 (define all-tests

@@ -1,16 +1,16 @@
 #lang scribble/manual
 
-@(require STLCAlg/terms
-          STLCAlg/types
+@(require STLCAlg/termsData
+          STLCAlg/typesData
           "utils.rkt")
-@(require (for-label racket STLCAlg/terms STLCAlg/types))
+@(require (for-label racket STLCAlg/termsData STLCAlg/typesData))
 
-@title[#:tag "terms"]{STLCAlg terms}
+@title[#:tag "terms"]{STLCAlg termsData}
 @(author-stg)
 
-@defmodule[STLCAlg/terms]
+@defmodule[STLCAlg/termsData]
 
-The @racketmodname[STLCAlg/terms] module implements the STLCAlg 
+The @racketmodname[STLCAlg/termsData] module implements the STLCAlg 
 terms data structures using the Racket dialect of Scheme/Lisp.
 
 @defproc[

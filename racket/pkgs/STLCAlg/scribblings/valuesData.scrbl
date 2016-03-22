@@ -1,25 +1,25 @@
 #lang scribble/manual
 
-@(require STLCAlg/terms
-          STLCAlg/types
-          STLCAlg/values
+@(require STLCAlg/termsData
+          STLCAlg/typesData
+          STLCAlg/valuesData
           "utils.rkt")
 
 @(require
   (for-label
     racket 
-    STLCAlg/terms
-    STLCAlg/types
-    STLCAlg/values
+    STLCAlg/termsData
+    STLCAlg/typesData
+    STLCAlg/valuesData
   )
 )
 
-@title[#:tag "values"]{STLCAlg values}
+@title[#:tag "values"]{STLCAlg valuesData}
 @(author-stg)
 
-@defmodule[STLCAlg/values]
+@defmodule[STLCAlg/valuesData]
 
-The @racketmodname[STLCAlg/values] module implements the STLCAlg 
+The @racketmodname[STLCAlg/valuesData] module implements the STLCAlg 
 values data structures using the Racket dialect of Scheme/Lisp.
 
 @defproc[
