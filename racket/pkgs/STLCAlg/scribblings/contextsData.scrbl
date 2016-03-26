@@ -92,83 +92,83 @@ Returns the type of the type info.
 }
 
 @defproc[
-  (env?
+  (cxt?
     [ someThing any ]
   )
   boolean?
 ]{
-Returns true if someThing is an env.
+Returns true if someThing is an cxt.
 }
 
 @defproc[
-  (empty-env?
+  (empty-cxt?
     [ someThing any ]
   )
   boolean?
 ]{
-Returns true if someThing is an empty env.
+Returns true if someThing is an empty cxt.
 }
 
 @defproc[
-  (empty-env)
-  empty-env?
+  (empty-cxt)
+  empty-cxt?
 ]{
-Returns an empty env.
+Returns an empty cxt.
 }
 
 @defproc[
-  (extend-env?
+  (extend-cxt?
     [ someThing any ]
   )
   boolean?
 ]{
-Returns true if someThing is an extend env.
+Returns true if someThing is an extend cxt.
 }
 
 @defproc[
-  (extend-env
+  (extend-cxt
     [ aName    name? ]
     [ someInfo info? ]
-    [ anEnv    env?  ]
+    [ anCxt    cxt?  ]
   )
-  extend-env?
+  extend-cxt?
 ]{
-Returns an extended env.
+Returns an extended cxt.
 }
 
 @defproc[
-  (extend-env-name
-    [ anExtendEnv extend-env? ]
+  (extend-cxt-name
+    [ anExtendCxt extend-cxt? ]
   )
   name?
 ]{
-Returns the extend env's name.
+Returns the extend cxt's name.
 }
 
 @defproc[
-  (extend-env-info
-    [ anExtendEnv extend-env? ]
+  (extend-cxt-info
+    [ anExtendCxt extend-cxt? ]
   )
   info?
 ]{
-Returns the extend env's info.
+Returns the extend cxt's info.
 }
 
 @defproc[
-  (extend-env-next
-    [ anExtendEnv extend-env? ]
+  (extend-cxt-next
+    [ anExtendCxt extend-cxt? ]
   )
-  env?
+  cxt?
 ]{
-Returns the extend env's next env.
+Returns the extend cxt's next cxt.
 }
 
 @defproc[
-  (get-info-env
-    [ anEnv env? ]
+  (get-info-cxt
+    [ anCxt cxt? ]
     [ aName name? ]
   )
   info? ]{
-Searches the env for the info corresponding to the name provided. Returns 
+Searches the cxt for the info corresponding to the name provided. Returns 
 null if not such name have been found.
 }

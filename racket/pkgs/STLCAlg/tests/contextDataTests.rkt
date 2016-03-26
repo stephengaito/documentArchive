@@ -8,7 +8,7 @@
 )
 
 (define all-tests
-  (test-suite "Contexts, Environments, Kinds, Info"
+  (test-suite "Contexts, Contexts, Kinds, Info"
 
     (test-case "Test Kinds"
       (let* (
@@ -44,34 +44,34 @@
       )
     )
 
-    (test-case "Test Environments (Contexts)"
+    (test-case "Test Contexts"
       (let* (
-        [ emptyEnv  (empty-env) ]
+        [ emptyCxt  (empty-cxt) ]
         [ aTypeName (global-name "aTypeName") ]
         [ aType     (tfree-type aTypeName) ]
         [ anInfo    (type-info aType) ]
         [ aVarName0 (global-name "aVarName0") ]
         [ aVarName1 (global-name "aVarName1") ]
-        [ extendEnv (extend-env aVarName0 anInfo emptyEnv) ]
+        [ extendCxt (extend-cxt aVarName0 anInfo emptyCxt) ]
             )
 
-        (check-false (env? 1))
+        (check-false (cxt? 1))
 
-        (check-true  (env? emptyEnv))
-        (check-true  (empty-env? emptyEnv))
-        (check-false (empty-env? 1))
+        (check-true  (cxt? emptyCxt))
+        (check-true  (empty-cxt? emptyCxt))
+        (check-false (empty-cxt? 1))
 
-        (check-true  (env? extendEnv))
-        (check-true  (extend-env? extendEnv))
-        (check-false (extend-env? emptyEnv))
-        (check-false (extend-env? 1))
-        (check-eq?   (extend-env-name extendEnv) aVarName0)
-        (check-eq?   (extend-env-info extendEnv) anInfo)
-        (check-eq?   (extend-env-next extendEnv) emptyEnv)
+        (check-true  (cxt? extendCxt))
+        (check-true  (extend-cxt? extendCxt))
+        (check-false (extend-cxt? emptyCxt))
+        (check-false (extend-cxt? 1))
+        (check-eq?   (extend-cxt-name extendCxt) aVarName0)
+        (check-eq?   (extend-cxt-info extendCxt) anInfo)
+        (check-eq?   (extend-cxt-next extendCxt) emptyCxt)
 
-        (check-eq?   (get-info-env extendEnv aVarName0) anInfo)
-        (check-eq?   (get-info-env extendEnv aVarName1) null)
-        (check-eq?   (get-info-env emptyEnv  aVarName0) null)
+        (check-eq?   (get-info-cxt extendCxt aVarName0) anInfo)
+        (check-eq?   (get-info-cxt extendCxt aVarName1) null)
+        (check-eq?   (get-info-cxt emptyCxt  aVarName0) null)
       )
     )
 

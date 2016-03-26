@@ -115,8 +115,7 @@ Returns true if someThing is a vLam value.
 
 @defproc[
   (vlam-value
-    [ aFuncValue value? ]
-    [ anArgValue value? ]
+    [ aLambdaFunc (-> value? value?) ]
   )
   vlam-value?
 ]{
@@ -168,3 +167,65 @@ Returns a vNeutral value.
 Returns the vNeutral value's neutral.
 }
 
+@defproc[
+  (env?
+    [ something any ]
+  )
+  boolean?
+]{
+Returns true if something is an env.
+}
+
+@defproc[
+  (empty-env?
+    [ something any ]
+  )
+  boolean?
+]{
+Returns true if something is an empty env.
+}
+
+@defproc[
+  (empty-env)
+  empty-env?
+]{
+Returns an empty env.
+}
+
+@defproc[
+  (extend-env?
+    [ something any ]
+  )
+  boolean?
+]{
+Returns true if something is a non-empty (extended) env.
+}
+
+@defproc[
+  (extend-env
+    [ aValue value? ]
+    [ anEnv  env? ]
+  )
+  extend-env?
+]{
+Extends anEnv by pre-pending the value aValue.
+}
+
+@defproc[
+  (extend-env-value
+    [ anEnv env? ]
+  )
+  value?
+]{
+Returns the first value in the environment.
+}
+
+@defproc[
+  (get-index-env
+    [ anInt integer? ]
+    [ anEnv extend-env? ]
+  )
+  value?
+]{
+Returns the anInt-th value in the environment.
+}

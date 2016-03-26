@@ -24,14 +24,15 @@
   #%app #%datum #%top
   #%require #%provide
   require provide rename-out all-from-out
-  define
-  list list? 
-  car cdr cadr caddr cadddr
+  define lambda
+  list list* list? list-tail length
+  cons car cdr cadr cddr caddr cadddr
   quote
   if case else
   equal? eqv? eq?
-  and
+  and not
   null
+  +
   displayln
 )
 

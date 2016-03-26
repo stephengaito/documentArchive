@@ -13,10 +13,16 @@
   vlam-value?
   vlam-value
   vlam-value-func
-  vlam-value-arg
   vneutral-value?
   vneutral-value
   vneutral-value-neutral
+  env?
+  empty-env?
+  empty-env
+  extend-env?
+  extend-env
+  extend-env-value
+  get-index-env
 )
 
 (define (neutral? someThing)
@@ -75,16 +81,12 @@
   )
 )
 
-(define (vlam-value aFuncValue anArgValue)
-  (list 'VLam aFuncValue anArgValue)
+(define (vlam-value aLambdaFunc)
+  (list 'VLam aLambdaFunc)
 )
 
 (define (vlam-value-func aVLamValue)
   (cadr aVLamValue)
-)
-
-(define (vlam-value-arg aVLamValue)
-  (caddr aVLamValue)
 )
 
 (define (vneutral-value? someThing)
@@ -99,4 +101,40 @@
 
 (define (vneutral-value-neutral aVNeutralValue)
   (cadr aVNeutralValue)
+)
+
+(define (env? someThing)
+  (and (list? someThing)
+    (eq? (car someThing) 'Env)
+  )
+)
+
+(define (empty-env? someThing)
+  (and (list? someThing)
+    (eq? (car someThing) 'Env)
+    (eq? (length someThing) 1)
+  )
+)
+
+(define (empty-env)
+  (list 'Env)
+)
+
+(define (extend-env? someThing)
+  (and (list? someThing)
+    (eq? (car someThing) 'Env)
+    (not (eq? (length someThing) 1))
+  )
+)
+
+(define (extend-env aValue anEnv)
+  (list* 'Env aValue (cdr anEnv))
+)
+
+(define (extend-env-value anEnv)
+  (cadr anEnv)
+)
+
+(define (get-index-env anInt anEnv)
+  (car (list-tail anEnv (+ anInt 1)))
 )

@@ -10,15 +10,15 @@
   type-info?
   type-info
   type-info-type
-  env?
-  empty-env?
-  empty-env
-  extend-env?
-  extend-env
-  extend-env-name
-  extend-env-info
-  extend-env-next
-  get-info-env
+  cxt?
+  empty-cxt?
+  empty-cxt
+  extend-cxt?
+  extend-cxt
+  extend-cxt-name
+  extend-cxt-info
+  extend-cxt-next
+  get-info-cxt
 )
 
 (define (kind? someThing)
@@ -68,54 +68,54 @@
   (cadr aTypeInfo)
 )
 
-(define (env? someThing)
+(define (cxt? someThing)
   (and (list? someThing)
     (case (car someThing)
-      [ ( EmptyEnv ExtendEnv ) #t ]
+      [ ( EmptyCxt ExtendCxt ) #t ]
       [ else #f ]
     )
   )
 )
 
-(define (empty-env? someThing)
+(define (empty-cxt? someThing)
   (and (list? someThing)
-    (eq? (car someThing) 'EmptyEnv)
+    (eq? (car someThing) 'EmptyCxt)
   )
 )
 
-(define (empty-env)
-  (list 'EmptyEnv)
+(define (empty-cxt)
+  (list 'EmptyCxt)
 )
 
-(define (extend-env? someThing)
+(define (extend-cxt? someThing)
   (and (list? someThing)
-    (eq? (car someThing) 'ExtendEnv)
+    (eq? (car someThing) 'ExtendCxt)
   )
 )
 
-(define (extend-env aName someInfo nextEnv)
-  (list 'ExtendEnv aName someInfo nextEnv)
+(define (extend-cxt aName someInfo nextCxt)
+  (list 'ExtendCxt aName someInfo nextCxt)
 )
 
-(define (extend-env-name anEnv)
-  (cadr anEnv)
+(define (extend-cxt-name anCxt)
+  (cadr anCxt)
 )
 
-(define (extend-env-info anEnv)
-  (caddr anEnv)
+(define (extend-cxt-info anCxt)
+  (caddr anCxt)
 )
 
-(define (extend-env-next anEnv)
-  (cadddr anEnv)
+(define (extend-cxt-next anCxt)
+  (cadddr anCxt)
 )
 
-(define (get-info-env anEnv aName)
-  (if (list? anEnv)
-    (case (car anEnv)
-      [ ( ExtendEnv )
-        (if (equal? (extend-env-name anEnv) aName)
-          (extend-env-info anEnv)
-          (get-info-env (extend-env-next anEnv) aName)
+(define (get-info-cxt anCxt aName)
+  (if (list? anCxt)
+    (case (car anCxt)
+      [ ( ExtendCxt )
+        (if (equal? (extend-cxt-name anCxt) aName)
+          (extend-cxt-info anCxt)
+          (get-info-cxt (extend-cxt-next anCxt) aName)
         )
       ] [ else null
       ]

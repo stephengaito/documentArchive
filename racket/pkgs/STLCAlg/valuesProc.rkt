@@ -8,35 +8,40 @@
 (provide
   value-free
   value-app
-  eval
+  lp-eval
 )
 
 (define (value-free aName)
-  (list (vneutral-value (nfree-neutral aName)))
+  (vneutral-value (nfree-neutral aName))
 )
 
 (define (value-app aFuncValue anArgValue)
   (case (car aFuncValue)
     [ ( VLam )    ((vlam-value-func aFuncValue) anArgValue) ]
-;    [ ( VNeutral) (vlam-value 
-;                    (lambda (x)
-;                      (eval (lam-term (lam-term-term aFuncValue) ???))
-;                    )
-;                  ) ]
+    [ ( VNeutral) (vneutral-value
+                    (napp-neutral
+                      (vneutral-value-neutral aFuncValue)
+                      anArgValue
+                    )
+                  ) ]
     [ else null ]
   )
 )
 
-(define (eval anInfTerm anEnv)
-  (case (car anInfTerm) 
-    [ ( Ann )    (eval (ann-term-term anInfTerm) anEnv) ]
-    [ ( Free )   (value-free (free-term-name anInfTerm) ) ]
-    ;;[ ( Bound ) (??) ]
+(define (lp-eval aTerm anEnv)
+  (case (car aTerm) 
+    [ ( Ann )    (lp-eval (ann-term-term aTerm) anEnv) ]
+    [ ( Free )   (value-free (free-term-name aTerm) ) ]
+    [ ( Bound )  (get-index-env (bnd-term-index aTerm) anEnv) ]
     [ ( App )    (value-app 
-                   (eval (app-term-func anInfTerm) anEnv) 
-                   (eval (app-term-arg  anInfTerm) anEnv)
+                   (lp-eval (app-term-func aTerm) anEnv) 
+                   (lp-eval (app-term-arg  aTerm) anEnv)
                  ) ]
-    ;;[ ( Lambda ) (???) ]
+    [ ( Lambda ) (vlam-value
+                   (lambda (x)
+                     (lp-eval (lam-term-term aTerm) (extend-env x anEnv))
+                   )
+                 ) ]
     [ else null ]
   )
 )

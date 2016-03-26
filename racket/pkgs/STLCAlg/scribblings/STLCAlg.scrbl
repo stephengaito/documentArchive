@@ -76,5 +76,6 @@ implementing can be found in the companion papers TODO.
 @include-section["typesData.scrbl"]
 @include-section["termsData.scrbl"]
 @include-section["valuesData.scrbl"]
+@include-section["valuesProc.scrbl"]
 @include-section["contextsData.scrbl"]
 

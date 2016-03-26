@@ -2,6 +2,7 @@
 
 (require rackunit)
 (require rackunit/text-ui)
+(require racket/pretty)
 
 (require
   "../typesData.rkt"
@@ -10,7 +11,7 @@
 )
 
 (define all-tests
-  (test-suite "Neutral and Values"
+  (test-suite "Neutral, Values and Environments"
 
     (test-case "Test neutral data structures"
       (let* (
@@ -40,27 +41,49 @@
 
     (test-case "Test values data structures"
       (let* (
-        [ aFuncName (global-name "aFuncName") ]
-        [ anArgName (global-name "anArgName") ]
-        [ vLam      (vlam-value aFuncName anArgName) ]
-        [ aNeutral  (nfree-neutral anArgName) ]
-        [ vNeutral  (vneutral-value aNeutral) ]
+        [ aLambdaFunc (lambda (x) x) ]
+        [ anArgName   (global-name "anArgName") ]
+        [ vLam        (vlam-value aLambdaFunc) ]
+        [ aNeutral    (nfree-neutral anArgName) ]
+        [ vNeutral    (vneutral-value aNeutral) ]
             )
-        (check-false (value? aFuncName))
+        (check-false (value? anArgName))
         (check-false (value? 1))
 
         (check-true  (value? vLam))
         (check-true  (vlam-value? vLam))
         (check-false (vlam-value? vNeutral))
         (check-false (vlam-value? 1))
-        (check-eq?   (vlam-value-func vLam) aFuncName)
-        (check-eq?   (vlam-value-arg  vLam) anArgName)
+        (check-eq?   (vlam-value-func vLam) aLambdaFunc)
 
         (check-true  (value? vNeutral))
         (check-true  (vneutral-value? vNeutral))
         (check-false (vneutral-value? vLam))
         (check-false (vneutral-value? 1))
         (check-eq?   (vneutral-value-neutral vNeutral) aNeutral)
+      )
+    )
+
+    (test-case "Test environment data structures"
+      (let* (
+        [ emptyEnv    (empty-env) ]
+        [ extendEnv01 (extend-env 1 emptyEnv) ]
+        [ extendEnv02 (extend-env 2 extendEnv01) ]
+            )
+        (check-false (env? 1))
+
+        (check-true  (env? emptyEnv))
+        (check-true  (empty-env? emptyEnv))
+        (check-false (empty-env? extendEnv01))
+        (check-false (empty-env? 1))
+
+        (check-true  (env? extendEnv01))
+        (check-true  (extend-env? extendEnv01))
+        (check-false (extend-env? emptyEnv))
+        (check-false (extend-env? 1))
+        (check-eq?   (extend-env-value extendEnv02) 2)
+        (check-eq?   (get-index-env 0 extendEnv02) 2)
+        (check-eq?   (get-index-env 1 extendEnv02) 1)
       )
     )
   )
