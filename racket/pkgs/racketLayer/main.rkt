@@ -23,7 +23,7 @@
   (rename-out [#%plain-module-begin #%module-begin])
   #%app #%datum #%top
   #%require #%provide
-  require provide rename-out
+  require provide rename-out all-from-out
   define
   list list? 
   car cdr cadr caddr cadddr
