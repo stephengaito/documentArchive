@@ -32,7 +32,7 @@
   equal? eqv? eq?
   and not
   null
-  +
+  + -
   displayln
 )
 
