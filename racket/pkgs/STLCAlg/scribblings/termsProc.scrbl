@@ -13,7 +13,7 @@
   )
 )
 
-@title[#:tag "quote"]{STLCAlg termsProc}
+@title[#:tag "termsProc"]{STLCAlg termsProc}
 @(author-stg)
 
 @defmodule[STLCAlg/termsProc]

@@ -4,29 +4,13 @@
           "utils.rkt")
 @(require (for-label racket STLCAlg/typesCtxData))
 
-@title[#:tag "contexts"]{STLCAlg typesCtxData}
+@title[#:tag "typesCtxData"]{STLCAlg typesCtxData}
 @(author-stg)
 
 @defmodule[STLCAlg/typesCtxData]
 
 The @racketmodname[STLCAlg/typesCtxData] module implements the STLCAlg 
 contexts data structures using the Racket dialect of Scheme/Lisp.
-
-@defproc[
-  (kind? 
-    [ someThing any ]
-  )
-  boolean?
-]{
-Returns true if someThing is a kind.
-}
-
-@defproc[
-  (kind)
-  kind?
-]{
-Returns a kind.
-}
 
 @defproc[
   (info?

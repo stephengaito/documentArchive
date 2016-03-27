@@ -1,8 +1,6 @@
 #lang racketLayer
 
 (provide
-  kind?
-  kind
   info?
   kind-info?
   kind-info
@@ -19,16 +17,6 @@
   extend-ctx-info
   extend-ctx-next
   get-info-ctx
-)
-
-(define (kind? someThing)
-  (and (list? someThing)
-    (eq? (car someThing) 'Star)
-  )
-)
-
-(define (kind)
-  (list 'Star)
 )
 
 (define (info? someThing)

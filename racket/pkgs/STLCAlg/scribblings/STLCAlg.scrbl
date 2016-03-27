@@ -73,6 +73,7 @@ implementing can be found in the companion papers TODO.
 
 @local-table-of-contents[]
 
+@include-section["namesData.scrbl"]
 @include-section["typesData.scrbl"]
 @include-section["typesCtxData.scrbl"]
 @include-section["termsData.scrbl"]

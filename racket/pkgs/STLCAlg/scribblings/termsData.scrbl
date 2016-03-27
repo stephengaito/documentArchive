@@ -5,7 +5,7 @@
           "utils.rkt")
 @(require (for-label racket STLCAlg/termsData STLCAlg/typesData))
 
-@title[#:tag "terms"]{STLCAlg termsData}
+@title[#:tag "termsData"]{STLCAlg termsData}
 @(author-stg)
 
 @defmodule[STLCAlg/termsData]

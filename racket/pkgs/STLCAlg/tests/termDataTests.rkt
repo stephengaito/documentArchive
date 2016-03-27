@@ -5,6 +5,7 @@
 (require racket/pretty)
 
 (require 
+  "../namesData.rkt"
   "../typesData.rkt"
   "../termsData.rkt"
 )

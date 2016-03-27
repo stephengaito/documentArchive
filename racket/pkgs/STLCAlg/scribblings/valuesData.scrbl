@@ -14,7 +14,7 @@
   )
 )
 
-@title[#:tag "values"]{STLCAlg valuesData}
+@title[#:tag "valuesData"]{STLCAlg valuesData}
 @(author-stg)
 
 @defmodule[STLCAlg/valuesData]

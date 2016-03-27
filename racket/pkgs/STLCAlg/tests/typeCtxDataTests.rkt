@@ -3,6 +3,7 @@
 (require rackunit rackunit/text-ui)
 
 (require
+  "../namesData.rkt"
   "../typesData.rkt"
   "../typesCtxData.rkt"
 )

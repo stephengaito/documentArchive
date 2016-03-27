@@ -16,7 +16,7 @@
   )
 )
 
-@title[#:tag "lp-eval"]{STLCAlg valuesProc}
+@title[#:tag "valuesProc"]{STLCAlg valuesProc}
 @(author-stg)
 
 @defmodule[STLCAlg/valuesProc]

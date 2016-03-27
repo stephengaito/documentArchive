@@ -3,6 +3,7 @@
 ;; This is the main entry point for the STLCAlg module/language
 
 (require 
+  "namesData.rkt"
   "typesData.rkt"
   "typesCtxData.rkt"
   "typesProc.rkt"
@@ -14,6 +15,7 @@
 
 (provide 
   (all-from-out
+    "namesData.rkt"
     "typesData.rkt"
     "typesCtxData.rkt"
     "typesProc.rkt"
