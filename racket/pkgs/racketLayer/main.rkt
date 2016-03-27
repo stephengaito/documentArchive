@@ -15,6 +15,7 @@
 )
 |#
 
+(require racket/pretty)
 
 ;; This form, if it works, is very restrictive
 ;;
@@ -28,11 +29,13 @@
   list list* list? list-tail length
   cons car cdr cadr cddr caddr cadddr
   quote
+  let begin
   if case else
   equal? eqv? eq?
   and not
   null
   + -
-  displayln
+  raise-arguments-error
+  pretty-print
 )
 
