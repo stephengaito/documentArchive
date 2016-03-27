@@ -74,9 +74,9 @@ implementing can be found in the companion papers TODO.
 @local-table-of-contents[]
 
 @include-section["typesData.scrbl"]
+@include-section["typesCtxData.scrbl"]
 @include-section["termsData.scrbl"]
 @include-section["termsProc.scrbl"]
 @include-section["valuesData.scrbl"]
 @include-section["valuesProc.scrbl"]
-@include-section["contextsData.scrbl"]
 

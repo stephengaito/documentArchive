@@ -10,15 +10,15 @@
   type-info?
   type-info
   type-info-type
-  cxt?
-  empty-cxt?
-  empty-cxt
-  extend-cxt?
-  extend-cxt
-  extend-cxt-name
-  extend-cxt-info
-  extend-cxt-next
-  get-info-cxt
+  ctx?
+  empty-ctx?
+  empty-ctx
+  extend-ctx?
+  extend-ctx
+  extend-ctx-name
+  extend-ctx-info
+  extend-ctx-next
+  get-info-ctx
 )
 
 (define (kind? someThing)
@@ -68,54 +68,54 @@
   (cadr aTypeInfo)
 )
 
-(define (cxt? someThing)
+(define (ctx? someThing)
   (and (list? someThing)
     (case (car someThing)
-      [ ( EmptyCxt ExtendCxt ) #t ]
+      [ ( EmptyCtx ExtendCtx ) #t ]
       [ else #f ]
     )
   )
 )
 
-(define (empty-cxt? someThing)
+(define (empty-ctx? someThing)
   (and (list? someThing)
-    (eq? (car someThing) 'EmptyCxt)
+    (eq? (car someThing) 'EmptyCtx)
   )
 )
 
-(define (empty-cxt)
-  (list 'EmptyCxt)
+(define (empty-ctx)
+  (list 'EmptyCtx)
 )
 
-(define (extend-cxt? someThing)
+(define (extend-ctx? someThing)
   (and (list? someThing)
-    (eq? (car someThing) 'ExtendCxt)
+    (eq? (car someThing) 'ExtendCtx)
   )
 )
 
-(define (extend-cxt aName someInfo nextCxt)
-  (list 'ExtendCxt aName someInfo nextCxt)
+(define (extend-ctx aName someInfo nextCtx)
+  (list 'ExtendCtx aName someInfo nextCtx)
 )
 
-(define (extend-cxt-name anCxt)
-  (cadr anCxt)
+(define (extend-ctx-name anCtx)
+  (cadr anCtx)
 )
 
-(define (extend-cxt-info anCxt)
-  (caddr anCxt)
+(define (extend-ctx-info anCtx)
+  (caddr anCtx)
 )
 
-(define (extend-cxt-next anCxt)
-  (cadddr anCxt)
+(define (extend-ctx-next anCtx)
+  (cadddr anCtx)
 )
 
-(define (get-info-cxt anCxt aName)
-  (if (list? anCxt)
-    (case (car anCxt)
-      [ ( ExtendCxt )
-        (if (equal? (extend-cxt-name anCxt) aName)
-          (extend-cxt-info anCxt)
-          (get-info-cxt (extend-cxt-next anCxt) aName)
+(define (get-info-ctx anCtx aName)
+  (if (list? anCtx)
+    (case (car anCtx)
+      [ ( ExtendCtx )
+        (if (equal? (extend-ctx-name anCtx) aName)
+          (extend-ctx-info anCtx)
+          (get-info-ctx (extend-ctx-next anCtx) aName)
         )
       ] [ else null
       ]

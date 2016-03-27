@@ -1,15 +1,15 @@
 #lang scribble/manual
 
-@(require STLCAlg/contextsData
+@(require STLCAlg/typesCtxData
           "utils.rkt")
-@(require (for-label racket STLCAlg/contextsData))
+@(require (for-label racket STLCAlg/typesCtxData))
 
-@title[#:tag "contexts"]{STLCAlg contextsData}
+@title[#:tag "contexts"]{STLCAlg typesCtxData}
 @(author-stg)
 
-@defmodule[STLCAlg/contextsData]
+@defmodule[STLCAlg/typesCtxData]
 
-The @racketmodname[STLCAlg/contextsData] module implements the STLCAlg 
+The @racketmodname[STLCAlg/typesCtxData] module implements the STLCAlg 
 contexts data structures using the Racket dialect of Scheme/Lisp.
 
 @defproc[
@@ -92,83 +92,83 @@ Returns the type of the type info.
 }
 
 @defproc[
-  (cxt?
+  (ctx?
     [ someThing any ]
   )
   boolean?
 ]{
-Returns true if someThing is an cxt.
+Returns true if someThing is an ctx.
 }
 
 @defproc[
-  (empty-cxt?
+  (empty-ctx?
     [ someThing any ]
   )
   boolean?
 ]{
-Returns true if someThing is an empty cxt.
+Returns true if someThing is an empty ctx.
 }
 
 @defproc[
-  (empty-cxt)
-  empty-cxt?
+  (empty-ctx)
+  empty-ctx?
 ]{
-Returns an empty cxt.
+Returns an empty ctx.
 }
 
 @defproc[
-  (extend-cxt?
+  (extend-ctx?
     [ someThing any ]
   )
   boolean?
 ]{
-Returns true if someThing is an extend cxt.
+Returns true if someThing is an extend ctx.
 }
 
 @defproc[
-  (extend-cxt
+  (extend-ctx
     [ aName    name? ]
     [ someInfo info? ]
-    [ anCxt    cxt?  ]
+    [ anCtx    ctx?  ]
   )
-  extend-cxt?
+  extend-ctx?
 ]{
-Returns an extended cxt.
+Returns an extended ctx.
 }
 
 @defproc[
-  (extend-cxt-name
-    [ anExtendCxt extend-cxt? ]
+  (extend-ctx-name
+    [ anExtendCtx extend-ctx? ]
   )
   name?
 ]{
-Returns the extend cxt's name.
+Returns the extend ctx's name.
 }
 
 @defproc[
-  (extend-cxt-info
-    [ anExtendCxt extend-cxt? ]
+  (extend-ctx-info
+    [ anExtendCtx extend-ctx? ]
   )
   info?
 ]{
-Returns the extend cxt's info.
+Returns the extend ctx's info.
 }
 
 @defproc[
-  (extend-cxt-next
-    [ anExtendCxt extend-cxt? ]
+  (extend-ctx-next
+    [ anExtendCtx extend-ctx? ]
   )
-  cxt?
+  ctx?
 ]{
-Returns the extend cxt's next cxt.
+Returns the extend ctx's next ctx.
 }
 
 @defproc[
-  (get-info-cxt
-    [ anCxt cxt? ]
+  (get-info-ctx
+    [ anCtx ctx? ]
     [ aName name? ]
   )
   info? ]{
-Searches the cxt for the info corresponding to the name provided. Returns 
+Searches the ctx for the info corresponding to the name provided. Returns 
 null if not such name have been found.
 }

@@ -4,7 +4,7 @@
 
 (require
   "../typesData.rkt"
-  "../contextsData.rkt"
+  "../typesCtxData.rkt"
 )
 
 (define all-tests
@@ -46,32 +46,32 @@
 
     (test-case "Test Contexts"
       (let* (
-        [ emptyCxt  (empty-cxt) ]
+        [ emptyCtx  (empty-ctx) ]
         [ aTypeName (global-name "aTypeName") ]
         [ aType     (tfree-type aTypeName) ]
         [ anInfo    (type-info aType) ]
         [ aVarName0 (global-name "aVarName0") ]
         [ aVarName1 (global-name "aVarName1") ]
-        [ extendCxt (extend-cxt aVarName0 anInfo emptyCxt) ]
+        [ extendCtx (extend-ctx aVarName0 anInfo emptyCtx) ]
             )
 
-        (check-false (cxt? 1))
+        (check-false (ctx? 1))
 
-        (check-true  (cxt? emptyCxt))
-        (check-true  (empty-cxt? emptyCxt))
-        (check-false (empty-cxt? 1))
+        (check-true  (ctx? emptyCtx))
+        (check-true  (empty-ctx? emptyCtx))
+        (check-false (empty-ctx? 1))
 
-        (check-true  (cxt? extendCxt))
-        (check-true  (extend-cxt? extendCxt))
-        (check-false (extend-cxt? emptyCxt))
-        (check-false (extend-cxt? 1))
-        (check-eq?   (extend-cxt-name extendCxt) aVarName0)
-        (check-eq?   (extend-cxt-info extendCxt) anInfo)
-        (check-eq?   (extend-cxt-next extendCxt) emptyCxt)
+        (check-true  (ctx? extendCtx))
+        (check-true  (extend-ctx? extendCtx))
+        (check-false (extend-ctx? emptyCtx))
+        (check-false (extend-ctx? 1))
+        (check-eq?   (extend-ctx-name extendCtx) aVarName0)
+        (check-eq?   (extend-ctx-info extendCtx) anInfo)
+        (check-eq?   (extend-ctx-next extendCtx) emptyCtx)
 
-        (check-eq?   (get-info-cxt extendCxt aVarName0) anInfo)
-        (check-eq?   (get-info-cxt extendCxt aVarName1) null)
-        (check-eq?   (get-info-cxt emptyCxt  aVarName0) null)
+        (check-eq?   (get-info-ctx extendCtx aVarName0) anInfo)
+        (check-eq?   (get-info-ctx extendCtx aVarName1) null)
+        (check-eq?   (get-info-ctx emptyCtx  aVarName0) null)
       )
     )
 

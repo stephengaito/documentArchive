@@ -4,18 +4,22 @@
 
 (require 
   "typesData.rkt"
-  "valuesData.rkt"
+  "typesCtxData.rkt"
+  "typesProc.rkt"
   "termsData.rkt"
-  "contextsData.rkt"
+  "termsProc.rkt"
+  "valuesData.rkt"
   "valuesProc.rkt"
 )
 
 (provide 
   (all-from-out
     "typesData.rkt"
-    "valuesData.rkt"
+    "typesCtxData.rkt"
+    "typesProc.rkt"
     "termsData.rkt"
-    "contextsData.rkt"
+    "termsProc.rkt"
+    "valuesData.rkt"
     "valuesProc.rkt"
   )
 )
