@@ -12,9 +12,9 @@
 )
 
 (define all-tests
-  (test-suite  "Term Procs (lp-quote rec-quote neutral-quote bound-free)"
+  (test-suite  "Term Procs (lp-quote rec-quote neutral-quote bound-free subst)"
 
-    (test-case "Test quote proceedure"
+    (test-case "Test bound-free neutral-quote rec-quote and lp-quote proceedures"
       (let* (
         [ aValueStr   "aValueName" ]
         [ aValueName  (global-name aValueStr) ]
@@ -56,6 +56,62 @@
         ;; lp-quote
         (check-true (free-term? (lp-quote aVNeutral)))
         (check-eq?  (free-term-name (lp-quote aVNeutral)) aValueName)
+      )
+    )
+
+    (test-case "Test subst proceedure"
+      (let* (
+        [ varStr01   "varName01" ]
+        [ varName01  (global-name varStr01) ]
+        [ freeTerm01 (free-term varName01) ]
+        [ varStr02   "varName02" ]
+        [ varName02  (global-name varStr02) ]
+        [ freeTerm02 (free-term varName02) ]
+        [ typeStr    "typeName" ]
+        [ typeName   (global-name typeStr) ]
+        [ aType      (tfree-type typeName) ]
+        [ bound00    (bnd-term 0) ]
+        [ bound01    (bnd-term 1) ]
+        [ ann00      (ann-term bound00 aType) ]
+        [ ann01      (ann-term bound01 aType) ]
+        [ app00      (app-term bound00 bound00) ]
+        [ app01      (app-term bound00 bound01) ]
+        [ app10      (app-term bound01 bound00) ]
+        [ lam00      (lam-term bound00) ]
+        [ lam01      (lam-term bound01) ]
+            )
+
+        ;; free-terms do not get replaced
+        (check-equal? (subst 10 freeTerm01 freeTerm02) freeTerm02)
+
+        ;; bnd-terms get replaced depending upon anInt
+        (check-equal? (subst 1 freeTerm01 bound00) bound00)
+        (check-equal? (subst 1 freeTerm01 bound01) freeTerm01)
+
+        ;; ann-terms no substitution needed
+        (check-equal? (subst 1 freeTerm01 ann00) ann00)
+
+        ;; ann-terms substitution performed
+        (check-true   (ann-term? (subst 0 freeTerm01 ann00)))
+        (check-true   (free-term? (ann-term-term (subst 0 freeTerm01 ann00))))
+
+        ;; app-term no subsitution needed
+        (check-equal? (subst 1 freeTerm01 app00) app00)
+
+        ;; app-term subsitution of func performed
+        (check-true   (app-term? (subst 1 freeTerm01 app10)))
+        (check-true   (free-term? (app-term-func (subst 1 freeTerm01 app10))))
+
+        ;; app-term subsitution of arg performed
+        (check-true   (app-term? (subst 1 freeTerm01 app01)))
+        (check-true   (free-term? (app-term-arg (subst 1 freeTerm01 app01))))
+
+        ;; lam-term no subsitution needed
+        (check-equal? (subst 1 freeTerm01 lam00) lam00)
+
+        ;; lam-term subsitution performed
+        (check-true   (lam-term? (subst 0 freeTerm01 lam01)))
+        (check-true   (free-term? (lam-term-term (subst 0 freeTerm01 lam01))))
       )
     )
 

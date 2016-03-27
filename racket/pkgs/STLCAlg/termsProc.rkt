@@ -12,6 +12,7 @@
   rec-quote
   neutral-quote 
   bound-free
+  subst
 )
 
 (define (lp-quote aValue)
@@ -44,5 +45,30 @@
   (if (quote-name? aName)
     (bnd-term (- (- anInt (quote-name-index aName)) 1))
     (free-term aName)
+  )
+)
+
+(define (subst anInt aNewTerm anOldTerm)
+  (case (car anOldTerm)
+    [ ( Ann )    (ann-term 
+                   (subst anInt aNewTerm (ann-term-term anOldTerm))
+                   (ann-term-type anOldTerm)
+                 ) ]
+    [ ( Bound )  (if (eq? anInt (bnd-term-index anOldTerm))
+                   aNewTerm
+                   anOldTerm
+                 ) ]
+    [ ( Free )   anOldTerm ]
+    [ ( App )    (app-term 
+                   (subst anInt aNewTerm (app-term-func anOldTerm))
+                   (subst anInt aNewTerm (app-term-arg anOldTerm))
+                 ) ]
+    [ ( Lambda ) (lam-term 
+                   (subst
+                     (+ anInt 1) 
+                     aNewTerm
+                     (lam-term-term anOldTerm)
+                   )
+                 ) ]
   )
 )

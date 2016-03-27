@@ -59,3 +59,14 @@ Recursively computes a quoted term across neutrals for a given value. (Recurses 
 ]{
 Returns the bound or free term associated with a given quote.
 }
+
+@defproc[
+  (subst
+    [ anInt number? ]
+    [ newTerm term? ]
+    [ oldTerm term? ]
+  )
+  term?
+]{
+Performs the recursive substitution of newTerm for oldTerm.
+}
