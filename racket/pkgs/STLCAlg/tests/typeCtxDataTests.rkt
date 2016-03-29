@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require rackunit rackunit/text-ui)
+(require rackunit rackunit/text-ui racket/pretty)
 
 (require
   "../namesData.rkt"
@@ -61,6 +61,8 @@
         (check-true  (ctx? emptyCtx))
         (check-true  (empty-ctx? emptyCtx))
         (check-false (empty-ctx? 1))
+        (check-pred  list? emptyCtx)
+        (check-eq?   (car emptyCtx) 'EmptyCtx)
 
         (check-true  (ctx? extendCtx))
         (check-true  (extend-ctx? extendCtx))
@@ -71,8 +73,12 @@
         (check-eq?   (extend-ctx-next extendCtx) emptyCtx)
 
         (check-eq?   (get-info-ctx extendCtx aVarName0) anInfo)
-        (check-eq?   (get-info-ctx extendCtx aVarName1) null)
-        (check-eq?   (get-info-ctx emptyCtx  aVarName0) null)
+        (check-exn   exn-name-not-found-in-context?
+          (lambda () (get-info-ctx extendCtx aVarName1) null)
+        )
+        (check-exn   exn-name-not-found-in-context?
+          (lambda () (get-info-ctx emptyCtx  aVarName0) null)
+        )
       )
     )
 

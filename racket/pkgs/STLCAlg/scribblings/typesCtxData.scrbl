@@ -2,7 +2,14 @@
 
 @(require STLCAlg/typesCtxData
           "utils.rkt")
-@(require (for-label racket STLCAlg/typesCtxData))
+@(require 
+  (for-label 
+    racket
+    STLCAlg/namesData
+    STLCAlg/typesData
+    STLCAlg/typesCtxData
+  )
+)
 
 @title[#:tag "typesCtxData"]{STLCAlg typesCtxData}
 @(author-stg)
@@ -148,11 +155,27 @@ Returns the extend ctx's next ctx.
 }
 
 @defproc[
+  (exn-name-not-found-in-context?
+    [ anExn exn? ]
+  )
+  boolean?
+]{
+Returns true if the exception, anExn, is a name-not-found-in-context 
+exception.
+}
+
+@defproc[
   (get-info-ctx
-    [ anCtx ctx? ]
+    [ aCtx ctx? ]
     [ aName name? ]
   )
-  info? ]{
-Searches the ctx for the info corresponding to the name provided. Returns 
-null if not such name have been found.
+  (or info? exn-name-not-found-in-context?)
+]{
+
+Searches the ctx for the info corresponding to the name provided. 
+
+Returns the info corresponding to aName if the context contains aName.
+
+Raises the @racket[exn-name-not-found-in-context?] exception otherwise.
+
 }

@@ -25,6 +25,7 @@
 
 (define (term? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (case (car someThing)
       [ ( Bound Ann Free App Lambda) #t ]
       [ else #f ]
@@ -34,6 +35,7 @@
 
 (define (inf-term? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (case (car someThing)
       [ ( Bound Ann Free App) #t ]
       [ else #f ]
@@ -43,6 +45,7 @@
 
 (define (chk-term? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (case (car someThing)
       [ ( Lambda ) #t ]
       [ else #f ]
@@ -51,7 +54,10 @@
 )
 
 (define (bnd-term? someThing)
-  (and (list? someThing) (eq? (car someThing) 'Bound))
+  (and (list? someThing) 
+    (< 0 (length someThing))
+    (eq? (car someThing) 'Bound)
+  )
 )
 
 (define (bnd-term aBindingNum)
@@ -63,7 +69,10 @@
 )
 
 (define (ann-term? someThing)
-  (and (list? someThing) (eq? (car someThing) 'Ann))
+  (and (list? someThing)
+    (< 0 (length someThing))
+    (eq? (car someThing) 'Ann)
+  )
 )
 
 (define (ann-term aTerm aType)
@@ -79,7 +88,10 @@
 )
 
 (define (free-term? someThing)
-  (and (list? someThing) (eq? (car someThing) 'Free))
+  (and (list? someThing)
+    (< 0 (length someThing))
+    (eq? (car someThing) 'Free)
+  )
 )
 
 (define (free-term aVarName)
@@ -91,7 +103,10 @@
 )
 
 (define (app-term? someThing)
-  (and (list? someThing) (eq? (car someThing) 'App))
+  (and (list? someThing)
+    (< 0 (length someThing))
+    (eq? (car someThing) 'App)
+  )
 )
 
 (define (app-term aFunctionTerm anArgumentTerm)
@@ -107,7 +122,10 @@
 )
 
 (define (lam-term? someThing)
-  (and (list? someThing) (eq? (car someThing) 'Lambda))
+  (and (list? someThing)
+    (< 0 (length someThing))
+    (eq? (car someThing) 'Lambda)
+  )
 )
 
 (define (lam-term aTerm)

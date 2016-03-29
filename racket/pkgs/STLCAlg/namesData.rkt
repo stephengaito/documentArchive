@@ -15,6 +15,7 @@
 
 (define (name? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (case (car someThing)
       [ (Global Local Quote) #t ]
       [ else #f ]
@@ -24,6 +25,7 @@
 
 (define (global-name? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'Global)
   )
 )
@@ -38,6 +40,7 @@
 
 (define (local-name? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'Local)
   )
 )
@@ -52,6 +55,7 @@
 
 (define (quote-name? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'Quote)
   )
 )

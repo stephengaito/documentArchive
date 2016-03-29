@@ -15,6 +15,7 @@
 
 (define (kind? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'Star)
   )
 )
@@ -25,6 +26,7 @@
 
 (define (type? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (case (car someThing)
       [ (TFree Func) #t ]
       [ else #f ]
@@ -34,6 +36,7 @@
 
 (define (tfree-type? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'TFree)
   )
 )
@@ -48,6 +51,7 @@
 
 (define (func-type? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'Func)
   )
 )

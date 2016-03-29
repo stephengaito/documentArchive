@@ -27,6 +27,7 @@
 
 (define (neutral? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (case (car someThing)
       [ (NFree NApp) #t ]
       [ else #f ]
@@ -36,6 +37,7 @@
 
 (define (nfree-neutral? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'NFree)
   )
 )
@@ -50,6 +52,7 @@
 
 (define (napp-neutral? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'NApp)
   )
 )
@@ -68,6 +71,7 @@
 
 (define (value? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (case (car someThing)
       [ (VLam VNeutral) #t ]
       [ else #f ]
@@ -77,6 +81,7 @@
 
 (define (vlam-value? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'VLam)
   )
 )
@@ -91,6 +96,7 @@
 
 (define (vneutral-value? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'VNeutral)
   )
 )
@@ -105,14 +111,15 @@
 
 (define (env? someThing)
   (and (list? someThing)
+    (< 0 (length someThing))
     (eq? (car someThing) 'Env)
   )
 )
 
 (define (empty-env? someThing)
   (and (list? someThing)
-    (eq? (car someThing) 'Env)
     (eq? (length someThing) 1)
+    (eq? (car someThing) 'Env)
   )
 )
 
@@ -122,8 +129,8 @@
 
 (define (extend-env? someThing)
   (and (list? someThing)
+    (< 1 (length someThing))
     (eq? (car someThing) 'Env)
-    (not (eq? (length someThing) 1))
   )
 )
 

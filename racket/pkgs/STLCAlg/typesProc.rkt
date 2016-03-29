@@ -5,13 +5,25 @@
   "typesData.rkt"
   "typesCtxData.rkt"
   "termsData.rkt"
+  "termsProc.rkt"
 )
 
 (provide
-;  chk-kind
-;  infer-type
-;  infer-rec-type
-;  chk-rec-type
+  exn-not-a-kind?
+  chk-kind
+  exn-not-a-type?
+  exn-illegal-application?
+  infer-type
+  infer-rec-type
+  exn-not-func-type?
+  exn-type-mismatch?
+  chk-rec-type
+)
+
+(define (exn-not-a-kind? anExn)
+  (and (exn:fail:contract? anExn)
+    (regexp-match #rx"^not-a-kind" (exn-message anExn))
+  )
 )
 
 ;; The chk-kind proceedure either returns #t or raises an arguments error
@@ -23,7 +35,9 @@
                     #t
                     (raise-arguments-error
                       'not-a-kind
-                      "name" (tfree-type-name aType)
+                      "The object named is not a kind"
+                      "name" (pretty-format (tfree-type-name aType) #:mode 'display)
+                      "info" (pretty-format anInfo #:mode 'display)
                     )
                   )
                 ) ]
@@ -34,11 +48,23 @@
   )
 )
 
+(define (exn-not-a-type? anExn)
+  (and (exn:fail:contract? anExn)
+    (regexp-match #rx"^not-a-type" (exn-message anExn))
+  )
+)
+
+(define (exn-illegal-application? anExn)
+  (and (exn:fail:contract? anExn)
+    (regexp-match #rx"^illegal-application" (exn-message anExn))
+  )
+)
+
 ;; The infer-type proceedure either returns a type or raises an arguments 
 ;; error
 ;;
-(define (infer-type aCtx aType)
-  (infer-rec-type 0 aCtx aType)
+(define (infer-type aCtx aTerm)
+  (infer-rec-type 0 aCtx aTerm)
 )
 
 ;; The infer-rec-type proceedure either returns a type or raises an 
@@ -58,6 +84,7 @@
                    (type-info-type anInfo)
                    (raise-arguments-error
                      'not-a-type
+                     "The object named is not a type"
                      "name: " (free-term-name aTerm)
                    )
                  )
@@ -79,14 +106,26 @@
                    )
                    (raise-arguments-error
                      'illegal-application
-                     "rangeType: " (pretty-print funcType)
-                     " argument: " (pretty-print (app-term-arg aTerm))
+                     "The type of the argument is incorrect for the given function"
+                     "rangeType: " (pretty-format funcType)
+                     " argument: " (pretty-format (app-term-arg aTerm))
                    )
                  )
                ) ]
   )
 )
 
+(define (exn-not-func-type? anExn)
+  (and (exn:fail:contract? anExn)
+    (regexp-match #rx"^not-func-type" (exn-message anExn))
+  )
+)
+
+(define (exn-type-mismatch? anExn)
+  (and (exn:fail:contract? anExn)
+    (regexp-match #rx"^type-mismatch" (exn-message anExn))
+  )
+)
 
 (define (chk-rec-type anInt aCtx aTerm aType)
   (if (lam-term? aTerm)
@@ -94,11 +133,13 @@
       (chk-rec-type 
         (+ 1 anInt)
         (extend-ctx (local-name anInt) (type-info (func-type-domain aType)) aCtx)
+        (subst 0 (free-term (local-name anInt)) (lam-term-term aTerm))
         (func-type-range aType)
       )
       (raise-arguments-error
         'not-func-type
-        "type: " (pretty-print aType)
+        "Recursively checking that a given term is a given type"
+        "type: " (pretty-format aType)
       )
     )
     (let ([ inferedType (infer-rec-type anInt aCtx aTerm) ])
@@ -106,8 +147,9 @@
         #t
         (raise-arguments-error
           'type-mismatch
-          " inferedType: " (pretty-print inferedType)
-          "requiredType: " (pretty-print aType)
+          "The type of the given term is not the same as the given type"
+          " inferedType: " (pretty-format inferedType)
+          "requiredType: " (pretty-format aType)
         )
       )
     )

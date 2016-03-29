@@ -34,8 +34,8 @@
   equal? eqv? eq?
   and not
   null
-  + -
-  raise-arguments-error
-  pretty-print
+  + - <
+  raise-arguments-error exn:fail:contract? regexp-match exn-message
+  pretty-format
 )
 
