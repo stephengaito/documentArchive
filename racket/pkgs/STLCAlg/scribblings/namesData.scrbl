@@ -1,8 +1,13 @@
 #lang scribble/manual
 
-@(require STLCAlg/namesData
-          "utils.rkt")
-@(require (for-label racket STLCAlg/namesData))
+@(require "utils.rkt")
+
+@(require
+  (for-label
+    racket
+    STLCAlg/namesData
+  )
+)
 
 @title[#:tag "namesData"]{STLCAlg namesData}
 @(author-stg)

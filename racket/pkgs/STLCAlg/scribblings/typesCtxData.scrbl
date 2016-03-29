@@ -1,7 +1,7 @@
 #lang scribble/manual
 
-@(require STLCAlg/typesCtxData
-          "utils.rkt")
+@(require "utils.rkt")
+
 @(require 
   (for-label 
     racket

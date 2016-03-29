@@ -1,16 +1,12 @@
 #lang scribble/manual
 
-@(require STLCAlg/termsData
-          STLCAlg/typesData
-          STLCAlg/valuesData
-          STLCAlg/valuesProc
-          "utils.rkt")
+@(require "utils.rkt")
 
 @(require
   (for-label
     racket
+    STLCAlg/namesData
     STLCAlg/termsData
-    STLCAlg/typesData
     STLCAlg/valuesData
     STLCAlg/valuesProc
   )
