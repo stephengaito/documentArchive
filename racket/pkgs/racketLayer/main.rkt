@@ -7,17 +7,8 @@
 ;; language/engine are allowed to be used in the overlying 
 ;; STLCAlg/STLCCoAlg/DTLCAlg/DTLCCoAlg languages/engines.
 
-#|
-;; This form opens everything out and is TOO permissive
-;;
-(provide (except-out (all-from-out racket/base) #%module-begin)
-         (rename-out [#%plain-module-begin #%module-begin])
-)
-|#
-
-(require racket/pretty)
-
-;; This form, if it works, is very restrictive
+;; We carefully restrict the symbols/methods to ensure a "simple" 
+;; underlying system.
 ;;
 (provide
   #%plain-module-begin
@@ -35,7 +26,5 @@
   and not
   null
   + - <
-  raise-arguments-error exn:fail:contract? regexp-match exn-message
-  pretty-format
 )
 

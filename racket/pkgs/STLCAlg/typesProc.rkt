@@ -1,5 +1,7 @@
 #lang racketLayer
 
+(require racketLayer/exceptions)
+
 (require
   "namesData.rkt"
   "typesData.rkt"

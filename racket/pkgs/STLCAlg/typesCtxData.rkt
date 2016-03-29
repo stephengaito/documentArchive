@@ -1,5 +1,7 @@
 #lang racketLayer
 
+(require racketLayer/exceptions)
+
 (provide
   info?
   kind-info?
