@@ -44,7 +44,7 @@ Racket programming system conviently provides. We do this so that we can
 provide rigorous proofs that our versions of these tools are correct. We 
 also re-implement these tools to show exactly what tools and parts of 
 Pure LISP that is required to provide our version of the foundations of 
-mathematics. The @hyperlink["../racketLayer/index.html"]{racketLayer} 
+mathematics. The @hyperlink["../lp4RacketLayer/index.html"]{lp4RacketLayer} 
 language provides an explicit definition of those parts of the Racket 
 programming language we consider to be part of Pure LISP.
 

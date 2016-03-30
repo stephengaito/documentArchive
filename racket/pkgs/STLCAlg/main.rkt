@@ -1,4 +1,4 @@
-#lang racketLayer
+#lang lp4RacketLayer
 
 ;; This is the main entry point for the STLCAlg module/language
 

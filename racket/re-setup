@@ -3,12 +3,12 @@
 reset
 
 echo ""
-echo "Setting up [racketLayer]"
+echo "Setting up [lp4RacketLayer]"
 echo ""
 
-raco setup racketLayer
-pushd pkgs/racketLayer > /dev/null
-raco scribble +m --latex-section 1 --dest latex scribblings/racketLayer.scrbl
+raco setup lp4RacketLayer
+pushd pkgs/lp4RacketLayer > /dev/null
+raco scribble +m --latex-section 1 --dest latex scribblings/lp4RacketLayer.scrbl
 pushd latex > /dev/null
 rm -rf manual-style.tex racket.tex scribble-load-replace.tex
 rm -rf scribble-load.tex scribble.tex
@@ -33,11 +33,11 @@ echo "Copying documentation"
 echo ""
 
 mkdir -p doc
-rsync -av pkgs/racketLayer/doc .
+rsync -av pkgs/lp4RacketLayer/doc .
 rsync -av pkgs/STLCAlg/doc .
 rsync -av pkgs/combined/doc .
 mkdir -p latex
-rsync -av pkgs/racketLayer/latex .
+rsync -av pkgs/lp4RacketLayer/latex .
 rsync -av pkgs/STLCAlg/latex .
 rsync -av pkgs/combined/latex .
 echo ""

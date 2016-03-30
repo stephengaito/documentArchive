@@ -10,9 +10,9 @@ echo ""
 raco pkg install doc-coverage
 
 echo ""
-echo "linking [racketLayer]"
+echo "linking [lp4RacketLayer]"
 echo ""
-raco pkg install --link pkgs/racketLayer
+raco pkg install --link pkgs/lp4RacketLayer
 
 echo ""
 echo "linking [STLCAlg]"
@@ -20,9 +20,9 @@ echo ""
 raco pkg install --link pkgs/STLCAlg
 
 echo ""
-echo "seting up [racketLayer]"
+echo "seting up [lp4RacketLayer]"
 echo ""
-raco setup racketLayer
+raco setup lp4RacketLayer
 
 echo ""
 echo "seting up [STLCAlg]"

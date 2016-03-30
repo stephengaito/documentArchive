@@ -1,6 +1,6 @@
 #lang racket/base
 
-;; This is the main entry point for the racketLayer language.
+;; This is the main entry point for the lp4RacketLayer language.
 ;;
 
 ;; It is used to control which aspects of the underlying Racket 
