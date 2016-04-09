@@ -40,11 +40,12 @@ are defined to be a computational non-well-founded foundations for
 mathematics actually computes what we say it does.
 
 To keep to this aim, we will re-implement many of the tools that the 
-Racket programming system conviently provides. We do this so that we can 
-provide rigorous proofs that our versions of these tools are correct. We 
-also re-implement these tools to show exactly what tools and parts of 
-Pure LISP that is required to provide our version of the foundations of 
-mathematics. The @hyperlink["../racketLayer/index.html"]{racketLayer} 
+Racket programming system conviently provides. We do this so that we 
+can provide rigorous proofs that our versions of these tools are 
+correct. We also re-implement these tools to show exactly what tools 
+and parts of Pure LISP that is required to provide our version of the 
+foundations of mathematics. The 
+@hyperlink["../diSimpRacketLayer/index.html"]{diSimpRacketLayer} 
 language provides an explicit definition of those parts of the Racket 
 programming language we consider to be part of Pure LISP.
 
@@ -69,12 +70,9 @@ extensible system.
 The Mathematical and Philosophyical ideas which this interpreter is
 implementing can be found in the companion papers TODO.
 
-
-
 @local-table-of-contents[]
 
-@include-section["types.scrbl"]
-@include-section["terms.scrbl"]
-@include-section["values.scrbl"]
-@include-section["contexts.scrbl"]
-
+@;include-section["types.scrbl"]
+@;include-section["terms.scrbl"]
+@;include-section["values.scrbl"]
+@;include-section["contexts.scrbl"]

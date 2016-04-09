@@ -35,3 +35,8 @@ diSimp build tool sub-command.
 3. Use the scribble --latex-section <n> command. Alas this will still 
 need post processing to remove any \includes and or overwritting scribble 
 created *.tex "style" files.
+
+# References
+
+See: [cola](http://piumarta.com/software/cola/)
+
