@@ -16,14 +16,14 @@
   #%app #%datum #%top
   #%require #%provide
   require provide rename-out
-;  define
-;  list list? 
-;  car cdr cadr caddr cadddr
-;  quote
-;  if case else
-;  equal? eqv? eq?
-;  and
-;  null
+  define
+  list list? 
+  car cdr cadr caddr cadddr
+  quote
+  if case else
+  equal? eqv? eq?
+  and
+  null
   displayln
 )
 

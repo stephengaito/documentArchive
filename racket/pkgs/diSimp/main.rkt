@@ -19,6 +19,14 @@
               [top-interaction #%top-interaction])
   #%app #%datum #%top
   #%require #%provide
+  define
+  list list?
+  car cdr cadr caddr cadddr
+  quote
+  if case else
+  equal? eqv? eq?
+  and
+  null
   displayln
 )
 
