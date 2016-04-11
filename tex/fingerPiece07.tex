@@ -1,0 +1,123 @@
+% Computation
+
+Our express aim is to provide a \emph{computational} foundation for mathematics.
+To do this we will use a number fundamental concepts or realizations:
+\begin{enumerate}
+\item	Lists/sequences are the fundamental ``objects''. Sets and logic are
+derivative concepts.
+
+\item	Categories are central to the definition of computation. They form the
+natural structures with which to ``generalize'' Turing's tabular definition of a
+computational machine or more recent labelled state transition machine
+descriptions at the heart of Turing's definition of computation. More
+importantly they provide the natural structures with which to describe
+\emph{provably correct} computation.
+
+\item	Turing's choice-machines (c-machines; non-deterministic machines) are more
+fundamental than his automatic-machines (a-machines; determinisitic machines).
+The von Neuman architecture can be viewed as a c-machine overlayed with a form
+of (modal) Hennessy-Milner logic and McCarthy's LISP to ensure deterministic
+computation. Compare the `Wizard Book's description of the arithmetic data-paths
+and central processing units of Register Machines, \cite[Chapter
+5]{abelsonSussmanSussman1996structureInterpretationComputerPrograms}.
+
+\item	Provably correct computation depends upon the triumvirate of Denotational,
+Operational and Axiomatic Semantics pioneered by Scott, Strachey, Plotkin, Floyd
+and Hoare in the late 1960's, 1970's and early 1980's. These semantics roughly
+correspond to Tarski's semantical model theory, Gentzen's
+natural-deduction/proof-theory, and (very roughly) Church's typed
+$\lambda$-calculus respectively from the 1930's and 1940's.
+
+\item	To provide a computational foundation for mathematics, we seek the
+\emph{largest} fixed point of the syntax/semantics  That is we seek a syntax
+which \emph{is} its own semantics. This means that non-well founded structures,
+potentially non-terminating processes and co-algebras are \emph{central} to this
+exposition. Ironically, the past 100 years of the foundations of mathematical
+thought has consistently striven to banish non-well founded structures as the
+basis of, among others, Russell's paradox. In fact, we see the \emph{human
+interpretation} of the linguistic meaning of what is essentially the logical
+liar paradox as the source of these paradoxes.
+
+\item	The primary objective of the working mathematician is to \emph{prove} that
+``useful'' computations are correct. Different mathematical communities use
+different (computational) languages focused upon different definitions of the
+concept of ``usefulness''. The objective of the community of foundational
+mathematicians is to provide the tools required to prove that these various
+(mathematical) (computational) languages \emph{are} correct.
+
+\end{enumerate}
+
+Current mathematical practice is to provide socially checked linguistic proofs
+in a style, which, we all assume, could be translated into a completely logical
+notation. There are, at present, a number of initiatives to replace these
+socially checked proofs with proof outlines constructed using ``interactive
+theorem provers'' such as ACL2, Agda, Coq, HOL, Isabelle, or Mizar. All of these
+systems use one or other system of logic (first, second or higher-order). 
+Our objective is to provide computations which are proven correct. 
+
+Hilbert's original goal was to ``remain in Cantor's paradise'' by proving that
+the axioms of a general foundation for mathematics (at one level) were
+\emph{consistent} using more restrictive ``finitist'' arguments at a higher
+meta-level. To recover the \emph{whole} of current mathematical practice using a
+\emph{computational} definition of rigour, we will be forced to make use of some
+definition of trans-finite computation, which is, not surprisingly, generally
+assumed to be beyond the abilities of finite-beings such as ourselves and our
+computational devices. This means that \emph{at some (meta-)level}, we must,
+like Hilbert, identify and prove correct a finte-computation which proves all
+``lower'' level computations to be correct.
+
+Again, current mathematical practice in the foundations of mathematics, is to
+accept socially checked linguistic proofs at the meta-mathematical level. Our
+aim is to provide provably correct computational proofs at \emph{all} levels.
+\emph{However} we are forced to \emph{begin} by providing socially agreed
+linguisitic justifications.
+
+\section{Liguistic justification}
+
+We begin by defining our (initially) finite-computational universe,
+\Universe{}{}, which we call ``Plato's playground'', to include all structures
+in the largest fixed point of the following two rules:
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{empty-list}
+\UnaryInfC{\judgement{()}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{x}{\Universe{}{}}}
+\AxiomC{\judgement{y}{\Universe{}{}}}
+\RightLabel{cons}
+\BinaryInfC{\judgement{(x . y)}{\Universe{}{}}}
+\end{prooftree}
+
+Liguistically we interpret these two rules to mean:
+\begin{itemize}
+\item	The empty list is a member of the universe.
+
+\item	If $x$ and $y$ are lists in the universe, then the ``cons'', $(x.y)$, of
+$x$ and $y$ is also in the universe.
+
+\end{itemize}
+
+We explicitly accept that any member of the universe, \Universe{}{}, might not
+be finite. That is, any member of the universe might be, what computer
+scientists call, a ``stream'', and in deed it might be a ``stream'' of
+``streams''.
+
+While we will provide completely rigorous definitions below, roughly
+\emph{denotational semantics} is provided by a mapping from a given syntactical
+form together with a given environment, to a specific element of a collection of
+semantic entities. Correspondingly, the denotational semantics of the first rule
+is that the \emph{syntactical form} $()$ (the marks in the sand `$($' and `$)$')
+together with any environment (including the empty environment) maps to the $()$
+element in the \Universe{}{}. In a more mathematical notation, $[()]_{\sigma} =
+()$. Similarly the denotational semantics of the second rule is that given an
+environment, $\sigma$, which contains a mapping for the variables, $x$ and $y$,
+the syntactic form $(x , y)$, is mapped to the element of \Universe{}{} given by
+$[ ( x . y ) ]_{\sigma} = ( [x]_{\sigma} . [y]_{\sigma} ) = ( \sigma(x) .
+\sigma(y) )$. Note that for these two rules and hence for any syntactic
+structure in Plato's playground, the denotational semantics of the syntax
+\emph{is} the syntax, and hence Plato's playground is the fixed-point of the
+denotational semantics.
+
