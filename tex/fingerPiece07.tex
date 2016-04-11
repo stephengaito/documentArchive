@@ -105,19 +105,26 @@ be finite. That is, any member of the universe might be, what computer
 scientists call, a ``stream'', and in deed it might be a ``stream'' of
 ``streams''.
 
-While we will provide completely rigorous definitions below, roughly
-\emph{denotational semantics} is provided by a mapping from a given syntactical
-form together with a given environment, to a specific element of a collection of
-semantic entities. Correspondingly, the denotational semantics of the first rule
-is that the \emph{syntactical form} $()$ (the marks in the sand `$($' and `$)$')
-together with any environment (including the empty environment) maps to the $()$
-element in the \Universe{}{}. In a more mathematical notation, $[()]_{\sigma} =
-()$. Similarly the denotational semantics of the second rule is that given an
-environment, $\sigma$, which contains a mapping for the variables, $x$ and $y$,
-the syntactic form $(x , y)$, is mapped to the element of \Universe{}{} given by
-$[ ( x . y ) ]_{\sigma} = ( [x]_{\sigma} . [y]_{\sigma} ) = ( \sigma(x) .
-\sigma(y) )$. Note that for these two rules and hence for any syntactic
-structure in Plato's playground, the denotational semantics of the syntax
-\emph{is} the syntax, and hence Plato's playground is the fixed-point of the
-denotational semantics.
+While we will provide completely rigorous definitions of the various semantic
+tools below, in this section we provide a high-level description of each tool.
+Each tool maps a syntatical structure given an environment. An environment, is a
+mapping from a collection of identifiers to semantical values in \Universe{}{}.
 
+Roughly \emph{denotational semantics} is provided by a mapping from a given
+syntactical form together with a given environment, to a specific element of a
+collection of semantic entities. Correspondingly, the denotational semantics of
+the first rule is that the \emph{syntactical form} $()$ (the marks in the sand
+`$($' and `$)$') together with any environment (including the empty environment)
+maps to the $()$ element in the \Universe{}{}. In a more mathematical notation,
+$[()]_{\sigma} = ()$. Similarly the denotational semantics of the second rule is
+that given an environment, $\sigma$, which contains a mapping for the variables,
+$x$ and $y$, the syntactic form $(x , y)$, is mapped to the element of
+\Universe{}{} given by $[ ( x . y ) ]_{\sigma} = ( [x]_{\sigma} . [y]_{\sigma} )
+= ( \sigma(x) . \sigma(y) )$. Note that for these two rules and hence for any
+syntactic structure in Plato's playground, the denotational semantics of the
+syntax \emph{is} the syntax, and hence Plato's playground is the fixed-point of
+the denotational semantics.
+
+\emph{Operational semantics} is provided by a 
+
+\emph{Axiomatic semantics} is provided by
