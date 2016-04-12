@@ -69,7 +69,7 @@ like Hilbert, identify and prove correct a finte-computation which proves all
 \section{Semi-formal overview}
 
 Current mathematical practice in the foundations of mathematics, is to accept
-socially checked linguistic proofs at the meta-mathematical level. Our aim is to
+socially checked finite proofs at the meta-mathematical level. Our aim is to
 provide provably correct computational proofs at \emph{all} levels.
 \emph{However} we are forced to \emph{begin} by providing a socially agreed
 semi-formal overview.
@@ -81,11 +81,27 @@ to get started, we will have to defer the fully formal definition of a number of
 key concepts until we have ``built'' sufficient formal structure to be able to
 provide these formal definitions. We assume we have some definition of the
 finite natural numbers, as well as a defintion of a mapping (function) from the
-finite natural numbers to themselves.
+finite natural numbers to themselves. We also assume that we have definitions of
+collection, partial-order, well-order and a well-order endowed with a
+predecessor mapping.
 
 \subsection{Syntax}
 
+When we are done we will have a well-ordering, $\mathfrak{W}(\bottom, \le)$
+endowed with a predecessor mapping which indexes a collection of
+meta-mathematical syntaxes. The lowest syntax, $S_{\bottom}$, corresponding to
+the ``object language'', consists exclusively of the symbols: `(', `)', and `.`.
+The syntaxes at any higher level may contain additional symbols. For each
+syntax, $S_{\tau}$, except $S_{\bottom}$, there is a distinguished symbol,
+`$\$_{\tau}$', as well as a distinguished collection of symbols,
+$\mathfrak{I}_{\tau}$, of identifiers and for each $\bottom < \tau$, $\$_{\tau}$
+is an identifier. There is an associated mapping, $|\cdot | : S^* \mapsTo
+\mathfrak{W}$ from the collection of symbol texts to the well-ordering.
 
+One of the key concepts in the various semantics is that of the state
+(environment or valuation). A state is a mapping, $\sigma : \mathfrak{I} \mapsTo
+\Universe{}{}$, from the collection of identifiers to \Universe{}{} where
+$|\sigma(x)| \le |x|$.
 
 We begin by defining our (initially) finite-computational universe,
 \Universe{}{}, which we call ``Plato's playground'', to include all structures
@@ -94,21 +110,21 @@ in the largest fixed point of the following two rules:
 \begin{prooftree}
 \AxiomC{}
 \RightLabel{empty-list}
-\UnaryInfC{\judgement{()}{\Universe{}{}}}
+\UnaryInfC{()}
 \end{prooftree}
 
 \begin{prooftree}
-\AxiomC{\judgement{x}{\Universe{}{}}}
-\AxiomC{\judgement{y}{\Universe{}{}}}
-\RightLabel{cons}
-\BinaryInfC{\judgement{(x . y)}{\Universe{}{}}}
+\AxiomC{x}
+\AxiomC{y}
+\RightLabel{pair}
+\BinaryInfC{(x . y)}
 \end{prooftree}
 
 Liguistically we interpret these two rules to mean:
 \begin{itemize}
 \item	The empty list is a member of the universe.
 
-\item	If $x$ and $y$ are lists in the universe, then the ``cons'', $(x.y)$, of
+\item	If $x$ and $y$ are lists in the universe, then the ``pair'', $(x.y)$, of
 $x$ and $y$ is also in the universe.
 
 \end{itemize}
@@ -118,13 +134,9 @@ be finite. That is, any member of the universe might be, what computer
 scientists call, a ``stream'', and in deed it might be a ``stream'' of
 ``streams''.
 
-While we will provide completely rigorous definitions of the various semantic
-tools below, in this section we provide a high-level description of each tool.
-Each tool maps a syntatical structure given an environment. An environment, is a
-mapping from a collection of identifiers to semantical values in \Universe{}{}.
-
-Roughly \emph{denotational semantics} is provided by a mapping from a given
-syntactical form together with a given environment, to a specific element of a
+A \emph{denotational semantics} is provided by a mapping, $[ \cdot ]_{\cdot} :
+\Universe{}{} \crossProduct \Sigma \mapsTo \Universe{}{}$, from an element of
+\Universe{}{} together with a given state, $\sigma$, to a specific element of a
 collection of semantic entities. Correspondingly, the denotational semantics of
 the first rule is that the \emph{syntactical form} $()$ (the marks in the sand
 `$($' and `$)$') together with any environment (including the empty environment)
@@ -141,3 +153,13 @@ the denotational semantics.
 \emph{Operational semantics} is provided by a 
 
 \emph{Axiomatic semantics} is provided by
+
+\section{Mud's eye view}
+
+In this section we pursue a mud's eye view of the construction of Plato's
+playground. While it does not represent the best way to conceptually understand
+the \emph{meaning} of Plato's playground, it \emph{does} satisfy the requirement
+of exhibiting an \emph{explicit finitist} construction.
+
+We allow ourselves three symbols `(', `)', '.'\footnote{As humans we are also allowed to use any amount of whitespace (in ASCII Unix notation the characters `\textvisiblespace' (space), `\textbackslash t' (tab), `\textbackslash n' (newline), `\textbackslash r' (return) ) to make things readable. All whitespace is ignored. Following LISP conventions we are also allowed one line comments, in that anything \emph{including and after} the character `;' (semicolon) is ignored up to the end of the current line.}.
+
