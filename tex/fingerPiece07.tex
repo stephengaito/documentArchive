@@ -168,12 +168,15 @@ useful/interesting linguistic extensions. A language extension consists of the
 specification of a syntax/semantics mapping which is a fixed point on the
 minimal language of Plato's playground itself.
 
-The conceptually simplest linguistic extension, since it is closest to the
-inspiration of Plato's playground, is the LISP extension. Following LISP
+The conceptually simplest linguistic extension, since it is closest to one of
+the inspirations of Plato's playground, is the LISP extension. Following LISP
 convention, \cite{mcCarthy1960lisp}, we refer to Plato's playground itself as
 the foundational language of F-expressions, while the LISP extension itself
-consists of the additional symbolic langauge of S-expressions and meta-langauge
-of M-expressions.
+consists of the additional symbolic langauge of S-expressions. In fact ``the''
+LISP extension is actually a family of mutually consistent extensions. One which
+adds lists (S$_{\text{L}}$-expressions), one which adds the natural numbers
+(S$_{\text{N}}$-expressions), one which adds the lambda calculus
+(S$_{\lambda}$-expressions), and so on, as need or interest arises.
 
 For the F-expressions, we allow ourselves three symbols `(', `)',
 '.'\footnote{To make things readable, as humans we are also allowed to use any
@@ -182,4 +185,14 @@ amount of whitespace (in ASCII Unix notation the characters `\textvisiblespace'
 r' (return) ). All whitespace is ignored. Following LISP conventions we are also
 allowed one line comments, in that anything \emph{including and after} the
 character `;' (semicolon) is ignored up to the end of the current line.}.
+
+For the S-expressions, we allow ourselves any of the printable ASCII
+characters\footnote{We could in principle allow any collection of printable
+characters such as, for example, the UTF-8 characters. However, for current
+purposes the ASCII characters are sufficient and yield a simpler core
+description.}.
+
+The S$_{\text{L}}$, S$_{\text{N}}$, and S$_{\lambda}$-expressions all inherit
+the same collection of characters as the S-expressions, but provide additional
+semantics not present in the base S-expressions.
 
