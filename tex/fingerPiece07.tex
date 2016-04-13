@@ -161,5 +161,25 @@ playground. While it does not represent the best way to conceptually understand
 the \emph{meaning} of Plato's playground, it \emph{does} satisfy the requirement
 of exhibiting an \emph{explicit finitist} construction.
 
-We allow ourselves three symbols `(', `)', '.'\footnote{As humans we are also allowed to use any amount of whitespace (in ASCII Unix notation the characters `\textvisiblespace' (space), `\textbackslash t' (tab), `\textbackslash n' (newline), `\textbackslash r' (return) ) to make things readable. All whitespace is ignored. Following LISP conventions we are also allowed one line comments, in that anything \emph{including and after} the character `;' (semicolon) is ignored up to the end of the current line.}.
+The typical activity of the mathematical community is to build language
+extensions of the foundational structure. So at any one time Plato's playground
+will be the minimal language in a partially ordered collection of currently
+useful/interesting linguistic extensions. A language extension consists of the
+specification of a syntax/semantics mapping which is a fixed point on the
+minimal language of Plato's playground itself.
+
+The conceptually simplest linguistic extension, since it is closest to the
+inspiration of Plato's playground, is the LISP extension. Following LISP
+convention, \cite{mcCarthy1960lisp}, we refer to Plato's playground itself as
+the foundational language of F-expressions, while the LISP extension itself
+consists of the additional symbolic langauge of S-expressions and meta-langauge
+of M-expressions.
+
+For the F-expressions, we allow ourselves three symbols `(', `)',
+'.'\footnote{To make things readable, as humans we are also allowed to use any
+amount of whitespace (in ASCII Unix notation the characters `\textvisiblespace'
+(space), `\textbackslash t' (tab), `\textbackslash n' (newline), `\textbackslash
+r' (return) ). All whitespace is ignored. Following LISP conventions we are also
+allowed one line comments, in that anything \emph{including and after} the
+character `;' (semicolon) is ignored up to the end of the current line.}.
 
