@@ -29,19 +29,19 @@ natural-deduction/proof-theory, and (very roughly) Church's typed
 $\lambda$-calculus respectively from the 1930's and 1940's.
 
 \item	To provide a computational foundation for mathematics, we seek the
-\emph{largest} fixed point of the syntax/semantics  That is we seek a syntax
-which \emph{is} its own semantics. This means that non-well founded structures,
-potentially non-terminating processes and co-algebras are \emph{central} to this
-exposition. Ironically, the past 100 years of the foundations of mathematical
-thought has consistently striven to banish non-well founded structures as the
-basis of, among others, Russell's paradox. In fact, we see the \emph{human
-interpretation} of the linguistic concept of `truth'' of what is essentially the
-logical liar paradox as the source of these paradoxes.
+\emph{largest} fixed point of the syntax/semantics.  That is we seek a syntax
+which is its own semantics. This means that non-well founded structures,
+potentially non-terminating processes and co-algebras, are \emph{central} to
+this exposition. Ironically, the past 100 years of the foundations of
+mathematical thought has consistently striven to banish non-well founded
+structures as the basis of, among others, Russell's paradox. In fact, we see the
+\emph{human interpretation} of the linguistic concept of `truth'' of what is
+essentially the logical liar paradox, as the source of these paradoxes.
 
 \item	The primary objective of the working mathematician is to \emph{prove} that
 ``useful'' computations are correct. Different mathematical communities use
-different (computational) languages focused upon different definitions of the
-concept of ``usefulness''. The objective of the community of foundational
+different (computational) languages focused upon different interpretations of
+the concept of ``usefulness''. The objective of the community of foundational
 mathematicians is to provide the tools required to prove that these various
 (mathematical) (computational) languages \emph{are} correct.
 
@@ -72,20 +72,52 @@ like Hilbert, identify and prove correct a finte-computation which proves all
 
 Current mathematical practice in the foundations of mathematics, is to accept
 socially checked finite proofs at the meta-mathematical level. Our aim is to
-provide provably correct computational proofs at \emph{all} levels.
-\emph{However} we are forced to \emph{begin} by providing a socially agreed
-semi-formal overview.
+provide provably correct computational proofs at \emph{all} levels. In this
+section we \emph{begin} by providing a merely socially agreed semi-formal
+overview of the ideas which we will provide fully proven computational proofs in
+later sections.
 
-Again, all current mathematical descriptions of the foundations of mathematics
-are essentially circular. Unfortunately our description is no exception. While
-we intend to provide complete formal definitions of all of the concepts we use,
-to get started, we will have to defer the fully formal definition of a number of
-key concepts until we have ``built'' sufficient formal structure to be able to
-provide these formal definitions. We assume we have some definition of the
-finite natural numbers, as well as a defintion of a mapping (function) from the
-finite natural numbers to themselves. We also assume that we have definitions of
-collection, partial-order, well-order and a well-order endowed with a
-predecessor mapping.
+Many current mathematical expositions of the foundations of mathematics are
+essentially circular. To provide a description of the \emph{language} of (first
+order) logic, they assume a knowledge of set theory. To provide a formal
+definition of Set Theory, they rely on that of first order logic, which in turn
+depends upon the corresponding \emph{language} of logic.
+
+We assert that the exposition given below, is not circular. However ``booting
+the foundations of mathematics''\footnotemark, without any circular
+dependencies, is a very tedious progression of detailed constructions. In this
+section, to provide a high-level orientation of this ``bootstrapping'' process,
+we provide a description which is inherently circular. We accept this
+circularity because we give a \emph{promise} that the subsequent, ``real''
+definitions are not circular (but are tedious).
+
+\footnotetext{``Booting the foundations of mathematics'', is very similar to
+booting a computer at power on, or building the first every compiler for a
+programming language. Everything must be done from scratch with very few
+resources.
+
+Bootstrapping a computer at power on is in practice a very tedious process,
+involving loading ultra-simple code from well know locations in the CPU's local
+address space, which then, in turn, loads slightly more complex code from well
+know locations on some external disk, which, in turn, loads ...
+
+Building the first ever compiler for a language with no other compilation tools
+is equally a very tedious process, one which, given modern cross-compilation
+techniques, has, almost certainly, not been done since sometime in late 1969
+with the advent of the first self-hosting version of Unix complete with a C
+compiler, see \cite[Chapter 2]{salus2008openSourceHistory}.
+
+Bootstrapping Mathematics involves an equally tedious process. We must identify
+specific mappings which are simple enough for an average mathematician to
+understand, and more importantly, ``believe'' reasonably ``true'', but which is
+complex enough to, in turn, define all subsequent, more complex, mathematical
+structures.}
+
+At a ``high-level'' of description, the ``boot'' process is fairly simple. We
+begin by constructing three related, simple, and more importantly \emph{finite},
+non-deterministic computational machines each of whose collection of productions
+\emph{are} significate parts of the universe of Plato's playground.
+\TODO{complete this description}
 
 \subsection{Syntax}
 
@@ -156,22 +188,6 @@ the denotational semantics.
 
 \emph{Axiomatic semantics} is provided by
 
-\section{Booting Mathematics}
-
-Bootstrapping a computer at power on is in practice a very tedious process,
-involving loading ultra-simple code from well know locations in the CPU's local
-address space, which then, in turn, loads slightly more complex code from well
-know locations on some external disk, which, in turn, loads ...
-
-Building the first ever compiler for a language with no other compilation tools
-is equally a very tedious process, one which, given modern cross-compilation
-techniques, has, almost certainly, not been done in decades.
-
-``Bootstrapping'' Mathematics involves an equally tedious process. We must
-identify specific mappings which are simple enough for an average mathematician
-to understand (and more importantly ``believe'' reasonably ``true'') but which
-is complex enough to in turn define more complex mathematical structures.
-
 \section{Mud's eye view}
 
 In this section we pursue a mud's eye view of the construction of Plato's
@@ -213,4 +229,6 @@ description.}.
 The S$_{\text{L}}$, S$_{\text{N}}$, and S$_{\lambda}$-expressions all inherit
 the same collection of characters as the S-expressions, but provide additional
 semantics not present in the base S-expressions.
+
+\section{Booting Mathematics}
 
