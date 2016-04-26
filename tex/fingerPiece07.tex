@@ -11,7 +11,8 @@ natural structures with which to ``generalize'' Turing's tabular definition of a
 computational machine or more recent labelled state transition machine
 descriptions at the heart of Turing's definition of computation. More
 importantly they provide the natural structures with which to describe
-\emph{provably correct} computation.
+\emph{provably correct} computation because they codify the ``mechanics'' of
+natural deduction.
 
 \item	Turing's choice-machines (c-machines; non-deterministic machines) are more
 fundamental than his automatic-machines (a-machines; determinisitic machines).
@@ -54,8 +55,8 @@ these socially checked proofs with proof outlines constructed using
 ``interactive theorem provers'' such as ACL2, Agda, Coq, HOL, Isabelle, or
 Mizar. All of these systems use one or other system of logic (first, second or
 higher-order). Our objective is to show that the collection of formally proven
-computations, is a Topos whose internal logic is the ``standard'' first order
-logic of Set Theory.
+computations, is a complementary \emph{pair} of Topoi whose internal logics are
+the ``standard'' first order (modal) logic of Set Theory.
 
 Hilbert's original goal was to ``remain in Cantor's paradise'' by proving that
 the axioms of a general foundation for mathematics (at one level) were
@@ -67,6 +68,40 @@ assumed to be beyond the abilities of finite-beings such as ourselves and our
 computational devices. This means that \emph{at some (meta-)level}, we must,
 like Hilbert, identify and prove correct a finte-computation which proves all
 ``lower'' level computations to be correct.
+
+\section{What is mathematics \emph{about}?}
+
+In order to provide a conceptual map of what a computational foundations of
+mathematics should ``look like'', we need to begin by sketching ``what
+mathematics is \emph{about}''.
+
+``Mathematics is the Queen of all the sciences''. 
+
+No mater what a mathematician may consider mathematics to be ``about'', they can
+not deny how deeply entwined mathematics is with the computation of scientific
+models, whose primary aim is to provide predictive models of essentially
+\emph{physical} \emph{observations}. The most critical presumption that we
+collectively make, is that, while the ``things'' of our external ``reality'' are
+\emph{meta-stable}, due to various conservation laws, these external procecesses
+are, realative to ``our'' ``existence'', ``eternal''.
+
+One of the most important principles of a computational foundation for
+mathematics, is that, mathematics is ``all about'', what a being of limited
+computational ability can observe about the realatively eternal processes around
+them. So one interpretation of ``what mathematics is \emph{about}'', is that
+mathematics is the study of the \emph{structure} of the \emph{observations} of
+``external'' processes.
+
+The second most important principle of a computational foundation for
+mathematics, is that mathematics \emph{is} \emph{computational}. Understanding
+the implications of computation, provides additional insight to the underlying
+structure of mathematics. In particular, the deep division between ``large'' and
+``small'' is really \emph{computational} and \emph{not} \emph{simply} a
+``device'' to keep mathematics from ``falling into'' Russel's paradox.
+
+So, in summary, mathematics is as much \emph{about} what can be ``constructed'',
+as \emph{about} what can be observed.
+
 
 \section{Semi-formal overview}
 
@@ -92,8 +127,8 @@ circularity because we give a \emph{promise} that the subsequent, ``real''
 definitions are not circular (but are tedious).
 
 \footnotetext{``Booting the foundations of mathematics'', is very similar to
-booting a computer at power on, or building the first every compiler for a
-programming language. Everything must be done from scratch with very few
+booting a computer at power on, or building the very first compiler for the very
+first programming language. Everything must be done from scratch with very few
 resources.
 
 Bootstrapping a computer at power on is in practice a very tedious process,
@@ -101,14 +136,14 @@ involving loading ultra-simple code from well know locations in the CPU's local
 address space, which then, in turn, loads slightly more complex code from well
 know locations on some external disk, which, in turn, loads ...
 
-Building the first ever compiler for a language with no other compilation tools
-is equally a very tedious process, one which, given modern cross-compilation
-techniques, has, almost certainly, not been done since sometime in late 1969
-with the advent of the first self-hosting version of Unix complete with a C
-compiler, see \cite[Chapter 2]{salus2008openSourceHistory}.
+Building the first ever compiler for the very first language with no other
+compilation tools is equally a very tedious process, one which, given modern
+cross-compilation techniques, has, almost certainly, not been done since
+sometime in late 1969 with the advent of the first self-hosting version of Unix
+complete with a C compiler, see \cite[Chapter 2]{salus2008openSourceHistory}.
 
 Bootstrapping Mathematics involves an equally tedious process. We must identify
-specific mappings which are simple enough for an average mathematician to
+specific mappings which are simple enough for the community of mathematicians to
 understand, and more importantly, ``believe'' reasonably ``true'', but which is
 complex enough to, in turn, define all subsequent, more complex, mathematical
 structures.}
