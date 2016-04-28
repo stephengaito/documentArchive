@@ -129,6 +129,38 @@ was \emph{not} necessary for the understanding of co-algebras.}
 
 \section{Semi-formal overview}
 
+As I have repeatedly reminded my children, \emph{mathematics is easy}, every
+step is essentially ``trivial'', \emph{what is hard} is keeping track of the
+volumes of detail. The skill of a mathematician is in being able to
+simultaneously keep track of this volume of detail by keeping an ``eye'' on the
+``big picture''. 
+
+To provide a computational foundation for mathematics is no different. In this
+case, the ``big picture'' is best understood by using ideas from both Category
+theory and (Programming) Language theory. We assert that while the following
+overview uses ideas which are currently defined using classical set theory, our
+subsequent development does not make any use of either first order logic or set
+theory, until of course these classical concepts have been given computational
+definitions.
+
+We begin by explicitly building a labelled transition system using a small
+collection of rules using the tools (but not the underlying goals) of type
+theory, see \cite[Appendix A.2]{awodeyCoquandVoevodsky2013homotopyTypeTheory} as
+well as \cite{jacobs1999categoricalLogicTypeTheory}. This labelled transition
+system is, for our purposes, a ``modern'' form of Turing machine. It is also a
+finite category which provides a doctrine for the category of list computations.
+\TODO{provide references for doctrines}.
+
+Our first task will be to show that this collection of list computations
+\emph{is} a category and more importantly that this category is in fact a Topos
+which more over satisfies the categorical version of the axiom of choice (in
+this case the countable axiom of choice). The significance of being a topos is
+that there is an internal (higher order) logic \emph{and} an associated
+set-theory. Since the category of list computations satisfies the axiom of
+choice, the internal logic is classical.
+
+\TODO{what are the next steps?}
+
 Current mathematical practice in the foundations of mathematics, is to accept
 socially checked finite proofs at the meta-mathematical level. Our aim is to
 provide provably correct computational proofs at \emph{all} levels. In this
@@ -178,7 +210,7 @@ non-deterministic computational machines each of whose collection of productions
 \emph{are} significate parts of the universe of Plato's playground.
 \TODO{complete this description}
 
-\subsection{Syntax}
+\section{Syntax}
 
 When we are done we will have a well-ordering, $\mathfrak{W}(\bottom, \le)$
 endowed with a predecessor mapping which indexes a collection of
@@ -198,29 +230,67 @@ $|\sigma(x)| \le |x|$.
 
 We begin by defining our (initially) finite-computational universe,
 \Universe{}{}, which we call ``Plato's playground'', to include all structures
-in the largest fixed point of the following two rules:
+in the largest fixed point of the following collection of rules:
+
+\subsection{Lists of lists}
 
 \begin{prooftree}
 \AxiomC{}
 \RightLabel{empty-list}
-\UnaryInfC{()}
+\UnaryInfC{(() . ())}
 \end{prooftree}
 
 \begin{prooftree}
-\AxiomC{x}
-\AxiomC{y}
-\RightLabel{pair}
-\BinaryInfC{(x . y)}
+\AxiomC{(x . y)}
+\RightLabel{duplicate}
+\UnaryInfC{(x . (x . y))}
 \end{prooftree}
 
-Liguistically we interpret these two rules to mean:
+\begin{prooftree}
+\AxiomC{(x . (y . z))}
+\RightLabel{pair}
+\UnaryInfC{((x . y) . z)}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{((x . y) . z)}
+\RightLabel{car}
+\UnaryInfC{(x . z)}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{((x . y) . z)}
+\RightLabel{cdr}
+\UnaryInfC{(y . z)}
+\end{prooftree}
+
+Liguistically we interpret these five rules to mean:
 \begin{itemize}
 \item	The empty list is a member of the universe.
+
+\item	If $(x.y)$ is a list in the universe, then the list, $(x.(x.y))$, is also
+in the universe.
 
 \item	If $x$ and $y$ are lists in the universe, then the ``pair'', $(x.y)$, of
 $x$ and $y$ is also in the universe.
 
+\item	If the ``pair'', $(x.y)$ is in the universe, then so is its first
+(``car'') member.
+
+\item	If the ``pair'', $(x.y)$ is in the universe, then so is its last
+(``cdr'') member.
 \end{itemize}
+
+\begin{cTikzPictureWorking}
+\node at (-1, 0)	{$\emptySet{}$};
+\node at (0, 0)     {\Universe{}{}};
+\draw[->] (-1, 0) -- (0,0);
+\draw[->] (0.1,0) arc [ start angle = 200, end angle = 540, radius = 1];
+\draw[->] (0.2,0) arc [ start angle = 200, end angle = 540, radius = 0.75];
+\draw[->] (0.3,0) arc [ start angle = 200, end angle = 540, radius = 0.5];
+\draw[->] (0.4,0) arc [ start angle = 200, end angle = 540, radius = 0.25];
+\end{cTikzPictureWorking}
+
 
 We explicitly accept that any member of the universe, \Universe{}{}, might not
 be finite. That is, any member of the universe might be, what computer
