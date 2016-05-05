@@ -234,6 +234,41 @@ in the largest fixed point of the following collection of rules:
 
 \subsection{Lists of lists}
 
+\subsubsection{Syntax}
+
+At the \emph{object} level, we have the following expression syntax:
+
+\begin{bnf*}\label{null-list}
+ \bnfProd{ListExp}{ 
+   \bnfTD{(} \bnfSP \bnfTD{)} \nonumber 
+   \bnfOR 
+   \bnfTD{(} \bnfSP \bnfPN{ListExp} \bnfSP 
+   \bnfTD{.} \bnfSP \bnfPN{ListExp} \bnfSP \bnfTD{)}
+ }
+\end{bnf*}
+
+At the \emph{meta/computational} level, we have the following extend the object
+syntax as follows:
+
+\begin{bnf*}
+ \bnfProd{ListExp}{\bnfTD{(} \bnfSP \bnfTD{car} \bnfSP \bnfPN{ListExp} \bnfSP \bnfTD{)} 
+ \bnfOR \bnfTD{(} \bnfSP \bnfTD{cdr} \bnfSP \bnfPN{ListExp} \bnfSP \bnfTD{)}}
+\end{bnf*}
+
+\subsubsection{Axiomatic Semantics}
+
+Classically, the axiomatic semantics of a particular computational fragment,
+consists of a precondition, the computational fragment, and a post-condition. In
+our case these pre and post conditions are observations, which we, recursively,
+build from a given structure, $\Gamma$, using a succession of either,
+\car{\Gamma}, or \cdr{\Gamma}, observations. These observations are assertions
+that a given (recursive) observation on a given object, $\Gamma$, exists. We
+denote a given base observation as, \observation{\Gamma}{\cdot}{\car{\Gamma}} or
+\observation{\Gamma}{\cdot}{\cdr{\Gamma}}. More complex observations can be
+built out of simpler \emph{named} observations listed in the context. For
+example the observation \observation{\Gamma}{\name{x}{\car{\Gamma}}}{\cdr{x}} is
+the same as \observation{\Gamma}{\cdot}{\cdr{\car{\Gamma}}}.
+
 \begin{prooftree}
 \AxiomC{}
 \RightLabel{empty-list}
@@ -244,6 +279,14 @@ in the largest fixed point of the following collection of rules:
 \AxiomC{(x . y)}
 \RightLabel{duplicate}
 \UnaryInfC{(x . (x . y))}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\observation{\Gamma}{}{\name{x}{\car{\Gamma}}}}
+\AxiomC{\observation{\Gamma}{}{\name{y}{\car{\cdr{\Gamma}}}}}
+\AxiomC{\observation{\Gamma}{}{\name{x}{\cdr{\cdr{\Gamma}}}}}
+\RightLabel{pair}
+\TrinaryInfC{\observation{\Gamma'}{}{((x . y) . z)}}
 \end{prooftree}
 
 \begin{prooftree}
