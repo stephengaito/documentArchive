@@ -28,11 +28,3 @@ how to write a minimal dependently typed Lambda Calculus in Pure LISP.
 the [LambdaPi](https://www.andres-loeh.de/LambdaPi/) web-page.
 
 2. A modern [GHC](https://www.haskell.org/ghc/) (we used ghc 7.10.3 from 
-early 2016).
-
-3. The readline cabal package.... to install, type:
-> cabal install readline
-
-4. The patched version of the LambdaPi.hs downloaded above, to patch, type:
-> patch --strip=1 < LambdaPi_patch
-

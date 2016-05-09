@@ -1,14 +1,8 @@
 **Table of Contents**
 
  - [fingerPieces](#fingerpieces)
- - [License](#license)
 
 <!--- END TOC -->
 
 # fingerPieces
 a place to work out new ideas
-
-# License
-
-The contents of this GitHub probject are copyright (C) Stephen Gaito, 
-PerceptiSys Ltd 2015; Some rights reserved.

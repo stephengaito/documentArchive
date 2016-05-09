@@ -25,8 +25,3 @@ Since we are using Behaviour Driven Development using a variety of
 specification tools, each story is developed into one or more 
 specifications of the "features" (located in the design/features 
 directory) representing the external model's behaviour . Each sprint file 
-records the features worked on during that sprint.
-
-While working on a given feature we will need to write a number of 
-specifications for the behaviour of various parts of the implementation. 
-These implementation level specifications will be located in an 

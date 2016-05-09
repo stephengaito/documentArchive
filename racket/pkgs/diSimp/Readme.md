@@ -59,9 +59,3 @@ at what level.
 > 
 > ;; Code here
 > 
-> (module+ test
->   ;; Tests to be run with raco test
->   "Hello testing world"
->   )
-> 
-> (module+ main
