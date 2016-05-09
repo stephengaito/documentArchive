@@ -1,3 +1,11 @@
+**Table of Contents**
+
+ - [diSimp](#disimp)
+  - [Notes](#notes)
+  - [Original main](#original-main)
+
+<!--- END TOC -->
+
 # diSimp
 
 ## Notes
@@ -57,7 +65,3 @@ at what level.
 >   )
 > 
 > (module+ main
->   ;; Main entry point, executed when run with the `racket` executable or DrRacket.
->   "Hello world"
->   )
-

@@ -1,3 +1,10 @@
+**Table of Contents**
+
+ - [LambdaPi](#lambdapi)
+ - [Dependencies](#dependencies)
+
+<!--- END TOC -->
+
 # LambdaPi
 
 This directory provides the patches required to get the existing 
@@ -28,9 +35,4 @@ early 2016).
 
 4. The patched version of the LambdaPi.hs downloaded above, to patch, type:
 > patch --strip=1 < LambdaPi_patch
-
-5. The executable lp ... to compile, type:
-> ghc --make -o lp LambdaPi.hs
-
-
 
