@@ -1,9 +1,3 @@
-**Table of Contents**
-
- - [Overview of sprint planning process.](#overview-of-sprint-planning-process-)
-
-<!--- END TOC -->
-
 # Overview of sprint planning process.
 
 We work in 

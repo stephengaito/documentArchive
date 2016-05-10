@@ -1,11 +1,11 @@
 **Table of Contents**
 
- - [DiSimplex compilation tools - Proving computations correct](#disimplex-compilation-tools-proving-computations-correct)
-  - [Problem](#problem)
-  - [Design goals](#design-goals)
-  - [Tools](#tools)
-  - [Resources](#resources)
-   - [Frontend](#frontend)
+  - [DiSimplex compilation tools - Proving computations correct](#disimplex-compilation-tools-proving-computations-correct)
+    - [Problem](#problem)
+    - [Design goals](#design-goals)
+    - [Tools](#tools)
+    - [Resources](#resources)
+      - [Frontend](#frontend)
 
 <!--- END TOC -->
 

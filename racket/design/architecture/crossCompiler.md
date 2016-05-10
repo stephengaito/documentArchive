@@ -1,10 +1,10 @@
 **Table of Contents**
 
- - [Cross compiler](#cross-compiler)
-  - [Problem](#problem)
-  - [Goals](#goals)
-  - [Requirements](#requirements)
-  - [Solution](#solution)
+  - [Cross compiler](#cross-compiler)
+    - [Problem](#problem)
+    - [Goals](#goals)
+    - [Requirements](#requirements)
+    - [Solution](#solution)
 
 <!--- END TOC -->
 

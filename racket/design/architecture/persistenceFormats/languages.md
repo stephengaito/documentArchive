@@ -1,17 +1,17 @@
 **Table of Contents**
 
- - [Language artefacts](#language-artefacts)
-  - [Problem](#problem)
-   - [Syntax](#syntax)
-   - [Axioms](#axioms)
-  - [Goals](#goals)
-  - [Requirements](#requirements)
-   - [Backus-Naur Form for language artefact](#backus-naur-form-for-language-artefact)
-  - [Solution](#solution)
-  - [Questions and Risks](#questions-and-risks)
-   - [Syntax](#syntax)
-   - [Axioms](#axioms)
-  - [Resources](#resources)
+  - [Language artefacts](#language-artefacts)
+    - [Problem](#problem)
+      - [Syntax](#syntax)
+      - [Axioms](#axioms)
+    - [Goals](#goals)
+    - [Requirements](#requirements)
+      - [Backus-Naur Form for language artefact](#backus-naur-form-for-language-artefact)
+    - [Solution](#solution)
+    - [Questions and Risks](#questions-and-risks)
+      - [Syntax](#syntax)
+      - [Axioms](#axioms)
+    - [Resources](#resources)
 
 <!--- END TOC -->
 
@@ -28,6 +28,14 @@ At the moment we will only worry about the [Abstract
 Syntax](https://en.wikipedia.org/wiki/Abstract_syntax) as represented by 
 its associated [Abstract Syntax Tree 
 (AST)](https://en.wikipedia.org/wiki/Abstract_syntax_tree).
+
+Could consider [ragg](http://www.hashcollision.org/ragg/) 
+[example](http://stackoverflow.com/a/12358029) and [Lexical analysis in 
+Racket](http://matt.might.net/articles/lexers-in-racket/) and the example 
+[Parsing BibTeX](http://matt.might.net/articles/parsing-bibtex/). See 
+also [HashCollision's projects](http://www.hashcollision.org/). See also 
+[Racket 
+Parsers](http://www.markcarter.me.uk/programming/racket/parsers.htm).
 
 ### Axioms
 

@@ -1,10 +1,10 @@
 **Table of Contents**
 
- - [Persistence formats](#persistence-formats)
-  - [Problem](#problem)
-  - [Goals](#goals)
-  - [Requirements](#requirements)
-  - [Solution](#solution)
+  - [Persistence formats](#persistence-formats)
+    - [Problem](#problem)
+    - [Goals](#goals)
+    - [Requirements](#requirements)
+    - [Solution](#solution)
 
 <!--- END TOC -->
 

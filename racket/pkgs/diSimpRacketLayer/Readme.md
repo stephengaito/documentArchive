@@ -1,8 +1,8 @@
 **Table of Contents**
 
- - [diSimpRacketLayer](#disimpracketlayer)
-  - [Notes](#notes)
-  - [Original main](#original-main)
+  - [diSimpRacketLayer](#disimpracketlayer)
+    - [Notes](#notes)
+    - [Original main](#original-main)
 
 <!--- END TOC -->
 

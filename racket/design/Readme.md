@@ -1,10 +1,10 @@
 **Table of Contents**
 
- - [Problem](#problem)
- - [Design goals](#design-goals)
- - [Tools](#tools)
- - [Resources](#resources)
-  - [Frontend](#frontend)
+  - [Problem](#problem)
+  - [Design goals](#design-goals)
+  - [Tools](#tools)
+  - [Resources](#resources)
+    - [Frontend](#frontend)
 
 <!--- END TOC -->
 

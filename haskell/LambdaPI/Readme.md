@@ -1,7 +1,7 @@
 **Table of Contents**
 
- - [LambdaPi](#lambdapi)
- - [Dependencies](#dependencies)
+  - [LambdaPi](#lambdapi)
+  - [Dependencies](#dependencies)
 
 <!--- END TOC -->
 

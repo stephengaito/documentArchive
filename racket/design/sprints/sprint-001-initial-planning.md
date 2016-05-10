@@ -1,12 +1,13 @@
 **Table of Contents**
 
- - [Sprint 001 initial planning](#sprint-001-initial-planning)
-  - [Tasks](#tasks)
-  - [Features](#features)
-  - [Specifications](#specifications)
-  - [Questions and Risks](#questions-and-risks)
-  - [Resources](#resources)
-  - [Wrap-up](#wrap-up)
+  - [Sprint 001 initial planning](#sprint-001-initial-planning)
+    - [Problem](#problem)
+    - [Tasks](#tasks)
+    - [Features](#features)
+    - [Specifications](#specifications)
+    - [Questions and Risks](#questions-and-risks)
+    - [Resources](#resources)
+    - [Wrap-up](#wrap-up)
 
 <!--- END TOC -->
 
@@ -14,6 +15,22 @@
 
 * Started: 2016/05/09
 * Ends: 2016/05/13 Friday
+
+## Problem
+
+We are designing a heavily data driven tool suite. The whole idea is that 
+we can specify languages and define computation in terms of rewriting of 
+the ASTs of these languages.
+
+One of the key issues of a data driven system is that its driving data 
+gets complex very quickly. This suggests a tool to visualise and navigate 
+this collection of data is important.
+
+**Risk** As mathematicians and scientists we *need* languages which are 
+precise, as humans we *like* languages which are ambiguous and 
+context-sensitive. What level of context-sensitivity is sufficient to 
+make a language humanly easy to work with, without compromising 
+precision.
 
 ## Tasks
 

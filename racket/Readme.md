@@ -1,8 +1,8 @@
 **Table of Contents**
 
- - [Overview](#overview)
- - [Notes for later](#notes-for-later)
-  - [LaTeX document generation.](#latex-document-generation-)
+  - [Overview](#overview)
+  - [Notes for later](#notes-for-later)
+    - [LaTeX document generation.](#latex-document-generation-)
 
 <!--- END TOC -->
 

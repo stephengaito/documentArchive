@@ -1,11 +1,11 @@
 **Table of Contents**
 
- - [Backus-Naur form tool](#backus-naur-form-tool)
-  - [Problem](#problem)
-  - [Goals](#goals)
-  - [Requirements](#requirements)
-  - [Solution](#solution)
-  - [Questions and Risks](#questions-and-risks)
+  - [Backus-Naur form tool](#backus-naur-form-tool)
+    - [Problem](#problem)
+    - [Goals](#goals)
+    - [Requirements](#requirements)
+    - [Solution](#solution)
+    - [Questions and Risks](#questions-and-risks)
 
 <!--- END TOC -->
 

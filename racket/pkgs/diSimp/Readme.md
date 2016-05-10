@@ -1,8 +1,8 @@
 **Table of Contents**
 
- - [diSimp](#disimp)
-  - [Notes](#notes)
-  - [Original main](#original-main)
+  - [diSimp](#disimp)
+    - [Notes](#notes)
+    - [Original main](#original-main)
 
 <!--- END TOC -->
 
