@@ -37,6 +37,14 @@ also [HashCollision's projects](http://www.hashcollision.org/). See also
 [Racket 
 Parsers](http://www.markcarter.me.uk/programming/racket/parsers.htm).
 
+After some research with NodeJS, Angular 2, and Jasmine I have discovered 
+that a better method of moving data structures between Racket and Angular 
+might be as stringified S-expressions.  Try using the reader/parser from 
+the [SLip](https://github.com/mishoo/SLip) project. OR try 
+[littlelisp](https://github.com/maryrosecook/littlelisp).
+
+Alternatively consider [PEG.js](http://pegjs.org/)
+
 ### Axioms
 
 Any language will have a small collection of axioms.
@@ -56,6 +64,15 @@ will simply to be "name" of the axiom.
 
 > Each axiom WILL consist of an axiom-name, a list of pre-conditions, a 
 > null body, and a list of post-conditions.
+
+### 
+
+| AST element    | Symbol or Racket list structure |
+| ----------     | ------------------------------- |
+| < symbol >     | /' |
+| < string >     | /'[^']*'/ \| /"[^"]*"/ |
+| < listItem >   | < symbol > \| < string > \| < listItem > |
+| < structure >  | < symbol >  |
 
 ### Backus-Naur Form for language artefact
 
