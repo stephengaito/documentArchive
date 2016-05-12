@@ -4,6 +4,7 @@
     - [Problem](#problem)
     - [Goals](#goals)
     - [Requirements](#requirements)
+      - [Meta^n-level AST description language](#meta-n-level-ast-description-language)
     - [Solution](#solution)
     - [Questions and Risks](#questions-and-risks)
 
@@ -21,6 +22,15 @@ it into an associated collection of Racket data structures.
 
 ## Requirements
 
+### Meta^n-level AST description language
+
+| AST element    | Symbol or Racket list structure |
+| ----------     | ------------------------------- |
+| < symbol >     | /' |
+| < string >     | /'[^']*'/ \| /"[^"]*"/ |
+| < listItem >   | < symbol > \| < string > \| < listItem > |
+| < structure >  | < symbol >  |
+
 ## Solution
 
 ## Questions and Risks
@@ -33,4 +43,4 @@ forms](https://docs.racket-lang.org/guide/macros.html).
 * We could also use Racket's native [structure 
 forms](https://docs.racket-lang.org/reference/define-struct.html).
 
- * can a Racket structure be car/cdr'ed?
+ * can a Racket structure be car/cdr-ed?

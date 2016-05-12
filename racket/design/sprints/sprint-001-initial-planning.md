@@ -38,8 +38,8 @@ precision.
  * Be able to specify a language syntax
  * Be able to specify language axioms
 
-* Build a simple tool to read a BNF and compile it into a collection of 
-  Racket structures.
+* Build a simple tool to read a context-free description of an AST and 
+  compile it into a collection of Racket structures.
 
 * Load a language artefact
 
@@ -64,6 +64,28 @@ All of the above are to be as simple as possible using flat Racket/text files.
 tool set?
 
 * How are the persistent forms of the above file formats organised?
+
+* We will eventually build a user interactive tool which is likely to 
+comprise a web/javascript based frontend coupled with a Racket 
+server/backend. This means that we have to find a transport medium which 
+allows the complexity of a language structure to be transferred back and 
+forth between the front and backends.
+
+  * We have experimented with using the obvious JSON (wire) format but 
+    this does not allow, for example, Racket symbols to be reliably 
+    transferred.
+
+  * We have experimented with using LISP/Racket S-expressions. Using code 
+    extracted from some MIT licensed code 
+    ([littlelisp](https://github.com/maryrosecook/littlelisp)) we can 
+    very reliably transfer S-expressions and have a great deal of control 
+    over how they are transcribed into javascript.
+
+  * Unfortunately the littlelisp parsing code is *at least* 20 times 
+    (~1000 parses per second) slower than the native JSON parsing code 
+    (~20000 parses per second). However the frontend/backend based tool 
+    is a *user integration* tool, so a significantly sub-second hit per 
+    user request is probably very easily tolerated.
 
 ## Resources
 
