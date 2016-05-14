@@ -14,7 +14,8 @@
 # Sprint 001 initial planning
 
 * Started: 2016/05/09
-* Ends: 2016/05/13 Friday
+* Extended: 2016/05/13
+* Ends: 2016/05/20 Friday
 
 ## Problem
 
@@ -46,6 +47,8 @@ precision.
 * Be able to write out a simple computational "proof"
 
 * Rudimentary verification of a simple "proof"
+
+* build a simple frontend/backend using Angular2/Racket
 
 All of the above are to be as simple as possible using flat Racket/text files.
 
