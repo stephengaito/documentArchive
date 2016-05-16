@@ -16,8 +16,8 @@
 )
  
 (serve/servlet start
-               #:servlet-path "/main"
-               #:servlet-regexp #rx"/main"
+               #:servlet-path "/index.html"
+               #:servlet-regexp #rx"^/silly"
                #:extra-files-paths
-                 (list (build-path "testDir"))
+                 (list (build-path "angularFrontEnd"))
 )
