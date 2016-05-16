@@ -9,22 +9,29 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
-var language_service_1 = require('./language.service');
-var languages_component_1 = require('./languages.component');
-var AppComponent = (function () {
-    function AppComponent() {
-        this.title = 'diSimplicial Explorer';
+var LanguageService = (function () {
+    function LanguageService() {
     }
-    AppComponent = __decorate([
-        core_1.Component({
-            selector: 'dse-app',
-            directives: [languages_component_1.LanguagesComponent],
-            providers: [language_service_1.LanguageService],
-            template: "\n    <h1>{{title}}</h1>\n    <ds-languages></ds-languages>\n  "
-        }), 
+    LanguageService.prototype.getLanguages = function () {
+        return Promise.resolve(LANGUAGES);
+    };
+    LanguageService = __decorate([
+        core_1.Injectable(), 
         __metadata('design:paramtypes', [])
-    ], AppComponent);
-    return AppComponent;
+    ], LanguageService);
+    return LanguageService;
 }());
-exports.AppComponent = AppComponent;
-//# sourceMappingURL=app.component.js.map
+exports.LanguageService = LanguageService;
+var LANGUAGES = [
+    { "id": 11, "name": "Mr. Nice" },
+    { "id": 12, "name": "Narco" },
+    { "id": 13, "name": "Bombasto" },
+    { "id": 14, "name": "Celeritas" },
+    { "id": 15, "name": "Magneta" },
+    { "id": 16, "name": "RubberMan" },
+    { "id": 17, "name": "Dynama" },
+    { "id": 18, "name": "Dr IQ" },
+    { "id": 19, "name": "Magma" },
+    { "id": 20, "name": "Tornado" }
+];
+//# sourceMappingURL=language.service.js.map

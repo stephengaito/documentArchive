@@ -10,21 +10,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var language_service_1 = require('./language.service');
-var languages_component_1 = require('./languages.component');
-var AppComponent = (function () {
-    function AppComponent() {
-        this.title = 'diSimplicial Explorer';
+var LanguagesComponent = (function () {
+    function LanguagesComponent(languageService) {
+        this.languageService = languageService;
     }
-    AppComponent = __decorate([
+    LanguagesComponent.prototype.getLanguages = function () {
+        var _this = this;
+        this.languageService.getLanguages()
+            .then(function (languages) { return _this.languages = languages; });
+    };
+    LanguagesComponent.prototype.ngOnInit = function () {
+        this.getLanguages();
+    };
+    LanguagesComponent = __decorate([
         core_1.Component({
-            selector: 'dse-app',
-            directives: [languages_component_1.LanguagesComponent],
-            providers: [language_service_1.LanguageService],
-            template: "\n    <h1>{{title}}</h1>\n    <ds-languages></ds-languages>\n  "
+            selector: 'ds-languages',
         }), 
-        __metadata('design:paramtypes', [])
-    ], AppComponent);
-    return AppComponent;
+        __metadata('design:paramtypes', [language_service_1.LanguageService])
+    ], LanguagesComponent);
+    return LanguagesComponent;
 }());
-exports.AppComponent = AppComponent;
-//# sourceMappingURL=app.component.js.map
+exports.LanguagesComponent = LanguagesComponent;
+//# sourceMappingURL=languages.component.js.map
