@@ -94,6 +94,33 @@ forth between the front and backends.
 
 * [Racket documentation](https://docs.racket-lang.org/)
 
+* [Racket web applications](https://docs.racket-lang.org/web-server/)
+
+* [Racket web continuation 
+tutorial](https://docs.racket-lang.org/continue/)
+
+* 
+[Html5Test](http://html5test.com/compare/browser/ie-10/chrome-44/firefox-40.html)
+
+* [GitHub:Fetch](https://github.com/github/fetch) 
+[Std:Fetch](https://fetch.spec.whatwg.org/)
+
+* [CSS selectors](http://www.w3schools.com/cssref/css_selectors.asp)
+
+* [ContextMenuJS](http://www.w3schools.com/cssref/css_selectors.asp)
+
+* [Std:XMLHttpRequest](https://xhr.spec.whatwg.org/)
+
+* [Std:DOM](https://dom.spec.whatwg.org/)
+
+* [Light Weight jQuery alternatives](https://dom.spec.whatwg.org/) 
+[Zepto.js](http://zeptojs.com/) 
+[$dom](https://github.com/julienw/dollardom/)
+
+* [JavaScript Tutorial](http://htmldog.com/guides/javascript/)
+
+
+
 ## Wrap-up
 
 Nothing at the moment
