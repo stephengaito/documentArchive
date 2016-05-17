@@ -99,6 +99,18 @@ forth between the front and backends.
 * [Racket web continuation 
 tutorial](https://docs.racket-lang.org/continue/)
 
+* [Mozilla simulate 
+events](https://developer.mozilla.org/samples/domref/dispatchEvent.html) 
+[Mozilla 
+events](https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Creating_and_triggering_events) 
+[triggering events](http://www.2ality.com/2013/06/triggering-events.html)
+
+* [Chai assertion Library](http://chaijs.com/)
+
+* [Jasmine test framework](http://jasmine.github.io/)
+
+* [Plain JS -- examples](https://plainjs.com/)
+
 * 
 [Html5Test](http://html5test.com/compare/browser/ie-10/chrome-44/firefox-40.html)
 
