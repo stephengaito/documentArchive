@@ -2,19 +2,27 @@ import { Component } from '@angular/core';
 import { RouteConfig, ROUTER_DIRECTIVES, ROUTER_PROVIDERS }
   from '@angular/router-deprecated';
 
-import { Language }           from './language';
 import { LanguageService }    from './language.service';
 import { LanguagesComponent } from './languages.component';
 
 @Component({
   selector: 'dse-app',
-  directives: [ LanguagesComponent ],
-  providers: [ LanguageService ],
+  directives: [ ROUTER_DIRECTIVES ],
+  providers: [ ROUTER_PROVIDERS, LanguageService ],
   template: `
     <h1>{{title}}</h1>
-    <ds-languages></ds-languages>
+    <nav>
+      <a [routerLink]="['Languages']">Languages</a>
+    </nav>
+    <router-outlet></router-outlet>
   `
 })
+
+@RouteConfig([
+  { path: '/languages',
+    name: 'Languages',
+    component: LanguagesComponent }
+])
 
 export class AppComponent {
   title = 'diSimplicial Explorer';

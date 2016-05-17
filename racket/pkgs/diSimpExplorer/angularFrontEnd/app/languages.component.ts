@@ -8,7 +8,9 @@ import { LanguageService } from './language.service';
   template: `
     <h2>Languages</h2>
     <ul class="languages">
-      <li > </li>
+      <li *ngFor="let language of languages">
+        {{language.name}}
+      </li>
     </ul>
   `
 })
