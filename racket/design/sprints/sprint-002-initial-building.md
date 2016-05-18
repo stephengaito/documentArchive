@@ -28,22 +28,19 @@ the ASTs of these languages.
 
 ## Tasks
 
-* build a simple frontend/backend using Zepto.js/Racket
+* setup testing infra-structure which is integrated with the design 
+  descriptions.
 
-* Be able to specify a language syntax
- * Be able to specify a language syntax
- * Be able to specify language axioms
+* build a simple frontend/backend based diSimpExplorer tool using 
+  Zepto.js/Racket which allows the user to browse a live collection of 
+  languages and language mappings.
 
-* Build a simple tool to read a context-free description of an AST and 
-  compile it into a collection of Racket structures.
+* extend the diSimp tool to initialise a diSimp tool workspace in which to 
+  save the languages and mappings.
 
-* Load a language artefact
-
-* Be able to write out a simple computational "proof"
-
-* Rudimentary verification of a simple "proof"
-
-All of the above are to be as simple as possible using flat Racket/text files.
+* extend the diSimp tool to setup/install any required diSimpExplorer 
+  libraries. (if any are required to be local the the workspace rather 
+  than globally located inside the diSimpExplorer package.
 
 ## Features
 

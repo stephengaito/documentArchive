@@ -79,8 +79,8 @@ The Racket (only) tests will use
 [RackUnit](http://docs.racket-lang.org/rackunit/) to manage the various 
 collection of tests. The tests will be located in the specs directory of 
 the given package, with each level of specifications located in the 
-specs/unit, specs/integration and specs/functional directories 
-respectively.
+specs/racket/unit, specs/racket/integration and specs/racket/functional 
+directories respectively.
 
 The diSimpExplorer functional tests will run the Racket web-application 
 three times one for each of the different browsers:
