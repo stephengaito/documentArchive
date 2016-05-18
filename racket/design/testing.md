@@ -1,3 +1,14 @@
+**Table of Contents**
+
+  - [Testing](#testing)
+    - [Problem](#problem)
+    - [Goals](#goals)
+    - [Requirements](#requirements)
+    - [Solution](#solution)
+    - [Questions and Risks](#questions-and-risks)
+
+<!--- END TOC -->
+
 # Testing
 
 ## Problem
@@ -133,5 +144,3 @@ all use [net/sendurl](https://docs.racket-lang.org/net/sendurl.html) to
 start a browser by default. We can manipulate the 
 '[external-browser](https://docs.racket-lang.org/net/sendurl.html#%28def._%28%28lib._net%2Fsendurl..rkt%29._external-browser%29%29)' 
 definition to control which of the above three browsers will be used.
-
-

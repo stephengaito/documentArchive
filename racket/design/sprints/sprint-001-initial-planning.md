@@ -16,6 +16,7 @@
 * Started: 2016/05/09
 * Extended: 2016/05/13
 * Ends: 2016/05/20 Friday
+* Completed: 2016/05/18 (early)
 
 ## Problem
 
@@ -35,20 +36,20 @@ precision.
 
 ## Tasks
 
-* Be able to specify a language syntax
- * Be able to specify a language syntax
- * Be able to specify language axioms
+* build a simple frontend/backend using Angular2/Racket (completed)
+
+* Be able to specify a language syntax (pushed)
+ * Be able to specify a language syntax (pushed)
+ * Be able to specify language axioms (pushed)
 
 * Build a simple tool to read a context-free description of an AST and 
-  compile it into a collection of Racket structures.
+  compile it into a collection of Racket structures. (pushed)
 
-* Load a language artefact
+* Load a language artefact (pushed)
 
-* Be able to write out a simple computational "proof"
+* Be able to write out a simple computational "proof" (pushed)
 
-* Rudimentary verification of a simple "proof"
-
-* build a simple frontend/backend using Angular2/Racket
+* Rudimentary verification of a simple "proof" (pushed)
 
 All of the above are to be as simple as possible using flat Racket/text files.
 
@@ -135,4 +136,46 @@ events](https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Creating_and_t
 
 ## Wrap-up
 
-Nothing at the moment
+* Once a very simple angular v2.0 web application was built I noticed the 
+  very large/complex number of javascript files required in order to use 
+  Angular2. It (as well as its documentation site which I assume is built 
+  using Angular2) are very slow.
+
+* In particular, after working through the Angular2 tutorials, I realised 
+  the deep miss-match between the Angular WAY of doing things and what the 
+  diSimpExplorer tool needs to do.  Angular (as do most of the single page 
+  application tools) assumes that the back end is "*simply*" a collection 
+  of tables (aka a database). 
+
+  While this is reasonable for most web-applications, this is NOT true for 
+  the diSimpExplorer tool. Our tool has much more complex backend 
+  processing (and fairly trivial frontend display).
+
+  More to the point the HTML formating *should* largely take place in one 
+  place and a natural place for that is the backend. The Angular2
+  alternative would have required multiple layers of S-expression 
+  translations to/from JSON. With simple HTML processing in the backend, 
+  these layers collapse into essentially one and then we use the frontend 
+  browser's native HTML parser (or occasionally its JSON parser) for the 
+  simple display.
+
+* I am now considering a simpler frontend which uses AJAX to call back 
+  and forth to the backend using the Zepto.js framework, to provide 
+  core-selection/processing, AJAX (using both HTML/DOM and JSON), and 
+  events.
+
+* Now that the frontend/backend framework rationale has been identified, 
+  I moved onto specifying a testing framework which could work reasonably 
+  simply between the front and back ends, and with both Racket and 
+  JavaScript code.
+
+* Finally I have managed to *begin* the process of identifying 
+  persistence formats. These format tasks **have NOT been completed** but 
+  have been pushed to the next sprint.
+
+* With the results of this sprint, the next sprint can be much more 
+  heavily BDD specification driven, and incremental.
+
+* Since the greatest risk is still the frontend/backend based 
+  diSimpExplorer tool, the next sprint SHOULD focus on building capability 
+  driven by simple diSimpExplorer tool stories.
