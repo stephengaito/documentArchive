@@ -64,6 +64,13 @@ Each racket package will have three racket scripts, which can each be
 run at the command line, to perform unit, integration and functional 
 tests, runUtests, runItests, and runFtests, respectively.
 
+The Racket (only) tests will use 
+[RackUnit](http://docs.racket-lang.org/rackunit/) to manage the various 
+collection of tests. The tests will be located in the specs directory of 
+the given package, with each level of specifications located in the 
+specs/unit, specs/integration and specs/functional directories 
+respectively.
+
 The diSimpExplorer functional tests will run the Racket web-application 
 three times one for each of the different browsers:
 
@@ -90,6 +97,14 @@ testing, the Jasmine based specifications will make use of the [Zepto.js
 trigger](http://zeptojs.com/#trigger) method to trigger user events on 
 various elements of the DOM, in ways as similar as possible to an actual 
 user interacting with the diSimpExplorer tool.
+
+The Jasmine specifications will be located in the specs/javascript 
+directory, with each level of specifications located in the 
+specs/javascript/unit, specs/javascript/integration, and 
+specs/javascript/functional directories respectively. The javascript 
+specifications will require node.js/nmp modules, these specification 
+only modules will be located in the specs/javascript/node_modules 
+directory.
 
 ## Questions and Risks
 
