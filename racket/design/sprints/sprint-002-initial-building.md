@@ -65,6 +65,7 @@ tool set?
 * [Racket documentation](https://docs.racket-lang.org/)
 
 * [Racket web applications](https://docs.racket-lang.org/web-server/)
+  [Racket HTTP servers](http://docs.racket-lang.org/web-server-internal/)
 
 * [Jasmine test framework](http://jasmine.github.io/)
 

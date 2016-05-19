@@ -9,9 +9,81 @@
   web-server/servlet-env
 )
 
-;;(external-browser (cons "chromium-browser " " "))
-;;(external-browser (cons "midori " " "))
+(define curDir (current-directory))
+(current-directory "specs/javascript")
 
+
+(define functionalSpecs 
+  (for/list
+    ( [ aFile (in-directory "functional")] 
+      #:when (regexp-match? #rx"\\.js$" aFile)
+    )
+    (string-append "/" (path->string aFile))
+  )
+)
+
+(current-directory curDir)
+
+(define (path->xscript aPath)
+  `(script (
+    (type "text/javascript")
+    (src ,aPath)
+  ))
+)
+
+(define jasmine-js
+  (list 
+    "/lib/jasmine-core/jasmine.js"
+    "/lib/jasmine-core/jasmine-html.js"
+    "/lib/jasmine-core/boot.js"
+  )
+)
+
+;;(displayln 
+;;  (map path->xscript functionalSpecs)
+;;)
+
+;;(displayln
+;;  (map path->xscript jasmine-js)
+;;)
+
+;(exit)
+
+(define functional-specs  (make-parameter #f))
+(define integration-specs (make-parameter #f))
+(define unit-specs        (make-parameter #f))
+(define browser-cmd       (make-parameter ""))
+
+;; parse the command line
+;;
+(command-line
+  #:program "runJSTests"
+  #:once-each
+    [ ("-f" "--functional")
+      "Check functional specifications"
+      (functional-specs #t) ]
+    [ ("-i" "--integration")
+      "Check integration specifications"
+      (integration-specs #t) ]
+    [ ("-u" "--unit")
+      "Check unit specifications"
+      (unit-specs #t) ]
+  #:args browser-command
+  (browser-cmd (string-join browser-command " " #:after-last " "))
+)
+
+;; determine which browser to use 
+;;
+(if (non-empty-string? (string-trim (browser-cmd)))
+  (begin 
+    (external-browser (cons (browser-cmd) ""))
+    (display (string-join (list "using browser command: [" (browser-cmd) "]\n")))
+  )
+  (display "using the default browser\n")
+)
+
+;; capture the required paths for our local work
+;;
 (define-runtime-path work-space  "specs/workspace")
 (define-runtime-path java-script "specs/javascript")
 
@@ -47,36 +119,41 @@
 
 (define (start req)
   (response/xexpr
-    `(html 
-       (head 
-        (title "Hello world!")
-        (link (
-          (rel "icon")
-          (type "image/png")
-          (href "/images/jasmine_favicon.png")
-        ))
-        (link (
-          (rel "stylesheet")
-          (type "text/css")
-          (href "/lib/jasmine-core/jasmine.css")
-        ))
-        (script (
-          (type "text/javascript")
-          (src "/lib/jasmine-core/jasmine.js")
-        ))
-        (script (
-          (type "text/javascript")
-          (src "/lib/jasmine-core/jasmine-html.js")
-        ))
-        (script (
-          (type "text/javascript")
-          (src "/lib/jasmine-core/boot.js")
-        ))
-        (script (
-          (type "text/javascript")
-          (src "/functional/browseLanguages.js")
-        ))
+    `(html
+      ,(append 
+        '(head 
+          (title "diSimpExplorer Specification checking")
+          (link (
+            (rel "icon")
+            (type "image/png")
+            (href "/images/jasmine_favicon.png")
+          ))
+          (link (
+            (rel "stylesheet")
+            (type "text/css")
+            (href "/lib/jasmine-core/jasmine.css")
+          ))
+        )
+        (map path->xscript jasmine-js)
+        (map path->xscript functionalSpecs)
       )
+;        (script (
+;          (type "text/javascript")
+;          (src "/lib/jasmine-core/jasmine.js")
+;        ))
+;        (script (
+;          (type "text/javascript")
+;          (src "/lib/jasmine-core/jasmine-html.js")
+;        ))
+;        (script (
+;          (type "text/javascript")
+;          (src "/lib/jasmine-core/boot.js")
+;        ))
+;        (script (
+;          (type "text/javascript")
+;          (src "/functional/browseLanguages.js")
+;        ))
+;      )
       (body )
     )
   )
