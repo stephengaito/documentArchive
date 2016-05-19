@@ -73,7 +73,8 @@ relevant.
 
 Each racket package will have three racket scripts, which can each be 
 run at the command line, to perform unit, integration and functional 
-tests, runUtests, runItests, and runFtests, respectively.
+tests, runUnitTests, runIntegrationTests, and runFunctionalTests, 
+respectively.
 
 The Racket (only) tests will use 
 [RackUnit](http://docs.racket-lang.org/rackunit/) to manage the various 

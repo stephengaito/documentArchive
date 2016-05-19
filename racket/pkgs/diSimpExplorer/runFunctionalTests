@@ -1,23 +1,83 @@
 #!/usr/bin/env racket
 #lang racket
 
+(require racket/runtime-path)
+(require net/sendurl)
+
 (require 
   web-server/servlet
   web-server/servlet-env
 )
+
+;;(external-browser (cons "chromium-browser " " "))
+;;(external-browser (cons "midori " " "))
+
+(define-runtime-path work-space  "specs/workspace")
+(define-runtime-path java-script "specs/javascript")
+
+#|
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Jasmine Spec Runner v<%= jasmineVersion %></title>
+
+  <link rel="shortcut icon" type="image/png" href="lib/jasmine-<%= jasmineVersion %>/jasmine_favicon.png">
+  <link rel="stylesheet" href="lib/jasmine-<%= jasmineVersion %>/jasmine.css">
+
+  <script src="lib/jasmine-<%= jasmineVersion %>/jasmine.js"></script>
+  <script src="lib/jasmine-<%= jasmineVersion %>/jasmine-html.js"></script>
+  <script src="lib/jasmine-<%= jasmineVersion %>/boot.js"></script>
+
+  <!-- include source files here... -->
+  <script src="src/Player.js"></script>
+  <script src="src/Song.js"></script>
+
+  <!-- include spec files here... -->
+  <script src="spec/SpecHelper.js"></script>
+  <script src="spec/PlayerSpec.js"></script>
+
+</head>
+
+<body>
+</body>
+</html>
+
+|#
 
 (define (start req)
   (response/xexpr
     `(html 
        (head 
         (title "Hello world!")
+        (link (
+          (rel "icon")
+          (type "image/png")
+          (href "/images/jasmine_favicon.png")
+        ))
+        (link (
+          (rel "stylesheet")
+          (type "text/css")
+          (href "/lib/jasmine-core/jasmine.css")
+        ))
+        (script (
+          (type "text/javascript")
+          (src "/lib/jasmine-core/jasmine.js")
+        ))
+        (script (
+          (type "text/javascript")
+          (src "/lib/jasmine-core/jasmine-html.js")
+        ))
+        (script (
+          (type "text/javascript")
+          (src "/lib/jasmine-core/boot.js")
+        ))
+        (script (
+          (type "text/javascript")
+          (src "/functional/browseLanguages.js")
+        ))
       )
-      (body 
-        (p "Hey out there!")
-        (p ,(path->string (current-directory)))
-        (p ,(path->string (find-system-path 'home-dir)))
-        (p ,(path->string (path->directory-path (path->complete-path (find-system-path 'run-file)))))
-      )
+      (body )
     )
   )
 )
@@ -25,8 +85,13 @@
 (serve/servlet 
   start 
   #:port 0
-  #:server-root-path (current-directory)
-  #:servlets-root (current-directory)
-  #:extra-files-paths (list "../javascript" (build-path default-web-root "htdocs"))
+  #:servlet-path "/"
+  #:extra-files-paths 
+    (list java-script 
+      (build-path 
+        java-script 
+        "node_modules/jasmine/node_modules/jasmine-core"
+      )
+    )
   #:launch-browser? true
 )
