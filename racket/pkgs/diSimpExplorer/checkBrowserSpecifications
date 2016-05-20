@@ -1,0 +1,338 @@
+#!/usr/bin/env racket
+#lang racket
+
+(require 
+  racket/runtime-path
+  racket/date
+)
+
+(require 
+  net/url
+  net/sendurl
+)
+
+(require 
+  web-server/http/request-structs
+  web-server/http/response-structs
+)
+
+(require "./restfulServlets.rkt")
+
+;; List the javascript files required to run Jasmine.js
+;;
+(define jasmine-js
+  (list 
+    "/jasmine/lib/jasmine-core/jasmine.js"
+    "/jasmine/lib/jasmine-core/jasmine-html.js"
+    "/jasmine/lib/jasmine-core/boot.js"
+  )
+)
+
+;; List the javascript files required to run the diSimpExplorer frontend
+;;
+(define application-js '())
+
+;; parse the command line
+;;
+(define main-page   (make-parameter "/all"))
+(define browser-cmd (make-parameter ""))
+;;
+(command-line
+  #:program "checkBrowserSpecifications"
+  #:once-each
+    [ ("-f" "--functional")
+      "Check functional specifications"
+      (main-page "/functional") ]
+    [ ("-i" "--integration")
+      "Check integration specifications"
+      (main-page "/integration") ]
+    [ ("-u" "--unit")
+      "Check unit specifications"
+      (main-page "/unit") ]
+  #:args browser-command
+  (browser-cmd (string-join browser-command " " #:after-last " "))
+)
+
+;; determine which browser to use 
+;;
+(if (non-empty-string? (string-trim (browser-cmd)))
+  (begin 
+    (external-browser (cons (browser-cmd) ""))
+    (display (string-join (list "using browser command: [" (browser-cmd) "]\n")))
+  )
+  (display "using the default browser\n")
+)
+
+;; capture the required paths for our local work
+;;
+(define-runtime-path work-space        "specs/workspace")
+(define-runtime-path app-java-script   "javascript")
+(define-runtime-path specs-java-script "specs/javascript")
+
+;; create a list of the various specification files
+;;
+(define curDir (current-directory))
+(current-directory "specs/javascript")
+;;
+(define functional-specs 
+  (for/list
+    ( [ aFile (in-directory "functional")] 
+      #:when (regexp-match? #rx"\\.js$" aFile)
+    )
+    (string-append "/specs/" (path->string aFile))
+  )
+)
+;;
+(define integration-specs 
+  (for/list
+    ( [ aFile (in-directory "integration")] 
+      #:when (regexp-match? #rx"\\.js$" aFile)
+    )
+    (string-append "/specs/" (path->string aFile))
+  )
+)
+;;
+(define unit-specs 
+  (for/list
+    ( [ aFile (in-directory "unit")] 
+      #:when (regexp-match? #rx"\\.js$" aFile)
+    )
+    (string-append "/specs/" (path->string aFile))
+  )
+)
+;;
+(current-directory curDir)
+
+;; Build the HTML parts from which we assemble each page
+;;
+(define header-preamble #<<END-OF-PREAMBLE
+<html>
+  <head>
+    <title>diSimpExplorer Specification checking</title>
+    <link rel="icon" type="image/png"
+      href="/jasmine/images/jasmine_favicon.png" />
+    <link rel="stylesheet" (type="text/css"
+      href="/jasmine/lib/jasmine-core/jasmine.css" />
+
+END-OF-PREAMBLE
+)
+
+(define html-postamble #<<END-OF-POSTAMBLE
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="/all">All</a></li>
+        <li><a href="/functional">Functional</a></li>
+        <li><a href="/integration">Integration</a></li>
+        <li><a href="/unit">Unit</a></li>
+        <li><a href="/quit">Quit</a></li>
+      </ul>
+    </nav>
+  </body>
+</html>
+END-OF-POSTAMBLE
+)
+;;(define html-postamble #<<END-OF-POSTAMBLE
+;;  </head>
+;;  <body/>
+;;</html>
+;;END-OF-POSTAMBLE
+;;)
+;;
+(define (path->scriptStrings aPath)
+  (list
+    "    <script type=\"text/javascript\" src=\""
+    aPath
+    "\"></script>\n"
+  )
+)
+
+;; Define the various pages/servlets
+;;
+(get "/all" 
+  (lambda ()
+    (string-append*
+      (flatten 
+        (list 
+          header-preamble
+          (map path->scriptStrings jasmine-js)
+          (map path->scriptStrings application-js)
+          (map path->scriptStrings functional-specs)
+          (map path->scriptStrings integration-specs)
+          (map path->scriptStrings unit-specs)
+          html-postamble
+        )
+      )
+    )      
+  )
+)
+;;
+(get "/functional" 
+  (lambda ()
+    (string-append*
+      (flatten 
+        (list 
+          header-preamble
+          (map path->scriptStrings jasmine-js)
+          (map path->scriptStrings application-js)
+          (map path->scriptStrings functional-specs)
+          html-postamble
+        )
+      )
+    )      
+  )
+)
+;;
+(get "/integration" 
+  (lambda ()
+    (string-append*
+      (flatten 
+        (list 
+          header-preamble
+          (map path->scriptStrings jasmine-js)
+          (map path->scriptStrings application-js)
+          (map path->scriptStrings integration-specs)
+          html-postamble
+        )
+      )
+    )      
+  )
+)
+;;
+(get "/unit" 
+  (lambda ()
+    (string-append*
+      (flatten 
+        (list 
+          header-preamble
+          (map path->scriptStrings jasmine-js)
+          (map path->scriptStrings application-js)
+          (map path->scriptStrings unit-specs)
+          html-postamble
+        )
+      )
+    )      
+  )
+)
+
+(define (path->mime-type file-path)
+  (case (string-downcase (bytes->string/utf-8 (filename-extension file-path)))
+    [ ("js")  #"application/javascript" ]
+    [ ("png") #"image/png" ]
+    [ ("css") #"text/css" ]
+    [ else #"unknown" ]
+  )
+)
+
+(date-display-format 'rfc2822)
+
+(define (get-url-path req)
+  (apply build-path 
+    "/"
+    (map path/param-path 
+      (url-path
+        (request-uri req)
+      )
+    )
+  )
+)
+  
+(define (get-file path file-path expires-in-seconds)
+  ;;(displayln (string-append "get-file [" path "] [" (path->string file-path) "] [" (number->string expires-in-seconds) "]"))
+  (define (file-system-path req)
+    ;;(displayln path)
+    ;;(displayln (get-url-path req))
+    (build-path 
+      file-path
+      (find-relative-path path (get-url-path req))
+    )
+  )
+  (define (binary-file-handler req)
+    (define filePath (file-system-path req))
+    ;;(displayln (string-append "REQUESTING [" (path->string (get-url-path req)) "]"))
+    ;;(displayln (string-append "  as file  [" (path->string filePath) "]"))
+    ;;(displayln (path->mime-type filePath))
+    (if (file-exists? filePath)
+      (let* (
+        [ file-port (open-input-file filePath #:mode 'binary) ]
+        [ contents (port->bytes file-port) ] )
+        (begin
+          (close-input-port file-port)
+          (list 
+            200
+            (list
+              (header #"Content-Type"
+                (path->mime-type filePath))
+              (header #"Content-Length"
+                (string->bytes/utf-8 
+                  (number->string (file-size filePath))))
+              (header #"Expires"
+                (string->bytes/utf-8 
+                  (date->string 
+                    (seconds->date 
+                      (+ (current-seconds) expires-in-seconds)))))
+              (header #"Last-Modified"
+                (string->bytes/utf-8
+                  (date->string 
+                    (seconds->date
+                      (file-or-directory-modify-seconds filePath)))))
+            )
+            contents
+          )
+        )
+      )
+      `(404
+        ((() . "") ())
+        ,(string-append 
+          "The url ["
+          (url->string (request-uri req))
+          "] could not be found on this server."
+        )
+      )
+    )
+  )
+  (define (binary-response-maker status headers body)
+    ;;(displayln headers)
+    ;;(displayln (header-value (car headers)))
+    ;;(displayln (cdr headers))
+    (response/full
+      status
+      (status->message status)
+      (current-seconds)
+      (header-value (car headers))
+      (cdr headers)
+      (list body)
+    )
+  )
+  (define binary-handler/keys/response-maker (list binary-file-handler '() binary-response-maker))
+  (hash-set! request-handlers
+             (string-append "GET ^" path)
+             binary-handler/keys/response-maker
+  )
+;;  (define-handler "GET" path binary-file-handler binary-response-maker)
+)
+
+(get-file "/app" app-java-script 0)
+
+(get-file 
+  "/jasmine" 
+  (build-path 
+    specs-java-script     
+    "node_modules/jasmine/node_modules/jasmine-core"
+  )
+  3600
+)
+
+(get-file "/specs" specs-java-script 0)
+
+;; Start the sever
+;;
+(run
+  #:launch-browser? #t
+  #:quit? #t
+  #:port 0
+  #:servlet-path (main-page)
+  #:log-file "/tmp/racket-web-server.log"
+)
+
