@@ -1,30 +1,20 @@
 #!/usr/bin/env racket
 #lang racket
 
-(require racket/runtime-path)
+;;(require racket/runtime-path)
 
 (require 
-  net/url
+;;  net/url
   net/sendurl
 )
 
-(require web-server/http/request-structs)
+;;(require web-server/http/request-structs)
 
-(require "./restfulServlets.rkt")
-
-;; List the javascript files required to run Jasmine.js
-;;
-(define jasmine-js
-  (list 
-    "/jasmine/lib/jasmine-core/jasmine.js"
-    "/jasmine/lib/jasmine-core/jasmine-html.js"
-    "/jasmine/lib/jasmine-core/boot.js"
-  )
+(require
+  "./restfulServlets.rkt"
+  "./dseFramework.rkt"
+  "./specFramework.rkt"
 )
-
-;; List the javascript files required to run the diSimpExplorer frontend
-;;
-(define application-js '())
 
 ;; parse the command line
 ;;
@@ -56,168 +46,6 @@
   )
   (display "using the default browser\n")
 )
-
-;; capture the required paths for our local work
-;;
-(define-runtime-path work-space        "specs/workspace")
-(define-runtime-path app-java-script   "javascript")
-(define-runtime-path specs-java-script "specs/javascript")
-
-;; create a list of the various specification files
-;;
-(define curDir (current-directory))
-(current-directory "specs/javascript")
-;;
-(define functional-specs 
-  (for/list
-    ( [ aFile (in-directory "functional")] 
-      #:when (regexp-match? #rx"\\.js$" aFile)
-    )
-    (string-append "/specs/" (path->string aFile))
-  )
-)
-;;
-(define integration-specs 
-  (for/list
-    ( [ aFile (in-directory "integration")] 
-      #:when (regexp-match? #rx"\\.js$" aFile)
-    )
-    (string-append "/specs/" (path->string aFile))
-  )
-)
-;;
-(define unit-specs 
-  (for/list
-    ( [ aFile (in-directory "unit")] 
-      #:when (regexp-match? #rx"\\.js$" aFile)
-    )
-    (string-append "/specs/" (path->string aFile))
-  )
-)
-;;
-(current-directory curDir)
-
-;; Build the HTML parts from which we assemble each page
-;;
-(define header-preamble #<<END-OF-PREAMBLE
-<html>
-  <head>
-    <title>diSimpExplorer Specification checking</title>
-    <link rel="icon" type="image/png"
-      href="/jasmine/images/jasmine_favicon.png" />
-    <link rel="stylesheet" (type="text/css"
-      href="/jasmine/lib/jasmine-core/jasmine.css" />
-
-END-OF-PREAMBLE
-)
-;;
-(define html-postamble #<<END-OF-POSTAMBLE
-  </head>
-  <body>
-    <nav>
-      <ul>
-        <li><a href="/all">All</a></li>
-        <li><a href="/functional">Functional</a></li>
-        <li><a href="/integration">Integration</a></li>
-        <li><a href="/unit">Unit</a></li>
-        <li><a href="/quit">Quit</a></li>
-      </ul>
-    </nav>
-  </body>
-</html>
-END-OF-POSTAMBLE
-)
-;;
-(define (path->scriptStrings aPath)
-  (list
-    "    <script type=\"text/javascript\" src=\""
-    aPath
-    "\"></script>\n"
-  )
-)
-
-;; Define the various pages/servlets
-;;
-(get "/all" 
-  (lambda ()
-    (string-append*
-      (flatten 
-        (list 
-          header-preamble
-          (map path->scriptStrings jasmine-js)
-          (map path->scriptStrings application-js)
-          (map path->scriptStrings functional-specs)
-          (map path->scriptStrings integration-specs)
-          (map path->scriptStrings unit-specs)
-          html-postamble
-        )
-      )
-    )      
-  )
-)
-;;
-(get "/functional" 
-  (lambda ()
-    (string-append*
-      (flatten 
-        (list 
-          header-preamble
-          (map path->scriptStrings jasmine-js)
-          (map path->scriptStrings application-js)
-          (map path->scriptStrings functional-specs)
-          html-postamble
-        )
-      )
-    )      
-  )
-)
-;;
-(get "/integration" 
-  (lambda ()
-    (string-append*
-      (flatten 
-        (list 
-          header-preamble
-          (map path->scriptStrings jasmine-js)
-          (map path->scriptStrings application-js)
-          (map path->scriptStrings integration-specs)
-          html-postamble
-        )
-      )
-    )      
-  )
-)
-;;
-(get "/unit" 
-  (lambda ()
-    (string-append*
-      (flatten 
-        (list 
-          header-preamble
-          (map path->scriptStrings jasmine-js)
-          (map path->scriptStrings application-js)
-          (map path->scriptStrings unit-specs)
-          html-postamble
-        )
-      )
-    )      
-  )
-)
-
-(require "./binaryServlets.rkt")
-
-(get-file "/app" app-java-script 0)
-
-(get-file 
-  "/jasmine" 
-  (build-path 
-    specs-java-script     
-    "node_modules/jasmine/node_modules/jasmine-core"
-  )
-  3600
-)
-
-(get-file "/specs" specs-java-script 0)
 
 ;; Start the sever
 ;;
