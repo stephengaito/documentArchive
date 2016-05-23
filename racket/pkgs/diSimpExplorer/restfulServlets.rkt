@@ -1,35 +1,36 @@
 #lang racket
 
-;; This file was taken from the Racket/SPIN project on GitHub ( 
-;; https://github.com/dmac/spin ). It was the main.rkt file contained in 
-;; the SPIN project on 2016-05-20 from commit 
+;; This file was taken from the Racket/SPIN project on GitHub (
+;; https://github.com/dmac/spin ). It was the main.rkt file contained in
+;; the SPIN project on 2016-05-20 from commit
 ;; 981c0ebb26e13d4c0088d23de8b20c4107116b13 committed on 2014-06-08.
 ;;
 ;; This file is licensed under "The MIT License"
 ;;
 ;; Copyright (c) 2014 Daniel MacDougall
 ;;
-;; With contributions by: 
+;; With contributions by:
 ;;   Felipe Oliveira Carvalho (@philix)
 ;;   Jordan Johnson (@RenaissanceBug)
+;;   Stephen Gaito (@stephengaito)
 ;;
-;; Permission is hereby granted, free of charge, to any person obtaining a 
-;; copy of this software and associated documentation files (the 
-;; "Software"), to deal in the Software without restriction, including 
-;; without limitation the rights to use, copy, modify, merge, publish, 
-;; distribute, sublicense, and/or sell copies of the Software, and to permit 
-;; persons to whom the Software is furnished to do so, subject to the 
+;; Permission is hereby granted, free of charge, to any person obtaining a
+;; copy of this software and associated documentation files (the
+;; "Software"), to deal in the Software without restriction, including
+;; without limitation the rights to use, copy, modify, merge, publish,
+;; distribute, sublicense, and/or sell copies of the Software, and to permit
+;; persons to whom the Software is furnished to do so, subject to the
 ;; following conditions:
 ;;
-;; The above copyright notice and this permission notice shall be included 
+;; The above copyright notice and this permission notice shall be included
 ;; in all copies or substantial portions of the Software.
 ;;
-;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
-;; OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-;; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN 
-;; NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
-;; DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
-;; OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
+;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+;; OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+;; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+;; NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+;; DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+;; OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 ;; USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ; TODO
@@ -48,7 +49,6 @@
          define-handler
          params
          header
-         request-handlers
          run)
 
 (define (get path handler) (define-handler "GET" path handler))
@@ -123,19 +123,15 @@
 (define (compile-path path)
   (string-append
     "^"
-    (regexp-replace* 
+    (regexp-replace*
       #rx":[^\\/]+"
       (regexp-replace* #rx"\\*[^\\/]+" path "([^?]+)")
       "([^/?]+)")
-    "(?:$|\\?)"
-  )
-)
+    "(?:$|\\?)"))
 
 (define (request->handler request
                           response-maker)
-  ;;(displayln (string-append "request->handler " (url->string (request-uri request))))
   (define handler/keys/response-maker (request->handler/keys/response-maker request))
-  ;;(displayln handler/keys/response-maker)
   (begin
     (cond
       [handler/keys/response-maker (render/handler (car handler/keys/response-maker)
@@ -145,7 +141,6 @@
 
 (define (request->handler/keys/response-maker request)
   (define handler-key (request->matching-key request))
-  ;;(displayln handler-key)
   (case handler-key
     [(#f) #f]
     [else (hash-ref request-handlers handler-key #f)]))
@@ -159,11 +154,8 @@
 
 (define (request->matching-key request)
   (define (key-matches-route? key)
-    ;;(displayln key)
     (match-define (list _ method path-regexp)
                   (regexp-match #rx"([^ ]+) ([^ ]+)" key))
-    ;;(displayln method)
-    ;;(displayln path-regexp)
     (and (equal? (request-method request) (string->bytes/utf-8 method))
          (regexp-match (regexp path-regexp)
                        (url->string (request-uri request)))))
