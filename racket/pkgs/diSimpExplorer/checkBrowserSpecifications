@@ -227,30 +227,22 @@ END-OF-POSTAMBLE
 
 (date-display-format 'rfc2822)
 
-(define (get-url-path req)
-  (apply build-path 
-    "/"
-    (map path/param-path 
-      (url-path
-        (request-uri req)
-      )
-    )
+(define (binary-response-maker status headers body)
+  (response/full
+    status
+    (status->message status)
+    (current-seconds)
+    (header-value (car headers))
+    (cdr headers)
+    (list body)
   )
 )
-  
+
 (define (get-file path file-path expires-in-seconds)
   ;;(displayln (string-append "get-file [" path "] [" (path->string file-path) "] [" (number->string expires-in-seconds) "]"))
-  (define (file-system-path req)
-    ;;(displayln path)
-    ;;(displayln (get-url-path req))
-    (build-path 
-      file-path
-      (find-relative-path path (get-url-path req))
-    )
-  )
   (define (binary-file-handler req)
-    (define filePath (file-system-path req))
-    ;;(displayln (string-append "REQUESTING [" (path->string (get-url-path req)) "]"))
+    (define filePath (build-path file-path (params req 'filePath)))
+    ;;(displayln (string-append "REQUESTING [" (url->string (request-uri req)) "]"))
     ;;(displayln (string-append "  as file  [" (path->string filePath) "]"))
     ;;(displayln (path->mime-type filePath))
     (if (file-exists? filePath)
@@ -292,25 +284,12 @@ END-OF-POSTAMBLE
       )
     )
   )
-  (define (binary-response-maker status headers body)
-    ;;(displayln headers)
-    ;;(displayln (header-value (car headers)))
-    ;;(displayln (cdr headers))
-    (response/full
-      status
-      (status->message status)
-      (current-seconds)
-      (header-value (car headers))
-      (cdr headers)
-      (list body)
-    )
+  (define-handler
+    "GET"
+    (string-append path "/*filePath")
+    binary-file-handler
+    binary-response-maker
   )
-  (define binary-handler/keys/response-maker (list binary-file-handler '() binary-response-maker))
-  (hash-set! request-handlers
-             (string-append "GET ^" path)
-             binary-handler/keys/response-maker
-  )
-;;  (define-handler "GET" path binary-file-handler binary-response-maker)
 )
 
 (get-file "/app" app-java-script 0)

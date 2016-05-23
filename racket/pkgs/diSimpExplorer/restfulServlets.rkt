@@ -118,13 +118,18 @@
 
 (define (path->keys path)
   (map (lambda (match) (string->symbol (substring match 2)))
-       (regexp-match* #rx"/:([^\\/]+)" path)))
+       (regexp-match* #rx"/[:\\*]([^\\/]+)" path)))
 
 (define (compile-path path)
   (string-append
     "^"
-    (regexp-replace* #rx":[^\\/]+" path "([^/?]+)")
-    "(?:$|\\?)"))
+    (regexp-replace* 
+      #rx":[^\\/]+"
+      (regexp-replace* #rx"\\*[^\\/]+" path "([^?]+)")
+      "([^/?]+)")
+    "(?:$|\\?)"
+  )
+)
 
 (define (request->handler request
                           response-maker)
