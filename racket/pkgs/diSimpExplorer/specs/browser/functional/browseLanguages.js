@@ -9,6 +9,7 @@ describe("Start diSimpExplore", function() {
     //
     // there should be some language elements
     //
-    expect($('div.languages').size()).not.toEqual(0); 
+    expect($('iframe').contents().find('div.languages').size()).not.toEqual(0); 
+    expect($('iframe').contents().find('div.language').size()).toEqual(3); 
   });
 });

@@ -4,26 +4,40 @@
 
 (define zepto-js
   (list
+    "zepto/zepto.min.js"
   )
 )
 
 (require racket/runtime-path)
-(define-runtime-path zepto-java-script "javascript")
+(define-runtime-path zepto-java-script "../browser/vendor/zepto")
+(define-runtime-path work-space-dir
+  (if (directory-exists? "languages")
+    (current-directory)
+    "../specs/workspace"
+  )
+)
 
-(define (dir->scriptString aDir)
+(define (dir->divString aDir)
   (list
     "  <div class=\"language\">"
-    aDir
+    (path->string aDir)
     "</div>\n"
   )
 )
 
 (require "./restfulServlets.rkt")
-(get "/languages"
+;;(get "/languages"
+(get "/"
   (lambda ()
     (string-append*
       (flatten
-        (map dir->scriptString (directory-list "languages"))
+        (list 
+          "<div class=\"languages\">"
+          (map dir->divString 
+            (directory-list (build-path work-space-dir "languages"))
+          )
+          "</div>"
+        )
       )
     )
   )

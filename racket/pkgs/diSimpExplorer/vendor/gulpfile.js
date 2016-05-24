@@ -3,6 +3,17 @@
 
 var gulp = require('gulp');
 var uglify = require('gulp-uglify');
+var concat = require('gulp-concat');
+
+gulp.task('minify-zepto', function() {
+  return gulp.src([
+    'zepto/src/zepto.js',
+    'zepto/src/event.js',
+    'zepto/src/ajax.js'
+  ]).pipe(concat('zepto.min.js'))
+  .pipe(uglify())
+  .pipe(gulp.dest('../browser/vendor/zepto'));
+});
  
 gulp.task('minify-jasmine', function() {
   return gulp.src([
@@ -22,6 +33,6 @@ gulp.task('jasmine-artefacts', function() {
 
 gulp.task('jasmine', ['minify-jasmine', 'jasmine-artefacts']);
 
-gulp.task('default', function() {
+gulp.task('default', ['jasmine', 'minify-zepto'], function() {
   // place code for your default task here
 });
