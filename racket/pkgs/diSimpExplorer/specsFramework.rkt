@@ -80,7 +80,7 @@ END-OF-PREAMBLE
 (define html-postamble #<<END-OF-POSTAMBLE
   </head>
   <body>
-    <nav>
+    <nav class="dseNavigation">
       <ul>
         <li><a href="/all">All</a></li>
         <li><a href="/functional">Functional</a></li>
@@ -89,6 +89,7 @@ END-OF-PREAMBLE
         <li><a href="/quit">Quit</a></li>
       </ul>
     </nav>
+    <div class="dseWindow"><iframe src="/"></iframe></div>
   </body>
 </html>
 END-OF-POSTAMBLE

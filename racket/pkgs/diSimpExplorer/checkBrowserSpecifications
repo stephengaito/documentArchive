@@ -13,7 +13,7 @@
 (require
   "./restfulServlets.rkt"
   "./dseFramework.rkt"
-  "./specFramework.rkt"
+  "./specsFramework.rkt"
 )
 
 ;; parse the command line
