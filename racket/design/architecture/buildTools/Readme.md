@@ -33,15 +33,30 @@ distinct and obvious as possible.
 The diSimpExplorer's browser implementation will use the following 
 tools:
 
-  * Zepto.js to help cooridnate the browser functionality.
+  * [node.js](https://nodejs.org/en/) and 
+    [npm.js](https://www.npmjs.com/) to manage the javascript packages.
 
-  * Jasmine.js to check the browser specifications.
+  * [gulp.js](http://gulpjs.com/) to manage the installation and 
+    scripting of the javascript and CSS packages.
 
-  * Uglify.js to minify the various javascript artefacts.
+  * [Zepto.js](http://zeptojs.com/) to help cooridnate the browser 
+    functionality.
 
-  * SASS to manage/compile the CSS artefacts.
+  * [Jasmine.js](http://jasmine.github.io/2.4/introduction.html) to check 
+    the browser specifications.
 
-  * Autoprefixer
+  * [Uglify.js](https://github.com/mishoo/UglifyJS2) to minify the 
+    various javascript artefacts.
+
+  * [SASS](http://sass-lang.com/) to manage/compile the CSS artefacts.
+
+  * [Autoprefixer](https://github.com/postcss/autoprefixer) to manage 
+    cross browser CSS.
+
+  * We *might* use either of 
+    [TypeScript](https://www.typescriptlang.org/) or 
+    [Babel](https://babeljs.io/) to compile javascript... or we might 
+    simply use javascript directly.
 
 The diSimpExplorer layout will be as follows:
 
