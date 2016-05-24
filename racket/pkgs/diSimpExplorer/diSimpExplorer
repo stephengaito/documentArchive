@@ -1,31 +1,18 @@
 #!/usr/bin/env racket
 #lang racket
 
-(require net/sendurl)
-
 (require
   "./server/restfulServlets.rkt"
   "./server/dseFramework.rkt"
-  "./specs/server/specsFramework.rkt"
 )
-
+ 
 ;; parse the command line
 ;;
-(define main-page   (make-parameter "/all"))
+(define main-page   (make-parameter "/"))
 (define browser-cmd (make-parameter ""))
 ;;
 (command-line
-  #:program "checkBrowserSpecifications"
-  #:once-each
-    [ ("-f" "--functional")
-      "Check functional specifications"
-      (main-page "/functional") ]
-    [ ("-i" "--integration")
-      "Check integration specifications"
-      (main-page "/integration") ]
-    [ ("-u" "--unit")
-      "Check unit specifications"
-      (main-page "/unit") ]
+  #:program "diSimpExplorer"
   #:args browser-command
   (browser-cmd (string-join browser-command " " #:after-last " "))
 )

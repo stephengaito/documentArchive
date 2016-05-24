@@ -87,7 +87,10 @@ The diSimpExplorer layout will be as follows:
       * **unit** the unit specifications for the browser implementation.
 
       * **vendor** a collection of the minified javascript and CSS code 
-        required for to check the specifications.
+        required to check the specifications.
+
+      * **workspace** a local collection of diSimpExplorer artefacts used 
+        in checking the specifications.
 
     * **server**
 
