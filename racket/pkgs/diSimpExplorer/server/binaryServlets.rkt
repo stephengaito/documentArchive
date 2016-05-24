@@ -69,11 +69,15 @@
         )
       )
       `(404
-        ((() . "") ())
-        ,(string-append 
-          "The url ["
-          (url->string (request-uri req))
-          "] could not be found on this server."
+        ( ,(header #"" #"")
+          ,(header #"" #"")
+        )
+        ,(string->bytes/utf-8 
+          (string-append 
+            "The url ["
+            (url->string (request-uri req))
+            "] could not be found on this server."
+          )
         )
       )
     )

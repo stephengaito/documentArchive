@@ -1,38 +1,28 @@
 #lang racket
 
-;;(require 
-;;  net/url
-;;  net/sendurl
-;;)
-
-;;(require web-server/http/request-structs)
-
-(require "./restfulServlets.rkt")
-(require "./dseFramework.rkt")
+(require "../../server/restfulServlets.rkt")
+(require "../../server/dseFramework.rkt")
 
 ;; List the javascript files required to run Jasmine.js
 ;;
 (define jasmine-js
   (list 
-    "/jasmine/lib/jasmine-core/jasmine.js"
-    "/jasmine/lib/jasmine-core/jasmine-html.js"
-    "/jasmine/lib/jasmine-core/boot.js"
+    "/jasmine/jasmine.js"
+    "/jasmine/jasmine-html.js"
+    "/jasmine/boot.js"
   )
 )
 
 ;; capture the required paths for our local work
 ;;
 (require racket/runtime-path)
-(define-runtime-path 
-  jasmine-java-script 
-  "specs/javascript/node_modules/jasmine/node_modules/jasmine-core"
-)
-(define-runtime-path specs-java-script "specs/javascript")
+(define-runtime-path jasmine-java-script "../browser/vendor/jasmine")
+(define-runtime-path specs-java-script "../browser")
 
 ;; create a list of the various specification files
 ;;
 (define curDir (current-directory))
-(current-directory "specs/javascript")
+(current-directory "specs/browser")
 ;;
 (define functional-specs 
   (for/list
@@ -70,9 +60,9 @@
   <head>
     <title>diSimpExplorer Specification checking</title>
     <link rel="icon" type="image/png"
-      href="/jasmine/images/jasmine_favicon.png" />
+      href="/jasmine/jasmine_favicon.png" />
     <link rel="stylesheet" (type="text/css"
-      href="/jasmine/lib/jasmine-core/jasmine.css" />
+      href="/jasmine/jasmine.css" />
 
 END-OF-PREAMBLE
 )
@@ -171,7 +161,6 @@ END-OF-POSTAMBLE
   )
 )
 
-(require "./binaryServlets.rkt")
+(require "../../server/binaryServlets.rkt")
 (get-file "/jasmine" jasmine-java-script 3600 )
-
-(get-file "/specs" specs-java-script 0 )
+(get-file "/specs"   specs-java-script 0 )
