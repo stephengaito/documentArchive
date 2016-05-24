@@ -28,23 +28,61 @@ distinct and obvious as possible.
 
 > Any non-Racket artefacts MUST be kept seperate from the Racket code.
 
-
 ## Solution
+
+The diSimpExplorer's browser implementation will use the following 
+tools:
+
+  * Zepto.js to help cooridnate the browser functionality.
+
+  * Jasmine.js to check the browser specifications.
+
+  * Uglify.js to minify the various javascript artefacts.
+
+  * SASS to manage/compile the CSS artefacts.
+
+  * Autoprefixer
 
 The diSimpExplorer layout will be as follows:
 
-* **diSimpExplorer** 
+* **diSimpExplorer** any command line scripts and/or configuration 
+  files required by the whole diSimpExplorer project.
 
   * **browser** a collection of javascript and CSS code required to 
     orchestrate the browser.
 
-  * **server** a collection of Racket code
+    * **vendor** a collection of the minified javascript and CSS code 
+      for the vendor supplied packages.
+
+  * **server** the collection of our Racket code used to implement the
+    webserver functionality. The primary diSimplicial racket code will 
+    be found in either the diSimp, diSimpCompiler or diSimpInterpreter 
+    Racket packages.
 
   * **specs**
 
     * **browser**
 
+      * **functional** the functional specifications for the browser
+        implementation.
+
+      * **integration** the integration specficiations for the browser
+        implementation.
+
+      * **unit** the unit specifications for the browser implementation.
+
+      * **vendor** a collection of the minified javascript and CSS code 
+        required for to check the specifications.
+
     * **server**
+
+      * **functional** the functional specifications for the server
+        implementation.
+
+      * **integration** the integration specficiations for the server
+        implementation.
+
+      * **unit** the unit specifications for the server implementation.
 
   * **vendor** any "local" configuration files and/or scripts required 
     to describe the vendor packages/tools required.
