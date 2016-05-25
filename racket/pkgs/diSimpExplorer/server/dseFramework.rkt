@@ -25,7 +25,7 @@
   )
 )
 
-(require "./restfulServlets.rkt")
+(require diSimpExplorer/server/restfulServlets)
 ;;(get "/languages"
 (get "/"
   (lambda ()
@@ -43,5 +43,5 @@
   )
 )
 
-(require "./binaryServlets.rkt")
+(require diSimpExplorer/server/binaryServlets)
 (get-file "/zepto" zepto-java-script 3600 )

@@ -6,7 +6,7 @@
   web-server/http/request-structs
   web-server/http/response-structs
 )
-(require "./restfulServlets.rkt")
+(require diSimpExplorer/server/restfulServlets)
 
 (provide get-file)
 

@@ -1,0 +1,82 @@
+#!/usr/bin/env racket
+#lang racket
+
+(define ignoreValue0 (system "reset"))
+
+;; RUN TESTS 
+;;
+(require racket/rerequire)
+
+(define (rackunit-modules dirList)
+  (flatten
+    (map
+      (lambda (aDir)
+        (filter 
+          (lambda (aPath) (equal? (filename-extension aPath) #"rkt"))
+          (map
+            (lambda (aPath) (build-path aDir aPath))
+            (directory-list aDir)
+          )
+        )
+      )
+      dirList
+    )
+  )
+)
+
+(define (run-tests aPath)
+  (begin
+    (printf "\nRuning tests for [~a]\n" aPath) (flush-output)
+    ;;(dynamic-rerequire aPath)
+    (dynamic-rerequire (path->string aPath))
+  )
+)
+
+(define ignoreValues 
+  (map run-tests 
+    (rackunit-modules 
+      (list
+        "specs/server/functional"
+        "specs/server/integration"
+        "specs/server/unit"
+      )
+    )
+  )
+)
+
+(displayln "")
+
+;; CHECK DOCUMENTATION using doc-coverage
+;;
+;;
+;;(require racket/path)
+;;(require doc-coverage)
+;;
+;;(define (scribble-modules)
+;;  (remove*
+;;    (map string->path (list "info.rkt" "main.rkt"))
+;;    (filter 
+;;      (lambda (aPath) (equal? (filename-extension aPath) #"rkt"))
+;;      (directory-list)
+;;    )
+;;  )
+;;)
+;;
+;;(define (check-module-documentation aModule)
+;;  (let ([ moduleName 
+;;          (string->symbol
+;;            (string-append "STLCAlg/" 
+;;              (path->string (path-replace-suffix aModule ""))
+;;            )
+;;          )
+;;       ])
+;;    (begin 
+;;      (printf "\nChecking documentation for [~a]\n" moduleName) (flush-output)
+;;      (dynamic-rerequire moduleName)
+;;      (check-all-documented moduleName)
+;;    )
+;;  )
+;;)
+;;
+;;(define ingoreValues2 (map check-module-documentation (scribble-modules)))
+

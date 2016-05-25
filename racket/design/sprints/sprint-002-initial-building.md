@@ -44,7 +44,7 @@ the ASTs of these languages.
 
 ## Features
 
-1. [diSimpExplorer browse languages](../../pkgs/diSimpExplorer/specs/javascript/functional/browseLanguages.js)
+1. [diSimpExplorer browse languages](../../pkgs/diSimpExplorer/specs/browser/functional/browseLanguages.js)
 
 ## Specifications
 

@@ -1,7 +1,7 @@
 #lang racket
 
-(require "../../server/restfulServlets.rkt")
-(require "../../server/dseFramework.rkt")
+(require diSimpExplorer/server/restfulServlets)
+(require diSimpExplorer/server/dseFramework)
 
 ;; List the javascript files required to run Jasmine.js
 ;;
@@ -161,6 +161,6 @@ END-OF-POSTAMBLE
   )
 )
 
-(require "../../server/binaryServlets.rkt")
+(require diSimpExplorer/server/binaryServlets)
 (get-file "/jasmine" jasmine-java-script 3600 )
 (get-file "/specs"   specs-java-script 0 )

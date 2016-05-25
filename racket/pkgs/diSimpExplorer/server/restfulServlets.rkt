@@ -47,6 +47,7 @@
          default-response-maker
          status->message
          define-handler
+         request->handler
          params
          header
          run)

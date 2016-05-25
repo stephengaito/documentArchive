@@ -4,9 +4,9 @@
 (require net/sendurl)
 
 (require
-  "./server/restfulServlets.rkt"
-  "./server/dseFramework.rkt"
-  "./specs/server/specsFramework.rkt"
+  diSimpExplorer/server/restfulServlets
+  diSimpExplorer/server/dseFramework
+  diSimpExplorer/specs/server/specsFramework
 )
 
 ;; parse the command line

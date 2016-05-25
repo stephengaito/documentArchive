@@ -7,6 +7,26 @@ module DiSimpBuilder
 
   class ToolsCommand < Command
     class << self
+
+      def checkForDiSimpExplorer
+        puts "\nChecking for the diSimpExplorer package"
+        if File.directory?('racket') &&
+           File.directory?('racket/pkgs') &&
+           File.directory?('racket/pkgs/diSimpExplorer') then
+          puts "Installing diSimpExplorer"
+          begin
+            system('raco pkg install --link racket/pkgs/diSimpExplorer')
+          rescue Exception
+            puts "trying again"
+            system('raco setup diSimpExplorer')
+          end
+        else
+          puts "This project does not contain the diSimpExplorer"
+          puts "Please change directories and try again"
+          exit(-1)
+        end
+      end
+
       def updateNpm
         puts "\nChecking for npm"
         if File.which('npm').nil? then
@@ -27,19 +47,6 @@ module DiSimpBuilder
           system("sudo npm install -g gulp")
         else
           puts "Found gulp"
-        end
-      end
-
-      def checkForDiSimpExplorer
-        puts "\nChecking for the diSimpExplorer package"
-        if File.directory?('racket') &&
-           File.directory?('racket/pkgs') &&
-           File.directory?('racket/pkgs/diSimpExplorer') then
-          puts "Found diSimpExplorer"
-        else
-          puts "This project does not contain the diSimpExplorer"
-          puts "Please change directories and try again"
-          exit(-1)
         end
       end
 
@@ -76,9 +83,9 @@ module DiSimpBuilder
           c.description 'Installs the diSimp (racket based) tools'
           c.action do |args, options|
             begin
-              checkForDiSimpExplorer
               puts "\nYou may be asked for your sudo password"
               puts "to allow global commands to be installed: "
+              checkForDiSimpExplorer
               updateNpm
               installGulp
               installLocalNpmDependencies
