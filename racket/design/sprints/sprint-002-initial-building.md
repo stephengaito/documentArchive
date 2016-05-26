@@ -46,6 +46,10 @@ the ASTs of these languages.
 
 1. [diSimpExplorer browse languages](../../pkgs/diSimpExplorer/specs/browser/functional/browseLanguages.js)
 
+2. [diSimpExplorer server languages](../../pkgs/diSimpExplorer/specs/server/functional/browseLanguages.rkt)
+
+3. [diSimpExplorer test utils](../../pkgs/diSimpExplorer/specs/server/unit/testUtils.rkt)
+
 ## Specifications
 
 ## Questions and Risks
