@@ -1,3 +1,13 @@
+**Table of Contents**
+
+  - [Build layout and tools](#build-layout-and-tools)
+    - [Problem](#problem)
+    - [Goals](#goals)
+    - [Requirements](#requirements)
+    - [Solution](#solution)
+
+<!--- END TOC -->
+
 # Build layout and tools
 
 ## Problem

@@ -1,3 +1,10 @@
+**Table of Contents**
+
+  - [External Vendor dependencies.](#external-vendor-dependencies-)
+  - [Zepto.js](#zepto-js)
+
+<!--- END TOC -->
+
 # External Vendor dependencies.
 
 This directory contains the external vendor dependencies required for the 
@@ -17,5 +24,3 @@ with this is by cloning the [gitHub
 project](https://github.com/madrobby/zepto) itself. To do this simply type:
 
 > git clone https://github.com/madrobby/zepto.git
-
-

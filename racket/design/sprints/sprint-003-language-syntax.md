@@ -1,6 +1,6 @@
 **Table of Contents**
 
-  - [Sprint 001 initial planning](#sprint-001-initial-planning)
+  - [Sprint 003 language syntax](#sprint-003-language-syntax)
     - [Problem](#problem)
     - [Tasks](#tasks)
     - [Features](#features)
