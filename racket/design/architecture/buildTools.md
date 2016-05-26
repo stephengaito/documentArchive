@@ -89,9 +89,6 @@ The diSimpExplorer layout will be as follows:
       * **vendor** a collection of the minified javascript and CSS code 
         required to check the specifications.
 
-      * **workspace** a local collection of diSimpExplorer artefacts used 
-        in checking the specifications.
-
     * **server**
 
       * **functional** the functional specifications for the server
@@ -101,6 +98,9 @@ The diSimpExplorer layout will be as follows:
         implementation.
 
       * **unit** the unit specifications for the server implementation.
+
+    * **workspace** a local collection of diSimpExplorer artefacts used 
+      in checking the specifications.
 
   * **vendor** any "local" configuration files and/or scripts required 
     to describe the vendor packages/tools required.

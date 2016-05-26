@@ -15,6 +15,7 @@
 
 * Started: 2016/05/18
 * Ends: 2016/05/27 Friday
+* Completed: 2016/05/26 (early)
 
 ## Problem
 
@@ -29,18 +30,18 @@ the ASTs of these languages.
 ## Tasks
 
 * setup testing infra-structure which is integrated with the design 
-  descriptions.
+  descriptions. **[completed]**
 
 * build a simple frontend/backend based diSimpExplorer tool using 
   Zepto.js/Racket which allows the user to browse a live collection of 
-  languages and language mappings.
+  languages and language mappings. **[completed]**
 
 * extend the diSimp tool to initialise a diSimp tool workspace in which to 
-  save the languages and mappings.
+  save the languages and mappings. **[completed]**
 
 * extend the diSimp tool to setup/install any required diSimpExplorer 
   libraries. (if any are required to be local the the workspace rather 
-  than globally located inside the diSimpExplorer package.
+  than globally located inside the diSimpExplorer package. **[completed]**
 
 ## Features
 
@@ -94,4 +95,6 @@ tool set?
 
 ## Wrap-up
 
-Nothing at the moment
+Completed all tasks.
+
+Significantly de-risked the building of the diSimpExplorer.

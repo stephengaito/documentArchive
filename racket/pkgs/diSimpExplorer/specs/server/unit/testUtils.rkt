@@ -1,5 +1,7 @@
 #lang racket
 
+;; Goal: To ensure the test-utils.rkt functions preform correctly.
+
 (require
   rackunit
   rackunit/text-ui
@@ -7,10 +9,12 @@
 
 (require diSimpExplorer/specs/server/test-utils)
 
-;; Some unit tests of the test-utlis.rkt functions
-
 (define all-tests
   (test-suite "Test-utils"
+
+    ;; The begin-equal? predicate checks to see if the
+    ;; pattern is a "subset" of the xexpr.
+    ;;
     (test-case "begin-equal?"
       (check-true (begin-equal? '(div) '(div silly)))
       (check-true 
@@ -25,6 +29,9 @@
       )
     )
 
+    ;; The select predicate selects all elements of the xexpr
+    ;; which begin with the pattern.
+    ;;
     (test-case "select"
       (define selection
         (select
