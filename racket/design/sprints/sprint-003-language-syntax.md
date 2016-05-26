@@ -14,6 +14,7 @@
 # Sprint 003 language syntax
 
 * Started: 2016/05/26
+* Paused: 2016/05/26 (while working on external websites)
 * Ends: 2016/06/10 Friday
 
 ## Problem
@@ -32,9 +33,14 @@ precision.
 
 ## Tasks
 
-* Be able to specify a language syntax
- * Be able to specify a language syntax
- * Be able to specify language axioms
+* For the "List of List" (LoL) language and its meta-description:
+
+  * Be able to specify a language syntax
+
+  * Be able to specify language axioms
+
+  * Provide a language mapping of the meta-description into the LoL 
+    language.
 
 * Build a simple tool to read a context-free description of an AST and 
   compile it into a collection of Racket structures.

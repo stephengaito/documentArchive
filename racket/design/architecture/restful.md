@@ -14,9 +14,10 @@
 
 ## Problem
 
-The diSimpExplorer uses a standard modern web browser as it graphical 
+The diSimpExplorer uses a standard modern web browser as its graphical 
 user interface "frontend". In particular this enables the eventual use of 
-MathJAX to display simple mathematical notation.
+[MathJAX](http://www.mathjax.org/) to display simple mathematical 
+notation.
 
 The diSimpExplorer is also performing a task on behalf of the user which 
 is both too large and complex to be performed in a browser as well as 
@@ -40,6 +41,10 @@ and in particular be
 > The diSimpExplorer web-server SHOULD have a RESTful interface
 
 ## Solution
+
+We make use of the [dmac/spin](https://github.com/dmac/spin) project, and 
+in particular [our modifications](https://github.com/stephengaito/spin) 
+(currently found on the "adding-binary-servlets" branch).
 
 ## Questions and Risk
 

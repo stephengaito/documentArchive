@@ -26,10 +26,11 @@ it into an associated collection of Racket data structures.
 
 | AST element    | Symbol or Racket list structure |
 | ----------     | ------------------------------- |
-| < symbol >     | /' |
-| < string >     | /'[^']*'/ \| /"[^"]*"/ |
-| < listItem >   | < symbol > \| < string > \| < listItem > |
-| < structure >  | < symbol >  |
+| < symbol >     | /'[^']\*/ |
+| < string >     | /'[^']\*'/ \| /"[^"]\*"/ |
+| < listItem >   | < symbol > \| < string > \| < list > |
+| < list >       | ( < listItem >\* ) |
+| < structure >  | ( < symbol > < listItem >\* ) |
 
 ## Solution
 

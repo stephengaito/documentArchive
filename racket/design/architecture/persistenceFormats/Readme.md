@@ -68,39 +68,13 @@ compiler is highly likely.
 In the **backend**, we will use Racket/LISP S-expressions, both 
 internally and as a persistence format.
 
-In the **frontend**, we will base our javascript S-expression parser on 
-code taken from the 
-[littlelisp](https://github.com/maryrosecook/littlelisp) project. This 
-code will be maintained in synchrony with the meta^n-level description 
-format. This code will map the syntactic elements of the meta^n-level 
-description into corresponding objects in the [**ES6** javascript 
-specification](http://www.ecma-international.org/ecma-262/6.0/) (and or 
-libraries of objects).
+In the **frontend**, we will simply use div structures provided by the 
+backend to display any S-expressions.
 
 ## Questions and Risks
 
 **How should we represent these artefacts over the TCP/IP wire?**
 
-Consider wire-transfer using JSON. Unfortunately this does not allow 
-Racket/LISP symbols to be distinguished from strings.
+  * Simply use div structures provided by the backend
 
-Could consider [ragg](http://www.hashcollision.org/ragg/)
-[example](http://stackoverflow.com/a/12358029) and [Lexical analysis in
-Racket](http://matt.might.net/articles/lexers-in-racket/) and the example
-[Parsing BibTeX](http://matt.might.net/articles/parsing-bibtex/). See
-also [HashCollision's projects](http://www.hashcollision.org/). See also
-[Racket
-Parsers](http://www.markcarter.me.uk/programming/racket/parsers.htm).
-
-After some research with NodeJS, Angular 2, and Jasmine I have discovered 
-that a better method of moving data structures between Racket and Angular 
-might be as stringified S-expressions.  Try using the reader/parser from 
-the [SLip](https://github.com/mishoo/SLip) project. OR try 
-[littlelisp](https://github.com/maryrosecook/littlelisp). Alternatively 
-consider [PEG.js](http://pegjs.org/)
-
-After some additional research I have found that the littlelisp based 
-S-expression parser is at least 20 times slower than the native JSON 
-parser, but, however, wire-transfer represents a small part of the user's 
-experience of the user interface (much more time will be spent 
-*thinking*).
+  * Occasionally (for menus) make use of JSON structures.
