@@ -15,7 +15,8 @@
 
 * Started: 2016/05/26
 * Paused: 2016/05/26 (while working on external websites)
-* Ends: 2016/06/10 Friday
+* Restarted: 2016/06/13
+* Ends: 2016/06/24 Friday
 
 ## Problem
 
