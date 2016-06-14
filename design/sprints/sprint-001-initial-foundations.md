@@ -73,6 +73,22 @@ We can then follow a chain of bootstrapping steps to go from a purely
 Racket based compiler to a purely mathematical programming language based 
 compiler (possibly implemented on Racket's runtime support).
 
+The programming language includes:
+
+* "lambda" for defining functions
+* "application" for applying arguments to functions
+* "begin"/"end" for defining "sequences" and/or local scopes
+* "cond" for defining ordered collections of conditions
+* "let"/"letrec" for defining local variables (our let is Racket's let*)
+* "car"/"cdr"/"cons" for manipulating lists
+* "null?" for testing empty lists
+
+We have one type, lists, and one type constructor, lambda.
+
+How does this compare to the [Simply typed lambda 
+calculus](https://en.wikipedia.org/wiki/Simply_typed_lambda_calculus), 
+[System T](https://en.wikipedia.org/wiki/Dialectica_interpretation) or 
+[PCF](https://en.wikipedia.org/wiki/Programming_language_for_Computable_Functions)?
 
 ## Resources
 
