@@ -17,7 +17,8 @@ serialised (by the next more powerful computational device).
 
 * define the List of Lists (LoL) model of computation
   * define the rules of LoL
-  * define a sequential computation in LoL
+  * define a sequential computation in LoL (in assembler and then more 
+    convient higher-level language)
   * define composition of sequential compositions.
   * exhibit a universal Turing machine as a LoL computation
   * show that any LoL computation can be computed by a Turing machine.
@@ -81,7 +82,7 @@ The programming language includes:
 * "cond" for defining ordered collections of conditions
 * "let"/"letrec" for defining local variables (our let is Racket's let*)
 * "car"/"cdr"/"cons" for manipulating lists
-* "null?" for testing empty lists
+* "nil?" for testing empty lists
 
 We have one type, lists, and one type constructor, lambda.
 
@@ -89,6 +90,27 @@ How does this compare to the [Simply typed lambda
 calculus](https://en.wikipedia.org/wiki/Simply_typed_lambda_calculus), 
 [System T](https://en.wikipedia.org/wiki/Dialectica_interpretation) or 
 [PCF](https://en.wikipedia.org/wiki/Programming_language_for_Computable_Functions)?
+
+We will implement this language in the LoL "assember" language:
+
+* "car"/"cdr"/"cons"
+* "nil?" 
+
+The conditions/assertions are the co-algebraic duals to the algebraic 
+manipulations. That is the universe, \universe{}, *is* the collection of 
+all mathematical objects which can be "observed" (i.e. "repsond" to the 
+"car"/"cdr"/"nil?" manipulations) as often as we like, yielding another 
+mathematical object. That is the universe is the collection of 
+mathematical objects which are "shapped" like LoL. They are essentially 
+LoL assembler processes.
+
+The current first-order axiomatisations of Set Theory (for example ZFC), 
+*assume* a *collection* of things. Those "things" which satisfy the 
+axioms are *sets*.
+
+One way to "understand" this is that the universe of ZFC sets is the 
+co-algebraic collection of mathematical processes which can always be 
+manipulated in the way the axioms of ZFC stipulate.
 
 ## Resources
 
