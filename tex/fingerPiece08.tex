@@ -14,7 +14,8 @@ Admittedly, at the moment, Set is not considered `computational'.
 
 The most obvious `computational' universe is the category of maps from the
 Ordinals into the set \set{0, 1, \textvisiblespace}.\footnote{This is the
-transfinite generalization of Turing's countable tapes.}
+transfinite generalization of Turing's countable tapes.} In this universe, a
+Turing machine is a \emph{finite} comonad.
 
 Each computational device be it `physical' or just defined in software on some
 `physical' device, defines its own `computational' universe. More specifically
@@ -61,3 +62,21 @@ Fundamental to the study of computational universes is a given universe's
 complexity measure. This is a mapping from an object or arrow (objects plus
 `mapping') into a representation of the collection of ordinals in the given
 universe.
+
+This complexity measure is (sub?) additive with respect to composition of
+arrows.
+
+Note that the complexity of an object is the complexity of its arrow from the
+final object to the given object.
+
+Question: how is this measure of complexity related to entropy or an imprecise
+measure?
+
+We \emph{want} to find a collection of smallest arrows from which all other
+arrows can be built... this is the programming language.
+
+Question: how is this related to a variational definition of physics?
+
+This measure of complexity is `like' the topological version of entropy, while
+an impreceise measure (of complexity?) is `like' the measure theoretic version
+of entropy.
