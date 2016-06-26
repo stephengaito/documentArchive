@@ -31,12 +31,15 @@ algebraic `syntax' and which captures the co-algebraic `behaviour'. There are
 two ways to consider this dual pair. Firstly, and our primary method, is to see
 the algebraic part as the initial object in the category of (sub) co-algebraic
 comonads associated with a given behaviour. Alternatively the co-algebraic part
-is the finial object in the category 0f (sub) algebraic monads associate with a
+is the final object in the category of (sub) algebraic monads associated with a
 given syntax.
 
 \paragraph{3}
 
-A computation is a path.
+A computation is a path whose boundary consists of atomic objects. Not quite, if
+this were `true' then no finite being could compute, since no finite being can
+ever control/measure their boundary conditions to atomicity. They can however
+control/measure their boundary conditions to within finite co-conditions.
 
 A formally proven computation is a path whose boundary objects are defined.
 
@@ -47,6 +50,11 @@ boundary is the given specification.
 
 An implementation of a given algorithm for a given specification is a
 (functorial) model in a given `computational' universe.
+
+How do we `define' an object? How do we distinguish between an `atomic' object
+and a `collection' object? An `atomic' object has a unique arrow from the
+initial object to itself. A `collection' object has multiple arrows from the
+initial object to itself.
 
 \paragraph{4}
 
@@ -75,8 +83,31 @@ measure?
 We \emph{want} to find a collection of smallest arrows from which all other
 arrows can be built... this is the programming language.
 
+Problem: each `programming language' defines its own complexity measure... why
+will one complexity measure be `best'? Is this a problem? Can we just
+\emph{choose} one? No not quite. For $P \subsetneq NP$ we do need the fact that
+\emph{some} `overall' measure of complexity increases for all but the `simplest'
+measure/programming-language. That is, while individual arrows might get `less
+complex', `overall' arrows get more complex. Does this mean there is a
+conservation of complexity?
+
+NO... there is a complexity measure defined by the comonad of the universe
+itself. How does this measure/programming-language relate to any other?
+
 Question: how is this related to a variational definition of physics?
 
 This measure of complexity is `like' the topological version of entropy, while
-an impreceise measure (of complexity?) is `like' the measure theoretic version
+an imprecise measure (of complexity?) is `like' the measure theoretic version
 of entropy.
+
+\paragraph{6}
+
+Question: what is a programming language?
+
+Answer: the description of a comonad. The constructors plus the recursion
+provide the positive co-free comonad while the conditionals provide the negative
+conditions on the final co-free comonad.
+
+A fundamental theorem will be that any (sub) comonad can be described by a
+programming language and more over there is a programming language with minimal
+complexity.
