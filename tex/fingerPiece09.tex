@@ -1,3 +1,81 @@
 % DiSimp Language
 
-To provide \emph{a} foundation of Mathematics, we seek a concatenative self-interpreting programming language.
+\newcommand{\AxiomaticIntro}[1]{& \textnormal{Axiom-intro:} & %
+ \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \nonumber \\ }
+\newcommand{\AxiomaticElim}[1]{& \textnormal{Axiom-elim:} & %
+ \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \nonumber }
+
+
+To provide \emph{a} foundation of Mathematics, we seek a concatenative, as
+opposed to an applicative, self-interpreting programming language. We do this in
+two parts. The core \emph{expression} langauge is purely concatenative. The
+larger \emph{programming} language is itself interpreted in the core expression
+language. We assert that the programming language is the smallest \emph{fully
+abstract}, Turing complete, language extending the core expression language.
+
+\section{Expressions}
+\newcommand{\nil}{\ensuremath{\cdot}}
+
+We use the symbol `\bnfTD{\nil}' to represent no list at all.
+
+\begin{bnf}\label{nil}
+ \bnfProd{ListExp}{ \bnfTD{\nil} \nonumber }
+ \Denotation{\denEql{\bnfSP\bnfTD{\nil}\bnfSP}{\sigma}{\bnfTD{\nil}}}
+ \Operational{
+  \AxiomC{}
+  \RightLabel{nil}
+  \UnaryInfC{\opExp{\bnfTD{\nil}}{\sigma}{\bnfTD{\nil}}{\sigma}}}
+ \AxiomaticIntro{
+  \AxiomC{\nil}
+  \RightLabel{nil-intro}
+  \UnaryInfC{\bnfTD{\nil}}
+ }
+ \AxiomaticElim{
+  \AxiomC{\bnfTD{\nil}}
+  \RightLabel{nil-elimination}
+  \UnaryInfC{\nil}
+ }
+\end{bnf}
+
+\begin{bnf}\label{null-list}
+ \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfTD{)} \nonumber }
+ \Denotation{\denEql{\bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP}{\sigma}{\bnfTD{(} \bnfSP  \bnfSP \bnfTD{)}}}
+ \Operational{
+  \AxiomC{}
+  \RightLabel{null}
+  \UnaryInfC{\opExp{\bnfTD{(} \bnfSP \bnfTD{)}}{\bnfTD{\nil}}{\bnfTD{\nil}}{\bnfTD{(} \bnfSP \bnfTD{)}}}
+ }
+ \AxiomaticIntro{
+  \AxiomC{\nil}
+  \RightLabel{null-intro}
+  \UnaryInfC{\bnfTD{(} \bnfSP \bnfTD{)}}
+ }
+ \AxiomaticElim{
+  \AxiomC{\bnfTD{(} \bnfSP \bnfTD{)}}
+  \RightLabel{null-elimination}
+  \UnaryInfC{\nil}
+ }
+\end{bnf}
+
+\begin{bnf}\label{list}
+ \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP \bnfPN{ListExp} \bnfSP \bnfTD{)} \nonumber }
+ \Denotation{\denEql{\bnfSP \bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP x \bnfSP \bnfTD{)} \bnfSP}{\sigma}{\bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP \denExp{ \bnfSP x \bnfSP }{\sigma} \bnfSP \bnfTD{)} \bnfSP }}
+ \Operational{
+  \AxiomC{}
+  \RightLabel{list}
+  \UnaryInfC{\opExp{\bnfSP \bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP x \bnfSP \bnfTD{)}}{\bnfSP \bnfTD{(} \bnfSP x \bnfSP \bnfTD{)}}{\nil}{\bnfSP \bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP x \bnfSP \bnfTD{)} \bnfSP }}
+ }
+ \AxiomaticIntro{
+  \AxiomC{\bnfTD{(}\bnfSP $x$ \bnfSP \bnfTD{)}}
+  \RightLabel{list-intro}
+  \UnaryInfC{\bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP $x$ \bnfSP \bnfTD{)}}
+ }
+ \AxiomaticElim{
+  \AxiomC{\bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP $x$ \bnfSP \bnfTD{)}}
+  \RightLabel{list-elimination}
+  \UnaryInfC{\bnfTD{(} \bnfSP $x$ \bnfSP \bnfTD{)}}
+ }
+\end{bnf}
+
+\section{Programming}
+

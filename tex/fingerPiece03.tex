@@ -241,23 +241,23 @@ standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
 \newcommand{\MExp}[1]{& \textnormal{MExp:} & #1  \nonumber \\}
 \newcommand{\denExp}[2]{\ensuremath{ \lbrack \! \lbrack #1 \rbrack \! \rbrack #2}}
 \newcommand{\denEql}[3]{\ensuremath{ \lbrack \! \lbrack #1 \rbrack \! \rbrack #2 = #3}}
-\newcommand{\Denotation}[1]{& \textnormal{Den:} & #1 \\}
-\newcommand{\opExp}[3]{\ensuremath{\langle #1 , #2 \rangle \rightarrow #3}}
+\newcommand{\Denotation}[1]{& \textnormal{Den:} & #1 \nonumber \\}
+\newcommand{\opExp}[4]{\ensuremath{\langle #1 , #2 \rangle \rightarrow \langle #3 , #4 \rangle }}
 \newcommand{\Operational}[1]{& \textnormal{Oper:} & %
- \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \nonumber \\}
+ \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \\}
 \newcommand{\Axiomatic}[1]{& \textnormal{Axiom:} & %
  \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \nonumber }
 
 \subsection{List expressions}
 
-\begin{bnf}\label{null-list}
+\begin{bnf}\label{ch3-null-list}
  \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfTD{)} \nonumber }
  \MExp{( \bnfSP \bnfTD{nil} \bnfSP )}
  \Denotation{\denEql{\bnfSP(\bnfSP)\bnfSP}{\sigma}{()}}
  \Operational{
   \AxiomC{}
   \RightLabel{$(\bnfSP)$}
-  \UnaryInfC{\opExp{()}{\sigma}{()}}}
+  \UnaryInfC{\opExp{()}{\sigma}{()}{\sigma}}}
  \Axiomatic{
   \AxiomC{}
   \RightLabel{$(\bnfSP)$}
@@ -272,11 +272,11 @@ standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
   {\sigma}{(\bnfSP \denExp{\bnfTD{list1}}{\sigma} \bnfSP
    \denExp{\bnfTD{list2}}{\sigma} \bnfSP)}}
  \Operational{
-  \AxiomC{\opExp{list1}{\sigma}{\lambda_1}}
-  \AxiomC{\opExp{list2}{\sigma}{\lambda_2}}
+  \AxiomC{\opExp{list1}{\sigma}{\lambda_1}{\sigma}}
+  \AxiomC{\opExp{list2}{\sigma}{\lambda_2}{\sigma}}
   \RightLabel{$\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}$}
   \BinaryInfC{\opExp{\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}}{\sigma}
-                   {(\bnfSP \lambda_1\bnfSP\lambda_2\bnfSP)}}
+                   {(\bnfSP \lambda_1\bnfSP\lambda_2\bnfSP)}{\sigma}}
  }
  \Axiomatic{
   \AxiomC{$\lambda_1$}
@@ -295,9 +295,9 @@ standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
   \bot \text{ otherwise }
   \end{cases}}}
  \Operational{
-  \AxiomC{\opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)}}
+  \AxiomC{\opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)}{\sigma}}
   \RightLabel{$\bnfTD{car}\bnfSP\bnfTD{list1}$}
-  \UnaryInfC{\opExp{\bnfSP\bnfTD{car}\bnfSP\bnfTD{list1}}{\sigma}{\lambda_1}}
+  \UnaryInfC{\opExp{\bnfSP\bnfTD{car}\bnfSP\bnfTD{list1}}{\sigma}{\lambda_1}{\sigma}}
  }
  \Axiomatic{
   \AxiomC{ $ ( \bnfSP \lambda_1 \bnfSP \lambda_2 \bnfSP ) $ }
@@ -315,10 +315,10 @@ standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
    \bot \text{ otherwise }
   \end{cases}}}
  \Operational{
-  \AxiomC{\opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)}}
+  \AxiomC{\opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)}{\sigma}}
   \RightLabel{$\bnfTD{cdr}\bnfSP\bnfTD{list1}$}
   \UnaryInfC{\bnfSP\opExp{\bnfTD{car}\bnfSP\bnfTD{list1}\bnfSP}
-   {\sigma}{\lambda_2}}
+   {\sigma}{\lambda_2}{\sigma}}
  }
  \Axiomatic{
   \AxiomC{$(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)$}
