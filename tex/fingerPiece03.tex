@@ -239,9 +239,12 @@ We begin by providing the syntax of our diSimplex (co-)data language following t
 standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
 
 \newcommand{\MExp}[1]{& \textnormal{MExp:} & #1  \nonumber \\}
-\newcommand{\denExp}[2]{\ensuremath{ \lbrack \! \lbrack #1 \rbrack \! \rbrack #2}}
-\newcommand{\denEql}[3]{\ensuremath{ \lbrack \! \lbrack #1 \rbrack \! \rbrack #2 = #3}}
+\newcommand{\denExp}[2]{\ensuremath{ \underline{\lbrack \! \lbrack #1 \rbrack \! \rbrack} #2}}
+\newcommand{\denEql}[3]{\ensuremath{ \underline{ \lbrack \! \lbrack #1 \rbrack \! \rbrack} #2 = #3}}
 \newcommand{\Denotation}[1]{& \textnormal{Den:} & #1 \nonumber \\}
+\newcommand{\coDenExp}[2]{\ensuremath{ \overline{ \lbrack \! \lbrack #1 \rbrack \! \rbrack} #2}}
+\newcommand{\coDenEql}[3]{\ensuremath{ \overline{ \lbrack \! \lbrack #1 \rbrack \! \rbrack} #2 = #3}}
+\newcommand{\coDenotation}[1]{& \textnormal{coDen:} & #1 \nonumber \\}
 \newcommand{\opExp}[4]{\ensuremath{\langle #1 , #2 \rangle \rightarrow \langle #3 , #4 \rangle }}
 \newcommand{\Operational}[1]{& \textnormal{Oper:} & %
  \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \\}
