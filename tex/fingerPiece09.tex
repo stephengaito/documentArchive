@@ -20,8 +20,8 @@ We use the symbol `\bnfTD{\nil}' to represent no list at all.
 
 \begin{bnf}\label{nil}
  \bnfProd{ListExp}{ \bnfTD{\nil} \nonumber }
- \Denotation{\denEql{\bnfSP\bnfTD{\nil}\bnfSP}{\sigma}{\bnfTD{\nil}}}
  \coDenotation{\coDenEql{\bnfSP\bnfTD{\nil}\bnfSP}{\sigma}{\bnfTD{\nil}}}
+ \Denotation{\denEql{\bnfSP\bnfTD{\nil}\bnfSP}{\sigma}{\bnfTD{\nil}}}
  \Operational{
   \AxiomC{}
   \RightLabel{nil}
@@ -40,8 +40,8 @@ We use the symbol `\bnfTD{\nil}' to represent no list at all.
 
 \begin{bnf}\label{null-list}
  \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfTD{)} \nonumber }
- \Denotation{\denEql{\bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP}{\sigma}{\bnfTD{(} \bnfSP  \bnfSP \bnfTD{)}}}
  \coDenotation{\coDenEql{\bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP}{\sigma}{\bnfTD{(} \bnfSP  \bnfSP \bnfTD{)}}}
+ \Denotation{\denEql{\bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP}{\sigma}{\bnfTD{(} \bnfSP  \bnfSP \bnfTD{)}}}
  \Operational{
   \AxiomC{}
   \RightLabel{null}
@@ -61,8 +61,8 @@ We use the symbol `\bnfTD{\nil}' to represent no list at all.
 
 \begin{bnf}\label{list}
  \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP \bnfPN{ListExp} \bnfSP \bnfTD{)} \nonumber }
- \Denotation{\denEql{\bnfSP \bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP x \bnfSP \bnfTD{)} \bnfSP}{\sigma}{\bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP \denExp{ \bnfSP x \bnfSP }{\sigma} \bnfSP \bnfTD{)} \bnfSP }}
  \coDenotation{\coDenEql{\bnfSP \bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP x \bnfSP \bnfTD{)} \bnfSP}{\sigma}{\bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP \coDenExp{ \bnfSP x \bnfSP }{\sigma} \bnfSP \bnfTD{)} \bnfSP }}
+ \Denotation{\denEql{\bnfSP \bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP x \bnfSP \bnfTD{)} \bnfSP}{\sigma}{\bnfTD{(} \bnfSP \bnfTD{(} \bnfSP \bnfTD{)} \bnfSP \bnfTD{.} \bnfSP \denExp{ \bnfSP x \bnfSP }{\sigma} \bnfSP \bnfTD{)} \bnfSP }}
  \Operational{
   \AxiomC{}
   \RightLabel{list}
