@@ -16,7 +16,10 @@
 * Started: 2016/05/26
 * Paused: 2016/05/26 (while working on external websites)
 * Restarted: 2016/06/13
-* Ends: 2016/06/24 Friday
+* Paused: July/August/September (while on holiday/rebuiding systems)
+* Restarted: 2016/09/19
+* Postponed: 2016/09/23 (while working on diSimpInterpreter)
+* Ends: unknown
 
 ## Problem
 
