@@ -15,9 +15,20 @@ popd > /dev/null
 popd > /dev/null
 
 echo ""
+echo "Setting up [diSimpInterpreter]"
+echo ""
+raco setup diSimpInterpreter
+#pushd pkgs/diSimpInterpreter > /dev/null
+#raco scribble +m --latex-section 1 --dest latex scribblings/diSimpInterpreter.scrbl
+#pushd latex > /dev/null
+#rm -rf manual-style.tex racket.tex scribble-load-replace.tex
+#rm -rf scribble-load.tex scribble.tex
+#popd > /dev/null
+#popd > /dev/null
+
+echo ""
 echo "Setting up [diSimp]"
 echo ""
-
 raco setup diSimp
 pushd pkgs/diSimp > /dev/null
 raco scribble +m --latex-section 1 --dest latex scribblings/diSimp.scrbl
@@ -26,6 +37,18 @@ rm -rf manual-style.tex racket.tex scribble-load-replace.tex
 rm -rf scribble-load.tex scribble.tex
 popd > /dev/null
 popd > /dev/null
+
+echo ""
+echo "Setting up [diSimpExplorer]"
+echo ""
+raco setup diSimpExplorer
+#pushd pkgs/diSimpExplorer > /dev/null
+#raco scribble +m --latex-section 1 --dest latex scribblings/diSimpExplorer.scrbl
+#pushd latex > /dev/null
+#rm -rf manual-style.tex racket.tex scribble-load-replace.tex
+#rm -rf scribble-load.tex scribble.tex
+#popd > /dev/null
+#popd > /dev/null
 
 echo ""
 echo "Copying documentation"

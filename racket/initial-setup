@@ -15,9 +15,19 @@ echo ""
 raco pkg install --link pkgs/diSimpRacketLayer
 
 echo ""
+echo "Linking [diSimpInterpreter]"
+echo ""
+raco pkg install --link pkgs/diSimpInterpreter
+
+echo ""
 echo "linking [diSimp]"
 echo ""
 raco pkg install --link pkgs/diSimp
+
+echo ""
+echo "Linking [diSimpExplorer]"
+echo ""
+raco pkg install --link pkgs/diSimpExplorer
 
 echo ""
 echo "setting up [diSimpRacketLayer]"
@@ -25,6 +35,17 @@ echo ""
 raco setup diSimpRacketLayer
 
 echo ""
+echo "setting up [diSimpInterpreter]"
+echo ""
+raco setup diSimpInterpreter
+
+echo ""
 echo "setting up [diSimp]"
 echo ""
 raco setup diSimp
+
+echo ""
+echo "setting up [diSimpExplorer]"
+echo ""
+raco setup diSimpExplorer
+
