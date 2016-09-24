@@ -44,7 +44,7 @@
 (define (check-module-documentation aModule)
   (let ([ moduleName 
           (string->symbol
-            (string-append "diSimp/" 
+            (string-append "diSimpInterpreter/" 
               (path->string (path-replace-suffix aModule ""))
             )
           )

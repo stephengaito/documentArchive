@@ -15,12 +15,14 @@
   (rename-out [#%plain-module-begin #%module-begin])
   #%app #%datum #%top
   #%require #%provide
-  require provide rename-out
+  require prefix-in
+  provide rename-out all-from-out prefix-out
   define
-  list list? 
+  list list? append
   car cdr cadr caddr cadddr
   quote
-  if case else
+  let
+  if case else cond
   equal? eqv? eq?
   and
   null

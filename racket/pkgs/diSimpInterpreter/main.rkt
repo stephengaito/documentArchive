@@ -12,9 +12,12 @@
 
 (define-syntax-rule (top-interaction . form) form)
 
+(require (prefix-in diSimp:: diSimpInterpreter/operators))
+
 ;; This form, if it works, is very restrictive
 ;;
 (provide 
+  (all-from-out diSimpInterpreter/operators)
   (rename-out [module-begin #%module-begin]
               [top-interaction #%top-interaction])
   #%app #%datum #%top
@@ -29,8 +32,17 @@
   null
   displayln
   diSimp
+  ;; we want to provide all of constants.rkt with a prefix-in 
+  ;; of 'diSimp::'
 )
 
 (define (diSimp aList)
-  aList
+  (let ( [ prog  (car aList) ]
+         [ stack (cdr aList) ] )
+    (cond
+      [ (equal? diSimp::pop prog)
+        (append diSimp::noopList (diSimp::popOp stack)) ]
+      [ else aList ]
+    )
+  )
 )
