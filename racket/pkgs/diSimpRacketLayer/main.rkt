@@ -11,19 +11,20 @@
 ;;
 (provide
   define-syntax-rule ; private/misc required for #%module-begin and #%top-interaction
-  #%plain-module-begin
+  #%plain-module-begin module+
   (rename-out [#%plain-module-begin #%module-begin])
   #%app #%datum #%top
   #%require #%provide
-  require prefix-in
+  require prefix-in submod
   provide rename-out all-from-out prefix-out
   define
-  list list? append
+  list list? append cons
   car cdr cadr caddr cadddr
   quote
   let
   if case else cond
   equal? eqv? eq?
+  positive? -
   and
   null
   displayln

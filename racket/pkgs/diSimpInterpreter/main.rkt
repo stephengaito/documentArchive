@@ -13,6 +13,7 @@
 (define-syntax-rule (top-interaction . form) form)
 
 (require (prefix-in diSimp:: diSimpInterpreter/operators))
+(require (submod diSimpInterpreter/operators privateAPI))
 
 ;; This form, if it works, is very restrictive
 ;;
@@ -41,7 +42,13 @@
          [ stack (cdr aList) ] )
     (cond
       [ (equal? diSimp::pop prog)
-        (append diSimp::noopList (diSimp::popOp stack)) ]
+        (append noopList (popOp stack)) ]
+      [ (equal? diSimp::stack prog)
+        (append noopList (stackOp stack)) ]
+      [ (equal? diSimp::unStack prog)
+        (append noopList (unStackOp stack)) ]
+      [ (equal? diSimp::newStack prog)
+        (append noopList (newStackOp stack)) ]
       [ else aList ]
     )
   )
