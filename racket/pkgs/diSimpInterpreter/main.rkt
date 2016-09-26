@@ -41,13 +41,15 @@
   (let ( [ prog  (car aList) ]
          [ stack (cdr aList) ] )
     (cond
-      [ (equal? diSimp::pop prog)
+      [ (equal? diSimp::popTag prog)
         (append noopList (popOp stack)) ]
-      [ (equal? diSimp::stack prog)
+      [ (equal? diSimp::consTag prog)
+        (append noopList (consOp stack)) ]
+      [ (equal? diSimp::stackTag prog)
         (append noopList (stackOp stack)) ]
-      [ (equal? diSimp::unStack prog)
+      [ (equal? diSimp::unStackTag prog)
         (append noopList (unStackOp stack)) ]
-      [ (equal? diSimp::newStack prog)
+      [ (equal? diSimp::newStackTag prog)
         (append noopList (newStackOp stack)) ]
       [ else aList ]
     )

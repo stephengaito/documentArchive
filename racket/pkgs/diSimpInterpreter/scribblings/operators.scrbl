@@ -12,35 +12,42 @@ The @racketmodname[diSimpInterpreter/operators] module implements the
 diSimplex interpreter operators using the Racket dialect of Scheme/Lisp.
 
 @defproc[
-  (noop)
+  (noopTag)
   list?
 ]{
 Returns the noop tag.
 }
 
 @defproc[
-  (pop)
+  (popTag)
   list?
 ]{
 Returns the pop tag.
 }
 
 @defproc[
-  (stack)
+  (consTag)
+  list?
+]{
+Returns the cons tag.
+}
+
+@defproc[
+  (stackTag)
   list?
 ]{
 Returns the stack tag.
 }
 
 @defproc[
-  (unStack)
+  (unStackTag)
   list?
 ]{
 Returns the unStack tag.
 }
 
 @defproc[
-  (newStack)
+  (newStackTag)
   list?
 ]{
 Returns the newStack tag.

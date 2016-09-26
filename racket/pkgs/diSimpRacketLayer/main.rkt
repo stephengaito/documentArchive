@@ -19,7 +19,7 @@
   provide rename-out all-from-out prefix-out
   define
   list list? append cons
-  car cdr cadr caddr cadddr
+  car cdr cddr cadr caddr cadddr
   quote
   let
   if case else cond

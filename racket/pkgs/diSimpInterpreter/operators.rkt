@@ -3,11 +3,12 @@
 (require (submod diSimpInterpreter/utils privateAPI))
 
 (provide 
-  noop
-  pop
-  stack
-  unStack
-  newStack
+  noopTag
+  popTag
+  consTag
+  stackTag
+  unStackTag
+  newStackTag
 )
 
 (module+ privateAPI
@@ -16,6 +17,8 @@
     noopOp
     popList
     popOp
+    consList
+    consOp
     stackList
     stackOp
     unStackList
@@ -27,32 +30,41 @@
 
 ;; makes no change to the stack
 ;;
-(define noop (diSimpTag 0) )
-(define noopList (list noop) )
+(define noopTag (diSimpTag 0) )
+(define noopList (list noopTag) )
 (define (noopOp aStack) aStack)
 
 ;; pops the top of the stack off
 ;;
-(define pop  (diSimpTag 1) )
-(define popList (list pop) )
+(define popTag  (diSimpTag 1) )
+(define popList (list popTag) )
 (define (popOp aStack) (cdr aStack) )
+
+;; pops the top two items on the stack
+;; and replaces them with their cons
+;;
+(define consTag (diSimpTag 2) )
+(define consList (list consTag) )
+(define (consOp aStack)
+  (cons (list (car aStack) (cadr aStack)) (cddr aStack))
+)
 
 ;; pushes the current stack onto the top of the stack
 ;;
 ;; is this too powerful?
 ;;
-(define stack (diSimpTag 2) )
-(define stackList (list stack) )
+(define stackTag (diSimpTag 3) )
+(define stackList (list stackTag) )
 (define (stackOp aStack) (cons aStack aStack) )
 
 ;; replaces the stack with the current top of the stack
 ;;
-(define unStack (diSimpTag 3) )
-(define unStackList (list unStack) )
+(define unStackTag (diSimpTag 4) )
+(define unStackList (list unStackTag) )
 (define (unStackOp aStack) (list (car aStack)) )
 
 ;; empties the stack
 ;;
-(define newStack (diSimpTag 4) )
-(define newStackList (list newStack) )
+(define newStackTag (diSimpTag 5) )
+(define newStackList (list newStackTag) )
 (define (newStackOp aStack) '(()) )
