@@ -11,20 +11,10 @@
 
 (require
   diSimpInterpreter
-  (submod diSimpInterpreter/operators privateAPI)
 )
 
 (define all-tests
   (begin 
-
-    (test-suite "Test operators/privateAPI"
-      (test-case "diSimpCount counts correctly"
-        (check-equal? (diSimpCount 0) '() )
-        (check-equal? (diSimpCount 1) '(()) )
-        (check-equal? (diSimpCount 2) '(() ()) )
-        (check-equal? (diSimpCount 3) '(() () ()) )
-      )
-    )
 
     (test-suite "Describe the specification of diSimp"
 

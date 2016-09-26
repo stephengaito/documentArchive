@@ -49,6 +49,8 @@ interpreter.
 
 ## Specifications
 
+* [diSimpSpec](../../pkgs/diSimpInterpreter/specs/functional/operatorsSpec.rkt)
+
 ## Questions and Risks
 
 The semantics of the data should be the identity. Unfortunately I do not 
