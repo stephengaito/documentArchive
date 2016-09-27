@@ -6,9 +6,9 @@
   noopTag
   popTag
   consTag
-  stackTag
-  unStackTag
-  newStackTag
+  treeTag
+  unTreeTag
+  newTreeTag
 )
 
 (module+ privateAPI
@@ -19,52 +19,54 @@
     popOp
     consList
     consOp
-    stackList
-    stackOp
-    unStackList
-    unStackOp
-    newStackList
-    newStackOp
+    treeList
+    treeOp
+    unTreeList
+    unTreeOp
+    newTreeList
+    newTreeOp
   )
 )
 
-;; makes no change to the stack
+;; makes no change to either tree
 ;;
 (define noopTag (diSimpTag 0) )
 (define noopList (list noopTag) )
-(define (noopOp aStack) aStack)
+(define (noopOp pTree fTree) (cons pTree fTree))
 
-;; pops the top of the stack off
+;; pops the top of the fTree off
 ;;
 (define popTag  (diSimpTag 1) )
 (define popList (list popTag) )
-(define (popOp aStack) (cdr aStack) )
+(define (popOp pTree fTree) (cons pTree (cdr fTree)) )
 
-;; pops the top two items on the stack
+;; pops the top two items on the fTree
 ;; and replaces them with their cons
 ;;
 (define consTag (diSimpTag 2) )
 (define consList (list consTag) )
-(define (consOp aStack)
-  (cons (list (car aStack) (cadr aStack)) (cddr aStack))
+(define (consOp pTree fTree)
+  (cons pTree 
+    (cons (list (car fTree) (cadr fTree)) (cddr fTree))
+  )
 )
 
-;; pushes the current stack onto the top of the stack
+;; pushes the current fTree onto the top of the fTree
 ;;
 ;; is this too powerful?
 ;;
-(define stackTag (diSimpTag 3) )
-(define stackList (list stackTag) )
-(define (stackOp aStack) (cons aStack aStack) )
+(define TreeTag (diSimpTag 3) )
+(define TreeList (list TreeTag) )
+(define (TreeOp pTree fTree) (cons pTree (cons fTree fTree)) )
 
-;; replaces the stack with the current top of the stack
+;; replaces the Tree with the current top of the fTree
 ;;
-(define unStackTag (diSimpTag 4) )
-(define unStackList (list unStackTag) )
-(define (unStackOp aStack) (list (car aStack)) )
+(define unTreeTag (diSimpTag 4) )
+(define unTreeList (list unTreeTag) )
+(define (unTreeOp pTree fTree) (cons pTree (list (car fTree))) )
 
-;; empties the stack
+;; empties the fTree
 ;;
-(define newStackTag (diSimpTag 5) )
-(define newStackList (list newStackTag) )
-(define (newStackOp aStack) '(()) )
+(define newTreeTag (diSimpTag 5) )
+(define newTreeList (list newTreeTag) )
+(define (newTreeOp pTree fTree) (cons pTree '(())) )

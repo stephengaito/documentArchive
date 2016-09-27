@@ -37,21 +37,22 @@
   ;; of 'diSimp::'
 )
 
-(define (diSimp aList)
-  (let ( [ prog  (car aList) ]
-         [ stack (cdr aList) ] )
+(define (diSimp aStructure)
+  (let ( [ prog   (car  aStructure) ]
+         [ pTree (cadr aStructure) ]
+         [ fTree (cddr aStructure) ] )
     (cond
       [ (equal? diSimp::popTag prog)
-        (append noopList (popOp stack)) ]
+        (append noopList (popOp pTree fTree)) ]
       [ (equal? diSimp::consTag prog)
-        (append noopList (consOp stack)) ]
-      [ (equal? diSimp::stackTag prog)
-        (append noopList (stackOp stack)) ]
+        (append noopList (consOp pTree fTree)) ]
+      [ (equal? diSimp::TreeTag prog)
+        (append noopList (TreeOp pTree fTree)) ]
       [ (equal? diSimp::unStackTag prog)
-        (append noopList (unStackOp stack)) ]
+        (append noopList (unTreeOp pTree fTree)) ]
       [ (equal? diSimp::newStackTag prog)
-        (append noopList (newStackOp stack)) ]
-      [ else aList ]
+        (append noopList (newTreeOp pTree fTree)) ]
+      [ else aStructure ]
     )
   )
 )
