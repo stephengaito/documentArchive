@@ -94,6 +94,19 @@
         )
       )
 
+      (test-case "computation get functions"
+        (let* ([ someInstructions '( (()) () 1 2 3) ]
+               [ someData         '( (()) () 3 4 5) ]
+               [ aComputation     (cons someInstructions someData) ])
+          (check-equal? (getInstructions aComputation) someInstructions)
+          (check-equal? (getData aComputation) someData)
+          (check-equal? 
+            (createComputation someInstructions someData) 
+            aComputation
+          )
+        )
+      )
+
     )
   )
 )

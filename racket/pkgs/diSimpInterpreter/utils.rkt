@@ -11,6 +11,9 @@
     getPastStack
     getFutureStack
     createBiStack
+    getInstructions
+    getData
+    createComputation
   )
 )
 
@@ -117,3 +120,20 @@
     )
   )
 )
+
+;; A computation is a pair of ( instructionBiStream . dataBiStream)
+;;
+
+(define (getInstructions aComputation)
+  (car aComputation)
+)
+
+(define (getData aComputation)
+  (cdr aComputation)
+)
+
+(define (createComputation someInstructions someData)
+  (cons someInstructions someData)
+)
+
+

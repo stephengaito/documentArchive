@@ -1,0 +1,16 @@
+#!/bin/bash
+
+reset
+
+echo ""
+echo "Setting up [diSimpInterpreter]"
+echo ""
+raco setup diSimpInterpreter
+#pushd pkgs/diSimpInterpreter > /dev/null
+#raco scribble +m --latex-section 1 --dest latex scribblings/diSimpInterpreter.scrbl
+#pushd latex > /dev/null
+#rm -rf manual-style.tex racket.tex scribble-load-replace.tex
+#rm -rf scribble-load.tex scribble.tex
+#popd > /dev/null
+#popd > /dev/null
+
