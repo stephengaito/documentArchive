@@ -3,14 +3,17 @@
 (module+ privateAPI
   (provide 
     diSimpTag
+    getContextStack
+    getPastStack
+    getFutureStack
+    getTop
+    createBiStream
+    pushTree
+    popTree
     nextStep
     previousStep
     pushContext
     popContext
-    getContextStack
-    getPastStack
-    getFutureStack
-    createBiStack
     getInstructions
     getData
     createComputation
@@ -47,9 +50,34 @@
   (cddr aBiStream)
 )
 
-(define (createBiStack aContextStack aPastStack aFutureStack)
+(define (getTop aBiStream)
+  (car (getFutureStack aBiStream))
+)
+
+(define (createBiStream aContextStack aPastStack aFutureStack)
   (cons aContextStack (cons aPastStack aFutureStack))
 )
+
+;; Push a tree onto the current top of the biStream
+;;
+(define (pushTree aTree aBiStream)
+  (createBiStream 
+    (getContextStack aBiStream)
+    (getPastStack aBiStream)
+    (cons aTree (getFutureStack aBiStream))
+  )
+)
+
+;; Pop the tree off the current top of the biStream
+;;
+(define (popTree aBiStream)
+  (createBiStream
+    (getContextStack aBiStream)
+    (getPastStack aBiStream)
+    (cdr (getFutureStack aBiStream))
+  )
+)
+
 
 ;; The nextStep biStream moves the current structure one subStack into 
 ;; the future.
@@ -60,7 +88,7 @@
   (let ([ contextStack (getContextStack aBiStream) ]
         [ pastStack    (getPastStack    aBiStream) ]
         [ futureStack  (getFutureStack  aBiStream) ])
-    (createBiStack
+    (createBiStream
       contextStack
       (cons (car futureStack) pastStack)
       (cdr futureStack)
@@ -77,7 +105,7 @@
   (let ([ contextStack (getContextStack aBiStream) ]
         [ pastStack    (getPastStack    aBiStream) ]
         [ futureStack  (getFutureStack  aBiStream) ])
-    (createBiStack
+    (createBiStream
       contextStack
       (cdr pastStack)
       (cons (car pastStack) futureStack)
@@ -94,7 +122,7 @@
   (let ([ contextStack (getContextStack aBiStream) ]
         [ pastStack    (getPastStack    aBiStream) ]
         [ futureStack  (getFutureStack  aBiStream) ])
-    (createBiStack
+    (createBiStream
       (cons 
         (cons pastStack futureStack)
         contextStack

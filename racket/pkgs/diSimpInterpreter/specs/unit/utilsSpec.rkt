@@ -34,7 +34,18 @@
           (check-equal? aPastStack    '() )
           (check-equal? aFutureStack  '((4 5) 6) )
           (check-equal? 
-            (createBiStack aContextStack aPastStack aFutureStack)
+            (createBiStream aContextStack aPastStack aFutureStack)
+            aBiStream
+          )
+        )
+      )
+
+      (test-case "biStream push/pop/top functions"
+        (let ( [ aBiStream '( () () 1 2 3 4 5) ] )
+          (check-equal? (getTop aBiStream) 1)
+          (check-equal? (pushTree 10 aBiStream) '( () () 10 1 2 3 4 5) )
+          (check-equal?
+            (pushTree (getTop aBiStream) (popTree aBiStream))
             aBiStream
           )
         )
