@@ -7,6 +7,10 @@
     previousStep
     pushContext
     popContext
+    getContextStack
+    getPastStack
+    getFutureStack
+    createBiStack
   )
 )
 
@@ -19,71 +23,81 @@
   )
 )
 
-;; A biStream is a tree which represents a bi-infinite list of lists.
+;; A biStream is a stack which represents a bi-infinite list of lists.
 ;;
-;; The tree representing a given biStream MUST have at least three
-;; subtrees with the structure: ( contextTree . ( pastTree . futureTree ))
+;; The stack representing a given biStream MUST have at least three
+;; subStacks with the structure: ( contextStack . ( pastStack . futureStack ))
 ;;
 ;; The following functions map biStreams to biStreams, allowing us to 
-;; "move" around a given biStream/tree
+;; "move" around a given biStream/stack
 ;;
 
-;; The nextStep biStream moves the current structure one subTree into 
+(define (getContextStack aBiStream)
+  (car aBiStream)
+)
+
+(define (getPastStack aBiStream)
+  (cadr aBiStream)
+)
+
+(define (getFutureStack aBiStream)
+  (cddr aBiStream)
+)
+
+(define (createBiStack aContextStack aPastStack aFutureStack)
+  (cons aContextStack (cons aPastStack aFutureStack))
+)
+
+;; The nextStep biStream moves the current structure one subStack into 
 ;; the future.
 ;;
 ;; (nextStep (previousStep aBiStream)) == aBiStream
 ;;
 (define (nextStep aBiStream)
-  (let ([ contextTree (car aBiStream) ]
-        [ pastTree    (cadr aBiStream) ]
-        [ futureTree  (cddr aBiStream) ])
-    (cons
-      contextTree
-      (cons 
-        (cons (car futureTree) pastTree)
-        (cdr futureTree)
-      )
+  (let ([ contextStack (getContextStack aBiStream) ]
+        [ pastStack    (getPastStack    aBiStream) ]
+        [ futureStack  (getFutureStack  aBiStream) ])
+    (createBiStack
+      contextStack
+      (cons (car futureStack) pastStack)
+      (cdr futureStack)
     )
   )
 )
 
-;; The previousStep biStream moves the current structure one subTree into 
+;; The previousStep biStream moves the current structure one subStack into 
 ;; the past.
 ;;
 ;; (previousStep (nextStep aBiStream)) == aBiStream
 ;;
 (define (previousStep aBiStream)
-  (let ([ contextTree (car aBiStream) ]
-        [ pastTree    (cadr aBiStream) ]
-        [ futureTree  (cddr aBiStream) ])
-    (cons
-      contextTree
-      (cons 
-        (cdr pastTree)
-        (cons (car pastTree) futureTree)
-      )
+  (let ([ contextStack (getContextStack aBiStream) ]
+        [ pastStack    (getPastStack    aBiStream) ]
+        [ futureStack  (getFutureStack  aBiStream) ])
+    (createBiStack
+      contextStack
+      (cdr pastStack)
+      (cons (car pastStack) futureStack)
     )
   )
 )
 
 ;; The pushContext biStream function moves the current structure into the 
-;; current structure's subTree.
+;; current structure's subStack.
 ;;
 ;; (pushContext (popContext aBiStream)) == aBiStream
 ;;
 (define (pushContext aBiStream)
-  (let ([ contextTree (car aBiStream) ]
-        [ pastTree    (cadr aBiStream) ]
-        [ futureTree  (cddr aBiStream) ])
-    (cons 
+  (let ([ contextStack (getContextStack aBiStream) ]
+        [ pastStack    (getPastStack    aBiStream) ]
+        [ futureStack  (getFutureStack  aBiStream) ])
+    (createBiStack
       (cons 
-        (cons pastTree futureTree)
-        contextTree
+        (cons pastStack futureStack)
+        contextStack
       )
-      (cons 
-        '()
-        (car futureTree)
-      )
+     '()
+      (car futureStack)
     )
   )
 )
@@ -94,12 +108,12 @@
 ;; (popContext (pushContext aBiStream)) == aBiStream
 ;;
 (define (popContext aBiStream)
-  (let ([ contextTree (car aBiStream) ]
-        [ pastTree    (cadr aBiStream) ]
-        [ futureTree  (cddr aBiStream) ])
+  (let ([ contextStack (getContextStack aBiStream) ]
+        [ pastStack    (getPastStack    aBiStream) ]
+        [ futureStack  (getFutureStack  aBiStream) ])
     (cons
-      (cdr contextTree)
-      (car contextTree)
+      (cdr contextStack)
+      (car contextStack)
     )
   )
 )

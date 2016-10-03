@@ -25,6 +25,21 @@
         (check-equal? (diSimpTag 3) '(((()))) )
       )
 
+      (test-case "biStream get functions"
+        (let* ( [ aBiStream      '((((3 2 1) ((4 5) 6) 7)) () (4 5) 6) ]
+                [ aContextStack (getContextStack aBiStream) ]
+                [ aPastStack    (getPastStack    aBiStream) ]
+                [ aFutureStack  (getFutureStack  aBiStream) ] )
+          (check-equal? aContextStack '(((3 2 1) ((4 5) 6) 7)) )
+          (check-equal? aPastStack    '() )
+          (check-equal? aFutureStack  '((4 5) 6) )
+          (check-equal? 
+            (createBiStack aContextStack aPastStack aFutureStack)
+            aBiStream
+          )
+        )
+      )
+
       (test-case "biStream nextStep moves into the future"
         (let ([ aBiStream '(() () 1 2 3 4 5) ])
           (check-equal? (nextStep aBiStream) '(() (1) 2 3 4 5) )
