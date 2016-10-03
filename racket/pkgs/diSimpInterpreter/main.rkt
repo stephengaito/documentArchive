@@ -46,11 +46,11 @@
         (append noopList (popOp pTree fTree)) ]
       [ (equal? diSimp::consTag prog)
         (append noopList (consOp pTree fTree)) ]
-      [ (equal? diSimp::TreeTag prog)
-        (append noopList (TreeOp pTree fTree)) ]
-      [ (equal? diSimp::unStackTag prog)
+      [ (equal? diSimp::treeTag prog)
+        (append noopList (treeOp pTree fTree)) ]
+      [ (equal? diSimp::unTreeTag prog)
         (append noopList (unTreeOp pTree fTree)) ]
-      [ (equal? diSimp::newStackTag prog)
+      [ (equal? diSimp::newTreeTag prog)
         (append noopList (newTreeOp pTree fTree)) ]
       [ else aStructure ]
     )

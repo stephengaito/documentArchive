@@ -48,23 +48,23 @@
         )
       )
 
-      (test-case "stack pushes the current stack onto the top of the stack"
-        (let* ([ stack-list (list diSimp::stackTag '() '() ) ]
-               [ result (diSimp stack-list) ])
+      (test-case "tree pushes the current tree onto the top of the tree"
+        (let* ([ tree-list (list diSimp::treeTag '() '() ) ]
+               [ result (diSimp tree-list) ])
           (check-equal? result '(() (() ()) () ()) )
         )
       )
 
       (test-case "unStack replaces the stack with the current top of the stack"
-        (let* ([ unStack-list (list diSimp::unStackTag '() '() ) ]
-               [ result (diSimp unStack-list) ])
+        (let* ([ unTree-list (list diSimp::unTreeTag '() '() ) ]
+               [ result (diSimp unTree-list) ])
           (check-equal? result '(() ()) )
         )
       )
 
       (test-case "newStack empties the stack"
-        (let* ([ newStack-list (list diSimp::newStackTag '() '() ) ]
-               [ result (diSimp newStack-list) ])
+        (let* ([ newTree-list (list diSimp::newTreeTag '() '() ) ]
+               [ result (diSimp newTree-list) ])
           (check-equal? result '(() ()) )
         )
       )
@@ -72,4 +72,4 @@
   )
 )
 
-(define ingnore-value (run-tests all-tests 'verbose))
+;;	(define ingnore-value (run-tests all-tests 'verbose))

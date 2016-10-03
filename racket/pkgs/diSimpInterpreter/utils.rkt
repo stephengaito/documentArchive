@@ -1,7 +1,11 @@
 #lang diSimpRacketLayer
 
 (module+ privateAPI
-  (provide diSimpTag)
+  (provide 
+    diSimpTag
+    next
+    previous
+  )
 )
 
 ;; creates a diSimp::tag of the appropriate value
@@ -54,7 +58,8 @@
 (define (into aBiStream)
   (let ([ pastTree   (car aBiStream) ]
         [ futureTree (cdr aBiStream) ])
-
+    '()
+  )
 )
 
 ;; The outof biStream function move the current structure out of the 
@@ -65,5 +70,6 @@
 (define (outof aBiStream)
   (let ([ pastTree   (car aBiStream) ]
         [ futureTree (cdr aBiStream) ])
-
+    '()
+  )
 )

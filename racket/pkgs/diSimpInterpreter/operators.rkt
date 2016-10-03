@@ -55,9 +55,9 @@
 ;;
 ;; is this too powerful?
 ;;
-(define TreeTag (diSimpTag 3) )
-(define TreeList (list TreeTag) )
-(define (TreeOp pTree fTree) (cons pTree (cons fTree fTree)) )
+(define treeTag (diSimpTag 3) )
+(define treeList (list treeTag) )
+(define (treeOp pTree fTree) (cons pTree (cons fTree fTree)) )
 
 ;; replaces the Tree with the current top of the fTree
 ;;
