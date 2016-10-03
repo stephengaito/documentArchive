@@ -14,6 +14,7 @@
 
 (require (prefix-in diSimp:: diSimpInterpreter/operators))
 (require (submod diSimpInterpreter/operators privateAPI))
+(require diSimpInterpreter/diSimp)
 
 ;; This form, if it works, is very restrictive
 ;;
@@ -32,27 +33,8 @@
   and
   null
   displayln
-  diSimp
   ;; we want to provide all of constants.rkt with a prefix-in 
   ;; of 'diSimp::'
+  diSimp
 )
 
-(define (diSimp aStructure)
-  (let ( [ prog   (car  aStructure) ]
-         [ pTree (cadr aStructure) ]
-         [ fTree (cddr aStructure) ] )
-    (cond
-      [ (equal? diSimp::popTag prog)
-        (append noopList (popOp pTree fTree)) ]
-      [ (equal? diSimp::consTag prog)
-        (append noopList (consOp pTree fTree)) ]
-      [ (equal? diSimp::treeTag prog)
-        (append noopList (treeOp pTree fTree)) ]
-      [ (equal? diSimp::unTreeTag prog)
-        (append noopList (unTreeOp pTree fTree)) ]
-      [ (equal? diSimp::newTreeTag prog)
-        (append noopList (newTreeOp pTree fTree)) ]
-      [ else aStructure ]
-    )
-  )
-)
