@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# This bash script sets up the Racket racketJoy package
+
+reset
+
+echo ""
+echo "installing [doc-coverage] for use in tests" 
+echo ""
+raco pkg install doc-coverage   # used for the tests
+
+echo ""
+echo "linking [racketJoy]"
+echo ""
+raco pkg install --link ../racketJoy
+
+echo ""
+echo "setting up [racketJoy]"
+echo ""
+raco setup racketJoy
+

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+reset
+
+echo ""
+echo "Setting up [racketJoy]"
+echo ""
+raco setup racketJoy
+
