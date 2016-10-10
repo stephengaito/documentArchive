@@ -6,4 +6,5 @@ compiled
 doc
 latex
 *.pdf
-
+*.swp
+tmp

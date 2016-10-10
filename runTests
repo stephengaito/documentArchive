@@ -27,34 +27,34 @@
 ;; CHECK DOCUMENTATION using doc-coverage
 ;;
 
-(require racket/path)
-(require doc-coverage)
+;;(require racket/path)
+;;(require doc-coverage)
 
-(define (scribble-modules)
-  (remove*
-    (map string->path (list "info.rkt" "main.rkt"))
-    (filter 
-      (lambda (aPath) (equal? (filename-extension aPath) #"rkt"))
-      (directory-list)
-    )
-  )
-)
+;;(define (scribble-modules)
+;;  (remove*
+;;    (map string->path (list "info.rkt" "main.rkt"))
+;;    (filter 
+;;      (lambda (aPath) (equal? (filename-extension aPath) #"rkt"))
+;;      (directory-list)
+;;    )
+;;  )
+;;)
 
-(define (check-module-documentation aModule)
-  (let ([ moduleName 
-          (string->symbol
-            (string-append "diSimpInterpreter/" 
-              (path->string (path-replace-suffix aModule ""))
-            )
-          )
-       ])
-    (begin 
-      (printf "\nChecking documentation for [~a]\n" moduleName) (flush-output)
-      (dynamic-rerequire moduleName)
-      (check-all-documented moduleName)
-    )
-  )
-)
+;;(define (check-module-documentation aModule)
+;;  (let ([ moduleName 
+;;          (string->symbol
+;;            (string-append "diSimpInterpreter/" 
+;;              (path->string (path-replace-suffix aModule ""))
+;;            )
+;;          )
+;;       ])
+;;    (begin 
+;;      (printf "\nChecking documentation for [~a]\n" moduleName) (flush-output)
+;;      (dynamic-rerequire moduleName)
+;;      (check-all-documented moduleName)
+;;    )
+;;  )
+;;)
 
-(define ingoreValues2 (map check-module-documentation (scribble-modules)))
+;;(define ingoreValues2 (map check-module-documentation (scribble-modules)))
 
