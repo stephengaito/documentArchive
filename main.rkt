@@ -51,6 +51,33 @@
   (cdr aStack)
 )
 
+(require "basicJoy.rkt")
+
+(define (pushCommandListOnStack commandList aStack)
+  (displayln commandList)
+  (displayln aStack)
+  (if (null? commandList)
+    aStack
+    (pushCommandListOnStack (cdr commandList) (cons (car commandList) aStack))
+  )
+) 
+
+(define (i aStack) 
+  (let ( [ command (car aStack) ]
+         [ rest    (cdr aStack) ] )
+    (if (list? command)
+      (i (pushCommandListOnStack command rest))
+      (begin
+        (displayln "i-implementation-")
+        (displayln command)
+        (displayln rest)
+        (displayln "i-implementation=")
+        (eval `( ,command (quote ,rest) ) racketJoy-namespace)
+      )
+    )
+  )
+)
+
 (define (racket-joy-eval someArgs)
   (if (symbol? someArgs)
     (set! joyStack (eval `( ,someArgs joyStack) racketJoy-namespace) )
