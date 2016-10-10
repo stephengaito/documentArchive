@@ -1,5 +1,8 @@
 #lang racket
 
+(require racket/rerequire)
+(require racket/enter)
+
 (module undefinedSymbols racket
   (require racket)
   (provide (rename-out [ racket-joy-top #%top ] ) )
@@ -41,7 +44,12 @@
 
 (define joyStack '())
 
-(define (newStack aStack) '() )
+(define (extendJoy aStack)
+  (let ( [ moduleName (car aStack) ] )
+    (eval `( require ,moduleName ) racketJoy-namespace)
+  )
+  (cdr aStack)
+)
 
 (define (racket-joy-eval someArgs)
   (if (symbol? someArgs)
