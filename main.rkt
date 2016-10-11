@@ -1,5 +1,6 @@
 #lang racket
 
+(require racketJoy/internals)
 (require racketJoy/coreJoy)
 
 (provide 
@@ -15,8 +16,6 @@
 (define-syntax-rule (racket-joy-top-interaction . aForm)
   (addArgsToJoyStack 'aForm )
 )
-
-;(require "basicJoy.rkt")
 
 (displayln "Hello from RacketJoy!")
 (showJoyStack)

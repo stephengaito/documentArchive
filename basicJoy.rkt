@@ -1,17 +1,11 @@
 #lang racket
 
-(require racketJoy/coreJoy)
+(require racketJoy/internals)
 
 (displayln "Loaded basicJoy")
 
 (extendJoy 'silly
   '(silly sillier silliest )
-)
-
-(extendJoy 'newStack 
-  (lambda (aStack)
-    '()
-  )
 )
 
 (extendJoy '+
