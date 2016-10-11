@@ -2,19 +2,50 @@
 
 (require racketJoy/internals)
 
-(extendJoy 'load
+;; Core Operators
+;;
+(extendJoy 'newstack 
   (lambda (aStack)
-    (let ([ top0 (car aStack) ]
+    '()
+  )
+)
+
+(extendJoy 'dup
+  (lambda (aStack)
+    (cons (car aStack) aStack)
+  )
+)
+
+(extendJoy 'pop
+  (lambda (aStack)
+    (cdr aStack)
+  )
+)
+
+
+;; Core Combinators
+;;
+(extendJoy 'i
+  (lambda (aStack)
+    (let ([ top  (car aStack) ]
           [ rest (cdr aStack) ])
-      (dynamic-require top0 #f)
-      rest
+      (evalCmdListOnStack top rest)
     )
   )
 )
 
-(extendJoy 'newStack 
+(extendJoy 'ifte
   (lambda (aStack)
-    '()
+    (let ([ top0 (car   aStack) ]
+          [ top1 (cadr  aStack) ]
+          [ top2 (caddr aStack) ]
+          [ rest (cdddr aStack) ])
+      (if
+        (car (evalCmdListOnStack top2 rest))
+        (evalCmdListOnStack top1 rest)
+        (evalCmdListOnStack top0 rest)
+      )
+    )
   )
 )
 
