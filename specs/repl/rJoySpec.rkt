@@ -12,9 +12,4 @@
   (list "((+ 2 2) (+ 1 1))")
 )
 
-(addSpec "broken"
-  '(+ 3 3)
-  (list "silly")
-)
-
 (runSpecsOn "rJoy")
