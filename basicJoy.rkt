@@ -1,16 +1,26 @@
-#lang racketJoy
+#lang racket
 
-;(displayln "Loaded basicJoy")
+(require racketJoy/coreJoy)
 
-;(define (newStack aStack) '() )
+(displayln "Loaded basicJoy")
 
-;(define (sum aStack)
-;  (displayln "sum-implementation-")
-;  (displayln aStack)
-;  (displayln "sum-implementation=")
-;  (let ([ top0 (car aStack)  ]
-;        [ top1 (cadr aStack) ]
-;        [ rest (cddr aStack) ] )
-;    (cons (+ top0 top1) rest)
-;  )
-;)
+(extendJoy 'silly
+  '(silly sillier silliest )
+)
+
+(extendJoy 'newStack 
+  (lambda (aStack)
+    '()
+  )
+)
+
+(extendJoy '+
+  (lambda (aStack)
+    (let ([ top0 (car aStack)  ]
+          [ top1 (cadr aStack) ]
+          [ rest (cddr aStack) ])
+      (cons (+ top0 top1) rest)
+    )
+  )
+)
+
