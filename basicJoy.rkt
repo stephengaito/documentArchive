@@ -2,36 +2,20 @@
 
 (require racketJoy/internals)
 
-(extendJoy ('+ aStack)
-  (let ([ top0 (car  aStack) ]
-        [ top1 (cadr aStack) ]
-        [ rest (cddr aStack) ])
-    (cons (+ top1 top0) rest)
-  )
+(extendJoy2 ('+ top1 top2 rest)
+  (cons (+ top2 top1) rest)
 )
 
-(extendJoy ('- aStack)
-  (let ([ top0 (car  aStack) ]
-        [ top1 (cadr aStack) ]
-        [ rest (cddr aStack) ])
-    (cons (- top1 top0) rest)
-  )
+(extendJoy2 ('- top1 top2 rest)
+  (cons (- top2 top1) rest)
 )
 
-(extendJoy ('* aStack)
-  (let ([ top0 (car  aStack) ]
-        [ top1 (cadr aStack) ]
-        [ rest (cddr aStack) ])
-    (cons (* top1 top0) rest)
-  )
+(extendJoy2 ('* top1 top2 rest)
+  (cons (* top2 top1) rest)
 )
 
-(extendJoy ('= aStack)
-  (let ([ top0 (car  aStack) ]
-        [ top1 (cadr aStack) ]
-        [ rest (cddr aStack) ])
-    (cons (eq? top1 top0) rest)
-  )
+(extendJoy2 ('= top1 top2 rest)
+  (cons (eq? top2 top1) rest)
 )
 
 (defineJoy 'factorial

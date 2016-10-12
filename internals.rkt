@@ -5,6 +5,9 @@
 (provide 
   defineJoy
   extendJoy
+  extendJoy1
+  extendJoy2
+  extendJoy3
   evalStack
   evalCmdListOnStack
   addDefToJoyTable
@@ -37,7 +40,6 @@
 )
 
 (define (addDefToJoyTable definedSymbol aDefinition)
-  (displayln (format "defining: [~a]" definedSymbol))
   (set!
     joyTable
     (hash-set
@@ -61,10 +63,71 @@
 
 (define-syntax (extendJoy someSyntax)
   (syntax-case someSyntax ()
-    [ (_ ( definedName someArgs ) definedBody)
+    [ (_ ( definedName theStackArg ) definedBody ... )
       #'(addDefToJoyTable
         (makeSymbol definedName)
-        (lambda (someArgs) definedBody)
+        (lambda (theStackArg) definedBody ... )
+      )
+    ]
+  )
+)
+
+(define-syntax (extendJoy1 someSyntax)
+  (syntax-case someSyntax ()
+    [ (_ ( definedName someArgs ... ) definedBody ... )
+      #'(addDefToJoyTable
+        (makeSymbol definedName)
+        (lambda (aStack)
+          (let ([ extendJoy1top1 (car aStack) ]
+                [ extendJoy1rest (cdr aStack) ])
+            (apply 
+              (lambda (someArgs ... ) definedBody ... )
+              extendJoy1top1 (list extendJoy1rest )
+            )
+          )
+        )
+      )
+    ]
+  )
+)
+
+(define-syntax (extendJoy2 someSyntax)
+  (syntax-case someSyntax ()
+    [ (_ ( definedName someArgs ... ) definedBody ... )
+      #'(addDefToJoyTable
+        (makeSymbol definedName)
+        (lambda (aStack)
+          (let ([ extendJoy2top1 (car  aStack) ]
+                [ extendJoy2top2 (cadr aStack) ]
+                [ extendJoy2rest (cddr aStack) ])
+            (apply 
+              (lambda (someArgs ... ) definedBody ... )
+              extendJoy2top1 extendJoy2top2 (list extendJoy2rest )
+            )
+          )
+        )
+      )
+    ]
+  )
+)
+
+(define-syntax (extendJoy3 someSyntax)
+  (syntax-case someSyntax ()
+    [ (_ ( definedName someArgs ... ) definedBody ... )
+      #'(addDefToJoyTable
+        (makeSymbol definedName)
+        (lambda (aStack)
+          (let ([ extendJoy3top1 (car   aStack) ]
+                [ extendJoy3top2 (cadr  aStack) ]
+                [ extendJoy3top3 (caddr aStack) ]
+                [ extendJoy3rest (cdddr aStack) ])
+            (apply 
+              (lambda (someArgs ... ) definedBody ... )
+              extendJoy3top1 extendJoy3top2 extendJoy3top3
+                (list extendJoy3rest )
+            )
+          )
+        )
       )
     ]
   )
@@ -133,21 +196,14 @@
 
 ;; Useful extensions to the Joy langauge
 ;;
-(extendJoy ('load aStack)
-  (let ([ top0 (car aStack) ]
-        [ rest (cdr aStack) ])
-    (dynamic-require top0 #f)
-    rest
-  )
+(extendJoy1 ('load top1 rest)
+  (dynamic-require top1 #f)
+  rest
 )
 
-(extendJoy ('define aStack)
-  (let ([ top0 (car  aStack) ]
-        [ top1 (cadr aStack) ]
-        [ rest (cddr aStack) ])
-    (defineJoy top0 top1)
-    rest
-  )
+(extendJoy2 ('define top1 top2 rest)
+  (defineJoy top1 top2)
+  rest
 )
 
 (addDefToJoyTable 'definitions

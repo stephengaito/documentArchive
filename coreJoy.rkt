@@ -12,77 +12,49 @@
   (cons (car aStack) aStack)
 )
 
-(extendJoy ('pop aStack)
-  (cdr aStack)
+(extendJoy1 ('pop top1 rest)
+  rest
 )
 
-(extendJoy ('swap aStack)
-  (let ([ top0 (car  aStack) ]
-        [ top1 (cadr aStack) ]
-        [ rest (cddr aStack) ])
-    (cons top1 (cons top0 rest))
-  )
+(extendJoy2 ('swap top1 top2 rest)
+  (cons top2 (cons top1 rest))
 )
 
-(extendJoy ('cons aStack)
-  (let ([ top0 (car  aStack) ]
-        [ top1 (cadr aStack) ]
-        [ rest (cddr aStack) ])
-    (cons (cons top1 top0) rest)
-  )
+(extendJoy2 ('cons top1 top2 rest)
+  (cons (cons top2 top1) rest)
 )
 
-(extendJoy ('concat aStack)
-  (let ([ top0 (car  aStack) ]
-        [ top1 (cadr aStack) ]
-        [ rest (cddr aStack) ])
-    (cons (append top1 top0) rest)
-  )
+(extendJoy2 ('concat top1 top2 rest)
+  (cons (append top2 top1) rest)
 )
 
 ;; Core Combinators
 ;;
-(extendJoy ('i aStack)
-  (let ([ top  (car aStack) ]
-        [ rest (cdr aStack) ])
-    (evalCmdListOnStack top rest)
+(extendJoy1 ('i top1 rest)
+  (evalCmdListOnStack top1 rest)
+)
+
+(extendJoy3 ('ifte top1 top2 top3 rest)
+  (if
+    (car (evalCmdListOnStack top3 rest))
+    (evalCmdListOnStack top2 rest)
+    (evalCmdListOnStack top1 rest)
   )
 )
 
-(extendJoy ('ifte aStack)
-  (let ([ top0 (car   aStack) ]
-        [ top1 (cadr  aStack) ]
-        [ top2 (caddr aStack) ]
-        [ rest (cdddr aStack) ])
-    (if
-      (car (evalCmdListOnStack top2 rest))
-      (evalCmdListOnStack top1 rest)
-      (evalCmdListOnStack top0 rest)
-    )
-  )
+(extendJoy2 ('dip top1 top2 rest)
+  (cons top2 (evalCmdListOnStack top1 rest))
 )
 
-(extendJoy ('dip aStack)
-  (let ([ top0 (car  aStack) ]
-        [ top1 (cadr aStack) ]
-        [ rest (cddr aStack) ])
-    (cons top1 (evalCmdListOnStack top0 rest))
-  )
-)
-
-(extendJoy ('map aStack)
-  (let ([ top0 (car  aStack) ]
-        [ top1 (cadr aStack) ]
-        [ rest (cddr aStack) ])
-    (cons
-      (map
-        (lambda (anItem)
-          (car (evalCmdListOnStack top0 (cons anItem rest)))
-        )
-        top1
+(extendJoy2 ('map top1 top2 rest)
+  (cons
+    (map
+      (lambda (anItem)
+        (car (evalCmdListOnStack top1 (cons anItem rest)))
       )
-      rest
+      top2
     )
+    rest
   )
 )
 
