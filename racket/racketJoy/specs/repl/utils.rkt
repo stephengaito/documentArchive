@@ -85,7 +85,7 @@
 
   (define specFile (open-output-file specFileName))
   (for ( [ aSpec (in-list specList) ] )
-    (displayln (cadr aSpec) specFile)
+    (writeln (cadr aSpec) specFile)
   )
   (close-output-port specFile)
 

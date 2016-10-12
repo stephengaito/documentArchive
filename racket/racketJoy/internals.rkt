@@ -301,6 +301,14 @@
   )
 )
 
+(extendJoy1 ('comment top1 rest)
+  rest
+)
+
+(extendJoy1 ('-- top1 rest)
+  rest
+)
+
 ;; XREPL/Readline completion helper
 ;;
 (require readline/rktrl)
