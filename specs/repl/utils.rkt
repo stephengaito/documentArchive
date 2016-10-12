@@ -37,15 +37,18 @@
       )
       (let ( [ aLine (read-line resultFile) ] )
         (if (null? expectedRegExps)
-          '()
-          ;(if (regexp-match (car expectedRegExps) aLine)
-          (if (string=? (car expectedRegExps) aLine)
-            (check-result-lines
-              (cdr expectedRegExps)
-              (cons aLine observedResults)
-              resultFile
+          (read-until-next-prompt (cons aLine observedResults) resultFile)
+          (begin
+            ;(displayln (format "expect: [~a]" (car expectedRegExps)))
+            ;(displayln (format " found: [~a]" aLine))
+            (if (string=? (car expectedRegExps) aLine)
+              (check-result-lines
+                (cdr expectedRegExps)
+                (cons aLine observedResults)
+                resultFile
+              )
+              (read-until-next-prompt (cons aLine observedResults) resultFile)
             )
-            (read-until-next-prompt (cons aLine observedResults) resultFile)
           )
         )
       )
@@ -55,6 +58,7 @@
 
 (define (check-result comment expectedRegExps resultFile)
   (let ( [ theResult (check-result-lines expectedRegExps '() resultFile) ] )
+    ;(displayln (format "check found: [~a]" theResult))
     (if (null? theResult)
       (displayln (string-append "SUCCESS: " comment))
       (begin

@@ -6,9 +6,11 @@ in [Racket](https://racket-lang.org/)
 
 ## Rational
 
-My primary aim is to gain a deeper understanding of a simple example of a
-[Concatenative programming 
-language](https://en.wikipedia.org/wiki/Concatenative_programming_language).
+My primary aim is to gain a deeper understanding of a simple example of 
+a [Concatenative programming 
+language](https://en.wikipedia.org/wiki/Concatenative_programming_language), 
+with a view to evolving it into a foundation for Mathematics (called 
+diSimp).
 
 As such I have no interest in implementing all of Joy's "atomic 
 programs", only the smallest subset which makes Joy an extensible Turing 
