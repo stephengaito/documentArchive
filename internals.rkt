@@ -12,16 +12,14 @@
   evalCmdListOnStack
   addDefToJoyTable
   addArgsToJoyStack
-  showJoyStack
 )
 
 (define traceJoy #f)
+(define showStack #f)
+(define evalCmdListDepth 0)
+
 (define joyStack '())    ;; an empty immutable list/stack
 (define joyTable (hash)) ;; an empty immutable hash table
-
-(define (showJoyStack)
-  (displayln joyStack)
-)
 
 (define (reportJoyCallArgs argListNames argList)
   (unless (or (null? argListNames) (null? argList))
@@ -32,7 +30,7 @@
 
 (define (reportJoyCall definedName argListNames argList)
   (when traceJoy
-    (newline)
+    (when (not showStack) (newline))
     (displayln (format "calling: [~a]" definedName))
     (reportJoyCallArgs argListNames argList)
   )
@@ -161,15 +159,25 @@
   )
 )
 
-(define (evalCmdListOnStack aCmdList aStack)
-  ;(displayln aCmdList)
-  ;(displayln aStack)
+(define (evalCmdListOnStackRecurse aCmdList aStack)
+  (when traceJoy
+    (newline)
+    (displayln (format "remaining[~a]: ~a" evalCmdListDepth aCmdList))
+  )
   (if (and (list? aCmdList) (not (null? aCmdList)))
-    (evalCmdListOnStack 
+    (evalCmdListOnStackRecurse 
       (cdr aCmdList)
       (evalStack (cons (car aCmdList) aStack))
     )
     aStack
+  )
+)
+
+(define (evalCmdListOnStack aCmdList aStack)
+  (set! evalCmdListDepth (+ evalCmdListDepth 1))
+  (let ([ result (evalCmdListOnStackRecurse aCmdList aStack)])
+    (set! evalCmdListDepth (- evalCmdListDepth 1))
+    result
   )
 ) 
 
@@ -218,11 +226,15 @@
   )
 )
 
+(define (showStackCall aStack)
+  (when traceJoy (newline))
+  (pretty-display aStack)
+  (newline)
+)
+
 (define (addArgsToJoyStack someArgs)
   (set! joyStack (evalStack (cons someArgs joyStack) ) )
-  (when traceJoy (newline))
-  (pretty-display joyStack)
-  (newline)
+  (when showStack (showStackCall joyStack))
 )
 
 ;; Useful extensions to the Joy langauge
@@ -260,6 +272,27 @@
 (addDefToJoyTable 'traceOff
   (lambda (aStack)
     (set! traceJoy #f)
+    aStack
+  )
+)
+
+(addDefToJoyTable 'showStackOn
+  (lambda (aStack)
+    (set! showStack #t)
+    aStack
+  )
+)
+
+(addDefToJoyTable 'showStackOff
+  (lambda (aStack)
+    (set! showStack #f)
+    aStack
+  )
+)
+
+(addDefToJoyTable 'showStack
+  (lambda (aStack)
+    (showStackCall aStack)
     aStack
   )
 )

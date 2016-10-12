@@ -18,4 +18,3 @@
 )
 
 (displayln "Hello from RacketJoy!")
-(showJoyStack)

@@ -4,7 +4,7 @@
 
 ;; Core Operators
 ;;
-(extendJoy ('newstack aStack)
+(extendJoy ('newStack aStack)
   '()
 )
 
@@ -34,11 +34,11 @@
   (evalCmdListOnStack top1 rest)
 )
 
-(extendJoy3 ('ifte top1 top2 top3 rest)
+(extendJoy3 ('ifte top1-else top2-then top3-if rest)
   (if
-    (car (evalCmdListOnStack top3 rest))
-    (evalCmdListOnStack top2 rest)
-    (evalCmdListOnStack top1 rest)
+    (car (evalCmdListOnStack top3-if rest))
+    (evalCmdListOnStack top2-then rest)
+    (evalCmdListOnStack top1-else rest)
   )
 )
 
