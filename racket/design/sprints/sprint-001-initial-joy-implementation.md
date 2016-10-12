@@ -35,9 +35,9 @@ racket and joy code) as well as Racket-level code.
 
 ## Specifications
 
-* [repl/rJoySpec](../../specs/repl/rJoySpec.rkt)
+* [repl/rJoySpec](../../racketJoy/specs/repl/rJoySpec.rkt)
 
-* [unit/coreJoySpec](../../specs/unit/coreJoySpec.rkt)
+* [unit/coreJoySpec](../../racketJoy/specs/unit/coreJoySpec.rkt)
 
 ## Questions and Risks
 

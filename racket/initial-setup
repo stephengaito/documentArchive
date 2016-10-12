@@ -12,7 +12,7 @@ raco pkg install doc-coverage   # used for the tests
 echo ""
 echo "linking [racketJoy]"
 echo ""
-raco pkg install --link ../racketJoy
+raco pkg install --link racketJoy
 
 echo ""
 echo "setting up [racketJoy]"

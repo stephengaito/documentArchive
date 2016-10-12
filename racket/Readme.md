@@ -1,16 +1,8 @@
-# Analysis of the Joy programming language 
+# Racket Joy
 
-This analysis contains a collection of mathematical papers exploring the 
-formal structure of the Joy programming language as well as a minimal 
-implemenation in Racket.
-
-* A (partial) implementation of [Manfred von Thun's Joy programming 
+A (partial) implementation of [Manfred von Thun's Joy programming 
 language](http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language) 
-in [Racket](https://racket-lang.org/) can be found in the [racket 
-directory](racket).
-
-* A proof that a (super-set) of Joy is fully abstract can be found in 
-the [fullyAbstractJoy directory](tex/fullyAbstractJoy).
+in [Racket](https://racket-lang.org/)
 
 ## Rational
 
@@ -54,25 +46,7 @@ language](https://en.wikipedia.org/wiki/Concatenative_programming_language).
 More information on concatenative programming languages can be found on 
 the [concatenative.org website](http://www.concatenative.org).
 
-## Formal theory of Programming Languages
+## License
 
-Durring the end of the 1950's through the early 1980's there was a great 
-deal of work attempting to provide a formal mathematical theory of the 
-semantics of programming langauages.
-
-We revist this theory and (minimally) extend it with an aim to provide a 
-fully formal computational foundation for Mathematics.
-
-## Licenses
-
-The mathematical papers, contained in the [tex](tex) directory, are all 
-Copyright PerceptiSys Ltd (Stephen Gaito) and released under a [Creative 
-Commons Attribution-ShareAlike 4.0 International 
-License](http://creativecommons.org/licenses/by-sa/4.0/). See the 
-frontMatter.tex file of each paper.
-
-The implementation of Joy, contained in the 
-[racketJoy](racket/racketJoy) directory, is Copyright PerceptiSys Ltd 
-(Stephen Gaito) and released under an [MIT 
-License](racket/racketJoy/LICENSE.txt). See the associated LICENSE.txt 
-file.
+The code and all the extensions for this version of the Joy programming 
+language are released under an [MIT License](LICENSE.txt)

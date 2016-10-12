@@ -15,7 +15,7 @@
 )
 
 (define (rackunit-modules)
-  (for ([ aPath (in-directory "specs")])
+  (for ([ aPath (in-directory "racketJoy/specs")])
     (when (regexp-match (regexp ".*Spec.rkt$") aPath)
       (run-tests aPath)
     )
