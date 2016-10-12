@@ -1,13 +1,18 @@
 #lang racket
 
+(require racket/pretty)
+
 (provide 
+  defineJoy
   extendJoy
   evalStack
   evalCmdListOnStack
+  addDefToJoyTable
   addArgsToJoyStack
   showJoyStack
 )
 
+(define traceJoy #f)
 (define joyStack '())    ;; an empty immutable list/stack
 (define joyTable (hash)) ;; an empty immutable hash table
 
@@ -31,7 +36,8 @@
   )
 )
 
-(define (extendJoy definedSymbol aDefinition)
+(define (addDefToJoyTable definedSymbol aDefinition)
+  (displayln (format "defining: [~a]" definedSymbol))
   (set!
     joyTable
     (hash-set
@@ -39,6 +45,28 @@
       (makeSymbol definedSymbol)
       aDefinition
     )
+  )
+)
+
+(define-syntax (defineJoy someSyntax)
+  (syntax-case someSyntax ()
+    [ (_ definedName definedBody)
+      #'(addDefToJoyTable
+        (makeSymbol definedName)
+        (quote definedBody)
+      )
+    ]
+  )
+)
+
+(define-syntax (extendJoy someSyntax)
+  (syntax-case someSyntax ()
+    [ (_ ( definedName someArgs ) definedBody)
+      #'(addDefToJoyTable
+        (makeSymbol definedName)
+        (lambda (someArgs) definedBody)
+      )
+    ]
   )
 )
 
@@ -69,6 +97,15 @@
   ;(displayln (string-append "evalStack: " (~a aStack)))
   (let ( [ command (car aStack) ]
          [ rest    (cdr aStack) ] )
+    (when traceJoy
+      (begin
+        (displayln "command: ") 
+        (pretty-display command)
+        (displayln "  stack: ")
+        (pretty-display rest)
+        (newline)
+      )
+    )
     (cond
       [   (list?   command) aStack
       ] [ (number? command) aStack
@@ -90,33 +127,30 @@
 
 (define (addArgsToJoyStack someArgs)
   (set! joyStack (evalStack (cons someArgs joyStack) ) )
-  (displayln joyStack)
+  (pretty-display joyStack)
+  (newline)
 )
 
 ;; Useful extensions to the Joy langauge
 ;;
-(extendJoy 'load
-  (lambda (aStack)
-    (let ([ top0 (car aStack) ]
-          [ rest (cdr aStack) ])
-      (dynamic-require top0 #f)
-      rest
-    )
+(extendJoy ('load aStack)
+  (let ([ top0 (car aStack) ]
+        [ rest (cdr aStack) ])
+    (dynamic-require top0 #f)
+    rest
   )
 )
 
-(extendJoy 'define
-  (lambda (aStack)
-    (let ([ top0 (car  aStack) ]
-          [ top1 (cadr aStack) ]
-          [ rest (cddr aStack) ])
-      (extendJoy top0 top1)
-      rest
-    )
+(extendJoy ('define aStack)
+  (let ([ top0 (car  aStack) ]
+        [ top1 (cadr aStack) ]
+        [ rest (cddr aStack) ])
+    (defineJoy top0 top1)
+    rest
   )
 )
 
-(extendJoy 'definitions
+(addDefToJoyTable 'definitions
   (lambda (aStack)
     (hash-map
       joyTable
@@ -125,6 +159,20 @@
       )
       #t
     )
+    aStack
+  )
+)
+
+(addDefToJoyTable 'traceOn
+  (lambda (aStack)
+    (set! traceJoy #t)
+    aStack
+  )
+)
+
+(addDefToJoyTable 'traceOff
+  (lambda (aStack)
+    (set! traceJoy #f)
     aStack
   )
 )
