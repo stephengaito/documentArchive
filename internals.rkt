@@ -2,15 +2,19 @@
 
 (require racket/pretty)
 
+(module+ privateAPI ; used by specifications
+  (provide
+    evalStack
+  )
+)
+
 (provide 
   defineJoy
   extendJoy
   extendJoy1
   extendJoy2
   extendJoy3
-  evalStack
   evalCmdListOnStack
-  addDefToJoyTable
   addArgsToJoyStack
 )
 

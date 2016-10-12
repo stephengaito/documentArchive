@@ -12,14 +12,15 @@
 
 (require
   racketJoy/internals
+  (submod racketJoy/internals privateAPI)
   racketJoy/coreJoy
   racketJoy/basicJoy
 )
 
 (define test-operators
   (test-suite "Test Joy Operators"
-    (test-case "newstack"
-      (check-equal? (evalStack '(newstack 1 2 3 4)) '())
+    (test-case "newStack"
+      (check-equal? (evalStack '(newStack 1 2 3 4)) '())
     )
 
     (test-case "dup"
