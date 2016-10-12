@@ -23,6 +23,21 @@
   (displayln joyStack)
 )
 
+(define (reportJoyCallArgs argListNames argList)
+  (unless (or (null? argListNames) (null? argList))
+    (displayln (format "~a = ~a" (car argListNames) (car argList)))
+    (reportJoyCallArgs (cdr argListNames) (cdr argList))
+  )
+)
+
+(define (reportJoyCall definedName argListNames argList)
+  (when traceJoy
+    (newline)
+    (displayln (format "calling: [~a]" definedName))
+    (reportJoyCallArgs argListNames argList)
+  )
+)
+
 (define (makeSymbol aSymbolOrString)
   (cond
     [ (string? aSymbolOrString) (string->symbol aSymbolOrString) 
@@ -30,8 +45,9 @@
     ] [ else 
       (begin
         (displayln 
-          (string-append "[" (~a aSymbolOrString) 
-            "] can not be made into a symbol! (using 'unknown)")
+          (format "[~a] can not be made into a symbol! (using 'unknown)"
+            aSymbolOrString
+          ) 
         )
         'unknown
       )
@@ -66,7 +82,10 @@
     [ (_ ( definedName theStackArg ) definedBody ... )
       #'(addDefToJoyTable
         (makeSymbol definedName)
-        (lambda (theStackArg) definedBody ... )
+        (lambda (theStackArg)
+          (reportJoyCall definedName '(theStackArg) (list theStackArg))
+          definedBody ...
+        )
       )
     ]
   )
@@ -81,7 +100,10 @@
           (let ([ extendJoy1top1 (car aStack) ]
                 [ extendJoy1rest (cdr aStack) ])
             (apply 
-              (lambda (someArgs ... ) definedBody ... )
+              (lambda (someArgs ... )
+                (reportJoyCall definedName '(someArgs ...) (list someArgs ...))
+                definedBody ...
+              )
               extendJoy1top1 (list extendJoy1rest )
             )
           )
@@ -101,7 +123,10 @@
                 [ extendJoy2top2 (cadr aStack) ]
                 [ extendJoy2rest (cddr aStack) ])
             (apply 
-              (lambda (someArgs ... ) definedBody ... )
+              (lambda (someArgs ... )
+                (reportJoyCall definedName '(someArgs ...) (list someArgs ...))
+                definedBody ...
+              )
               extendJoy2top1 extendJoy2top2 (list extendJoy2rest )
             )
           )
@@ -122,7 +147,10 @@
                 [ extendJoy3top3 (caddr aStack) ]
                 [ extendJoy3rest (cdddr aStack) ])
             (apply 
-              (lambda (someArgs ... ) definedBody ... )
+              (lambda (someArgs ... )
+                (reportJoyCall definedName '(someArgs ...) (list someArgs ...))
+                definedBody ...
+              )
               extendJoy3top1 extendJoy3top2 extendJoy3top3
                 (list extendJoy3rest )
             )
@@ -149,38 +177,40 @@
   (let ([ cmdImpl (hash-ref joyTable command 'unknown) ])
     (cond
       [ (procedure? cmdImpl) (apply cmdImpl (list aStack))
-      ] [ (list? cmdImpl)    (evalCmdListOnStack cmdImpl aStack)
+      ] [ (list? cmdImpl)
+        (begin
+          (when traceJoy
+            (newline)
+            (displayln (format "evaluating: [~a]" command))
+            (displayln (format "body = ~a" cmdImpl))
+          )
+          (evalCmdListOnStack cmdImpl aStack)
+        )
       ] [ else (cons command aStack)
       ]
     )
   )
 )
 
+(define (reportAndReturnStackUpdate aStack)
+  (when traceJoy
+    (newline)
+    (displayln (format "adding: ~a" (car aStack)))
+  )
+  aStack
+)
+
 (define (evalStack aStack) 
-  ;(displayln (string-append "evalStack: " (~a aStack)))
   (let ( [ command (car aStack) ]
          [ rest    (cdr aStack) ] )
-    (when traceJoy
-      (begin
-        (displayln "command: ") 
-        (pretty-display command)
-        (displayln "  stack: ")
-        (pretty-display rest)
-        (newline)
-      )
-    )
     (cond
-      [   (list?   command) aStack
-      ] [ (number? command) aStack
-      ] [ (string? command) aStack
+      [   (list?   command) (reportAndReturnStackUpdate aStack)
+      ] [ (number? command) (reportAndReturnStackUpdate aStack)
+      ] [ (string? command) (reportAndReturnStackUpdate aStack)
       ] [ (symbol? command) (evalSymbol command rest)
       ] [ else 
         (begin
-          (displayln 
-            (string-append 
-              "unknown command [" (~a command) "] ignored"
-            )
-          )
+          (displayln (format "unknown command [~a] ignored" command))
           (evalStack rest)
         )
       ]
@@ -190,6 +220,7 @@
 
 (define (addArgsToJoyStack someArgs)
   (set! joyStack (evalStack (cons someArgs joyStack) ) )
+  (when traceJoy (newline))
   (pretty-display joyStack)
   (newline)
 )
@@ -211,7 +242,7 @@
     (hash-map
       joyTable
       (lambda (aKey aValue)
-        (displayln (string-append (~a aKey) " == " (~a aValue)))
+        (displayln (format "~a == ~a" aKey aValue))
       )
       #t
     )
