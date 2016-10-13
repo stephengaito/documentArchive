@@ -36,10 +36,12 @@ Computational Foundation of Mathematics.
 Mathematics are based upon first or higher order logic. In order to provide a Computational Foundation of Mathematics we need to answer three primary questions:
 
 \begin{itemize}
-	\item What is Mathematics?
-	\item What constitues a Foundation of Mathematics?
-	\item What is a Computational Process?
+\item What is Mathematics?
+\item What constitues a Foundation of Mathematics?
+\item What is a Computational Process?
 \end{itemize}
+
+\subsection{What is Mathematics?}
 
 Again, for historical reasons, Mathematics is currently identified with some
 super-set of a formulation of the axioms of the well-founded sets, such as ZFC.
@@ -51,9 +53,70 @@ While we assert that what is normally considered computation, augmented with
 something as powerfull as the Well-Ordering Theorem, can provide a Computational
 Foundation for what is currently considered Mathematics, we will argue that
 Computational \emph{processes} are more than sufficient to provide foundations
-for real analysis. Unfortunately, for \emph{this paper} we will limit ourselves
-to showing that the collection of Lists of Lists and Joy processes form a fully
+for real analysis. 
+
+\TODO{fill in this gap: discuss Topos as a model of well-founded set theory.
+Discuss Coalgebras as a model of processes. See fingerPiece01}
+
+For the purposes of \emph{this paper} we will define Mathematics to be any fully
 algebraic pair of Topos which contain an \emph{implementation} of the Reals.
+
+\subsection{What constitues a Foundation of Mathematics?}
+
+Following Hatcher, \cite[section 2.5]{hatcher1982logicalFoundationsMath}, we posit the
+following list of critera any Foundation of Mathematics must satisfy:
+
+\begin{enumerate}
+\item \textbf{A foundation of mathematics must be adequate for a reasonably large
+portion of mathematics.}
+	
+\noindent If we ``assume'' something as powerful as the Axiom of Choice, we will
+be able to recover the whole of current mathematical set theory (smaller than
+the first strongly inaccessible cardinal).
+	
+\item \textbf{A foundation must derive from some intuitively natural principles.}
+	
+\noindent The foundational (co-)data language \emph{is} the List of Lists. The
+only operations on this language are LISP's car, cdr, cons, together with
+failure and repetition.
+	
+\item \textbf{The basic principles and primitive (undefined) notions should be
+as economical as possible.}
+	
+\noindent See above.
+	
+\item \textbf{The foundation must be consistent.}
+	
+\noindent For a computational foundation, consistency is given since we are
+\emph{computing} the (standard) model of the formal theory. What is more
+important is that the formal theory is fully abstract, that is the denotation
+and operational semantics are equivalent, in logical terms, the formal theory is
+both sound and complete.
+	
+\item \textbf{The foundation should be expressed (or expressible) as a formal system.}
+	
+\noindent In computational terms, each formal system is a (programming) language
+complete with a syntax as well as denotational, operational and axiomatic
+semantics. Every such formal system \emph{must} have (at least) a denotational
+interpretation into the foundational (co-)data language.
+	
+\item \textbf{The construction of everyday mathematics in the system should be
+``natural'' and ``orderly''.}
+	
+\noindent With the proposed computational foundations of mathematics, there is a
+collection of formal theories each of which have (at least) an interpretation in
+the (co-)data language. Each of these formal theories should be tailored to the
+mathematical field in question, so by definition they should represent
+``natural'' and ``orderly'' systems in which to conduct mathematics in a given
+field.
+	
+\end{enumerate}
+
+\subsection{What is a Compuational Process?}
+
+\subsection{Why Lists of Lists and Joy processes?}
+
+
 
 \printbibliography
 \end{document}
