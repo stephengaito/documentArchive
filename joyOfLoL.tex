@@ -1,0 +1,61 @@
+% LaTeX source for the joyOfLoL document
+%
+
+\documentclass[a4paper,openany]{amsart}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{disitt}
+\usepackage{disitt-symbols}
+%\usepackage{disitt-code}
+\usepackage[backend=biber,style=alphabetic,citestyle=alphabetic]{biblatex}
+\addbibresource{joyOfLoL.bib}
+\usepackage{mdframed}
+\newmdenv[linecolor=white,backgroundcolor=gray!10]{infobox}
+\newenvironment{myQuote}{\begin{quotation}}{\end{quotation}}
+\surroundwithmdframed[linecolor=white,backgroundcolor=gray!10]{myQuote}
+
+\begin{document}
+	
+\sloppy
+	
+\title[Joy of LoL]{The Joy of Laughing out Loud: Lists of Lists and Joy
+processes as a Computational Foundation for Mathematics}
+ \input{frontMatter}
+\subjclass[2010]{Primary unknown; Secondary unknown} %
+\keywords{Keyword one, keyword two etc.}%
+	
+\begin{abstract}
+We show that the collection of Lists of Lists and Joy processes form a
+Computational Foundation of Mathematics.
+\end{abstract} 
+\maketitle 
+\tableofcontents 
+	
+	
+\section{Introduction} For historical reasons, all current foundations of
+Mathematics are based upon first or higher order logic. In order to provide a Computational Foundation of Mathematics we need to answer three primary questions:
+
+\begin{itemize}
+	\item What is Mathematics?
+	\item What constitues a Foundation of Mathematics?
+	\item What is a Computational Process?
+\end{itemize}
+
+Again, for historical reasons, Mathematics is currently identified with some
+super-set of a formulation of the axioms of the well-founded sets, such as ZFC.
+In particular it is assumed that Cantor's collection of Ordinals larger than
+$\omega$ and their well-ordering are \emph{required} to provide a credible
+formulation of real analysis as required for Mathematical Physics.
+
+While we assert that what is normally considered computation, augmented with
+something as powerfull as the Well-Ordering Theorem, can provide a Computational
+Foundation for what is currently considered Mathematics, we will argue that
+Computational \emph{processes} are more than sufficient to provide foundations
+for real analysis. Unfortunately, for \emph{this paper} we will limit ourselves
+to showing that the collection of Lists of Lists and Joy processes form a fully
+algebraic pair of Topos which contain an \emph{implementation} of the Reals.
+
+\printbibliography
+\end{document}
+
+
