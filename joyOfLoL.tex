@@ -66,6 +66,11 @@ algebraic pair of Topos which contain an \emph{implementation} of the Reals.
 
 \subsection{What constitutes a Foundation of Mathematics?}
 
+\TODO{Discuss organizational/structural, formal/existential,
+	ontological/material modes of foundation. See
+	\cite{marquis1995categoryFoundationsMath} as well as \cite{awodey2009a}. Are
+	these usefully seen as being in a linear adjoint chain?}
+
 Following Hatcher, \cite[section 2.5]{hatcher1982logicalFoundationsMath}, we posit the
 following list of criteria any Foundation of Mathematics must satisfy:
 
@@ -151,7 +156,7 @@ In each case, we have an unspecified collection of ``things'' for which we can
 make observations.
 
 Literally, the lists of lists is the ``collection'' of ``things'' to which we
-can apply the basic joy operations to observe a ``thing's'' ``structure''. Being
+can apply the basic joy operations to observe the ``thing's'' ``structure''. Being
 a finite being, computational or organic, we can only ever apply a finite number
 of operation/observations, but that does not mean that every list of lists is a
 finite structure. It only means that there are potentially lists of lists whose
@@ -166,8 +171,8 @@ run. While we might turn them off, that is our external choice not an internal
 limitation of the operating system itself. So the computational concept of
 process is of a computational ``program'' with an potentially unlimited number
 of cycles. It usefulness to us is in the external observations we might make of
-the process's ongoing behaviour rather than the ``final'' answer if might
-compute.
+the process's ongoing behaviour rather than any ``final'' answer it might
+``compute''.
 
 Similarly, a list of lists is a potentially infinite ``object'' to which any
 finite computation can only build or observer a finite portion of it.
@@ -177,8 +182,30 @@ different ``things'' are really the same. Set theory declares two sets to be
 equal if they have the same collection of elements, that is if they are
 extensionally equal. For the lists of lists, we declare that two potentially
 distinct list of lists are equal if given the same collection of observations,
-they always give the same ``answer''. This is an extensional concept of
-equality.
+they always give the same collection of ``answers''. This is an extensional
+concept of equality.
+
+\subsubsection{What are the Joy operations}
+
+\begin{itemize}
+
+	\item push () \TODO{similar to car in Lisp; similar to write in Turing machine}
+
+	\item pop  \TODO{same as cdr in Lisp; similar to erase in Turing machine}
+
+	\item dup  \TODO{similar to car in Lisp; similar to move right in Turing
+		machine; is this too powerful?}
+
+	\item cons \TODO{same as cons in Lisp; similar to move left in Turing machine}
+	
+	\item ifte \TODO{similar to cond in Lisp; similar to a Turing machine's ability
+		to choose its next state/action dependent upon its current state/tape-symbol;
+		should consider Lisp's cond instead; there are really \emph{two} cond's, one is
+		sequential, the other is parallel}
+
+\end{itemize}
+
+
 
 \printbibliography
 \end{document}
