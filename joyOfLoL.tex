@@ -218,6 +218,84 @@ compuation. Each type of model has its own strengths and weaknesses. This
 informal interpretation has been suggested by Awodey's comments, \cite[Section 5
 ``Conclusions'']{awodey2009a}.
 
+We will follow the \emph{spirit} but not the letter of the formal presentation
+of Type Theory provided by \cite[Appendix A.2]{awodey2009a}.
+
+We have three judgements, the first, the positive existence judgement, is
+%
+\begin{equation*}
+x : \sigma : \rho
+\end{equation*}
+%
+where $\rho$ is meta variable denoting a list of lists, $\sigma$ is a meta
+variable denoting a list of lists selector sequence, and $x$ is a meta variable
+denoting the selected portion of the list of lists obtained by applying the
+selector, $\sigma$, to the list of lists, $\rho$. The judgement \emph{asserts}
+that the selected portion of the list of lists is itself a valid list of lists.
+
+The second judgement, the negative existence judgement, is
+%
+\begin{equation*}
+\emptyset : \sigma : \rho
+\end{equation*}
+%
+where, again, $\rho$ is a meta variable denoting a list of lists, and $\sigma$,
+is a meta variable denoting a list of lists selector sequence. The judgement
+\emph{asserts} that the selected portion of the list of lists is \emph{not} a
+valid list of lists.
+
+The third judgement, the null list judgement, is
+%
+\begin{equation*}
+( ) : \sigma : \rho
+\end{equation*}
+%
+where, again, $\rho$ is a meta variable denoting a list of lists, and $\sigma$,
+is a meta varialbe denoting a list of lists selector sequence. The judgement
+\emph{asserts} that the selected portion of the lists of lists is `$( )$' (the
+null list).
+
+\begin{prooftree}
+\AxiomC{$ x : \sigma : \rho $,}
+\AxiomC{$ y : \sigma' : x $}
+\RightLabel{sequential composition}
+\BinaryInfC{$ y : \sigma' \sigma : \rho $}
+\end{prooftree}
+
+Informally, the \emph{sequential composition} rule states that if we know that
+the selector, $\sigma$, applied to the list of lists, $\rho$, results in a list
+of lists, $x$, \emph{and} if the selector, $\sigma'$, applied to the list of
+lists, $x$, results in the list of lists, $y$, then the sequential composition
+of the selectors, $\sigma' \sigma$ (apply first $\sigma$ and then $\sigma'$),
+applied to $\rho$ results in the list of lists, $y$.
+
+\begin{prooftree}
+\AxiomC{$x : \text{id} : \rho$}
+\RightLabel{null list introduction}
+\UnaryInfC{$ () : \text{car} : \rho'$, \quad $ x : \text{cdr} : \rho'$}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$ () : \text{car} : \rho$,}
+\AxiomC{$ x : \text{cdr} : \rho$}
+\RightLabel{null list elimination}
+\BinaryInfC{$ x : \text{id} : \rho'$}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$ x : \sigma : \rho$,}
+\AxiomC{$ IF ???? $}
+\RightLabel{if exists}
+\BinaryInfC{$ ???? $}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$ \emptyset : \sigma : \rho$,}
+\AxiomC{$ IF ???? $}
+\RightLabel{if does not exist}
+\BinaryInfC{$ ???? $}
+\end{prooftree}
+
 \printbibliography
 \end{document}
 
