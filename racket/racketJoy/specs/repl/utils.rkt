@@ -15,10 +15,10 @@
 )
 
 (define (read-until-next-prompt observedResults resultFile)
-  (let ( [ peekResult (peek-string 2 0 resultFile) ] )
-    (if (string=? peekResult "->")
+  (let ( [ peekResult (peek-string 1 0 resultFile) ] )
+    (if (string=? peekResult ">")
       (begin
-        (read-string 3 resultFile)
+        (read-string 2 resultFile)
         observedResults
       )
       (let ( [ aLine (read-line resultFile) ] )
@@ -29,10 +29,10 @@
 )
 
 (define (check-result-lines expectedRegExps observedResults resultFile)
-  (let ( [ peekResult (peek-string 2 0 resultFile) ] )
-    (if (string=? peekResult "->")
+  (let ( [ peekResult (peek-string 1 0 resultFile) ] )
+    (if (string=? peekResult ">")
       (begin
-        (read-string 3 resultFile)
+        (read-string 2 resultFile)
         '()
       )
       (let ( [ aLine (read-line resultFile) ] )
