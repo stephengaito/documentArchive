@@ -6,7 +6,7 @@
 \usepackage[english]{babel}
 \usepackage{disitt}
 \usepackage{disitt-symbols}
-%\usepackage{disitt-code}
+\usepackage{disitt-code}
 \usepackage[backend=biber,style=alphabetic,citestyle=alphabetic]{biblatex}
 \addbibresource{joyOfLoL.bib}
 \usepackage{mdframed}
@@ -275,12 +275,24 @@ applied to $\rho$ results in the list of lists, $y$.
 \UnaryInfC{$ () : \text{car} : \rho'$, \quad $ x : \text{cdr} : \rho'$}
 \end{prooftree}
 
+\begin{racket}
+(assert (judgement x id $\rho$))
+pushnull
+(assert (judgement () car $\rho'$) (judgement x cdr $\rho'$))
+\end{racket}
+
 \begin{prooftree}
 \AxiomC{$ () : \text{car} : \rho$,}
 \AxiomC{$ x : \text{cdr} : \rho$}
 \RightLabel{null list elimination}
 \BinaryInfC{$ x : \text{id} : \rho'$}
 \end{prooftree}
+
+\begin{racket}
+(assert (judgement () car \rho) (judgement x cdr \rho))
+popnull
+(assert (judgement x id \rho'))
+\end{racket}
 
 \begin{prooftree}
 \AxiomC{$ x : \sigma : \rho$,}
@@ -294,6 +306,15 @@ applied to $\rho$ results in the list of lists, $y$.
 \AxiomC{$ IF ???? $}
 \RightLabel{if does not exist}
 \BinaryInfC{$ ???? $}
+\end{prooftree}
+
+\section{examples}
+
+\begin{prooftree}
+\AxiomC{$x : car : \rho$}
+\AxiomC{$y : cdr : \rho$}
+\RightLabel{dup}
+\BinaryInfC{$x : car : \rho'$ \quad $x : cadr : \rho'$ \quad $y : cddr : \rho'$}
 \end{prooftree}
 
 \printbibliography
