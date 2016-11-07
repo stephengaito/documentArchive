@@ -219,41 +219,65 @@ informal interpretation has been suggested by Awodey's comments, \cite[Section 5
 ``Conclusions'']{awodey2009a}.
 
 We will follow the \emph{spirit} but not the letter of the formal presentation
-of Type Theory provided by \cite[Appendix A.2]{awodey2009a}.
+of Type Theory provided by \cite[Appendix
+A.2]{awodeyCoquandVoevodsky2013homotopyTypeTheory}. Classical type theory is
+concerned with computing, via natural deduction rules, judgements of both the
+``truth'' of existence of types and the ``truth'' of proofs that a given type is
+``inhabited''. We \emph{instead} provide dual formal theories of construction
+and observation of lists of lists, using computation via natural deduction
+rules.
 
-We have three judgements, the first, the positive existence judgement, is
+Our basic judgement is based upon one or more observations. Any observation is
+built as a sequence of selectors applied to a given List of Lists. Our basic
+selectors are $\text{id}$, $\text{car}$, and $\text{cdr}$. The result of a
+selector applied to a list of lists such as, $\rho$, is another list of lists.
+
+Similar to Type theory as presented by,
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, we have the following three
+judgements:
 %
-\begin{equation*}
-x : \sigma : \rho
-\end{equation*}
+\begin{center}
+ $ \Gamma \: \text{ctx}$ \qquad
+ $ \Gamma \vdash x : \sigma \rho $ \qquad 
+ $ \Gamma \vdash x = y $
+\end{center}
+%
+Informally, $\Gamma \: \text{ctx}$, is the judgement that the observations
+contained in the context, $\Gamma$, are valid about one or more list of lists.
+The judgement, $\Gamma \vdash x : \sigma \rho$ asserts that, in the context of
+$\Gamma$, the observation, $\sigma \rho$, consisting of the selector, $\sigma$,
+applied to the list of lists, $\rho$, is denoted by the meta-variable, $x$. The
+judgement, $\Gamma \vdash x = y$, asserts that, in the context of, $\Gamma$,
+that the two observations denoted by $x$ and $y$ respectively, are equal.
+
+Again, similar to type theory as presented by,
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, we have inference rules of
+the form:
+%
+\begin{center}\begin{prooftree}
+\AxiomC{$\mathcal{J}_1$}
+\AxiomC{$\cdots$}
+\AxiomC{$\mathcal{J}_n$}
+\RightLabel{Name}
+\TrinaryInfC{$\mathcal{J}$}
+\end{prooftree}\end{center}
+
+
+
+We have the following nine judgements:
+%
+\vspace{1ex}\begin{center}\begin{tabular}{rccc}
+selector & list of lists    &    null list       &   non-existing \\
+id       & $x : * : id  : \rho$ & $x : ( ) : id  : \rho$ & $x : \emptyset : id  : \rho$ \\
+car      & $x : * : car : \rho$ & $x : ( ) : car : \rho$ & $x : \emptyset : car : \rho$ \\
+cdr      & $x : * : cdr : \rho$ & $x : ( ) : cdr : \rho$ & $x : \emptyset : cdr : \rho$
+\end{tabular}\end{center}\vspace{1ex}
 %
 where $\rho$ is meta variable denoting a list of lists, $\sigma$ is a meta
 variable denoting a list of lists selector sequence, and $x$ is a meta variable
 denoting the selected portion of the list of lists obtained by applying the
 selector, $\sigma$, to the list of lists, $\rho$. The judgement \emph{asserts}
 that the selected portion of the list of lists is itself a valid list of lists.
-
-The second judgement, the negative existence judgement, is
-%
-\begin{equation*}
-\emptyset : \sigma : \rho
-\end{equation*}
-%
-where, again, $\rho$ is a meta variable denoting a list of lists, and $\sigma$,
-is a meta variable denoting a list of lists selector sequence. The judgement
-\emph{asserts} that the selected portion of the list of lists is \emph{not} a
-valid list of lists.
-
-The third judgement, the null list judgement, is
-%
-\begin{equation*}
-( ) : \sigma : \rho
-\end{equation*}
-%
-where, again, $\rho$ is a meta variable denoting a list of lists, and $\sigma$,
-is a meta varialbe denoting a list of lists selector sequence. The judgement
-\emph{asserts} that the selected portion of the lists of lists is `$( )$' (the
-null list).
 
 \begin{prooftree}
 \AxiomC{$ x : \sigma : \rho $,}
