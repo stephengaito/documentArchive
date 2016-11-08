@@ -218,19 +218,56 @@ compuation. Each type of model has its own strengths and weaknesses. This
 informal interpretation has been suggested by Awodey's comments, \cite[Section 5
 ``Conclusions'']{awodey2009a}.
 
-We will follow the \emph{spirit} but not the letter of the formal presentation
-of Type Theory provided by \cite[Appendix
+We will essentially follow the \emph{spirit} but not the letter of the formal
+presentation of Type Theory provided by \cite[Appendix
 A.2]{awodeyCoquandVoevodsky2013homotopyTypeTheory}. Classical type theory is
-concerned with computing, via natural deduction rules, judgements of both the
-``truth'' of existence of types and the ``truth'' of proofs that a given type is
-``inhabited''. We \emph{instead} provide dual formal theories of construction
-and observation of lists of lists, using computation via natural deduction
-rules.
+concerned with computing, via a form of Gentzen's Sequent Calculus, judgements
+of both the ``truth'' of existence of types and the ``truth'' of proofs that a
+given type is ``inhabited''. We \emph{instead} provide a Floyd-Hoare formal
+theory for a dialect of the Joy language whose stacks are lists of lists, which
+we denote JoyLoL. This Floyd-Hoare theory provides the rules required to
+formally prove the correctness of individual JoyLoL programs using a process
+similar to Gentzen's Natural Deduction. These formally proven programs provide
+the computations required to dually construct and/or observe portions of any
+given list of lists.
 
-Our basic judgement is based upon one or more observations. Any observation is
-built as a sequence of selectors applied to a given List of Lists. Our basic
-selectors are $\text{id}$, $\text{car}$, and $\text{cdr}$. The result of a
-selector applied to a list of lists such as, $\rho$, is another list of lists.
+The duality here, between construction and observation, is integral to our
+foundations of mathematics. It is essentially Cantor's distinction between
+\emph{sets} and \emph{absolutely infinite multiplicities} or formal set theory's
+\emph{proper classes}. This duality \emph{is} the distinction, in Computer
+Science, between \emph{data} and \emph{processes}. In Category theory, it is the
+distinction between Algebras and Co-Algebras. While Cantor and classical
+Set-Theory, developed to make Cantor's naive set theory rigorous, has no
+particularly good reasons for the distinction between set and class except to
+avoid various paradoxes, Computer Science and Category theory both have good
+computational reasons for this distinction. \TODO{provide refereneces such as
+``The search for Certainty''}
+
+The Floyd–Hoare formal theory for JoyLoL consists of a collection of rules which
+link pairs of observations. There is a rule for each JoyLoL program construct.
+There is also a collection of observation inference rules which allow a given
+collection of observations to be appropriately weakened or strengthened as
+required for a given correctness proof. A formal correctness proof of a JoyLoL
+program, consists of a ordered sequence of inter-twined observations and JoyLoL
+program constructs or observation inference rules. This sequence begins and ends
+with observations, which are called the pre-conditions and post-conditions
+respectively. In this sequence each JoyLoL program construct or observation
+inference rule instance are bracketed by observations which correspond, up to
+renaming of meta-variables, to that construct or inference rule's pre and post
+conditions.
+
+In terms of the material theory, the correctness proof asserts that the given
+JoyLoL program will correctly transform any list of lists which satisfies the
+pre-conditions into a list of lists which satisfies the post-condition. In terms
+of the structural theory, the correctness proof specifies a particular directed
+path of arrows in the category of Lists of Lists, between the objects denoted by
+the pre-condition and post-condition.
+
+Central to this formal theory are the structure and collection of the possible
+observations. Any observation is built as a sequence of selectors applied to a
+given List of Lists. Our basic selectors are $\text{id}$, $\text{car}$, and
+$\text{cdr}$. The result of a selector applied to a list of lists such as,
+$\rho$, is another list of lists.
 
 Similar to Type theory as presented by,
 \cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, we have the following three
