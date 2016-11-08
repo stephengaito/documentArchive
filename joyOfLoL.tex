@@ -267,7 +267,18 @@ Central to this formal theory are the structure and collection of the possible
 observations. Any observation is built as a sequence of selectors applied to a
 given List of Lists. Our basic selectors are $\text{id}$, $\text{car}$, and
 $\text{cdr}$. The result of a selector applied to a list of lists such as,
-$\rho$, is another list of lists.
+$\rho$, is another list of lists. The denotations of any particular observation
+consists of four symbols. The first symbol is the meta-variable which informally
+denotes the list of lists which is the result of this observation. The second
+symbol denotes the expected structure of the resulting list of lists. The third
+symbol denotes the sequence of selectors. The last symbol is a meta-variable
+which denotes the list of lists to which the selectors are applied. The
+meta-variables are denoted by a collection of symbols for variables such as
+$x_0$, $x_1$, etc. We will also use the symbol ``$\underline{\ }$'' to denote
+any meta-variable of which we are not interested. The collection of symbols
+which denote the expected structure consists of ``$\emptyset$'', ``$()$'', and
+``$*$'', which denote the empty list of lists, the null list of
+lists, and any unspecified list of lists.
 
 Similar to Type theory as presented by,
 \cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, we have the following three
@@ -299,9 +310,8 @@ the form:
 \TrinaryInfC{$\mathcal{J}$}
 \end{prooftree}\end{center}
 
-
-
-We have the following nine judgements:
+Given the collection of selectors and expected structures, we have the following
+nine observations:
 %
 \vspace{1ex}\begin{center}\begin{tabular}{rccc}
 selector & list of lists    &    null list       &   non-existing \\
@@ -313,14 +323,15 @@ cdr      & $x : * : cdr : \rho$ & $x : ( ) : cdr : \rho$ & $x : \emptyset : cdr 
 where $\rho$ is meta variable denoting a list of lists, $\sigma$ is a meta
 variable denoting a list of lists selector sequence, and $x$ is a meta variable
 denoting the selected portion of the list of lists obtained by applying the
-selector, $\sigma$, to the list of lists, $\rho$. The judgement \emph{asserts}
-that the selected portion of the list of lists is itself a valid list of lists.
+selector, $\sigma$, to the list of lists, $\rho$. Each observations
+\emph{asserts} that the selected portion of the list of lists is itself a valid
+list of lists of the expected structure.
 
 \begin{prooftree}
-\AxiomC{$ x : \sigma : \rho $,}
-\AxiomC{$ y : \sigma' : x $}
+\AxiomC{$ x : * : \sigma : \rho $,}
+\AxiomC{$ y : * : \sigma' : x $}
 \RightLabel{sequential composition}
-\BinaryInfC{$ y : \sigma' \sigma : \rho $}
+\BinaryInfC{$ y : * : \sigma' \sigma : \rho $}
 \end{prooftree}
 
 Informally, the \emph{sequential composition} rule states that if we know that
@@ -331,15 +342,15 @@ of the selectors, $\sigma' \sigma$ (apply first $\sigma$ and then $\sigma'$),
 applied to $\rho$ results in the list of lists, $y$.
 
 \begin{prooftree}
-\AxiomC{$x : \text{id} : \rho$}
+\AxiomC{$x : * : \text{id} : \rho$}
 \RightLabel{null list introduction}
-\UnaryInfC{$ () : \text{car} : \rho'$, \quad $ x : \text{cdr} : \rho'$}
+\UnaryInfC{$ \underline{\ } : () : \text{car} : \rho'$, \quad $ x : * : \text{cdr} : \rho'$}
 \end{prooftree}
 
 \begin{racket}
-(assert (judgement x id $\rho$))
+((x * (id) $\rho$ observe) assert)
 pushnull
-(assert (judgement () car $\rho'$) (judgement x cdr $\rho'$))
+(( _ () (car) $\rho'$ observe) (x * (cdr) $\rho'$ observe) assert)
 \end{racket}
 
 \begin{prooftree}
