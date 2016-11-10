@@ -382,12 +382,70 @@ popnull
 
 \section{examples}
 
+One of the key aspects of the JoyLoL language as opposed to standard programming
+languages is that list of lists can be infinite (process) objects and in
+particular, each ``element'' of any given list could itself be an infinite list.
+This means that, for example, Joy's dup operator is potentially too powerful if
+it is applied to a potential infinite process (rather than a finite data list).
+This is essentially related to the concept of action at a distance in Physics,
+what is the definition of ``locality'' and how powerful can a local action be? A
+key aspect of Turing's (and Gandy's) definition of computation, as essentially
+noted by G\"odel, is that computation is defined in as minimalistic a manner
+possible.
+
+Turing's machines were, as originally defined, special purpose computing agents,
+used to show that universal computers could be built which used ``data'' to
+define computation.
+
+Thinking structurally for the moment, we can see the objects and morphisms of a
+category as generalized ``data'' (though with a potentially infinite extent) and
+generalized ``computation'' (though with a potentially finite description). This
+is essentially the Harvard Architecture. That is the objects of the Category of
+Lists of Lists, are Lists of Lists while the morphisms are JoyLoL programs
+(which can ultimately be translated into a List of Lists).
+
 \begin{prooftree}
-\AxiomC{$x : car : \rho$}
-\AxiomC{$y : cdr : \rho$}
+\AxiomC{$x : * : car : \rho$}
+\AxiomC{$y : * : cdr : \rho$}
 \RightLabel{dup}
-\BinaryInfC{$x : car : \rho'$ \quad $x : cadr : \rho'$ \quad $y : cddr : \rho'$}
+\BinaryInfC{$x : * : car : \rho'$ \quad $x : * : cadr : \rho'$ \quad $y : * : cddr : \rho'$}
 \end{prooftree}
+
+Translated into JoyLoL we have
+%
+\begin{racket}
+;; pre-condition
+((x * (car) rho-pre observe)
+ (y * (cdr) rho-pre observe) assert)
+dup
+;; post-condition
+((x * (car) rho-post observe)
+ (x * (car cdr) rho-post observe)
+ (y * (cdr cdr) rho-post observe) assert)
+\end{racket}
+
+A key feature of JoyLoL is that it can only change objects in limited ways. In
+particular it can only add or remove one null list ``()'' per computational
+step. To be able to ``dup(licate)'' a potentially infinite complex list of
+lists, we have two related problems, firstly, where do we store the intermediate
+structure if we can not do it all at once, and secondly, if we must inter-twine
+temporary storage and final duplication of partial structures, how do we keep
+track of ``where we are'' in the overall computation? One option is to use yet
+another element on the stack as temporary storage, this would be a von Neumann
+or Princeton architecture. Such a strategy will, when we come to investigate
+space-time and computational traces, make ``tracing'' the identity of an
+``object'' much more difficult. Another option is to allow JoyLoL to have an
+explicitly Harvard architecture, where there is separate ``memory'' for both
+data and process logic, and the JoyLoL operators can manipulate either. In
+categorical terms, the ``data'' memory are the objects, while the ``process
+logic'' memories are the categorical morphisms.
+
+To this end we have the following JoyLoL operators:
+%
+\begin{racket}
+pushNull, popNull
+selectCar, selectCdr
+\end{racket}
 
 \printbibliography
 \end{document}
