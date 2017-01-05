@@ -47,5 +47,7 @@ _minted*
 generatedGuileCode
 generatedHaskellCode
 generatedRacketCode
+generatedJoyLoLCode
 tmp
 *~
+.joyLoL-history

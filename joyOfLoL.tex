@@ -347,11 +347,11 @@ applied to $\rho$ results in the list of lists, $y$.
 \UnaryInfC{$ \underline{\ } : () : \text{car} : \rho'$, \quad $ x : * : \text{cdr} : \rho'$}
 \end{prooftree}
 
-\begin{racket}
+\begin{joyLoL}
 ((x * (id) $\rho$ observe) assert)
 pushnull
 (( _ () (car) $\rho'$ observe) (x * (cdr) $\rho'$ observe) assert)
-\end{racket}
+\end{joyLoL}
 
 \begin{prooftree}
 \AxiomC{$ () : \text{car} : \rho$,}
@@ -360,11 +360,11 @@ pushnull
 \BinaryInfC{$ x : \text{id} : \rho'$}
 \end{prooftree}
 
-\begin{racket}
+\begin{joyLoL}
 (assert (judgement () car \rho) (judgement x cdr \rho))
 popnull
 (assert (judgement x id \rho'))
-\end{racket}
+\end{joyLoL}
 
 \begin{prooftree}
 \AxiomC{$ x : \sigma : \rho$,}
@@ -413,7 +413,7 @@ Lists of Lists, are Lists of Lists while the morphisms are JoyLoL programs
 
 Translated into JoyLoL we have
 %
-\begin{racket}
+\begin{joyLoL}
 ;; pre-condition
 ((x * (car) rho-pre observe)
  (y * (cdr) rho-pre observe) assert)
@@ -422,7 +422,7 @@ dup
 ((x * (car) rho-post observe)
  (x * (car cdr) rho-post observe)
  (y * (cdr cdr) rho-post observe) assert)
-\end{racket}
+\end{joyLoL}
 
 A key feature of JoyLoL is that it can only change objects in limited ways. In
 particular it can only add or remove one null list ``()'' per computational
@@ -442,10 +442,10 @@ logic'' memories are the categorical morphisms.
 
 To this end we have the following JoyLoL operators:
 %
-\begin{racket}
+\begin{joyLoL}
 pushNull, popNull
 selectCar, selectCdr
-\end{racket}
+\end{joyLoL}
 
 \printbibliography
 \end{document}
