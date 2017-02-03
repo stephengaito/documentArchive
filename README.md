@@ -1,4 +1,4 @@
-# aTeXersProgress
+# A TeXer's Progress
 
 A TeXer's progress is an exploration of how to use ConTeXt from the 
 point of view of a LaTeX user. In this project we develop a simple 
