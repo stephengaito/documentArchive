@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# This bash script sets up the required TextAdept Lua code for 
+# use writing the "A TeXer's Progress" documents.
+
+echo "This will OVERWRITE any existing"
+echo "  TextAdept LaTeX and ConTeXt modules"
+echo ""
+echo "ARE YOU SURE YOU WANT TO DO THIS?"
+echo ""
+echo "Type Ctrl-C to STOP the setup or Return to PROCEED"
+read
+
+
+moduleDir=$HOME/.textadept/modules
+mkdir -p $moduleDir
+cp -R latex   $moduleDir
+cp -R context $moduleDir
