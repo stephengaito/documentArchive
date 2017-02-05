@@ -4,4 +4,10 @@ local M = { }
 
 -- Initialization for the LaTeX module
 
+-- remove the default mapping from *.tex to pdflatex
+textadept.run.compile_commands.tex = nil
+
+-- add the mapping from the latex lexer to pdflatex
+textadept.run.compile_commands['latext'] = 'pdflatex %f'
+
 return M
