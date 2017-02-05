@@ -8,6 +8,6 @@ local M = { }
 textadept.run.compile_commands.tex = nil
 
 -- add the mapping from the latex lexer to pdflatex
-textadept.run.compile_commands['latext'] = 'pdflatex %f'
+textadept.run.compile_commands['latex'] = 'pdflatex %f'
 
 return M
