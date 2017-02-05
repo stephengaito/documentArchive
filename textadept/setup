@@ -21,4 +21,7 @@ cp -R context $moduleDir
 
 # use textadept to edit the user's initialization file
 #
+echo "We are using TextAdept to edit your .textadept/init.lua file."
+echo "A TextAdept window will flash and then disappear"
+echo "... this is expected behaviour."
 textadept --force --nosession --userhome $PWD/setupDir $HOME/.textadept/init.lua
