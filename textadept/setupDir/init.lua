@@ -34,7 +34,7 @@ function updateInitLua()
   initBuffer:add_text(
     "-- 'ConTeXt' are interpreted as ConTeXt files.\n\n")
   initBuffer:add_text(
-    "textadept.file_types.patterns['^%.*[Cc][Oo][Nn][Tt][Ee][Xx][Tt]'] = 'context'\n\n")
+    "textadept.file_types.patterns['[Cc][Oo][Nn][Tt][Ee][Xx][Tt]'] = 'context'\n\n")
   io.save_file()
   quit()
 end
