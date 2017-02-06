@@ -4,6 +4,11 @@ function initLaTeX(lexerName)
   if lexerName == 'latex' then
     -- Initialization for the LaTeX module
 
+    -- add in CTags function
+    local ctags = require 'latex/ctags'
+    keys['latex'] = keys.latex or {}
+    keys.latex.cg = ctags.goto_symbol -- Ctrl-g
+
     -- remove the default mapping from *.tex to pdflatex
     textadept.run.compile_commands.tex = nil
 
@@ -12,9 +17,20 @@ function initLaTeX(lexerName)
 
     -- add some latex snippets
     snippets['latex'] = snippets['latex'] or {}
-    snippets['latex']['begin'] = 'begin{%1}\n%0\n\\end{%1}'
+    snippets.latex['begin']   = 'begin{%1}\n%0\n\\end{%1}'
+    snippets.latex['itemize'] = 'begin{itemize}\n\t\\item %0\n\\end{itemize}'
+    snippets.latex['enum']    = 'begin{enumerate}\n\t\\item %0\n\\end{enumerate}'
+    snippets.latex['emph']    = 'emph{%1}'
+    snippets.latex['bold']    = 'textbf{%1}'
+    snippets.latex['doc']     = 'documentclass[%1(a4,12pt)]{%2(amsart)}\n\n\\begin{document}\n\n%0\n\n\\end{document}'
+    snippets.latex['chap']    = 'chapter{%1}\n'
+    snippets.latex['sec']     = 'section{%1}\n'
+    snippets.latex['ssec']    = 'subsection{%1}\n'
+    snippets.latex['toc']     = 'tableofcontents\n'
   end
 end
+
+
 
 events.connect(events.LEXER_LOADED, initLaTeX)
 
