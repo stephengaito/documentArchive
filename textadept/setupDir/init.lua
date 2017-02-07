@@ -35,6 +35,8 @@ function updateInitLua()
     "-- 'ConTeXt' are interpreted as ConTeXt files.\n\n")
   initBuffer:add_text(
     "textadept.file_types.patterns['[Cc][Oo][Nn][Tt][Ee][Xx][Tt]'] = 'context'\n\n")
+  initBuffer.add_text("local rwp = require('common/reWrapParagraph')\n")
+  initBuffer.add_text("keys['c]'] = rwp.reWrapParagraph\n\n")
   io.save_file()
   quit()
 end

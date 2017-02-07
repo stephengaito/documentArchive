@@ -18,6 +18,7 @@ moduleDir=$HOME/.textadept/modules
 mkdir -p $moduleDir
 cp -R latex   $moduleDir
 cp -R context $moduleDir
+cp -R common  $moduleDir
 
 # use textadept to edit the user's initialization file
 #
