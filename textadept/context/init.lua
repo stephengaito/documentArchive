@@ -14,7 +14,16 @@ function initLaTeX(lexerName)
 
     -- add some latex snippets
     snippets['context'] = snippets['context'] or {}
-    snippets['context']['start'] = 'start%1\n%0\n\\stop%1'
+    snippets.context['start']   = 'start%1\n%0\n\\stop%1'
+    snippets.context['itemize'] = 'startitemize\n\t%0\n\\stopitemize'
+    snippets.context['enum']    = 'startenumerate\n\t%0\n\\stopenumerate'
+    snippets.context['emph']    = 'emph{%0}'
+    snippets.context['bold']    = 'textbf{%0}'
+    snippets.context['doc']     = '????'
+    snippets.context['chap']    = 'startchapter[title={%1}]\n%0\n\\stopchapter'
+    snippets.context['sec']     = 'startsection[title={%1}]\n%0\n\\stopsection'
+    snippets.context['ssec']    = 'startsubsection[title={%1}]\n%0\n\\stopsubsection'
+    snippets.context['toc']     = 'tableofcontents'
 
     -- add comment string for context
     textadept.editing.comment_string['context'] = '%'
