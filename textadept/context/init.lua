@@ -15,6 +15,9 @@ function initLaTeX(lexerName)
     -- add some latex snippets
     snippets['context'] = snippets['context'] or {}
     snippets['context']['start'] = 'start%1\n%0\n\\stop%1'
+
+    -- add comment string for context
+    textadept.editing.comment_string['context'] = '%'
   end
 end
 
