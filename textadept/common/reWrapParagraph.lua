@@ -56,7 +56,6 @@ function M.reWrapSelection()
   buffer:replace_sel(newText)
   buffer:new_line()
   buffer:new_line()
-  buffer:line_down()
 end
 --
 -- ReWrap the paragraph which contains the current position

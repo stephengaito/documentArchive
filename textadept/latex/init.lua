@@ -1,12 +1,14 @@
 -- Copyright 2017 Stephen Gaito. See License.md
 
-function initLaTeX(lexerName)
+local function initLaTeX(lexerName)
   if lexerName == 'latex' then
     -- Initialization for the LaTeX module
 
     -- add in latex specific key codes
     keys['latex'] = keys.latex or {}
     keys.latex.cg = require('latex/ctags').goto_symbol    -- Ctrl-g
+    --keys.latex[not OSX and (GUI and 'cR' or 'cmr') or 'mR'] = require('common/clearMBuffer').clearMessageBufferRunCompile
+    keys.latex['cR'] = require('common/clearMBuffer').clearMessageBufferRunCompile
 
     -- remove the default mapping from *.tex to pdflatex
     textadept.run.compile_commands.tex = nil
