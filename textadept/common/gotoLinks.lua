@@ -35,6 +35,15 @@ function M.goto_link()
   -- check to see if the file can be opened 
   local linkFile = io.open(linkFileName)
   if linkFile == nil then return end
+
+  -- if Textredux is not loaded...
+  -- simply open the links file in read only mode
+  if package.loaded['textredux'] == nil then
+    io.close(linkFile)
+    io.open_file(linkFileName)
+    buffer.read_only = true
+    return
+  end
   
   for line in linkFile:lines() do
     if not line:match("^[ t]*#") then

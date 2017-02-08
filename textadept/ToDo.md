@@ -1,10 +1,6 @@
-# ToDo
-
-Things to do:
+# Things to do:
 
 ## Add LaTeX->ConTeXt transformation tool
-
-## Make ctags support conditional on having Textredux module installed
 
 ## (un)Comment block
 * prepend lines whose paragraphs begin with %xxx with %xxx

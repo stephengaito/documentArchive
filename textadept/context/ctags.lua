@@ -124,6 +124,8 @@ end
 -- Requires [ctags]((http://ctags.sourceforge.net/)) to be installed.
 function M.goto_symbol()
   if not buffer.filename then return end
+  if package.loaded['textredux'] == nil then return end
+  
   local symbols = {}
   local p = spawn(M.CTAGS..' --sort=no --excmd=number -f - "'..buffer.filename..'"')
   for line in p:read('*all'):gmatch('[^\r\n]+') do
