@@ -1,6 +1,11 @@
 -- Copyright 2017 Stephen Gaito. See License.md
+-- This code has been modeled on ctags.lua from the
+-- [Textredux](http://rgieseke.github.io/textredux/)
 
 M = {}
+
+local reduxstyle = require 'textredux.core.style'
+local reduxlist  = require 'textredux.core.list'
 
 M.links     = {} -- array of all links
 M.linkUrls  = {} -- table of linkName->linkUrl
@@ -8,7 +13,9 @@ M.linkUrls  = {} -- table of linkName->linkUrl
 local function on_selection(list, item)
   local linkName = item[1]
   list:close()
-  textadept.menu.open_page(M.linkUrls[linkName])
+  -- The following two lines were taken from textadept.menu.open_page
+  local cmd = (WIN32 and 'start ""') or (OSX and 'open') or 'xdg-open'
+  spawn(string.format('%s "%s"', cmd, M.linkUrls[linkName]))
 end
 
 local function trimStr(aString)
@@ -23,11 +30,17 @@ function M.goto_link()
   local linkName  = nil
   local linkUrl   = nil
   local linkDesc  = {}
-  for line in  io.lines(_USERHOME .. '/modules/' .. lexerName .. '/links.txt') do
+  local linkFileName = _USERHOME .. '/modules/' .. lexerName .. '/links.txt'
+  
+  -- check to see if the file can be opened 
+  local linkFile = io.open(linkFileName)
+  if linkFile == nil then return end
+  
+  for line in linkFile:lines() do
     if not line:match("^[ t]*#") then
       if line:match("^[ \t]*$") then -- we have finished a link
         if linkName then
-          M.links[#links+1] = {linkName, linkDesc:concat(" ")}
+          M.links[#M.links+1] = {linkName, table.concat(linkDesc, " ")}
           M.linkUrls[linkName] = linkUrl
           linkState = 1 -- restart
           linkName  = nil
@@ -53,17 +66,17 @@ function M.goto_link()
   
   -- add last link
   if linkName then
-    links[#links+1] = {linkName, linkDesc:concat(" ")}
-    linkUrls[linkName] = linkUrl
+    M.links[#M.links+1] = {linkName, table.concat(linkDesc, " ")}
+    M.linkUrls[linkName] = linkUrl
   end
   
   -- now show in a reduxlist
-  if #links > 0 then
+  if #M.links > 0 then
     local list = reduxlist.new('Go to link')
-    list.items = links
+    list.items = M.links
     list.on_selection = on_selection
     list.column_styles = { reduxstyle.default}
-    list.show()
+    list:show()
   end
 end
 

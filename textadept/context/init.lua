@@ -6,6 +6,10 @@ function initLaTeX(lexerName)
   if lexerName == 'context' then
     -- Initialization for the ConTeXt module
 
+    -- add in latex specific key codes
+    keys['context'] = keys.context or {}
+    -- keys.context.cg = require('context/ctags').goto_symbol    -- Ctrl-g
+
     -- remove the default mapping from *.tex to pdflatex
     textadept.run.compile_commands.tex = nil
 

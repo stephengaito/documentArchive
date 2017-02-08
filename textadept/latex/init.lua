@@ -4,10 +4,9 @@ function initLaTeX(lexerName)
   if lexerName == 'latex' then
     -- Initialization for the LaTeX module
 
-    -- add in CTags function
-    local ctags = require 'latex/ctags'
+    -- add in latex specific key codes
     keys['latex'] = keys.latex or {}
-    keys.latex.cg = ctags.goto_symbol -- Ctrl-g
+    keys.latex.cg = require('latex/ctags').goto_symbol    -- Ctrl-g
 
     -- remove the default mapping from *.tex to pdflatex
     textadept.run.compile_commands.tex = nil
