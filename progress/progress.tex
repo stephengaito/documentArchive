@@ -1,6 +1,6 @@
 % A ConTeXt file
 
-%\startproduct
+\startcomponent atest-file
 
 %<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img 
 %alt="Creative Commons License" style="border-width:0" 
@@ -16,9 +16,10 @@
 %href="https://github.com/stephengaito/aTeXersProgress" 
 %rel="dct:source">https://github.com/stephengaito/aTeXersProgress</a>. 
 
-\starttext
+%\starttext
+\startdocument
 
-\section{Introduction}
+\startsection[title={Introduction}]
 
 A TeXer's Progress is a personal attempt, of an existing \LaTeX\ user, to 
 understand how to write mathematical texts using \ConTeXt. We will produce 
@@ -29,7 +30,9 @@ Two-shift maps, written in \LaTeX\ as a long article and a book respectively.
 Finally, the fourth and fifth documents, will be same mathematical exposition 
 redone using \ConTeXt, again in both a long article and a book format. 
 
-\section{Where to put things} 
+\stopsection
+
+\startsection[title={Where to put things}]
 
 The first and most important problem to solve is where to put things. 
 \ConTeXt\ has four main types of files, those which define Projects, 
@@ -55,7 +58,9 @@ common files, such as the \ConTeXt\ Environment files, in the top level
 directory. All of the Product and Component files for given article will be 
 placed in the same subdirectory. 
 
-\section{A question of style}
+\stopsection
+
+\startsection[title={A question of style}]
 
 The key idea behind both \LaTeX\ and \ConTeXt\ is that content and format 
 should be kept separate. A key difference between \LaTeX\ and \ConTeXt\ is 
@@ -72,7 +77,9 @@ useful separation between the content of the mathematical article and the
 layout style of the article's format. It also allows the writer to provide 
 local modifications to suit their own needs. 
 
-\section{ToDo}
+\stopsection
+
+\startsection[title={ToDo}]
 
 \startitemize
   \item using Modules?
@@ -81,10 +88,15 @@ local modifications to suit their own needs.
   \item ...
 \stopitemize
 
-\section{Bibliography}
+\stopsection
+
+\startsection[title={Bibliography}]
 
 \placelistofpublications
 
-\stoptext
+\stopsection
 
-%\stopproduct
+\stopdocument
+%\stoptext
+
+\stopcomponent
