@@ -17,18 +17,27 @@
 %rel="dct:source">https://github.com/stephengaito/aTeXersProgress</a>. 
 
 %\starttext
-\startdocument
+%\startdocument
+
+\doifmode{book}{\startfrontmatter}
+\placecontent
+
+\doifmode{book}{
+\stopfrontmatter
+\startbodymatter
+}
 
 \startsection[title={Introduction}]
 
 A TeXer's Progress is a personal attempt, of an existing \LaTeX\ user, to 
 understand how to write mathematical texts using \ConTeXt. We will produce 
-five distinct documents. The first one, this document, will highlight the 
-important points of this journey. The second and third documents will be a 
+ten distinct documents. The first one, this document, will highlight the 
+important points of this journey. The second, and third documents will be a 
 mathematical exposition of the chaotic dynamics of the H\'enon, Lozi and 
-Two-shift maps, written in \LaTeX\ as a long article and a book respectively. 
-Finally, the fourth and fifth documents, will be same mathematical exposition 
-redone using \ConTeXt, again in both a long article and a book format. 
+Two-shift maps, written in \LaTeX\ as a long article and a book. The fourth 
+and fifth documents will be the same mathematical exposition redone using 
+\ConTeXt, again in both a long article and a book format. Finally, each of 
+these previous documents will be provided in both PDF and XHTML formats. 
 
 \stopsection
 
@@ -79,6 +88,21 @@ local modifications to suit their own needs.
 
 \stopsection
 
+\startsection[title={Using Lua}]
+
+One of the most important benefits of \ConTeXt\ is the integration of Lua. 
+
+\startluacode
+
+-- local aPath = kpse.find_file('silly')
+-- texio.write(aPath)
+-- texio.write("\n")
+local test = require 'silly'
+
+\stopluacode
+
+\stopsection
+
 \startsection[title={ToDo}]
 
 \startitemize
@@ -90,13 +114,20 @@ local modifications to suit their own needs.
 
 \stopsection
 
+\doifmode{book}{
+\stopbodymatter
+\startbackmatter
+}
+
 \startsection[title={Bibliography}]
 
 \placelistofpublications
 
 \stopsection
 
-\stopdocument
+\doifmode{book}{\stopbackmatter}
+
+%\stopdocument
 %\stoptext
 
 \stopcomponent
