@@ -1,5 +1,8 @@
 % A ConTeXt file
 
+\usemodule[joylol]
+
+
 \startcomponent atest-file
 
 %<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img 
@@ -91,15 +94,6 @@ local modifications to suit their own needs.
 \startsection[title={Using Lua}]
 
 One of the most important benefits of \ConTeXt\ is the integration of Lua. 
-
-\startluacode
-
--- local aPath = kpse.find_file('silly')
--- texio.write(aPath)
--- texio.write("\n")
-local test = require 'silly'
-
-\stopluacode
 
 \stopsection
 

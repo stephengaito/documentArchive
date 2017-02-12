@@ -1,0 +1,42 @@
+%D \module
+%D   [     file=t-joylol,
+%D      version=2017.02.12,
+%D        title=\CONTEXT\ User module,
+%D     subtitle=JoyLoL,
+%D       author=Stephen Gaito,
+%D         date=\currentdate,
+%D    copyright=PerceptiSys Ltd (Stephen Gaito),
+%D        email=stephen@perceptisys.co.uk,
+%D      license=GNU General Public License]
+
+%C Copyright (C) 2017 PerceptiSys Ltd (Stephen Gaito
+%C
+%C This program is free software: you can redistribute it and/or modify
+%C it under the terms of the GNU General Public License as published by
+%C the Free Software Foundation, either version 3 of the License, or
+%C (at your option) any later version.
+%C
+%C This program is distributed in the hope that it will be useful,
+%C but WITHOUT ANY WARRANTY; without even the implied warranty of
+%C MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%C GNU General Public License for more details.
+%C
+%C You should have received a copy of the GNU General Public License
+%C along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+% begin info
+%
+% title   : \CONTEXT\ interface to the JoyLoL programming language
+% comment : This user module give \CONTEXT\ the abilty to compile and run JoyLoL coe
+% status  : under development, mkiv only
+%
+% end info
+
+\writestatus{loading}{ConTeXt User Module / JoyLoL}
+
+\unprotect
+
+\ctxloadluafile{t-joylol}
+
+\protect \endinput
+
