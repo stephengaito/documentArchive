@@ -1,0 +1,48 @@
+% A ConTeXt document
+
+\startchapter[title=Logistics]
+
+\startsection[title=Where to put things]
+
+The \TeX\ Directory Structure (TDS) specifies an overall structure for any 
+collection of \TeX\ resources. \ConTeXt\ resources naturally fit within this 
+overall structure. 
+
+In \ConTeXt\ there are two distinct types of modules, \emph{core} and 
+\emph{third-party} modules. In addition \ConTeXt\ has had two major 
+generations, \emph{MkII} and \emph{MkIV}, we will only deal with the \LuaTeX\ 
+based MkIV generation. 
+
+Third-party MkIV generation modules consist of an interface description, 
+written in XML and a number of MkIV and Lua module definition files. 
+Third-party modules may also contain additional documention or example files, 
+as well as some lua scripts for use with the mtxrun commands. These files are 
+all located in the following TDS based file tree: 
+
+\starttyping
+
+t-<moduleName>
+  doc
+    context
+      third
+        <moduleName>
+          {contains any document files or examples for the module}
+  scripts
+    context
+      lua
+        {contains any mtxrun based lua scripts}
+  tex
+    context
+      interface
+        t-<moduleName>.xml
+      third
+        <moduleName>
+          {contains any MkIV or Lua definition files for the module}
+
+\stoptyping
+
+Note that all third-party files should begin with the prefix \type{t-}. 
+
+\stopsection
+
+\stopchapter
