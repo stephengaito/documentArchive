@@ -1,4 +1,4 @@
-<--! leave blank -->
+<!-- leave blank -->
 # ConTeXt maintenance scripts for Unix
 
 This directory contains a collection of simple scripts which help install, 
@@ -130,5 +130,5 @@ the 'uc-x' functions.
 # License 
 
 All of the scripts *in this directory* are placed in the public domain and 
-may be used and altered as you wish. There is NO WARANTY FOR ANY USE. 
-
+may be used and altered as you wish. There is NO WARRANTY FOR ANY USE. Use 
+these scripts at your own risk. 
