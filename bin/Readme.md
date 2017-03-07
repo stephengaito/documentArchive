@@ -49,9 +49,13 @@ type:
 To use these scripts cd into the root of your ConTeXt installation and type: 
 
 > ./downLoad-beta
+
 or
+
 > ./downLoad-current
+
 or
+
 > ./downLoad-experiemental
 
 These scripts will install the appropriate version into 'beta', 'current' or 
@@ -83,11 +87,12 @@ beginning. *Make sure you use a programmer's editor such as nano*.
 
 ## Using Textadept commands 
 
-There are three 'ta-x' commands: 'ta-b', 'ta-c' and 'ta-e', starts textadept 
-after sourcing the setuptex script in the beta, current or experimental 
-installation respectively. Note that these scripts assume that your root 
-ConTeXt installation is located in the '/usr/local/context' directory. If 
-this is not the case then you will need to alter these scripts accordingly. 
+There are three 'ta-x' commands: 'ta-b', 'ta-c' and 'ta-e', each of which 
+starts textadept after sourcing the setuptex script in the beta, current or 
+experimental installation respectively. Note that these scripts assume that 
+your root ConTeXt installation is located in the '/usr/local/context' 
+directory. If this is not the case then you will need to alter these scripts 
+accordingly. 
 
 ## Using the shell terminal functions 
 
@@ -112,6 +117,11 @@ referenced code type:
 
 > mtxrun --script xrefs --build
 
+This xrefs mtxrun script is part of the "A ConTeXt Module Writer's Progress". 
+It is located in the 't-helloworld/scripts/context/lua' directory. You are 
+welcome to alter your own local copy to provide any cross references you 
+might find useful. GitHub pull requests will be happily considered. 
+
 **Note** both the 'webXrefs' and 'mtxrun --scripts xrefs --build' commands 
 can only be run in shells in which you have chosen a ConTeXt installation 
 using one of the 'uc-x' functions.
@@ -123,12 +133,12 @@ package. On a debian derived system, you can do this by typing:
 
 ### webContext
 
-The 'webContext' command automates the mtxrun server script. To use this 
-command you must have previously chosen a ConTeXt installation using one of 
-the 'uc-x' functions. 
+The 'webContext' command automates the standard ConTeXt mtxrun server script. 
+To use this command you must have previously chosen a ConTeXt installation 
+using one of the 'uc-x' functions. 
 
 # License 
 
-All of the scripts *in this directory* are placed in the public domain and 
+All of the scripts *in this 'bin' directory* are placed in the public domain and 
 may be used and altered as you wish. There is NO WARRANTY FOR ANY USE. Use 
 these scripts at your own risk. 
