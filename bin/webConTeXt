@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# This bash script automates running the ConTeXt mtxrun server
+
+xdg-open http://localhost:8088/mtx-server-ctx-startup.lua
+
+exec mtxrun --script server --auto
