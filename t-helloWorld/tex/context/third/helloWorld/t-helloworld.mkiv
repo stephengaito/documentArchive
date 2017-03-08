@@ -18,10 +18,10 @@
 %C without limitation the rights to use, copy, modify, merge, publish, 
 %C distribute, sublicense, and/or sell copies of the Software, and to 
 %C permit persons to whom the Software is furnished to do so, subject to 
-%C the following conditions:
+%C the following conditions: 
 %C
 %C The above copyright notice and this permission notice shall be included 
-%C in all copies or substantial portions of the Software.
+%C in all copies or substantial portions of the Software. 
 %C
 %C THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
 %C OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
@@ -29,7 +29,7 @@
 %C IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
 %C CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
 %C TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
-%C SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+%C SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 
 % begin info
 %
@@ -42,12 +42,83 @@
 %M \usemodule[helloworld]
 %M \loadsetups[t-helloworld.xml]
 
+%M \setupinteraction
+%M   [state=start,
+%M    color=green,
+%M    style=bold]
+%M % make chapter, section bookmarks visible when opening document
+%M \placebookmarks[chapter,section,subsection][chapter,section]
+%M \setupinteractionscreen[option=bookmark]
+
+%D \startsection[title=Introduction]
+
+%D The HelloWorld \ConTeXt\ module is intentionally simple. All it does is 
+%D say Hello. Its primary purpose is to provide a simple example module 
+%D with which to discuss the most often used core \ConTeXt\ module 
+%D building commands. 
+
+%D \stopsection
+
 \unprotect
+
+%D \startsection[title=Hello World command]
+
+%D This is a test of the Hello World \ConTeXt\ module. 
+
+%D The following \type{\HelloWorld} macros, with and without the optional 
+%D argument, use \ConTeXt\ to write the words `Hello World' and `Hello 
+%D Chris' respectively. 
+
+%D \type{\HelloWorld\} produces:
+
+%D \HelloWorld\
+
+%D %\HelloWorld[Chris] 
+
+%D %\HelloWorld[color=blue][Chris] 
 
 \unexpanded\def\HelloWorld{Hello World!}
 
-\def\HelloWorld_direct
+%\def\HelloWorld_direct
+
+%D \stopsection
+
+%D \startsection[title=Hello World environment]
+
+%D \starttyping
+%D \startHelloWorld 
+%D 
+%D \input darwin
+%D
+%D \stopHellowWorld
+%D \stoptyping
+%D produces:
+
+%D %\startHelloWorld 
+%D
+%D \input darwin
+%D
+%D %\stopHellowWorld
+
+
+%D \stopsection
+
+%D \startsection[title=Hello Lua command]
+
+%D The \type{\HelloLua} macros use lua to write the words `Hello World' 
+%D and `Hello Chris' to the \LuaTeX\ logs and console. 
+
+%D %\HelloLua\
+
+%D %\HelloLua[Chris]
+
 
 \unexpanded\def\HelloLua{\directlua{texio.write_nl("Hello from Lua!")}}
+
+%D \stopsection
+
+%D \startsection[title=Hello Lua environment]
+
+%D \stopsection
 
 \protect \endinput
