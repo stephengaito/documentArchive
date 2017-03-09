@@ -77,9 +77,16 @@
 
 %D %\HelloWorld[color=blue][Chris] 
 
-\unexpanded\def\HelloWorld{Hello World!}
+\unexpanded\def\HelloWorld{\dodoubleempty\HelloWorld_direct}
 
-%\def\HelloWorld_direct
+\def\HelloWorld_direct
+  {\ifsecondargument
+     \expandafter\HelloWorld_direct_double
+   \else\iffirstargument
+     \doubleexpandafter\HelloWorld_direct_single
+   \else
+     \doubleexpandafter\HelloWorld_direct_zero
+   \fi\fi}
 
 %D \stopsection
 
