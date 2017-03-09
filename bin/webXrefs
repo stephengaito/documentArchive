@@ -7,6 +7,14 @@ if [ -z "$TEXROOT" ];  then
   exit 1
 fi
 
+echo ""
+echo "We are running webfsd in the foreground"
+echo "and on the local loop-back ip address"
+echo "for security reasons."
+echo ""
+echo "Type Ctrl-C to stop the server"
+echo ""
+
 cd $TEXROOT/../xrefs
 pwd
 

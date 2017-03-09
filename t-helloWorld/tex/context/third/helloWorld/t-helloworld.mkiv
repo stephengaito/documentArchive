@@ -71,7 +71,7 @@
 
 %D \type{\HelloWorld\} produces:
 
-%D \HelloWorld\
+%D \HelloWorld[][]{}
 
 %D %\HelloWorld[Chris] 
 
@@ -87,6 +87,9 @@
    \else
      \doubleexpandafter\HelloWorld_direct_zero
    \fi\fi}
+
+   
+\def\HelloWorld_zero[#1][#2]{Hello World!}
 
 %D \stopsection
 

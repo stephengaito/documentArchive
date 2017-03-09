@@ -1,0 +1,131 @@
+\startmoduledocumentation[type=mkiv,file=t-helloworld,version=2017.03.06,title=\CONTEXT\ User module,subtitle=Hello World in ConTeXt and LuaTeX,author=Stephen Gaito,date=\currentdate,copyright=PerceptiSys Ltd (Stephen Gaito),email=stephen@perceptisys.co.uk,license=MIT License]
+\usemodule[helloworld]
+\loadsetups[t-helloworld.xml]
+\setupinteraction
+  [state=start,
+   color=green,
+   style=bold]
+% make chapter, section bookmarks visible when opening document
+\placebookmarks[chapter,section,subsection][chapter,section]
+\setupinteractionscreen[option=bookmark]
+\startdocumentation
+\startsection[title=Introduction]
+\stopdocumentation
+\startdocumentation
+The HelloWorld \ConTeXt\ module is intentionally simple. All it does is 
+say Hello. Its primary purpose is to provide a simple example module 
+with which to discuss the most often used core \ConTeXt\ module 
+building commands. 
+\stopdocumentation
+\startdocumentation
+\stopsection
+\stopdocumentation
+
+
+\startdefinition
+\unprotect
+\stopdefinition
+\startdocumentation
+\startsection[title=Hello World command]
+\stopdocumentation
+\startdocumentation
+This is a test of the Hello World \ConTeXt\ module. 
+\stopdocumentation
+\startdocumentation
+The following \type{\HelloWorld} macros, with and without the optional 
+argument, use \ConTeXt\ to write the words `Hello World' and `Hello 
+Chris' respectively. 
+\stopdocumentation
+\startdocumentation
+\type{\HelloWorld\} produces:
+\stopdocumentation
+\startdocumentation
+\HelloWorld[][]{}
+\stopdocumentation
+\startdocumentation
+%\HelloWorld[Chris] 
+\stopdocumentation
+\startdocumentation
+%\HelloWorld[color=blue][Chris] 
+\stopdocumentation
+
+
+\startdefinition
+\unexpanded\def\HelloWorld{\dodoubleempty\HelloWorld_direct}
+\stopdefinition
+
+
+\startdefinition
+\def\HelloWorld_direct
+  {\ifsecondargument
+     \expandafter\HelloWorld_direct_double
+   \else\iffirstargument
+     \doubleexpandafter\HelloWorld_direct_single
+   \else
+     \doubleexpandafter\HelloWorld_direct_zero
+   \fi\fi}
+\stopdefinition
+
+
+\startdefinition
+\def\HelloWorld_zero[#1][#2]{Hello World!}
+\stopdefinition
+\startdocumentation
+\stopsection
+\stopdocumentation
+\startdocumentation
+\startsection[title=Hello World environment]
+\stopdocumentation
+\startdocumentation
+\starttyping
+\startHelloWorld 
+
+\input darwin
+
+\stopHellowWorld
+\stoptyping
+produces:
+\stopdocumentation
+\startdocumentation
+%\startHelloWorld 
+
+\input darwin
+
+%\stopHellowWorld
+\stopdocumentation
+\startdocumentation
+\stopsection
+\stopdocumentation
+\startdocumentation
+\startsection[title=Hello Lua command]
+\stopdocumentation
+\startdocumentation
+The \type{\HelloLua} macros use lua to write the words `Hello World' 
+and `Hello Chris' to the \LuaTeX\ logs and console. 
+\stopdocumentation
+\startdocumentation
+%\HelloLua\
+\stopdocumentation
+\startdocumentation
+%\HelloLua[Chris]
+\stopdocumentation
+
+
+\startdefinition
+\unexpanded\def\HelloLua{\directlua{texio.write_nl("Hello from Lua!")}}
+\stopdefinition
+\startdocumentation
+\stopsection
+\stopdocumentation
+\startdocumentation
+\startsection[title=Hello Lua environment]
+\stopdocumentation
+\startdocumentation
+\stopsection
+\stopdocumentation
+
+
+\startdefinition
+\protect \endinput
+\stopdefinition
+\stopmoduledocumentation

@@ -131,6 +131,15 @@ package. On a debian derived system, you can do this by typing:
 
 > sudo apt-get install webfs
 
+The standard Debian/Ubuntu installation of webfs is setup to automatically 
+run webfsd on port 8000. The whole point of using webfsd is to be able to 
+run a controlled webserver in the foreground and only on the local 
+loop-back for security reasons. To stop the automatic running of webfsd, 
+type: 
+
+> sudo /etc/init.d/webfs stop
+> sudo chmod a-x /etc/init.d/webfs
+
 ### webContext
 
 The 'webContext' command automates the standard ConTeXt mtxrun server script. 
