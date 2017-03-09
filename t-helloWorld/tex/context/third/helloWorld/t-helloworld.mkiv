@@ -63,19 +63,31 @@
 
 %D \startsection[title=Hello World command]
 
+%D \startsubsection[title=Examples]
+
 %D This is a test of the Hello World \ConTeXt\ module. 
 
 %D The following \type{\HelloWorld} macros, with and without the optional 
 %D argument, use \ConTeXt\ to write the words `Hello World' and `Hello 
 %D Chris' respectively. 
 
-%D \type{\HelloWorld\} produces:
+%D The command \type{\HelloWorld} produces:
 
-%D \HelloWorld[][]{}
+%D \HelloWorld
 
-%D %\HelloWorld[Chris] 
+%D The command \type{\HelloWorld[Chris]} produces:
+
+%D \HelloWorld[Chris] 
+
+%D The command \type{\HelloWorld[Bonjour][Chris]} produces:
+
+%D \HelloWorld[Bonjour][Chris] 
 
 %D %\HelloWorld[color=blue][Chris] 
+
+%D \stopsubsection
+
+%D \startsubsection[title=Implementation]
 
 \unexpanded\def\HelloWorld{\dodoubleempty\HelloWorld_direct}
 
@@ -85,12 +97,16 @@
    \else\iffirstargument
      \doubleexpandafter\HelloWorld_direct_single
    \else
-     \doubleexpandafter\HelloWorld_direct_zero
+     \doubleexpandafter\HelloWorld_direct_none
    \fi\fi}
 
+\def\HelloWorld_direct_double[#1][#2]{#1 #2!}
    
-\def\HelloWorld_zero[#1][#2]{Hello World!}
+\def\HelloWorld_direct_single[#1][#2]{Hello #1!}
+   
+\def\HelloWorld_direct_none[#1][#2]{Hello World!}
 
+%D \stopsubsection
 %D \stopsection
 
 %D \startsection[title=Hello World environment]

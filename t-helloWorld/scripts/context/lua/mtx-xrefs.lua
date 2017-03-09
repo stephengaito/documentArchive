@@ -124,6 +124,12 @@ addPattern('macros',                'macros')
 addPattern('setinterfaceconstants', 'setinterfaceconstant')
 addPattern('setinterfacevariables', 'setinterfacevariable')
 addPattern('setinterface', 'setinterface')
+addPattern('dosingleempty', 'dosingleempty')
+addPattern('dodoubleempty', 'dodoubleempty')
+addPattern('iffirstargument', 'iffirstargument')
+addPattern('ifsecondargument', 'ifsecondargument')
+addPattern('singleexpandafter', 'singleexpandafter')
+addPattern('doubleexpandafter', 'doubleexpandafter')
 
 local function collectNameSpaces(definitionStr, curDir, aFile)
   local patterns = scripts.xrefs.definitionPatterns
