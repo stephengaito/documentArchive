@@ -57,9 +57,18 @@
 %D with which to discuss the most often used core \ConTeXt\ module 
 %D building commands. 
 
+%D \listnamespaces\
+
 %D \stopsection
 
 \unprotect
+
+% Question: Do we need to define any constants or variables?
+
+\installnamespace{helloWorld}
+
+\installcommandhandler \????helloWorld {helloWorld} \????helloWorld
+
 
 %D \startsection[title=Hello World command]
 
