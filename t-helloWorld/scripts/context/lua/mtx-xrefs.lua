@@ -115,9 +115,11 @@ local function buildInterfaceSyntax(interfaceSyntax, someXml, curDir, aFile)
 end
 
 scripts.xrefs.definitionPatterns = { }
+
 local function addPattern(patternName, pattern)
   scripts.xrefs.definitionPatterns[patternName] = { ['_pattern_'] = pattern }
 end
+
 addPattern('namespaces',            'namespace')
 addPattern('loadsetups',            'loadsetups')
 addPattern('macros',                'macros')
@@ -143,7 +145,27 @@ local function collectNameSpaces(definitionStr, curDir, aFile)
   end
 end
 
+scripts.xrefs.authors = { }
+local authors = scripts.xrefs.authors
+
+local function addAuthor(definitionStr, curDir, aFile)
+  if not aFile:match('%.lua') and not aFile:match('%.tex') and not curDir:match('test') then
+    local authorName = definitionStr:match("author%s*=%s*([^,%]]+)[,%]]")
+    if authorName then
+      authorName = authorName:gsub('\\?%&', '&'):gsub('%/', '&'):gsub('%s+[Aa][Nn][Dd]%s+', '&')
+      authorName = authorName:gsub('[%{%}%"]', ''):gsub("%'", '')
+      authorName:gsub('([^%&]+)', function(c)
+        local aName = c:gsub('^%s*', ''):gsub('%s*$','')
+        local files = authors[aName] or { }
+        files[aFile] = curDir
+        authors[aName] = files
+      end)
+    end
+  end
+end
+
 local function findInterfacesNamespaces(parentFilesTable, curDir, aFile)
+  io.write('.')
   if aFile:match('%.xml$') then
     if scripts.xrefs.verbose then report('interface '..aFile) end
     local interfaceFile = io.open(aFile, 'r')
@@ -166,6 +188,7 @@ local function findInterfacesNamespaces(parentFilesTable, curDir, aFile)
     definitionFile:close()
     --
     collectNameSpaces(definitionStr, curDir, aFile)
+    addAuthor(definitionStr, curDir, aFile)
   end
 end
 
@@ -234,6 +257,7 @@ function scripts.xrefs.build()
   scripts.xrefs.createFileHtml(htmlDir)
   scripts.xrefs.createInterfaceSyntaxHtml(htmlDir)
   scripts.xrefs.createPatternsHtml(htmlDir)
+  scripts.xrefs.createAuthorsHtml(htmlDir)
   scripts.xrefs.createRootIndexHtml(htmlDir)
 end
 

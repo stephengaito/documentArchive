@@ -3,6 +3,7 @@ local function writeMainMenuHtml(htmlFile)
   htmlFile:write('    <a href="/files/index.html">files</a>\n')
   htmlFile:write('    <a href="/syntax/index.html">syntax</a>\n')
   htmlFile:write('    <a href="/patterns/index.html">patterns</a>\n')
+  htmlFile:write('    <a href="/authors/index.html">authors</a>\n')
   htmlFile:write('    <a href="/documents">docs</a>\n')
   htmlFile:write('  </div>\n')
 end
@@ -271,6 +272,76 @@ function scripts.xrefs.createPatternsHtml(htmlDir)
     for i, patternName in ipairs(keys) do 
       writeAPatternHtml(scripts.xrefs.definitionPatterns[patternName], '/patterns', patternName, breadCrumbs)
       htmlFile:write('    <li><a href="/patterns/'..patternName..'.html">'..patternName..'</a></li>\n')
+    end
+    htmlFile:write('  </ul>\n')
+    writeHtmlFooter(htmlFile, breadCrumbs)
+    htmlFile:close()
+  end
+  lfs.chdir(oldDir)
+end
+
+local function writeAnAuthorHtml(filesFound, aPath, aTag, breadCrumbs)
+  io.write('.')
+  local htmlFile = io.open(aTag..'.html', 'w')
+  if htmlFile then
+    local keys = { }
+    for aKey in pairs(filesFound) do
+      keys[#keys+1] = aKey
+    end
+    table.sort(keys)
+    --
+    -- add this bread crumb
+    --
+    local aCrumb = { }
+    aCrumb['url'] = aPath..'/'..aTag..'.html'
+    aCrumb['tag'] = aTag
+    local lastBreadCrumb = #breadCrumbs+1
+    breadCrumbs[lastBreadCrumb] = aCrumb
+    --
+    writeHtmlHeader(htmlFile, breadCrumbs)
+    htmlFile:write('  <ul>\n')
+    for i, aKey in ipairs(keys) do
+      htmlFile:write('    <li><a href="/files/'..filesFound[aKey]..'/'..aKey..'.html">'..aKey..'</a></li>\n')
+    end
+    htmlFile:write('  </ul>\n')
+    writeHtmlFooter(htmlFile, breadCrumbs)
+    htmlFile:close()
+    breadCrumbs[lastBreadCrumb] = nil
+  end
+end
+
+
+function scripts.xrefs.createAuthorsHtml(htmlDir)
+  local oldDir = lfs.currentdir()
+  lfs.chdir(htmlDir)
+  lfs.mkdir('authors')
+  lfs.chdir('authors')
+  local htmlFile = io.open('index.html', 'w')
+  if htmlFile then
+    io.write('\n\nProcessing Authors: ')
+    --
+    -- sort the authors
+    --
+    local keys = { }
+    for aKey in pairs(scripts.xrefs.authors) do
+      keys[#keys+1] = aKey
+    end
+    table.sort(keys)    
+    --
+    -- add the authors bread crumb
+    --
+    local breadCrumbs = { }
+    local aCrumb = { }
+    aCrumb['url'] = '/authors/index.html'
+    aCrumb['tag'] = 'authors'
+    local lastBreadCrumb = #breadCrumbs+1
+    breadCrumbs[lastBreadCrumb] = aCrumb
+
+    writeHtmlHeader(htmlFile, breadCrumbs)
+    htmlFile:write('  <ul>\n')
+    for i, authorName in ipairs(keys) do 
+      writeAnAuthorHtml(scripts.xrefs.authors[authorName], '/authors', authorName, breadCrumbs)
+      htmlFile:write('    <li><a href="/authors/'..authorName..'.html">'..authorName..',</a></li>\n')
     end
     htmlFile:write('  </ul>\n')
     writeHtmlFooter(htmlFile, breadCrumbs)
