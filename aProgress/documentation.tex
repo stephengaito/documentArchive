@@ -1,14 +1,25 @@
 % A ConTeXt document
 
-\startchapter[title=Documentation]
+\product moduleWriting
+
+\startcomponent documentation
+
+\chapter{Documentation}
 
 There are two ways to document a given \ConTeXt\ module, by either providing 
 documentation embedded in the module definition file, or conversely by 
 writing various \ConTeXt\ documents. 
 
-\startsection[title=Internal documentation]
+\startsection[title=Finding out how to do things]
 
-The \ConTeXt\ module documenation system makes use \TeX\ comments embedded 
+
+\stopsection
+
+\startsection[title=Providing documentation]
+
+\startsubsection[title=Internal documentation]
+
+The \ConTeXt\ module documentation system makes use \TeX\ comments embedded 
 inside the module definition files to provide literate programming style 
 documentation of the macro definitions for any given module. 
 
@@ -100,6 +111,8 @@ the \type{mtx-modules.lua} file in the
 
 \stoptyping
 
+\stopsubsection
+
 \stopsection
 
-\stopchapter
+\stopcomponent
