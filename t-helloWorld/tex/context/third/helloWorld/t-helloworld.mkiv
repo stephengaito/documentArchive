@@ -76,79 +76,124 @@
 
 %D This is a test of the Hello World \ConTeXt\ module. 
 
-%D The following \type{\HelloWorld} macros, with and without the optional 
+%D The following \type{\helloWorld} macros, with and without the optional 
 %D argument, use \ConTeXt\ to write the words `Hello World' and `Hello 
 %D Chris' respectively. 
 
-%D The command \type{\HelloWorld} produces:
+%D The command \type{\helloWorld} produces:
 
-%D \HelloWorld
+%D \helloWorld
 
-%D The command \type{\HelloWorld[Chris]} produces:
+%D The command \type{\helloWorld[Chris]} produces:
 
-%D \HelloWorld[Chris] 
+%D \helloWorld[Chris] 
 
-%D The command \type{\HelloWorld[Bonjour][Chris]} produces:
+%D The command \type{\helloWorld[Bonjour][Chris]} produces:
 
-%D \HelloWorld[Bonjour][Chris] 
+%D \helloWorld[Bonjour][Chris] 
 
-%D %\HelloWorld[color=blue][Chris] 
+%D %\helloWorld[color=blue][Chris] 
 
 %D \stopsubsection
 
 %D \startsubsection[title=Implementation]
 
-\unexpanded\def\HelloWorld{\dodoubleempty\HelloWorld_direct}
+\unexpanded\def\helloWorld{\dodoubleempty\helloWorld_direct}
 
-\def\HelloWorld_direct
+\def\helloWorld_direct
   {\ifsecondargument
-     \expandafter\HelloWorld_direct_double
+     \expandafter\helloWorld_direct_double
    \else\iffirstargument
-     \doubleexpandafter\HelloWorld_direct_single
+     \doubleexpandafter\helloWorld_direct_single
    \else
-     \doubleexpandafter\HelloWorld_direct_none
+     \doubleexpandafter\helloWorld_direct_none
    \fi\fi}
 
-\def\HelloWorld_direct_double[#1][#2]{#1 #2!}
+\def\helloWorld_direct_double[#1][#2]{#1 #2!}
    
-\def\HelloWorld_direct_single[#1][#2]{Hello #1!}
+\def\helloWorld_direct_single[#1][#2]{Hello #1!}
    
-\def\HelloWorld_direct_none[#1][#2]{Hello World!}
+\def\helloWorld_direct_none[#1][#2]{Hello World!}
 
 %D \stopsubsection
 %D \stopsection
 
 %D \startsection[title=Hello World environment]
 
+%D \startsubsection[title=Examples]
+
 %D \starttyping
 %D \startHelloWorld 
 %D 
 %D \input darwin
 %D
-%D \stopHellowWorld
+%D \stopHelloWorld
 %D \stoptyping
 %D produces:
 
-%D %\startHelloWorld 
+%D \startHelloWorld 
 %D
 %D \input darwin
 %D
-%D %\stopHellowWorld
+%D \stopHelloWorld
 
+%D \stopsubsection
+
+%D \startsubsection[title=Implementation: Start]
+
+\unexpanded\def\startHelloWorld{\dodoubleempty\helloWorld_start}
+
+\def\helloWorld_start
+  {\ifsecondargument
+     \expandafter\helloWorld_start_double
+   \else\iffirstargument
+     \doubleexpandafter\helloWorld_start_single
+   \else
+     \doubleexpandafter\helloWorld_start_none
+   \fi\fi}
+
+\def\helloWorld_start_double[#1][#2]{starting: #1 #2!}
+   
+\def\helloWorld_start_single[#1][#2]{starting: Hello #1!}
+   
+\def\helloWorld_start_none[#1][#2]{starting: Hello World!}
+
+%D \stopsubsection
+
+%D \startsubsection[title=Implementation: Stop]
+
+\unexpanded\def\stopHelloWorld{\dodoubleempty\helloWorld_stop}
+
+\def\helloWorld_stop
+  {\ifsecondargument
+     \expandafter\helloWorld_stop_double
+   \else\iffirstargument
+     \doubleexpandafter\helloWorld_stop_single
+   \else
+     \doubleexpandafter\helloWorld_stop_none
+   \fi\fi}
+
+\def\helloWorld_stop_double[#1][#2]{stopping: #1 #2!}
+   
+\def\helloWorld_stop_single[#1][#2]{stopping: Hello #1!}
+   
+\def\helloWorld_stop_none[#1][#2]{stopping: Hello World!}
+
+%D \stopsubsection
 
 %D \stopsection
 
 %D \startsection[title=Hello Lua command]
 
-%D The \type{\HelloLua} macros use lua to write the words `Hello World' 
+%D The \type{\helloLua} macros use lua to write the words `Hello World' 
 %D and `Hello Chris' to the \LuaTeX\ logs and console. 
 
-%D %\HelloLua\
+%D %\helloLua\
 
-%D %\HelloLua[Chris]
+%D %\helloLua[Chris]
 
 
-\unexpanded\def\HelloLua{\directlua{texio.write_nl("Hello from Lua!")}}
+\unexpanded\def\helloLua{\directlua{texio.write_nl("Hello from Lua!")}}
 
 %D \stopsection
 
