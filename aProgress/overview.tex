@@ -1,10 +1,8 @@
-% A ConTeXt document
-
-\product moduleWriting
+% A ConTeXt document [master document: moduleWriting.tex ]
 
 \startcomponent overview
 
-\chapter{Overview}
+\startchapter[title=Overview]
 
 \startsection[title=Introduction]
 
@@ -12,7 +10,7 @@
 ConTeXt is similar to, but in many respects more disciplined internally 
 than, \LaTeX. This internal discipline makes it easier to write \ConTeXt\ 
 modules. Unfortunately, \ConTeXt's current documentation, while copious, 
-can be patchy and if more focused upon document writers than module 
+can be patchy and is more focused upon document writers than module 
 builders. This is likely the result of \ConTeXt's continual development. 
 
 This document is an attempt to provide a consistent overview of the 
@@ -27,5 +25,7 @@ to provide Test Driven Development within a \ConTeXt\ and \LuaTeX\
 environment. 
 
 \stopsection
+
+\stopchapter
 
 \stopcomponent
