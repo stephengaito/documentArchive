@@ -18,6 +18,7 @@ local helpinfo = [[
   <category name="basic">
    <subcategory>
     <flag name="build"><short>build cross references</short></flag>
+    <flag name="check"><short>check ConTeXt interface files</short></flag>
     <flag name="verbose"><short>provide verbose narative of actions</short></flag>
    </subcategory>
   </category>
@@ -28,6 +29,8 @@ local helpinfo = [[
    <subcategory>
     <example><command>mtxrun --script xrefs --build [xrefsHtmlDirectory]</command></example>
     <example><command>mtxrun --script xrefs --verbose --build [xrefsHtmlDirectory]</command></example>
+    <example><command>mtxrun --script xrefs --check</command></example>
+    <example><command>mtxrun --script xrefs --verbose --check</command></example>
    </subcategory>
    <subcategory>
     <example><command>The parameter xrefsHtmlDirectory is optional.</command></example>
@@ -206,17 +209,22 @@ local function loadExamples(parentFilesTable, curDir, aFile)
   end
 end
 
-function scripts.xrefs.build()
-  --
-  -- determine the htmlDir
-  --
+local function setup()
   local contextDir = os.getenv('SELFAUTOPARENT')
   local subDir = contextDir:match('[^/]+$')
   contextDir = contextDir:gsub('/[^%/]+$', '')
   scripts.xrefs.contextDir = contextDir
+  scripts.xrefs.subDir     = subDir
+end
+
+function scripts.xrefs.build()
+  setup()
+  --
+  -- determine the htmlDir
+  --
   local htmlDir    = environment.files[1]
   if htmlDir == nil then
-    htmlDir = contextDir..'/xrefs'
+    htmlDir = scripts.xrefs.contextDir..'/xrefs'
   end
   --
   -- prove that we can write into the htmlDir
@@ -239,13 +247,12 @@ function scripts.xrefs.build()
   --
   -- Now do the work
   --
-  
   scripts.xrefs.files = { }
   scripts.xrefs.interfaceSyntax = { }
-  lfs.chdir(contextDir)
+  lfs.chdir(scripts.xrefs.contextDir)
   --print('\nLooking for files: ')
   scripts.xrefs.walkDirDoing(
-    '.', subDir, scripts.xrefs.files,
+    '.', scripts.xrefs.subDir, scripts.xrefs.files,
     findInterfacesNamespaces, function() end)
   --print(pp.write(scripts.xrefs.interfaceSyntax))
   scripts.xrefs.interfaceSyntax = scripts.xrefs.interfaceSyntax[':@rt@']
@@ -261,12 +268,54 @@ function scripts.xrefs.build()
   scripts.xrefs.createRootIndexHtml(htmlDir)
 end
 
+
+local function checkInterfaceSyntax(interfaceXml, curDir, aFile)
+  print(curDir..'/'..aFile)
+  for e in xml.collected(interfaceXml, 'cd:command') do
+    print(pp.write(e))
+  end
+end
+
+local function checkInterfaces(parentFilesTable, curDir, aFile)
+  io.write('.')
+  if aFile:match('%.xml$') then
+    if scripts.xrefs.verbose then report('interface '..aFile) end
+    local interfaceFile = io.open(aFile, 'r')
+    local interfaceStr  = interfaceFile:read('*all')
+    interfaceFile:close()
+    if interfaceStr:match('%<cd%:interface') then
+      -- we only care about interface definitions
+      parentFilesTable[aFile] = curDir..'/'..aFile
+      local interfaceXml  = xml.convert(interfaceStr)
+      if interfaceXml['statistics']['errormessage'] ~= nil then
+        report('non-valid xml in '..aFile)
+      end
+      checkInterfaceSyntax(interfaceXml, curDir, aFile)
+    end
+  end
+end
+
+scripts.xrefs.interfacesNeedingFixes = { }
+
+function scripts.xrefs.check()
+  setup()
+  lfs.chdir(scripts.xrefs.contextDir)
+  --print('\nLooking for files: ')
+  scripts.xrefs.walkDirDoing(
+    '.', scripts.xrefs.subDir, scripts.xrefs.interfacesNeedingFixes,
+    checkInterfaces, function() end)
+
+end
+
 if environment.argument("verbose") then
   scripts.xrefs.verbose = true
 end
 
 if environment.argument("build") then
   scripts.xrefs.build()
+elseif environment.argument("check") then
+  scripts.xrefs.check()
 else
   application.help()
 end
+
