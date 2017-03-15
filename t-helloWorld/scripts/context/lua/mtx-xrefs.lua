@@ -268,17 +268,40 @@ function scripts.xrefs.build()
   scripts.xrefs.createRootIndexHtml(htmlDir)
 end
 
+resolvers.load()
 
 local function checkInterfaceSyntax(interfaceXml, curDir, aFile)
-  print(curDir..'/'..aFile)
   for e in xml.collected(interfaceXml, 'cd:command') do
-    print(pp.write(e))
+    if e.at['file'] then
+      local aFileName = e.at['file']
+      local aFilePath = resolvers.findfile(aFileName)
+      if aFilePath and aFilePath ~= '' then
+        --print('['..aFileName..'] FOUND')
+      else
+        local aTestFileName = aFileName:gsub('%.[^%.]+$', '.mkiv')
+        aFilePath = resolvers.findfile(aTestFileName)
+        if aFilePath and aFilePath ~= '' then
+          print(curDir..'/'..aFile)
+          print('['..aFileName..'] = '..aTestFileName)
+        else
+          local aTestFileName = aFileName:gsub('%.[^%.]+$', '.mkvi')
+          aFilePath = resolvers.findfile(aTestFileName)
+          if aFilePath and aFilePath ~= '' then
+            print(curDir..'/'..aFile)
+            print('['..aFileName..'] = '..aTestFileName)
+          else
+            print(curDir..'/'..aFile)
+            print('['..aFileName..'] NO FILE FOUND')
+          end
+        end
+      end
+    end
   end
 end
 
 local function checkInterfaces(parentFilesTable, curDir, aFile)
   io.write('.')
-  if aFile:match('%.xml$') then
+  if aFile:match('%.xml$') and not curDir:match('mkii') then
     if scripts.xrefs.verbose then report('interface '..aFile) end
     local interfaceFile = io.open(aFile, 'r')
     local interfaceStr  = interfaceFile:read('*all')
