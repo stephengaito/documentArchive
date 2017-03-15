@@ -270,28 +270,35 @@ end
 
 resolvers.load()
 
-local function checkInterfaceSyntax(interfaceXml, curDir, aFile)
+local function checkInterfaceSyntax(fixupTable, interfaceXml, curDir, aFile)
   for e in xml.collected(interfaceXml, 'cd:command') do
     if e.at['file'] then
       local aFileName = e.at['file']
       local aFilePath = resolvers.findfile(aFileName)
       if aFilePath and aFilePath ~= '' then
-        --print('['..aFileName..'] FOUND')
       else
         local aTestFileName = aFileName:gsub('%.[^%.]+$', '.mkiv')
         aFilePath = resolvers.findfile(aTestFileName)
         if aFilePath and aFilePath ~= '' then
-          print(curDir..'/'..aFile)
-          print('['..aFileName..'] = '..aTestFileName)
+          fixupTable[aFile] = fixupTable[aFile] or { }
+          fixupTable[aFile]['dir'] = curDir
+          fixupTable[aFile][aFileName] = fixupTable[aFile][aFileName] or { }
+          fixupTable[aFile][aFileName]['file'] = aTestFileName
+          fixupTable[aFile][aFileName]['path'] = aFilePath
         else
           local aTestFileName = aFileName:gsub('%.[^%.]+$', '.mkvi')
           aFilePath = resolvers.findfile(aTestFileName)
           if aFilePath and aFilePath ~= '' then
-            print(curDir..'/'..aFile)
-            print('['..aFileName..'] = '..aTestFileName)
+            fixupTable[aFile] = fixupTable[aFile] or { }
+            fixupTable[aFile]['dir'] = curDir
+            fixupTable[aFile][aFileName] = fixupTable[aFile][aFileName] or { }
+            fixupTable[aFile][aFileName]['file'] = aTestFileName
+            fixupTable[aFile][aFileName]['path'] = aFilePath
           else
-            print(curDir..'/'..aFile)
-            print('['..aFileName..'] NO FILE FOUND')
+            fixupTable[aFile] = fixupTable[aFile] or { }
+            fixupTable[aFile]['dir'] = curDir
+            fixupTable[aFile][aFileName] = fixupTable[aFile][aFileName] or { }
+            fixupTable[aFile][aFileName]['file'] = 'Not found'
           end
         end
       end
@@ -299,7 +306,7 @@ local function checkInterfaceSyntax(interfaceXml, curDir, aFile)
   end
 end
 
-local function checkInterfaces(parentFilesTable, curDir, aFile)
+local function checkInterfaces(fixupTable, curDir, aFile)
   io.write('.')
   if aFile:match('%.xml$') and not curDir:match('mkii') then
     if scripts.xrefs.verbose then report('interface '..aFile) end
@@ -308,12 +315,11 @@ local function checkInterfaces(parentFilesTable, curDir, aFile)
     interfaceFile:close()
     if interfaceStr:match('%<cd%:interface') then
       -- we only care about interface definitions
-      parentFilesTable[aFile] = curDir..'/'..aFile
       local interfaceXml  = xml.convert(interfaceStr)
       if interfaceXml['statistics']['errormessage'] ~= nil then
         report('non-valid xml in '..aFile)
       end
-      checkInterfaceSyntax(interfaceXml, curDir, aFile)
+      checkInterfaceSyntax(fixupTable, interfaceXml, curDir, aFile)
     end
   end
 end
@@ -327,7 +333,7 @@ function scripts.xrefs.check()
   scripts.xrefs.walkDirDoing(
     '.', scripts.xrefs.subDir, scripts.xrefs.interfacesNeedingFixes,
     checkInterfaces, function() end)
-
+  print(pp.write(scripts.xrefs.interfacesNeedingFixes))
 end
 
 if environment.argument("verbose") then
