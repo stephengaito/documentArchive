@@ -1,3 +1,5 @@
-# Future tasks ToDo
+# Future tasks ToDo 
 
-None at the moment
+* Determine the correct [interface 
+granularity](tasks/interfaceGranularity.md) 
+

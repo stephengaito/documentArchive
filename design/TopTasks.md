@@ -8,5 +8,5 @@ inside lua5.2 and lua5.3, textadept and luaTex/ConTeXt.
 
 2. Begin writing ConTeXt based documentation of the JoyLoL language. 
 
-3. Begin JoyLoL lexer for Textadept and ConTeXt. 
+3. Begin JoyLoL lexer/module for Textadept and ConTeXt. 
 
