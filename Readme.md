@@ -7,13 +7,15 @@ which is restricted to manipulating Lists of Lists.
 
 This implementation can be used in three distinct platforms:
 
-1. [Lua](https://www.lua.org/)
+1. [Lua](https://www.lua.org/) a light weight embeddable scripting 
+language written in ANSI-C.
 
-2. [Textadept](https://foicica.com/textadept/) (a programmer's text 
-editor and IDE)
+2. [Textadept](https://foicica.com/textadept/) a programmer's text 
+editor and IDE (which embeds Lua).
 
 3. [ConTeXt](http://www.contextgarden.net/)/[LuaTeX](http://www.luatex.org/) 
-(a type setting system based upon Knuth's [TeX](https://www.tug.org/))
+a type setting system based upon Knuth's [TeX](https://www.tug.org/) 
+(which embeds Lua).
 
 ## License
 
