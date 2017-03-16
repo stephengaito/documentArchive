@@ -12,8 +12,7 @@ This implementation can be used in three distinct platforms:
 2. [Textadept](https://foicica.com/textadept/) (a programmer's text 
 editor and IDE)
 
-3. 
-[ConTeXt](http://www.contextgarden.net/)/[LuaTeX](http://www.luatex.org/) 
+3. [ConTeXt](http://www.contextgarden.net/)/[LuaTeX](http://www.luatex.org/) 
 (a type setting system based upon Knuth's [TeX](https://www.tug.org/))
 
 ## License
