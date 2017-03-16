@@ -26,7 +26,43 @@ document.
 
 For a \emph{module} writer, the documentation, while copious, is spread 
 more widely. Again the best places to start are still the reference and 
-excursion manuals. 
+excursion manuals. Inside any \goto{Standalone 
+installation}[url(cStandalone)] there is a collection of current manuals 
+located in the directory 
+\type{tex/texmf-context/doc/context/documents/general/manuals}.
+
+\startsubsection[title=Local web-servers]
+
+More importantly are the comments contained in the \ConTeXt\ source code 
+it self. Assuming you have installed the \goto{Standalone 
+installation}[url(cStandalone)], the \type{mtxrun --script server --auto} 
+command will provide a local web-server which can be used, among other 
+things, to browse the primary collection of \ConTeXt\ commands, their 
+syntax and more importantly the \ConTeXt\ module file which contains the 
+command definition. \ConTeXt's core module code is very cleanly written 
+and more importantly contains supporting discussion of the intent behind 
+the higher level command definitions. All of this code and discussion can 
+be easily found using your browser's find in page function. 
+
+This module provides the \type{mtxrun --script xrefs --build} command 
+which walks through the code in a local standalone copy of \ConTeXt\ to 
+produce a collection of static cross reference web-pages. By default these 
+pages are created in the \type{xrefs} directory located beside the main 
+\type{tex} directory of your standalone installation. You can use any 
+web-server to server these pages. These cross reference web-pages provide 
+a simple tool to browse the existing \ConTeXt\ source code, together with 
+collections of links to the usage of important commands. These cross 
+reference web-pages also provide a way to browse the existing the 
+\ConTeXt\ interface definition XML syntax, together with all known 
+examples of each XML entity's use. 
+
+To use either of these commands, it is important to remember to 
+\type{mtxrun --generate} after any major change to your standalone 
+installation. For Unix users, this module has provided, in the \type{bin} 
+directory, simple bash scripts which can be used to automate the running 
+of these web-servers. 
+
+\stopsubsection
 
 \stopsection
 
