@@ -17,6 +17,30 @@ editor and IDE (which embeds Lua).
 a type setting system based upon Knuth's [TeX](https://www.tug.org/) 
 (which embeds Lua).
 
+## Dependencies
+
+### Runtime
+
+* Lua (either v5.2 or v5.3)
+-- LuaFileSystem
+-- LPeg
+* TextAdept
+* LuaTeX/ConTeXt
+
+### Compiling
+
+* Lua
+-- LuaFileSystem
+-- LPeg
+* Lake
+* CuTest
+* LunaTest
+* ConTests
+* GCC or CLANG (Window's c1 should work but is untested)
+
+## Installation
+
+
 ## License
 
 All C, Lua, and ConTeXt code (*.c, *.h, *.lua, *.mkiv files) is, except 

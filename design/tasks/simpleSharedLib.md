@@ -15,8 +15,28 @@ simplest installation, simplest "makefile" for our needs, and best/useful
 documentation. 
 
 > cd /usr/local/bin
+
 > wget https://github.com/stevedonovan/Lake/raw/master/lake
+
 > chmod a+x lake
+
+### Install Test systems 
+
+**CuTest** is simple and best to use for raw C code. Old JoyLoL embedded 
+the whole source from [cutest](https://github.com/asimjalis/cutest) as 
+forked and modified in 
+[stephengaito/cutest](https://github.com/stephengaito/cutest) (using the 
+notEqualsAssertions and namedSubSuites branches). This source was located 
+in the specs/cuTest directory (which was parallel to the unit, functional, 
+and integration directories of test suites). 
+
+**LunaTest** is simple and best to use for Lua code. Should be located in 
+a specs/lunaTest directory and should be taken from 
+[silentbicycle/lunatest](https://github.com/silentbicycle/lunatest) as 
+modified by [stephengaito/lunatest]() (See 
+[stephengaito/ConTests](https://github.com/stephengaito/ConTests)). As in 
+ConTests, we really ONLY need the lunatest.lua file itself, and we really 
+only need to be able to 'require' lunatest.lua. 
 
 ### Obtain lua5.2 and lua5.3 headers
 
