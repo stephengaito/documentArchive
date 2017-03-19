@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# This bash script obtains a copy of the [CuTest]() for local use.
+
+mkdir -p ansi-c/specs/cuTest
+
+rm -rf ansi-c/specs/cuTest/CuTest.h
+
+rm -rf ansi-c/specs/cuTest/CuTest.c
+
+wget --directory-prefix=ansi-c/specs/cuTest https://github.com/stephengaito/cutest/raw/combined/CuTest.h
+
+wget --directory-prefix=ansi-c/specs/cuTest https://github.com/stephengaito/cutest/raw/combined/CuTest.c
+

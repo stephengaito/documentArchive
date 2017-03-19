@@ -8,7 +8,6 @@ require both runtime and compile tools.
 ### Runtime
 
 * Lua (both v5.2 and v5.3)
--- LuaRocks
 -- LuaFileSystem
 -- LPeg
 * TextAdept
@@ -39,8 +38,6 @@ type:
 > sudo apt-get install lua5.2 liblua5.2-dev
 
 > sudo apt-get install lua5.3 liblua5.3-dev
-
-> sudo apt-get install luarocks
 
 > sudo apt-get install lua-filesystem-dev lua-lpeg-dev
 
@@ -114,6 +111,19 @@ tested.
 
 ### CuTest (testing ANSI-C code)
 
+[CuTest](https://github.com/asimjalis/cutest) is used to test the ANSI-C 
+code. To do this we use the [modified 
+version](https://github.com/stephengaito/cutest/tree/combined). Type:
+
+> ./bin/getCuTest
+
 ### LunaTest (testing Lua code)
 
+[LunaTest](https://github.com/silentbicycle/lunatest) is used to test the 
+Lua code in both the Lua and TextAdept directories. Again we use the 
+[modified version](https://github.com/stephengaito/lunatest). 
+
+> ./bin/getLunaTest
+
 ### ConTests (testing ConTeXt code)
+

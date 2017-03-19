@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# This bash script obtains a copy of the [LunaTest]() for local use.
+
+mkdir -p lua/specs/lunaTest
+
+rm -rf lua/specs/lunaTest/lunatest.lua
+
+wget --directory-prefix=lua/specs/lunaTest https://github.com/stephengaito/lunatest/raw/master/lunatest.lua
+
+mkdir -p textadept/specs/lunaTest
+
+rm -rf textadept/specs/lunaTest/lunatest.lua
+
+wget --directory-prefix=textadept/specs/lunaTest https://github.com/stephengaito/lunatest/raw/master/lunatest.lua
+
