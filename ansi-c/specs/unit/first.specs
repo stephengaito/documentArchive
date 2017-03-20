@@ -1,0 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "CuTest.h"
+
+// suiteName: - First tests -
+
+void Test_first(CuTest* tc) {
+  CuAssertStrEquals(tc, 'something', '');
+}
