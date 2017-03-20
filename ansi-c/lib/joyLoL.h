@@ -1,2 +1,2 @@
 
-extern char* helloWorld(void);
+extern char* helloWorld(const char* aName);

@@ -8,5 +8,9 @@
 // suiteName: - First tests -
 
 void Test_first(CuTest* tc) {
-  CuAssertStrEquals(tc, helloWorld(), "Hello world!\n");
+  CuAssertStrEquals(tc, helloWorld(""), "Hello world!\n");
+}
+
+void Test_second(CuTest* tc) {
+  CuAssertStrEquals(tc, helloWorld("Chris"), "Hello Chris!\n");
 }
