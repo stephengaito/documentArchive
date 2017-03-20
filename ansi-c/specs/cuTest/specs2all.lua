@@ -5,8 +5,6 @@
 --  <specFileCName>+
 -- and creates the associated *<allTestsFileName>.c CuTest file 
 
-local pp = require 'pl.pretty'
-
 if #arg < 2 then
   print('usage: '..arg[0]..' <allTestsFileName> <specFileCName>+')
   os.exit(-1)

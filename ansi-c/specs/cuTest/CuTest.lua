@@ -1,7 +1,5 @@
 -- A Lua file
 
-local pp = require('pl.pretty')
-
 local cuTest = {
   ext     = '.specs',
   obj_ext = '.c',

@@ -3,8 +3,6 @@
 -- This Lua Script reads a *.specs file and creates the associated *.c 
 -- CuTest file 
 
-local pp = require 'pl.pretty'
-
 if #arg < 1 then
   print('usage: '..arg[0]..' <specsFile>')
   os.exit(-1)
