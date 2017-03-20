@@ -1,5 +1,7 @@
 -- A Lua file
 
+local pp = require('pl.pretty')
+
 local cuTest = {
   ext     = '.specs',
   obj_ext = '.c',
@@ -19,7 +21,7 @@ function cuTest.program(args)
   args.src = cuTestR:get_targets()
   table.insert(args.src, 1, '../cuTest/CuTest.c')
   table.insert(args.src, 1, argC)
-  args.incdir = { '../cuTest' }
+  args.incdir = { '../cuTest', '../../lib' }
   return c.program(args)
 end
 
