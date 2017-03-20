@@ -7,5 +7,5 @@
 // suiteName: - First tests -
 
 void Test_first(CuTest* tc) {
-  CuAssertStrEquals(tc, 'something', '');
+  CuAssertStrEquals(tc, "something", "");
 }

@@ -1,29 +1,26 @@
 -- A Lua file
 
-local cuTest = { }
+local cuTest = {
+  ext     = '.specs',
+  obj_ext = '.c',
+  compile = '../cuTest/specs2c.lua $(INPUT)'
+}
 
-function cuTest.allTests(testName)
-  testName = testName:gsub('^(.)', function(c) return c:upper() end)
-  local allTests = { }
-  allTests['a'] = 'All'..testName..'Tests'
-  allTests['c'] = 'All'..testName..'Tests.c'
-  allTests['o'] = 'All'..testName..'Tests.o'
-  allTests['s'] = './All'..testName..'Tests'
-  return allTests
-end
+lake.add_group(cuTest)
 
-function cuTest.buildAllTests(allTestName, testFiles)
-  print('\nCreating ['..allTestName..']')
-  
-  for i, aTestFile in ipairs(testFiles) do 
-    print(aTestFile)
-  end
-end
-
-function cuTest.buildTestSuites(specsFileName, suiteFileName)
-  print('\nFinding tests in: ['..specsFileName..']')
-  print('creating: ['..suiteFileName..']')
-  
+function cuTest.program(args)
+  local argC    = args[1]..'.c'
+  local cuTestR = cuTest.group{src='*'}
+  target(
+    argC,
+    cuTestR:get_targets(),
+    '../cuTest/specs2all.lua $(TARGET) $(DEPENDS)'
+  )
+  args.src = cuTestR:get_targets()
+  table.insert(args.src, 1, '../cuTest/CuTest.c')
+  table.insert(args.src, 1, argC)
+  args.incdir = { '../cuTest' }
+  return c.program(args)
 end
 
 return cuTest
