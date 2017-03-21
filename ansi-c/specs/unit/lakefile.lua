@@ -1,6 +1,6 @@
 -- A Lua Lakefile
 
-local cuTest = dofile('../cuTest/CuTest.lua')
+local cuTest = dofile('../cuTest/CuTestLakeLang.lua')
 
 local joyLoL = target('../../lib/joyLoL.so', '', function(t)
   lfs.chdir('../../lib')
