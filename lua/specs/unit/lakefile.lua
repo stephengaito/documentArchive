@@ -1,8 +1,4 @@
--- A Lua LakeFile
-
-local pp = require 'pl.pretty'
-
---local lunaTest = dofile('../lunaTest/LunaTestLakeLang.lua')
+-- A Lua LakeFile for joyLoL/lua/specs/unit
 
 local joyLoL = target('../../lib/joyLoL.so', '', function(t)
   lfs.chdir('../../lib')

@@ -1,8 +1,8 @@
--- A Lua Lakefile
+-- A Lua Lakefile for joyLoL/ansi-c/specs/unit
 
 local cuTest = dofile('../cuTest/CuTestLakeLang.lua')
 
-local joyLoL = target('../../lib/joyLoL.so', '', function(t)
+local joyLoL = target('../../lib/libjoyLoL.a', '', function(t)
   lfs.chdir('../../lib')
   print('')
   print(lfs.currentdir())
