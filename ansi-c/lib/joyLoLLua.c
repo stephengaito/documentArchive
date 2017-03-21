@@ -18,7 +18,7 @@ static const struct luaL_Reg joyLoLFuncs [] = {
   {NULL, NULL} /* sentinel */
 };
 
-int luaopen_joyLoL (lua_State *L) {
+int luaopen_joyLoLC (lua_State *L) {
   luaL_newlib(L, joyLoLFuncs);
   return 1;
 }

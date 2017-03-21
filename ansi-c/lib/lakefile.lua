@@ -1,10 +1,8 @@
 -- A Lua Lakefile for joyLoL/ansi-c/lib
 
--- fix annoying error message about the use of 'u'
--- the following line has been modified from lake
---
-c.lib = '$(AR) rc $(TARGET) $(DEPENDS) && ranlib $(TARGET)'
+LUA_LIBS = 'lua5.2'
+--LUA_LIBS = 'lua5.3'
 
-local joyLoLstatic = c.library{'joyLoL', src='*'}
+local joyLoLShared = c.shared{'joyLoLC', src='*', needs='lua'}
 
-default{joyLoLstatic}
+default{joyLoLShared}
