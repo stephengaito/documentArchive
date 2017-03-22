@@ -4,7 +4,11 @@
 
 git log -1 --date=short \
   --pretty=format:"
-static const struct keyValueStruct gitKeyValues[] = {
+typedef struct keyValueStruct {
+  const char *key;
+  const char *value;
+} KeyValues;
+static const KeyValues gitKeyValues[] = {
   { \"authorName\",      \"%an\"},
   { \"commitDate\",      \"%ad\"},
   { \"commitShortHash\", \"%h\"},

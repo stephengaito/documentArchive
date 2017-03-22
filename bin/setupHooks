@@ -1,3 +1,0 @@
-#!/bin/bash
-
-cp bin/hooks/* .git/hooks
