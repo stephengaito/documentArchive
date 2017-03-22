@@ -78,6 +78,11 @@ packages).
 
 See "C Modules" section 27.3 in "Programming in Lua 3rd Ed".
 
+### Ensure both C and Lua modules have versions
+
+Provide both explicit and implicit (git-hooks) version information to both 
+the C and Lua modules. 
+
 ### Install shared libraries
 
 **Lua** should be located in the /usr/local/lib/lua/5.x directory.
