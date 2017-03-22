@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Post-{commit, checkout, merge} hook to set version infomation
+
+git log -1 --date=short \
+  --pretty=format:"
+static const struct keyValueStruct gitKeyValues[] = {
+  { \"authorName\",      \"%an\"},
+  { \"commitDate\",      \"%ad\"},
+  { \"commitShortHash\", \"%h\"},
+  { \"commitLongHash\",  \"%H\"},
+  { \"subject\",         \"%s\"},
+  { \"notes\",           \"%N\"},
+  { NULL,                NULL}
+}
+" HEAD > ansi-c/lib/gitVersion.h
+
+git log -1 --date=short \
+  --pretty=format:"
+local gitKeyValues = {
+  { \"authorName\",      \"%an\"},
+  { \"commitDate\",      \"%ad\"},
+  { \"commitShortHash\", \"%h\"},
+  { \"commitLongHash\",  \"%H\"},
+  { \"subject\",         \"%s\"},
+  { \"notes\",           \"%N\"}
+}
+
+return gitKeyValues
+
+" HEAD > lua/lib/gitVersion.lua
