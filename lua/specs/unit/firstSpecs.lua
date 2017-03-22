@@ -3,11 +3,9 @@
 -- This is our first set of tests
 -- We expect the "helloWorld" methods in the Lua-C interface to work
 
-package.cpath = '../../../ansi-c/lib/?.so;'..package.cpath
-
 local joyLoL = require 'joyLoLC'
 
-local lt = dofile('../lunaTest/lunatest.lua')
+local lt = lunaTest
 
 local firstSpecs = { }
 
