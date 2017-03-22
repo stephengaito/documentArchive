@@ -8,6 +8,7 @@ typedef struct keyValueStruct {
   const char *key;
   const char *value;
 } KeyValues;
+
 static const KeyValues gitKeyValues[] = {
   { \"authorName\",      \"%an\"},
   { \"commitDate\",      \"%ad\"},
@@ -16,12 +17,12 @@ static const KeyValues gitKeyValues[] = {
   { \"subject\",         \"%s\"},
   { \"notes\",           \"%N\"},
   { NULL,                NULL}
-}
+};
 " HEAD > ansi-c/lib/gitVersion.h
 
 git log -1 --date=short \
   --pretty=format:"
-local gitKeyValues = {
+return {
   { \"authorName\",      \"%an\"},
   { \"commitDate\",      \"%ad\"},
   { \"commitShortHash\", \"%h\"},
@@ -29,7 +30,4 @@ local gitKeyValues = {
   { \"subject\",         \"%s\"},
   { \"notes\",           \"%N\"}
 }
-
-return gitKeyValues
-
 " HEAD > lua/lib/gitVersion.lua
