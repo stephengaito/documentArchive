@@ -16,9 +16,11 @@ static int luaCVersion (lua_State *L) {
 static int luaCGitVersion (lua_State *L) {
   lua_createtable (L, 0, 10);
   for ( int i = 0; gitKeyValues[i].key; i++ ) {
+    //fprintf(stderr, "gitKeyValues[%s] = [%s]\n", gitKeyValues[i].key, gitKeyValues[i].value);
+    //fflush(stderr);
     lua_pushstring(L, gitKeyValues[i].key);
     lua_pushstring(L, gitKeyValues[i].value);
-    lua_settable(L, -1);
+    lua_settable(L, -3);
   }
   return 1;
 }
