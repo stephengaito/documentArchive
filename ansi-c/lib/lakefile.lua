@@ -7,8 +7,10 @@ lfs.mkdir('5.3')
 
 -- define what to do for both lua5.2 and lua5.3
 --
-local joyLoLC52 = c.shared{'5.2/joyLoLC', src='*', incdir='/usr/include/lua5.2', odir='5.2'}
-local joyLoLC53 = c.shared{'5.3/joyLoLC', src='*', incdir='/usr/include/lua5.3', odir='5.3'}
+local joyLoLC52 =
+  c.shared{'5.2/joyLoLC', src='*', odir='5.2', needs='lua5.2'}
+local joyLoLC53 =
+  c.shared{'5.3/joyLoLC', src='*', odir='5.3', needs='lua5.3'}
 
 -- provide human useful external targets
 --

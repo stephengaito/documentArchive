@@ -1,9 +1,14 @@
 -- A Lua Lakefile for joyLoL/ansi-c/specs/unit
 
 local cuTest = dofile('../cuTest/CuTestLakeLang.lua')
-local lfs    = require 'lfs'
---local pp     = require 'pl.pretty'
 
+-- ensure both 5.2 and 5.3 directories exist
+--
+lfs.mkdir('5.2') 
+lfs.mkdir('5.3')
+
+-- specify how to build the joyLoLC libraries
+--
 local function lakeLib(aTarget)
   lfs.chdir('../../lib')
   print('')
@@ -14,10 +19,42 @@ local function lakeLib(aTarget)
   print(lfs.currentdir())
 end
 
-local joyLoLSrcs = path.files_from_mask('../../lib/*.c')
+-- determine what is in the joyLoLC libraries
+--
+local joyLoLSrcs    = path.files_from_mask('../../lib/*.c', true)
+local joyLoLHeaders = path.files_from_mask('../../lib/*.h', true)
+for i=1,#joyLoLHeaders do
+  joyLoLSrcs[#joyLoLSrcs+1] = joyLoLHeaders[i]
+end
 
-local joyLoL = target('../../lib/5.2/joyLoLC.so', joyLoLSrcs, lakeLib(t))
 
-cuTest.program{'allUnitTests', deps={ joyLoL.target }} 
+-- specify the joyLoLC library targets
+--
+local joyLoLC52 = 
+  target('../../lib/5.2/joyLoLC.so', joyLoLSrcs, lakeLib)
+local joyLoLC53 = 
+  target('../../lib/5.3/joyLoLC.so', joyLoLSrcs, lakeLib)
 
-default(target('allUnitTests.test', 'allUnitTests', './allUnitTests'))
+-- specify how to build the allUnitTests programs
+--
+local allTests52 = cuTest.program{
+  '5.2/allUnitTests',
+  deps={ joyLoLC52.target },
+  odir='5.2',
+  needs='lua5.2'
+} 
+local allTests53 = cuTest.program{
+  '5.3/allUnitTests',
+  deps={ joyLoLC53.target },
+  odir='5.3',
+  needs='lua5.3'
+} 
+
+-- provide human useful external test targets
+--
+target('test52', allTests52.target, './5.2/allUnitTests')
+target('test53', allTests53.target, './5.3/allUnitTests')
+
+-- test both versions by default
+--
+default(target('tests', 'test52 test53', ''))
