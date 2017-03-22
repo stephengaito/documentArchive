@@ -55,7 +55,7 @@ end
 luaFile:write([=[
 
 
-lunaTest.run()
+lunaTest.run(true)
 
 ]=])
 

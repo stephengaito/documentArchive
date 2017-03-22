@@ -47,9 +47,10 @@ local allTests53 = target(
 
 -- provide human useful external test targets
 --
-target('test52', allTests52.target, './5.2/allUnitTests --verbose')
-target('test53', allTests53.target, './5.3/allUnitTests --verbose')
+target('test52', allTests52.target, './5.2/allUnitTests')
+target('test53', allTests53.target, './5.3/allUnitTests')
+target('testTA', allTests53.target, 'textadept --force --nosession --userhome .')
 
--- test both versions by default
+-- test all versions by default
 --
-default(target('tests', 'test52 test53', ''))
+default(target('tests', 'test52 test53 testTA', ''))
