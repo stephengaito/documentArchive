@@ -1,8 +1,20 @@
 -- A Lua Lakefile for joyLoL/ansi-c/lib
 
-LUA_LIBS = 'lua5.2'
---LUA_LIBS = 'lua5.3'
+-- ensure both 5.2 and 5.3 directories exist
+--
+lfs.mkdir('5.2') 
+lfs.mkdir('5.3')
 
-local joyLoLShared = c.shared{'joyLoLC', src='*', needs='lua'}
+-- define what to do for both lua5.2 and lua5.3
+--
+local joyLoLC52 = c.shared{'5.2/joyLoLC', src='*', incdir='/usr/include/lua5.2', odir='5.2'}
+local joyLoLC53 = c.shared{'5.3/joyLoLC', src='*', incdir='/usr/include/lua5.3', odir='5.3'}
 
-default{joyLoLShared}
+-- provide human useful external targets
+--
+target('52', joyLoLC52.target, '')
+target('53', joyLoLC53.target, '')
+
+-- build both versions by default
+--
+default(target('all', '52 53', ''))
