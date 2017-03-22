@@ -107,3 +107,5 @@ lua5.2/luatex and lua5.3/textadept?
 
 Where should the resulting shared libraries be placed for each platform? 
 
+see: [Lua: Building C 
+Modules](http://lua-users.org/wiki/BuildingModules)

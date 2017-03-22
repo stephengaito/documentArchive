@@ -54,6 +54,7 @@ end
 
 luaFile:write([=[
 
+
 print('\n--------------------------------------------------------------')
 print('command:\t'..arg[0]..' '..table.concat(arg, ' '))
 print('running:\t]=])
