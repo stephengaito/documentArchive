@@ -5,9 +5,9 @@
 Show that we can create a simple shared library for lua written in ANSI-C 
 which can be used inside lua5.2 and lua5.3, textadept and luaTex/ConTeXt. 
 
-## Tasks 
+## Tasks ![needsWork](/design/images/needsWork.png)
 
-### Install lua build system ![done](/design/images/completed.png)
+### Install lua build system ![done](/design/images/done.png)
 
 [lake](http://stevedonovan.github.io/lake/scripts/lake.html) 
 ([gitHub](https://github.com/stevedonovan/Lake)) looks like it has the 
@@ -20,25 +20,26 @@ documentation.
 
 > chmod a+x lake
 
-### Install Test systems 
+### Install Test systems ![needsWork](/design/images/needsWork.png)
 
-**CuTest** is simple and best to use for raw C code. Old JoyLoL embedded 
-the whole source from [cutest](https://github.com/asimjalis/cutest) as 
-forked and modified in 
+![done](/design/images/done.png) **CuTest** is simple and best to use for 
+raw C code. Old JoyLoL embedded the whole source from 
+[cutest](https://github.com/asimjalis/cutest) as forked and modified in 
 [stephengaito/cutest](https://github.com/stephengaito/cutest) (using the 
 notEqualsAssertions and namedSubSuites branches). This source was located 
 in the specs/cuTest directory (which was parallel to the unit, functional, 
 and integration directories of test suites). 
 
-**LunaTest** is simple and best to use for Lua code. Should be located in 
-a specs/lunaTest directory and should be taken from 
+![needsWork](/design/images/needsWork.png) **LunaTest** is simple and best 
+to use for Lua code. Should be located in a specs/lunaTest directory and 
+should be taken from 
 [silentbicycle/lunatest](https://github.com/silentbicycle/lunatest) as 
 modified by [stephengaito/lunatest]() (See 
 [stephengaito/ConTests](https://github.com/stephengaito/ConTests)). As in 
 ConTests, we really ONLY need the lunatest.lua file itself, and we really 
 only need to be able to 'require' lunatest.lua. 
 
-### Obtain lua5.2 and lua5.3 headers
+### Obtain lua5.2 and lua5.3 headers ![done](/design/images/done.png)
 
 **Note** Lua5.2 headers/sources should be compatible with LuaTex and Lua5.3 
 header/sources should be compatible with Textadept 
@@ -78,12 +79,12 @@ packages).
 
 See "C Modules" section 27.3 in "Programming in Lua 3rd Ed".
 
-### Ensure both C and Lua modules have versions
+### Ensure both C and Lua modules have versions ![done](/design/images/done.png)
 
 Provide both explicit and implicit (git-hooks) version information to both 
 the C and Lua modules. 
 
-### Install shared libraries
+### Install shared libraries ![needsWork](/design/images/needsWork.png)
 
 **Lua** should be located in the /usr/local/lib/lua/5.x directory.
 
