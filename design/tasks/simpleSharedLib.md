@@ -74,7 +74,7 @@ respectively) SO we may be able simply to use [lua's source
 zips](http://www.lua.org/ftp/) directly (or of course any related OS 
 packages). 
 
-### Create a (linux) shared library
+### Create a (linux) shared library ![done](/design/images/done.png)
 ... using the Lua C-API which returns the string "Hello World!". 
 
 See "C Modules" section 27.3 in "Programming in Lua 3rd Ed".
