@@ -50,7 +50,7 @@ local allTests53 = target(
 target('test52', allTests52.target, './5.2/allUnitTests')
 target('test53', allTests53.target, './5.3/allUnitTests')
 target('testTA', allTests53.target, 'textadept --force --nosession --userhome .')
-target('testLT', allTests52.target, 'CLUAINPUTS=../../../ansi-c/lib/5.2/:`kpsewhich --var-value=CLUAINPUTS` luatex test.tex')
+target('testLT', allTests52.target, 'LUAINPUTS=../../lib/:`kpsewhich --var-value=LUAINPUTS` CLUAINPUTS=../../../ansi-c/lib/5.2/:`kpsewhich --var-value=CLUAINPUTS` luatex test.tex')
 
 -- test all versions by default
 --

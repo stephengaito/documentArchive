@@ -39,6 +39,14 @@ modified by [stephengaito/lunatest]() (See
 ConTests, we really ONLY need the lunatest.lua file itself, and we really 
 only need to be able to 'require' lunatest.lua. 
 
+* ![needsWork](/design/images/needsWork.png) We still need to reconcile 
+lunatest.lua currently installed in lua/specs/lunaTest with that used by 
+ConTests. 
+
+![notStarted](/design/images/notStarted.png) **ConTests** is a ConTeXt 
+module designed to provide tests of ConTeXt-MKiv and Lua methosd inside 
+ConTeXt. 
+
 ### Obtain lua5.2 and lua5.3 headers ![done](/design/images/done.png)
 
 **Note** Lua5.2 headers/sources should be compatible with LuaTex and Lua5.3 

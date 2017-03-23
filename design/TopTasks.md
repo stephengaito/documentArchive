@@ -2,7 +2,7 @@
 
 These tasks are ordered with greatest risk or need first. 
 
-1. ![notStarted](/design/images/notStarted.pnd) Begin [JoyLoL 
+1. ![notStarted](/design/images/notStarted.png) Begin [JoyLoL 
 parser/lexer](tasks/joyLoL-parser-lexer.md) for Textadept and ConTeXt. 
 
 2. ![needsWork](/design/images/needsWork.png) Show that we can create a 

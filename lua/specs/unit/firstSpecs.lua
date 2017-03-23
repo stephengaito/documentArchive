@@ -3,7 +3,7 @@
 -- This is our first set of tests
 -- We expect the "helloWorld" methods in the Lua-C interface to work
 
-local joyLoL = require 'joyLoLC'
+local joyLoL = joyLoL
 
 local lt = lunaTest
 

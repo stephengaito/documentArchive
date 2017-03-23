@@ -23,11 +23,11 @@ static const KeyValues gitKeyValues[] = {
 git log -1 --date=short \
   --pretty=format:"
 return {
-  { \"authorName\",      \"%an\"},
-  { \"commitDate\",      \"%ad\"},
-  { \"commitShortHash\", \"%h\"},
-  { \"commitLongHash\",  \"%H\"},
-  { \"subject\",         \"%s\"},
-  { \"notes\",           \"%N\"}
+  authorName      = \"%an\",
+  commitDate      = \"%ad\",
+  commitShortHash = \"%h\",
+  commitLongHash  = \"%H\",
+  subject         = \"%s\",
+  notes           = \"%N\"
 }
 " HEAD > lua/lib/gitVersion.lua
