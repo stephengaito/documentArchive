@@ -7,7 +7,7 @@ which can be used inside lua5.2 and lua5.3, textadept and luaTex/ConTeXt.
 
 ## Tasks 
 
-### Install lua build system ![done](/design/images/greenSquare.pnd)
+### Install lua build system ![done](/design/images/greenSquare.png)
 
 [lake](http://stevedonovan.github.io/lake/scripts/lake.html) 
 ([gitHub](https://github.com/stevedonovan/Lake)) looks like it has the 
