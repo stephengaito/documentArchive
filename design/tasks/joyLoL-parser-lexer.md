@@ -2,7 +2,12 @@
 
 ## Goal
 
-Write a Lua LPeg based Parser/Lexer module for JoyLoL.
+Sketch infrastructure to provide multiple languages for JoyLoL. Each 
+langauge should be provided by a distinct JoyLoL Language module.
+
+To begin we write a two distinct languages with diametrically opposite 
+syntactical styles, JoyLoL (proper) and WhileLoL. We provide an initial 
+Lua LPeg based Parser/Lexer module for both. 
 
 ## Tasks ![notStarted](/design/images/notStarted.png)
 
