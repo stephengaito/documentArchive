@@ -1,4 +1,5 @@
 *.bib
 *.log
 *.tuc
-
+*.pdf
+*Bib.lua
