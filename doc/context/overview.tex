@@ -6,20 +6,36 @@
 
 \startsection
 
-We will provide a full formal description of two diametrically different 
-programming languages, JoyLoL and WhileRecLoL. The language WhileRecLoL 
-will be in the same overall class of languages as most standard imperative 
+We will provide full formal descriptions of six distinctly different 
+programming languages, JoyLoL, WhileLoL, WhileRecLoL, EagerLambdaLoL, 
+LazyLambdaLoL and LogicLoL. The languages WhileLoL and WhileRecLoL will be 
+in the same overall class of languages as most standard imperative 
 programming languages such as, Lua, C, Pascal, Algol, Java, Python, PHP, 
 Ruby, etc. Most programmers will recognize WhileRecLoL as a close, but 
-simplified, cousin to the languages they are currently using.
+simplified, cousin to the languages they are currently using. The 
+languages EagerLambaLoL and LazyLambdaLoL represent the class of eager and 
+lazy functional languages such as ML and Haskell respectively. The 
+LogicLoL language represents the class of logic programming lanaguages 
+such as Prolog. 
 
-The primary importance of JoyLoL on the other hand is that it \emph{is} a 
-fixed point of the formal semantics operator. This is why JoyLoL is being 
-proposed as a foundation for both computation and more importantly 
+The JoyLoL language, is in a new class of \quote{concatenative} languages 
+originally explored by Manfred von Thun\footnote{For example, see 
+\cite[vonThun1994overview], \cite[vonThun1994mathematicalFoundations] or 
+\cite[vonThun1994rational] all of which can be found in 
+\cite[vonThun2011archive] or \cite[vonThun2005website].}. The primary 
+importance of JoyLoL is that it \emph{is} a fixed point of the formal 
+semantics operator. As a fixed point of the semantics operator, JoyLoL 
+provides a foundation for both computation and more importantly 
 Mathematics\footnote{While we assert that JoyLoL provides a 
 \emph{computational} foundation for Mathematics, proving this assertion 
 will be the work of many (future) papers. We will not even attempt a proof 
 in this document.}. 
+
+Across all of these languages the constant similarity is the \quote{LoL} 
+or List of Lists. In each language the \emph{only} expressions are Lists 
+of Lists. Depending upon the language, these lists of lists are 
+potentially infinite expressions, which will, however, always have a 
+finite description at any particular point in a computation. 
 
 As developed over the past 50 years, the formal semantics operator has 
 three parts: 
@@ -28,11 +44,72 @@ three parts:
 \item Denotational Semantics
 \item Operational Semantics
 \item Axiomatic Semantics
-\stopitemize
 
-A good introduction to these three types of formal semantics can be found 
-in \cite[winskel1993formalSemanticsProgrammingLanguages, 
-gunter1992semainticProgrammingLanguages] 
+\stopitemize Good introductions to these three types of formal semantics 
+can be found in \cite[winskel1993formalSemanticsProgrammingLanguages] and 
+\cite[gunter1992semainticProgrammingLanguages]. (TODO see 
+\cite[aptVanEmden1980logicProgramming] and 
+\cite[billaud1990semanticsOfPrologWithCut] for early reports of Prolog's 
+semantics) 
+
+The collection of Lists of Lists \emph{is} an \quotation{infinitely} 
+\quotation{complex} \quotation{structure}. In its complete incarnation, it 
+is strictly \emph{more} complex than the whole of any formal set theory 
+such as ZFC\footnote{In this paper we will only consider the component 
+which corresponds to classical, $\omega$-computation.}. This is, for 
+finite beings, such as mere mortal mathematicians, a large and complex 
+\quote{world} to explore. It is a world in which it is very easy to get 
+lost. While we assert that JoyLoL provides a computational foundation for 
+Mathematics, to help us \quote{mere mortal mathematicians} orient 
+ourselves, we will often make reference to classical mathematical 
+concepts. It is important to realize that these classical mathematical 
+concepts are simply aids to our mathematical intuition, and not formal 
+statements. 
+
+The most important classical intuition is that of Algebra and CoAlgebra, 
+or equivalently, for a Computer Scientist, that of Data and Process. Both 
+classical Mathematics and Computational theory have, by and large, 
+explicitly limited themselves to the well-founded and total, largely to 
+avoid Poincar\'{e}'s \quote{Vicious Circles}. We will see that the 
+non-well-founded, non-terminating processes, Cantor's \quote{Absolute 
+Infinite}, have a surprisingly easily understood structure, essentially 
+dual to classical set theory. However, the \emph{computational} theory of 
+these non-terminating processes, has a profound impact on Mathematics. By 
+ignoring this computational theory, we, as mathematicians, make simple 
+problems, hard. 
+
+\emph{Intuitively}, \emph{a} List of Lists, is a potentially infinite 
+structure which records a potentially infinite \emph{structured} 
+collection of observations of a potentially non-terminating process of 
+processes. As \emph{finite} mathematicians, we can only manipulate finite 
+structures, \emph{finite records of observations} of a potentially infinte 
+process. One such record of observations might be denoted by, for example: 
+
+\startcenteraligned
+\starttyping
+(() ( ( )))
+\stoptyping
+\stopcenteraligned
+
+\noindentation This is of course the denotation of Lists in John 
+McCarthy's Lisp, see 
+\cite[mcCarthyAbrahamsEdwardsHartLevin1965lispManual]. 
+
+Where classically, formal semantics concentrated on \emph{one} denotation, 
+to provide a \emph{formal} description of these potentially 
+non-terminating process, it is critical that we carefully distinguish 
+\emph{two} distinct denotations: the classical \emph{algebraic} denotation 
+(corresponding to a least fixed point of the semantics operator) and the 
+non-classical \emph{coAlgebraic} denotation (corresponding to a greatest 
+fixed point of the semantics operator). While for data, the data itself is 
+its own denotation, for a potentially non-terminating process, \emph{an 
+answer} (a data object) is insufficient to \emph{denote} that process. 
+Instead the appropriate denotation of a non-terminating process is its 
+trace of observations (or any finite record of this trace which is 
+\quote{sufficient} for current purposes). Similarly, while the 
+\quote{big-step} operational semantics might suffice for a data object, 
+the \quote{one-step} operational semantics is the only definition of 
+operational semantics appropriate for a non-terminating process. 
 
 \stopsection 
 
