@@ -3,12 +3,55 @@
 
 \startcomponent joyLoLSyntax
 
-\startchapter[title=The syntax of JoyLoL]
+\startchapter[title=The syntax and semantics of JoyLoL]
 
 \startsection
 
-We begin by listing the syntax of JoYLol together with its associated 
-semantics.
+The formal semantics of the \emph{other} programming languages are 
+certainly simpler. This is because, the semantics of the other languages, 
+are defined in terms of the semantics of JoyLoL. This means that any deep 
+subtleties are simply encapsulated in the semantics of JoyLoL. Any reader 
+who is willing to take the existence of the formal semantics of JoyLoL as 
+given, are welcome to skip to the other chapters until they are ready or 
+willing to understand the full import of the semantics of JoyLoL. 
+
+The essential subtleties of our formal semantics for JoyLoL comes from three areas:
+
+\startitemize[n,packed]
+
+\head {\bf Foundations}
+
+We are explicitly working \emph{without} classical first order set theory. 
+Yet formal semantics \emph{is} defined as \emph{mappings} between 
+\emph{collections} of \quote{things}. 
+
+\noindentation \emph{How do we define mappings and collections while we 
+are defining semantics with which to define mappings and collections with 
+which... ?}\footnote{I personally know of no completely rigorous 
+exposition of the foundations of classical mathematics. I suspect the 
+closest, mathematically, we might come close to this is in G\"odel's proofs 
+first and second incompleteness results. However, even here the results 
+hinge upon an informal interpretation of \quote{truth} at the meta-level.} 
+
+\head {\bf Metamathematics} 
+
+A partial answer to our foundational question above
+
+Any formal semantics is a programming language \emph{about} another 
+\quote{object-level} programming language (which is itself a language 
+\emph{about} objects as \quote{values}). 
+
+\head {\bf Computation of \emph{properties} of potentially non-terminating 
+processes} 
+
+
+
+\stopitemize
+
+
+We begin by listing the syntax of JoyLol together with its associated 
+semantics. We loosely follow the presentation in 
+\cite[winskel1993formalSemanticsProgrammingLanguages]. 
 
 \stopsection
 

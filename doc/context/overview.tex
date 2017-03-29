@@ -4,7 +4,7 @@
 
 \startchapter[title=Overview]
 
-\startsection
+\startsection[title=Introduction]
 
 We will provide full formal descriptions of six distinctly different 
 programming languages, JoyLoL, WhileLoL, WhileRecLoL, EagerLambdaLoL, 
@@ -41,11 +41,18 @@ As developed over the past 50 years, the formal semantics operator has
 three parts: 
 
 \startitemize[n, packed]
-\item Denotational Semantics
-\item Operational Semantics
-\item Axiomatic Semantics
 
-\stopitemize Good introductions to these three types of formal semantics 
+\item Denotational Semantics (roughly equivalent to Tarski's model 
+semantics) 
+
+\item Operational Semantics (roughly equivalent to Gentzen's natural 
+deduction) 
+
+\item Axiomatic Semantics (roughly equivalent to Type theory) 
+
+\stopitemize
+
+Good introductions to these three types of formal semantics 
 can be found in \cite[winskel1993formalSemanticsProgrammingLanguages] and 
 \cite[gunter1992semainticProgrammingLanguages]. (TODO see 
 \cite[aptVanEmden1980logicProgramming] and 
@@ -54,10 +61,10 @@ semantics)
 
 The collection of Lists of Lists \emph{is} an \quotation{infinitely} 
 \quotation{complex} \quotation{structure}. In its complete incarnation, it 
-is strictly \emph{more} complex than the whole of any formal set theory 
-such as ZFC\footnote{In this paper we will only consider the component 
-which corresponds to classical, $\omega$-computation.}. This is, for 
-finite beings, such as mere mortal mathematicians, a large and complex 
+is strictly \emph{more} complex than the whole of any formal \emph{set} 
+theory such as ZFC\footnote{In this paper we will only consider the 
+component which corresponds to classical, $\omega$-computation.}. This is, 
+for finite beings, such as mere mortal mathematicians, a large and complex 
 \quote{world} to explore. It is a world in which it is very easy to get 
 lost. While we assert that JoyLoL provides a computational foundation for 
 Mathematics, to help us \quote{mere mortal mathematicians} orient 
@@ -69,8 +76,8 @@ statements.
 The most important classical intuition is that of Algebra and CoAlgebra, 
 or equivalently, for a Computer Scientist, that of Data and Process. Both 
 classical Mathematics and Computational theory have, by and large, 
-explicitly limited themselves to the well-founded and total, largely to 
-avoid Poincar\'{e}'s \quote{Vicious Circles}. We will see that the 
+explicitly limited themselves to the well-founded and terminating, largely 
+to avoid Poincar\'{e}'s \quote{Vicious Circles}. We will see that the 
 non-well-founded, non-terminating processes, Cantor's \quote{Absolute 
 Infinite}, have a surprisingly easily understood structure, essentially 
 dual to classical set theory. However, the \emph{computational} theory of 
@@ -81,9 +88,10 @@ problems, hard.
 \emph{Intuitively}, \emph{a} List of Lists, is a potentially infinite 
 structure which records a potentially infinite \emph{structured} 
 collection of observations of a potentially non-terminating process of 
-processes. As \emph{finite} mathematicians, we can only manipulate finite 
-structures, \emph{finite records of observations} of a potentially infinte 
-process. One such record of observations might be denoted by, for example: 
+processes. As \emph{finite} mathematicians, we can only ever manipulate 
+finite structures, \emph{finite records of observations} of a potentially 
+infinte process. One such record of observations might be denoted by, for 
+example: 
 
 \startcenteraligned
 \starttyping
@@ -109,9 +117,35 @@ trace of observations (or any finite record of this trace which is
 \quote{sufficient} for current purposes). Similarly, while the 
 \quote{big-step} operational semantics might suffice for a data object, 
 the \quote{one-step} operational semantics is the only definition of 
-operational semantics appropriate for a non-terminating process. 
+operational semantics appropriate for a potentially non-terminating 
+process. Finally, to provide an Axiomatic semantics, with out recourse to 
+classical first order set theory, we will make essential use of finite 
+descriptions of the traces of potentially non-terminating processes. 
+
+Philosophically, it is important to know when two \quote{things} are the 
+\quote{same}. For an algebraic list of lists, two lists are equal if there 
+is a \emph{finite}, structurally inductive, comparison of the two objects. 
+This is the familiar concept of recursive equality. For sets this is 
+\emph{extensive} equality. For a coAlgebraic list of lists, two 
+potentially non-terminating processes are equal if they respond in the 
+same way to any collection of \quote{observations}. This is the concept, 
+from Theoretical Computer Science and CoAlgebraic Category theory, of 
+\quote{bisimulation}. 
 
 \stopsection 
+
+\startsection[title=How rigorous can rigour be?]
+
+We have to start by addressing the \quotation{White Elephant in the Room}, namely: 
+
+\startcenteraligned
+\em \bf How much rigour can a finite being, \\
+\em \bf or a finite computational device expect to provide?
+\stopcenteraligned
+
+this is a test
+
+\stopsection
 
 \stopchapter
 
