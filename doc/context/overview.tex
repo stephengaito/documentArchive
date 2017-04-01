@@ -115,12 +115,13 @@ answer} (a data object) is insufficient to \emph{denote} that process.
 Instead the appropriate denotation of a non-terminating process is its 
 trace of observations (or any finite record of this trace which is 
 \quote{sufficient} for current purposes). Similarly, while the 
-\quote{big-step} operational semantics might suffice for a data object, 
-the \quote{one-step} operational semantics is the only definition of 
-operational semantics appropriate for a potentially non-terminating 
-process. Finally, to provide an Axiomatic semantics, with out recourse to 
-classical first order set theory, we will make essential use of finite 
-descriptions of the traces of potentially non-terminating processes. 
+\quote{big-step} operational semantics might suffice for a data object or 
+a terminating process, the \quote{one-step} operational semantics is the 
+only definition of operational semantics appropriate for a potentially 
+non-terminating process. Finally, to provide an Axiomatic semantics, with 
+out recourse to classical first order set theory, we will make essential 
+use of finite descriptions of the traces of potentially non-terminating 
+processes. 
 
 Philosophically, it is important to know when two \quote{things} are the 
 \quote{same}. For an algebraic list of lists, two lists are equal if there 
@@ -141,7 +142,11 @@ foundation for Mathematics, must be \quote{certain}, but what exactly
 does \quote{certainty} mean and how \quote{certain} can a finite 
 computational artefact be? 
 
-Currently, certainty in mathematics, is generally identified with the 
+(TODO: there are two aspects here: (1) implementation vs idea 
+(logical-formalism vs intuitionism) and (2) current mathematical certainty 
+expressed \emph{using} logical-formalism vs other possible approaches) 
+
+sCurrently, certainty in mathematics, is generally identified with the 
 \emph{computation} of the \quote{Logical} \quote{Truth} of a 
 \quote{formal} assertion, which represents \emph{a logical 
 implementation}, of an intuitive understanding, of an idea which we want 
@@ -153,28 +158,122 @@ possible ways to express the \quote{same} intuitive thought.
 Notice as well that there are multiple different levels of granularity 
 with which to express and \quote{prove} a given statement to a 
 \quote{sufficient} \quote{level} of detail. While most current 
-mathamatical \quote{proofs} are conducted in an informal but rigorous 
-style, the generally acknowledged highest standard of proof is a first, 
-second or higher order logical proof using natural deduction. (TODO wrong 
-words!) At the moment, the translation of a high-level mathematical 
-argument into a \quote{completely rigorous} but impossibly detailed 
-logical argument is very tedious and difficult, largely because the highly 
-detailed, n-th order logical notation, is very far from the original 
-intuitive idea to be proved. 
+mathematical \quote{proofs} are conducted in an informal but rigorous 
+style, the generally acknowledged highest standard of proof is a natural 
+deduction proof expressed using first, second or higher order logical 
+notation. (TODO wrong words!) At the moment, the translation of a 
+high-level mathematical argument into a \quote{completely rigorous} but 
+impossibly detailed logical argument is very tedious and difficult, 
+largely because the highly detailed, n-th order logical notation, is very 
+far from the original intuitive idea to be proved. 
 
-obtained using a \quote{Formalist} axiomatic 
-computation of the \quote{truth} of a logical assertion representing a 
+There are many discussions of the Logical-Formalist \quote{schools} of the 
+foundations of Mathematics, \cite[giaquinto2002searchCertainty], 
+\cite[shapiro2000thinkingMathematics] and 
+\cite[hatcher1982logicalFoundationsMath] each provide interesting accounts of 
+the strengths and weaknesses of these approaches. Equally important in any 
+of these expositions, are the accounts of the Intuitionist critique of the 
+logical-formalist approach. 
 
-\footnote{While there are 
-many discussions of the Logical-Formalist \quote{schools} of the 
-foundations of Mathematics \cite[giaquinto2002searchCertainty] provides an 
-interesting account of the strengths and weaknesses of these approaches}. 
+For a (software) Business Analyst or Systems Architect, the key words from 
+the above discussion are, \quote{computation}, \quote{implementation}, 
+\quote{specification}, and \quote{algorithm}. For the Business Analyst, 
+every specification is always just one of many possible 
+\emph{implementations} of the business problem to be solved. Each 
+different possible phrasing of the specification carries different 
+\quote{non-functional} (or extra-specificational) implications for the way 
+a given business problem is \quote{solved}. Equally, for the Systems 
+Architect, each proposed software implementation satisfying a given 
+specification, has different non-functional implications in terms of, for 
+example, speed, memory usage, and programmer or maintenance effort. The 
+critical point here is \quotation{\emph{an} implementation is just that 
+\emph{an} implementation}, one of many possible solutions to a problem. 
+Each of which provides different capabilities or penalties. As any 
+Business Analyst or Systems Architect knows, business problems can only 
+ever be solved by \emph{an} implementation, but to keep business 
+flexibility in a highly dynamical environment, it should be as easy as 
+possible to \emph{change} implementations as and when those implementations 
+begin to limit the business growth. Implementations are critical to a 
+business, \emph{but} implementations come and go, the goal is always to 
+solve the business problem. 
 
-In 
+For our purposes, the classical Logical-Formalist approach using, for 
+example, set theory expressed in a first order logic formalism, or type 
+theory\footnote{See for example, 
+\cite[awodeyCoquandVoevodsky2013homotopyTypeTheory].}, ....
 
-see \cite[mackenzie2001mechanizingProof] and \cite[lakatos1976proofsRefutations]
+Instead of computing logical truth that a given structure exists, using 
+Gentzen's natural deduction (algorithm), compute the structure itself. 
+However, if we \emph{compute} a structure, how do we know that we have 
+computed the structure we specified? 
 
-\cite[]
+TODO: We want to discuss deduction vs induction in the generation of 
+knowledge. Mathematics is (almost) pure deduction. However any human 
+subject \quote{to be done} must include aspects of scientific/engineering 
+induction. That is the verification of any \emph{deductive} mathematical 
+proof, requires some computational system to behave \quote{correctly}. How 
+do we know that any particular verificational computation of a given proof 
+is correct? 
+
+\emph{Deductively} we can be certain a given computation is, \emph{in 
+theory}, correct. However conducting the \emph{actual} computation entails 
+dependence on \emph{inductively} determined \emph{models} of 
+\quote{reality} which may or may not apply in a given time or place.
+
+Arthur C. Clarke's \quote{Nine Billion Names of God}, or Anthony S. 
+Haines' \quote{And on gloomy Sunday...}, in two different ways, suggest 
+how potentially extremely rare events, the coincidence of naming all the 
+names of God, or a \quote{research agency} outside our existence, could 
+both have profound \emph{global} impacts on any given \quote{computation}. 
+The point here is not that either of these stories are \quote{true} 
+(though they \emph{could be}), but rather that potentially rare events 
+might break any given model of physically realized computation. There will 
+never be any way a \emph{finite} being can mitigate against these rare 
+events. Given the rarity of these example events in that they will only 
+occur \emph{once} in a given existence, it is not, on the whole, rational, 
+to worry about rare events such as these. So, a \emph{finite} being, can 
+\emph{never} be 100\% \emph{certain} of any computation, but we can be 
+fairly certain, or rather, for all rational purposes, a computation can be 
+considered to be \emph{certain enough}. 
+
+We can \quote{draw the line} between deductive certainty and inductively 
+good enough models at various levels in the \quote{computational 
+hierarchy}. We could take the quite considerable effort to deductively 
+verify the whole computational infrastructure (compilers, operating 
+system, peripherals, CPU, memory, transistor states, etc.) down to the 
+Quantum-mechanical level. Or, we could simply assume a good-enough model 
+of computation of a computational language and then deductively verify any 
+given program in that language. However, no mater where we draw this line 
+between deductive certainty and inductively good enough models, a line 
+must be chosen. The result of any particular computation will only ever be 
+\quote{good enough}. 
+
+As with any security issue, we have a risk / benefit analysis to conduct. 
+We then have to make difficult choices as to how to minimize the costs of 
+the risks, maximize the value of the benefits, while simultaneously 
+minimizing the costs of the effort all required to get the chosen 
+low-level of risks and high-level of benefits. 
+
+For current Mathematical practice, an individual mathematician 
+\quote{verifying} a proof, is likely to be \emph{highly} error prone. 
+However it is assumed that over all interested mathematicians, any 
+mistakes in a given proof \emph{will be found}. To help reduce the 
+difficulty of understanding (i.e. verifying) any given proof statement, 
+mathematicians spend a lot of effort identifying independently useful 
+lemmas from which to build simpler proof statements to a wide range of 
+similar mathematical problems. 
+
+Similarly our collective confidence in a given proof of correctness of a 
+given program, will come from running the verification on multiple 
+\emph{independently different} platforms (the equivalent of multiple 
+mathematicians). Our collective confidence will also be increased if the 
+program is structured out of a \quote{library} of simpler and 
+independently useful \quote{parts}, each of which are verified and more 
+importantly regularly used on a wide range of range of platforms and in a 
+wide range of problems. 
+
+See \cite[mackenzie2001mechanizingProof] and \cite[lakatos1976proofsRefutations]
+
 
 \stopsection
 
