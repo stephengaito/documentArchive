@@ -1,0 +1,35 @@
+% A ConTeXt document [master document: ../joyLoL.tex]
+
+
+\startcomponent lists
+\startchapter[title=Lists of Lists]
+%\startextension
+
+\startsection[title=Goals]
+
+The lists extension is the core JoyLoL extension. It provides the core 
+lists of lists structures. It \emph{only} provides the most basic JoyLoL 
+expressions. It has no ability to preform any computation other than to 
+build up List of Lists structures. 
+
+I suggest we use [generational garbage 
+collection](http://wiki.c2.com/?GenerationalGarbageCollection) together 
+with immutable objects so that objects in more recent "heaps" can only 
+point to older "heaps" and not visa versa. This means that, if the 
+individual "heaps" are first class Lua objects, then we can use the 
+finalization of the heap object to ["stop and 
+copy"](http://wiki.c2.com/?StopAndCopy) live JoyLoL objects into older 
+heaps just before the newer heap is reclaimed by the Lua GC. Essentially 
+we are letting the Lua GC drive the JoyLoL GC. 
+
+%\startsyntax
+
+%\stopsyntax 
+
+%\startinitialization
+
+%\stopinitialization
+
+%\stopextension
+\stopchapter
+\stopcomponent

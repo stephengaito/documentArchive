@@ -84,7 +84,7 @@ The JoyLoL/Lua/C/Sting-template libraries will interface with each other
 over Lua->C, C->C, C->Lua and Lua->Lua interfaces. (What about 
 {JoyLoL, String-template}<->XXX interfaces?) 
 
-We produce the following collection of tools: 
+We produce the following collection of extensions: 
 
 1. **Language parser(s)**: We simply parse JoyLoL to an 'Abstract Parse 
 Tree'. However, since JoyLoL is explicitly its own formal semantics, the 
@@ -95,24 +95,30 @@ the JoyLoL language itself as Lists of Lists.
 of Lists as well as tools to 'collect garbage' (i.e. collect lists of 
 lists which are no longer reachable from the 'base' collection of lists). 
 
-3. **Computational contexts**: Maintains a collection of pairs of Lists of 
+3. **Strings**: String of characters.
+
+4. **Symbols**: Symbols are strings which are placed in a global dictionary.
+
+5. **Numbers**: Integers
+
+6. **Computational contexts**: Maintains a collection of pairs of Lists of 
 Lists (the data and process stacks). 
 
-4. **Lists of Lists interpreter**: This is essentially a JoyLoL extension 
+7. **Lists of Lists interpreter**: This is essentially a JoyLoL extension 
 which manipulates computational contexts. It must maintain the currently 
 known collection of extensions, as well as a namespace based dictionary of 
-'words'. 
+defined 'symbols'. 
 
-5. **Lists of Lists deductive verifier**: 
+8. **Lists of Lists deductive verifier**: 
 
-6. **Lists of Lists inductive verifier**: (is this *just* a Lua/C unit 
+9. **Lists of Lists inductive verifier**: (is this *just* a Lua/C unit 
 tester of the composite Lua/C implementation model?) 
 
-7. **Lists of Lists cross compiler (to Lua and C)**: Is a JoyLoL 
+10. **Lists of Lists cross compiler (to Lua and C)**: Is a JoyLoL 
 meta-program which cross compiles a Lists of Lists into a JoyLoL 
 extension. 
 
-8. **Language unparser(s)**: A template engine which can be used, by for 
+11. **Language unparser(s)**: A template engine which can be used, by for 
 example the cross compiler, to generate complex structured strings. 
 
 ### Extensions 
