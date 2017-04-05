@@ -2,11 +2,11 @@
 
 # This bash script obtains a copy of the [LunaTest]() for local use.
 
-mkdir -p lua/specs/lunaTest
+mkdir -p archive/lua/specs/lunaTest
 
-rm -rf lua/specs/lunaTest/lunatest.lua
+rm -rf archive/lua/specs/lunaTest/lunatest.lua
 
-wget --directory-prefix=lua/specs/lunaTest https://github.com/stephengaito/lunatest/raw/master/lunatest.lua
+wget --directory-prefix=archive/lua/specs/lunaTest https://github.com/stephengaito/lunatest/raw/master/lunatest.lua
 
 mkdir -p textadept/specs/lunaTest
 
