@@ -18,7 +18,7 @@ static const KeyValues gitKeyValues[] = {
   { \"notes\",           \"%N\"},
   { NULL,                NULL}
 };
-" HEAD > ansi-c/lib/gitVersion.h
+" HEAD > archive/ansi-c/lib/gitVersion.h
 
 git log -1 --date=short \
   --pretty=format:"
@@ -30,4 +30,4 @@ return {
   subject         = \"%s\",
   notes           = \"%N\"
 }
-" HEAD > lua/lib/gitVersion.lua
+" HEAD > archive/lua/lib/gitVersion.lua
