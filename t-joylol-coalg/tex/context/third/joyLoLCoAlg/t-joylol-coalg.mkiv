@@ -1,0 +1,139 @@
+% A ConTeXt MkIV module
+%D \module
+%D   [     file=t-joylol-coalg,
+%D      version=2017.04.05,
+%D        title=\CONTEXT\ User module,
+%D     subtitle=JoyLoL CoAlgebra definitions,
+%D       author=Stephen Gaito,
+%D         date=\currentdate,
+%D    copyright=PerceptiSys Ltd (Stephen Gaito),
+%D        email=stephen@perceptisys.co.uk,
+%D      license=MIT License]
+
+%C Copyright (C) 2017 PerceptiSys Ltd (Stephen Gaito)
+%C
+%C Permission is hereby granted, free of charge, to any person obtaining a 
+%C copy of this software and associated documentation files (the 
+%C "Software"), to deal in the Software without restriction, including 
+%C without limitation the rights to use, copy, modify, merge, publish, 
+%C distribute, sublicense, and/or sell copies of the Software, and to 
+%C permit persons to whom the Software is furnished to do so, subject to 
+%C the following conditions: 
+%C
+%C The above copyright notice and this permission notice shall be included 
+%C in all copies or substantial portions of the Software. 
+%C
+%C THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+%C OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+%C MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+%C IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+%C CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+%C TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+%C SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+% begin info
+%
+% title   : JoyLoL CoAlgebra definitions
+% comment : Provides structured document and code generation
+% status  : under development, mkiv only
+%
+% end info
+
+%M \usemodule[joylol-coalg]
+%M \loadsetups[t-joylol-coalg.xml]
+
+%M \setupinteraction
+%M   [state=start,
+%M    color=green,
+%M    style=bold]
+%M % make chapter, section bookmarks visible when opening document
+%M \placebookmarks[chapter,section,subsection][chapter,section]
+%M \setupinteractionscreen[option=bookmark]
+
+%D \startsection[title=Introduction]
+
+%D The JoyLoL CoAlgebra \ConTeXt\ module provides the tools required to 
+%D fully describe the formal semantics of a particular JoyLoL CoAlgebraic 
+%D extension. 
+
+%D \listnamespaces\
+
+%D \stopsection
+
+\unprotect
+
+\installnamespace{joyLoLCoAlg}
+
+\installcommandhandler \????joyLoLCoAlg {joyLoLCoAlg} \????joyLoLCoAlg
+
+%D \startsection[title=JoyLoLCoAlg environment]
+
+%D The JoyLoLCoAlg environment provides a highly structured environment in 
+%D which to describe the formal semantics and implementation of a 
+%D particular JoyLoL CoAlgebraic extension. 
+
+%D \startsubsection[title=Examples]
+
+%D \starttyping
+%D \startJoyLoLCoAlg[title=List of Lists][lists]
+%D \stoptyping
+
+%D The first argument provides the arguments to an embedded 
+%D \type{\startchapter} command. 
+
+%D The second argument provides the arguments to an embedded 
+%D \type{\startcomponent} command. It also provides the base file name of 
+%D all of the automatically generated code fragments. 
+
+%D \stopsubsection
+
+%D \startsubsection[title=Implementation: Start]
+
+\unexpanded\def\startJoyLoLCoAlg{\dodoubleempty\joyLoLCoAlg_start}
+
+\def\joyLoLCoAlg_start
+  {\ifsecondargument
+     \expandafter\joyLoLCoAlg_start_double
+   \else\iffirstargument
+     \doubleexpandafter\joyLoLCoAlg_start_single
+   \else
+     \doubleexpandafter\joyLoLCoAlg_start_none
+   \fi\fi}
+
+\def\joyLoLCoAlg_start_double[#1][#2]{\startcomponent[#2]\startchapter[#1]}
+   
+\def\joyLoLCoAlg_start_single[#1][#2]{\errmessage{\string\startJoyLoLCoAlg\space requires two arguments but only one [#1] has been supplied}}
+   
+\def\joyLoLCoAlg_start_none[#1][#2]{\errmessage{\string\startJoyLoLCoAlg\space requires two arguments but none have been supplied}}
+
+%D \stopsubsection
+
+%D \startsubsection[title=Implementation: Stop]
+
+\unexpanded\def\stopJoyLoLCoAlg{\dodoubleempty\joyLoLCoAlg_stop}
+
+\def\joyLoLCoAlg_stop
+  {\ifsecondargument
+     \expandafter\joyLoLCoAlg_stop_double
+   \else\iffirstargument
+     \doubleexpandafter\joyLoLCoAlg_stop_single
+   \else
+     \doubleexpandafter\joyLoLCoAlg_stop_none
+   \fi\fi}
+
+\def\joyLoLCoAlg_stop_double[#1][#2]{\errmessage{\string\stopJoyLoLCoAlg\space should have NO arguments}}
+   
+\def\joyLoLCoAlg_stop_single[#1][#2]{\errmessage{\string\stopJoyLoLCoAlg\space should have NO arguments}}
+   
+\def\joyLoLCoAlg_stop_none[#1][#2]{\stopchapter\stopcomponent}
+
+
+%D \stopsubsection
+
+%D \stopsection
+
+%D \startsection[title=]
+
+\protect \endinput
+
+
