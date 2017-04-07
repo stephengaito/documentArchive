@@ -178,3 +178,12 @@ Engine](https://john.nachtimwald.com/2014/08/06/using-lua-as-a-templating-engine
 [labels as values in 
 clang](http://stackoverflow.com/questions/36983970/labels-as-values-in-clang) 
 
+[Computed goto for efficient dispatch 
+tables](http://eli.thegreenplace.net/2012/07/12/computed-goto-for-efficient-dispatch-tables)
+
+[Load-time relocation of shared 
+libraries](http://eli.thegreenplace.net/2011/08/25/load-time-relocation-of-shared-libraries)
+
+[Position Independent Code (PIC) in shared 
+libraries](http://eli.thegreenplace.net/2011/11/03/position-independent-code-pic-in-shared-libraries)
+
