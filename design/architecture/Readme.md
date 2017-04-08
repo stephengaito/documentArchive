@@ -165,6 +165,19 @@ JoyLoL, as well as Lua and C via JoyLoLTemplates.
 See [Compilation of Stack-Based 
 Languages](http://www.complang.tuwien.ac.at/projects/rafts.html) 
 
+See Chapter 4 (Translation (of Forth) to C) in [Implementation of 
+Stack-Based Languages on Register 
+Machines](http://www.complang.tuwien.ac.at/papers/ertl96diss.ps.gz) 
+(taken from the above website). Basically this suggests ways to *use* C 
+and its optimization tools to maximum effect.
+
+See also [Mark Probst](http://www.complang.tuwien.ac.at/schani/)'s 
+[Proper Tail Recursion in C (Diploma 
+Thesis)](http://www.complang.tuwien.ac.at/schani/diplarb.ps)
+
+See also [x86 calling 
+conventions](https://en.wikipedia.org/wiki/X86_calling_conventions)
+
 [Writing an LLVM Backend](http://llvm.org/docs/WritingAnLLVMBackend.html) 
 
 [StringTemplates](http://www.stringtemplate.org/) 
