@@ -1,0 +1,60 @@
+% A ConTeXt document [master document: joyLoL.tex]
+
+\startcomponent overview
+
+\startchapter[title=Overview]
+
+\startsection[title=Implementation]
+
+\startsubsection[title=System code]
+
+We build the lowest level system code for JoyLoL using ANSI-C with a few 
+\quotation{standard} POSIX extension libraries. 
+
+We use a \quote{trampolining} interpreter as the main \quote{eval} loop 
+for JoyLoL. Since all JoyLoL words explicitly manage the context's data 
+and process stacks, there is no need for the ANSI-C call stack. In the 
+best of all worlds we could implement JoyLoL's lowest levels using a 
+systems programming language with native Tail Calls. However no such 
+language currently exists. While the functional languages such as Haskell, 
+and Scheme have native Tail Calls, they do not map sufficiently cleanly 
+onto the underlying Assembler of a give computer's CPU. All C-like 
+languages who do typically map reasonably cleanly onto a given CPU's 
+architecture, do not have a Tail Call friendly call structure. 
+
+We have chosen ANSI-C for its:
+
+\startitemize
+
+\item {\bf portability}: There are a large number of ANSI-C compatible C 
+compilers which target almost \emph{all} computers currently in existence. 
+
+\item {\bf inter-working}: There are a large number of code libraries 
+implementing useful algorithms which can be \quote{loaded} into the 
+runtime image of an ANSI-C compiled program.
+
+\item {\bf transparency}: The semantic gap between ANSI-C and the 
+\quote{assembler} / \quote{machine-code} of almost any computer is small 
+enough that a \emph{large number} of skilled programmers could, if needed, 
+hand code any C code directly into a given machine-code. For our needs, 
+this means that there is no obscure mapping between the short pieces of 
+JoyLoL implementation code and a given CPU's machine-code. This ensures 
+that what JoyLoL does when running is \quote{relatively} easy to 
+understand for most programmers. 
+
+\item {\bf familiarity}: While programmers are only a small part of our 
+target audience, given we are explicitly dealing with the mathematics of 
+computation, the programming community is an important part of the 
+audience. More importantly \quote{most} programmers have a \quote{working} 
+familiarity with the subset of ANSI-C used to implement the lowest levels 
+of JoyLoL. 
+
+\stopitemize
+
+\stopsubsection
+
+\stopsection
+
+\stopchapter
+
+\stopcomponent
