@@ -6,6 +6,41 @@
 
 \startsection[title=Implementation]
 
+\startsubsection[title=Bridging the semantic gap]
+
+JoyLoL \emph{is explicitly defined to be} a fixed point of the formal 
+semantic functor, making JoyLoL its own formal semantic definition. 
+However there is, currently, no existing computational device which 
+\emph{implements} the JoyLoL language. That is, there is no computational 
+device which \quote{runs} JoyLoL code natively. 
+
+The objective of this document is to provide an implementation of JoyLoL 
+in as transparently correct way as possible. As discussed in, 
+\cite[gaito2017joyLoLDefinition], the formal definition of any 
+computational language has two distinct components: one \emph{deductive} 
+and the other \emph{inductive}. While we can rigorously check any 
+deductive proofs of correctness, we can only ever hope to falsify any 
+inductive tests of correctness. Any formally correct implementation of a 
+computational language needs to be explicitly clear where the line between 
+the deductively provable and the inductively testable is located.
+
+The desired goal of any rigorous implementation is to keep as much as 
+possible of the code deductively provable. Conversely any rigorous 
+implementation needs to keep any code which is only inductively testable 
+as clear and simple as possible. However how and were we draw the line 
+between the deductively provable and the merely inductively testable 
+implementation, will have profound impact upon the \emph{performance} of 
+all resulting JoyLoL computations run using this implementation. Provable 
+correctness \emph{and} performance are \emph{both} critically important. 
+
+JoyLoL is a Forth-like langauge which manipulates \quote{stacks}. Almost 
+all existing computational devices are \quote{register based}. Cleanly and 
+performanly implementing stack based languages on a register based 
+computational device has been previously explored in XXXX's thesis, 
+\cite[XXXX]. 
+
+\stopsubsection
+
 \startsubsection[title=System code]
 
 We build the lowest level system code for JoyLoL using ANSI-C with a few 
