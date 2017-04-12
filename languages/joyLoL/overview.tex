@@ -33,31 +33,24 @@ implementation, will have profound impact upon the \emph{performance} of
 all resulting JoyLoL computations run using this implementation. Provable 
 correctness \emph{and} performance are \emph{both} critically important. 
 
-JoyLoL is a Forth-like langauge which manipulates \quote{stacks}. Almost 
-all existing computational devices are \quote{register based}. Cleanly and 
-performanly implementing stack based languages on a register based 
-computational device has been previously explored in XXXX's thesis, 
-\cite[XXXX]. 
+To obtain the correct balance of correctness, (potential) performance, and 
+simplicity, JoyLoL has been designed as a \quote{trampolining} 
+interpreter, written in ANSI-C, but meta-compiled from Literate sources 
+written in ConTeXt/LuaTeX which are transcribed into ANSI-C source before 
+being compiled to an executable on a given platform by an appropriately 
+chosen ANSI-C compiler. 
 
-\stopsubsection
+The literate sources, provide human readable documentation and 
+justifications for each JoyLoL Co-Algebraic extension, complete with 
+formal semantic definitions of each axiomatic word in JoyLoL. 
 
-\startsubsection[title=System code]
+\stopsubsection 
+
+\startsubsection[title=ANSI-C system code]
 
 We build the lowest level system code for JoyLoL using ANSI-C with a few 
-\quotation{standard} POSIX extension libraries. 
-
-We use a \quote{trampolining} interpreter as the main \quote{eval} loop 
-for JoyLoL. Since all JoyLoL words explicitly manage the context's data 
-and process stacks, there is no need for the ANSI-C call stack. In the 
-best of all worlds we could implement JoyLoL's lowest levels using a 
-systems programming language with native Tail Calls. However no such 
-language currently exists. While the functional languages such as Haskell, 
-and Scheme have native Tail Calls, they do not map sufficiently cleanly 
-onto the underlying Assembler of a give computer's CPU. All C-like 
-languages who do typically map reasonably cleanly onto a given CPU's 
-architecture, do not have a Tail Call friendly call structure. 
-
-We have chosen ANSI-C for its:
+\quotation{standard} POSIX extension libraries. We have chosen ANSI-C for 
+its: 
 
 \startitemize
 
@@ -67,6 +60,11 @@ compilers which target almost \emph{all} computers currently in existence.
 \item {\bf inter-working}: There are a large number of code libraries 
 implementing useful algorithms which can be \quote{loaded} into the 
 runtime image of an ANSI-C compiled program.
+
+\item {\bf performance}: \emph{If} desired, the overall JoyLoL interpreter 
+can be compiled using any of the modern ANSI-C compilers' optimization 
+modes. Since ANSI-C is so heavily used, the optimizing modes of most 
+compilers are realatively well \quote{understood}, tested and stable. 
 
 \item {\bf transparency}: The semantic gap between ANSI-C and the 
 \quote{assembler} / \quote{machine-code} of almost any computer is small 
@@ -85,6 +83,33 @@ familiarity with the subset of ANSI-C used to implement the lowest levels
 of JoyLoL. 
 
 \stopitemize
+
+\stopsubsection
+
+\startsubsection[title=Interpreter structure]
+
+We use a \quote{trampolining} interpreter as the main \quote{eval} loop 
+for JoyLoL. Since all JoyLoL words explicitly manage the context's data 
+and process stacks, there is no need for the ANSI-C call stack. In the 
+best of all worlds we could implement JoyLoL's lowest levels using a 
+systems programming language with native Tail Calls. However no such 
+language currently exists. While the functional languages such as Haskell, 
+and Scheme have native Tail Calls, they do not map sufficiently cleanly 
+onto the underlying Assembler of a give computer's CPU. All C-like 
+languages who do typically map reasonably cleanly onto a given CPU's 
+architecture, do not have a Tail Call friendly call structure. 
+
+Trampolining interpreters are discussed in, \cite[right={, Section 
+5.2)}][friedmanWand2008essentialsProgrammingLanguages] 
+
+JoyLoL is a Forth-like language which manipulates \quote{stacks}. Almost 
+all existing general purpose computational devices are \quote{register 
+based}. Cleanly and performantly implementing stack based languages on a 
+register based computational device has been previously explored in Ertl's 
+thesis, \cite[ertl1996implementationStackLanguages]. 
+
+has been previously explored in Probst's thesis, 
+\cite[probst2001tailRecursionC]. 
 
 \stopsubsection
 
