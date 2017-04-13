@@ -1,0 +1,121 @@
+% A ConTeXt MkIV module
+%D \module
+%D   [     file=t-joylol-words,
+%D      version=2017.04.13,
+%D        title=\CONTEXT\ User module,
+%D     subtitle=Defining JoyLoL words,
+%D       author=Stephen Gaito,
+%D         date=\currentdate,
+%D    copyright=PerceptiSys Ltd (Stephen Gaito),
+%D        email=stephen@perceptisys.co.uk,
+%D      license=MIT License]
+
+%C Copyright (C) 2017 PerceptiSys Ltd (Stephen Gaito)
+%C
+%C Permission is hereby granted, free of charge, to any person obtaining a 
+%C copy of this software and associated documentation files (the 
+%C "Software"), to deal in the Software without restriction, including 
+%C without limitation the rights to use, copy, modify, merge, publish, 
+%C distribute, sublicense, and/or sell copies of the Software, and to 
+%C permit persons to whom the Software is furnished to do so, subject to 
+%C the following conditions: 
+%C
+%C The above copyright notice and this permission notice shall be included 
+%C in all copies or substantial portions of the Software. 
+%C
+%C THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+%C OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+%C MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+%C IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+%C CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+%C TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+%C SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+% begin info
+%
+% title   : Defining JoyLoL words
+% comment : Provides structured document and code generation
+% status  : under development, mkiv only
+%
+% end info
+
+%% \usemodule-ed by t-joylol-coalg.mkiv
+
+%D \section{Introduction}
+
+%D The JoyLoL words \ConTeXt\ module provides the tools required to fully 
+%D describe the formal semantics of a particular JoyLoL word in a 
+%D CoAlgebraic extension. 
+
+%D \listnamespaces\
+
+\unprotect
+
+%D \section{JoyLoL word environment}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation: start}
+
+\def\startJoyLoLWord[#1]{start-joylol-word = \type{[#1]}}
+
+%D \subsection{Implementation: stop}
+
+\def\stopJoyLoLWord{stop-joylol-word}
+
+%D \section{Describing the data stack}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation}
+
+\def\preDataStack[#1][#2]{preDataStack \type{[#1]} \type{[#2]}}
+\def\postDataStack[#1]{postDataStack \type{[#1]}}
+
+%D \section{Describing the process stack}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation}
+
+\def\preProcessStack[#1][#2]{preProcessStack \type{[#1]} \type{[#2]}}
+\def\postProcessStack[#1]{postProcessStack \type{[#1]}}
+
+%D \section{JoyLoL code environment}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation: start}
+
+\def\startJoyLoLCode{starttyping-joylol-code}
+
+%D \subsection{Implementation: stop}
+
+\def\stopJoyLoLCode{stoptyping-joylol-code}
+
+%D \section{C code environment}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation: start}
+
+\def\startCCode{starttyping-c-code}
+
+%D \subsection{Implementation: stop}
+
+\def\stopCCode{starttyping-c-code}
+
+%D \section{Lua code environment}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation: start}
+
+\def\startLuaCode{starttyping-lua-code}
+
+%D \subsection{Implementation: stop}
+
+\def\stopLuaCode{stoptyping-lua-code}
+
+\protect \endinput
+
