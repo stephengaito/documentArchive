@@ -2,6 +2,10 @@
 
 \startcomponent overview
 
+\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
+src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
+(Stephen Gaito)}, year=2017] 
+
 \startchapter[title=Overview]
 
 \startsection[title=Implementation]
@@ -170,6 +174,17 @@ all existing general purpose computational devices are \quote{register
 based}. Cleanly and performantly implementing stack based languages on a 
 register based computational device has been previously explored in Ertl's 
 thesis, \cite[ertl1996implementationStackLanguages]. 
+
+\stopsubsection
+
+\startsubsection[title=Bootstrapping JoyLoL]
+
+Since we want as rigorous as possible toolset, we ultimately need to use 
+JoyLoL to deductively prove its own correctness. Unfortunately, at least 
+initially, most users do not have a running version of JoyLoL. In order to 
+obtain the \emph{first} running version, we need to \quote{bootstrap} the 
+toolset by building an initial version of JoyLoL which is not rigorously 
+checked. 
 
 \stopsubsection
 

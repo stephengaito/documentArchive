@@ -50,7 +50,7 @@
 %M \placebookmarks[chapter,section,subsection][chapter,section]
 %M \setupinteractionscreen[option=bookmark]
 
-%D \startsection[title=Introduction]
+%D \section{Introduction}
 
 %D The JoyLoL CoAlgebra \ConTeXt\ module provides the tools required to 
 %D fully describe the formal semantics of a particular JoyLoL CoAlgebraic 
@@ -58,21 +58,19 @@
 
 %D \listnamespaces\
 
-%D \stopsection
-
 \unprotect
 
 \installnamespace{joyLoLCoAlg}
 
 \installcommandhandler \????joyLoLCoAlg {joyLoLCoAlg} \????joyLoLCoAlg
 
-%D \startsection[title=JoyLoLCoAlg environment]
+%D \section{JoyLoLCoAlg environment}
 
 %D The JoyLoLCoAlg environment provides a highly structured environment in 
 %D which to describe the formal semantics and implementation of a 
 %D particular JoyLoL CoAlgebraic extension. 
 
-%D \startsubsection[title=Examples]
+%D \subsection{Examples}
 
 %D \starttyping
 %D \startJoyLoLCoAlg[title=List of Lists][lists]
@@ -85,9 +83,7 @@
 %D \type{\startcomponent} command. It also provides the base file name of 
 %D all of the automatically generated code fragments. 
 
-%D \stopsubsection
-
-%D \startsubsection[title=Implementation: Start]
+%D \subsection{Implementation: Start}
 
 \unexpanded\def\startJoyLoLCoAlg{\dodoubleempty\joyLoLCoAlg_start}
 
@@ -106,9 +102,7 @@
    
 \def\joyLoLCoAlg_start_none[#1][#2]{\errmessage{\string\startJoyLoLCoAlg\space requires two arguments but none have been supplied}}
 
-%D \stopsubsection
-
-%D \startsubsection[title=Implementation: Stop]
+%D \subsection{Implementation: Stop}
 
 \unexpanded\def\stopJoyLoLCoAlg{\dodoubleempty\joyLoLCoAlg_stop}
 
@@ -127,12 +121,38 @@
    
 \def\joyLoLCoAlg_stop_none[#1][#2]{\stopchapter\stopcomponent}
 
+%D \section{Source licenses}
 
-%D \stopsubsection
+%D \subsection{Examples}
 
-%D \stopsection
+%D \subsection{Implementation}
 
-%D \startsection[title=]
+\unexpanded\def\srcCopyrightCCBYSA{}
+
+% <a rel="license" 
+% href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative 
+% Commons License" style="border-width:0" 
+% src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br 
+% /><span xmlns:dct="http://purl.org/dc/terms/" 
+% property="dct:title">JoyLoL</span> by <a 
+% xmlns:cc="http://creativecommons.org/ns#" 
+% href="https://www.perceptisys.co.uk" property="cc:attributionName" 
+% rel="cc:attributionURL">Perceptisys Ltd (Stephen Gaito)</a> is licensed 
+% under a <a rel="license" 
+% href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons 
+% Attribution-ShareAlike 4.0 International License</a>.<br />Based on a 
+% work at <a xmlns:dct="http://purl.org/dc/terms/" href="gitHub" 
+% rel="dct:source">gitHub</a>. 
+
+%D \section{Target licenses}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation}
+
+\unexpanded\def\targetCopyrightMIT{}
+
+%D \section{Something}
 
 \protect \endinput
 
