@@ -36,9 +36,13 @@ correctness \emph{and} performance are \emph{both} critically important.
 To obtain the correct balance of correctness, (potential) performance, and 
 simplicity, JoyLoL has been designed as a \quote{trampolining} 
 interpreter, written in ANSI-C, but meta-compiled from Literate sources 
-written in ConTeXt/LuaTeX which are transcribed into ANSI-C source before 
+written in \ConTeXt/\LuaTeX\ which are transcribed into ANSI-C source before 
 being compiled to an executable on a given platform by an appropriately 
 chosen ANSI-C compiler. 
+
+\stopsubsection
+
+\startsubsection[title=Literate Sources]
 
 The literate sources, provide human readable documentation and 
 justifications for each JoyLoL Co-Algebraic extension, complete with 
@@ -88,28 +92,84 @@ of JoyLoL.
 
 \startsubsection[title=Interpreter structure]
 
-We use a \quote{trampolining} interpreter as the main \quote{eval} loop 
-for JoyLoL. Since all JoyLoL words explicitly manage the context's data 
-and process stacks, there is no need for the ANSI-C call stack. In the 
-best of all worlds we could implement JoyLoL's lowest levels using a 
-systems programming language with native Tail Calls. However no such 
-language currently exists. While the functional languages such as Haskell, 
-and Scheme have native Tail Calls, they do not map sufficiently cleanly 
-onto the underlying Assembler of a give computer's CPU. All C-like 
-languages who do typically map reasonably cleanly onto a given CPU's 
-architecture, do not have a Tail Call friendly call structure. 
+Since all JoyLoL words explicitly manage the context's data and process 
+stacks, there is, in theory, no need for the ANSI-C call stack. The 
+typical C-like language uses the call stack to hold both local data, any 
+call parameters, as well as the process location to which to 
+\quote{return}. Because data and process information are mixed on the call 
+stack, to keep the call stack from growing without bounds, the explicit 
+expectation of any C-like language is that calls \quote{return} in the 
+\emph{strict} reverse order in which they are called, and that, more 
+importantly, there is a finite limit on the number of calls a process 
+might make. 
 
-Trampolining interpreters are discussed in, \cite[right={, Section 
-5.2)}][friedmanWand2008essentialsProgrammingLanguages] 
+When using JoyLoL as a foundation of Mathematics, we will find that there 
+are many processes which do not naturally follow this strict return in 
+reverse order pattern. Keeping the data and process stacks separate 
+ensures that JoyLoL does not need to be enforce this strict call pattern. 
+Instead JoyLoL implements a \quote{continuation passing style} of 
+programming, see, for example, \cite[stracheyWadsworth2000continuations], 
+\cite[right={, section 5.1)}][gordon1979denotationalDescriptionProgLangs], 
+\cite[right={, chapter 10)}][tennent1981programmingLanguages] 
+\cite[right={, chapters 5 and 
+6)}][friedmanWand2008essentialsProgrammingLanguages]. 
+
+In typical programming languages, this continuation passing style is 
+implemented using either explicit \quote{jumps}/\quote{gotos}, see 
+\cite[right={, chapter 10)}][tennent1981programmingLanguages], or, 
+alternatively, using \quote{tail calls}, see \cite[right={, chapter 
+2)}][probst2001tailRecursionC], or \cite[right={, section 
+6.2)}][friedmanWand2008essentialsProgrammingLanguages]. The use of 
+explicit computed gotos, which are implemented as non-ANSI-C standard 
+\emph{extensions}, requires the use of global variables to pass the data 
+and process stacks. Unfortunately this use of global variables inhibits 
+most standard C compiler optimizations\footnote{With considerably more 
+effort, we \emph{could} arrange to keep the data and process stacks in 
+\quote{local} variables in \quote{simulated} \quote{C-call stacks}. While 
+this \emph{might} improve performance, the use of such simulated C-call 
+stacks, being so non-standard, would seriously reduce the number of 
+programmers who could \emph{easily} understand the resulting C-code.}. 
+
+In the best of all worlds, we could implement JoyLoL's lowest levels using 
+a \emph{systems programming language} with native \quote{tail calls}. 
+Since the data and process stacks can now be passed as \quote{normal} 
+procedure parameters, standard C compiler optimizations will not be 
+inhibited. Unfortunately no widely used systems programming language 
+currently implements tail calls. While the functional languages such as 
+Haskell, and Lisp/Scheme have native tail calls, they do not map 
+sufficiently cleanly onto the underlying machine-language of a given 
+computer's CPU. All C-like languages, who do typically map reasonably 
+cleanly onto a given CPU's architecture, do not have a tail call friendly 
+call structure. 
+
+To solve this problem, following \cite[right={, Section 
+5.2)}][friedmanWand2008essentialsProgrammingLanguages], we use a 
+\quote{trampolining} interpreter as the main \quote{eval loop} for JoyLoL. 
+The use of trampolining, ensures that the C-call stack never grows very 
+large. JoyLoL words are implemented as simple C procedures keeping the 
+structure of the resulting C-code simple. Trampolining also allows the use 
+of external libraries which expect C-call stacks. For each cycle around 
+the JoyLoL eval loop, the top of the process stack is used to determine 
+which C procedure (JoyLoL word) to call next. 
+
+Unfortunately, while providing simply structured C-code, trampolinging of 
+small C proceedures, is not as performant as a system which makes use of 
+native tail calls. Instead by using the \ConTeXt/\LuaTeX\ based 
+meta-compiler we can pre-compile any complex JoyLoL word definitions as 
+explicit C procedures which \emph{can allow} a given C compiler's 
+optimization mode to produce performant code. This means that the JoyLoL 
+system itself can be written in JoyLoL, allowing it to be proven 
+deductively correct, yet still be performant. 
+
+\stopsubsection
+
+\startsubsection[title=Call structure]
 
 JoyLoL is a Forth-like language which manipulates \quote{stacks}. Almost 
 all existing general purpose computational devices are \quote{register 
 based}. Cleanly and performantly implementing stack based languages on a 
 register based computational device has been previously explored in Ertl's 
 thesis, \cite[ertl1996implementationStackLanguages]. 
-
-has been previously explored in Probst's thesis, 
-\cite[probst2001tailRecursionC]. 
 
 \stopsubsection
 
