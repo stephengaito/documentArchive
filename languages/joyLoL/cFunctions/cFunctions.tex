@@ -1,0 +1,69 @@
+% A ConTeXt document [master document: ../joyLoL.tex]
+
+\startJoyLoLCoAlg[title=C-Functions][cFunctions]
+
+\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
+src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
+(Stephen Gaito)}, year=2017] 
+
+\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
+
+\startsection[title=Goals]
+
+A C-Function represents a JoyLoL word implemented as an ANSI-C function 
+which directly manipulates a Context. 
+
+\dependsOn[coAlgebras]
+\dependsOn[context]
+\dependsOn[boolean]
+
+\startJoyLoLCHeader
+
+typedef void (CFunction)(Context*);
+
+typedef struct cFunction_struct {
+  CoAlgebras super;
+  CFunction  theFunction;
+} CFunction;
+
+\stopJoyLoLCHeader
+
+\startJoyLoLWord[isCFunction]
+
+\preProcessStack[aCFunc][]
+\postDataStack[isBoolean]
+
+\startJoyLoLCCode
+
+if (!aCFunc) then
+  pushDataFalse(aCtx);
+if (aCFunc->isA == CFUNCTIONS_COALG) then
+  pushDataTrue(aCtx);
+pushDataFalse(aCtx);
+
+\stopJoyLoLCCode
+
+\stopJoyLoLWord
+
+\startJoyLoLWord[executeCFunc]
+
+\preProcessStack[aCFunc][]
+
+\startJoyLoLCCode
+
+if (!aCFunc) then
+  raiseException(aCtx, "no atom (CFunction)");
+if (aCFunc->super.isA != CFUNCTIONS_COALG) then
+  raiseException(aCtx, "not a CFunction");
+if (!aCFunc->theFunction) then
+  raiseException(aCtx, "no CFunction found");
+
+(aCFunc->theFunction)(aCtx);
+
+\stopJoyLoLCCode
+
+\stopJoyLoLWord
+
+\stopsection
+
+\stopJoyLoLCoAlg

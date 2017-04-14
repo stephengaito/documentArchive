@@ -1,0 +1,44 @@
+% A ConTeXt document [master document: ../joyLoL.tex]
+
+\startJoyLoLCoAlg[title=Booleans][booleans]
+
+\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
+src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
+(Stephen Gaito)}, year=2017] 
+
+\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
+
+\startsection[title=Goals]
+
+A Boolean has exactly two possible values, \quote{true} or \quote{false}. 
+
+\stopsection
+
+\dependsOn[coAlgebras]
+\dependsOn[context]
+
+\startJoyLoLCHeader
+
+typedef struct boolean_struct {
+  CoAlgebras super;
+  size_t     theBoolean;
+} Boolean;
+
+\stopJoyLoLCHeader
+
+\startJoyLoLWord[isBoolean]
+
+\preDataStack[aBool][]
+
+\startJoyLoLCCode
+
+if (!aBool) then pushDataFalse(aCtx);
+if (aBool->super.isA == BOOLEANS_COALG) then
+  pushDataTrue(aCtx);
+pushDataFalse(aCtx);
+
+\stopJoyLoLCCode
+
+\stopJoyLoLWord
+
+\stopJoyLoLCoAlg
