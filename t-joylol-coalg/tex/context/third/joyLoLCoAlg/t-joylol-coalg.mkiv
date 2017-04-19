@@ -96,6 +96,8 @@
      \doubleexpandafter\joyLoLCoAlg_start_none
    \fi\fi}
 
+\def\openJoyLoLCoAlt#1{\directlua{thirddata.joyLoLCoAlg.open{#1}}}
+   
 \def\joyLoLCoAlg_start_double[#1][#2]{\startcomponent[#2]\startchapter[#1]}
    
 \def\joyLoLCoAlg_start_single[#1][#2]{\errmessage{\string\startJoyLoLCoAlg\space requires two arguments but only one [#1] has been supplied}}
