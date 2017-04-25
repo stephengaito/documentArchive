@@ -41,6 +41,7 @@
 
 %% \usemodule-ed by t-joylol-coalg.mkiv
 \usemodule[t-high-cpp]
+%\usemodule[t-high-lisp]
 
 %D \section{Introduction}
 
@@ -63,14 +64,6 @@
 %D \subsection{Implementation: stop}
 
 \def\stopJoyLoLWord{stop-joylol-word}
-
-%D \section{Describing CoAlgebraic dependencies}
-
-%D \subsection{Examples}
-
-%D \subsection{Implementation}
-
-\def\dependsOn[#1]{dependsOn \type{[#1]}}
 
 %D \section{Describing the data stack}
 
@@ -96,11 +89,15 @@
 
 %D \subsection{Implementation: start}
 
-\def\startJoyLoLCode{starttyping-joylol-code}
+\definetyping[JoyLoLCode]
+%\setuptyping[JoyLoLCode][option=lisp]
 
 %D \subsection{Implementation: stop}
 
-\def\stopJoyLoLCode{stoptyping-joylol-code}
+\let\oldStopJoyLoLCode=\stopJoyLoLCode
+\def\stopJoyLoLCode{%
+  \oldStopJoyLoLCode%
+  \directlua{thirddata.joyLoLCoAlgs.joyLoL.writeBuffer('_typing_')}}
 
 %D \section{C header environment}
 
