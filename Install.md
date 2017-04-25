@@ -10,8 +10,12 @@ require both runtime and compile tools.
 * Lua (both v5.2 and v5.3)
 -- LuaFileSystem
 -- LPeg
+
 * TextAdept
+
 * LuaTeX/ConTeXt
+-- t-high [Syntax Highlighting](https://modules.contextgarden.net/cgi-bin/module.cgi/action=view/id=82) 
+  module ([download v1.0](https://modules.contextgarden.net/dl/high-1.0.zip)) 
 
 ### Compiling
 

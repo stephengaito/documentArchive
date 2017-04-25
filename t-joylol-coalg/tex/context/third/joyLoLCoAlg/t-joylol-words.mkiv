@@ -40,6 +40,7 @@
 % end info
 
 %% \usemodule-ed by t-joylol-coalg.mkiv
+\usemodule[t-high-cpp]
 
 %D \section{Introduction}
 
@@ -108,6 +109,7 @@
 %D \subsection{Implementation: start}
 
 \definetyping[CHeader]
+\setuptyping[CHeader][option=cpp]
 
 %D \subsection{Implementation: stop}
 
@@ -122,23 +124,31 @@
 
 %D \subsection{Implementation: start}
 
-\def\startCCode{starttyping-c-code}
+\definetyping[CCode]
+\setuptyping[CCode][option=cpp]
 
 %D \subsection{Implementation: stop}
 
-\def\stopCCode{starttyping-c-code}
-
+\let\oldStopCCode=\stopCCode
+\def\stopCCode{%
+  \oldStopCCode%
+  \directlua{thirddata.joyLoLCoAlgs.joyLoL.writeBuffer('_typing_')}}
+  
 %D \section{Lua code environment}
 
 %D \subsection{Examples}
 
 %D \subsection{Implementation: start}
 
-\def\startLuaCode{starttyping-lua-code}
+\definetyping[LuaCode]
+\setuptyping[LuaCode][option=lua]
 
 %D \subsection{Implementation: stop}
 
-\def\stopLuaCode{stoptyping-lua-code}
+\let\oldStopLuaCode=\stopLuaCode
+\def\stopLuaCode{%
+  \oldStopLuaCode%
+  \directlua{thirddata.joyLoLCoAlgs.joyLoL.writeBuffer('_typing_')}}
 
 \protect \endinput
 
