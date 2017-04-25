@@ -37,4 +37,8 @@ end
 
 interfaces.writestatus("joyLoL", joyLoL.version())
 
+function joyLoL.writeBuffer(bufferName)
+  texio.write_nl(buffers.getcontent(bufferName))
+end
+
 coAlgs.joyLoL = joyLoL

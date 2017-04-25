@@ -17,27 +17,27 @@ A Boolean has exactly two possible values, \quote{true} or \quote{false}.
 \dependsOn[coAlgebras]
 \dependsOn[context]
 
-\startJoyLoLCHeader
+\startCHeader
 
 typedef struct boolean_struct {
   CoAlgebras super;
   size_t     theBoolean;
 } Boolean;
 
-\stopJoyLoLCHeader
+\stopCHeader
 
 \startJoyLoLWord[isBoolean]
 
 \preDataStack[aBool][]
 
-\startJoyLoLCCode
+\startCCode
 
 if (!aBool) then pushDataFalse(aCtx);
 if (aBool->super.isA == BOOLEANS_COALG) then
   pushDataTrue(aCtx);
 pushDataFalse(aCtx);
 
-\stopJoyLoLCCode
+\stopCCode
 
 \stopJoyLoLWord
 

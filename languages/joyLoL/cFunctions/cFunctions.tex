@@ -17,7 +17,7 @@ which directly manipulates a Context.
 \dependsOn[context]
 \dependsOn[boolean]
 
-\startJoyLoLCHeader
+\startCHeader
 
 typedef void (CFunction)(Context*);
 
@@ -26,14 +26,14 @@ typedef struct cFunction_struct {
   CFunction  theFunction;
 } CFunction;
 
-\stopJoyLoLCHeader
+\stopCHeader
 
 \startJoyLoLWord[isCFunction]
 
 \preProcessStack[aCFunc][]
 \postDataStack[isBoolean]
 
-\startJoyLoLCCode
+\startCCode
 
 if (!aCFunc) then
   pushDataFalse(aCtx);
@@ -41,7 +41,7 @@ if (aCFunc->isA == CFUNCTIONS_COALG) then
   pushDataTrue(aCtx);
 pushDataFalse(aCtx);
 
-\stopJoyLoLCCode
+\stopCCode
 
 \stopJoyLoLWord
 
@@ -49,7 +49,7 @@ pushDataFalse(aCtx);
 
 \preProcessStack[aCFunc][]
 
-\startJoyLoLCCode
+\startCCode
 
 if (!aCFunc) then
   raiseException(aCtx, "no atom (CFunction)");
@@ -60,7 +60,7 @@ if (!aCFunc->theFunction) then
 
 (aCFunc->theFunction)(aCtx);
 
-\stopJoyLoLCCode
+\stopCCode
 
 \stopJoyLoLWord
 

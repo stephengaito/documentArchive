@@ -63,6 +63,14 @@
 
 \def\stopJoyLoLWord{stop-joylol-word}
 
+%D \section{Describing CoAlgebraic dependencies}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation}
+
+\def\dependsOn[#1]{dependsOn \type{[#1]}}
+
 %D \section{Describing the data stack}
 
 %D \subsection{Examples}
@@ -99,11 +107,14 @@
 
 %D \subsection{Implementation: start}
 
-\def\startCHeader{starttyping-c-header}
+\definetyping[CHeader]
 
 %D \subsection{Implementation: stop}
 
-\def\stopCHeader{starttyping-c-header}
+\let\oldStopCHeader=\stopCHeader
+\def\stopCHeader{%
+  \oldStopCHeader%
+  \directlua{thirddata.joyLoLCoAlgs.joyLoL.writeBuffer('_typing_')}}
 
 %D \section{C code environment}
 
