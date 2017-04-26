@@ -54,9 +54,25 @@
 
 %D The JoyLoL CoAlgebra \ConTeXt\ module provides the tools required to 
 %D fully describe the formal semantics of a particular JoyLoL CoAlgebraic 
-%D extension. 
+%D extension including any defined JoyLoL words. It consists of literate 
+%D documentation of the acutal source code produced to implement the 
+%D JoyLoL CoAlgebraic extension. 
 
-%D \listnamespaces\
+%D \subsection{Implementation}
+
+%D In this section we define load the Syntax Highlighter modules used by 
+%D the code display commands (below). We also load the ConTests module 
+%D used to test the JoyLoL CoAlgebra module itself. We then load the lua 
+%D code associated with the \type{t-joylol-coalg} module. Finally we 
+%D define the \ConTeXt\ \type{joyLoLCoAlg} namespace, in particular, this 
+%D registers a namespace to be used exclusively by the lua code to store 
+%D the CoAlgebras as they are defined. 
+
+\writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions}
+
+\usemodule[t-high-cpp]
+%\usemodule[t-high-lisp]
+\usemodule[t-contests]
 
 \unprotect
 
@@ -70,7 +86,11 @@
 
 %D The JoyLoLCoAlg environment provides a highly structured environment in 
 %D which to describe the formal semantics and implementation of a 
-%D particular JoyLoL CoAlgebraic extension. 
+%D particular JoyLoL CoAlgebraic extension.
+
+%D A typical JoyLoLCoAlg environment consists of a collection of JoyLoL 
+%D words. This includes a \quote{global} word which defines any global 
+%D code required by the CoAlgegraic extension as a whole. 
 
 %D \subsection{Examples}
 
@@ -85,6 +105,9 @@
 %D \type{\startcomponent} command. It also provides the base file name of 
 %D all of the automatically generated code fragments. 
 
+%D The second argument also determines the name of any JoyLoL, ANSI-C, or 
+%D Lua source file artefacts produced by this literate code documentation. 
+
 %D \subsection{Implementation: Start}
 
 \def\startJoyLoLCoAlg[#1][#2]{
@@ -92,6 +115,22 @@
   \startchapter[#1]
   \directlua{thirddata.joyLoLCoAlgs.newCoAlg('#2')}
 }
+
+%D \subsubsection{Implementation: Start: Tests}
+
+%D \startConTestSuite
+%D   \mock\startcomponent[#1]{\relax}
+%D   \mock\startchapter[#1]{\relax}
+%D   \startJoyLoLCoAlg[title=List of Lists][lists]
+%D   \startConTestLua
+%D     local theCoAlg = thirddata.joyLoLCoAlgs.theCoAlg
+%D     assert.isTable(theCoAlg)
+%D     assert.hasKey(theCoAlg, 'lists')
+%D     assert.isTable(theCoAlg['lists'])
+%D     assert.hasKey(theCoAlg['lists'], 'name')
+%D     assert.matches(theCoAlg['lists'].name, 'lists')
+%D   \stopConTestLua
+%D \stopConTestSuite
 
 %D \subsection{Implementation: Stop}
 
@@ -142,9 +181,131 @@
   \directlua{thirddata.joyLoLCoAlgs.addDependency('#1')}
 }
 
-%D \section{Something}
+%D \section{Code display}
 
-\usemodule[t-joylol-words]
+%D \subsection{Implementation}
+
+\definetextbackground[JFrame]
+\setuptextbackground[JFrame][location=text, background=color, backgroundcolor=gray]
+
+%D \section{JoyLoL word environment}
+
+%D A JoyLoL word contains one or more sections of code, either JoyLoL, 
+%D ANSI-C or Lua, together with a collection of descriptors of the JoyLoL 
+%D \{pre, post\} \{data, process\} stacks. 
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation: start}
+
+\def\startJoyLoLWord[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.newWord('#1')}
+}
+
+%D \subsection{Implementation: stop}
+
+\def\stopJoyLoLWord{
+  \directlua{thirddata.joyLoLCoAlgs.endWord()}
+}
+
+%D \section{Describing the data stack}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation}
+
+\def\preDataStack[#1][#2]{
+  \directlua{thirddata.joyLoLCoAlgs.addPreDataStackDescription('#1', '#2')}
+}
+
+\def\postDataStack[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.addPostDataStackDescription('#1')}
+}
+
+%D \section{Describing the process stack}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation}
+
+\def\preProcessStack[#1][#2]{
+  \directlua{thirddata.joyLoLCoAlgs.addPreProcessStackDescription('#1', '#2')}
+}
+
+\def\postProcessStack[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.addPostProcessStackDescription('#1')}
+}
+
+%D \section{JoyLoL code environment}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation: start}
+
+\definetyping[JoyLoLCode]
+%\setuptyping[JoyLoLCode][option=lisp]
+
+%D \subsection{Implementation: stop}
+
+\let\oldStopJoyLoLCode=\stopJoyLoLCode
+\def\stopJoyLoLCode{%
+  \oldStopJoyLoLCode%
+  \directlua{thirddata.joyLoLCoAlgs.addJoyLoLCode('_typing_')}
+}
+
+%D \section{C header environment}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation: start}
+
+\definetyping[CHeader]
+\setuptyping
+  [CHeader]
+  [ option=cpp, numbering=line,
+    before={\noindent\startJFrame}, after=\stopJFrame
+  ]
+%\setuptyping[CHeader][option=cpp]
+
+%D \subsection{Implementation: stop}
+
+\let\oldStopCHeader=\stopCHeader
+\def\stopCHeader{%
+  \oldStopCHeader%
+  \directlua{thirddata.joyLoLCoAlgs.addCHeader('_typing_')}
+}
+
+%D \section{C code environment}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation: start}
+
+\definetyping[CCode]
+\setuptyping[CCode][option=cpp]
+
+%D \subsection{Implementation: stop}
+
+\let\oldStopCCode=\stopCCode
+\def\stopCCode{%
+  \oldStopCCode%
+  \directlua{thirddata.joyLoLCoAlgs.addCCode('_typing_')}}
+  
+%D \section{Lua code environment}
+
+%D \subsection{Examples}
+
+%D \subsection{Implementation: start}
+
+\definetyping[LuaCode]
+\setuptyping[LuaCode][option=lua]
+
+%D \subsection{Implementation: stop}
+
+\let\oldStopLuaCode=\stopLuaCode
+\def\stopLuaCode{%
+  \oldStopLuaCode%
+  \directlua{thirddata.joyLoLCoAlgs.addLuaCode('_typing_')}}
 
 \protect \endinput
 
