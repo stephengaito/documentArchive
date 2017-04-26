@@ -127,8 +127,12 @@
 %D     assert.isTable(theCoAlg)
 %D     assert.hasKey(theCoAlg, 'lists')
 %D     assert.isTable(theCoAlg['lists'])
-%D     assert.hasKey(theCoAlg['lists'], 'name')
-%D     assert.matches(theCoAlg['lists'].name, 'lists')
+%D     local lists = theCoAlg.lists
+%D     assert.hasKey(lists, 'name')
+%D     assert.matches(lists.name, 'lists')
+%D     assert.hasKey(lists, 'words')
+%D     local words = lists.words
+%D     assert.hasKey(words, 'global')
 %D   \stopConTestLua
 %D \stopConTestSuite
 
