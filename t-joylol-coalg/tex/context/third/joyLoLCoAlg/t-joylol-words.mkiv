@@ -66,11 +66,15 @@
 
 %D \subsection{Implementation: start}
 
-\def\startJoyLoLWord[#1]{start-joylol-word = \type{[#1]}}
+\def\startJoyLoLWord[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.newWord('#1')}
+}
 
 %D \subsection{Implementation: stop}
 
-\def\stopJoyLoLWord{stop-joylol-word}
+\def\stopJoyLoLWord{
+  \directlua{thirddata.joyLoLCoAlgs.endWord()}
+}
 
 %D \section{Describing the data stack}
 
@@ -78,8 +82,13 @@
 
 %D \subsection{Implementation}
 
-\def\preDataStack[#1][#2]{preDataStack \type{[#1]} \type{[#2]}}
-\def\postDataStack[#1]{postDataStack \type{[#1]}}
+\def\preDataStack[#1][#2]{
+  \directlua{thirddata.joyLoLCoAlgs.addPreDataStackDescription('#1', '#2')}
+}
+
+\def\postDataStack[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.addPostDataStackDescription('#1')}
+}
 
 %D \section{Describing the process stack}
 
@@ -87,8 +96,13 @@
 
 %D \subsection{Implementation}
 
-\def\preProcessStack[#1][#2]{preProcessStack \type{[#1]} \type{[#2]}}
-\def\postProcessStack[#1]{postProcessStack \type{[#1]}}
+\def\preProcessStack[#1][#2]{
+  \directlua{thirddata.joyLoLCoAlgs.addPreProcessStackDescription('#1', '#2')}
+}
+
+\def\postProcessStack[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.addPostProcessStackDescription('#1')}
+}
 
 %D \section{JoyLoL code environment}
 
@@ -104,7 +118,8 @@
 \let\oldStopJoyLoLCode=\stopJoyLoLCode
 \def\stopJoyLoLCode{%
   \oldStopJoyLoLCode%
-  \directlua{thirddata.joyLoLCoAlgs.joyLoL.writeBuffer('_typing_')}}
+  \directlua{thirddata.joyLoLCoAlgs.addJoyLoLCode('_typing_')}
+}
 
 %D \section{C header environment}
 
@@ -125,7 +140,8 @@
 \let\oldStopCHeader=\stopCHeader
 \def\stopCHeader{%
   \oldStopCHeader%
-  \directlua{thirddata.joyLoLCoAlgs.joyLoL.writeBuffer('_typing_')}}
+  \directlua{thirddata.joyLoLCoAlgs.addCHeader('_typing_')}
+}
 
 %D \section{C code environment}
 
@@ -141,7 +157,7 @@
 \let\oldStopCCode=\stopCCode
 \def\stopCCode{%
   \oldStopCCode%
-  \directlua{thirddata.joyLoLCoAlgs.joyLoL.writeBuffer('_typing_')}}
+  \directlua{thirddata.joyLoLCoAlgs.addCCode('_typing_')}}
   
 %D \section{Lua code environment}
 
@@ -157,7 +173,7 @@
 \let\oldStopLuaCode=\stopLuaCode
 \def\stopLuaCode{%
   \oldStopLuaCode%
-  \directlua{thirddata.joyLoLCoAlgs.joyLoL.writeBuffer('_typing_')}}
+  \directlua{thirddata.joyLoLCoAlgs.addLuaCode('_typing_')}}
 
 \protect \endinput
 

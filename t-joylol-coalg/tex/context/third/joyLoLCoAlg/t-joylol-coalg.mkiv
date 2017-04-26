@@ -87,43 +87,19 @@
 
 %D \subsection{Implementation: Start}
 
-\unexpanded\def\startJoyLoLCoAlg{\dodoubleempty\joyLoLCoAlg_start}
-
-\def\joyLoLCoAlg_start
-  {\ifsecondargument
-     \expandafter\joyLoLCoAlg_start_double
-   \else\iffirstargument
-     \doubleexpandafter\joyLoLCoAlg_start_single
-   \else
-     \doubleexpandafter\joyLoLCoAlg_start_none
-   \fi\fi}
-
-\def\openJoyLoLCoAlt#1{\directlua{thirddata.joyLoLCoAlg.open{#1}}}
-   
-\def\joyLoLCoAlg_start_double[#1][#2]{\startcomponent[#2]\startchapter[#1]}
-   
-\def\joyLoLCoAlg_start_single[#1][#2]{\errmessage{\string\startJoyLoLCoAlg\space requires two arguments but only one [#1] has been supplied}}
-   
-\def\joyLoLCoAlg_start_none[#1][#2]{\errmessage{\string\startJoyLoLCoAlg\space requires two arguments but none have been supplied}}
+\def\startJoyLoLCoAlg[#1][#2]{
+  \startcomponent[#2]
+  \startchapter[#1]
+  \directlua{thirddata.joyLoLCoAlgs.newCoAlg('#2')}
+}
 
 %D \subsection{Implementation: Stop}
 
-\unexpanded\def\stopJoyLoLCoAlg{\dodoubleempty\joyLoLCoAlg_stop}
-
-\def\joyLoLCoAlg_stop
-  {\ifsecondargument
-     \expandafter\joyLoLCoAlg_stop_double
-   \else\iffirstargument
-     \doubleexpandafter\joyLoLCoAlg_stop_single
-   \else
-     \doubleexpandafter\joyLoLCoAlg_stop_none
-   \fi\fi}
-
-\def\joyLoLCoAlg_stop_double[#1][#2]{\errmessage{\string\stopJoyLoLCoAlg\space should have NO arguments}}
-   
-\def\joyLoLCoAlg_stop_single[#1][#2]{\errmessage{\string\stopJoyLoLCoAlg\space should have NO arguments}}
-   
-\def\joyLoLCoAlg_stop_none[#1][#2]{\stopchapter\stopcomponent}
+\def\stopJoyLoLCoAlg{
+  \directlua{thirddata.joyLoLCoAlgs.createCoAlg()}
+  \stopchapter
+  \stopcomponent
+}
 
 %D \section{Source licenses}
 
@@ -162,7 +138,9 @@
 
 %D \subsection{Implementation}
 
-\def\dependsOn[#1]{dependsOn \type{[#1]}}
+\def\dependsOn[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.addDependency('#1')}
+}
 
 %D \section{Something}
 
