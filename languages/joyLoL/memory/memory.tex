@@ -28,6 +28,7 @@ Things you can do with a memory block:
 \item get a new block
 
 
+\startJFrame
 
 I suggest we use [generational garbage 
 collection](http://wiki.c2.com/?GenerationalGarbageCollection) together 
@@ -38,6 +39,8 @@ finalization of the heap object to ["stop and
 copy"](http://wiki.c2.com/?StopAndCopy) live JoyLoL objects into older 
 heaps just before the newer heap is reclaimed by the Lua GC. Essentially 
 we are letting the Lua GC drive the JoyLoL GC. 
+
+\stopJFrame
 
 %\startsyntax
 

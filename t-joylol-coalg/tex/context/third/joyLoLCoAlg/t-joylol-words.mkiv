@@ -53,6 +53,13 @@
 
 \unprotect
 
+%D \section{Code display}
+
+%D \subsection{Implementation}
+
+\definetextbackground[JFrame]
+\setuptextbackground[JFrame][location=text, background=color, backgroundcolor=gray]
+
 %D \section{JoyLoL word environment}
 
 %D \subsection{Examples}
@@ -106,7 +113,12 @@
 %D \subsection{Implementation: start}
 
 \definetyping[CHeader]
-\setuptyping[CHeader][option=cpp]
+\setuptyping
+  [CHeader]
+  [ option=cpp, numbering=line,
+    before={\noindent\startJFrame}, after=\stopJFrame
+  ]
+%\setuptyping[CHeader][option=cpp]
 
 %D \subsection{Implementation: stop}
 
