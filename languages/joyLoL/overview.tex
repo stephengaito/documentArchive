@@ -44,6 +44,17 @@ written in \ConTeXt/\LuaTeX\ which are transcribed into ANSI-C source before
 being compiled to an executable on a given platform by an appropriately 
 chosen ANSI-C compiler. 
 
+Finally since JoyLoL is meant to form a foundation for Mathematics, and, 
+as such, the basis of mathematical proof, we need to ensure the JoyLoL 
+language is accessible within the most common tool, \TeX, used by 
+mathematicians to communicate their proofs. To do this we wrap JoyLoL in a 
+simple Lua interface. By wrapping the ANSI-C JoyLoL libraries in a Lua 
+interface, we allow the JoyLoL libraries to be used, in particular, inside 
+\LuaTeX\ and hence inside \LaTeX\ and \ConTeXt\ documents. At the moment, 
+\LaTeX\ does not make integral use of \LuaTeX's Lua subsystem. Instead we 
+make use of \ConTeXt\ for most of our documentation and mathematical 
+writing, since \ConTeXt\ does make integral use of \LuaTeX's Lua subsystem. 
+
 \stopsubsection
 
 \startsubsection[title=Literate Sources]
@@ -156,8 +167,8 @@ of external libraries which expect C-call stacks. For each cycle around
 the JoyLoL eval loop, the top of the process stack is used to determine 
 which C procedure (JoyLoL word) to call next. 
 
-Unfortunately, while providing simply structured C-code, trampolinging of 
-small C proceedures, is not as performant as a system which makes use of 
+Unfortunately, while providing simply structured C-code, trampolining of 
+small C procedures, is not as performant as a system which makes use of 
 native tail calls. Instead by using the \ConTeXt/\LuaTeX\ based 
 meta-compiler we can pre-compile any complex JoyLoL word definitions as 
 explicit C procedures which \emph{can allow} a given C compiler's 
@@ -174,17 +185,6 @@ all existing general purpose computational devices are \quote{register
 based}. Cleanly and performantly implementing stack based languages on a 
 register based computational device has been previously explored in Ertl's 
 thesis, \cite[ertl1996implementationStackLanguages]. 
-
-\stopsubsection
-
-\startsubsection[title=Bootstrapping JoyLoL]
-
-Since we want as rigorous as possible toolset, we ultimately need to use 
-JoyLoL to deductively prove its own correctness. Unfortunately, at least 
-initially, most users do not have a running version of JoyLoL. In order to 
-obtain the \emph{first} running version, we need to \quote{bootstrap} the 
-toolset by building an initial version of JoyLoL which is not rigorously 
-checked. 
 
 \stopsubsection
 
