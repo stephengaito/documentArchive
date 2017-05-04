@@ -93,43 +93,56 @@ end
 local parseJoyLoL = joyLoL.parse
 
 -- We need a simple JoyLoL template engine
+-- Our template engine has been inspired by:
+--   https://john.nachtimwald.com/2014/08/06/using-lua-as-a-templating-engine/
 
-function joyLoL.nextChunk(aCtx)
-  local strToParse = popData(aCtx)
-  if type(strToParse) == 'string' then
-    local position = 1
-    local textChunk = strToParse:match('.+{{', position)
+function joyLoL.renderNextChunk(aCtx)
+  local renderedText    = popProcess(aCtx)
+  local curTemplate     = popProcess(aCtx)
+  local prevJoyLoLChunk = popData(aCtx)
+  
+  if prevJoyLoLChunk then
+    renderedText:insert(prevJoyLoLChunk)
+  end
+  
+  if type(curTemplate) == 'string' and (0 < #curTemplate) then
+    local position  = 1
+    local textChunk = curTemplate:match('.+{{', position)
     if textChunk then 
       local textChunkLen = #textChunk
       textChunk = textChunk:sub(position, textChunkLen-2)
+      renderedText:insert(textChunk)
       position = position + textChunkLen
     end
-    local joyLoLChunk = strToParse:match('.+}}', position)
+    
+    local joyLoLChunk = curTemplate:match('.+}}', position)
     if joyLoLChunk then
+      local joyLoLChunkLen = #joyLoLChunk
+      joyLoLChunk = joyLoLChunk:sub(position, joyLoLChunkLen-2)
+      position = position + joyLoLChunkLen
+      curTemplate = curTemplate:sub(position, #curTemplate-position)
+      pushProcess(aCtx, curTemplate)
+      pushProcess(aCtx, renderedText)
+      pushProcess(aCtx, 'renderNextChunk')
       pushProcess(aCtx, 'eval')
       pushProcess(aCtx, 'parse')
       pushData(aCtx, joyLoLChunk)
     end
   else
-    pushData(strToParse)
+    -- nothing more to do...
+    pushData(renderedText:concat())
   end
-end
-
-local nextChunk = joyLoL.nextChunck
-
-function joyLoL.renderChunk(aCtx)
-  local textChunk    = popData(aCtx)
-  local joyLoLChunk  = popData(aCtx)
-  local renderedText = popProcess(aCtx)
-  -- HERE BE DRAGONS
 end
 
 local renderChunk = joyLoL.renderChunk
 
 function joyLoL.render(aCtx)
+  local aTemplate = popData(aCtx)
+  pushData(aCtx, nil)    -- "result" of "initial" joyLoLChunk
+
+  pushProcess(aCtx, aTemplate)
   pushProcess(aCtx, nil) -- result of renderer
-  pushProcess(aCtx, 'renderChunk')
-  pushProcess(aCtx, 'nextChunk')
+  pushProcess(aCtx, 'renderNextChunk')
 end
 
 local render = joyLoL.render
