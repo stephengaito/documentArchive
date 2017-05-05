@@ -1,0 +1,19 @@
+-- A Lunatest Lua file
+
+local pp     = require('pl.pretty')
+local lt     = dofile('./languages/joyLoL/build/tests/lunatest.lua')
+local joyLoL = dofile('./languages/joyLoL/build/tests/joyLoL.lua')
+
+function test_nextWord()
+  local aCtx = joyLoL.newContext()
+  --joyLoL.pushData(aCtx, "test")
+  joyLoL.pushData(aCtx, {})
+  joyLoL.nextWord(aCtx)
+  print(pp.write(aCtx))
+end
+
+function off_test_evalString()
+  print(pp.write(joyLoL.evalString('test')))
+end
+
+lt.run()

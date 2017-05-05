@@ -31,6 +31,7 @@
 -- Changes: 
 --  * added License from: https://github.com/stevedonovan/Lake/blob/master/LICENSE.txt
 --  * changed Unix script header from 'lua' to 'texlua' to use LuaTeX's lua
+--  * altered file.copy to report all errors if v=true
 
 local usage = [[
 Lake version 1.4  A Lua-based Build Engine
@@ -158,7 +159,7 @@ end
 
 function file.copy(src,dest,v)
     local inf,err = io.open(src,'rb')
-    if err then return nil,err end
+    if err then return fail(err,v) end
     local dir = path.splitpath(dest)
     if dir ~= '' and not path.isdir(dir) then
         local ok, e = path.mkdir(dir)

@@ -1,0 +1,5 @@
+-- A Lua Lakefile
+
+local tests = dofile('lakeLibs/tests.lua')
+
+default{tests}
