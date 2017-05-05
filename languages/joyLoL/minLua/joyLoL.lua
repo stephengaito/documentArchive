@@ -107,11 +107,10 @@ function joyLoL.nextWord(aCtx)
     local aWord = strToParse:match('[^%s]+', position)
     position = position + #aWord
     local restOfStrToParse = strToParse:sub(position, #strToParse-position)
-    print(pp.write(restOfStrToParse))
     pushData(aCtx, restOfStrToParse)
     pushData(aCtx, aWord)
   else
-    pushData(aCtx, strToParse)
+    pushData(aCtx, "")
     pushData(aCtx, "")
   end
 end
