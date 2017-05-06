@@ -6,24 +6,60 @@ local joyLoL = dofile('./languages/joyLoL/build/tests/joyLoL.lua')
 
 
 function test_nextWord()
-  local aCtx = joyLoL.newContext()
+  --
   -- If we parse a string then the first word is on top
   -- and the rest of the string is below
   --
+  local aCtx = joyLoL.newContext()
   joyLoL.pushData(aCtx, "test")
   joyLoL.nextWord(aCtx)
   lt.assert_equal('test', aCtx.data[1])
   lt.assert_equal('',     aCtx.data[2])
   --
   aCtx = joyLoL.newContext()
-  joyLoL.pushData(aCtx, "this is a test")
+  joyLoL.pushData(aCtx, "this is a test  ")
   joyLoL.nextWord(aCtx)
-  lt.assert_equal('this',       aCtx.data[1])
-  lt.assert_equal(' is a test', aCtx.data[2])
-  
-  --joyLoL.pushData(aCtx, {})
-  --joyLoL.nextWord(aCtx)
-  --print(pp.write(aCtx))
+  lt.assert_equal('this',       joyLoL.popData(aCtx))
+  lt.assert_equal(' is a test  ', joyLoL.peekData(aCtx))
+  joyLoL.nextWord(aCtx)
+  lt.assert_equal('is',       joyLoL.popData(aCtx))
+  lt.assert_equal(' a test  ', joyLoL.peekData(aCtx))
+  joyLoL.nextWord(aCtx)
+  lt.assert_equal('a',       joyLoL.popData(aCtx))
+  lt.assert_equal(' test  ', joyLoL.peekData(aCtx))
+  joyLoL.nextWord(aCtx)
+  lt.assert_equal('test',       joyLoL.popData(aCtx))
+  lt.assert_equal('  ', joyLoL.peekData(aCtx))
+  joyLoL.nextWord(aCtx)
+  lt.assert_equal('',       joyLoL.popData(aCtx))
+  lt.assert_equal('', joyLoL.peekData(aCtx))
+  --
+  -- If we attempt to parse something that is not a string
+  -- then delete it and place two empty strings on the stack
+  aCtx = joyLoL.newContext()
+  joyLoL.pushData(aCtx, {})
+  joyLoL.nextWord(aCtx)
+  lt.assert_equal('',       joyLoL.popData(aCtx))
+  lt.assert_equal('', joyLoL.peekData(aCtx))
+end
+
+function test_parse()
+  --
+  -- parse a string into a list structure
+  -- when we are done the list replaces the original string 
+  --
+  local aCtx = joyLoL.newContext()
+  joyLoL.pushData(aCtx, " this is a test ")
+  joyLoL.pushProcess(aCtx, "parse")
+  joyLoL.eval(aCtx)
+  lt.assert_nil(joyLoL.popProcess(aCtx))
+  local aList = joyLoL.popData(aCtx)
+  lt.assert_table(aList)
+  lt.assert_equal(4, #aList)
+  lt.assert_equal("this", aList[1])
+  lt.assert_equal("is",   aList[2])
+  lt.assert_equal("a",    aList[3])
+  lt.assert_equal("test", aList[4])
 end
 
 function off_test_evalString()

@@ -26,12 +26,13 @@ local pp = require('pl.pretty')
 local joyLoL = { }
 local table_insert = table.insert
 local table_remove = table.remove
-local table_append = table.append
 local table_concat = table.concat
 
 function joyLoL.version()
   return 'JoyLoL minimal Lua version: 0.0.1 (hand coded)'
 end
+
+joyLoL.trace = false
 
 -- We need JoyLoL contexts
 
@@ -99,14 +100,14 @@ local peekProcess = joyLoL.peekProcess
 
 function joyLoL.nextWord(aCtx)
   local strToParse = popData(aCtx)
-  print(type(strToParse))
   if type(strToParse) == 'string' then
     local position = 1
-    local whiteSpace = strToParse:match('%s+', position)
+    local whiteSpace = strToParse:match('^%s+', position)
     if whiteSpace then position = position + #whiteSpace end
-    local aWord = strToParse:match('[^%s]+', position)
+    local aWord = strToParse:match('^[^%s]+', position)
+    if not aWord then aWord = "" end
     position = position + #aWord
-    local restOfStrToParse = strToParse:sub(position, #strToParse-position)
+    local restOfStrToParse = strToParse:sub(position, #strToParse)
     pushData(aCtx, restOfStrToParse)
     pushData(aCtx, aWord)
   else
@@ -126,9 +127,12 @@ local matchingSymbols = {
 
 function joyLoL.parseList(aCtx)
   local aWord = popData(aCtx)
-  if aWord then
+  --print(aWord)
+  if type(aWord) == 'string' and 0 < #aWord then
     local aList = popProcess(aCtx)
+    -- print(pp.write(aList))
     local closingChar = peekProcess(aCtx)
+    -- print(closingChar)
     if aWord == closingChar then
       popProcess(aCtx)       -- we are finished parsing
       popData(aCtx)          -- remove the rest of the string
@@ -138,22 +142,25 @@ function joyLoL.parseList(aCtx)
       pushProcess(aCtx, {})                     -- recursive list to build
       pushProcess(aCtx, 'parseList')
       pushProcess(aCtx, 'nextWord')
-    elseif aWord then
+    else
       if not aList then aList = { } end
-      table_append(aList, aWord)
+      table_insert(aList, aWord)
       pushProcess(aCtx, aList)       -- continue parsing list
       pushProcess(aCtx, 'parseList')
       pushProcess(aCtx, 'nextWord')
-    else -- ERROR!
-      -- do something!
     end
+  else
+    popData(aCtx) -- remove the empty rest of string
+    local aList = popProcess(aCtx)
+    pushData(aCtx, aList)
+    popProcess(aCtx) -- remove the matching symbol
   end
 end
 
 local parseList = joyLoL.parseList
 
 function joyLoL.parse(aCtx)
-  pushProcess(aCtx, 0)  -- closingChar
+  pushProcess(aCtx, "")  -- closingChar
   pushProcess(aCtx, {}) -- list being built
   pushProcess(aCtx, 'parseList')
   pushProcess(aCtx, 'nextWord')
@@ -220,18 +227,23 @@ local render = joyLoL.render
 
 function joyLoL.eval(aCtx)
   while 0 < #aCtx.process do
-    print('\n\n-----')
-    print(pp.write(aCtx))
+    if joyLoL.trace then
+      print('\n\n-----')
+      print(pp.write(aCtx))
+    end
     local aCmd = popProcess(aCtx)
     if type(aCmd) == 'function' then
+      if joyLoL.trace then print('calling: ['..pp.write(aCmd)..']') end
       aCmd(aCtx)
     elseif type(joyLoL[aCmd]) == 'function' then
-      print('calling: ['..aCmd..']')
+      if joyLoL.trace then print('calling: ['..aCmd..']('..pp.write(joyLoL[aCmd])..')') end
       joyLoL[aCmd](aCtx)
     else
-      pushData(aCmd)
+      if joyLoL.trace then print('adding: ['..pp.write(aCmd)..']') end
+      pushData(aCtx, aCmd)
     end
   end
+  if joyLoL.trace then print('finished eval: ['..pp.write(aCtx.data)..']') end
   return aCtx.data
 end
 
@@ -242,7 +254,7 @@ function joyLoL.evalString(aStr)
   pushProcess(aCtx, "eval")
   pushProcess(aCtx, "parse")
   pushData(aCtx, aStr)
-  evalCtx(aCtx)
+  return evalCtx(aCtx)
 end
 
 
