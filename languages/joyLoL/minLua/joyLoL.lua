@@ -180,32 +180,43 @@ function joyLoL.renderNextChunk(aCtx)
   local curTemplate     = popProcess(aCtx)
   local prevJoyLoLChunk = popData(aCtx)
   
-  if prevJoyLoLChunk then
+  if prevJoyLoLChunk
+    and type(prevJoyLoLChunk) == 'string'
+    and 0 < #prevJoyLoLChunk then
     table_insert(renderedText, prevJoyLoLChunk)
   end
   
   if type(curTemplate) == 'string' and (0 < #curTemplate) then
-    local position  = 1
-    local textChunk = curTemplate:match('.+{{', position)
-    if textChunk then 
-      local textChunkLen = #textChunk
-      textChunk = textChunk:sub(position, textChunkLen-2)
-      table_insert(renderedText, textChunk)
-      position = position + textChunkLen
-    end
-    
-    local joyLoLChunk = curTemplate:match('.+}}', position)
-    if joyLoLChunk then
-      local joyLoLChunkLen = #joyLoLChunk
-      joyLoLChunk = joyLoLChunk:sub(position, joyLoLChunkLen-2)
-      position = position + joyLoLChunkLen
-      curTemplate = curTemplate:sub(position, #curTemplate-position)
-      pushProcess(aCtx, curTemplate)
-      pushProcess(aCtx, renderedText)
-      pushProcess(aCtx, 'renderNextChunk')
-      pushProcess(aCtx, 'eval')
-      pushProcess(aCtx, 'parse')
-      pushData(aCtx, joyLoLChunk)
+    if curTemplate:find('{{') then
+      local position  = 1
+      local textChunk = curTemplate:match('^.*{{', position)
+      if textChunk then 
+        local textChunkLen = #textChunk
+        textChunk = textChunk:sub(1, textChunkLen-2)
+        if 0 < #textChunk then table_insert(renderedText, textChunk) end
+        position = position + textChunkLen
+      end
+      
+      local joyLoLChunk = curTemplate:match('^.+}}', position)
+      if joyLoLChunk then
+        local joyLoLChunkLen = #joyLoLChunk
+        joyLoLChunk = joyLoLChunk:sub(1, joyLoLChunkLen-2)
+        position = position + joyLoLChunkLen
+        curTemplate = curTemplate:sub(position, #curTemplate)
+        pushProcess(aCtx, curTemplate)
+        pushProcess(aCtx, renderedText)
+        pushProcess(aCtx, 'renderNextChunk')
+        if not joyLoLChunk:match('^%s*$') then
+          pushProcess(aCtx, 'eval')
+          pushProcess(aCtx, 'parse')
+          pushData(aCtx, joyLoLChunk)
+        else
+          pushData(aCtx, "")
+        end
+      end
+    else -- there is no '{{' in the template
+      table_insert(renderedText, curTemplate)
+      pushData(aCtx, table_concat(renderedText))
     end
   else
     -- nothing more to do...
