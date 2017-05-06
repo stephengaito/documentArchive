@@ -60,6 +60,22 @@ function test_parse()
   lt.assert_equal("is",   aList[2])
   lt.assert_equal("a",    aList[3])
   lt.assert_equal("test", aList[4])
+  --
+  aCtx = joyLoL.newContext()
+  joyLoL.pushData(aCtx, " this ( is a ) test ")
+  joyLoL.pushProcess(aCtx, "parse")
+  joyLoL.eval(aCtx)
+  lt.assert_nil(joyLoL.popProcess(aCtx))
+  local aList = joyLoL.popData(aCtx)
+  lt.assert_table(aList)
+  lt.assert_equal(3, #aList)
+  lt.assert_equal("this", aList[1])
+  lt.assert_equal("test", aList[3])
+  local innerList = aList[2]
+  lt.assert_table(innerList)
+  lt.assert_equal(2, #innerList)
+  lt.assert_equal('is', innerList[1])
+  lt.assert_equal('a',  innerList[2])
 end
 
 function off_test_evalString()

@@ -127,25 +127,28 @@ local matchingSymbols = {
 
 function joyLoL.parseList(aCtx)
   local aWord = popData(aCtx)
-  --print(aWord)
   if type(aWord) == 'string' and 0 < #aWord then
     local aList = popProcess(aCtx)
-    -- print(pp.write(aList))
     local closingChar = peekProcess(aCtx)
-    -- print(closingChar)
     if aWord == closingChar then
-      popProcess(aCtx)       -- we are finished parsing
-      popData(aCtx)          -- remove the rest of the string
-      pushData(aCtx, aList)  -- place result on data
+      -- pop up one level of parseList recursion...
+      popProcess(aCtx)       -- remove this closing char
+      local prevList = popProcess(aCtx)
+      table_insert(prevList, aList)
+      pushProcess(aCtx, prevList)
+      pushProcess(aCtx, 'parseList')
+      pushProcess(aCtx, 'nextWord')
     elseif matchingSymbols[aWord] then
+      -- push down one level of parseList recursion...
+      pushProcess(aCtx, aList) -- replace aList back on to stack
       pushProcess(aCtx, matchingSymbols[aWord]) -- recursive list end
       pushProcess(aCtx, {})                     -- recursive list to build
       pushProcess(aCtx, 'parseList')
       pushProcess(aCtx, 'nextWord')
     else
-      if not aList then aList = { } end
+      -- add word to list and continue parsing list
       table_insert(aList, aWord)
-      pushProcess(aCtx, aList)       -- continue parsing list
+      pushProcess(aCtx, aList)
       pushProcess(aCtx, 'parseList')
       pushProcess(aCtx, 'nextWord')
     end
