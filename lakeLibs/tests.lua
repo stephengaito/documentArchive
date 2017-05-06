@@ -29,8 +29,10 @@ target(tests.ltTests, tests.orgTests, function()
   file.copy(tests.orgTests, tests.ltTests, true)
 end)
 
-return target(
+tests.target = target(
   'tests',
   { tests.ltTests, tests.minJoyLoL, tests.ltScript },
   'texlua '..tests.ltTests..' -v'
 )
+
+return tests
