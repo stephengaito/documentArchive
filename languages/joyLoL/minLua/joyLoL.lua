@@ -228,7 +228,7 @@ local renderChunk = joyLoL.renderChunk
 
 function joyLoL.render(aCtx)
   local aTemplate = popData(aCtx)
-  pushData(aCtx, {})    -- "result" of "initial" joyLoLChunk
+  pushData(aCtx, "")    -- "result" of "initial" joyLoLChunk
 
   pushProcess(aCtx, aTemplate)
   pushProcess(aCtx, {}) -- result of renderer
