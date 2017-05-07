@@ -151,7 +151,7 @@ function off_test_evalString()
   print(pp.write(joyLoL.evalString('test')))
 end
 
-function test_fail()
+function off_test_fail()
   lt.fail("this should fail")
 end
 

@@ -29,9 +29,12 @@
 -- Taken from: https://github.com/stevedonovan/Lake/raw/master/lake
 -- Commited: 065ac45 on 30 Jan 2014
 -- Changes: 
---  * added License from: https://github.com/stevedonovan/Lake/blob/master/LICENSE.txt
---  * changed Unix script header from 'lua' to 'texlua' to use LuaTeX's lua
+--  * added License from:
+--    https://github.com/stevedonovan/Lake/blob/master/LICENSE.txt
+--  * changed Unix script header from 'lua' to 'texlua' to use LuaTeX's lua 
 --  * altered file.copy to report all errors if v=true
+--  * added test for texlua in utils.execute (since texlua's version of 
+--    os.execute returns the raw code like lua5.1) 
 
 local usage = [[
 Lake version 1.4  A Lua-based Build Engine
@@ -558,7 +561,8 @@ function utils.split2(s,delim)
   return s:match('([^'..delim..']+)'..delim..'(.*)')
 end
 
-local lua52 = rawget(_G,'setfenv') == nil
+local lua52  = rawget(_G,'setfenv') == nil
+local texlua = rawget(os,'exec')    ~= nil
 
 function utils.execute (cmd,quiet)
     if quiet then
@@ -566,7 +570,7 @@ function utils.execute (cmd,quiet)
         cmd = cmd .. null
     end
     local res1,res2,res2 = os.execute(cmd)
-    if not lua52 then
+    if texlua or not lua52 then
         return res1==0,res1
     else
         return res1,res2
