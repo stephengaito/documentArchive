@@ -68,6 +68,16 @@ end
 
 local peekData = joyLoL.peekData
 
+function joyLoL.peekNData(aCtx, anInt)
+  local result = nil
+  if 0 < anInt and anInt < (#aCtx.data + 1) then
+    result = aCtx.data[anInt]
+  end
+  return result
+end
+
+local peekNData = joyLoL.peekNData
+
 function joyLoL.pushProcess(aCtx, anObj)
   return table_insert(aCtx.process, 1, anObj)
 end
@@ -94,6 +104,15 @@ end
 
 local peekProcess = joyLoL.peekProcess
 
+function joyLoL.peekNProcess(aCtx, anInt)
+  local result = nil
+  if 0 < anInt and anInt < (#aCtx.process + 1) then
+    result = aCtx.process[anInt]
+  end
+  return result
+end
+
+local peekNData = joyLoL.peekNData
 
 -- We need a JoyLoL LPeg parser which is capable of parsing a simple Lua 
 -- string 
@@ -236,6 +255,98 @@ function joyLoL.render(aCtx)
 end
 
 local render = joyLoL.render
+
+-- We need to able to manipulate lists
+
+function joyLoL.newList(aCtx)
+  pushData(aCtx, {})
+end
+
+local newList = joyLoL.newList
+
+function joyLoL.pushOntoList(aCtx)
+  local anItem = popData(aCtx)
+  local aList  = popData(aCtx)
+  table_insert(aList, 1, anItem)
+  pushData(aCtx, aList)
+end
+
+local pushOntoList = joyLoL.pushOntoList
+
+function joyLoL.popFromList(aCtx)
+  local aList = popData(aCtx)
+  local anItem = table_remove(aList, 1)
+  pushData(aCtx, aList)
+  pushData(aCtx, anItem)
+end
+
+local popFromList = joyLoL.popFromList
+
+function joyLoL.appendToEndList(aCtx)
+  local anItem = popData(aCtx)
+  local aList  = popData(aCtx)
+  table_insert(aList, anItem)
+  pushData(aCtx, aList)
+end
+
+local appendToEndList = joyLoL.appendToEndList
+
+function joyLoL.removeFromEndList(aCtx)
+  local aList = popData(aCtx)
+  local anItem = table_remove(aList)
+  pushData(aCtx, aList)
+  pushData(aCtx, anItem)
+end
+
+local removeFromEndList = joyLoL.removeFromEndList
+
+function joyLoL.concatList(aCtx)
+  local aSep  = popData(aCtx)
+  local aList = popData(aCtx)
+  local aStr = table_concat(aList, aSep)
+  pushData(aCtx, aStr)
+end
+
+local concatList = joyLoL.concatList
+
+-- We need to be able to manipulate dictionaries
+
+function joyLoL.newDictionary(aCtx)
+  pushData(aCtx, {})
+end
+
+local newDictionary = joyLoL.newDictionary
+
+function joyLoL.addToDict(aCtx)
+  local aValue = popData(aCtx)
+  local aKey   = popData(aCtx)
+  local aDict  = popData(aCtx)
+  aDict[aKey] = aValue
+  pushData(aCtx, aDict)
+end
+
+local addToDict = joyLoL.addToDict
+
+function joyLoL.deleteFromDict(aCtx)
+  local aKey  = popData(aCtx)
+  local aDict = popData(aCtx)
+  aDict[aKey] = nil
+  pushData(aCtx, aDict)
+end
+
+local deleteFromDict = joyLoL.deleteFromDict
+
+function joyLoL.lookupInDict(aCtx)
+  local aKey  = popData(aCtx)
+  local aDict = peekData(aCtx)
+  if aDict[aKey] then
+    pushData(aCtx, aDict[aKey])
+  else
+    pushData(aCtx, "")
+  end
+end
+
+local lookupInDict = joyLoL.lookupInDict
 
 -- We need to be able to evaluate contexts.
 
