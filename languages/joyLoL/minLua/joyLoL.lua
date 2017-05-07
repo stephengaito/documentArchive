@@ -58,6 +58,15 @@ end
 
 local popData = joyLoL.popData
 
+function joyLoL.swapData(aCtx)
+  local top    = popData(aCtx)
+  local second = popData(aCtx)
+  pushData(aCtx, top)
+  pushData(aCtx, second)
+end
+
+local swapData = joyLoL.swapData
+
 function joyLoL.peekData(aCtx)
   local result = nil
   if 0 < #aCtx.data then
@@ -93,6 +102,14 @@ function joyLoL.popProcess(aCtx)
 end
 
 local popProcess = joyLoL.popProcess
+
+function joyLoL.swapProcess(aCtx)
+  local top    = popProcess(aCtx)
+  local second = popProcess(aCtx)
+  pushProcess(aCtx, top)
+  pushProcess(aCtx, second)
+end
+
 
 function joyLoL.peekProcess(aCtx)
   local result = nil

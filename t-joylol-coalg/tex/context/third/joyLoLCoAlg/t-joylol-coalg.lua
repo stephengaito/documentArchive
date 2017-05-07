@@ -55,10 +55,58 @@ function coAlgs.addDependency(dependencyName)
   dependsOn[#dependsOn+1] = dependencyName
 end
 
+local function buildContext(theCoAlg)
+  local pushData, pushProcess = joyLoL.pushData, joyLoL.pushProcess
+  local jEval = joyLoL.eval
+  
+  local aCtx = joyLoL.newContext()
+  joyLoL.newDictionary(aCtx)
+  pushData(aCtx, 'words')
+  joyLoL.newDictionary(aCtx)
+  for aKey, aValue in pairs(theCoAlg.words) do 
+    pushData(aCtx, aKey)
+    aValue['name'] = nil
+    joyLoL.newList(aCtx)
+    texio.write(pp.write(aKey))
+    texio.write(pp.write(aValue))
+    -- need to do one more layer of pairs BEFORE ipairs!!!!
+    for i, aStr in ipairs(aValue) do
+      pushData(aCtx, aStr)
+      pushProcess(aCtx, 'appendToEndList')
+      texio.write(aStr)
+      texio.write(pp.write(aCtx))
+      jEval(aCtx)
+    end
+    pushProcess(aCtx, 'addToDict')
+    texio.write(pp.write(aCtx))
+    jEval(aCtx)
+  end
+  pushProcess(aCtx, 'addToDict')
+  pushData(aCtx, 'dependsOn')
+  joyLoL.newList(aCtx)
+  for i, aStr in ipairs(theCoAlg.dependsOn) do
+    pushData(aCtx, aStr)
+    pushProcess(aCtx, 'appendToEndList')
+    jEval(aCtx)
+  end
+  pushProcess(aCtx, 'addToDict')
+  jEval(aCtx)
+  pushData(aCtx, 'wordOrder')
+  joyLoL.newList(aCtx)
+  for i, aStr in ipairs(theCoAlg.wordOrder) do
+    pushData(aCtx, aStr)
+    pushProcess(aCtx, 'appendToEndList')
+    jEval(aCtx)
+  end
+  pushProcess(aCtx, 'addToDict')
+  jEval(aCtx)
+  return aCtx
+end
+
 function coAlgs.createCoAlg()
   if not theCoAlg then return end
   if not theCoAlg.name then theCoAlg.name = 'unknown' end
---  local aCtx = joyLoL.newContext()
+  local aCtx = buildContext(theCoAlg)
 --  joyLoL.pushData(aCtx, coAlgs.templates.base)
 --  joyLoL.pushProcess(aCtx, 'render')
 --  joyLoL.eval(aCtx)
@@ -66,7 +114,7 @@ function coAlgs.createCoAlg()
   texio.write_nl(string.format('creating JoyLoL CoAlgebra: [%s]', outFilePath))
   local outFile = io.open(outFilePath, 'w')
   outFile:write(pp.write(theCoAlg))
---  outFile:write(joyLoL.popData(aCtx))
+  outFile:write(pp.write(aCtx))
   outFile:close()
   texio.write_nl(string.format(' created JoyLoL CoAlgebra: [%s]', outFilePath))
 end
