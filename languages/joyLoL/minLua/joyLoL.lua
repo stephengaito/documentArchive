@@ -29,7 +29,7 @@ local table_remove = table.remove
 local table_concat = table.concat
 
 function joyLoL.version()
-  return 'JoyLoL minimal Lua version: 0.0.1 (hand coded)'
+  return 'JoyLoL minimal Lua version: 0.0.2 (hand coded)'
 end
 
 joyLoL.trace = false

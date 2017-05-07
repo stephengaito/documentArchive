@@ -15,6 +15,8 @@ local coAlgs     = thirddata.joyLoLCoAlgs
 coAlgs.theCoAlg  = {}
 local theCoAlg   = coAlgs.theCoAlg
 
+local pp = require('pl/pretty')
+
 interfaces.writestatus('joyLoL', "loaded JoyLoL CoAlgs")
 
 -- **Problem**: we can not assume that a user *has* a compiled and working 
@@ -53,17 +55,20 @@ function coAlgs.addDependency(dependencyName)
   dependsOn[#dependsOn+1] = dependencyName
 end
 
-local pp = require('pl/pretty')
-
 function coAlgs.createCoAlg()
   if not theCoAlg then return end
   if not theCoAlg.name then theCoAlg.name = 'unknown' end
+--  local aCtx = joyLoL.newContext()
+--  joyLoL.pushData(aCtx, coAlgs.templates.base)
+--  joyLoL.pushProcess(aCtx, 'render')
+--  joyLoL.eval(aCtx)
   local outFilePath = string.format('build/%s.txt', theCoAlg.name)
   texio.write_nl(string.format('creating JoyLoL CoAlgebra: [%s]', outFilePath))
   local outFile = io.open(outFilePath, 'w')
   outFile:write(pp.write(theCoAlg))
+--  outFile:write(joyLoL.popData(aCtx))
   outFile:close()
-  texio.write_nl(string.format('created JoyLoL CoAlgebra: [%s]', outFilePath))
+  texio.write_nl(string.format(' created JoyLoL CoAlgebra: [%s]', outFilePath))
 end
 
 function coAlgs.newWord(wordName)
