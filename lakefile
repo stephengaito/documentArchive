@@ -2,10 +2,16 @@
 
 local tests = dofile('lakeLibs/tests.lua')
 
-local install = target(
+local installJoyLoL = target(
   './t-joylol-coalg/tex/context/third/joyLoLCoAlg/joyLoLMinLua/joyLoL.lua',
   tests.target,
   function(t) file.copy(tests.minJoyLoL, t.target, true) end 
 )
 
-default{install}
+local installPP = target(
+  './t-joylol-coalg/tex/context/third/joyLoLCoAlg/joyLoLMinLua/prettyPrint.lua',
+  tests.target,
+  function(t) file.copy(tests.minPP, t.target, true) end 
+)
+
+default{ installJoyLoL, installPP }

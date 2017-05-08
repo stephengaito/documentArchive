@@ -338,7 +338,15 @@ function joyLoL.addToDict(aCtx)
   local aValue = popData(aCtx)
   local aKey   = popData(aCtx)
   local aDict  = popData(aCtx)
-  aDict[aKey] = aValue
+  if type(aDict) == 'table' then
+    aDict[aKey] = aValue
+  else
+    texio.write_nl(pp.write(aCtx))
+    texio.write_nl(pp.write(aValue))
+    texio.write_nl(pp.write(aKey))
+    texio.write_nl(pp.write(aDict))
+    texio.write_nl('EXPECTED a Dictionary')
+  end
   pushData(aCtx, aDict)
 end
 

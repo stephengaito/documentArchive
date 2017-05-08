@@ -2,18 +2,22 @@
 
 local pp     = require('pl.pretty')
 
-local lt     = dofile('./languages/joyLoL/build/tests/lunatest.lua')
+package.path = './languages/joyLoL/build/tests/?.lua;'..package.path
+
+local lt     = require('lunatest')
 local assert_equal = lt.assert_equal
 local assert_table = lt.assert_table
 local assert_nil   = lt.assert_nil
 
-local joyLoL = dofile('./languages/joyLoL/build/tests/joyLoL.lua')
+local joyLoL = require('joyLoL')
 local pushData, peekData, peekNData, popData
   = joyLoL.pushData, joyLoL.peekData, joyLoL.peekNData, joyLoL.popData
 local pushProcess, peekProcess, peekNProcess, popProcess
   = joyLoL.pushProcess, joyLoL.peekProcess, joyLoL.peekNProcess, joyLoL.popProcess
 local newContext = joyLoL.newContext
 local jEval = joyLoL.eval
+
+lt.suite('prettyPrintTests')
 
 function test_nextWord()
   --
@@ -255,5 +259,7 @@ end
 function off_test_fail()
   lt.fail("this should fail")
 end
+
+
 
 lt.run()
