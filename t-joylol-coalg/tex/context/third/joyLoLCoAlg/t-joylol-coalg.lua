@@ -39,6 +39,9 @@ if not hasJoyLoL then
   joyLoL = require 'joyLoLMinLua/joyLoL'
 end
 
+local pushData, pushProcess = joyLoL.pushData, joyLoL.popData
+local newList, newDictionary = joyLoL.newList, joyLoL.newDictionary
+
 interfaces.writestatus("joyLoL", joyLoL.version())
 
 function coAlgs.newCoAlg(coAlgName)
@@ -47,6 +50,21 @@ function coAlgs.newCoAlg(coAlgName)
   theCoAlg.dependsOn = {}
   theCoAlg.words     = {}
   theCoAlg.wordOrder = {}
+  theCoAlg.ctx       = joyLoL.newContext()
+  local aCtx = theCoAlg.ctx
+  -- Create dependsOn list
+  pushData(aCtx, 'dependsOn')
+  newList(aCtx)
+  pushProcess(aCtx, 'addToDict-dependsOn')
+  -- Create wordOrder list
+  pushData(aCtx, 'wordOrder')
+  newList(aCtx)
+  pushProcess(aCtx, 'addToDict-wordOrder')
+  -- Create words dictionary
+  pushData(aCtx, 'words')
+  newDictionary(aCtx)
+  pushProcess(aCtx, 'addToDict-words')
+  -- add the new word: "global"
   coAlgs.newWord('global')
 end
 
@@ -60,53 +78,88 @@ local function buildContext(theCoAlg)
   local jEval = joyLoL.eval
   
   local aCtx = joyLoL.newContext()
+  --
+  -- Create the top-level dictionary
+  --
   joyLoL.newDictionary(aCtx)
+  --
+  -- Add Words dictionary to the top-level dictionary
+  --
   pushData(aCtx, 'words')
   joyLoL.newDictionary(aCtx)
-  for aKey, aValue in pairs(theCoAlg.words) do 
-    pushData(aCtx, aKey)
-    aValue['name'] = nil
-    joyLoL.newList(aCtx)
-    texio.write(pp.write(aKey))
-    texio.write(pp.write(aValue))
-    -- need to do one more layer of pairs BEFORE ipairs!!!!
-    for i, aStr in ipairs(aValue) do
-      pushData(aCtx, aStr)
-      pushProcess(aCtx, 'appendToEndList')
-      texio.write(aStr)
-      texio.write(pp.write(aCtx))
-      jEval(aCtx)
+  pushProcess(aCtx, 'addToDict-words')
+  --
+  -- Step through each word...
+  --
+  for aWord, aWordValue in pairs(theCoAlg.words) do 
+    --
+    -- Add a dictionary for each particular word to the words dictionary 
+    --
+    pushData(aCtx, aWord)
+    aWordValue['name'] = nil
+    joyLoL.newDictionary(aCtx)
+    pushProcess(aCtx, 'addToDict-aWord')
+    --
+    -- step through each key/value in the given word
+    --
+    for aKey, aValue in pairs(aWordValue) do
+      --
+      -- Add a list for each key/value
+      --
+      pushData(aCtx, aKey)
+      joyLoL.newList(aCtx)
+      pushProcess(aCtx, 'addToDict-key/value')
+      --
+      -- Step through each string in a given key/value
+      --
+      for i, aStr in ipairs(aValue) do
+        if aStr then
+          pushData(aCtx, aStr)
+          pushProcess(aCtx, 'appendToEndList-key/value')
+          --jEval(aCtx)
+        end
+      end
+      --jEval(aCtx)
     end
-    pushProcess(aCtx, 'addToDict')
-    texio.write(pp.write(aCtx))
-    jEval(aCtx)
+    --jEval(aCtx)
   end
-  pushProcess(aCtx, 'addToDict')
+  --jEval(aCtx)
+  --
+  -- Add dependsOn to top-level dictionary
+  --
   pushData(aCtx, 'dependsOn')
   joyLoL.newList(aCtx)
+  pushProcess(aCtx, 'addToDict-top')
   for i, aStr in ipairs(theCoAlg.dependsOn) do
-    pushData(aCtx, aStr)
-    pushProcess(aCtx, 'appendToEndList')
-    jEval(aCtx)
+    if aStr then
+      pushData(aCtx, aStr)
+      pushProcess(aCtx, 'appendToEndList-dependsOn')
+      --jEval(aCtx)
+    end
   end
-  pushProcess(aCtx, 'addToDict')
-  jEval(aCtx)
+  --jEval(aCtx)
+  --
+  -- Add WordOrder to top-level dictionary
+  --
   pushData(aCtx, 'wordOrder')
   joyLoL.newList(aCtx)
+  pushProcess(aCtx, 'addToDict-top')
   for i, aStr in ipairs(theCoAlg.wordOrder) do
-    pushData(aCtx, aStr)
-    pushProcess(aCtx, 'appendToEndList')
-    jEval(aCtx)
+    if aStr then
+      pushData(aCtx, aStr)
+      pushProcess(aCtx, 'appendToEndList-wordOrder')
+      --jEval(aCtx)
+    end
   end
-  pushProcess(aCtx, 'addToDict')
   jEval(aCtx)
+  --
   return aCtx
 end
 
 function coAlgs.createCoAlg()
   if not theCoAlg then return end
   if not theCoAlg.name then theCoAlg.name = 'unknown' end
-  local aCtx = buildContext(theCoAlg)
+--  local aCtx = buildContext(theCoAlg)
 --  joyLoL.pushData(aCtx, coAlgs.templates.base)
 --  joyLoL.pushProcess(aCtx, 'render')
 --  joyLoL.eval(aCtx)
@@ -114,7 +167,7 @@ function coAlgs.createCoAlg()
   texio.write_nl(string.format('creating JoyLoL CoAlgebra: [%s]', outFilePath))
   local outFile = io.open(outFilePath, 'w')
   outFile:write(pp.write(theCoAlg))
-  outFile:write(pp.write(aCtx))
+--  outFile:write(pp.write(aCtx))
   outFile:close()
   texio.write_nl(string.format(' created JoyLoL CoAlgebra: [%s]', outFilePath))
 end
