@@ -58,6 +58,7 @@ end
 interfaces.writestatus("joyLoL", joyLoL.version())
 
 function coAlgs.newCoAlg(coAlgName)
+  texio.write_nl('newCoAlg: ['..coAlgName..']')
   theCoAlg           = {}
   theCoAlg.name      = coAlgName
   theCoAlg.dependsOn = {}
@@ -102,6 +103,7 @@ end
 
 
 function coAlgs.createCoAlg()
+  texio.write_nl("createCoAlg...")
   if not theCoAlg then return end
   if not theCoAlg.name then theCoAlg.name = 'unknown' end
   local outFilePath = string.format('build/%s.txt', theCoAlg.name)
@@ -201,23 +203,79 @@ function coAlgs.addPostProcessStackDescription(condition)
 end
 
 function coAlgs.addJoyLoLCode(bufferName)
+  texio.write_nl('addJoyLoLCode: ['..bufferName..']')
   local theCode = theCoAlg.words[theCoAlg.curWord].joyLoLCode
   theCode[#theCode+1] = buffers.getcontent(bufferName)
+  local aCtx = theCoAlg.ctx
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'appendToEndList')
+  pushProcessQuoted(aCtx, buffers.getcontent(bufferName))
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, 'joyLoLCode')
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, theCoAlg.curWord)
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, 'words')
+  jEval(aCtx)  
 end
 
 function coAlgs.addCHeader(bufferName)
+  texio.write_nl('addCHeader: ['..bufferName..']')
   local theCode = theCoAlg.words[theCoAlg.curWord].cHeader
   theCode[#theCode+1] = buffers.getcontent(bufferName)
+  local aCtx = theCoAlg.ctx
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'appendToEndList')
+  pushProcessQuoted(aCtx, buffers.getcontent(bufferName))
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, 'cHeader')
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, theCoAlg.curWord)
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, 'words')
+  jEval(aCtx)  
 end
 
 function coAlgs.addCCode(bufferName)
+  texio.write_nl('addCCode: ['..bufferName..']')
   local theCode = theCoAlg.words[theCoAlg.curWord].cCode
   theCode[#theCode+1] = buffers.getcontent(bufferName)
+  local aCtx = theCoAlg.ctx
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'appendToEndList')
+  pushProcessQuoted(aCtx, buffers.getcontent(bufferName))
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, 'cCode')
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, theCoAlg.curWord)
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, 'words')
+  jEval(aCtx)  
 end
 
 function coAlgs.addLuaCode(bufferName)
+  texio.write_nl('addLuaCode: ['..bufferName..']')
   local theCode = theCoAlg.words[theCoAlg.curWord].luaCode
   theCode[#theCode+1] = buffers.getcontent(bufferName)
+  local aCtx = theCoAlg.ctx
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'appendToEndList')
+  pushProcessQuoted(aCtx, buffers.getcontent(bufferName))
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, 'luaCode')
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, theCoAlg.curWord)
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, 'words')
+  jEval(aCtx)  
 end
 
 coAlgs.joyLoL = joyLoL
