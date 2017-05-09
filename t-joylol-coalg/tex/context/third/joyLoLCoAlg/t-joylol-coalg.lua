@@ -45,25 +45,12 @@ local popData, popProcess   = joyLoL.popData, joyLoL.popProcess
 local newList, newDictionary = joyLoL.newList, joyLoL.newDictionary
 local jEval = joyLoL.eval
 
---[=[
-local function jEval(aCtx)
-  texio.write_nl("----jEval----")
-  texio.write_nl(pp.write(aCtx))
-  joyLoL.eval(aCtx)
-  texio.write_nl(pp.write(aCtx))
-  texio.write_nl("-------------")
-end
---]=]
-
 interfaces.writestatus("joyLoL", joyLoL.version())
 
 function coAlgs.newCoAlg(coAlgName)
   texio.write_nl('newCoAlg: ['..coAlgName..']')
   theCoAlg           = {}
   theCoAlg.name      = coAlgName
-  theCoAlg.dependsOn = {}
-  theCoAlg.words     = {}
-  theCoAlg.wordOrder = {}
   theCoAlg.ctx       = joyLoL.newContext()
   local aCtx = theCoAlg.ctx
   -- Create main dictionary
@@ -90,8 +77,6 @@ end
 
 function coAlgs.addDependency(dependencyName)
   texio.write_nl('addDependency: ['..dependencyName..']')
-  local dependsOn = theCoAlg.dependsOn
-  dependsOn[#dependsOn+1] = dependencyName
   local aCtx = theCoAlg.ctx
   pushProcess(aCtx, 'popData')
   pushProcess(aCtx, 'appendToEndList')
@@ -134,19 +119,6 @@ end
 function coAlgs.newWord(wordName)
   texio.write_nl('newWord: ['..wordName..']')
   theCoAlg.curWord    = wordName
-  theCoAlg.words[wordName] = {}
-  theCoAlg.wordOrder[#theCoAlg.wordOrder+1] = wordName
-  
-  local theWord       = theCoAlg.words[wordName]
-  theWord.name        = wordName
-  theWord.preData     = {}
-  theWord.postData    = {}
-  theWord.preProcess  = {}
-  theWord.postProcess = {}
-  theWord.joyLoLCode  = {}
-  theWord.cHeader     = {}
-  theWord.cCode       = {}
-  theWord.luaCode     = {}
   local aCtx = theCoAlg.ctx
   addStrToListNamed(aCtx, wordName, 'wordOrder')
   newDictionary(aCtx)
