@@ -40,9 +40,20 @@ if not hasJoyLoL then
 end
 
 local pushData, pushProcess = joyLoL.pushData, joyLoL.pushProcess
+local pushProcessQuoted = joyLoL.pushProcessQuoted
 local popData, popProcess   = joyLoL.popData, joyLoL.popProcess
 local newList, newDictionary = joyLoL.newList, joyLoL.newDictionary
 local jEval = joyLoL.eval
+
+--[=[
+local function jEval(aCtx)
+  texio.write_nl("----jEval----")
+  texio.write_nl(pp.write(aCtx))
+  joyLoL.eval(aCtx)
+  texio.write_nl(pp.write(aCtx))
+  texio.write_nl("-------------")
+end
+--]=]
 
 interfaces.writestatus("joyLoL", joyLoL.version())
 
@@ -56,20 +67,21 @@ function coAlgs.newCoAlg(coAlgName)
   local aCtx = theCoAlg.ctx
   -- Create main dictionary
   newDictionary(aCtx)
+  jEval(aCtx)
   -- Create dependsOn list
-  pushData(aCtx, 'dependsOn')
-  newList(aCtx)
   pushProcess(aCtx, 'addToDict')
+  newList(aCtx)
+  pushProcess(aCtx, 'dependsOn')
   jEval(aCtx)
   -- Create wordOrder list
-  pushData(aCtx, 'wordOrder')
-  newList(aCtx)
   pushProcess(aCtx, 'addToDict')
+  newList(aCtx)
+  pushProcess(aCtx, 'wordOrder')
   jEval(aCtx)
   -- Create words dictionary
-  pushData(aCtx, 'words')
-  newDictionary(aCtx)
   pushProcess(aCtx, 'addToDict')
+  newDictionary(aCtx)
+  pushProcess(aCtx, 'words')
   jEval(aCtx)
   -- add the new word: "global"
   coAlgs.newWord('global')
@@ -93,23 +105,24 @@ function coAlgs.createCoAlg()
 end
 
 local function addNewList(aCtx, listName)
-  pushData(aCtx, listName)
-  newList(aCtx)
   pushProcess(aCtx, 'addToDict')
+  newList(aCtx)
+  pushProcess(aCtx, listName)
   jEval(aCtx)
 end
 
 local function addStrToListNamed(aCtx, aStr, listName)
-  pushData   (aCtx, listName)
   pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, listName)
   jEval(aCtx)
-  pushData   (aCtx, aStr)
   pushProcess(aCtx, 'appendToEndList')
+  pushProcessQuoted(aCtx, aStr) -- need to explicitly quote this string
   jEval(aCtx)
   popData(aCtx)
 end
 
 function coAlgs.newWord(wordName)
+  texio.write_nl('newWord: ['..wordName..']')
   theCoAlg.curWord    = wordName
   theCoAlg.words[wordName] = {}
   theCoAlg.wordOrder[#theCoAlg.wordOrder+1] = wordName
@@ -126,8 +139,11 @@ function coAlgs.newWord(wordName)
   theWord.luaCode     = {}
   local aCtx = theCoAlg.ctx
   addStrToListNamed(aCtx, wordName, 'wordOrder')
-  pushData(aCtx, wordName)
   newDictionary(aCtx)
+  pushProcessQuoted(aCtx, wordName) -- need to explicitly quote this string
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, 'words')
+  jEval(aCtx)
   addNewList(aCtx, 'preData')
   addNewList(aCtx, 'postData')
   addNewList(aCtx, 'preProcess')
@@ -136,8 +152,10 @@ function coAlgs.newWord(wordName)
   addNewList(aCtx, 'cHeader')
   addNewList(aCtx, 'cCode')
   addNewList(aCtx, 'luaCode')
+  --
+  pushProcess(aCtx, 'popData')
   pushProcess(aCtx, 'addToDict')
-  --jEval(aCtx)
+  jEval(aCtx)
 end
 
 function coAlgs.endWord()
