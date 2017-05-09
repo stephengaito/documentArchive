@@ -173,39 +173,93 @@ function coAlgs.endWord()
 end
 
 function coAlgs.addPreDataStackDescription(name, condition)
-  local theStack = theCoAlg.words[theCoAlg.curWord].preData
-  theStack[#theStack+1] = { }
-  local aDesc = theStack[#theStack]
-  aDesc.name = name
-  aDesc.condition = condition
+  texio.write_nl('addPreDataStackDescription: ['..name..']['..condition..']')
+  local aCtx = theCoAlg.ctx
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'appendToEndList')
+  pushProcess(aCtx, 'addToDict')
+  pushProcessQuoted(aCtx, condition)
+  pushProcessQuoted(aCtx, 'condition')
+  pushProcess(aCtx, 'addToDict')
+  pushProcessQuoted(aCtx, name)
+  pushProcessQuoted(aCtx, 'name')
+  newDictionary(aCtx) -- new dictionary for this condition
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, 'preData')
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, theCoAlg.curWord)
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, 'words')
+  jEval(aCtx)
 end
 
 function coAlgs.addPostDataStackDescription(condition)
-  local theStack = theCoAlg.words[theCoAlg.curWord].postData
-  theStack[#theStack+1] = { }
-  local aDesc = theStack[#theStack]
-  aDesc.condition = condition
+  texio.write_nl('addPostDataStackDescription: ['..condition..']')
+  local aCtx = theCoAlg.ctx
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'appendToEndList')
+  pushProcess(aCtx, 'addToDict')
+  pushProcessQuoted(aCtx, condition)
+  pushProcessQuoted(aCtx, 'condition')
+  newDictionary(aCtx) -- new dictionary for this condition
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, 'postData')
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, theCoAlg.curWord)
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, 'words')
+  jEval(aCtx)
 end
 
 function coAlgs.addPreProcessStackDescription(name, condition)
-  local theStack = theCoAlg.words[theCoAlg.curWord].preProcess
-  theStack[#theStack+1] = { }
-  local aDesc = theStack[#theStack]
-  aDesc.name = name
-  aDesc.condition = condition
+  texio.write_nl('addPreProcessStackDescription: ['..name..']['..condition..']')
+  local aCtx = theCoAlg.ctx
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'appendToEndList')
+  pushProcess(aCtx, 'addToDict')
+  pushProcessQuoted(aCtx, condition)
+  pushProcessQuoted(aCtx, 'condition')
+  pushProcess(aCtx, 'addToDict')
+  pushProcessQuoted(aCtx, name)
+  pushProcessQuoted(aCtx, 'name')
+  newDictionary(aCtx) -- new dictionary for this condition
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, 'preProcess')
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, theCoAlg.curWord)
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, 'words')
+  jEval(aCtx)
 end
 
 function coAlgs.addPostProcessStackDescription(condition)
-  local theStack = theCoAlg.words[theCoAlg.curWord].postProcess
-  theStack[#theStack+1] = { }
-  local aDesc = theStack[#theStack]
-  aDesc.condition = condition
+  texio.write_nl('addPostProcessStackDescription: ['..condition..']')
+  local aCtx = theCoAlg.ctx
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'appendToEndList')
+  pushProcess(aCtx, 'addToDict')
+  pushProcessQuoted(aCtx, condition)
+  pushProcessQuoted(aCtx, 'condition')
+  newDictionary(aCtx) -- new dictionary for this condition
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, 'postProcess')
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, theCoAlg.curWord)
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, 'words')
+  jEval(aCtx)
 end
 
 function coAlgs.addJoyLoLCode(bufferName)
   texio.write_nl('addJoyLoLCode: ['..bufferName..']')
-  local theCode = theCoAlg.words[theCoAlg.curWord].joyLoLCode
-  theCode[#theCode+1] = buffers.getcontent(bufferName)
   local aCtx = theCoAlg.ctx
   pushProcess(aCtx, 'popData')
   pushProcess(aCtx, 'popData')
@@ -218,13 +272,11 @@ function coAlgs.addJoyLoLCode(bufferName)
   pushProcessQuoted(aCtx, theCoAlg.curWord)
   pushProcess(aCtx, 'lookupInDict')
   pushProcess(aCtx, 'words')
-  jEval(aCtx)  
+  jEval(aCtx)
 end
 
 function coAlgs.addCHeader(bufferName)
   texio.write_nl('addCHeader: ['..bufferName..']')
-  local theCode = theCoAlg.words[theCoAlg.curWord].cHeader
-  theCode[#theCode+1] = buffers.getcontent(bufferName)
   local aCtx = theCoAlg.ctx
   pushProcess(aCtx, 'popData')
   pushProcess(aCtx, 'popData')
@@ -237,13 +289,11 @@ function coAlgs.addCHeader(bufferName)
   pushProcessQuoted(aCtx, theCoAlg.curWord)
   pushProcess(aCtx, 'lookupInDict')
   pushProcess(aCtx, 'words')
-  jEval(aCtx)  
+  jEval(aCtx)
 end
 
 function coAlgs.addCCode(bufferName)
   texio.write_nl('addCCode: ['..bufferName..']')
-  local theCode = theCoAlg.words[theCoAlg.curWord].cCode
-  theCode[#theCode+1] = buffers.getcontent(bufferName)
   local aCtx = theCoAlg.ctx
   pushProcess(aCtx, 'popData')
   pushProcess(aCtx, 'popData')
@@ -256,13 +306,11 @@ function coAlgs.addCCode(bufferName)
   pushProcessQuoted(aCtx, theCoAlg.curWord)
   pushProcess(aCtx, 'lookupInDict')
   pushProcess(aCtx, 'words')
-  jEval(aCtx)  
+  jEval(aCtx)
 end
 
 function coAlgs.addLuaCode(bufferName)
   texio.write_nl('addLuaCode: ['..bufferName..']')
-  local theCode = theCoAlg.words[theCoAlg.curWord].luaCode
-  theCode[#theCode+1] = buffers.getcontent(bufferName)
   local aCtx = theCoAlg.ctx
   pushProcess(aCtx, 'popData')
   pushProcess(aCtx, 'popData')
@@ -275,7 +323,7 @@ function coAlgs.addLuaCode(bufferName)
   pushProcessQuoted(aCtx, theCoAlg.curWord)
   pushProcess(aCtx, 'lookupInDict')
   pushProcess(aCtx, 'words')
-  jEval(aCtx)  
+  jEval(aCtx)
 end
 
 coAlgs.joyLoL = joyLoL

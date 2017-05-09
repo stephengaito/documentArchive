@@ -292,7 +292,7 @@ local function popDataList(aCtx)
 end
 
 function joyLoL.pushOntoList(aCtx)
-  local anItem = popDataStr(aCtx)
+  local anItem = popData(aCtx)
   local aList  = popDataList(aCtx)
   table_insert(aList, 1, anItem)
   pushData(aCtx, aList)
@@ -306,7 +306,7 @@ function joyLoL.popFromList(aCtx)
 end
 
 function joyLoL.appendToEndList(aCtx)
-  local anItem = popDataStr(aCtx)
+  local anItem = popData(aCtx)
   local aList  = popDataList(aCtx)
   table_insert(aList, anItem)
   pushData(aCtx, aList)
