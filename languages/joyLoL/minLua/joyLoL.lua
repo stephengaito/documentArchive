@@ -375,28 +375,29 @@ end
 
 -- We need to be able to evaluate contexts.
 
-function joyLoL.eval(aCtx)
+function joyLoL.eval(aCtx, localTrace)
+  local trace = localTrace or joyLoL.trace
   while 0 < #aCtx.process do
-    if joyLoL.trace then
+    if trace then
       print('\n\n-----')
       print(pp.toString(aCtx))
     end
     local aCmd = popProcess(aCtx)
     if type(aCmd) == 'function' then
-      if joyLoL.trace then print('calling: ['..pp.toString(aCmd)..']') end
+      if trace then print('calling: ['..pp.toString(aCmd)..']') end
       aCmd(aCtx)
     elseif type(aCmd) == 'string' and aCmd:match("^'") then
-      if joyLoL.trace then print('adding quoted string: ['..pp.toString(aCmd)..']') end
+      if trace then print('adding quoted string: ['..pp.toString(aCmd)..']') end
       pushData(aCtx, aCmd:sub(2))
     elseif type(joyLoL[aCmd]) == 'function' then
-      if joyLoL.trace then print('calling: ['..aCmd..']('..pp.toString(joyLoL[aCmd])..')') end
+      if trace then print('calling: ['..aCmd..']('..pp.toString(joyLoL[aCmd])..')') end
       joyLoL[aCmd](aCtx)
     else
-      if joyLoL.trace then print('adding: ['..pp.toString(aCmd)..']') end
+      if trace then print('adding: ['..pp.toString(aCmd)..']') end
       pushData(aCtx, aCmd)
     end
   end
-  if joyLoL.trace then print('finished eval: ['..pp.toString(aCtx.data)..']') end
+  if trace then print('finished eval: ['..pp.toString(aCtx.data)..']') end
   return aCtx.data
 end
 

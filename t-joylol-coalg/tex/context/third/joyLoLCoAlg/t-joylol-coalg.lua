@@ -88,8 +88,16 @@ function coAlgs.newCoAlg(coAlgName)
 end
 
 function coAlgs.addDependency(dependencyName)
+  texio.write_nl('addDependency: ['..dependencyName..']')
   local dependsOn = theCoAlg.dependsOn
   dependsOn[#dependsOn+1] = dependencyName
+  local aCtx = theCoAlg.ctx
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'appendToEndList')
+  pushProcessQuoted(aCtx, dependencyName)
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcess(aCtx, 'dependsOn')
+  jEval(aCtx)
 end
 
 
