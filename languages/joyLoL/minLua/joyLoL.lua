@@ -102,6 +102,8 @@ function joyLoL.pushProcessQuoted(aCtx, aStr)
   return table_insert(aCtx.process, 1, "'"..aStr)
 end
 
+local pushProcessQuoted = joyLoL.pushProcessQuoted
+
 function joyLoL.popProcess(aCtx)
   local result = nil
   if 0 < #aCtx.process then
@@ -135,6 +137,35 @@ function joyLoL.peekNProcess(aCtx, anInt)
     result = aCtx.process[anInt]
   end
   return result
+end
+
+function joyLoL.reportContext(aCtx)
+  local aCtxStr = pp.toString(aCtx)
+  pushData(aCtx, aCtxStr)
+end
+
+local function popDataStr(aCtx)
+  local aStr = popData(aCtx)
+  if type(aStr) ~= 'string' then
+    reportError("Expected a string\naCtx: "..pp.toString(aCtx)..'\naStr: '..pp.toString(aStr))
+  end
+  return aStr
+end
+
+local function popDataList(aCtx)
+  local aList = popData(aCtx)
+  if type(aList) ~= 'table' then
+    reportError("Expected a list\naCtx: "..pp.toString(aCtx)..'\naList: '..pp.toString(aList))
+  end
+  return aList
+end
+
+local function popDataDict(aCtx)
+  local aDict = popData(aCtx)
+  if type(aDict) ~= 'table' or 0 < #aDict then
+    reportError("Expected a dictionary\naCtx: "..pp.toString(aCtx)..'\naDict: '..pp.toString(aDict))
+  end
+  return aDict
 end
 
 -- We need a JoyLoL LPeg parser which is capable of parsing a simple Lua 
@@ -243,7 +274,7 @@ function joyLoL.renderNextChunk(aCtx)
         pushProcess(aCtx, renderedText)
         pushProcess(aCtx, 'renderNextChunk')
         if not joyLoLChunk:match('^%s*$') then
-          pushProcess(aCtx, 'eval')
+          pushProcess(aCtx, 'interpret')
           pushProcess(aCtx, 'parse')
           pushData(aCtx, joyLoLChunk)
         else
@@ -269,26 +300,20 @@ function joyLoL.render(aCtx)
   pushProcess(aCtx, 'renderNextChunk')
 end
 
+function joyLoL.getTemplate(aCtx)
+  local templateName = popDataStr(aCtx)
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'swapData')
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, templateName)
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, 'templates')
+end
+
 -- We need to able to manipulate lists
 
 function joyLoL.newList(aCtx)
   pushProcess(aCtx, {})
-end
-
-local function popDataStr(aCtx)
-  local aStr = popData(aCtx)
-  if type(aStr) ~= 'string' then
-    reportError("Expected a string\naCtx: "..pp.toString(aCtx)..'\naStr: '..pp.toString(aStr))
-  end
-  return aStr
-end
-
-local function popDataList(aCtx)
-  local aList = popData(aCtx)
-  if type(aList) ~= 'table' then
-    reportError("Expected a list\naCtx: "..pp.toString(aCtx)..'\naList: '..pp.toString(aList))
-  end
-  return aList
 end
 
 function joyLoL.pushOntoList(aCtx)
@@ -330,14 +355,6 @@ end
 
 function joyLoL.newDictionary(aCtx)
   pushProcess(aCtx, {})
-end
-
-local function popDataDict(aCtx)
-  local aDict = popData(aCtx)
-  if type(aDict) ~= 'table' or 0 < #aDict then
-    reportError("Expected a dictionary\naCtx: "..pp.toString(aCtx)..'\naDict: '..pp.toString(aDict))
-  end
-  return aDict
 end
 
 local function peekDataDict(aCtx)
@@ -403,10 +420,17 @@ end
 
 function joyLoL.evalString(aStr)
   local aCtx = newContext()
-  pushProcess(aCtx, "eval")
+  pushProcess(aCtx, "interpret")
   pushProcess(aCtx, "parse")
   pushData(aCtx, aStr)
   return evalCtx(aCtx)
+end
+
+function joyLoL.interpret(aCtx)
+  local joyLoLBlock = popDataList(aCtx)
+  for i, aCmd in ipairs(joyLoLBlock) do
+    pushProcess(aCtx, aCmd)
+  end
 end
 
 return joyLoL

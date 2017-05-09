@@ -17,8 +17,6 @@ local theCoAlg   = coAlgs.theCoAlg
 
 local pp = require('pl/pretty')
 
-interfaces.writestatus('joyLoL', "loaded JoyLoL CoAlgs")
-
 -- **Problem**: we can not assume that a user *has* a compiled and working 
 -- C based JoyLoL. This is the "Bootstrapping (Compiler)" problem (see 
 -- Wikipedia). We solve this problem by writing a minimal joyLoL 
@@ -38,6 +36,8 @@ if not hasJoyLoL then
     "Could NOT load joyLoL... loading mininal Lua version instead.")
   joyLoL = require 'joyLoLMinLua/joyLoL'
 end
+
+coAlgs.joyLoL = joyLoL
 
 local pushData, pushProcess = joyLoL.pushData, joyLoL.pushProcess
 local pushProcessQuoted = joyLoL.pushProcessQuoted
@@ -83,10 +83,18 @@ end
 
 function coAlgs.newCoAlg(coAlgName)
   texio.write_nl('newCoAlg: ['..coAlgName..']')
-  theCoAlg           = {}
-  theCoAlg.name      = coAlgName
-  theCoAlg.ctx       = joyLoL.newContext()
+  theCoAlg               = {}
+  theCoAlg.name          = coAlgName
+  theCoAlg.ctx           = joyLoL.newContext()
+  theCoAlg.hasJoyLoLCode = false;
+  theCoAlg.hasLuaCode    = false;
+  theCoAlg.hasCHeader    = false;
+  theCoAlg.hasCCode      = false;
+  -- 
   local aCtx = theCoAlg.ctx
+  pushProcess(aCtx, 'addToDict')
+  pushProcessQuoted(aCtx, coAlgName)
+  pushProcessQuoted(aCtx, 'coAlgName')
   addNewList(aCtx, 'dependsOn')
   addNewList(aCtx, 'wordOrder')
   addNewDict(aCtx, 'words')
@@ -109,16 +117,37 @@ function coAlgs.addDependency(dependencyName)
   jEval(aCtx)
 end
 
+local function writeCodeFile(aCtx, coAlgName, templateName, filePath, fileExt)
+  local outFilePath = string.format('%s/%s.%s', filePath, coAlgName, fileExt)
+  local outFile = io.open(outFilePath, 'w')
+  outFile:write(pp.write(theCoAlg))
+  pushProcess(aCtx, 'render')
+  pushProcess(aCtx, 'getTemplate')
+  pushProcessQuoted(aCtx, templateName)
+  jEval(aCtx)
+  local renderedBaseTemplate = popData(aCtx)
+  texio.write_nl(renderedBaseTemplate)
+  outFile:write('\n')
+  outFile:write(renderedBaseTemplate)
+  outFile:write('\n')
+  outFile:close()
+end
+
 function coAlgs.createCoAlg()
   texio.write_nl("createCoAlg...")
   if not theCoAlg then return end
-  if not theCoAlg.name then theCoAlg.name = 'unknown' end
-  local outFilePath = string.format('build/%s.txt', theCoAlg.name)
-  texio.write_nl(string.format('creating JoyLoL CoAlgebra: [%s]', outFilePath))
-  local outFile = io.open(outFilePath, 'w')
-  outFile:write(pp.write(theCoAlg))
-  outFile:close()
-  texio.write_nl(string.format(' created JoyLoL CoAlgebra: [%s]', outFilePath))
+  local coAlgName = theCoAlg.name or 'unknown'
+  texio.write_nl(string.format('creating JoyLoL CoAlgebra: [%s]', coAlgName))
+  --
+  local aCtx = theCoAlg.ctx
+  coAlgs.loadTemplates(aCtx) -- contains a jEval
+  --
+  if theCoAlg.hasCHeader    then writeCodeFile(aCtx, coAlgName, 'cHeader',    'build', 'h')   end
+  if theCoAlg.hasCCode      then writeCodeFile(aCtx, coAlgName, 'cCode',      'build', 'c')   end
+  if theCoAlg.hasLuaCode    then writeCodeFile(aCtx, coAlgName, 'luaCode',    'build', 'lua') end
+  if theCoAlg.hasJoyLoLCode then writeCodeFile(aCtx, coAlgName, 'joyLoLCode', 'build', 'joy') end
+  --
+  texio.write_nl(string.format(' created JoyLoL CoAlgebra: [%s]', coAlgName))
 end
 
 function coAlgs.newWord(wordName)
@@ -235,6 +264,7 @@ end
 
 function coAlgs.addJoyLoLCode(bufferName)
   texio.write_nl('addJoyLoLCode: ['..bufferName..']')
+  theCoAlg.hasJoyLoLCode = true
   local aCtx = theCoAlg.ctx
   pushProcess(aCtx, 'popData')
   pushProcess(aCtx, 'popData')
@@ -252,6 +282,7 @@ end
 
 function coAlgs.addCHeader(bufferName)
   texio.write_nl('addCHeader: ['..bufferName..']')
+  theCoAlg.hasCHeader = true
   local aCtx = theCoAlg.ctx
   pushProcess(aCtx, 'popData')
   pushProcess(aCtx, 'popData')
@@ -269,6 +300,7 @@ end
 
 function coAlgs.addCCode(bufferName)
   texio.write_nl('addCCode: ['..bufferName..']')
+  theCoAlg.hasCCode = true
   local aCtx = theCoAlg.ctx
   pushProcess(aCtx, 'popData')
   pushProcess(aCtx, 'popData')
@@ -286,6 +318,7 @@ end
 
 function coAlgs.addLuaCode(bufferName)
   texio.write_nl('addLuaCode: ['..bufferName..']')
+  theCoAlg.hasLuaCode = true
   local aCtx = theCoAlg.ctx
   pushProcess(aCtx, 'popData')
   pushProcess(aCtx, 'popData')
@@ -302,3 +335,5 @@ function coAlgs.addLuaCode(bufferName)
 end
 
 coAlgs.joyLoL = joyLoL
+
+interfaces.writestatus('joyLoL', "loaded JoyLoL CoAlgs")

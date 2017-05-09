@@ -4,16 +4,19 @@ local pp     = require('pl.pretty')
 
 package.path = './languages/joyLoL/build/tests/?.lua;'..package.path
 
-local lt     = require('lunatest')
-local assert_equal = lt.assert_equal
-local assert_table = lt.assert_table
-local assert_nil   = lt.assert_nil
+local lt            = require('lunatest')
+local assert_equal  = lt.assert_equal
+local assert_table  = lt.assert_table
+local assert_nil    = lt.assert_nil
+local assert_string = lt.assert_string
+local assert_match  = lt.assert_match
 
 local joyLoL = require('joyLoL')
 local pushData, peekData, peekNData, popData
   = joyLoL.pushData, joyLoL.peekData, joyLoL.peekNData, joyLoL.popData
 local pushProcess, peekProcess, peekNProcess, popProcess
   = joyLoL.pushProcess, joyLoL.peekProcess, joyLoL.peekNProcess, joyLoL.popProcess
+local pushProcessQuoted = joyLoL.pushProcessQuoted
 local newContext = joyLoL.newContext
 local jEval = joyLoL.eval
 
@@ -103,7 +106,7 @@ function test_renderNextChunk()
   joyLoL.renderNextChunk(aCtx)
   assert_equal(" test block ", popData(aCtx))
   assert_equal('parse', popProcess(aCtx))
-  assert_equal('eval', popProcess(aCtx))
+  assert_equal('interpret', popProcess(aCtx))
   assert_equal('renderNextChunk', popProcess(aCtx))
   local aList = popProcess(aCtx)
   assert_table(aList)
@@ -127,7 +130,7 @@ function test_renderNextChunk()
   joyLoL.renderNextChunk(aCtx)
   assert_equal(" this is a test with no non-joyLoL block ", popData(aCtx))
   assert_equal('parse', popProcess(aCtx))
-  assert_equal('eval', popProcess(aCtx))
+  assert_equal('interpret', popProcess(aCtx))
   assert_equal('renderNextChunk', popProcess(aCtx))
   local aList = popProcess(aCtx)
   assert_table(aList)
@@ -159,6 +162,30 @@ function test_render()
   assert_table(aCtx.process)
   assert_equal(0, #aCtx.process)
   assert_equal(" > this is a test  with no joyLoL block < ", popData(aCtx))
+  --
+  pushData(aCtx, " > this is a test {{ reportContext }} with simple joyLoL block < ")
+  pushProcess(aCtx, "render")
+  jEval(aCtx)
+  assert_table(aCtx.process)
+  assert_equal(0, #aCtx.process)
+  local renderedText = popData(aCtx)
+  --print('>>'..renderedText..'<<')
+  assert_match("^ > this is a test", renderedText)
+  assert_match(" with simple joyLoL block < $", renderedText)
+  assert_match('%[%"data%"%] %=', renderedText)
+  assert_match('%[%"process%"%] %=', renderedText)
+  --
+  aCtx = newContext()
+  pushProcess(aCtx, 'render')
+  pushProcessQuoted(aCtx, " > this is a test {{ lookupInDict 'aKey }} with complex joyLoL block < ")  
+  pushProcess(aCtx, 'addToDict')
+  pushProcessQuoted(aCtx, 'aValue')
+  pushProcessQuoted(aCtx, 'aKey')
+  joyLoL.newDictionary(aCtx)
+  jEval(aCtx)
+  assert_table(aCtx.process)
+  assert_equal(0, #aCtx.process)
+  assert_equal(" > this is a test aValue with complex joyLoL block < ", popData(aCtx))
 end
 
 function test_lists()
@@ -250,6 +277,20 @@ function test_dictionary()
   local aDict = peekData(aCtx)
   assert_table(aDict)
   assert_nil(aDict['aKey'])
+end
+
+function test_reportContext()
+  local aCtx = newContext()
+  pushData(aCtx, 'someThingData')
+  pushProcess(aCtx, 'someThingProcess')
+  joyLoL.reportContext(aCtx)
+  local aCtxStr = popData(aCtx)
+  assert_string(aCtxStr)
+  assert_match('%[%"data%"%] %= ', aCtxStr)
+  assert_match('someThingData', aCtxStr)
+  assert_match('%[%"process%"%] %=', aCtxStr)
+  assert_match('someThingProcess', aCtxStr)
+  --print(aCtxStr)
 end
 
 function off_test_evalString()
