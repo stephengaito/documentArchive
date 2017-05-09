@@ -47,31 +47,54 @@ local jEval = joyLoL.eval
 
 interfaces.writestatus("joyLoL", joyLoL.version())
 
+-----------------------------------------------------------------------------
+-- NOTE the following uses raw JoyLoL code to collect the coAlgebra's 
+-- literate code description.
+
+-- To understand this code.... **think categorically**
+
+-- In JoyLoL a particular object in the category *is* the structure of the 
+-- data stack, while a particular arrow in the category *is* the process 
+-- stack.
+
+-- To understand what these arrows are doing... you read the JoyLoL code 
+-- in reverse order (from a 'jEval' up). 
+-----------------------------------------------------------------------------
+
+local function addNewDict(aCtx, dictName)
+  pushProcess(aCtx, 'addToDict')
+  newDictionary(aCtx)
+  pushProcessQuoted(aCtx, dictName)
+end
+
+local function addNewList(aCtx, listName)
+  pushProcess(aCtx, 'addToDict')
+  newList(aCtx)
+  pushProcess(aCtx, listName)
+end
+
+local function addStrToListNamed(aCtx, aStr, listName)
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'appendToEndList')
+  pushProcessQuoted(aCtx, aStr) -- need to explicitly quote this string
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, listName)
+end
+
 function coAlgs.newCoAlg(coAlgName)
   texio.write_nl('newCoAlg: ['..coAlgName..']')
   theCoAlg           = {}
   theCoAlg.name      = coAlgName
   theCoAlg.ctx       = joyLoL.newContext()
   local aCtx = theCoAlg.ctx
-  -- Create main dictionary
+  addNewList(aCtx, 'dependsOn')
+  addNewList(aCtx, 'wordOrder')
+  addNewDict(aCtx, 'words')
   newDictionary(aCtx)
   jEval(aCtx)
-  -- Create dependsOn list
-  pushProcess(aCtx, 'addToDict')
-  newList(aCtx)
-  pushProcess(aCtx, 'dependsOn')
-  jEval(aCtx)
-  -- Create wordOrder list
-  pushProcess(aCtx, 'addToDict')
-  newList(aCtx)
-  pushProcess(aCtx, 'wordOrder')
-  jEval(aCtx)
-  -- Create words dictionary
-  pushProcess(aCtx, 'addToDict')
-  newDictionary(aCtx)
-  pushProcess(aCtx, 'words')
-  jEval(aCtx)
+  --
   -- add the new word: "global"
+  --
   coAlgs.newWord('global')
 end
 
@@ -86,7 +109,6 @@ function coAlgs.addDependency(dependencyName)
   jEval(aCtx)
 end
 
-
 function coAlgs.createCoAlg()
   texio.write_nl("createCoAlg...")
   if not theCoAlg then return end
@@ -99,33 +121,12 @@ function coAlgs.createCoAlg()
   texio.write_nl(string.format(' created JoyLoL CoAlgebra: [%s]', outFilePath))
 end
 
-local function addNewList(aCtx, listName)
-  pushProcess(aCtx, 'addToDict')
-  newList(aCtx)
-  pushProcess(aCtx, listName)
-  jEval(aCtx)
-end
-
-local function addStrToListNamed(aCtx, aStr, listName)
-  pushProcess(aCtx, 'lookupInDict')
-  pushProcess(aCtx, listName)
-  jEval(aCtx)
-  pushProcess(aCtx, 'appendToEndList')
-  pushProcessQuoted(aCtx, aStr) -- need to explicitly quote this string
-  jEval(aCtx)
-  popData(aCtx)
-end
-
 function coAlgs.newWord(wordName)
   texio.write_nl('newWord: ['..wordName..']')
   theCoAlg.curWord    = wordName
   local aCtx = theCoAlg.ctx
-  addStrToListNamed(aCtx, wordName, 'wordOrder')
-  newDictionary(aCtx)
-  pushProcessQuoted(aCtx, wordName) -- need to explicitly quote this string
-  pushProcess(aCtx, 'lookupInDict')
-  pushProcess(aCtx, 'words')
-  jEval(aCtx)
+  pushProcess(aCtx, 'popData')
+  pushProcess(aCtx, 'addToDict')
   addNewList(aCtx, 'preData')
   addNewList(aCtx, 'postData')
   addNewList(aCtx, 'preProcess')
@@ -134,9 +135,11 @@ function coAlgs.newWord(wordName)
   addNewList(aCtx, 'cHeader')
   addNewList(aCtx, 'cCode')
   addNewList(aCtx, 'luaCode')
-  --
-  pushProcess(aCtx, 'popData')
-  pushProcess(aCtx, 'addToDict')
+  newDictionary(aCtx)
+  pushProcessQuoted(aCtx, wordName) -- need to explicitly quote this string
+  pushProcess(aCtx, 'lookupInDict')
+  pushProcessQuoted(aCtx, 'words')
+  addStrToListNamed(aCtx, wordName, 'wordOrder')
   jEval(aCtx)
 end
 
