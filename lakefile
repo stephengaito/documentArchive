@@ -1,7 +1,7 @@
 -- A Lua Lakefile
 
-local docDir    = 't-joylol/doc/context/third/joylol'
-local moduleDir = 't-joylol/tex/context/third/joylol'
+local docDir    = 't-joylol/doc/context/third/joyLoL'
+local moduleDir = 't-joylol/tex/context/third/joyLoL'
 local srcFiles = {
   docDir..'/joylol.tex',
   docDir..'/overview.tex',
