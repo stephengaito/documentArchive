@@ -1,12 +1,3 @@
-% A ConTeXt document [master document: literateModules.tex]
-
-\startchapter[title=Lakefile]
-
-We use a slightly updated version of Steve Donovan's Lakefile tool to 
-drive the creation of the various files required by any given 
-\type{t-joylol} managed \ConTeXt\ module. 
-
-\startLakefile
 -- A Lua Lakefile
 
 local docDir    = 't-joylol/doc/context/third/joylol'
@@ -103,6 +94,3 @@ target('diff', diffTargets)
 target('tests', testTargets)
 
 default(buildTargets)
-\stopLakefile
-
-\stopchapter
