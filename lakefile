@@ -9,8 +9,8 @@ local srcFiles = {
   docDir..'/lakefile.tex'
 }
 
-local joylolDoc = 
-  'cd '..docDir..' ; context joylol.tex '
+local joylolDoc =
+  'cd '..docDir..' ; context -once joylol.tex ; diSimp bib ; context joylol.tex'
 
 local moduleTargets = {
   't-joylol.mkiv',
@@ -61,7 +61,7 @@ for i, anExec in ipairs(testExecs) do
     cdir='build',
     needs='lua5.2'
   }
-  
+ 
   table.insert(testTargets, target(
     'build/'..anExec..'-results.lua',
     'build/'..anExec,

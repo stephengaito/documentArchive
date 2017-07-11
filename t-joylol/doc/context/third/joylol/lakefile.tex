@@ -9,8 +9,8 @@ drive the creation of the various files required by any given
 \startLakefile
 -- A Lua Lakefile
 
-local docDir    = 't-joylol/doc/context/third/joylol'
-local moduleDir = 't-joylol/tex/context/third/joylol'
+local docDir    = 't-joylol/doc/context/third/joyLoL'
+local moduleDir = 't-joylol/tex/context/third/joyLoL'
 local srcFiles = {
   docDir..'/joylol.tex',
   docDir..'/overview.tex',
@@ -19,7 +19,7 @@ local srcFiles = {
 }
 
 local joylolDoc = 
-  'cd '..docDir..' ; context joylol.tex '
+  'cd '..docDir..' ; context -once joylol.tex ; diSimp bib ; context joylol.tex'
 
 local moduleTargets = {
   't-joylol.mkiv',
@@ -104,5 +104,10 @@ target('tests', testTargets)
 
 default(buildTargets)
 \stopLakefile
+
+\createLakefileFile%
+  {default}%
+  {../../../../../build/lakefile}%
+  {}
 
 \stopchapter
