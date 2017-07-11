@@ -1,16 +1,10 @@
 % A ConTeXt document [master document: joyLoL.tex]
 
-\startcomponent overview
+\chapter[title=Overview]
 
-%\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
-%src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
-%(Stephen Gaito)}, year=2017] 
+\section[title=Implementation]
 
-\startchapter[title=Overview]
-
-\startsection[title=Implementation]
-
-\startsubsection[title=Bridging the semantic gap]
+\subsection[title=Bridging the semantic gap]
 
 JoyLoL \emph{is explicitly defined to be} a fixed point of the formal 
 semantic functor, making JoyLoL its own formal semantic definition. 
@@ -55,17 +49,13 @@ interface, we allow the JoyLoL libraries to be used, in particular, inside
 make use of \ConTeXt\ for most of our documentation and mathematical 
 writing, since \ConTeXt\ does make integral use of \LuaTeX's Lua subsystem. 
 
-\stopsubsection
-
-\startsubsection[title=Literate Sources]
+\subsection[title=Literate Sources]
 
 The literate sources, provide human readable documentation and 
 justifications for each JoyLoL Co-Algebraic extension, complete with 
 formal semantic definitions of each axiomatic word in JoyLoL. 
 
-\stopsubsection 
-
-\startsubsection[title=ANSI-C system code]
+\subsection[title=ANSI-C system code]
 
 We build the lowest level system code for JoyLoL using ANSI-C with a few 
 \quotation{standard} POSIX extension libraries. We have chosen ANSI-C for 
@@ -103,9 +93,7 @@ of JoyLoL.
 
 \stopitemize
 
-\stopsubsection
-
-\startsubsection[title=Interpreter structure]
+\subsection[title=Interpreter structure]
 
 Since all JoyLoL words explicitly manage the context's data and process 
 stacks, there is, in theory, no need for the ANSI-C call stack. The 
@@ -176,9 +164,7 @@ optimization mode to produce performant code. This means that the JoyLoL
 system itself can be written in JoyLoL, allowing it to be proven 
 deductively correct, yet still be performant. 
 
-\stopsubsection
-
-\startsubsection[title=Call structure]
+\subsection[title=Call structure]
 
 JoyLoL is a Forth-like language which manipulates \quote{stacks}. Almost 
 all existing general purpose computational devices are \quote{register 
@@ -186,16 +172,14 @@ based}. Cleanly and performantly implementing stack based languages on a
 register based computational device has been previously explored in Ertl's 
 thesis, \cite[ertl1996implementationStackLanguages]. 
 
-\stopsubsection
+\subsection[title=Bootstrapping JoyLoL]
 
-\startsubsection[title=Bootstrapping JoyLoL]
-
-Since we want as rigorous as possible tool set, we ultimately need to use 
-JoyLoL to deductively prove its own correctness. Unfortunately, at least 
-initially, most users do not have a running version of JoyLoL. In order to 
-obtain the \emph{first} running version, we need to \quote{bootstrap} the 
-tool set by building an initial version of JoyLoL which is not rigorously 
-checked. 
+Since we want your tool set to be as rigorous as possible, we ultimately 
+need to use JoyLoL to deductively prove its own correctness. 
+Unfortunately, at least initially, most users do not have a running 
+version of JoyLoL. In order to obtain the \emph{first} running version, we 
+need to \quote{bootstrap} the tool set by building an initial version of 
+JoyLoL which is not rigorously checked. 
 
 Since we assume that any serious user of JoyLoL will be using JoyLoL to 
 develop mathematical arguments, and hence will be using \ConTeXt, we will 
@@ -207,10 +191,13 @@ using the \type{MinJoyLoL} environment.
 \defineLitProgs[MinJoyLoL]
 \stopMkIVCode
 
-\stopsubsection
+\section[title=Organization]
 
-\stopsection
+While we assert that all of the CoAlgebraic extensions provided in this 
+document are conservative extensions over JoyLoL provided with only Lists 
+of Lists, it is useful, for \quote{bears of \emph{very} little brains} 
+such as myself, to work, at least initially, with the extra structure 
+provided by these CoAlgebraic extensions. We will show in a subsequent 
+paper that all of the CoAlgebraic extensions provided in this document, 
+are conservative extensions over JoyLoL provided with only lists of lists. 
 
-\stopchapter
-
-\stopcomponent

@@ -2,7 +2,7 @@
 
 \startchapter[title=Preamble]
 
-\setPrependMkIVCode{default}
+\prependMkIVCode{default}
 \startMkIVCode
 %D \module
 %D   [     file=t-joylol,
@@ -49,12 +49,16 @@
 \ctxloadluafile{t-joylol}
 \stopMkIVCode
 
+\startMkIVCode
+\protect \endinput
+\stopMkIVCode
+
 \createMkIVCodeFile%
   {default}%
   {../../../../../build/t-joylol.mkiv}%
   {A ConTeXt MkIV module}
 
-\setPrependLuaCode{default}
+\prependLuaCode{default}
 \startLuaCode
 -- This is the lua code associated with t-joylol.mkiv
 
