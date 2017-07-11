@@ -197,6 +197,16 @@ obtain the \emph{first} running version, we need to \quote{bootstrap} the
 tool set by building an initial version of JoyLoL which is not rigorously 
 checked. 
 
+Since we assume that any serious user of JoyLoL will be using JoyLoL to 
+develop mathematical arguments, and hence will be using \ConTeXt, we will 
+provide this \quote{bootstrapped} JoyLoL using Lua. To do this each JoyLoL 
+CoAlgebra will contain a highly simplified version of itself as pure Lua 
+using the \type{MinJoyLoL} environment. 
+
+\startMkIVCode
+\defineLitProgs[MinJoyLoL]
+\stopMkIVCode
+
 \stopsubsection
 
 \stopsection
