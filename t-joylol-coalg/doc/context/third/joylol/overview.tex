@@ -1,3 +1,195 @@
-% A ConTeXt document [master document: joylol.tex]
+% A ConTeXt document [master document: joyLoL.tex]
 
-\chaper[title=overview]
+\startcomponent overview
+
+\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
+src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
+(Stephen Gaito)}, year=2017] 
+
+\startchapter[title=Overview]
+
+\startsection[title=Implementation]
+
+\startsubsection[title=Bridging the semantic gap]
+
+JoyLoL \emph{is explicitly defined to be} a fixed point of the formal 
+semantic functor, making JoyLoL its own formal semantic definition. 
+However there is, currently, no existing computational device which 
+\emph{implements} the JoyLoL language. That is, there is no computational 
+device which \quote{runs} JoyLoL code natively. 
+
+The objective of this document is to provide an implementation of JoyLoL 
+in as transparently correct way as possible. As discussed in, 
+\cite[gaito2017joyLoLDefinition], the formal definition of any 
+computational language has two distinct components: one \emph{deductive} 
+and the other \emph{inductive}. While we can rigorously check any 
+deductive proofs of correctness, we can only ever hope to falsify any 
+inductive tests of correctness. Any formally correct implementation of a 
+computational language needs to be explicitly clear where the line between 
+the deductively provable and the inductively testable is located.
+
+The desired goal of any rigorous implementation is to keep as much as 
+possible of the code deductively provable. Conversely any rigorous 
+implementation needs to keep any code which is only inductively testable 
+as clear and simple as possible. However how and were we draw the line 
+between the deductively provable and the merely inductively testable 
+implementation, will have profound impact upon the \emph{performance} of 
+all resulting JoyLoL computations run using this implementation. Provable 
+correctness \emph{and} performance are \emph{both} critically important. 
+
+To obtain the correct balance of correctness, (potential) performance, and 
+simplicity, JoyLoL has been designed as a \quote{trampolining} 
+interpreter, written in ANSI-C, but meta-compiled from Literate sources 
+written in \ConTeXt/\LuaTeX\ which are transcribed into ANSI-C source before 
+being compiled to an executable on a given platform by an appropriately 
+chosen ANSI-C compiler. 
+
+Finally since JoyLoL is meant to form a foundation for Mathematics, and, 
+as such, the basis of mathematical proof, we need to ensure the JoyLoL 
+language is accessible within the most common tool, \TeX, used by 
+mathematicians to communicate their proofs. To do this we wrap JoyLoL in a 
+simple Lua interface. By wrapping the ANSI-C JoyLoL libraries in a Lua 
+interface, we allow the JoyLoL libraries to be used, in particular, inside 
+\LuaTeX\ and hence inside \LaTeX\ and \ConTeXt\ documents. At the moment, 
+\LaTeX\ does not make integral use of \LuaTeX's Lua subsystem. Instead we 
+make use of \ConTeXt\ for most of our documentation and mathematical 
+writing, since \ConTeXt\ does make integral use of \LuaTeX's Lua subsystem. 
+
+\stopsubsection
+
+\startsubsection[title=Literate Sources]
+
+The literate sources, provide human readable documentation and 
+justifications for each JoyLoL Co-Algebraic extension, complete with 
+formal semantic definitions of each axiomatic word in JoyLoL. 
+
+\stopsubsection 
+
+\startsubsection[title=ANSI-C system code]
+
+We build the lowest level system code for JoyLoL using ANSI-C with a few 
+\quotation{standard} POSIX extension libraries. We have chosen ANSI-C for 
+its: 
+
+\startitemize
+
+\item {\bf portability}: There are a large number of ANSI-C compatible C 
+compilers which target almost \emph{all} computers currently in existence. 
+
+\item {\bf inter-working}: There are a large number of code libraries 
+implementing useful algorithms which can be \quote{loaded} into the 
+runtime image of an ANSI-C compiled program.
+
+\item {\bf performance}: \emph{If} desired, the overall JoyLoL interpreter 
+can be compiled using any of the modern ANSI-C compilers' optimization 
+modes. Since ANSI-C is so heavily used, the optimizing modes of most 
+compilers are realatively well \quote{understood}, tested and stable. 
+
+\item {\bf transparency}: The semantic gap between ANSI-C and the 
+\quote{assembler} / \quote{machine-code} of almost any computer is small 
+enough that a \emph{large number} of skilled programmers could, if needed, 
+hand code any C code directly into a given machine-code. For our needs, 
+this means that there is no obscure mapping between the short pieces of 
+JoyLoL implementation code and a given CPU's machine-code. This ensures 
+that what JoyLoL does when running is \quote{relatively} easy to 
+understand for most programmers. 
+
+\item {\bf familiarity}: While programmers are only a small part of our 
+target audience, given we are explicitly dealing with the mathematics of 
+computation, the programming community is an important part of the 
+audience. More importantly \quote{most} programmers have a \quote{working} 
+familiarity with the subset of ANSI-C used to implement the lowest levels 
+of JoyLoL. 
+
+\stopitemize
+
+\stopsubsection
+
+\startsubsection[title=Interpreter structure]
+
+Since all JoyLoL words explicitly manage the context's data and process 
+stacks, there is, in theory, no need for the ANSI-C call stack. The 
+typical C-like language uses the call stack to hold both local data, any 
+call parameters, as well as the process location to which to 
+\quote{return}. Because data and process information are mixed on the call 
+stack, to keep the call stack from growing without bounds, the explicit 
+expectation of any C-like language is that calls \quote{return} in the 
+\emph{strict} reverse order in which they are called, and that, more 
+importantly, there is a finite limit on the number of calls a process 
+might make. 
+
+When using JoyLoL as a foundation of Mathematics, we will find that there 
+are many processes which do not naturally follow this strict return in 
+reverse order pattern. Keeping the data and process stacks separate 
+ensures that JoyLoL does not need to be enforce this strict call pattern. 
+Instead JoyLoL implements a \quote{continuation passing style} of 
+programming, see, for example, \cite[stracheyWadsworth2000continuations], 
+\cite[right={, section 5.1)}][gordon1979denotationalDescriptionProgLangs], 
+\cite[right={, chapter 10)}][tennent1981programmingLanguages] 
+\cite[right={, chapters 5 and 
+6)}][friedmanWand2008essentialsProgrammingLanguages]. 
+
+In typical programming languages, this continuation passing style is 
+implemented using either explicit \quote{jumps}/\quote{gotos}, see 
+\cite[right={, chapter 10)}][tennent1981programmingLanguages], or, 
+alternatively, using \quote{tail calls}, see \cite[right={, chapter 
+2)}][probst2001tailRecursionC], or \cite[right={, section 
+6.2)}][friedmanWand2008essentialsProgrammingLanguages]. The use of 
+explicit computed gotos, which are implemented as non-ANSI-C standard 
+\emph{extensions}, requires the use of global variables to pass the data 
+and process stacks. Unfortunately this use of global variables inhibits 
+most standard C compiler optimizations\footnote{With considerably more 
+effort, we \emph{could} arrange to keep the data and process stacks in 
+\quote{local} variables in \quote{simulated} \quote{C-call stacks}. While 
+this \emph{might} improve performance, the use of such simulated C-call 
+stacks, being so non-standard, would seriously reduce the number of 
+programmers who could \emph{easily} understand the resulting C-code.}. 
+
+In the best of all worlds, we could implement JoyLoL's lowest levels using 
+a \emph{systems programming language} with native \quote{tail calls}. 
+Since the data and process stacks can now be passed as \quote{normal} 
+procedure parameters, standard C compiler optimizations will not be 
+inhibited. Unfortunately no widely used systems programming language 
+currently implements tail calls. While the functional languages such as 
+Haskell, and Lisp/Scheme have native tail calls, they do not map 
+sufficiently cleanly onto the underlying machine-language of a given 
+computer's CPU. All C-like languages, who do typically map reasonably 
+cleanly onto a given CPU's architecture, do not have a tail call friendly 
+call structure. 
+
+To solve this problem, following \cite[right={, Section 
+5.2)}][friedmanWand2008essentialsProgrammingLanguages], we use a 
+\quote{trampolining} interpreter as the main \quote{eval loop} for JoyLoL. 
+The use of trampolining, ensures that the C-call stack never grows very 
+large. JoyLoL words are implemented as simple C procedures keeping the 
+structure of the resulting C-code simple. Trampolining also allows the use 
+of external libraries which expect C-call stacks. For each cycle around 
+the JoyLoL eval loop, the top of the process stack is used to determine 
+which C procedure (JoyLoL word) to call next. 
+
+Unfortunately, while providing simply structured C-code, trampolining of 
+small C procedures, is not as performant as a system which makes use of 
+native tail calls. Instead by using the \ConTeXt/\LuaTeX\ based 
+meta-compiler we can pre-compile any complex JoyLoL word definitions as 
+explicit C procedures which \emph{can allow} a given C compiler's 
+optimization mode to produce performant code. This means that the JoyLoL 
+system itself can be written in JoyLoL, allowing it to be proven 
+deductively correct, yet still be performant. 
+
+\stopsubsection
+
+\startsubsection[title=Call structure]
+
+JoyLoL is a Forth-like language which manipulates \quote{stacks}. Almost 
+all existing general purpose computational devices are \quote{register 
+based}. Cleanly and performantly implementing stack based languages on a 
+register based computational device has been previously explored in Ertl's 
+thesis, \cite[ertl1996implementationStackLanguages]. 
+
+\stopsubsection
+
+\stopsection
+
+\stopchapter
+
+\stopcomponent
