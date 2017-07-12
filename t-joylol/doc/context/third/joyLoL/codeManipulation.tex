@@ -5,3 +5,304 @@
 In this chapter we define the \ConTeXt\ tools we will use to define the 
 JoyLoL language. 
 
+The JoyLoL CoAlgebra \ConTeXt\ module provides the tools required to 
+fully describe the formal semantics of a particular JoyLoL CoAlgebraic 
+extension including any defined JoyLoL words. It consists of literate 
+documentation of the acutal source code produced to implement the 
+JoyLoL CoAlgebraic extension. 
+
+\subsection{Implementation}
+
+In this section we define load the Syntax Highlighter modules used by 
+the code display commands (below). We also load the ConTests module 
+used to test the JoyLoL CoAlgebra module itself. We then load the lua 
+code associated with the \type{t-joylol-coalg} module. Finally we 
+define the \ConTeXt\ \type{joyLoLCoAlg} namespace, in particular, this 
+registers a namespace to be used exclusively by the lua code to store 
+the CoAlgebras as they are defined. 
+
+\startMkIVCode
+\writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions}
+
+\usemodule[t-high-cpp]
+%\usemodule[t-high-lisp]
+\usemodule[t-contests]
+\stopMkIVCode
+
+\startMkIVCode
+\installnamespace{joyLoLCoAlg}
+
+\installcommandhandler \????joyLoLCoAlg {joyLoLCoAlg} \????joyLoLCoAlg
+\stopMkIVCode
+
+\section{JoyLoLCoAlg environment}
+
+The JoyLoLCoAlg environment provides a highly structured environment in 
+which to describe the formal semantics and implementation of a 
+particular JoyLoL CoAlgebraic extension.
+
+A typical JoyLoLCoAlg environment consists of a collection of JoyLoL 
+words. This includes a \quote{global} word which defines any global 
+code required by the CoAlgegraic extension as a whole. 
+
+\subsection{Examples}
+
+\starttyping
+\startJoyLoLCoAlg[title=List of Lists][lists]
+\stoptyping
+
+The first argument provides the arguments to an embedded 
+\type{\startchapter} command. 
+
+The second argument provides the arguments to an embedded 
+\type{\startcomponent} command. It also provides the base file name of 
+all of the automatically generated code fragments. 
+
+The second argument also determines the name of any JoyLoL, ANSI-C, or 
+Lua source file artefacts produced by this literate code documentation. 
+
+\subsection{Implementation: Start}
+
+\startMkIVCode
+\def\startJoyLoLCoAlg[#1][#2]{
+  \startcomponent[#2]
+  \startchapter[#1]
+  \directlua{thirddata.joyLoLCoAlgs.newCoAlg('#2')}
+}
+\stopMkIVCode
+
+\subsubsection{Implementation: Start: Tests}
+
+\starttyping
+\startTestSuite[startJoyLoLCoAlg]
+
+\startTestCase[should do something]
+\startConTest
+  \mock\startcomponent[#1]{\relax}
+  \mock\startchapter[#1]{\relax}
+  \startJoyLoLCoAlg[title=List of Lists][lists]
+  \startConTestLua
+    local theCoAlg = thirddata.joyLoLCoAlgs.theCoAlg
+    assert.isTable(theCoAlg)
+    assert.hasKey(theCoAlg, 'lists')
+    assert.isTable(theCoAlg['lists'])
+    local lists = theCoAlg.lists
+    assert.hasKey(lists, 'name')
+    assert.matches(lists.name, 'lists')
+    assert.hasKey(lists, 'words')
+    local words = lists.words
+    assert.hasKey(words, 'global')
+  \stopConTestLua
+\stopConTest
+\stopTestCase
+\stopTestSuite
+\stoptyping
+
+\subsection{Implementation: Stop}
+
+\startMkIVCode
+\def\stopJoyLoLCoAlg{
+  \directlua{thirddata.joyLoLCoAlgs.createCoAlg()}
+  \stopchapter
+  \stopcomponent
+}
+\stopMkIVCode
+
+\section{Source licenses}
+
+\subsection{Examples}
+
+\subsection{Implementation}
+
+\startMkIVCode
+\unexpanded\def\srcCopyrightCCBYSA{}
+\stopMkIVCode
+
+% <a rel="license" 
+% href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative 
+% Commons License" style="border-width:0" 
+% src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br 
+% /><span xmlns:dct="http://purl.org/dc/terms/" 
+% property="dct:title">JoyLoL</span> by <a 
+% xmlns:cc="http://creativecommons.org/ns#" 
+% href="https://www.perceptisys.co.uk" property="cc:attributionName" 
+% rel="cc:attributionURL">Perceptisys Ltd (Stephen Gaito)</a> is licensed 
+% under a <a rel="license" 
+% href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons 
+% Attribution-ShareAlike 4.0 International License</a>.<br />Based on a 
+% work at <a xmlns:dct="http://purl.org/dc/terms/" href="gitHub" 
+% rel="dct:source">gitHub</a>. 
+
+\section{Target licenses}
+
+\subsection{Examples}
+
+\subsection{Implementation}
+
+\startMkIVCode
+\unexpanded\def\targetCopyrightMIT{}
+\stopMkIVCode
+
+\section{Describing CoAlgebraic dependencies}
+
+\subsection{Examples}
+
+\subsection{Implementation}
+
+\startMkIVCode
+\def\dependsOn[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.addDependency('#1')}
+}
+\stopMkIVCode
+
+\section{Code display}
+
+\subsection{Implementation}
+
+\startMkIVCode
+\definetextbackground[JFrame]
+\setuptextbackground[JFrame][location=text, background=color, backgroundcolor=gray]
+\stopMkIVCode
+
+\section{JoyLoL word environment}
+
+A JoyLoL word contains one or more sections of code, either JoyLoL, 
+ANSI-C or Lua, together with a collection of descriptors of the JoyLoL 
+\{pre, post\} \{data, process\} stacks. 
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\def\startJoyLoLWord[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.newWord('#1')}
+}
+\stopMkIVCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\def\stopJoyLoLWord{
+  \directlua{thirddata.joyLoLCoAlgs.endWord()}
+}
+\stopMkIVCode
+
+\section{Describing the data stack}
+
+\subsection{Examples}
+
+\subsection{Implementation}
+
+\startMkIVCode
+\def\preDataStack[#1][#2]{
+  \directlua{thirddata.joyLoLCoAlgs.addPreDataStackDescription('#1', '#2')}
+}
+
+\def\postDataStack[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.addPostDataStackDescription('#1')}
+}
+\stopMkIVCode
+
+\section{Describing the process stack}
+
+\subsection{Examples}
+
+\subsection{Implementation}
+
+\startMkIVCode
+\def\preProcessStack[#1][#2]{
+  \directlua{thirddata.joyLoLCoAlgs.addPreProcessStackDescription('#1', '#2')}
+}
+
+\def\postProcessStack[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.addPostProcessStackDescription('#1')}
+}
+\stopMkIVCode
+
+\section{JoyLoL code environment}
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\definetyping[JoyLoLCode]
+%\setuptyping[JoyLoLCode][option=lisp]
+\stopMkIVCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\let\oldStopJoyLoLCode=\stopJoyLoLCode
+\def\stopJoyLoLCode{%
+  \oldStopJoyLoLCode%
+  \directlua{thirddata.joyLoLCoAlgs.addJoyLoLCode('_typing_')}
+}
+\stopMkIVCode
+
+\section{C header environment}
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\definetyping[CHeader]
+\setuptyping
+  [CHeader]
+  [ option=cpp, numbering=line,
+    before={\noindent\startJFrame}, after=\stopJFrame
+  ]
+%\setuptyping[CHeader][option=cpp]
+\stopMkIVCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\let\oldStopCHeader=\stopCHeader
+\def\stopCHeader{%
+  \oldStopCHeader%
+  \directlua{thirddata.joyLoLCoAlgs.addCHeader('_typing_')}
+}
+\stopMkIVCode
+
+\section{C code environment}
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\definetyping[CCode]
+\setuptyping[CCode][option=cpp]
+\stopMkIVCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\let\oldStopCCode=\stopCCode
+\def\stopCCode{%
+  \oldStopCCode%
+  \directlua{thirddata.joyLoLCoAlgs.addCCode('_typing_')}}
+\stopMkIVCode
+
+\section{Lua code environment}
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\definetyping[LuaCode]
+\setuptyping[LuaCode][option=lua]
+\stopMkIVCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\let\oldStopLuaCode=\stopLuaCode
+\def\stopLuaCode{%
+  \oldStopLuaCode%
+  \directlua{thirddata.joyLoLCoAlgs.addLuaCode('_typing_')}}
+\stopMkIVCode
