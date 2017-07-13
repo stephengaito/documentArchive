@@ -1,49 +1,40 @@
-% A ConTeXt document [master document: joylol.tex]
+% A ConTeXt document [master document: joylol.tex] 
 
 \chapter[title=Code Manipulation] 
 
 In this chapter we define the \ConTeXt\ tools we will use to define the 
 JoyLoL language. 
 
-The JoyLoL CoAlgebra \ConTeXt\ module provides the tools required to 
-fully describe the formal semantics of a particular JoyLoL CoAlgebraic 
-extension including any defined JoyLoL words. It consists of literate 
-documentation of the acutal source code produced to implement the 
-JoyLoL CoAlgebraic extension. 
+The JoyLoL CoAlgebra \ConTeXt\ module provides the tools required to fully 
+describe the formal semantics of a particular JoyLoL CoAlgebraic extension 
+including any defined JoyLoL words. It consists of literate documentation 
+of the actual source code produced to implement the JoyLoL CoAlgebraic 
+extension. 
 
-\subsection{Implementation}
+\subsection{Implementation} 
 
-In this section we define load the Syntax Highlighter modules used by 
-the code display commands (below). We also load the ConTests module 
-used to test the JoyLoL CoAlgebra module itself. We then load the lua 
-code associated with the \type{t-joylol-coalg} module. Finally we 
-define the \ConTeXt\ \type{joyLoLCoAlg} namespace, in particular, this 
-registers a namespace to be used exclusively by the lua code to store 
-the CoAlgebras as they are defined. 
+In this section we load the Syntax Highlighter modules used by the code 
+display commands (below). We also load the ConTests module used to test 
+the JoyLoL CoAlgebra module itself. We then load the lua code associated 
+with the \type{t-joylol} module. 
 
 \startMkIVCode
-\writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions}
+\writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions} 
 
 \usemodule[t-high-cpp]
 %\usemodule[t-high-lisp]
 \usemodule[t-contests]
 \stopMkIVCode
 
-\startMkIVCode
-\installnamespace{joyLoLCoAlg}
-
-\installcommandhandler \????joyLoLCoAlg {joyLoLCoAlg} \????joyLoLCoAlg
-\stopMkIVCode
-
-\section{JoyLoLCoAlg environment}
+\startTestSuite{JoyLoLCoAlg environment}
 
 The JoyLoLCoAlg environment provides a highly structured environment in 
-which to describe the formal semantics and implementation of a 
-particular JoyLoL CoAlgebraic extension.
+which to describe the formal semantics and implementation of a particular 
+JoyLoL CoAlgebraic extension. 
 
 A typical JoyLoLCoAlg environment consists of a collection of JoyLoL 
-words. This includes a \quote{global} word which defines any global 
-code required by the CoAlgegraic extension as a whole. 
+words. This includes a \quote{global} word which defines any global code 
+required by the CoAlgegraic extension as a whole. 
 
 \subsection{Examples}
 
@@ -61,20 +52,21 @@ all of the automatically generated code fragments.
 The second argument also determines the name of any JoyLoL, ANSI-C, or 
 Lua source file artefacts produced by this literate code documentation. 
 
-\subsection{Implementation: Start}
-
 \startMkIVCode
-\def\startJoyLoLCoAlg[#1][#2]{
+\def\declareJoyLoLCoAlg[#1][#2]{
   \startcomponent[#2]
   \startchapter[#1]
   \directlua{thirddata.joyLoLCoAlgs.newCoAlg('#2')}
 }
+
+\let\startJoyLoLCoAlg=\declareJoyLoLCoAlg
+
+\def\stopJoyLoLCoAlg{\relax}
 \stopMkIVCode
 
 \subsubsection{Implementation: Start: Tests}
 
 \starttyping
-\startTestSuite[startJoyLoLCoAlg]
 
 \startTestCase[should do something]
 \startConTest
