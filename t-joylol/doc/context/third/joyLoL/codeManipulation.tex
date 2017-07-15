@@ -66,14 +66,12 @@ Lua source file artefacts produced by this literate code documentation.
 
 \subsubsection{Implementation: Start: Tests}
 
-\starttyping
-
 \startTestCase[should do something]
 \startConTest
   \mock\startcomponent[#1]{\relax}
   \mock\startchapter[#1]{\relax}
   \startJoyLoLCoAlg[title=List of Lists][lists]
-  \startConTestLua
+  \startLuaConTest
     local theCoAlg = thirddata.joyLoLCoAlgs.theCoAlg
     assert.isTable(theCoAlg)
     assert.hasKey(theCoAlg, 'lists')
@@ -84,11 +82,10 @@ Lua source file artefacts produced by this literate code documentation.
     assert.hasKey(lists, 'words')
     local words = lists.words
     assert.hasKey(words, 'global')
-  \stopConTestLua
+  \stopLuaConTest
 \stopConTest
 \stopTestCase
 \stopTestSuite
-\stoptyping
 
 \subsection{Implementation: Stop}
 
