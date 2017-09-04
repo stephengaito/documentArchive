@@ -66,6 +66,12 @@ Lua source file artefacts produced by this literate code documentation.
 
 \startLuaCode
 local function newCoAlg(coAlgName)
+  joylol.theCoAlg[coAlgName] =
+    joylol.theCoAlg[coAlgName] or {}
+  local theCoAlg        = joylol.theCoAlg[coAlgName]
+  theCoAlg.name         = coAlgName
+  theCoAlg.words        = theCoAlg.words or {}
+  theCoAlg.words.global = {}
 end
 
 joylol.newCoAlg = newCoAlg
