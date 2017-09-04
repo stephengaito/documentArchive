@@ -46,7 +46,7 @@
 
 \ctxloadluafile{t-joylol}
 
-% from file: overview.tex after line: 200
+% from file: overview.tex after line: 150
 
 \defineLitProgs[MinJoyLoL]
 
@@ -55,7 +55,7 @@
 \writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions}
 
 \usemodule[t-literate-progs]
-%\usemodule[t-high-lisp]
+\usemodule[t-high-lisp]
 \usemodule[t-contests]
 
 % from file: codeManipulation.tex after line: 50
@@ -70,6 +70,97 @@
 
 \def\stopJoyLoLCoAlg{\relax}
 
-% from file: conclusion.tex after line: 0
+% from file: codeManipulation.tex after line: 100
+
+\def\stopJoyLoLCoAlg{
+  \directlua{thirddata.joylol.createCoAlg()}
+  \stopchapter
+  \stopcomponent
+}
+
+% from file: codeManipulation.tex after line: 100
+
+\unexpanded\def\srcCopyrightCCBYSA{}
+
+% from file: codeManipulation.tex after line: 150
+
+\unexpanded\def\targetCopyrightMIT{}
+
+% from file: codeManipulation.tex after line: 150
+
+\def\dependsOn[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.addDependency('#1')}
+}
+
+% from file: codeManipulation.tex after line: 150
+
+\definetextbackground[JFrame]
+\setuptextbackground[JFrame][location=text, background=color, backgroundcolor=gray]
+
+% from file: codeManipulation.tex after line: 150
+
+\def\startJoyLoLWord[#1]{
+  \directlua{thirddata.joylol.newWord('#1')}
+}
+
+% from file: codeManipulation.tex after line: 200
+
+\def\stopJoyLoLWord{
+  \directlua{thirddata.joylol.endWord()}
+}
+
+% from file: codeManipulation.tex after line: 200
+
+\def\preDataStack[#1][#2]{
+  \directlua{thirddata.joylol.addPreDataStackDescription('#1', '#2')}
+}
+
+\def\postDataStack[#1]{
+  \directlua{thirddata.joylol.addPostDataStackDescription('#1')}
+}
+
+% from file: codeManipulation.tex after line: 250
+
+\def\preProcessStack[#1][#2]{
+  \directlua{thirddata.joylol.addPreProcessStackDescription('#1', '#2')}
+}
+
+\def\postProcessStack[#1]{
+  \directlua{thirddata.joylol.addPostProcessStackDescription('#1')}
+}
+
+% from file: codeManipulation.tex after line: 250
+
+\defineLitProgs
+  [JoyLoLCode]
+  [ option=lisp, numbering=line,
+    before={\noindent\startJFrame}, after=\stopJFrame
+  ]
+
+% from file: codeManipulation.tex after line: 250
+
+\defineLitProgs
+  [CHeader]
+  [ option=cpp, numbering=line,
+    before={\noindent\startJFrame}, after=\stopJFrame
+  ]
+
+% from file: codeManipulation.tex after line: 300
+
+\defineLitProgs
+  [CCode]
+  [ option=cpp, numbering=line,
+    before={\noindent\startJFrame}, after=\stopJFrame
+  ]
+
+% from file: codeManipulation.tex after line: 300
+
+\defineLitProgs
+  [LuaCode]
+  [ option=lua, numbering=line,
+    before={\noindent\startJFrame}, after=\stopJFrame
+  ]
+
+% from file: preamble.tex after line: 50
 
 \protect \endinput

@@ -37,3 +37,8 @@ local function newCoAlg(coAlgName)
 end
 
 joylol.newCoAlg = newCoAlg
+
+local function createCoAlg()
+end
+
+joylol.createCoAlg = createCoAlg

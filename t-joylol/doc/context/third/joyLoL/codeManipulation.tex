@@ -22,7 +22,7 @@ with the \type{t-joylol} module.
 \writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions} 
 
 \usemodule[t-literate-progs]
-%\usemodule[t-high-lisp]
+\usemodule[t-high-lisp]
 \usemodule[t-contests]
 \stopMkIVCode
 
@@ -108,11 +108,18 @@ joylol.newCoAlg = newCoAlg
 
 \startMkIVCode
 \def\stopJoyLoLCoAlg{
-  \directlua{thirddata.joyLoLCoAlgs.createCoAlg()}
+  \directlua{thirddata.joylol.createCoAlg()}
   \stopchapter
   \stopcomponent
 }
 \stopMkIVCode
+
+\startLuaCode
+local function createCoAlg()
+end
+
+joylol.createCoAlg = createCoAlg
+\stopLuaCode
 
 \section{Source licenses}
 
@@ -182,17 +189,31 @@ ANSI-C or Lua, together with a collection of descriptors of the JoyLoL
 
 \startMkIVCode
 \def\startJoyLoLWord[#1]{
-  \directlua{thirddata.joyLoLCoAlgs.newWord('#1')}
+  \directlua{thirddata.joylol.newWord('#1')}
 }
 \stopMkIVCode
+
+\startLuaCode
+local function newWord(aWord)
+end
+
+joylol.newWord = newWord
+\stopLuaCode
 
 \subsection{Implementation: stop}
 
 \startMkIVCode
 \def\stopJoyLoLWord{
-  \directlua{thirddata.joyLoLCoAlgs.endWord()}
+  \directlua{thirddata.joylol.endWord()}
 }
 \stopMkIVCode
+
+\startLuaCode
+local function endWord()
+end
+
+joylol.endWord = endWord
+\stopLuaCode
 
 \section{Describing the data stack}
 
@@ -202,13 +223,25 @@ ANSI-C or Lua, together with a collection of descriptors of the JoyLoL
 
 \startMkIVCode
 \def\preDataStack[#1][#2]{
-  \directlua{thirddata.joyLoLCoAlgs.addPreDataStackDescription('#1', '#2')}
+  \directlua{thirddata.joylol.addPreDataStackDescription('#1', '#2')}
 }
 
 \def\postDataStack[#1]{
-  \directlua{thirddata.joyLoLCoAlgs.addPostDataStackDescription('#1')}
+  \directlua{thirddata.joylol.addPostDataStackDescription('#1')}
 }
 \stopMkIVCode
+
+\startLuaCode
+local function addPreDataStackDescription(arg1, arg2)
+end
+
+joylol.addPreDataStackDescription = addPreDataStackDescription
+
+local function addPostDataStackDescription(arg1, arg2)
+end
+
+joylol.addPostDataStackDescription = addPostDataStackDescription
+\stopLuaCode
 
 \section{Describing the process stack}
 
@@ -218,97 +251,78 @@ ANSI-C or Lua, together with a collection of descriptors of the JoyLoL
 
 \startMkIVCode
 \def\preProcessStack[#1][#2]{
-  \directlua{thirddata.joyLoLCoAlgs.addPreProcessStackDescription('#1', '#2')}
+  \directlua{thirddata.joylol.addPreProcessStackDescription('#1', '#2')}
 }
 
 \def\postProcessStack[#1]{
-  \directlua{thirddata.joyLoLCoAlgs.addPostProcessStackDescription('#1')}
+  \directlua{thirddata.joylol.addPostProcessStackDescription('#1')}
 }
 \stopMkIVCode
+
+\startLuaCode
+local function addPreProcessStackDescription(arg1, arg2)
+end
+
+joylol.addPreProcessStackDescription = addPreProcessStackDescription
+
+local function addPostProcessStackDescription(arg1, arg2)
+end
+
+joylol.addPostProcessStackDescription = addPostProcessStackDescription
+\stopLuaCode
 
 \section{JoyLoL code environment}
 
 \subsection{Examples}
 
-\subsection{Implementation: start}
+\subsection{Implementation}
 
 \startMkIVCode
-\definetyping[JoyLoLCode]
-%\setuptyping[JoyLoLCode][option=lisp]
-\stopMkIVCode
-
-\subsection{Implementation: stop}
-
-\startMkIVCode
-\let\oldStopJoyLoLCode=\stopJoyLoLCode
-\def\stopJoyLoLCode{%
-  \oldStopJoyLoLCode%
-  \directlua{thirddata.joyLoLCoAlgs.addJoyLoLCode('_typing_')}
-}
+\defineLitProgs
+  [JoyLoLCode]
+  [ option=lisp, numbering=line,
+    before={\noindent\startJFrame}, after=\stopJFrame
+  ]
 \stopMkIVCode
 
 \section{C header environment}
 
 \subsection{Examples}
 
-\subsection{Implementation: start}
+\subsection{Implementation}
 
 \startMkIVCode
-\definetyping[CHeader]
-\setuptyping
+\defineLitProgs
   [CHeader]
   [ option=cpp, numbering=line,
     before={\noindent\startJFrame}, after=\stopJFrame
   ]
-%\setuptyping[CHeader][option=cpp]
-\stopMkIVCode
-
-\subsection{Implementation: stop}
-
-\startMkIVCode
-\let\oldStopCHeader=\stopCHeader
-\def\stopCHeader{%
-  \oldStopCHeader%
-  \directlua{thirddata.joyLoLCoAlgs.addCHeader('_typing_')}
-}
 \stopMkIVCode
 
 \section{C code environment}
 
 \subsection{Examples}
 
-\subsection{Implementation: start}
+\subsection{Implementation}
 
 \startMkIVCode
-\definetyping[CCode]
-\setuptyping[CCode][option=cpp]
-\stopMkIVCode
-
-\subsection{Implementation: stop}
-
-\startMkIVCode
-\let\oldStopCCode=\stopCCode
-\def\stopCCode{%
-  \oldStopCCode%
-  \directlua{thirddata.joyLoLCoAlgs.addCCode('_typing_')}}
+\defineLitProgs
+  [CCode]
+  [ option=cpp, numbering=line,
+    before={\noindent\startJFrame}, after=\stopJFrame
+  ]
 \stopMkIVCode
 
 \section{Lua code environment}
 
 \subsection{Examples}
 
-\subsection{Implementation: start}
+\subsection{Implementation}
 
 \startMkIVCode
-\definetyping[LuaCode]
-\setuptyping[LuaCode][option=lua]
-\stopMkIVCode
-
-\subsection{Implementation: stop}
-
-\startMkIVCode
-\let\oldStopLuaCode=\stopLuaCode
-\def\stopLuaCode{%
-  \oldStopLuaCode%
-  \directlua{thirddata.joyLoLCoAlgs.addLuaCode('_typing_')}}
+\defineLitProgs
+  [LuaCode]
+  [ option=lua, numbering=line,
+    before={\noindent\startJFrame}, after=\stopJFrame
+  ]
 \stopMkIVCode
