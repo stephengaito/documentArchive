@@ -15,7 +15,9 @@ if not modules then modules = { } end modules ['t-joylol'] = {
 thirddata        = thirddata        or {}
 thirddata.joylol = thirddata.joylol or {}
 
-local joylol   = thirddata.joylol
+local joylol     = thirddata.joylol
+joylol.theCoAlg  = joylol.theCoAlg  or {}
+
 
 local tInsert = table.insert
 local tConcat = table.concat
@@ -24,3 +26,14 @@ local tSort   = table.sort
 local sFmt    = string.format
 local sMatch  = string.match
 local toStr   = tostring
+
+local function newCoAlg(coAlgName)
+  joylol.theCoAlg[coAlgName] =
+    joylol.theCoAlg[coAlgName] or {}
+  local theCoAlg        = joylol.theCoAlg[coAlgName]
+  theCoAlg.name         = coAlgName
+  theCoAlg.words        = theCoAlg.words or {}
+  theCoAlg.words.global = {}
+end
+
+joylol.newCoAlg = newCoAlg

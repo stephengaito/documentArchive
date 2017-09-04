@@ -21,7 +21,7 @@ with the \type{t-joylol} module.
 \startMkIVCode
 \writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions} 
 
-\usemodule[t-high-cpp]
+\usemodule[t-literate-progs]
 %\usemodule[t-high-lisp]
 \usemodule[t-contests]
 \stopMkIVCode
@@ -56,7 +56,7 @@ Lua source file artefacts produced by this literate code documentation.
 \def\declareJoyLoLCoAlg[#1][#2]{
   \startcomponent[#2]
   \startchapter[#1]
-  \directlua{thirddata.joyLoLCoAlgs.newCoAlg('#2')}
+  \directlua{thirddata.joylol.newCoAlg('#2')}
 }
 
 \let\startJoyLoLCoAlg=\declareJoyLoLCoAlg
@@ -64,19 +64,30 @@ Lua source file artefacts produced by this literate code documentation.
 \def\stopJoyLoLCoAlg{\relax}
 \stopMkIVCode
 
+\startLuaCode
+local function newCoAlg(coAlgName)
+end
+
+joylol.newCoAlg = newCoAlg
+\stopLuaCode
+
 \subsubsection{Implementation: Start: Tests}
 
 \startTestCase[should do something]
 \startConTest
-  \mock\startcomponent[#1]{\relax}
-  \mock\startchapter[#1]{\relax}
+  \mockContextMacro{startcomponent}{1}
+  \mockContextMacro{startchapter}{1}
   \startJoyLoLCoAlg[title=List of Lists][lists]
+  \assertMacroNthArgumentOnMthExpansionMatches%
+    {startcomponent}{1}{1}{lists}{}
+  \assertMacroNthArgumentOnMthExpansionMatches%
+    {startchapter}{1}{1}{title=List of Lists}{}
   \startLuaConTest
-    local theCoAlg = thirddata.joyLoLCoAlgs.theCoAlg
+    local theCoAlg = thirddata.joylol.theCoAlg
     assert.isTable(theCoAlg)
     assert.hasKey(theCoAlg, 'lists')
-    assert.isTable(theCoAlg['lists'])
     local lists = theCoAlg.lists
+    assert.isTable(lists)
     assert.hasKey(lists, 'name')
     assert.matches(lists.name, 'lists')
     assert.hasKey(lists, 'words')

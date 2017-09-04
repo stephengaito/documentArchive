@@ -50,6 +50,26 @@
 
 \defineLitProgs[MinJoyLoL]
 
+% from file: codeManipulation.tex after line: 0
+
+\writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions}
+
+\usemodule[t-literate-progs]
+%\usemodule[t-high-lisp]
+\usemodule[t-contests]
+
+% from file: codeManipulation.tex after line: 50
+
+\def\declareJoyLoLCoAlg[#1][#2]{
+  \startcomponent[#2]
+  \startchapter[#1]
+  \directlua{thirddata.joylol.newCoAlg('#2')}
+}
+
+\let\startJoyLoLCoAlg=\declareJoyLoLCoAlg
+
+\def\stopJoyLoLCoAlg{\relax}
+
 % from file: conclusion.tex after line: 0
 
 \protect \endinput
