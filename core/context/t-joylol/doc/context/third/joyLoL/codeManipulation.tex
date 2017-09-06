@@ -215,6 +215,91 @@ end
 joylol.endWord = endWord
 \stopLuaCode
 
+\section{JoyLoL stack action: In }
+
+A JoyLoL stack action (either in or out) contains one or more sections of 
+\emph{implementation} code, either ANSI-C or Lua, together with a 
+collection of descriptors of the JoyLoL \{pre, post\} \{data, process\} 
+stacks. These stack actions provide the only allowed interface between an 
+implementation language's \quote{local} variables and the JoyLoL stack 
+context. \quote{In} actions take a data structure in a local variable and 
+place it on either the data or process stacks. 
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\def\startJoyLoLStackActionIn[#1]{
+  \directlua{thirddata.joylol.newStackActionIn('#1')}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function newStackActionIn(aWord)
+end
+
+joylol.newStackActionIn = newStackActionIn
+\stopLuaCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\def\stopJoyLoLStackActionIn{
+  \directlua{thirddata.joylol.endStackActionIn()}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function endStackActionIn()
+end
+
+joylol.endStackActionIn = endStackActionIn
+\stopLuaCode
+
+\section{JoyLoL stack action: Out }
+
+A JoyLoL stack action (either in or out) contains one or more sections of 
+\emph{implementation} code, either ANSI-C or Lua, together with a 
+collection of descriptors of the JoyLoL \{pre, post\} \{data, process\} 
+stacks. These stack actions provide the only allowed interface between an 
+implementation language's \quote{local} variables and the JoyLoL stack 
+context. \quote{Out} actions take an item on either the data or process 
+stack and place it into a data structure in a local variable and 
+\emph{possibly} \quote{removing} it from the appropriate stack. 
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\def\startJoyLoLStackActionOut[#1]{
+  \directlua{thirddata.joylol.newStackActionOut('#1')}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function newStackActionOut(aWord)
+end
+
+joylol.newStackActionOut = newStackActionOut
+\stopLuaCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\def\stopJoyLoLStackActionOut{
+  \directlua{thirddata.joylol.endStackActionOut()}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function endStackActionOut()
+end
+
+joylol.endStackActionOut = endStackActionOut
+\stopLuaCode
+
 \section{Describing the data stack}
 
 \subsection{Examples}
