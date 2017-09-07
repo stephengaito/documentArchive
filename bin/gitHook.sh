@@ -2,6 +2,10 @@
 #
 # Post-{commit, checkout, merge} hook to set version infomation
 
+# Create the ANSI-C gitVersion.h file
+#
+gitVH=bin/gitVersion.h
+#
 git log -1 --date=short \
   --pretty=format:"
 typedef struct keyValueStruct {
@@ -18,8 +22,12 @@ static const KeyValues gitKeyValues[] = {
   { \"notes\",           \"%N\"},
   { NULL,                NULL}
 };
-" HEAD > archive/ansi-c/lib/gitVersion.h
+" HEAD > $gitVH
 
+# Create the Lua gitVersion.lua file
+#
+gitVLua=bin/gitVersion.lua
+#
 git log -1 --date=short \
   --pretty=format:"
 return {
@@ -30,4 +38,9 @@ return {
   subject         = \"%s\",
   notes           = \"%N\"
 }
-" HEAD > archive/lua/lib/gitVersion.lua
+" HEAD > $gitVLua
+
+# Now distribute these files to appropriate locations
+#
+cp $gitVLua core/lua/build
+

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cp bin/gitHook.sh .git/hooks/post-checkout
+cp bin/gitHook.sh .git/hooks/post-commit
+cp bin/gitHook.sh .git/hooks/post-merge
