@@ -5,10 +5,10 @@
 \prependMkIVCode{default}
 \startMkIVCode
 %D \module
-%D   [     file=t-joylol,
+%D   [     file=t-joylol-coalg,
 %D      version=2017.05.10,
 %D        title=\CONTEXT\ User module,
-%D     subtitle=The JoyLoL prgramming language for \ConTeXt\,
+%D     subtitle=The JoyLoL CoAlgebraic Extensions \ConTeXt\ module,
 %D       author=Stephen Gaito,
 %D         date=\currentdate,
 %D    copyright=PerceptiSys Ltd (Stephen Gaito),
@@ -46,7 +46,7 @@
 
 \unprotect
 
-\ctxloadluafile{t-joylol}
+\ctxloadluafile{t-joylol-coalg}
 \stopMkIVCode
 
 \startMkIVCode
@@ -55,16 +55,16 @@
 
 \createMkIVCodeFile%
   {default}%
-  {../../../../../build/t-joylol.mkiv}%
+  {../../../../../build/t-joylol-coalg.mkiv}%
   {A ConTeXt MkIV module}
 
 \prependLuaCode{default}
 \startLuaCode
--- This is the lua code associated with t-joylol.mkiv
+-- This is the lua code associated with t-joylol-coalg.mkiv
 
-if not modules then modules = { } end modules ['t-joylol'] = {
+if not modules then modules = { } end modules ['t-joylol-coalg'] = {
     version   = 1.000,
-    comment   = "joylol programming language - lua",
+    comment   = "joylol coalgegraic extensions - lua",
     author    = "PerceptiSys Ltd (Stephen Gaito)",
     copyright = "PerceptiSys Ltd (Stephen Gaito)",
     license   = "MIT License"
@@ -407,19 +407,19 @@ end
 
 coAlgs.joyLoL = joyLoL
 
-interfaces.writestatus('joyLoL', "loaded JoyLoL CoAlgs")
+interfaces.writestatus('joyLoLCoAlg', "loaded JoyLoL CoAlgs")
 \stopLuaCode
 
 \createLuaCodeFile%
   {default}%
-  {../../../../../build/t-joylol.lua}%
+  {../../../../../build/t-joylol-coalg.lua}%
   {-- A Lua file}
 
 \prependLuaTemplate{default}
 \startLuaTemplate
-if not modules then modules = { } end modules ['t-joylol-coalg'] = {
+if not modules then modules = { } end modules ['t-joylol-coalg-templates'] = {
     version   = 1.000,
-    comment   = "JoyLoLCoAlgs - templates",
+    comment   = "JoyLoL CoAlgebraic extensions module - templates",
     author    = "PerceptiSys Ltd (Stephen Gaito)",
     copyright = "PerceptiSys Ltd (Stephen Gaito)",
     license   = "MIT License"
@@ -489,12 +489,12 @@ function coAlgs.loadTemplates(aCtx)
   jEval(aCtx)
 end
 
-interfaces.writestatus('joyLoL', 'loaded JoyLoL CoAlg templates')
+interfaces.writestatus('joyLoLCoAlg', 'loaded JoyLoL CoAlg templates')
 \stopLuaTemplate
 
 \createLuaTemplateFile%
   {default}%
-  {../../../../../build/t-joylol-templates.lua}%
+  {../../../../../build/t-joylol-coalg-templates.lua}%
   {-- A Lua template file}
 
 \prependMinJoyLoL{default}
@@ -939,7 +939,7 @@ return joyLoL
 
 \createMinJoyLoLFile%
   {default}%
-  {../../../../../build/joyLoLMinLua/t-joylol-templates.lua}%
+  {../../../../../build/t-joylol-min.lua}%
   {-- A Lua file}
 
 \setLuaCodeStream{prettyPrint}
@@ -1004,7 +1004,7 @@ return pp
 
 \createLuaCodeFile%
   {prettyPrint}%
-  {../../../../../build/joyLoLMinLua/t-joylol-prettyPrint.lua}%
+  {../../../../../build/t-joylol-prettyPrint.lua}%
   {-- A Lua file}
 
 \stopchapter

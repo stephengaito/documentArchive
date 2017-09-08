@@ -1,0 +1,167 @@
+% A ConTeXt document [master document: memory.tex]
+
+\chapter[title=Code]
+
+\startCHeader
+#ifndef JOYLOL_LISTS_H
+#define JOYLOL_LISTS_H
+
+// We mark Pairs/Atoms using the least significant three bits of the car
+// pointer.
+//
+// The least significant bit is used as the mark-sweep marker.
+#define MARK_SWEEP_MARKER       0x1L
+// The next least significant bit is used as the print-sweep marker.
+#define PRINT_MARKER            0x2L
+// The next least signficant bit is used as the equal-sweep marker.
+#define EQUAL_MARKER            0x4L
+
+// The higher bits are used as a pointer to either a CoAlg object:
+//#define AS_COALG(aPtr) ((CoAlgebra*)(((size_t)aPtr) & (~(MEM_ALIGNMENT))))
+//#define AS_TAG(aPtr)   ((size_t)aPtr)
+
+// A Pair consists of a pair of pointers the car and cdr pointers,
+// pointing to another Pair/Atom.
+//
+// An Atom consists of a tag and a pointer pointing to either a
+// String/Symbol or a Function.
+
+typedef struct pair_atom_struct PairAtom; // pre-defined to break circular definition below
+
+typedef struct pair_atom_struct {
+  CoAlgebra*        coAlg;
+  size_t            tag;
+  union {
+    Assertion*      assertion;
+    Boolean         boolean;
+    Context*        context;
+    Description*    description;
+    JoyLoLFunction* func;
+    Natural         natural;
+    Observation*    observation;
+    Pair            pair;
+    Symbol*         symbol;
+  };
+} PairAtom;
+
+typedef struct list_block_struct {
+  PairAtom* block;
+  struct list_block_struct* nextBlock;
+} ListBlock;
+
+typedef struct list_memory_struct {
+  ListBlock* rootListBlock;
+  PairAtom*  freePairs;
+} ListMemory;
+
+ListMemory* createListMemory(void);
+
+extern PairAtom* newPairAtom(CoAlgebras* coAlgs);
+
+extern PairAtom* newPair(CoAlgebras* coAlgs, PairAtom* car, PairAtom* cdr);
+
+extern PairAtom* copyLoL(CoAlgebras* coAlgs, PairAtom* aLoL);
+
+#define equalLoL(lolA, lolB) equalLoLDebug(lolA, lolB, FALSE)
+extern size_t equalLoLDebug(PairAtom* lolA, PairAtom* lolB, size_t debugFlag);
+
+#endif
+\stopCHeader
+
+\startCHeader
+#ifndef JOYLOL_LISTS_PRIVATE_H
+#define JOYLOL_LISTS_PRIVATE_H
+
+#define LIST_BLOCK_SIZE 1024
+
+extern void collectGarbage(ListMemory* someListMemory);
+extern void addListBlock(ListMemory* someListMemory);
+
+#endif
+\stopCHeader
+
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/lists_private.h"
+
+ListMemory* createListMemory(void) {
+  ListMemory* someListMem = (ListMemory*) calloc(1, sizeof(ListMemory));
+  assert(someListMem);
+
+  // lazy initialization by addListBlock/newPairAtom
+  someListMem->rootListBlock = NULL;
+  someListMem->freePairs     = NULL;
+
+  return someListMem;
+}
+
+void addListBlock(ListMemory* someListMem) {
+  DEBUG(FALSE, "addListBlock > %p %zu\n", someListMem, (size_t)LIST_BLOCK_SIZE);
+
+  // obtain a new list block
+  ListBlock* aNewListBlock = (ListBlock*)calloc(1, sizeof(ListBlock));
+  assert( !( ((long int)aNewListBlock) & ((long int)0x7) ) );
+
+  // integrate this new list block into the linked list of
+  // list blocks
+  if ( someListMem->rootListBlock ) {
+    ListBlock *lastListBlock = someListMem->rootListBlock;
+    while ( lastListBlock->nextBlock ) {
+      lastListBlock = lastListBlock->nextBlock;
+    }
+    assert(lastListBlock->nextBlock == NULL);
+    lastListBlock->nextBlock = aNewListBlock;
+  } else {
+    someListMem->rootListBlock = aNewListBlock;
+  }
+  DEBUG(FALSE, "addListBlock = %p %p\n", someListMem, aNewListBlock);
+
+  // make sure this list block has some PairAtoms
+  aNewListBlock->block = (PairAtom*)calloc(LIST_BLOCK_SIZE, sizeof(PairAtom));
+  assert( aNewListBlock->block );
+  assert( !( ((long int)aNewListBlock->block) & ((long int)0x7) ) );
+
+  // add these new pairAtoms to the free list
+  PairAtom* nextPairAtom = aNewListBlock->block;
+  PairAtom* lastPairAtom = nextPairAtom + LIST_BLOCK_SIZE - 1;
+  for ( ; nextPairAtom < lastPairAtom ; nextPairAtom++ ) {
+//    assert( !( ((long int)nextPairAtom) & ((long int)0x7) ) );
+    nextPairAtom->pair.car = NULL;
+    nextPairAtom->pair.cdr = nextPairAtom + 1;
+  }
+  nextPairAtom->pair.cdr = someListMem->freePairs;
+  someListMem->freePairs = aNewListBlock->block;
+  DEBUG(FALSE, "addListBlock < %p %p %p\n", someListMem,
+        aNewListBlock, aNewListBlock->block);
+}
+
+void collectGarbage(ListMemory* someListMem) {
+  DEBUG(FALSE, "collectGarbage %p\n", someListMem);
+  // add a garbage collection mark-sweep here
+}
+
+PairAtom* newPairAtom(CoAlgebras* coAlgs) {
+  assert(coAlgs);
+  assert(coAlgs->pairs);
+  ListMemory* someListMem = coAlgs->pairs->listMemory;
+  // ensure there are some list blocks
+  if ( ! someListMem->freePairs ) collectGarbage(someListMem);
+  if ( ! someListMem->freePairs ) addListBlock(someListMem);
+  assert(someListMem->freePairs);
+
+  PairAtom* aNewPairAtom = someListMem->freePairs;
+  someListMem->freePairs = aNewPairAtom->pair.cdr;
+
+  aNewPairAtom->coAlg    = NULL;
+  aNewPairAtom->pair.car = NULL;
+  aNewPairAtom->pair.cdr = NULL;
+
+  return aNewPairAtom;
+}
+\stopCCode

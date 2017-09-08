@@ -3,10 +3,10 @@
 % from file: preamble.tex after line: 0
 
 %D \module
-%D   [     file=t-joylol,
+%D   [     file=t-joylol-coalg,
 %D      version=2017.05.10,
 %D        title=\CONTEXT\ User module,
-%D     subtitle=The JoyLoL prgramming language for \ConTeXt\,
+%D     subtitle=The JoyLoL CoAlgebraic Extensions \ConTeXt\ module,
 %D       author=Stephen Gaito,
 %D         date=\currentdate,
 %D    copyright=PerceptiSys Ltd (Stephen Gaito),
@@ -44,11 +44,7 @@
 
 \unprotect
 
-\ctxloadluafile{t-joylol}
-
-% from file: overview.tex after line: 150
-
-\defineLitProgs[MinJoyLoL]
+\ctxloadluafile{t-joylol-coalg}
 
 % from file: codeManipulation.tex after line: 0
 
@@ -57,6 +53,10 @@
 \usemodule[t-literate-progs]
 \usemodule[t-high-lisp]
 \usemodule[t-contests]
+
+% from file: overview.tex after line: 150
+
+\defineLitProgs[MinJoyLoL]
 
 % from file: codeManipulation.tex after line: 50
 
@@ -175,7 +175,7 @@
     before={\noindent\startJFrame}, after=\stopJFrame
   ]
 
-% from file: codeManipulation.tex after line: 350
+% from file: codeManipulation.tex after line: 400
 
 \defineLitProgs
   [CCode]

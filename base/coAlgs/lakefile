@@ -1,0 +1,98 @@
+-- A Lua Lakefile
+
+local docDir    = 't-joylol/doc/context/third/joyLoL'
+local moduleDir = 't-joylol/tex/context/third/joyLoL'
+local srcFiles = {
+  docDir..'/joylol.tex',
+  docDir..'/overview.tex',
+  docDir..'/conclusion.tex',
+  docDir..'/lakefile.tex'
+}
+
+local joylolDoc =
+  'cd '..docDir..' ; context -once joylol.tex ; diSimp bib ; context joylol.tex'
+
+local moduleTargets = {
+  't-joylol.mkiv',
+  't-joylol.lua',
+  't-joylol-templates.lua',
+  'joyLoLMinLua/joylol.lua'
+}
+
+local testExecs = {
+  'allCTests'
+}
+
+local buildTargets   = { }
+local diffTargets    = { }
+local installTargets = { }
+local testTargets    = { }
+
+for i, aTarget in ipairs(moduleTargets) do
+
+  table.insert(buildTargets, target(
+    'build/'..aTarget,
+    srcFiles,
+    joylolDoc
+  ))
+
+  table.insert(diffTargets, target(
+    'diff-'..aTarget,
+    'build/'..aTarget,
+    'diff $(DEPENDS) '..moduleDir..'/'..aTarget
+  ))
+
+  table.insert(installTargets, target(
+    moduleDir..'/'..aTarget,
+    'build/'..aTarget,
+    'cp $(DEPENDS) $(TARGET)'
+  ))
+end
+
+for i, anExec in ipairs(testExecs) do
+
+  table.insert(buildTargets, target(
+    'build/'..anExec..'.c',
+    srcFiles,
+    joylolDoc
+  ))
+
+  c.program{
+    'build/'..anExec,
+    src=anExec..'.c',
+    cdir='build',
+    needs='lua5.2'
+  }
+ 
+  table.insert(testTargets, target(
+    'build/'..anExec..'-results.lua',
+    'build/'..anExec,
+    './build/'..anExec
+  ))
+end
+
+table.insert(buildTargets, target(
+  'build/lakefile',
+  srcFiles,
+  joylolDoc
+))
+
+table.insert(diffTargets, target(
+  'diff-lakefile',
+  'build/lakefile',
+  'diff $(DEPENDS) lakefile'
+))
+
+table.insert(installTargets, target(
+  'lakefile',
+  'build/lakefile',
+  'cp $(DEPENDS) $(TARGET)'
+))
+
+target('install', installTargets)
+
+target('diff', diffTargets)
+
+target('tests', testTargets)
+
+default(buildTargets)

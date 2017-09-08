@@ -1,8 +1,10 @@
-% A ConTeXt document [master document: ../joyLoL.tex]
+% A ConTeXt document [master document: memory.tex]
 
-\startJoyLoLCoAlg[title=Memory blocks][memory]
+%\startJoyLoLCoAlg[title=Memory blocks][memory]
 
-\startsection[title=Goals]
+\chapter[title=Overview]
+
+\section[title=Goals]
 
 The memory extension provides a first class JoyLoL implementation of 
 \quote{memory}. A memory block has:
@@ -27,8 +29,9 @@ Things you can do with a memory block:
 
 \item get a new block
 
+\stopitemize
 
-\startJFrame
+%\startJFrame
 
 I suggest we use [generational garbage 
 collection](http://wiki.c2.com/?GenerationalGarbageCollection) together 
@@ -40,7 +43,7 @@ copy"](http://wiki.c2.com/?StopAndCopy) live JoyLoL objects into older
 heaps just before the newer heap is reclaimed by the Lua GC. Essentially 
 we are letting the Lua GC drive the JoyLoL GC. 
 
-\stopJFrame
+%\stopJFrame
 
 %\startsyntax
 
@@ -50,4 +53,4 @@ we are letting the Lua GC drive the JoyLoL GC.
 
 %\stopinitialization
 
-\stopJoyLoLCoAlg
+%\stopJoyLoLCoAlg
