@@ -4,6 +4,46 @@
 
 \setCHeaderStream{public}
 \startCHeader
+#ifndef JOYLOL_MACROS_H
+#define JOYLOL_MACROS_H
+
+#include <stdlib.h>
+
+#ifndef JOYLOL_SYSTEM_CONFIG_PATH
+#define JOYLOL_SYSTEM_CONFIG_PATH "/usr/local/etc/joyLoL"
+#endif
+
+#ifndef JOYLOL_SYSTEM_PLUGINS_PATH
+#define JOYLOL_SYSTEM_PLUGINS_PATH "/usr/local/lib/joyLoL"
+#endif
+
+#ifndef NULL
+#define NULL (void*)0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#define MEM_ALIGNMENT ((size_t)0x7)
+#define IS_MEM_ALIGNED(someMem) (!( ((size_t)(someMem)) & (MEM_ALIGNMENT) ))
+
+extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
+#define joyLoLCalloc(numItems, itemType) (itemType*)joyLoLCalloc0((numItems), sizeof(itemType))
+
+#ifndef NDEBUG
+#include <stdio.h>
+#define DEBUG(debugFlag, format, ... ) \
+  if (debugFlag) { printf( format, __VA_ARGS__ ); fflush(stdout); }
+#else
+#define DEBUG(...)
+#endif
+
+#endif
+
 typedef coAlgebra_struct {
   void*   isA;
   Symbol* name;

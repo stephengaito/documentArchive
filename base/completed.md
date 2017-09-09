@@ -4,6 +4,7 @@ joylol/lists.h -> coAlgs/instanceCode.tex
 joylol/lists_private.h -> coAlgs/instanceCode.tex
 lists.c -> coAlgs/instanceCode.tex
 
+joylol/macros.h -> coAlgs/classCode.tex
 joylol/coAlgs/coAlgs.h -> coALgs/classCode.tex
 coAlgs/coAlgs.c -> coAlgs/classCode.tex
 

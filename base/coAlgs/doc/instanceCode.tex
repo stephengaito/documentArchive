@@ -88,10 +88,8 @@ extern void addListBlock(ListMemory* someListMemory);
 #include <string.h>
 #include <assert.h>
 
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/lists_private.h"
+#include "coAlgs.h"
+#include "coAlgs-private.h"
 
 ListMemory* createListMemory(void) {
   ListMemory* someListMem = (ListMemory*) calloc(1, sizeof(ListMemory));
