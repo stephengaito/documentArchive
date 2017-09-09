@@ -168,3 +168,120 @@ PairAtom* newPairAtom(CoAlgebras* coAlgs) {
   return aNewPairAtom;
 }
 \stopCCode
+
+
+\starttyping
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "CuTest.h"
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/lists_private.h"
+#include "joyLoL/printer.h"
+
+// suiteName: - Pairs CoAlgebra tests -
+
+void Test_createPairsCoAlgebra(CuTest* tc) {
+  CoAlgebras *coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Pairs* pairs = coAlgs->pairs;
+  CuAssertPtrNotNull(tc, pairs);
+
+  CuAssertPtrNotNull(tc, pairs->listMemory);
+}
+
+void Test_newListBlock(CuTest* tc) {
+  // create the first list block and make sure it is properly integrated
+  // into linked list of list blocks
+
+  ListMemory* someListMem = createListMemory();
+
+  CuAssertPtrNull(tc, someListMem->rootListBlock);
+  CuAssertPtrNull(tc, someListMem->freePairs);
+
+  addListBlock(someListMem);
+  CuAssertPtrNotNull(tc, someListMem->rootListBlock);
+  CuAssertPtrNotNull(tc, someListMem->rootListBlock->block);
+  CuAssertPtrNull(tc, someListMem->rootListBlock->nextBlock);
+  CuAssertPtrNotNull(tc, someListMem->freePairs);
+
+  // check to make sure freePairs list is correctly linked
+  PairAtom* nextPairAtom = someListMem->rootListBlock->block;
+  PairAtom* lastPairAtom = nextPairAtom + LIST_BLOCK_SIZE - 1;
+  for ( ; nextPairAtom < lastPairAtom ; nextPairAtom++ ) {
+//    CuAssertTrue(tc, !( ((long int)nextPairAtom) & ((long int)0x7) ));
+    CuAssertPtrNull(tc, nextPairAtom->pair.car);
+    CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, nextPairAtom + 1);
+  }
+  CuAssertPtrNull(tc, nextPairAtom->pair.cdr);
+  CuAssertPtrEquals(tc, someListMem->freePairs, someListMem->rootListBlock->block);
+
+  // add another list block
+  PairAtom* oldFreePairs = someListMem->freePairs;
+  addListBlock(someListMem);
+  CuAssertPtrNotNull(tc, someListMem->rootListBlock->nextBlock);
+  CuAssertPtrNotNull(tc, someListMem->rootListBlock->nextBlock->block);
+  CuAssertPtrNull(tc, someListMem->rootListBlock->nextBlock->nextBlock);
+  CuAssertPtrNotNull(tc, someListMem->freePairs);
+
+  // check to make sure freePairs list is correctly linked
+  nextPairAtom = someListMem->rootListBlock->nextBlock->block;
+  lastPairAtom = nextPairAtom + LIST_BLOCK_SIZE - 1;
+  for ( ; nextPairAtom < lastPairAtom ; nextPairAtom++ ) {
+//    CuAssertTrue(tc, !( ((long int)nextPairAtom) & ((long int)0x7) ));
+    CuAssertPtrNull(tc, nextPairAtom->pair.car);
+    CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, nextPairAtom + 1);
+  }
+  CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, oldFreePairs);
+  CuAssertPtrEquals(tc, someListMem->freePairs, someListMem->rootListBlock->nextBlock->block);
+}
+
+void Test_newPairAtom(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  CuAssertPtrNotNull(tc, coAlgs->pairs);
+  ListMemory* someListMem = coAlgs->pairs->listMemory;
+  CuAssertPtrNotNull(tc, someListMem);
+
+  CuAssertPtrNotNull(tc, someListMem->freePairs);
+  PairAtom* oldFreePairs = someListMem->freePairs;
+  PairAtom* newFreePairs = someListMem->freePairs->pair.cdr;
+
+  PairAtom* aNewPair = newPairAtom(coAlgs);
+  CuAssertPtrNotNull(tc, aNewPair );
+  CuAssertPtrNull(tc, aNewPair->pair.car);
+  CuAssertPtrNull(tc, aNewPair->pair.cdr);
+  CuAssertPtrEquals(tc, oldFreePairs, aNewPair);
+  CuAssertPtrEquals(tc, newFreePairs, someListMem->freePairs);
+}
+
+void Test_printPairs(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  CuAssertPtrNotNull(tc, coAlgs->pairs);
+
+  PairAtom* aNewPair = newPair(coAlgs,
+                               newPair(coAlgs, NULL, NULL),
+                               newPair(coAlgs, NULL, NULL));
+  CuAssertPtrNotNull(tc, aNewPair);
+  CuAssertIntEquals(tc, printSizeDebug(aNewPair, FALSE), 28);
+  CuAssertStrEquals(tc, printLoLDebug(aNewPair, FALSE), "( ( ) ) ( )");
+}
+
+void Test_allocateLotsOfPairAtoms(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  PairAtom* aNewPair = NULL;
+  for ( size_t i = 0; i < 3*LIST_BLOCK_SIZE; i++ ) {
+    aNewPair = newPairAtom(coAlgs);
+  }
+  CuAssertPtrNotNull(tc, aNewPair);
+  CuAssertPtrNull(tc, aNewPair->pair.car);
+  CuAssertPtrNull(tc, aNewPair->pair.cdr);
+}
+\stoptyping

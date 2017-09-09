@@ -8,7 +8,178 @@ typedef coAlgebra_struct {
   void*   isA;
   Symbol* name;
 } CoAlgebra;
+
+#ifndef JOYLOL_COALG_COALGS_H
+#define JOYLOL_COALG_COALGS_H
+
+typedef struct coalgebra_struct  CoAlgebra;
+typedef struct coalgebras_struct CoAlgebras;
+typedef struct pair_atom_struct  PairAtom;
+typedef const char Symbol;
+
+typedef size_t (CoAlgEquality)(CoAlgebra*, PairAtom*, PairAtom*, size_t);
+typedef size_t (CoAlgPrintSize)(PairAtom*, size_t);
+typedef size_t (CoAlgPrintStr)(PairAtom*, char*, size_t);
+
+#define ASSERTION_COALG    1
+#define BOOLEAN_COALG      2
+#define CONTEXT_COALG      3
+#define DESCRIPTION_COALG  4
+#define FUNCTION_COALG     5
+#define NATURAL_COALG      6
+#define OBSERVATION_COALG  7
+#define PAIR_COALG         8
+#define PROOF_COALG        9
+#define SYMBOL_COALG       10
+
+typedef struct coalgebra_struct {
+  size_t          isA;
+  Symbol*         name;
+  CoAlgEquality*  equality;
+  CoAlgPrintSize* printSize;
+  CoAlgPrintStr*  printStr;
+} CoAlgebra;
+
+#include "joyLoL/coAlg/assertions.h"
+#include "joyLoL/coAlg/booleans.h"
+#include "joyLoL/coAlg/contexts.h"
+#include "joyLoL/coAlg/descriptions.h"
+#include "joyLoL/coAlg/functions.h"
+#include "joyLoL/coAlg/naturals.h"
+#include "joyLoL/coAlg/observations.h"
+#include "joyLoL/coAlg/pairs.h"
+#include "joyLoL/coAlg/proofs.h"
+#include "joyLoL/coAlg/symbols.h"
+
+typedef struct coalgebras_struct {
+  Assertions*    assertions;
+  Booleans*      booleans;
+  Contexts*      contexts;
+  Descriptions*  descriptions;
+  Functions*     functions;
+  Naturals*      naturals;
+  Observations*  observations;
+  Pairs*         pairs;
+  Proofs*        proofs;
+  Symbols*       symbols;
+} CoAlgebras;
+
+extern void initACoAlgebra(CoAlgebra* aCoAlg);
+
+extern CoAlgebras* createCoAlgebras(void);
+
+#endif
 \stopCHeader
+
+\startCCode
+#include <stdlib.h>
+#include <assert.h>
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+
+void initACoAlgebra(CoAlgebra* newCoAlg) {
+  newCoAlg->isA       = 0;
+  newCoAlg->name      = "";
+  newCoAlg->equality  = NULL;
+  newCoAlg->printSize = NULL;
+  newCoAlg->printStr  = NULL;
+}
+
+CoAlgebras* createCoAlgebras(void) {
+  CoAlgebras* coAlgs = (CoAlgebras*) calloc(1, sizeof(CoAlgebras));
+  assert(coAlgs);
+
+
+  // create all the known coAlgebras
+  coAlgs->assertions    = createAssertionsCoAlgebra();
+  coAlgs->booleans      = createBooleansCoAlgebra();
+  coAlgs->contexts      = createContextsCoAlgebra();
+  coAlgs->descriptions  = createDescriptionsCoAlgebra();
+  coAlgs->functions     = createFunctionsCoAlgebra();
+  coAlgs->naturals      = createNaturalsCoAlgebra();
+  coAlgs->observations  = createObservationsCoAlgebra();
+  coAlgs->pairs         = createPairsCoAlgebra();
+  coAlgs->proofs        = createProofsCoAlgebra();
+  coAlgs->symbols       = createSymbolsCoAlgebra();
+
+  // initialize all the known coAlgebras
+  initPairsCoAlgebra(coAlgs); // need to initialize this first for listMemory
+
+  initAssertionsCoAlgebra(coAlgs);
+  initBooleansCoAlgebra(coAlgs);
+  initContextsCoAlgebra(coAlgs);
+  initDescriptionsCoAlgebra(coAlgs);
+  initFunctionsCoAlgebra(coAlgs);
+  initNaturalsCoAlgebra(coAlgs);
+  initObservationsCoAlgebra(coAlgs);
+  initProofsCoAlgebra(coAlgs);
+  initSymbolsCoAlgebra(coAlgs);
+
+  return coAlgs;
+}
+\stopCCode
+
+
+\starttyping
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "CuTest.h"
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/dictionary.h"
+#include "joyLoL/dictionary_private.h"
+#include "joyLoL/text.h"
+#include "joyLoL/parser.h"
+#include "joyLoL/printer.h"
+#include "joyLoL/eval.h"
+#include "joyLoL/eval_private.h"
+
+// suiteName: - Base CoAlgebra tests -
+
+void Test_reportSizes(CuTest* tc) {
+  printf("\nStructure Sizes\n");
+  printf("              void* = %zu bytes\n", sizeof(void*));
+  printf("                int = %zu bytes\n", sizeof(int));
+  printf("           long int = %zu bytes\n", sizeof(long int));
+  printf("\n");
+
+  PairAtom aPairAtom;
+  printf("           PairAtom = %zu bytes\n", sizeof(PairAtom));
+  printf("     PairAtom.coAlg = %zu bytes\n", sizeof(aPairAtom.coAlg));
+  printf("       PairAtom.tag = %zu bytes\n", sizeof(aPairAtom.tag));
+  printf("      PairAtom.pair = %zu bytes\n", sizeof(aPairAtom.pair));
+  printf("  PairAtom.pair.car = %zu bytes\n", sizeof(aPairAtom.pair.car));
+  printf("  PairAtom.pair.cdr = %zu bytes\n", sizeof(aPairAtom.pair.cdr));
+  printf("   PairAtom.boolean = %zu bytes\n", sizeof(aPairAtom.boolean));
+  printf("    PairAtom.symbol = %zu bytes\n", sizeof(aPairAtom.symbol));
+  printf("      PairAtom.func = %zu bytes\n", sizeof(aPairAtom.func));
+  printf("   PairAtom.natural = %zu bytes\n", sizeof(aPairAtom.natural));
+  printf("\n");
+
+  ListBlock aListBlock;
+  printf("          ListBlock = %zu bytes\n", sizeof(ListBlock));
+  printf("    ListBlock.block = %zu bytes\n", sizeof(aListBlock.block));
+  printf("ListBlock.nextBlock = %zu bytes\n", sizeof(aListBlock.nextBlock));
+  printf("\n");
+}
+
+void Test_createBaseCoAlgebras(CuTest* tc) {
+  CoAlgebras *coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  CuAssertPtrNotNull(tc, coAlgs->booleans);
+  CuAssertPtrNotNull(tc, coAlgs->contexts);
+  CuAssertPtrNotNull(tc, coAlgs->functions);
+  CuAssertPtrNotNull(tc, coAlgs->naturals);
+  CuAssertPtrNotNull(tc, coAlgs->pairs);
+  CuAssertPtrNotNull(tc, coAlgs->symbols);
+}
+\stoptyping
 
 %\startsyntax
 
