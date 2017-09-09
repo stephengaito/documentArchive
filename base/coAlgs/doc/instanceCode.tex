@@ -1,7 +1,8 @@
-% A ConTeXt document [master document: memory.tex]
+% A ConTeXt document [master document: coAlgs.tex]
 
-\chapter[title=Code]
+\section[title=Instance Code]
 
+\setCHeaderStream{public}
 \startCHeader
 #ifndef JOYLOL_LISTS_H
 #define JOYLOL_LISTS_H
@@ -68,6 +69,7 @@ extern size_t equalLoLDebug(PairAtom* lolA, PairAtom* lolB, size_t debugFlag);
 #endif
 \stopCHeader
 
+\setCHeaderStream{private}
 \startCHeader
 #ifndef JOYLOL_LISTS_PRIVATE_H
 #define JOYLOL_LISTS_PRIVATE_H
@@ -80,6 +82,7 @@ extern void addListBlock(ListMemory* someListMemory);
 #endif
 \stopCHeader
 
+\setCCodeStream{instance}
 \startCCode
 #include <stdlib.h>
 #include <string.h>

@@ -1,6 +1,6 @@
-% A ConTeXt document [master document: memory.tex]
+% A ConTeXt document [master document: coAlgs.tex]
 
-\startchapter[title=Lakefile]
+\section[title=Lakefile]
 
 We use a slightly updated version of Steve Donovan's Lakefile tool to 
 drive the creation of the various files required by any given 
@@ -9,23 +9,24 @@ drive the creation of the various files required by any given
 \startLakefile
 -- A Lua Lakefile
 
-local docDir    = 't-joylol/doc/context/third/joyLoL'
-local moduleDir = 't-joylol/tex/context/third/joyLoL'
+local docDir    = 'doc'
 local srcFiles = {
-  docDir..'/joylol.tex',
+  docDir..'/coAlgs.tex',
   docDir..'/overview.tex',
-  docDir..'/conclusion.tex',
+  docDir..'/classCode.tex',
+  docDir..'/instanceCode.tex',
   docDir..'/lakefile.tex'
 }
 
-local joylolDoc = 
-  'cd '..docDir..' ; context -once joylol.tex ; diSimp bib ; context joylol.tex'
+local coAlgsDoc = 
+  'cd '..docDir..' ; context coAlgs.tex'
+--  'cd '..docDir..' ; context -once coAlgs.tex ; diSimp bib ; context coAlgs.tex'
 
 local moduleTargets = {
-  't-joylol.mkiv',
-  't-joylol.lua',
-  't-joylol-templates.lua',
-  'joyLoLMinLua/joylol.lua'
+  'coAlgs.h',
+  'coAlgs-private.h',
+  'coAlgs-class.c',
+  'coAlgs-instance.c'
 }
 
 local testExecs = {
@@ -34,7 +35,6 @@ local testExecs = {
 
 local buildTargets   = { }
 local diffTargets    = { }
-local installTargets = { }
 local testTargets    = { }
 
 for i, aTarget in ipairs(moduleTargets) do
@@ -42,20 +42,9 @@ for i, aTarget in ipairs(moduleTargets) do
   table.insert(buildTargets, target(
     'build/'..aTarget,
     srcFiles,
-    joylolDoc
+    coAlgsDoc
   ))
 
-  table.insert(diffTargets, target(
-    'diff-'..aTarget,
-    'build/'..aTarget,
-    'diff $(DEPENDS) '..moduleDir..'/'..aTarget
-  ))
-
-  table.insert(installTargets, target(
-    moduleDir..'/'..aTarget,
-    'build/'..aTarget,
-    'cp $(DEPENDS) $(TARGET)'
-  ))
 end
 
 for i, anExec in ipairs(testExecs) do
@@ -63,7 +52,7 @@ for i, anExec in ipairs(testExecs) do
   table.insert(buildTargets, target(
     'build/'..anExec..'.c',
     srcFiles,
-    joylolDoc
+    coAlgsDoc
   ))
 
   c.program{
@@ -83,24 +72,8 @@ end
 table.insert(buildTargets, target(
   'build/lakefile',
   srcFiles,
-  joylolDoc
+  coAlgsDoc
 ))
-
-table.insert(diffTargets, target(
-  'diff-lakefile',
-  'build/lakefile',
-  'diff $(DEPENDS) lakefile'
-))
-
-table.insert(installTargets, target(
-  'lakefile',
-  'build/lakefile',
-  'cp $(DEPENDS) $(TARGET)'
-))
-
-target('install', installTargets)
-
-target('diff', diffTargets)
 
 target('tests', testTargets)
 
@@ -111,5 +84,3 @@ default(buildTargets)
   {default}%
   {../lakefile}%
   {}
-
-\stopchapter

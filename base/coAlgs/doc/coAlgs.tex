@@ -1,5 +1,6 @@
 % A ConTeXt document [master document: ../joyLoL.tex]
 
+\usemodule[t-diSimp]
 \usemodule[t-joylol-coalg]
 
 \startJoyLoLCoAlg[title=CoAglegras][coAlgs]
@@ -10,26 +11,14 @@ src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd
 
 \targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
 
-\startsection[title=Goals]
+\component overview
 
-The CoAlgebras \quote{extension} provides the basis upon which the whole 
-of the JoyLoL implementation is built. It provides a first class 
-interface. 
+\component classCode
 
-\setCHeaderStream{coAlgebras}
-\startCHeader
-typedef coAlgebra_struct {
-  void*   isA;
-  Symbol* name;
-} CoAlgebra;
-\stopCHeader
+\component instanceCode
 
-%\startsyntax
+\component conclusion
 
-%\stopsyntax 
-
-%\startinitialization
-
-%\stopinitialization
+\component lakefile
 
 \stopJoyLoLCoAlg
