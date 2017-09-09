@@ -94,18 +94,11 @@
 
 % from file: codeManipulation.tex after line: 150
 
-\definetextbackground[JFrame]
-\setuptextbackground%
-  [JFrame]%
-  [location=paragraph, background=color, backgroundcolor=gray]
-
-% from file: codeManipulation.tex after line: 150
-
 \def\startJoyLoLWord[#1]{
   \directlua{thirddata.joylol.newWord('#1')}
 }
 
-% from file: codeManipulation.tex after line: 200
+% from file: codeManipulation.tex after line: 150
 
 \def\stopJoyLoLWord{
   \directlua{thirddata.joylol.endWord()}
@@ -117,7 +110,7 @@
   \directlua{thirddata.joylol.newStackActionIn('#1')}
 }
 
-% from file: codeManipulation.tex after line: 250
+% from file: codeManipulation.tex after line: 200
 
 \def\stopJoyLoLStackActionIn{
   \directlua{thirddata.joylol.endStackActionIn()}
@@ -160,37 +153,13 @@
 \defineLitProgs
   [JoyLoLCode]
   [ option=lisp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
+    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 
 \defineLitProgs
   [MinJoyLoLCode]
   [ option=lisp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
-
-% from file: codeManipulation.tex after line: 350
-
-\defineLitProgs
-  [CHeader]
-  [ option=cpp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
-
-% from file: codeManipulation.tex after line: 400
-
-\defineLitProgs
-  [CCode]
-  [ option=cpp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
-
-% from file: codeManipulation.tex after line: 400
-
-\defineLitProgs
-  [LuaCode]
-  [ option=lua, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
+    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 
 % from file: preamble.tex after line: 50

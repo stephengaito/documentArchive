@@ -169,17 +169,6 @@ joylol.createCoAlg = createCoAlg
 }
 \stopMkIVCode
 
-\section{Code display}
-
-\subsection{Implementation}
-
-\startMkIVCode
-\definetextbackground[JFrame]
-\setuptextbackground%
-  [JFrame]%
-  [location=paragraph, background=color, backgroundcolor=gray]
-\stopMkIVCode
-
 \section{JoyLoL word environment}
 
 A JoyLoL word contains one or more sections of code, either JoyLoL, 
@@ -369,54 +358,13 @@ joylol.addPostProcessStackDescription = addPostProcessStackDescription
 \defineLitProgs
   [JoyLoLCode]
   [ option=lisp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
+    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 
 \defineLitProgs
   [MinJoyLoLCode]
   [ option=lisp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
+    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 \stopMkIVCode
 
-\section{C header environment}
-
-\subsection{Examples}
-
-\subsection{Implementation}
-
-\startMkIVCode
-\defineLitProgs
-  [CHeader]
-  [ option=cpp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
-\stopMkIVCode
-
-\section{C code environment}
-
-\subsection{Examples}
-
-\subsection{Implementation}
-
-\startMkIVCode
-\defineLitProgs
-  [CCode]
-  [ option=cpp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
-\stopMkIVCode
-
-\section{Lua code environment}
-
-\subsection{Examples}
-
-\subsection{Implementation}
-
-\startMkIVCode
-\defineLitProgs
-  [LuaCode]
-  [ option=lua, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
-\stopMkIVCode
