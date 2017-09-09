@@ -10,6 +10,7 @@ drive the creation of the various files required by any given
 -- A Lua Lakefile
 
 local docDir    = 'doc'
+local sharedLib = 'coAlgs.so'
 local srcFiles = {
   docDir..'/coAlgs.tex',
   docDir..'/overview.tex',
@@ -34,7 +35,6 @@ local testExecs = {
 }
 
 local buildTargets   = { }
-local diffTargets    = { }
 local testTargets    = { }
 
 for i, aTarget in ipairs(moduleTargets) do
@@ -47,6 +47,15 @@ for i, aTarget in ipairs(moduleTargets) do
 
 end
 
+local sharedTarget = c.shared{
+  sharedLib,
+  src='*.c',
+  cdir='build',
+  needs='lua5.2'
+}
+
+table.insert(buildTargets, sharedTarget.target)
+
 for i, anExec in ipairs(testExecs) do
 
   table.insert(buildTargets, target(
@@ -55,16 +64,16 @@ for i, anExec in ipairs(testExecs) do
     coAlgsDoc
   ))
 
-  c.program{
+  local testTarget = c.program{
     'build/'..anExec,
-    src=anExec..'.c',
+    src={anExec..'.c', 'build/'..sharedLib },
     cdir='build',
     needs='lua5.2'
   }
   
   table.insert(testTargets, target(
     'build/'..anExec..'-results.lua',
-    'build/'..anExec,
+    testTarget.target,
     './build/'..anExec
   ))
 end
@@ -82,5 +91,5 @@ default(buildTargets)
 
 \createLakefileFile%
   {default}%
-  {../lakefile}%
+  {../build/lakefile}%
   {}
