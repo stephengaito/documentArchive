@@ -16,14 +16,12 @@ The CoAlgebras \quote{extension} provides the basis upon which the whole
 of the JoyLoL implementation is built. It provides a first class 
 interface. 
 
-\startCHeader[coAlgebras]
-
+\setCHeaderStream{coAlgebras}
+\startCHeader
 typedef coAlgebra_struct {
   void*   isA;
   Symbol* name;
-  
 } CoAlgebra;
-
 \stopCHeader
 
 %\startsyntax

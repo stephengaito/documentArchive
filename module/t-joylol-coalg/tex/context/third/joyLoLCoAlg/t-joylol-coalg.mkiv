@@ -95,7 +95,9 @@
 % from file: codeManipulation.tex after line: 150
 
 \definetextbackground[JFrame]
-\setuptextbackground[JFrame][location=text, background=color, backgroundcolor=gray]
+\setuptextbackground%
+  [JFrame]%
+  [location=paragraph, background=color, backgroundcolor=gray]
 
 % from file: codeManipulation.tex after line: 150
 
@@ -115,7 +117,7 @@
   \directlua{thirddata.joylol.newStackActionIn('#1')}
 }
 
-% from file: codeManipulation.tex after line: 200
+% from file: codeManipulation.tex after line: 250
 
 \def\stopJoyLoLStackActionIn{
   \directlua{thirddata.joylol.endStackActionIn()}
