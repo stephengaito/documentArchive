@@ -4,8 +4,8 @@
 
 \setCHeaderStream{public}
 \startCHeader
-#ifndef JOYLOL_MACROS_H
-#define JOYLOL_MACROS_H
+#ifndef JOYLOL_COALG_COALGS_H
+#define JOYLOL_COALG_COALGS_H
 
 #include <stdlib.h>
 
@@ -42,24 +42,13 @@ extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
 #define DEBUG(...)
 #endif
 
-#endif
-
-typedef coAlgebra_struct {
-  void*   isA;
-  Symbol* name;
-} CoAlgebra;
-
-#ifndef JOYLOL_COALG_COALGS_H
-#define JOYLOL_COALG_COALGS_H
-
 typedef struct coalgebra_struct  CoAlgebra;
-typedef struct coalgebras_struct CoAlgebras;
 typedef struct pair_atom_struct  PairAtom;
 typedef const char Symbol;
 
 typedef size_t (CoAlgEquality)(CoAlgebra*, PairAtom*, PairAtom*, size_t);
-typedef size_t (CoAlgPrintSize)(PairAtom*, size_t);
-typedef size_t (CoAlgPrintStr)(PairAtom*, char*, size_t);
+//typedef size_t (CoAlgPrintSize)(PairAtom*, size_t);
+//typedef size_t (CoAlgPrintStr)(PairAtom*, char*, size_t);
 
 #define ASSERTION_COALG    1
 #define BOOLEAN_COALG      2
@@ -76,33 +65,22 @@ typedef struct coalgebra_struct {
   size_t          isA;
   Symbol*         name;
   CoAlgEquality*  equality;
-  CoAlgPrintSize* printSize;
-  CoAlgPrintStr*  printStr;
+//  CoAlgPrintSize* printSize;
+//  CoAlgPrintStr*  printStr;
 } CoAlgebra;
 
-#include "joyLoL/coAlg/assertions.h"
-#include "joyLoL/coAlg/booleans.h"
-#include "joyLoL/coAlg/contexts.h"
-#include "joyLoL/coAlg/descriptions.h"
-#include "joyLoL/coAlg/functions.h"
-#include "joyLoL/coAlg/naturals.h"
-#include "joyLoL/coAlg/observations.h"
-#include "joyLoL/coAlg/pairs.h"
-#include "joyLoL/coAlg/proofs.h"
-#include "joyLoL/coAlg/symbols.h"
+//#include "joyLoL/coAlg/assertions.h"
+//#include "joyLoL/coAlg/booleans.h"
+//#include "joyLoL/coAlg/contexts.h"
+//#include "joyLoL/coAlg/descriptions.h"
+//#include "joyLoL/coAlg/functions.h"
+//#include "joyLoL/coAlg/naturals.h"
+//#include "joyLoL/coAlg/observations.h"
+//#include "joyLoL/coAlg/pairs.h"
+//#include "joyLoL/coAlg/proofs.h"
+//#include "joyLoL/coAlg/symbols.h"
 
-typedef struct coalgebras_struct {
-  Assertions*    assertions;
-  Booleans*      booleans;
-  Contexts*      contexts;
-  Descriptions*  descriptions;
-  Functions*     functions;
-  Naturals*      naturals;
-  Observations*  observations;
-  Pairs*         pairs;
-  Proofs*        proofs;
-  Symbols*       symbols;
-} CoAlgebras;
+typedef CoAlgebra* CoAlgebras;
 
 extern void initACoAlgebra(CoAlgebra* aCoAlg);
 
@@ -111,51 +89,51 @@ extern CoAlgebras* createCoAlgebras(void);
 #endif
 \stopCHeader
 
+\setCCodeStream{class}
 \startCCode
 #include <stdlib.h>
 #include <assert.h>
 
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
+#include "coAlgs.h"
 
 void initACoAlgebra(CoAlgebra* newCoAlg) {
   newCoAlg->isA       = 0;
   newCoAlg->name      = "";
   newCoAlg->equality  = NULL;
-  newCoAlg->printSize = NULL;
-  newCoAlg->printStr  = NULL;
+//  newCoAlg->printSize = NULL;
+//  newCoAlg->printStr  = NULL;
 }
 
 CoAlgebras* createCoAlgebras(void) {
-  CoAlgebras* coAlgs = (CoAlgebras*) calloc(1, sizeof(CoAlgebras));
-  assert(coAlgs);
+//  CoAlgebras* coAlgs = (CoAlgebras*) calloc(1, sizeof(CoAlgebras));
+  CoAlgebras* coAlgs = NULL;
+//  assert(coAlgs);
 
 
   // create all the known coAlgebras
-  coAlgs->assertions    = createAssertionsCoAlgebra();
-  coAlgs->booleans      = createBooleansCoAlgebra();
-  coAlgs->contexts      = createContextsCoAlgebra();
-  coAlgs->descriptions  = createDescriptionsCoAlgebra();
-  coAlgs->functions     = createFunctionsCoAlgebra();
-  coAlgs->naturals      = createNaturalsCoAlgebra();
-  coAlgs->observations  = createObservationsCoAlgebra();
-  coAlgs->pairs         = createPairsCoAlgebra();
-  coAlgs->proofs        = createProofsCoAlgebra();
-  coAlgs->symbols       = createSymbolsCoAlgebra();
+//  coAlgs->assertions    = createAssertionsCoAlgebra();
+//  coAlgs->booleans      = createBooleansCoAlgebra();
+//  coAlgs->contexts      = createContextsCoAlgebra();
+//  coAlgs->descriptions  = createDescriptionsCoAlgebra();
+//  coAlgs->functions     = createFunctionsCoAlgebra();
+//  coAlgs->naturals      = createNaturalsCoAlgebra();
+//  coAlgs->observations  = createObservationsCoAlgebra();
+//  coAlgs->pairs         = createPairsCoAlgebra();
+//  coAlgs->proofs        = createProofsCoAlgebra();
+//  coAlgs->symbols       = createSymbolsCoAlgebra();
 
   // initialize all the known coAlgebras
-  initPairsCoAlgebra(coAlgs); // need to initialize this first for listMemory
+//  initPairsCoAlgebra(coAlgs); // need to initialize this first for listMemory
 
-  initAssertionsCoAlgebra(coAlgs);
-  initBooleansCoAlgebra(coAlgs);
-  initContextsCoAlgebra(coAlgs);
-  initDescriptionsCoAlgebra(coAlgs);
-  initFunctionsCoAlgebra(coAlgs);
-  initNaturalsCoAlgebra(coAlgs);
-  initObservationsCoAlgebra(coAlgs);
-  initProofsCoAlgebra(coAlgs);
-  initSymbolsCoAlgebra(coAlgs);
+//  initAssertionsCoAlgebra(coAlgs);
+//  initBooleansCoAlgebra(coAlgs);
+//  initContextsCoAlgebra(coAlgs);
+//  initDescriptionsCoAlgebra(coAlgs);
+//  initFunctionsCoAlgebra(coAlgs);
+//  initNaturalsCoAlgebra(coAlgs);
+//  initObservationsCoAlgebra(coAlgs);
+//  initProofsCoAlgebra(coAlgs);
+//  initSymbolsCoAlgebra(coAlgs);
 
   return coAlgs;
 }

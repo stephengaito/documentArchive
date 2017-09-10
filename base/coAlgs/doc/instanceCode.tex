@@ -2,7 +2,8 @@
 
 \section[title=Instance Code]
 
-\setCHeaderStream{public}
+%\setCHeaderStream{public}
+\setCHeaderStream{unUsed}
 \startCHeader
 #ifndef JOYLOL_LISTS_H
 #define JOYLOL_LISTS_H
@@ -69,7 +70,8 @@ extern size_t equalLoLDebug(PairAtom* lolA, PairAtom* lolB, size_t debugFlag);
 #endif
 \stopCHeader
 
-\setCHeaderStream{private}
+%\setCHeaderStream{private}
+\setCHeaderStream{unUsed}
 \startCHeader
 #ifndef JOYLOL_LISTS_PRIVATE_H
 #define JOYLOL_LISTS_PRIVATE_H
@@ -83,6 +85,11 @@ extern void addListBlock(ListMemory* someListMemory);
 \stopCHeader
 
 \setCCodeStream{instance}
+\startCCode
+// do nothing!
+\stopCCode
+
+\setCCodeStream{unUsed}
 \startCCode
 #include <stdlib.h>
 #include <string.h>

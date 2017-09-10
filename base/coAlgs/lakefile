@@ -1,7 +1,7 @@
 -- A Lua Lakefile
 
 local docDir    = 'doc'
-local sharedLib = 'coAlgs.so'
+local sharedLib = 'coAlgs'
 local srcFiles = {
   docDir..'/coAlgs.tex',
   docDir..'/overview.tex',
@@ -17,6 +17,11 @@ local coAlgsDoc =
 local moduleTargets = {
   'coAlgs.h',
   'coAlgs-private.h',
+  'coAlgs-class.c',
+  'coAlgs-instance.c'
+}
+
+local srcTargets = {
   'coAlgs-class.c',
   'coAlgs-instance.c'
 }
@@ -40,7 +45,7 @@ end
 
 local sharedTarget = c.shared{
   sharedLib,
-  src='*.c',
+  src=srcTargets,
   cdir='build',
   needs='lua5.2'
 }
@@ -57,7 +62,7 @@ for i, anExec in ipairs(testExecs) do
 
   local testTarget = c.program{
     'build/'..anExec,
-    src={anExec..'.c', 'build/'..sharedLib },
+    src={anExec..'.c', 'build/'..sharedLib..'so' },
     cdir='build',
     needs='lua5.2'
   }
