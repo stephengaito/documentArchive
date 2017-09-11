@@ -3,11 +3,25 @@
 \section[title=Class Code]
 
 \setCHeaderStream{public}
-\startCHeader
-#ifndef JOYLOL_COALG_COALGS_H
-#define JOYLOL_COALG_COALGS_H
+\setCCodeStream{class}
+\setCTestStream{class}
+\addCTestInclude{<coAlgs.h>}
 
+In this section we concentrate on the C code required to implement the 
+kernel JoyLoL CoAlgebra. The CoAlgebra, \type{CoAlg}, is the base of the 
+JoyLoL interpreter. This CoAlgebra has two parts, a \quote{class} part, 
+and an \quote{instance} part. This class part manages the loading, 
+registration and listing of new \quote{external} CoAlgebras. The instance 
+part, discussed in the next section, manages the creation and removal of 
+CoAlgebra \quote{values} (more commonly know as \quote{object} instances). 
+
+We begin by setting up some standard C header defines, the most important 
+of which deal with memory allocation and alignment as well as a simple 
+\type{DEBUG} system. 
+
+\startCHeader
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef JOYLOL_SYSTEM_CONFIG_PATH
 #define JOYLOL_SYSTEM_CONFIG_PATH "/usr/local/etc/joyLoL"
@@ -17,6 +31,10 @@
 #define JOYLOL_SYSTEM_PLUGINS_PATH "/usr/local/lib/joyLoL"
 #endif
 
+#ifndef JOYLOL_COALGS_INCREMENT
+#define JOYLOL_COALGS_INCREMENT 10
+#endif
+ 
 #ifndef NULL
 #define NULL (void*)0
 #endif
@@ -41,25 +59,32 @@ extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
 #else
 #define DEBUG(...)
 #endif
+\stopCHeader
 
-typedef struct coalgebra_struct  CoAlgebra;
-typedef struct pair_atom_struct  PairAtom;
+The ANSI-C implementation of a CoAlgebra is as a simple \type{struct} 
+which contains the following items:
+
+\startitemize
+
+\item a \type{size_t} value which is unique for each registered CoAlgebra 
+and hence acting as a test for identity, 
+
+\item a \type{Symbol} value which provides a human readable \emph{name} 
+for the CoAlgebra, 
+
+\item a \type{C-function} which (recursively) tests for equality of two 
+CoAlgebra instances of given type of CoAlgebra.
+
+\stopitemize
+
+\startCHeader
+typedef struct coalgebra_struct         CoAlgebra;
+typedef struct coalgebra_handle_struct  CoAlgHandle;
 typedef const char Symbol;
 
-typedef size_t (CoAlgEquality)(CoAlgebra*, PairAtom*, PairAtom*, size_t);
-//typedef size_t (CoAlgPrintSize)(PairAtom*, size_t);
-//typedef size_t (CoAlgPrintStr)(PairAtom*, char*, size_t);
-
-#define ASSERTION_COALG    1
-#define BOOLEAN_COALG      2
-#define CONTEXT_COALG      3
-#define DESCRIPTION_COALG  4
-#define FUNCTION_COALG     5
-#define NATURAL_COALG      6
-#define OBSERVATION_COALG  7
-#define PAIR_COALG         8
-#define PROOF_COALG        9
-#define SYMBOL_COALG       10
+typedef size_t (CoAlgEquality)(CoAlgebra*, CoAlgHandle*, CoAlgHandle*, size_t);
+//typedef size_t (CoAlgPrintSize)(CoAlgHandle*, size_t);
+//typedef size_t (CoAlgPrintStr)(CoAlgHandle*, char*, size_t);
 
 typedef struct coalgebra_struct {
   size_t          isA;
@@ -69,41 +94,80 @@ typedef struct coalgebra_struct {
 //  CoAlgPrintStr*  printStr;
 } CoAlgebra;
 
-//#include "joyLoL/coAlg/assertions.h"
-//#include "joyLoL/coAlg/booleans.h"
-//#include "joyLoL/coAlg/contexts.h"
-//#include "joyLoL/coAlg/descriptions.h"
-//#include "joyLoL/coAlg/functions.h"
-//#include "joyLoL/coAlg/naturals.h"
-//#include "joyLoL/coAlg/observations.h"
-//#include "joyLoL/coAlg/pairs.h"
-//#include "joyLoL/coAlg/proofs.h"
-//#include "joyLoL/coAlg/symbols.h"
-
-typedef CoAlgebra* CoAlgebras;
-
-extern void initACoAlgebra(CoAlgebra* aCoAlg);
-
-extern CoAlgebras* createCoAlgebras(void);
-
-#endif
+typedef struct coalgebras_struct {
+  size_t numCoAlgs;
+  size_t maxNumCoAlgs;
+  CoAlgebra* theCoAlgs;
+} CoAlgebras;
 \stopCHeader
 
-\setCCodeStream{class}
+\startTestSuite[registerCoAlgebra]
+
+\startCHeader
+extern CoAlgebras *registerCoAlgebra(
+  CoAlgebras *theCoAlgs,
+  Symbol *name,
+  CoAlgEquality *equalityFunc
+);
+\stopCHeader
+
 \startCCode
-#include <stdlib.h>
-#include <assert.h>
-
-#include "coAlgs.h"
-
-void initACoAlgebra(CoAlgebra* newCoAlg) {
-  newCoAlg->isA       = 0;
-  newCoAlg->name      = "";
-  newCoAlg->equality  = NULL;
-//  newCoAlg->printSize = NULL;
-//  newCoAlg->printStr  = NULL;
+CoAlgebras *registerCoAlgebra(
+  CoAlgebras *coAlgs,
+  Symbol *name,
+  CoAlgEquality *equalityFunc
+) {
+  // we follow a policy of lazy management of the coAlgs
+  // if coAlgs is NULL, we create a new one
+  // if coAlgs is too small we expand it
+  if (!coAlgs) {
+    // we need to create a new coAlgs structure...
+    //
+    coAlgs = (CoAlgebras*) calloc(1, sizeof(CoAlgebras));
+    assert(coAlgs);
+    coAlgs->numCoAlgs    = 0;
+    coAlgs->maxNumCoAlgs = 0;
+    coAlgs->theCoAlgs    = NULL;
+  }
+  if (coAlgs->maxNumCoAlgs <= coAlgs->numCoAlgs) {
+    // we need to expand the existing theCoAlgs vector...
+    //
+    CoAlgebra *oldCoAlgs = coAlgs->theCoAlgs;
+    size_t oldCoAlgsSize = coAlgs->maxNumCoAlgs * sizeof(CoAlgebra);
+    coAlgs->maxNumCoAlgs += JOYLOL_COALGS_INCREMENT;
+    coAlgs->theCoAlgs = calloc(coAlgs->maxNumCoAlgs, sizeof(CoAlgebra));
+    if (oldCoAlgs) {
+      memcpy(coAlgs->theCoAlgs, oldCoAlgs, oldCoAlgsSize);
+      free(oldCoAlgs);
+    }
+  }
+  CoAlgebra *theCoAlgs = coAlgs->theCoAlgs;
+  size_t newCoAlg = coAlgs->numCoAlgs;
+  theCoAlgs[newCoAlg].isA       = newCoAlg;
+  theCoAlgs[newCoAlg].name      = strdup(name);
+  theCoAlgs[newCoAlg].equality  = equalityFunc;
+  //  theCoAlgs[newCoAlg].printSize = NULL;
+  //  theCoAlgs[newCoAlg].printStr  = NULL;
+  coAlgs->numCoAlgs++;
+  return coAlgs;
 }
+\stopCCode
 
+\startTestCase[should create a new coAlgs]
+
+\startCTest
+  CoAlgebras *someCoAlgs = registerCoAlgebra(NULL, "newCoAlg", NULL);
+  AssertPtrNotNull(someCoAlgs);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\subsection[title=createCoAlgebras]
+
+\startCHeader
+extern CoAlgebras* createCoAlgebras(void);
+\stopCHeader
+\startCCode
 CoAlgebras* createCoAlgebras(void) {
 //  CoAlgebras* coAlgs = (CoAlgebras*) calloc(1, sizeof(CoAlgebras));
   CoAlgebras* coAlgs = NULL;
@@ -139,6 +203,31 @@ CoAlgebras* createCoAlgebras(void) {
 }
 \stopCCode
 
+\startCHeader
+//#include "joyLoL/coAlg/assertions.h"
+//#include "joyLoL/coAlg/booleans.h"
+//#include "joyLoL/coAlg/contexts.h"
+//#include "joyLoL/coAlg/descriptions.h"
+//#include "joyLoL/coAlg/functions.h"
+//#include "joyLoL/coAlg/naturals.h"
+//#include "joyLoL/coAlg/observations.h"
+//#include "joyLoL/coAlg/pairs.h"
+//#include "joyLoL/coAlg/proofs.h"
+//#include "joyLoL/coAlg/symbols.h"
+
+#define ASSERTION_COALG    1
+#define BOOLEAN_COALG      2
+#define CONTEXT_COALG      3
+#define DESCRIPTION_COALG  4
+#define FUNCTION_COALG     5
+#define NATURAL_COALG      6
+#define OBSERVATION_COALG  7
+#define PAIR_COALG         8
+#define PROOF_COALG        9
+#define SYMBOL_COALG       10
+\stopCHeader
+
+\subsection[title=Old tests]
 
 \starttyping
 #include <stdio.h>

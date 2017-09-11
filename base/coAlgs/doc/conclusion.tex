@@ -2,22 +2,37 @@
 
 \section[title=Conclusions]
 
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_COALGS}
 \createCHeaderFile%
   {public}%
   {../build/coAlgs.h}%
   {}
 
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_COALGS_PRIVATE}
 \createCHeaderFile%
   {private}%
   {../build/coAlgs-private.h}%
   {}
 
+\prependCCode{class}
+\startCCode
+#include <stdlib.h>
+#include <assert.h>
+
+#include "coAlgs.h"
+\stopCCode
+
 \createCCodeFile%
   {class}%
   {../build/coAlgs-class.c}%
   {}
-  
+
 \createCCodeFile%
   {instance}%
   {../build/coAlgs-instance.c}%
+  {}
+
+\createCTestFile%
+  {class}%
+  {../build/allCTests.c}%
   {}

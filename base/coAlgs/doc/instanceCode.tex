@@ -73,15 +73,10 @@ extern size_t equalLoLDebug(PairAtom* lolA, PairAtom* lolB, size_t debugFlag);
 %\setCHeaderStream{private}
 \setCHeaderStream{unUsed}
 \startCHeader
-#ifndef JOYLOL_LISTS_PRIVATE_H
-#define JOYLOL_LISTS_PRIVATE_H
-
 #define LIST_BLOCK_SIZE 1024
 
 extern void collectGarbage(ListMemory* someListMemory);
 extern void addListBlock(ListMemory* someListMemory);
-
-#endif
 \stopCHeader
 
 \setCCodeStream{instance}
