@@ -2,22 +2,46 @@
 
 \chapter[title=Conclusion]
 
-%\createCHeaderFile%
-%  {default}%
-%  {../../../../../build/t-joylol.h}%
-%  {// An ANSI-C header file}
+\addDocumentDirectory%
+  {t-joylol-coalg/doc/context/third/joyLoLCoAlg}
 
-%\createCCodeFile%
-%  {default}%
-%  {../../../../../build/t-joylol.c}%
-%  {// An ANSI-C code file}
+\createMkIVCodeFile%
+  {default}%
+  {t-joylol-coalg.mkiv}%
+  {A ConTeXt MkIV module}
 
-%  \createLuaCodeFile%
-%  {cTests}%
-%  {../../../../../build/t-joylol-cTests.lua}%
-%  {-- A Lua file for CTests}
+\createLuaCodeFile%
+  {default}%
+  {t-joylol-coalg.lua}%
+  {-- A Lua file}
 
-%\createCTestFile%
-%  {default}%
-%  {../../../../../build/allCTests.c}%
-%  {// A CTests file}
+\createLuaTemplateFile%
+  {default}%
+  {t-joylol-coalg-templates.lua}%
+  {-- A Lua template file}
+
+\createMinJoyLoLFile%
+  {default}%
+  {t-joylol-min.lua}%
+  {-- A Lua file}
+
+\createLuaCodeFile%
+  {prettyPrint}%
+  {t-joylol-prettyPrint.lua}%
+  {-- A Lua file}
+
+\addMainDocument{joyLoLCoAlg.tex}
+\addSubDocument{overview.tex}
+\addSubDocument{codeManipulation.tex}
+\addSubDocument{preamble.tex}
+\addSubDocument{conclusion.tex}
+\addConTeXtModuleDirectory%
+  {t-joylol-coalg/tex/context/third/joyLoLCoAlg}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+  

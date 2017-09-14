@@ -53,11 +53,6 @@
 \protect \endinput
 \stopMkIVCode
 
-\createMkIVCodeFile%
-  {default}%
-  {../../../../../build/t-joylol-coalg.mkiv}%
-  {A ConTeXt MkIV module}
-
 \prependLuaCode{default}
 \startLuaCode
 -- This is the lua code associated with t-joylol-coalg.mkiv
@@ -410,11 +405,6 @@ coAlgs.joyLoL = joyLoL
 interfaces.writestatus('joyLoLCoAlg', "loaded JoyLoL CoAlgs")
 \stopLuaCode
 
-\createLuaCodeFile%
-  {default}%
-  {../../../../../build/t-joylol-coalg.lua}%
-  {-- A Lua file}
-
 \prependLuaTemplate{default}
 \startLuaTemplate
 if not modules then modules = { } end modules ['t-joylol-coalg-templates'] = {
@@ -491,11 +481,6 @@ end
 
 interfaces.writestatus('joyLoLCoAlg', 'loaded JoyLoL CoAlg templates')
 \stopLuaTemplate
-
-\createLuaTemplateFile%
-  {default}%
-  {../../../../../build/t-joylol-coalg-templates.lua}%
-  {-- A Lua template file}
 
 \prependMinJoyLoL{default}
 \startMinJoyLoL
@@ -937,11 +922,6 @@ end
 return joyLoL
 \stopMinJoyLoL
 
-\createMinJoyLoLFile%
-  {default}%
-  {../../../../../build/t-joylol-min.lua}%
-  {-- A Lua file}
-
 \setLuaCodeStream{prettyPrint}
 \startLuaCode
 -- A Lua file
@@ -1001,10 +981,5 @@ pp.toString = toString
 
 return pp
 \stopLuaCode
-
-\createLuaCodeFile%
-  {prettyPrint}%
-  {../../../../../build/t-joylol-prettyPrint.lua}%
-  {-- A Lua file}
 
 \stopchapter
