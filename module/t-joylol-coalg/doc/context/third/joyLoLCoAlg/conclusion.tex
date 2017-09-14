@@ -20,14 +20,17 @@
   {t-joylol-coalg-templates.lua}%
   {-- A Lua template file}
 
+\ensureDirectoryExists{build/joyLoL}
+\ensureDirectoryExists{build/joyLoLMinLua}
+
 \createMinJoyLoLFile%
   {default}%
-  {t-joylol-min.lua}%
+  {joyLoLMinLua/joyLoL.lua}%
   {-- A Lua file}
 
 \createLuaCodeFile%
   {prettyPrint}%
-  {t-joylol-prettyPrint.lua}%
+  {joyLoLMinLua/prettyPrint.lua}%
   {-- A Lua file}
 
 \addMainDocument{joyLoLCoAlg.tex}

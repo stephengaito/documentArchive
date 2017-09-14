@@ -4,6 +4,7 @@ ToRead
 tmp
 *Bib.lua
 build
+install
 gitVersion.h
 gitVersion.lua
 *.log

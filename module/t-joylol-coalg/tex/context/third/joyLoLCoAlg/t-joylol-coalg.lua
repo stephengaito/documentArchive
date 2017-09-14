@@ -17,9 +17,9 @@ thirddata.joylol = thirddata.joylol or {}
 
 local joylol   = thirddata.joylol
 
--- local coAlgs     = thirddata.joyLoLCoAlgs
--- coAlgs.theCoAlg  = {}
--- local theCoAlg   = coAlgs.theCoAlg
+local coAlgs     = thirddata.joyLoLCoAlgs
+coAlgs.theCoAlg  = {}
+local theCoAlg   = coAlgs.theCoAlg
 
 
 local tInsert = table.insert
@@ -50,7 +50,7 @@ if not hasJoyLoL then
   joyLoL = require 'joyLoLMinLua/joyLoL'
 end
 
-coAlgs.joyLoL = joyLoL
+--coAlgs.joyLoL = joyLoL
 
 local pushData, pushProcess = joyLoL.pushData, joyLoL.pushProcess
 local pushProcessQuoted = joyLoL.pushProcessQuoted
@@ -354,9 +354,9 @@ interfaces.writestatus('joyLoLCoAlg', "loaded JoyLoL CoAlgs")
 -- from file: codeManipulation.tex after line: 50
 
 local function newCoAlg(coAlgName)
-  joylol.theCoAlg[coAlgName] =
-    joylol.theCoAlg[coAlgName] or {}
-  local theCoAlg        = joylol.theCoAlg[coAlgName]
+  theCoAlg[coAlgName] =
+    theCoAlg[coAlgName] or {}
+  local theCoAlg        = theCoAlg[coAlgName]
   theCoAlg.name         = coAlgName
   theCoAlg.words        = theCoAlg.words or {}
   theCoAlg.words.global = {}

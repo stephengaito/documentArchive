@@ -2,16 +2,18 @@
 
 \section[title=Conclusions]
 
+\addDocumentDirectory{doc}
+
 \CHeaderIncludeGuard{public}{JOYLOL_COALG_COALGS}
 \createCHeaderFile%
   {public}%
-  {../build/coAlgs.h}%
+  {coAlgs.h}%
   {}
 
 \CHeaderIncludeGuard{private}{JOYLOL_COALG_COALGS_PRIVATE}
 \createCHeaderFile%
   {private}%
-  {../build/coAlgs-private.h}%
+  {coAlgs-private.h}%
   {}
 
 \prependCCode{class}
@@ -24,15 +26,32 @@
 
 \createCCodeFile%
   {class}%
-  {../build/coAlgs-class.c}%
+  {coAlgs-class.c}%
   {}
 
 \createCCodeFile%
   {instance}%
-  {../build/coAlgs-instance.c}%
+  {coAlgs-instance.c}%
   {}
 
 \createCTestFile%
   {class}%
-  {../build/allCTests.c}%
+  {allCTests.c}%
   {}
+
+\addMainDocument{coAlgs.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{classCode.tex}
+\addSubDocument{instanceCode.tex} 
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{install}
+
+\ensureDirectoryExists{install}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+

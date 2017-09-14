@@ -1,5 +1,11 @@
 -- A Lua Make System file
 
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('build/joyLoL')
+lfs.mkdir('build/joyLoLMinLua')
+
 require 'lms.litProgs'
 
 litProgs.targets{
@@ -14,8 +20,8 @@ litProgs.targets{
     't-joylol-coalg.mkiv',
     't-joylol-coalg.lua',
     't-joylol-coalg-templates.lua',
-    't-joylol-min.lua',
-    't-joylol-prettyPrint.lua',
+    'joyLoLMinLua/joyLoL.lua',
+    'joyLoLMinLua/prettyPrint.lua',
   },
   buildDir  = 'build',
   docDir    = 't-joylol-coalg/doc/context/third/joyLoLCoAlg',

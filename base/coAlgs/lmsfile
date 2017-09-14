@@ -1,0 +1,32 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('install')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'coAlgs.tex',
+  docFiles = {
+    'overview.tex',
+    'classCode.tex',
+    'instanceCode.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'coAlgs.h',
+    'coAlgs-private.h',
+    'coAlgs-class.c',
+    'coAlgs-instance.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
+
+target{'doc',     docTargets}
+target{'diff',    diffTargets}
+target{'install', installTargets}
+target{'default', buildTargets}
