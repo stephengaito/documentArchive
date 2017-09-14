@@ -1,0 +1,33 @@
+% A ConTeXt document [master document: joylol.tex] 
+
+\chapter[title=Lua Make System files] 
+
+In this section we add the code required to produce Lua Make System files 
+which know how to compile JoyLoL CoAlgebraic extensions as shared 
+libraries which can be loaded into a Lua implementation. 
+
+\startMkIVCode
+\def\addJoyLoLTargets#1{%
+  \directlua{
+    thirddata.joyLoLCoAlgs.addJoyLoLTargets('#1')
+  }
+}
+\stopMkIVCode
+
+\startLuaCode
+local function addJoyLoLTargets(aCodeStream)
+  litProgs.setCodeStream('Lmsfile', aCodeStream)
+  litProgs.markCodeOrigin('Lmsfile')
+  local lmsfile = {}
+  tInsert(lmsfile, "require 'lms.joyLoL'\n")
+  tInsert(lmsfile, "joyLoL.targets{")
+  tInsert(lmsfile, "  coAlgLibs = {")
+  HERE BE DRAGONS!!!!!
+  tInsert(lmsfile, "  },")
+  tInsert(lmsfile, "}")
+  litProgs.setPrepend('Lmsfile', aCodeStream, true)
+  litProgs.addCode.default('Lmsfile', tConcat(lmsfile, '\n'))
+end
+
+coAlgs.addJoyLoLTargets = addJoyLoLTargets
+\stopLuaCode
