@@ -20,10 +20,23 @@ local function addJoyLoLTargets(aCodeStream)
   litProgs.markCodeOrigin('Lmsfile')
   local lmsfile = {}
   tInsert(lmsfile, "require 'lms.joyLoL'\n")
-  tInsert(lmsfile, "joyLoL.targets{")
-  tInsert(lmsfile, "  coAlgLibs = {")
-  HERE BE DRAGONS!!!!!
+  tInsert(lmsfile, "joylol.targets{")
+  tInsert(lmsfile, "  coAlgs = {")
+  for i, aCoAlg in ipairs(build.coAlgsToBuild) do
+    tInsert(lmsfile, "    '"..aCoAlg.."',")
+  end
   tInsert(lmsfile, "  },")
+  tInsert(lmsfile, "  srcFiles = {")
+  for i, aSrcFile in ipairs(build.srcTargets) do
+    tInsert(lmsfile, "    '"..aSrcFile.."',")
+  end
+  tInsert(lmsfile, "  },")
+  tInsert(lmsfile, "  coAlgLibs = {")
+  for i, aCoAlgDependency in ipairs(build.coAlgDependencies) do
+    tInsert(lmsfile, "    '"..aCoAlgDependency.."',")
+  end
+  tInsert(lmsfile, "  },")
+  tInsert(lmsfile, "  buildDir = 'build',")
   tInsert(lmsfile, "}")
   litProgs.setPrepend('Lmsfile', aCodeStream, true)
   litProgs.addCode.default('Lmsfile', tConcat(lmsfile, '\n'))

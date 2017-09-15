@@ -26,6 +26,23 @@ litProgs.targets{
   moduleDir = 'install',
 }
 
+require 'lms.joyLoL'
+
+joylol.targets{
+  coAlgs = {
+    'coAlgs',
+  },
+  srcFiles = {
+    'coAlgs.h',
+    'coAlgs-private.h',
+    'coAlgs-class.c',
+    'coAlgs-instance.c',
+  },
+  coAlgLibs = {
+  },
+  buildDir = 'build',
+}
+
 target{'doc',     docTargets}
 target{'diff',    diffTargets}
 target{'install', installTargets}

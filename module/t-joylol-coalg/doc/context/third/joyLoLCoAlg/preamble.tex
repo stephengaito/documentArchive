@@ -68,12 +68,15 @@ if not modules then modules = { } end modules ['t-joylol-coalg'] = {
 thirddata        = thirddata        or {}
 thirddata.joylol = thirddata.joylol or {}
 
-local joylol   = thirddata.joylol
+local joylol     = thirddata.joylol
 
--- local coAlgs     = thirddata.joyLoLCoAlgs
--- coAlgs.theCoAlg  = {}
--- local theCoAlg   = coAlgs.theCoAlg
+local coAlgs     = thirddata.joyLoLCoAlgs
+coAlgs.theCoAlg  = {}
+local theCoAlg   = coAlgs.theCoAlg
 
+local litProgs   = thirddata.literateProgs or {}
+litProgs.build   = litProgs.build or {}
+local build      = litProgs.build
 
 local tInsert = table.insert
 local tConcat = table.concat
@@ -103,7 +106,7 @@ if not hasJoyLoL then
   joyLoL = require 'joyLoLMinLua/joyLoL'
 end
 
-coAlgs.joyLoL = joyLoL
+--coAlgs.joyLoL = joyLoL
 
 local pushData, pushProcess = joyLoL.pushData, joyLoL.pushProcess
 local pushProcessQuoted = joyLoL.pushProcessQuoted

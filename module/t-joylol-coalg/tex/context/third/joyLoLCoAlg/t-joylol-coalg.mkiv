@@ -98,7 +98,7 @@
   \directlua{thirddata.joylol.newWord('#1')}
 }
 
-% from file: codeManipulation.tex after line: 150
+% from file: codeManipulation.tex after line: 200
 
 \def\stopJoyLoLWord{
   \directlua{thirddata.joylol.endWord()}
@@ -161,6 +161,14 @@
   [ option=lisp, numbering=line,
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
+
+% from file: lmsfile.tex after line: 0
+
+\def\addJoyLoLTargets#1{%
+  \directlua{
+    thirddata.joyLoLCoAlgs.addJoyLoLTargets('#1')
+  }
+}
 
 % from file: preamble.tex after line: 50
 

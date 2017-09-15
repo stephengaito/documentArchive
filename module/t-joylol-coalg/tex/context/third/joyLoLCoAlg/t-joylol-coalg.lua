@@ -15,12 +15,15 @@ if not modules then modules = { } end modules ['t-joylol-coalg'] = {
 thirddata        = thirddata        or {}
 thirddata.joylol = thirddata.joylol or {}
 
-local joylol   = thirddata.joylol
+local joylol     = thirddata.joylol
 
 local coAlgs     = thirddata.joyLoLCoAlgs
 coAlgs.theCoAlg  = {}
 local theCoAlg   = coAlgs.theCoAlg
 
+local litProgs   = thirddata.literateProgs or {}
+litProgs.build   = litProgs.build or {}
+local build      = litProgs.build
 
 local tInsert = table.insert
 local tConcat = table.concat
@@ -356,10 +359,13 @@ interfaces.writestatus('joyLoLCoAlg', "loaded JoyLoL CoAlgs")
 local function newCoAlg(coAlgName)
   theCoAlg[coAlgName] =
     theCoAlg[coAlgName] or {}
-  local theCoAlg        = theCoAlg[coAlgName]
-  theCoAlg.name         = coAlgName
-  theCoAlg.words        = theCoAlg.words or {}
-  theCoAlg.words.global = {}
+  local lCoAlg        = theCoAlg[coAlgName]
+  lCoAlg.name         = coAlgName
+  lCoAlg.words        = lCoAlg.words or {}
+  lCoAlg.words.global = {}
+  build.coAlgsToBuild = build.coAlgsToBuild or {}
+  tInsert(build.coAlgsToBuild, coAlgName)
+  build.coAlgDependencies = build.coAlgDependencies or {}
 end
 
 joylol.newCoAlg = newCoAlg
@@ -436,3 +442,34 @@ local function addPostProcessStackDescription(arg1, arg2)
 end
 
 joylol.addPostProcessStackDescription = addPostProcessStackDescription
+
+-- from file: lmsfile.tex after line: 0
+
+local function addJoyLoLTargets(aCodeStream)
+  litProgs.setCodeStream('Lmsfile', aCodeStream)
+  litProgs.markCodeOrigin('Lmsfile')
+  local lmsfile = {}
+  tInsert(lmsfile, "require 'lms.joyLoL'\n")
+  tInsert(lmsfile, "joylol.targets{")
+  tInsert(lmsfile, "  coAlgs = {")
+  for i, aCoAlg in ipairs(build.coAlgsToBuild) do
+    tInsert(lmsfile, "    '"..aCoAlg.."',")
+  end
+  tInsert(lmsfile, "  },")
+  tInsert(lmsfile, "  srcFiles = {")
+  for i, aSrcFile in ipairs(build.srcTargets) do
+    tInsert(lmsfile, "    '"..aSrcFile.."',")
+  end
+  tInsert(lmsfile, "  },")
+  tInsert(lmsfile, "  coAlgLibs = {")
+  for i, aCoAlgDependency in ipairs(build.coAlgDependencies) do
+    tInsert(lmsfile, "    '"..aCoAlgDependency.."',")
+  end
+  tInsert(lmsfile, "  },")
+  tInsert(lmsfile, "  buildDir = 'build',")
+  tInsert(lmsfile, "}")
+  litProgs.setPrepend('Lmsfile', aCodeStream, true)
+  litProgs.addCode.default('Lmsfile', tConcat(lmsfile, '\n'))
+end
+
+coAlgs.addJoyLoLTargets = addJoyLoLTargets

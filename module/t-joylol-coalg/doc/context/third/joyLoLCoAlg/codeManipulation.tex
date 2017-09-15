@@ -67,12 +67,15 @@ Lua source file artefacts produced by this literate code documentation.
 
 \startLuaCode
 local function newCoAlg(coAlgName)
-  joylol.theCoAlg[coAlgName] =
-    joylol.theCoAlg[coAlgName] or {}
-  local theCoAlg        = joylol.theCoAlg[coAlgName]
-  theCoAlg.name         = coAlgName
-  theCoAlg.words        = theCoAlg.words or {}
-  theCoAlg.words.global = {}
+  theCoAlg[coAlgName] =
+    theCoAlg[coAlgName] or {}
+  local lCoAlg        = theCoAlg[coAlgName]
+  lCoAlg.name         = coAlgName
+  lCoAlg.words        = lCoAlg.words or {}
+  lCoAlg.words.global = {}
+  build.coAlgsToBuild = build.coAlgsToBuild or {}
+  tInsert(build.coAlgsToBuild, coAlgName)
+  build.coAlgDependencies = build.coAlgDependencies or {}
 end
 
 joylol.newCoAlg = newCoAlg
