@@ -22,6 +22,9 @@ of which deal with memory allocation and alignment as well as a simple
 \startCHeader
 #include <stdlib.h>
 #include <string.h>
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 
 #ifndef JOYLOL_SYSTEM_CONFIG_PATH
 #define JOYLOL_SYSTEM_CONFIG_PATH "/usr/local/etc/joyLoL"
@@ -110,6 +113,67 @@ typedef struct coalgebra_struct {
 } CoAlgebra;
 \stopCHeader
 
+\startTestSuite[set/get Lua-state global CoAlgebras LightUserData]
+
+We want the ability to have different collections of loaded CoAlgebras for 
+each Lua state. However, we also need fast access to the C-implementations 
+of the loaded CoAlgebras. To achieve this we use the Lua Registry with the 
+\quote{well-known} key \type{coAlgebrasKey}. We store a pointer to the 
+collection of registered CoAlgebras, as a LightUserData, in the Lua 
+registry under the key \type{coAlgebrasKey}, so that it is only accessible 
+by the C implementation of any CoAlgebra. This ensures that the pointer to 
+CoAlgebras is unique for any particular Lua state, but can be different 
+for each distinct Lua state. 
+
+This means that \type{coAlgebrasKey} must be a symbol which is unique in 
+the loaded executable, but has no meaningful value \emph{other than} its 
+location in memory. It is declared external in \type{coAlg.h} and is 
+declared \emph{only} in the \type{coAlg.so} itself. 
+
+\startCHeader
+extern void* coAlgebrasKey;
+
+extern CoAlgebras* getCoAlgebras(lua_State *lstate);
+extern void setCoAlgebras(lua_State *lstate, CoAlgebras* coAlgs);
+\stopCHeader
+
+\startCCode
+void* coAlgebrasKey = NULL;
+
+CoAlgebras* getCoAlgebras(lua_State *lstate) {
+  lua_rawgetp(lstate, LUA_REGISTRYINDEX, (void *)&coAlgebrasKey);
+  CoAlgebras* coAlgs = (CoAlgebras*)lua_touserdata (lstate, -1);
+  lua_pop(lstate, 1);
+  return coAlgs;
+}
+
+void setCoAlgebras(lua_State *lstate, CoAlgebras* coAlgs) {
+  lua_pushlightuserdata (lstate, (void *)coAlgs);
+  lua_rawsetp(lstate, LUA_REGISTRYINDEX, (void *)&coAlgebrasKey);
+}
+\stopCCode
+
+\startTestCase[should set and get a Lua-State global CoAlgebras LightUserData]
+
+\startCTest
+  CoAlgebras* luaCoAlgs = getCoAlgebras(lstate);
+  AssertPtrNull(luaCoAlgs);
+  CoAlgebras* coAlgs = (CoAlgebras*)0x100;
+  setCoAlgebras(lstate, coAlgs);
+  luaCoAlgs = getCoAlgebras(lstate);
+  AssertPtrEquals(luaCoAlgs, coAlgs);
+  CoAlgebras* newCoAlgs = (CoAlgebras*)0x200;
+  setCoAlgebras(lstate, newCoAlgs);
+  luaCoAlgs = getCoAlgebras(lstate);
+  AssertPtrNotEquals(luaCoAlgs, coAlgs);
+  AssertPtrEquals(luaCoAlgs, newCoAlgs);
+  setCoAlgebras(lstate, NULL);
+  luaCoAlgs = getCoAlgebras(lstate);
+  AssertPtrNull(luaCoAlgs);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
 \startTestSuite[registerCoAlgebra]
 
 The CoAlgebras structure provides access to all of the CoAlgebras known to 
@@ -128,24 +192,25 @@ typedef struct coalgebras_struct {
 #define sizeofCoAlgebras(numCoAlgs) \
   (sizeof(CoAlgebras) + sizeof(CoAlgebra)*(numCoAlgs))
   
-extern CoAlgebras *registerCoAlgebra(
-  CoAlgebras *coAlgs,
-  Symbol *name,
+extern size_t registerCoAlgebra(
+  lua_State     *lstate,
+  Symbol        *name,
   CoAlgRegister *registerFunc,
   CoAlgEquality *equalityFunc,
-  CoAlgData     coAlgData
+  CoAlgData      coAlgData
 );
 \stopCHeader
 
 \startCCode
-CoAlgebras *registerCoAlgebra(
-  CoAlgebras *coAlgs,
-  Symbol *name,
+size_t registerCoAlgebra(
+  lua_State     *lstate,
+  Symbol        *name,
   CoAlgRegister *registerFunc,
   CoAlgEquality *equalityFunc,
   CoAlgData     coAlgData
 ) {
-  CoAlgebra* coAlgsVec;
+  CoAlgebras* coAlgs    = getCoAlgebras(lstate);
+  CoAlgebra*  coAlgsVec = NULL;
 
   // we follow a policy of lazy management of the coAlgs
   // if coAlgs is NULL, we create a new one
@@ -156,6 +221,7 @@ CoAlgebras *registerCoAlgebra(
     coAlgs = (CoAlgebras*)
       calloc(1, sizeofCoAlgebras(JOYLOL_COALGS_INCREMENT));
     assert(coAlgs);
+    setCoAlgebras(lstate, coAlgs);
     
     coAlgs->numCoAlgs    = 0;
     coAlgs->maxNumCoAlgs = JOYLOL_COALGS_INCREMENT;
@@ -176,6 +242,7 @@ CoAlgebras *registerCoAlgebra(
 
     coAlgs = calloc(1, sizeofCoAlgebras(newMaxNumCoAlgs));
     assert(coAlgs);
+    setCoAlgebras(lstate, coAlgs);
     
     if (oldCoAlgs) {
       memcpy(coAlgs, oldCoAlgs,
@@ -200,7 +267,7 @@ CoAlgebras *registerCoAlgebra(
   
   coAlgs->numCoAlgs++;
   
-  return coAlgs;
+  return newCoAlg;
 }
 \stopCCode
 
@@ -216,9 +283,9 @@ completely new CoAlgebras structure.
   CoAlgEquality* fakeEqualityFunc = (CoAlgEquality*) 0x200;
   CoAlgData*     fakeCoAlgData    = (CoAlgData*)     0x300;
   
-  CoAlgebras *coAlgs =
-    registerCoAlgebra(NULL, coAlgName,
+  registerCoAlgebra(lstate, coAlgName,
       fakeRegisterFunc, fakeEqualityFunc, fakeCoAlgData);
+  CoAlgebras *coAlgs = getCoAlgebras(lstate);
   AssertPtrNotNull(coAlgs);
   CoAlgebra *coAlgsVec = getCoAlgebrasVector(coAlgs);
   AssertIntEquals(
@@ -244,8 +311,9 @@ the existing one runs out of \quote{space}.
     fakeRegisterFunc     += 1;
     fakeEqualityFunc     += 1;
     fakeCoAlgData        += 1;
-    coAlgs = registerCoAlgebra(coAlgs, coAlgName,
+    registerCoAlgebra(lstate, coAlgName,
       fakeRegisterFunc, fakeEqualityFunc, fakeCoAlgData);
+    coAlgs = getCoAlgebras(lstate);
     AssertPtrNotNull(coAlgs);
     if (i%JOYLOL_COALGS_INCREMENT) {
       AssertPtrEquals(oldCoAlgs, coAlgs);
