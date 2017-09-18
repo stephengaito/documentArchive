@@ -47,10 +47,12 @@ of which deal with memory allocation and alignment as well as a simple
 #endif
 
 #define MEM_ALIGNMENT ((size_t)0x7)
-#define IS_MEM_ALIGNED(someMem) (!( ((size_t)(someMem)) & (MEM_ALIGNMENT) ))
+#define IS_MEM_ALIGNED(someMem) \
+  (!( ((size_t)(someMem)) & (MEM_ALIGNMENT) ))
 
 extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
-#define joyLoLCalloc(numItems, itemType) (itemType*)joyLoLCalloc0((numItems), sizeof(itemType))
+#define joyLoLCalloc(numItems, itemType) \
+  (itemType*)joyLoLCalloc0((numItems), sizeof(itemType))
 
 #ifndef NDEBUG
 #include <stdio.h>
@@ -75,39 +77,63 @@ for the CoAlgebra,
 \item a \type{C-function} which (recursively) tests for equality of two 
 CoAlgebra instances of given type of CoAlgebra.
 
+\item a \type{C-function} with (re)registers a given CoAlgebra with the 
+JoyLoL interpreter. This registration function's primary purpose is two 
+fold. It registers the CoAlgebra with the central collection of known 
+CoAlgebras (to be discussed in the next subsection, below), as well as 
+registers the individual JoyLoL functions provided by the CoAlgebra with 
+the interpreter's dictionary of words. 
+
 \stopitemize
 
 \startCHeader
+typedef struct coalgebras_struct        CoAlgebras;
 typedef struct coalgebra_struct         CoAlgebra;
 typedef struct coalgebra_handle_struct  CoAlgHandle;
 typedef const char Symbol;
 
-typedef size_t (CoAlgEquality)(CoAlgebra*, CoAlgHandle*, CoAlgHandle*, size_t);
-//typedef size_t (CoAlgPrintSize)(CoAlgHandle*, size_t);
+typedef size_t (CoAlgRegister)(CoAlgebras*);
+typedef size_t (CoAlgEquality)(CoAlgebra*,
+                               CoAlgHandle*,
+                               CoAlgHandle*,
+                               size_t);
 //typedef size_t (CoAlgPrintStr)(CoAlgHandle*, char*, size_t);
+typedef void *CoAlgData;
 
 typedef struct coalgebra_struct {
   size_t          isA;
   Symbol*         name;
-  CoAlgEquality*  equality;
-//  CoAlgPrintSize* printSize;
-//  CoAlgPrintStr*  printStr;
+  CoAlgRegister*  registerFunc;
+  CoAlgEquality*  equalityFunc;
+  //CoAlgPrintStr*  printStrFunc;
+  CoAlgData       coAlgData;
 } CoAlgebra;
-
-typedef struct coalgebras_struct {
-  size_t numCoAlgs;
-  size_t maxNumCoAlgs;
-  CoAlgebra* theCoAlgs;
-} CoAlgebras;
 \stopCHeader
 
 \startTestSuite[registerCoAlgebra]
 
+The CoAlgebras structure provides access to all of the CoAlgebras known to 
+a given JoyLoL interpreter. As such it will be accessed repeatedly, so 
+should probably be accessible with as few memory accesses as possible. 
+
 \startCHeader
+typedef struct coalgebras_struct {
+  size_t numCoAlgs;
+  size_t maxNumCoAlgs;
+} CoAlgebras;
+
+#define getCoAlgebrasVector(coAlgs) \
+  (CoAlgebra*) (((void*)(coAlgs)) + sizeof(CoAlgebras))
+
+#define sizeofCoAlgebras(numCoAlgs) \
+  (sizeof(CoAlgebras) + sizeof(CoAlgebra)*(numCoAlgs))
+  
 extern CoAlgebras *registerCoAlgebra(
-  CoAlgebras *theCoAlgs,
+  CoAlgebras *coAlgs,
   Symbol *name,
-  CoAlgEquality *equalityFunc
+  CoAlgRegister *registerFunc,
+  CoAlgEquality *equalityFunc,
+  CoAlgData     coAlgData
 );
 \stopCHeader
 
@@ -115,49 +141,129 @@ extern CoAlgebras *registerCoAlgebra(
 CoAlgebras *registerCoAlgebra(
   CoAlgebras *coAlgs,
   Symbol *name,
-  CoAlgEquality *equalityFunc
+  CoAlgRegister *registerFunc,
+  CoAlgEquality *equalityFunc,
+  CoAlgData     coAlgData
 ) {
+  CoAlgebra* coAlgsVec;
+
   // we follow a policy of lazy management of the coAlgs
   // if coAlgs is NULL, we create a new one
   // if coAlgs is too small we expand it
   if (!coAlgs) {
     // we need to create a new coAlgs structure...
     //
-    coAlgs = (CoAlgebras*) calloc(1, sizeof(CoAlgebras));
+    coAlgs = (CoAlgebras*)
+      calloc(1, sizeofCoAlgebras(JOYLOL_COALGS_INCREMENT));
     assert(coAlgs);
+    
     coAlgs->numCoAlgs    = 0;
-    coAlgs->maxNumCoAlgs = 0;
-    coAlgs->theCoAlgs    = NULL;
+    coAlgs->maxNumCoAlgs = JOYLOL_COALGS_INCREMENT;
   }
+  coAlgsVec = getCoAlgebrasVector(coAlgs);
+  assert((((void*)coAlgsVec)-((void*)coAlgs)) == sizeof(CoAlgebras));
+
   if (coAlgs->maxNumCoAlgs <= coAlgs->numCoAlgs) {
-    // we need to expand the existing theCoAlgs vector...
-    //
-    CoAlgebra *oldCoAlgs = coAlgs->theCoAlgs;
-    size_t oldCoAlgsSize = coAlgs->maxNumCoAlgs * sizeof(CoAlgebra);
-    coAlgs->maxNumCoAlgs += JOYLOL_COALGS_INCREMENT;
-    coAlgs->theCoAlgs = calloc(coAlgs->maxNumCoAlgs, sizeof(CoAlgebra));
+    // we need to expand the existing coAlgs structure...
+    //  
+    CoAlgebras *oldCoAlgs  = coAlgs;
+    
+    size_t oldNumCoAlgs    = coAlgs->numCoAlgs;
+    size_t oldMaxNumCoAlgs = coAlgs->maxNumCoAlgs;
+    
+    size_t newMaxNumCoAlgs =
+      oldMaxNumCoAlgs + JOYLOL_COALGS_INCREMENT;
+
+    coAlgs = calloc(1, sizeofCoAlgebras(newMaxNumCoAlgs));
+    assert(coAlgs);
+    
     if (oldCoAlgs) {
-      memcpy(coAlgs->theCoAlgs, oldCoAlgs, oldCoAlgsSize);
+      memcpy(coAlgs, oldCoAlgs,
+        sizeofCoAlgebras(oldNumCoAlgs));
       free(oldCoAlgs);
     }
+    
+    coAlgs->numCoAlgs    = oldNumCoAlgs;
+    coAlgs->maxNumCoAlgs = newMaxNumCoAlgs;
+
+    coAlgsVec = getCoAlgebrasVector(coAlgs);
   }
-  CoAlgebra *theCoAlgs = coAlgs->theCoAlgs;
+  assert((((void*)coAlgsVec)-((void*)coAlgs)) == sizeof(CoAlgebras));
+  
   size_t newCoAlg = coAlgs->numCoAlgs;
-  theCoAlgs[newCoAlg].isA       = newCoAlg;
-  theCoAlgs[newCoAlg].name      = strdup(name);
-  theCoAlgs[newCoAlg].equality  = equalityFunc;
-  //  theCoAlgs[newCoAlg].printSize = NULL;
-  //  theCoAlgs[newCoAlg].printStr  = NULL;
+  
+  coAlgsVec[newCoAlg].isA           = newCoAlg;
+  coAlgsVec[newCoAlg].name          = strdup(name);
+  coAlgsVec[newCoAlg].registerFunc  = registerFunc;
+  coAlgsVec[newCoAlg].equalityFunc  = equalityFunc;
+  coAlgsVec[newCoAlg].coAlgData     = coAlgData;
+  
   coAlgs->numCoAlgs++;
+  
   return coAlgs;
 }
 \stopCCode
 
 \startTestCase[should create a new coAlgs]
 
+We start by adding one single coAlg, this tests the creation of a 
+completely new CoAlgebras structure. 
+
 \startCTest
-  CoAlgebras *someCoAlgs = registerCoAlgebra(NULL, "newCoAlg", NULL);
-  AssertPtrNotNull(someCoAlgs);
+  char*          coAlgName        = strdup("newCoAlgA");
+  char*          coAlgNameEnd     = coAlgName + strlen("newCoAlg");
+  CoAlgRegister* fakeRegisterFunc = (CoAlgRegister*) 0x100;
+  CoAlgEquality* fakeEqualityFunc = (CoAlgEquality*) 0x200;
+  CoAlgData*     fakeCoAlgData    = (CoAlgData*)     0x300;
+  
+  CoAlgebras *coAlgs =
+    registerCoAlgebra(NULL, coAlgName,
+      fakeRegisterFunc, fakeEqualityFunc, fakeCoAlgData);
+  AssertPtrNotNull(coAlgs);
+  CoAlgebra *coAlgsVec = getCoAlgebrasVector(coAlgs);
+  AssertIntEquals(
+    (((void*)coAlgsVec)-((void*)coAlgs)),
+    sizeof(CoAlgebras)
+  );
+  AssertPtrNotNull(coAlgsVec);
+  AssertIntEquals(coAlgsVec[0].isA, 0);
+  AssertStrEquals(coAlgsVec[0].name, "newCoAlgA");
+  AssertPtrEquals(coAlgsVec[0].registerFunc, fakeRegisterFunc);
+  AssertPtrEquals(coAlgsVec[0].equalityFunc, fakeEqualityFunc);
+  AssertPtrEquals(coAlgsVec[0].coAlgData,    fakeCoAlgData);
+\stopCTest
+
+Now we want to test the expansion of an existing CoAlgebras structure when 
+the existing one runs out of \quote{space}. 
+
+\startCTest
+  AssertIntTrue(JOYLOL_COALGS_INCREMENT < 26);
+  for(int i = 1; i < 26; i++) {
+    CoAlgebras *oldCoAlgs = coAlgs;
+    *coAlgNameEnd         = 'A' + i;
+    fakeRegisterFunc     += 1;
+    fakeEqualityFunc     += 1;
+    fakeCoAlgData        += 1;
+    coAlgs = registerCoAlgebra(coAlgs, coAlgName,
+      fakeRegisterFunc, fakeEqualityFunc, fakeCoAlgData);
+    AssertPtrNotNull(coAlgs);
+    if (i%JOYLOL_COALGS_INCREMENT) {
+      AssertPtrEquals(oldCoAlgs, coAlgs);
+    } else {
+      AssertPtrNotEquals(oldCoAlgs, coAlgs);
+    }
+    CoAlgebra *coAlgsVec = getCoAlgebrasVector(coAlgs);
+    AssertIntEquals(
+      (((void*)coAlgsVec)-((void*)coAlgs)),
+      sizeof(CoAlgebras)
+    );
+    AssertPtrNotNull(coAlgsVec);
+    AssertIntEquals(coAlgsVec[i].isA, i);
+    AssertStrEquals(coAlgsVec[i].name, coAlgName);
+    AssertPtrEquals(coAlgsVec[i].registerFunc, fakeRegisterFunc);
+    AssertPtrEquals(coAlgsVec[i].equalityFunc, fakeEqualityFunc);
+    AssertPtrEquals(coAlgsVec[i].coAlgData,    fakeCoAlgData);
+  }
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -187,7 +293,8 @@ CoAlgebras* createCoAlgebras(void) {
 //  coAlgs->symbols       = createSymbolsCoAlgebra();
 
   // initialize all the known coAlgebras
-//  initPairsCoAlgebra(coAlgs); // need to initialize this first for listMemory
+// need to initialize this first for listMemory
+//  initPairsCoAlgebra(coAlgs); 
 
 //  initAssertionsCoAlgebra(coAlgs);
 //  initBooleansCoAlgebra(coAlgs);
