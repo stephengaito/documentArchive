@@ -8,11 +8,6 @@ gitVH=bin/gitVersion.h
 #
 git log -1 --date=short \
   --pretty=format:"
-typedef struct keyValueStruct {
-  const char *key;
-  const char *value;
-} KeyValues;
-
 static const KeyValues gitKeyValues[] = {
   { \"authorName\",      \"%an\"},
   { \"commitDate\",      \"%ad\"},
@@ -43,4 +38,4 @@ return {
 # Now distribute these files to appropriate locations
 #
 cp $gitVLua core/lua/build
-
+cp $gitVH   base/coAlgs/build
