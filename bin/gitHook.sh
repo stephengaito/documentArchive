@@ -42,4 +42,5 @@ local gitVersion = {
 # Now distribute these files to appropriate locations
 #
 cp $gitVLua core/lua/doc
+cp $gitVC   base/booleans/doc
 cp $gitVC   base/coAlgs/doc

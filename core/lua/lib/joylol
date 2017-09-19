@@ -1,0 +1,49 @@
+#!/usr/bin/env texlua
+
+-- from file: gitVersion-lua.tex after line: 0
+
+local gitVersion = {
+  authorName      = "Stephen Gaito",
+  commitDate      = "2017-09-19",
+  commitShortHash = "43b9ea3",
+  commitLongHash  = "43b9ea3df7dc77f28b69893e216c64e900a8d204",
+  subject         = "added registration of CoAlgs ; added code to ensure coAlgs with the same name can not be registered multiple times",
+  notes           = ""
+}
+
+-- from file: conclusion.tex after line: 0
+
+-- JoyLoL command line interpreter
+
+-- Start by adding the standard JoyLoL CoAlg locations to the Lua search
+-- paths
+
+local joylolPaths = {
+  os.getenv('HOME')..'/.joylol/?.lua',
+  '/usr/local/lib/joylol/?.lua',
+  '/usr/lib/joylol/?.lua',
+  package.path
+}
+package.path = table.concat(joylolPaths, ';')
+print(package.path)
+
+local joylolCPaths = {
+  os.getenv('HOME')..'/.joylol/?.so',
+  '/usr/local/lib/joylol/?.so',
+  '/usr/lib/joylol/?.so',
+  package.path
+}
+package.cpath = table.concat(joylolCPaths, ';')
+print(package.cpath)
+
+local coAlgs = require 'joylol.coAlgs'
+
+print(coAlgs.gitVersion('authorName'))
+print(coAlgs.gitVersion('commitDate'))
+print(coAlgs.gitVersion('commitShortHash'))
+
+local booleans = require 'joylol.booleans'
+
+print(booleans.gitVersion('authorName'))
+print(booleans.gitVersion('commitDate'))
+print(booleans.gitVersion('commitShortHash'))

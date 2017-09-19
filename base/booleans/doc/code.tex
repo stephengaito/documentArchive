@@ -1,0 +1,30 @@
+% A ConTeXt document [master document: booleans.tex]
+
+\section[title=Code]
+
+%\dependsOn[coAlgebras]
+%\dependsOn[context]
+
+\startCHeader
+typedef struct boolean_struct {
+  CoAlgebras super;
+  size_t     theBoolean;
+} Boolean;
+\stopCHeader
+
+\component gitVersion-c
+
+\startJoyLoLWord[isBoolean]
+
+\preDataStack[aBool][]
+
+\starttyping
+\startCCode
+if (!aBool) then pushDataFalse(aCtx);
+if (aBool->super.isA == BOOLEANS_COALG) then
+  pushDataTrue(aCtx);
+pushDataFalse(aCtx);
+\stopCCode
+\stoptyping
+
+\stopJoyLoLWord

@@ -5,7 +5,7 @@
 \setCHeaderStream{public}
 \setCCodeStream{class}
 \setCTestStream{class}
-\addCTestInclude{<coAlgs.h>}
+\addCTestInclude{<joylol/coAlgs.h>}
 
 In this section we concentrate on the C code required to implement the 
 kernel JoyLoL CoAlgebra. The CoAlgebra, \type{CoAlg}, is the base of the 
@@ -401,21 +401,6 @@ const char *getGitVersion(const KeyValues *gitVersion,
   }
   return "key not found";
 }
-\stopCCode
-
-Now each shared library needs to implement the following code to provide 
-an interface between the generic C-implementation, above, and the Lua 
-module for the shared library. 
-
-\startCCode
-static int lua_coAlgs_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
 \stopCCode
 
 At the moment we can only (easily) test the \type{getGitVersion} function.

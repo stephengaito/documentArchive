@@ -1,5 +1,24 @@
 -- A Lua Make System file
 
+c = c or {}
+c.cIncs = c.cIncs or {}
+tInsert(c.cIncs, tConcat({
+  '-I',
+  makePath{
+    getEnv('HOME'),
+    '.joylol',
+    'include'
+  }
+}, ''))
+
+c.libs = c.libs or {}
+tInsert(c.libs, makePath{
+  getEnv('HOME'),
+  '.joylol',
+  'joylol',
+  'coAlgs.so'
+})
+
 lfs = require 'lfs'
 
 lfs.mkdir('build')
@@ -10,18 +29,16 @@ lfs.mkdir('install/joylol')
 require 'lms.litProgs'
 
 litProgs.targets{
-  mainDoc  = 'coAlgs.tex',
+  mainDoc  = 'booleans.tex',
   docFiles = {
     'overview.tex',
-    'classCode.tex',
-    'instanceCode.tex',
+    'code.tex',
     'conclusion.tex',
   },
   srcFiles = {
-    'joylol/coAlgs.h',
-    'joylol/coAlgs-private.h',
-    'coAlgs-class.c',
-    'coAlgs-instance.c',
+    'joylol/booleans.h',
+    'joylol/booleans-private.h',
+    'booleans.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',
@@ -34,18 +51,16 @@ contests.targets{
   testExecs = {
     'allCTests',
   },
-  mainDoc = 'coAlgs.tex',
+  mainDoc = 'booleans.tex',
   docFiles = {
     'overview.tex',
-    'classCode.tex',
-    'instanceCode.tex',
+    'code.tex',
     'conclusion.tex',
   },
   srcFiles = {
-    'joylol/coAlgs.h',
-    'joylol/coAlgs-private.h',
-    'coAlgs-class.c',
-    'coAlgs-instance.c',
+    'joylol/booleans.h',
+    'joylol/booleans-private.h',
+    'booleans.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',
@@ -56,13 +71,12 @@ require 'lms.joyLoL'
 
 joylol.targets{
   coAlgs = {
-    'coAlgs',
+    'booleans',
   },
   srcFiles = {
-    'joylol/coAlgs.h',
-    'joylol/coAlgs-private.h',
-    'coAlgs-class.c',
-    'coAlgs-instance.c',
+    'joylol/booleans.h',
+    'joylol/booleans-private.h',
+    'booleans.c',
   },
   coAlgLibs = {
   },

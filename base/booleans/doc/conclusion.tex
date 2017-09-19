@@ -1,0 +1,114 @@
+% A ConTeXt document [master document: booleans.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_BOOLEANS}
+\createCHeaderFile%
+  {public}
+  {joylol/booleans.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_BOOLEANS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/booleans-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <assert.h>
+
+#include <joylol/coAlgs.h>
+\stopCCode
+
+\appendCCode{default}
+\startCCode
+static int lua_booleans_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  const char* aValue = "no valid key provided";
+  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
+  lua_pushstring(lstate, aValue);
+  return 1;
+}
+
+static size_t joylol_register_booleans(lua_State *lstate) {
+  registerCoAlgebra(
+    lstate,
+    "Booleans",
+    joylol_register_booleans,
+    NULL, // no equality function
+    NULL  // no booleans-data
+  );
+  
+  // in future... register Booleans words with JoyLoL dictionary. 
+  
+  return TRUE;
+}
+
+static const struct luaL_Reg lua_booleans [] = {
+  {"gitVersion", lua_booleans_getGitVersion},
+  {NULL, NULL}
+};
+
+int luaopen_joylol_booleans (lua_State *lstate) {
+  joylol_register_booleans(lstate);
+  luaL_newlib(lstate, lua_booleans);
+  return 1;
+}
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {booleans.c}%
+  {}
+
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{booleans.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{install}
+
+\ensureDirectoryExists{build/joylol}
+\ensureDirectoryExists{install}
+\ensureDirectoryExists{install/joylol}
+
+\addJoyLoLTargets{default}
+
+\addCTestTargets{default}
+
+\compileLmsfile{default}
+
+\prependLmsfile{default}
+\startLmsfile
+c = c or {}
+c.cIncs = c.cIncs or {}
+tInsert(c.cIncs, tConcat({
+  '-I',
+  makePath{
+    getEnv('HOME'),
+    '.joylol',
+    'include'
+  }
+}, ''))
+
+c.libs = c.libs or {}
+tInsert(c.libs, makePath{
+  getEnv('HOME'),
+  '.joylol',
+  'joylol',
+  'coAlgs.so'
+})
+\stopLmsfile
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

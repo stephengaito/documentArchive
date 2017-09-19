@@ -1,8 +1,5 @@
 -- A Lua Make System file
 
-local tConcat = table.concat
-local tInsert = table.insert
-
 lfs = require 'lfs'
 
 lfs.mkdir('build')
