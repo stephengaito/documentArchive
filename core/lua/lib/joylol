@@ -5,9 +5,9 @@
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-09-19",
-  commitShortHash = "43b9ea3",
-  commitLongHash  = "43b9ea3df7dc77f28b69893e216c64e900a8d204",
-  subject         = "added registration of CoAlgs ; added code to ensure coAlgs with the same name can not be registered multiple times",
+  commitShortHash = "47a24eb",
+  commitLongHash  = "47a24eb183f41fbacdab1ae09b29d422c0c79c57",
+  subject         = "added strings coAlg; moved build/joylol, install, install/joylol to t-lit-progs",
   notes           = ""
 }
 
@@ -47,3 +47,9 @@ local booleans = require 'joylol.booleans'
 print(booleans.gitVersion('authorName'))
 print(booleans.gitVersion('commitDate'))
 print(booleans.gitVersion('commitShortHash'))
+
+local strings = require 'joylol.strings'
+
+print(strings.gitVersion('authorName'))
+print(strings.gitVersion('commitDate'))
+print(strings.gitVersion('commitShortHash'))

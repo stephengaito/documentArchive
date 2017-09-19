@@ -71,7 +71,7 @@ require 'lms.joyLoL'
 
 joylol.targets{
   coAlgs = {
-    'string',
+    'strings',
   },
   srcFiles = {
     'joylol/strings.h',
