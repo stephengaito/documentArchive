@@ -95,7 +95,7 @@ typedef struct coalgebra_struct         CoAlgebra;
 typedef struct coalgebra_handle_struct  CoAlgHandle;
 typedef const char Symbol;
 
-typedef size_t (CoAlgRegister)(CoAlgebras*);
+typedef size_t (CoAlgRegister)(lua_State*);
 typedef size_t (CoAlgEquality)(CoAlgebra*,
                                CoAlgHandle*,
                                CoAlgHandle*,
@@ -231,6 +231,15 @@ size_t registerCoAlgebra(
   coAlgsVec = getCoAlgebrasVector(coAlgs);
   assert((((void*)coAlgsVec)-((void*)coAlgs)) == sizeof(CoAlgebras));
 
+  for(size_t i = 0; i < coAlgs->numCoAlgs; i++ ) {
+    if (strcmp(name, coAlgsVec[i].name) == 0) {
+    
+      // a coAlgebra with this name has already been registered. 
+      // so return its index...
+      return i;
+    }
+  }
+  
   if (coAlgs->maxNumCoAlgs <= coAlgs->numCoAlgs) {
     // we need to expand the existing coAlgs structure...
     //  
@@ -334,6 +343,21 @@ the existing one runs out of \quote{space}.
     AssertPtrEquals(coAlgsVec[i].equalityFunc, fakeEqualityFunc);
     AssertPtrEquals(coAlgsVec[i].coAlgData,    fakeCoAlgData);
   }
+\stopCTest
+
+Now we want to test the addition of CoAlgebra with an existing name does 
+not change the number of registered CoAlgebras but simple returns the 
+existing CoAlgebra index. 
+
+\startCTest
+  CoAlgebras* oldCoAlgs = getCoAlgebras(lstate);
+  size_t oldNumCoAlgs = oldCoAlgs->numCoAlgs;
+  size_t anIndex = 
+    registerCoAlgebra(lstate, "newCoAlgF", NULL, NULL, NULL);
+  coAlgs = getCoAlgebras(lstate);
+  AssertIntEquals(anIndex, 5);
+  AssertPtrEquals(oldCoAlgs, coAlgs);
+  AssertIntEquals(oldNumCoAlgs, coAlgs->numCoAlgs);
 \stopCTest
 \stopTestCase
 \stopTestSuite

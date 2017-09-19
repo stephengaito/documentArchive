@@ -26,12 +26,27 @@
 
 \appendCCode{class}
 \startCCode
+static size_t joylol_register_coAlgs(lua_State *lstate) {
+  registerCoAlgebra(
+    lstate,
+    "CoAlgs",
+    joylol_register_coAlgs,
+    NULL, // no equality function
+    NULL  // no coAlg-data
+  );
+  
+  // in future... register CoAlgs words with JoyLoL dictionary. 
+  
+  return TRUE;
+}
+
 static const struct luaL_Reg lua_coAlgs [] = {
   {"gitVersion", lua_coAlgs_getGitVersion},
   {NULL, NULL}
 };
 
 int luaopen_joylol_coAlgs (lua_State *lstate) {
+  joylol_register_coAlgs(lstate);
   luaL_newlib(lstate, lua_coAlgs);
   return 1;
 }
