@@ -336,11 +336,11 @@ the existing one runs out of \quote{space}.
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[registerVersion]
+\startTestSuite[getGitVersion]
 
-We need a generic way of registering the git version of a given CoAlgebra. 
+We need a generic way of obtaining the git version of a given CoAlgebra. 
 We do this in two parts. In the \type{bin} directory of any (collection 
-of) CoAlgebra(s) there should be a shell pair of shell scripts. The 
+of) CoAlgebra(s) there should be a pair of shell scripts. The 
 \type{gitHook.sh} is a \type{bash} shell script which is run at various 
 points in the git event cycle to capture the git version information into 
 either a C-header file or a Lua file. These files can then be loaded as 
@@ -351,8 +351,9 @@ which copies the \type{gitHook.sh} script into the correct places in the
 \type{.git} directory. 
 
 For CoAlgebras implemented in ANSI-C, the following function will take the 
-git version information in the \type{gitVersion.h} file and place it into 
-a \type{version} table in Lua. 
+git version information in the \type{gitVersion.h} file which is 
+statically linked in a given CoAlgabra's shared library and return the 
+value associated with any valid key requested. 
 
 \startCHeader
 typedef struct keyValueStruct {
@@ -360,25 +361,57 @@ typedef struct keyValueStruct {
   const char *value;
 } KeyValues;
 
-extern void registerVersion(lua_State *lstate, KeyValues *versionInfo);
+extern const char *getGitVersion(const KeyValues *gitVersion, 
+                                 const char* gitVersionKey);
 \stopCHeader
 
-The following implementation \emph{expects} that the C-module's table has 
-already been pushed onto the Lua stack. 
-
 \startCCode
-void registerVersion(lua_State *lstate, KeyValues *versionInfo) {
-  size_t numKeys = 0;
-  for(numKeys = 0 ; versionInfo[numKeys].key ; numKeys++);
-  lua_createtable (lstate, 0, numKeys);
-  for(numKeys = 0 ; versionInfo[numKeys].key ; numKeys++) {
-    lua_pushstring(lstate, versionInfo[numKeys].value);
-    lua_setfield(lstate, -2, versionInfo[numKeys].key);
+const char *getGitVersion(const KeyValues *gitVersion,
+                          const char* gitVersionKey) {
+  for(int i = 0 ; gitVersion[i].key ; i++) {
+    if (strcmp(gitVersionKey, gitVersion[i].key) == 0) {
+      return gitVersion[i].value;
+    }
   }
-  lua_setfield(lstate, -2, "version");
+  return "key not found";
 }
 \stopCCode
 
+Now each shared library needs to implement the following code to provide 
+an interface between the generic C-implementation, above, and the Lua 
+module for the shared library. 
+
+\startCCode
+static int lua_coAlgs_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  const char* aValue = "no valid key provided";
+  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
+  lua_pushstring(lstate, aValue);
+  return 1;
+}
+
+\stopCCode
+
+At the moment we can only (easily) test the \type{getGitVersion} function.
+
+\startTestCase[should get value associated with keys]
+\startCTest
+  static const KeyValues testKVs[] = {
+    { "key1", "value1" },
+    { "key2", "value2" },
+    { NULL,   NULL }
+  };
+  const char* aValue = getGitVersion(testKVs, "key1");
+  AssertPtrNotNull(aValue);
+  AssertStrEquals(aValue, "value1");
+  aValue = getGitVersion(testKVs, "key2");
+  AssertPtrNotNull(aValue);
+  AssertStrEquals(aValue, "value2");
+  aValue = getGitVersion(testKVs, "noKey");
+  AssertPtrNotNull(aValue);
+  AssertStrEquals(aValue, "key not found");
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \subsection[title=createCoAlgebras]

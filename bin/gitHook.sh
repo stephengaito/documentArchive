@@ -8,7 +8,7 @@ gitVH=bin/gitVersion.h
 #
 git log -1 --date=short \
   --pretty=format:"
-static const KeyValues gitKeyValues[] = {
+static const KeyValues gitVersionKeyValues[] = {
   { \"authorName\",      \"%an\"},
   { \"commitDate\",      \"%ad\"},
   { \"commitShortHash\", \"%h\"},
