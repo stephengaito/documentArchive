@@ -1,19 +1,19 @@
-% A ConTeXt document [master document: booleans.tex]
+% A ConTeXt document [master document: strings.tex]
 
 \section[title=Conclusions]
 
 \addDocumentDirectory{doc}
 
-\CHeaderIncludeGuard{public}{JOYLOL_COALG_BOOLEANS}
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_STRINGS}
 \createCHeaderFile%
   {public}
-  {joylol/booleans.h}
+  {joylol/strings.h}
   {}
 
-\CHeaderIncludeGuard{private}{JOYLOL_COALG_BOOLEANS_PRIVATE}
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_STRINGSS_PRIVATE}
 \createCHeaderFile%
   {private}
-  {joylol/booleans-private.h}
+  {joylol/strings-private.h}
   {}
 
 \prependCCode{default}
@@ -26,7 +26,7 @@
 
 \appendCCode{default}
 \startCCode
-static int lua_booleans_getGitVersion (lua_State *lstate) {
+static int lua_strings_getGitVersion (lua_State *lstate) {
   const char* aKey   = lua_tostring(lstate, 1);
   const char* aValue = "no valid key provided";
   if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
@@ -34,35 +34,35 @@ static int lua_booleans_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_booleans(lua_State *lstate) {
+static size_t joylol_register_strings(lua_State *lstate) {
   registerCoAlgebra(
     lstate,
-    "Booleans",
-    joylol_register_booleans,
+    "Strings",
+    joylol_register_strings,
     NULL, // no equality function
-    NULL  // no booleans-data
+    NULL  // no strings-data
   );
   
-  // in future... register Booleans words with JoyLoL dictionary. 
+  // in future... register Strings words with JoyLoL dictionary. 
   
   return TRUE;
 }
 
-static const struct luaL_Reg lua_booleans [] = {
-  {"gitVersion", lua_booleans_getGitVersion},
+static const struct luaL_Reg lua_strings [] = {
+  {"gitVersion", lua_strings_getGitVersion},
   {NULL, NULL}
 };
 
-int luaopen_joylol_booleans (lua_State *lstate) {
-  joylol_register_booleans(lstate);
-  luaL_newlib(lstate, lua_booleans);
+int luaopen_joylol_strings (lua_State *lstate) {
+  joylol_register_strings(lstate);
+  luaL_newlib(lstate, lua_strings);
   return 1;
 }
 \stopCCode
 
 \createCCodeFile%
   {default}%
-  {booleans.c}%
+  {strings.c}%
   {}
 
 \createCTestFile%
@@ -70,7 +70,7 @@ int luaopen_joylol_booleans (lua_State *lstate) {
   {allCTests.c}%
   {}
 
-\addMainDocument{booleans.tex}
+\addMainDocument{strings.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
 \addSubDocument{conclusion.tex} 

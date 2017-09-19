@@ -44,3 +44,4 @@ local gitVersion = {
 cp $gitVLua core/lua/doc
 cp $gitVC   base/booleans/doc
 cp $gitVC   base/coAlgs/doc
+cp $gitVC   base/strings/doc

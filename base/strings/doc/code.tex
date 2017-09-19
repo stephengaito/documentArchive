@@ -1,0 +1,21 @@
+% A ConTeXt document [master document: strings.tex]
+
+\section[title=Code]
+
+%\dependsOn[coAlgebras]
+%\dependsOn[context]
+
+\startCHeader
+typedef struct strings_struct {
+  CoAlgebras  super;
+  const char* theString;
+} Boolean;
+\stopCHeader
+
+\component gitVersion-c
+
+\startJoyLoLWord[isString]
+
+\preDataStack[aString][]
+
+\stopJoyLoLWord
