@@ -1,0 +1,71 @@
+% A ConTeXt document [master document: joylol.tex]
+
+\startchapter[title=Preamble]
+
+\prependLuaCode{default}
+
+\component gitVersion-lua
+
+\startLuaCode
+-- JoyLoL command line interpreter 
+
+-- Start by adding the standard JoyLoL CoAlg locations to the Lua search 
+-- paths 
+
+local joylolPaths = {
+  os.getenv('HOME')..'/.joylol/?.lua',
+  '/usr/local/lib/joylol/?.lua',
+  '/usr/lib/joylol/?.lua',
+  package.path
+}
+package.path = table.concat(joylolPaths, ';')
+print(package.path)
+
+local joylolCPaths = {
+  os.getenv('HOME')..'/.joylol/?.so',
+  '/usr/local/lib/joylol/?.so',
+  '/usr/lib/joylol/?.so',
+  package.path
+}
+package.cpath = table.concat(joylolCPaths, ';')
+print(package.cpath)
+
+local coAlgs = require 'joylol.coAlgs'
+
+print(coAlgs.gitVersion('authorName'))
+print(coAlgs.gitVersion('commitDate'))
+print(coAlgs.gitVersion('commitShortHash'))
+\stopLuaCode
+
+\addDocumentDirectory{doc}
+
+\createLuaCodeFile%
+  {default}%
+  {joylol}%
+  {!/usr/bin/env texlua}
+
+\addMainDocument{joylol.tex}
+\addSubDocument{overview.tex}
+\addSubDocument{conclusion.tex}
+\addConTeXtModuleDirectory{lib}
+
+\ensureDirectoryExists{lib}
+
+\startLmsfile
+local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}
+local joylolDep    = makePath{'build', 'joylol'}
+tInsert(installTargets, target{
+  target       = joylolTarget,
+  dependencies = { joylolDep },
+  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
+})
+\stopLmsfile
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+
+\stopchapter

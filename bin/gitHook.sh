@@ -21,11 +21,12 @@ static const KeyValues gitVersionKeyValues[] = {
 
 # Create the Lua gitVersion.lua file
 #
-gitVLua=bin/gitVersion.lua
+gitVLua=bin/gitVersion-lua.tex
 #
 git log -1 --date=short \
   --pretty=format:"
-return {
+\startLuaCode
+local gitVersion = {
   authorName      = \"%an\",
   commitDate      = \"%ad\",
   commitShortHash = \"%h\",
@@ -33,9 +34,10 @@ return {
   subject         = \"%s\",
   notes           = \"%N\"
 }
+\stopLuaCode
 " HEAD > $gitVLua
 
 # Now distribute these files to appropriate locations
 #
-cp $gitVLua core/lua/build
+cp $gitVLua core/lua/doc
 cp $gitVH   base/coAlgs/build

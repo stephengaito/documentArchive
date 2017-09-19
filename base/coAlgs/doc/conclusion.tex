@@ -28,11 +28,11 @@
 \appendCCode{class}
 \startCCode
 static const struct luaL_Reg lua_coAlgs [] = {
-  {"version", lua_coAlgs_getGitVersion},
+  {"gitVersion", lua_coAlgs_getGitVersion},
   {NULL, NULL}
 };
 
-int luaopen_coAlgs (lua_State *lstate) {
+int luaopen_joylol_coAlgs (lua_State *lstate) {
   luaL_newlib(lstate, lua_coAlgs);
   return 1;
 }

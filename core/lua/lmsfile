@@ -1,0 +1,38 @@
+-- A Lua Make System file
+
+local tConcat = table.concat
+local tInsert = table.insert
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('lib')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'joylol.tex',
+  docFiles = {
+    'overview.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'lib',
+}
+
+local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}
+local joylolDep    = makePath{'build', 'joylol'}
+tInsert(installTargets, target{
+  target       = joylolTarget,
+  dependencies = { joylolDep },
+  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
+})
+
+target{'doc',     docTargets}
+target{'diff',    diffTargets}
+target{'install', installTargets}
+target{'default', buildTargets}

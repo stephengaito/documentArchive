@@ -6,7 +6,7 @@ tmp
 build
 install
 gitVersion.h
-gitVersion.lua
+gitVersion-lua.tex
 *.log
 *.tuc
 *.pdf
