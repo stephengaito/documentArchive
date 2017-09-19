@@ -5,7 +5,7 @@ tmp
 *Bib.lua
 build
 install
-gitVersion.h
+gitVersion-c.tex
 gitVersion-lua.tex
 *.log
 *.tuc

@@ -2,12 +2,13 @@
 #
 # Post-{commit, checkout, merge} hook to set version infomation
 
-# Create the ANSI-C gitVersion.h file
+# Create the ANSI-C gitVersion-c.tex file
 #
-gitVH=bin/gitVersion.h
+gitVC=bin/gitVersion-c.tex
 #
 git log -1 --date=short \
   --pretty=format:"
+\startCCode
 static const KeyValues gitVersionKeyValues[] = {
   { \"authorName\",      \"%an\"},
   { \"commitDate\",      \"%ad\"},
@@ -17,9 +18,10 @@ static const KeyValues gitVersionKeyValues[] = {
   { \"notes\",           \"%N\"},
   { NULL,                NULL}
 };
-" HEAD > $gitVH
+\stopCCode
+" HEAD > $gitVC
 
-# Create the Lua gitVersion.lua file
+# Create the Lua gitVersion-lua.tex file
 #
 gitVLua=bin/gitVersion-lua.tex
 #
@@ -40,4 +42,4 @@ local gitVersion = {
 # Now distribute these files to appropriate locations
 #
 cp $gitVLua core/lua/doc
-cp $gitVH   base/coAlgs/build
+cp $gitVC   base/coAlgs/doc
