@@ -93,7 +93,7 @@ the interpreter's dictionary of words.
 typedef struct coalgebras_struct        CoAlgebras;
 typedef struct coalgebra_struct         CoAlgebra;
 typedef struct coalgebra_handle_struct  CoAlgHandle;
-typedef const char Symbol;
+typedef const char                      Symbol;
 
 typedef size_t (CoAlgRegister)(lua_State*);
 typedef size_t (CoAlgEquality)(CoAlgebra*,
@@ -425,95 +425,9 @@ At the moment we can only (easily) test the \type{getGitVersion} function.
 \stopTestCase
 \stopTestSuite
 
-\subsection[title=createCoAlgebras]
-
-\startCHeader
-extern CoAlgebras* createCoAlgebras(void);
-\stopCHeader
-\startCCode
-CoAlgebras* createCoAlgebras(void) {
-//  CoAlgebras* coAlgs = (CoAlgebras*) calloc(1, sizeof(CoAlgebras));
-  CoAlgebras* coAlgs = NULL;
-//  assert(coAlgs);
-
-
-  // create all the known coAlgebras
-//  coAlgs->assertions    = createAssertionsCoAlgebra();
-//  coAlgs->booleans      = createBooleansCoAlgebra();
-//  coAlgs->contexts      = createContextsCoAlgebra();
-//  coAlgs->descriptions  = createDescriptionsCoAlgebra();
-//  coAlgs->functions     = createFunctionsCoAlgebra();
-//  coAlgs->naturals      = createNaturalsCoAlgebra();
-//  coAlgs->observations  = createObservationsCoAlgebra();
-//  coAlgs->pairs         = createPairsCoAlgebra();
-//  coAlgs->proofs        = createProofsCoAlgebra();
-//  coAlgs->symbols       = createSymbolsCoAlgebra();
-
-  // initialize all the known coAlgebras
-// need to initialize this first for listMemory
-//  initPairsCoAlgebra(coAlgs); 
-
-//  initAssertionsCoAlgebra(coAlgs);
-//  initBooleansCoAlgebra(coAlgs);
-//  initContextsCoAlgebra(coAlgs);
-//  initDescriptionsCoAlgebra(coAlgs);
-//  initFunctionsCoAlgebra(coAlgs);
-//  initNaturalsCoAlgebra(coAlgs);
-//  initObservationsCoAlgebra(coAlgs);
-//  initProofsCoAlgebra(coAlgs);
-//  initSymbolsCoAlgebra(coAlgs);
-
-  return coAlgs;
-}
-\stopCCode
-
-\startCHeader
-//#include "joyLoL/coAlg/assertions.h"
-//#include "joyLoL/coAlg/booleans.h"
-//#include "joyLoL/coAlg/contexts.h"
-//#include "joyLoL/coAlg/descriptions.h"
-//#include "joyLoL/coAlg/functions.h"
-//#include "joyLoL/coAlg/naturals.h"
-//#include "joyLoL/coAlg/observations.h"
-//#include "joyLoL/coAlg/pairs.h"
-//#include "joyLoL/coAlg/proofs.h"
-//#include "joyLoL/coAlg/symbols.h"
-
-#define ASSERTION_COALG    1
-#define BOOLEAN_COALG      2
-#define CONTEXT_COALG      3
-#define DESCRIPTION_COALG  4
-#define FUNCTION_COALG     5
-#define NATURAL_COALG      6
-#define OBSERVATION_COALG  7
-#define PAIR_COALG         8
-#define PROOF_COALG        9
-#define SYMBOL_COALG       10
-\stopCHeader
-
 \subsection[title=Old tests]
 
 \starttyping
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "CuTest.h"
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/dictionary_private.h"
-#include "joyLoL/text.h"
-#include "joyLoL/parser.h"
-#include "joyLoL/printer.h"
-#include "joyLoL/eval.h"
-#include "joyLoL/eval_private.h"
-
-// suiteName: - Base CoAlgebra tests -
-
-void Test_reportSizes(CuTest* tc) {
   printf("\nStructure Sizes\n");
   printf("              void* = %zu bytes\n", sizeof(void*));
   printf("                int = %zu bytes\n", sizeof(int));
@@ -538,18 +452,6 @@ void Test_reportSizes(CuTest* tc) {
   printf("    ListBlock.block = %zu bytes\n", sizeof(aListBlock.block));
   printf("ListBlock.nextBlock = %zu bytes\n", sizeof(aListBlock.nextBlock));
   printf("\n");
-}
-
-void Test_createBaseCoAlgebras(CuTest* tc) {
-  CoAlgebras *coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-  CuAssertPtrNotNull(tc, coAlgs->booleans);
-  CuAssertPtrNotNull(tc, coAlgs->contexts);
-  CuAssertPtrNotNull(tc, coAlgs->functions);
-  CuAssertPtrNotNull(tc, coAlgs->naturals);
-  CuAssertPtrNotNull(tc, coAlgs->pairs);
-  CuAssertPtrNotNull(tc, coAlgs->symbols);
-}
 \stoptyping
 
 %\startsyntax
