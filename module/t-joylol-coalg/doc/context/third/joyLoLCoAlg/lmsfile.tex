@@ -16,6 +16,10 @@ libraries which can be loaded into a Lua implementation.
 
 \startLuaCode
 local function addJoyLoLTargets(aCodeStream)
+  build.existingDirs = build.existingDirs or { }
+  tInsert(build.existingDirs, 'build/joylol')
+  tInsert(build.existingDirs, 'install')
+  tInsert(build.existingDirs, 'install/joylol')
   litProgs.setCodeStream('Lmsfile', aCodeStream)
   litProgs.markCodeOrigin('Lmsfile')
   local lmsfile = {}

@@ -446,6 +446,10 @@ joylol.addPostProcessStackDescription = addPostProcessStackDescription
 -- from file: lmsfile.tex after line: 0
 
 local function addJoyLoLTargets(aCodeStream)
+  build.existingDirs = build.existingDirs or { }
+  tInsert(build.existingDirs, 'build/joylol')
+  tInsert(build.existingDirs, 'install')
+  tInsert(build.existingDirs, 'install/joylol')
   litProgs.setCodeStream('Lmsfile', aCodeStream)
   litProgs.markCodeOrigin('Lmsfile')
   local lmsfile = {}

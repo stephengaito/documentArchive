@@ -82,10 +82,3 @@ joylol.targets{
   },
   buildDir = 'build',
 }
-
-target{'tests',   testTargets}
-
-target{'doc',     docTargets}
-target{'diff',    diffTargets}
-target{'install', installTargets}
-target{'default', buildTargets}

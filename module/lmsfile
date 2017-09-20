@@ -28,8 +28,3 @@ litProgs.targets{
   docDir    = 't-joylol-coalg/doc/context/third/joyLoLCoAlg',
   moduleDir = 't-joylol-coalg/tex/context/third/joyLoLCoAlg',
 }
-
-target{'doc',     docTargets}
-target{'diff',    diffTargets}
-target{'install', installTargets}
-target{'default', buildTargets}
