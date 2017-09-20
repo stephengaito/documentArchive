@@ -1,24 +1,5 @@
 -- A Lua Make System file
 
-c = c or {}
-c.cIncs = c.cIncs or {}
-tInsert(c.cIncs, tConcat({
-  '-I',
-  makePath{
-    getEnv('HOME'),
-    '.joylol',
-    'include'
-  }
-}, ''))
-
-c.libs = c.libs or {}
-tInsert(c.libs, makePath{
-  getEnv('HOME'),
-  '.joylol',
-  'joylol',
-  'coAlgs.so'
-})
-
 lfs = require 'lfs'
 
 lfs.mkdir('build')
@@ -30,28 +11,6 @@ require 'lms.litProgs'
 
 litProgs.targets{
   mainDoc  = 'booleans.tex',
-  docFiles = {
-    'overview.tex',
-    'code.tex',
-    'conclusion.tex',
-  },
-  srcFiles = {
-    'joylol/booleans.h',
-    'joylol/booleans-private.h',
-    'booleans.c',
-  },
-  buildDir  = 'build',
-  docDir    = 'doc',
-  moduleDir = 'install',
-}
-
-require 'lms.contests'
-
-contests.targets{
-  testExecs = {
-    'allCTests',
-  },
-  mainDoc = 'booleans.tex',
   docFiles = {
     'overview.tex',
     'code.tex',
@@ -79,6 +38,29 @@ joylol.targets{
     'booleans.c',
   },
   coAlgLibs = {
+    'coAlgs',
   },
   buildDir = 'build',
+}
+
+require 'lms.contests'
+
+contests.targets{
+  testExecs = {
+    'allCTests',
+  },
+  mainDoc = 'booleans.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/booleans.h',
+    'joylol/booleans-private.h',
+    'booleans.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
 }

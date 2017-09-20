@@ -150,42 +150,6 @@ local function addStrToListNamed(aCtx, aStr, listName)
   pushProcessQuoted(aCtx, listName)
 end
 
-function coAlgs.newCoAlg(coAlgName)
-  texio.write_nl('newCoAlg: ['..coAlgName..']')
-  theCoAlg               = {}
-  theCoAlg.name          = coAlgName
-  theCoAlg.ctx           = joyLoL.newContext()
-  theCoAlg.hasJoyLoLCode = false;
-  theCoAlg.hasLuaCode    = false;
-  theCoAlg.hasCHeader    = false;
-  theCoAlg.hasCCode      = false;
-  -- 
-  local aCtx = theCoAlg.ctx
-  pushProcess(aCtx, 'addToDict')
-  pushProcessQuoted(aCtx, coAlgName)
-  pushProcessQuoted(aCtx, 'coAlgName')
-  addNewList(aCtx, 'dependsOn')
-  addNewList(aCtx, 'wordOrder')
-  addNewDict(aCtx, 'words')
-  newDictionary(aCtx)
-  jEval(aCtx)
-  --
-  -- add the new word: "global"
-  --
-  coAlgs.newWord('global')
-end
-
-function coAlgs.addDependency(dependencyName)
-  texio.write_nl('addDependency: ['..dependencyName..']')
-  local aCtx = theCoAlg.ctx
-  pushProcess(aCtx, 'popData')
-  pushProcess(aCtx, 'appendToEndList')
-  pushProcessQuoted(aCtx, dependencyName)
-  pushProcess(aCtx, 'lookupInDict')
-  pushProcess(aCtx, 'dependsOn')
-  jEval(aCtx)
-end
-
 local function writeCodeFile(aCtx, coAlgName, templateName, filePath, fileExt)
   local outFilePath = string.format('%s/%s.%s', filePath, coAlgName, fileExt)
   local outFile = io.open(outFilePath, 'w')

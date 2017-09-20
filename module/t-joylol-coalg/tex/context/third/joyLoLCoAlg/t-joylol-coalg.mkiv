@@ -63,7 +63,7 @@
 \def\declareJoyLoLCoAlg[#1][#2]{
   \startcomponent[#2]
   \startchapter[#1]
-  \directlua{thirddata.joylol.newCoAlg('#2')}
+  \directlua{thirddata.joyLoLCoAlgs.newCoAlg('#2')}
 }
 
 \let\startJoyLoLCoAlg=\declareJoyLoLCoAlg
@@ -78,7 +78,7 @@
   \stopcomponent
 }
 
-% from file: codeManipulation.tex after line: 100
+% from file: codeManipulation.tex after line: 150
 
 \unexpanded\def\srcCopyrightCCBYSA{}
 
@@ -92,7 +92,7 @@
   \directlua{thirddata.joyLoLCoAlgs.addDependency('#1')}
 }
 
-% from file: codeManipulation.tex after line: 150
+% from file: codeManipulation.tex after line: 200
 
 \def\startJoyLoLWord[#1]{
   \directlua{thirddata.joylol.newWord('#1')}
@@ -104,25 +104,25 @@
   \directlua{thirddata.joylol.endWord()}
 }
 
-% from file: codeManipulation.tex after line: 200
+% from file: codeManipulation.tex after line: 250
 
 \def\startJoyLoLStackActionIn[#1]{
   \directlua{thirddata.joylol.newStackActionIn('#1')}
 }
 
-% from file: codeManipulation.tex after line: 200
+% from file: codeManipulation.tex after line: 250
 
 \def\stopJoyLoLStackActionIn{
   \directlua{thirddata.joylol.endStackActionIn()}
 }
 
-% from file: codeManipulation.tex after line: 250
+% from file: codeManipulation.tex after line: 300
 
 \def\startJoyLoLStackActionOut[#1]{
   \directlua{thirddata.joylol.newStackActionOut('#1')}
 }
 
-% from file: codeManipulation.tex after line: 250
+% from file: codeManipulation.tex after line: 300
 
 \def\stopJoyLoLStackActionOut{
   \directlua{thirddata.joylol.endStackActionOut()}
@@ -138,7 +138,7 @@
   \directlua{thirddata.joylol.addPostDataStackDescription('#1')}
 }
 
-% from file: codeManipulation.tex after line: 300
+% from file: codeManipulation.tex after line: 350
 
 \def\preProcessStack[#1][#2]{
   \directlua{thirddata.joylol.addPreProcessStackDescription('#1', '#2')}
@@ -148,7 +148,7 @@
   \directlua{thirddata.joylol.addPostProcessStackDescription('#1')}
 }
 
-% from file: codeManipulation.tex after line: 350
+% from file: codeManipulation.tex after line: 400
 
 \defineLitProgs
   [JoyLoLCode]

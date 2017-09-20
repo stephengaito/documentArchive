@@ -97,42 +97,6 @@ local function addStrToListNamed(aCtx, aStr, listName)
   pushProcessQuoted(aCtx, listName)
 end
 
-function coAlgs.newCoAlg(coAlgName)
-  texio.write_nl('newCoAlg: ['..coAlgName..']')
-  theCoAlg               = {}
-  theCoAlg.name          = coAlgName
-  theCoAlg.ctx           = joyLoL.newContext()
-  theCoAlg.hasJoyLoLCode = false;
-  theCoAlg.hasLuaCode    = false;
-  theCoAlg.hasCHeader    = false;
-  theCoAlg.hasCCode      = false;
-  --
-  local aCtx = theCoAlg.ctx
-  pushProcess(aCtx, 'addToDict')
-  pushProcessQuoted(aCtx, coAlgName)
-  pushProcessQuoted(aCtx, 'coAlgName')
-  addNewList(aCtx, 'dependsOn')
-  addNewList(aCtx, 'wordOrder')
-  addNewDict(aCtx, 'words')
-  newDictionary(aCtx)
-  jEval(aCtx)
-  --
-  -- add the new word: "global"
-  --
-  coAlgs.newWord('global')
-end
-
-function coAlgs.addDependency(dependencyName)
-  texio.write_nl('addDependency: ['..dependencyName..']')
-  local aCtx = theCoAlg.ctx
-  pushProcess(aCtx, 'popData')
-  pushProcess(aCtx, 'appendToEndList')
-  pushProcessQuoted(aCtx, dependencyName)
-  pushProcess(aCtx, 'lookupInDict')
-  pushProcess(aCtx, 'dependsOn')
-  jEval(aCtx)
-end
-
 local function writeCodeFile(aCtx, coAlgName, templateName, filePath, fileExt)
   local outFilePath = string.format('%s/%s.%s', filePath, coAlgName, fileExt)
   local outFile = io.open(outFilePath, 'w')
@@ -356,19 +320,44 @@ interfaces.writestatus('joyLoLCoAlg', "loaded JoyLoL CoAlgs")
 
 -- from file: codeManipulation.tex after line: 50
 
+--local function newCoAlg(coAlgName)
+--  theCoAlg[coAlgName] =
+--    theCoAlg[coAlgName] or {}
+--  local lCoAlg        = theCoAlg[coAlgName]
+--  lCoAlg.name         = coAlgName
+--  lCoAlg.words        = lCoAlg.words or {}
+--  lCoAlg.words.global = {}
+--end
+
 local function newCoAlg(coAlgName)
-  theCoAlg[coAlgName] =
-    theCoAlg[coAlgName] or {}
-  local lCoAlg        = theCoAlg[coAlgName]
-  lCoAlg.name         = coAlgName
-  lCoAlg.words        = lCoAlg.words or {}
-  lCoAlg.words.global = {}
+  texio.write_nl('newCoAlg: ['..coAlgName..']')
+  theCoAlg               = {}
+  theCoAlg.name          = coAlgName
+  theCoAlg.ctx           = joyLoL.newContext()
+  theCoAlg.hasJoyLoLCode = false;
+  theCoAlg.hasLuaCode    = false;
+  theCoAlg.hasCHeader    = false;
+  theCoAlg.hasCCode      = false;
   build.coAlgsToBuild = build.coAlgsToBuild or {}
   tInsert(build.coAlgsToBuild, coAlgName)
   build.coAlgDependencies = build.coAlgDependencies or {}
+  --
+  --local aCtx = theCoAlg.ctx
+  --pushProcess(aCtx, 'addToDict')
+  --pushProcessQuoted(aCtx, coAlgName)
+  --pushProcessQuoted(aCtx, 'coAlgName')
+  --addNewList(aCtx, 'dependsOn')
+  --addNewList(aCtx, 'wordOrder')
+  --addNewDict(aCtx, 'words')
+  --newDictionary(aCtx)
+  --jEval(aCtx)
+  --
+  -- add the new word: "global"
+  --
+  --coAlgs.newWord('global')
 end
 
-joylol.newCoAlg = newCoAlg
+coAlgs.newCoAlg = newCoAlg
 
 -- from file: codeManipulation.tex after line: 100
 
@@ -377,7 +366,24 @@ end
 
 joylol.createCoAlg = createCoAlg
 
--- from file: codeManipulation.tex after line: 150
+-- from file: codeManipulation.tex after line: 200
+
+local function addDependency(dependencyName)
+  build.coAlgDependencies = build.coAlgDependencies or {}
+  tInsert(build.coAlgDependencies, dependencyName)
+  --texio.write_nl('addDependency: ['..dependencyName..']')
+  --local aCtx = theCoAlg.ctx
+  --pushProcess(aCtx, 'popData')
+  --pushProcess(aCtx, 'appendToEndList')
+  --pushProcessQuoted(aCtx, dependencyName)
+  --pushProcess(aCtx, 'lookupInDict')
+  --pushProcess(aCtx, 'dependsOn')
+  --jEval(aCtx)
+end
+
+coAlgs.addDependency = addDependency
+
+-- from file: codeManipulation.tex after line: 200
 
 local function newWord(aWord)
 end
@@ -391,35 +397,35 @@ end
 
 joylol.endWord = endWord
 
--- from file: codeManipulation.tex after line: 200
+-- from file: codeManipulation.tex after line: 250
 
 local function newStackActionIn(aWord)
 end
 
 joylol.newStackActionIn = newStackActionIn
 
--- from file: codeManipulation.tex after line: 200
+-- from file: codeManipulation.tex after line: 250
 
 local function endStackActionIn()
 end
 
 joylol.endStackActionIn = endStackActionIn
 
--- from file: codeManipulation.tex after line: 250
+-- from file: codeManipulation.tex after line: 300
 
 local function newStackActionOut(aWord)
 end
 
 joylol.newStackActionOut = newStackActionOut
 
--- from file: codeManipulation.tex after line: 250
+-- from file: codeManipulation.tex after line: 300
 
 local function endStackActionOut()
 end
 
 joylol.endStackActionOut = endStackActionOut
 
--- from file: codeManipulation.tex after line: 300
+-- from file: codeManipulation.tex after line: 350
 
 local function addPreDataStackDescription(arg1, arg2)
 end
@@ -431,7 +437,7 @@ end
 
 joylol.addPostDataStackDescription = addPostDataStackDescription
 
--- from file: codeManipulation.tex after line: 300
+-- from file: codeManipulation.tex after line: 350
 
 local function addPreProcessStackDescription(arg1, arg2)
 end

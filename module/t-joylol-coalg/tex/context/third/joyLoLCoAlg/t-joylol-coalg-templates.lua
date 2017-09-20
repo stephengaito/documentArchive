@@ -1,6 +1,6 @@
 -- A Lua template file
 
--- from file: preamble.tex after line: 400
+-- from file: preamble.tex after line: 350
 
 if not modules then modules = { } end modules ['t-joylol-coalg-templates'] = {
     version   = 1.000,

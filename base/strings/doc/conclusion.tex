@@ -76,33 +76,11 @@ int luaopen_joylol_strings (lua_State *lstate) {
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 
-\addJoyLoLTargets{default}
-
 \addCTestTargets{default}
 
+\addJoyLoLTargets{default}
+
 \compileLmsfile{default}
-
-\prependLmsfile{default}
-\startLmsfile
-c = c or {}
-c.cIncs = c.cIncs or {}
-tInsert(c.cIncs, tConcat({
-  '-I',
-  makePath{
-    getEnv('HOME'),
-    '.joylol',
-    'include'
-  }
-}, ''))
-
-c.libs = c.libs or {}
-tInsert(c.libs, makePath{
-  getEnv('HOME'),
-  '.joylol',
-  'joylol',
-  'coAlgs.so'
-})
-\stopLmsfile
 
 \createLmsfileFile%
   {default}%

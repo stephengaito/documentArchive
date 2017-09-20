@@ -57,7 +57,7 @@ Lua source file artefacts produced by this literate code documentation.
 \def\declareJoyLoLCoAlg[#1][#2]{
   \startcomponent[#2]
   \startchapter[#1]
-  \directlua{thirddata.joylol.newCoAlg('#2')}
+  \directlua{thirddata.joyLoLCoAlgs.newCoAlg('#2')}
 }
 
 \let\startJoyLoLCoAlg=\declareJoyLoLCoAlg
@@ -66,19 +66,44 @@ Lua source file artefacts produced by this literate code documentation.
 \stopMkIVCode
 
 \startLuaCode
+--local function newCoAlg(coAlgName)
+--  theCoAlg[coAlgName] =
+--    theCoAlg[coAlgName] or {}
+--  local lCoAlg        = theCoAlg[coAlgName]
+--  lCoAlg.name         = coAlgName
+--  lCoAlg.words        = lCoAlg.words or {}
+--  lCoAlg.words.global = {}
+--end
+
 local function newCoAlg(coAlgName)
-  theCoAlg[coAlgName] =
-    theCoAlg[coAlgName] or {}
-  local lCoAlg        = theCoAlg[coAlgName]
-  lCoAlg.name         = coAlgName
-  lCoAlg.words        = lCoAlg.words or {}
-  lCoAlg.words.global = {}
+  texio.write_nl('newCoAlg: ['..coAlgName..']')
+  theCoAlg               = {}
+  theCoAlg.name          = coAlgName
+  theCoAlg.ctx           = joyLoL.newContext()
+  theCoAlg.hasJoyLoLCode = false;
+  theCoAlg.hasLuaCode    = false;
+  theCoAlg.hasCHeader    = false;
+  theCoAlg.hasCCode      = false;
   build.coAlgsToBuild = build.coAlgsToBuild or {}
   tInsert(build.coAlgsToBuild, coAlgName)
   build.coAlgDependencies = build.coAlgDependencies or {}
+  -- 
+  --local aCtx = theCoAlg.ctx
+  --pushProcess(aCtx, 'addToDict')
+  --pushProcessQuoted(aCtx, coAlgName)
+  --pushProcessQuoted(aCtx, 'coAlgName')
+  --addNewList(aCtx, 'dependsOn')
+  --addNewList(aCtx, 'wordOrder')
+  --addNewDict(aCtx, 'words')
+  --newDictionary(aCtx)
+  --jEval(aCtx)
+  --
+  -- add the new word: "global"
+  --
+  --coAlgs.newWord('global')
 end
 
-joylol.newCoAlg = newCoAlg
+coAlgs.newCoAlg = newCoAlg
 \stopLuaCode
 
 \subsubsection{Implementation: Start: Tests}
@@ -171,6 +196,23 @@ joylol.createCoAlg = createCoAlg
   \directlua{thirddata.joyLoLCoAlgs.addDependency('#1')}
 }
 \stopMkIVCode
+
+\startLuaCode
+local function addDependency(dependencyName)
+  build.coAlgDependencies = build.coAlgDependencies or {}
+  tInsert(build.coAlgDependencies, dependencyName)
+  --texio.write_nl('addDependency: ['..dependencyName..']')
+  --local aCtx = theCoAlg.ctx
+  --pushProcess(aCtx, 'popData')
+  --pushProcess(aCtx, 'appendToEndList')
+  --pushProcessQuoted(aCtx, dependencyName)
+  --pushProcess(aCtx, 'lookupInDict')
+  --pushProcess(aCtx, 'dependsOn')
+  --jEval(aCtx)
+end
+
+coAlgs.addDependency = addDependency
+\stopLuaCode
 
 \section{JoyLoL word environment}
 
