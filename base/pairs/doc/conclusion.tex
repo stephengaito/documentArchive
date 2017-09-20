@@ -1,0 +1,88 @@
+% A ConTeXt document [master document: pairs.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_PAIRS}
+\createCHeaderFile%
+  {public}
+  {joylol/pairs.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_PAIRS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/pairs-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <assert.h>
+
+#include <joylol/coAlgs.h>
+\stopCCode
+
+\appendCCode{default}
+\startCCode
+static int lua_pairs_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  const char* aValue = "no valid key provided";
+  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
+  lua_pushstring(lstate, aValue);
+  return 1;
+}
+
+static size_t joylol_register_pairs(lua_State *lstate) {
+  registerCoAlgebra(
+    lstate,
+    "Pairs",
+    joylol_register_pairs,
+    NULL, // no equality function
+    NULL  // no booleans-data
+  );
+  
+  // in future... register Pairs words with JoyLoL dictionary. 
+  
+  return TRUE;
+}
+
+static const struct luaL_Reg lua_pairs [] = {
+  {"gitVersion", lua_pairs_getGitVersion},
+  {NULL, NULL}
+};
+
+int luaopen_joylol_pairs (lua_State *lstate) {
+  joylol_register_pairs(lstate);
+  luaL_newlib(lstate, lua_pairs);
+  return 1;
+}
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {pairs.c}%
+  {}
+
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{pairs.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{install}
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

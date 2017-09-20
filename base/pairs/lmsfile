@@ -1,0 +1,66 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('build/joylol')
+lfs.mkdir('install')
+lfs.mkdir('install/joylol')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'pairs.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/pairs.h',
+    'joylol/pairs-private.h',
+    'pairs.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets{
+  coAlgs = {
+    'pairs',
+  },
+  srcFiles = {
+    'joylol/pairs.h',
+    'joylol/pairs-private.h',
+    'pairs.c',
+  },
+  coAlgLibs = {
+    'coAlgs',
+  },
+  buildDir = 'build',
+}
+
+require 'lms.contests'
+
+contests.targets{
+  testExecs = {
+    'allCTests',
+  },
+  mainDoc = 'pairs.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/pairs.h',
+    'joylol/pairs-private.h',
+    'pairs.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
