@@ -4,6 +4,58 @@
 
 \addDocumentDirectory{doc}
 
+Before we actually we write out the \type{CoAlgs} C-header file, provide 
+some standard definitions, the most important of which deal with 
+memory allocation and alignment as well as a simple \type{DEBUG} system. 
+
+\prependCHeader{public}
+\startCHeader
+#include <stdlib.h>
+#include <string.h>
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+
+#ifndef JOYLOL_SYSTEM_CONFIG_PATH
+#define JOYLOL_SYSTEM_CONFIG_PATH "/usr/local/etc/joyLoL"
+#endif
+
+#ifndef JOYLOL_SYSTEM_PLUGINS_PATH
+#define JOYLOL_SYSTEM_PLUGINS_PATH "/usr/local/lib/joyLoL"
+#endif
+
+#ifndef JOYLOL_COALGS_INCREMENT
+#define JOYLOL_COALGS_INCREMENT 10
+#endif
+ 
+#ifndef NULL
+#define NULL (void*)0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#define MEM_ALIGNMENT ((size_t)0x7)
+#define IS_MEM_ALIGNED(someMem) \
+  (!( ((size_t)(someMem)) & (MEM_ALIGNMENT) ))
+
+extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
+#define joyLoLCalloc(numItems, itemType) \
+  (itemType*)joyLoLCalloc0((numItems), sizeof(itemType))
+
+#ifndef NDEBUG
+#include <stdio.h>
+#define DEBUG(debugFlag, format, ... ) \
+  if (debugFlag) { printf( format, __VA_ARGS__ ); fflush(stdout); }
+#else
+#define DEBUG(...)
+#endif
+\stopCHeader
+
 \CHeaderIncludeGuard{public}{JOYLOL_COALG_COALGS}
 \createCHeaderFile%
   {public}%
@@ -65,13 +117,13 @@ int luaopen_joylol_coAlgs (lua_State *lstate) {
 \stopCCode
 
 \createCCodeFile%
-  {class}%
-  {coAlgs-class.c}%
+  {coAlgHandles}%
+  {coAlgHandles.c}%
   {}
 
 \createCCodeFile%
-  {instance}%
-  {coAlgs-instance.c}%
+  {coAlgebras}%
+  {coAlgebras.c}%
   {}
 
 \createCTestFile%
@@ -81,8 +133,8 @@ int luaopen_joylol_coAlgs (lua_State *lstate) {
 
 \addMainDocument{coAlgs.tex}
 \addSubDocument{overview.tex} 
-\addSubDocument{classCode.tex}
-\addSubDocument{instanceCode.tex} 
+\addSubDocument{coAlgHandles.tex}
+\addSubDocument{coAlgebras.tex} 
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

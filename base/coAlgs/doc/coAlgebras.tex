@@ -1,10 +1,9 @@
 % A ConTeXt document [master document: coAlgs.tex]
 
-\section[title=Class Code]
+\section[title=CoAlgebras]
 
 \setCHeaderStream{public}
-\setCCodeStream{class}
-\setCTestStream{class}
+\setCCodeStream{coAlgebras}
 \addCTestInclude{<joylol/coAlgs.h>}
 
 In this section we concentrate on the C code required to implement the 
@@ -15,56 +14,7 @@ registration and listing of new \quote{external} CoAlgebras. The instance
 part, discussed in the next section, manages the creation and removal of 
 CoAlgebra \quote{values} (more commonly know as \quote{object} instances). 
 
-We begin by setting up some standard C header defines, the most important 
-of which deal with memory allocation and alignment as well as a simple 
-\type{DEBUG} system. 
 
-\startCHeader
-#include <stdlib.h>
-#include <string.h>
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#ifndef JOYLOL_SYSTEM_CONFIG_PATH
-#define JOYLOL_SYSTEM_CONFIG_PATH "/usr/local/etc/joyLoL"
-#endif
-
-#ifndef JOYLOL_SYSTEM_PLUGINS_PATH
-#define JOYLOL_SYSTEM_PLUGINS_PATH "/usr/local/lib/joyLoL"
-#endif
-
-#ifndef JOYLOL_COALGS_INCREMENT
-#define JOYLOL_COALGS_INCREMENT 10
-#endif
- 
-#ifndef NULL
-#define NULL (void*)0
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#define MEM_ALIGNMENT ((size_t)0x7)
-#define IS_MEM_ALIGNED(someMem) \
-  (!( ((size_t)(someMem)) & (MEM_ALIGNMENT) ))
-
-extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
-#define joyLoLCalloc(numItems, itemType) \
-  (itemType*)joyLoLCalloc0((numItems), sizeof(itemType))
-
-#ifndef NDEBUG
-#include <stdio.h>
-#define DEBUG(debugFlag, format, ... ) \
-  if (debugFlag) { printf( format, __VA_ARGS__ ); fflush(stdout); }
-#else
-#define DEBUG(...)
-#endif
-\stopCHeader
 
 The ANSI-C implementation of a CoAlgebra is as a simple \type{struct} 
 which contains the following items:
@@ -184,8 +134,10 @@ should probably be accessible with as few memory accesses as possible.
 
 \startCHeader
 typedef struct coalgebras_struct {
-  size_t numCoAlgs;
-  size_t maxNumCoAlgs;
+  size_t       numCoAlgs;
+  size_t       maxNumCoAlgs;
+  HandleMemory handleMemory;
+  CoAlgebra*   coAlgs;
 } CoAlgebras;
 
 #define getCoAlgebrasVector(coAlgs) \

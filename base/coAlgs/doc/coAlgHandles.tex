@@ -1,14 +1,54 @@
 % A ConTeXt document [master document: coAlgs.tex]
 
-\section[title=Instance Code]
+\section[title=CoAlgHandles]
 
-%\setCHeaderStream{public}
-\setCHeaderStream{unUsed}
+Since the implementation of any particular CoAlgebraic extension will of 
+necessity make use of \type{CoAlgHandle}s, we \emph{begin} by providing 
+their implementation. While a programming \quote{handle} typically has no 
+publicly accessible internal structure, our \type{CoAlgHandle} have a 
+simple three part structure. 
+
+The first (type) part is a \type{CoAlgebra*} pointer to the data structure 
+which represents the CoAlgebra for which the handle is a handle. This 
+CoAlgebra pointer ensures that the implementation code knows what the 
+given handle, is a handle \emph{for}, as well as what is can \emph{do}. 
+
+The second (flag) part is a collection of bits to provide useful 
+meta-flags associated with a handle. At least three of these meta-flags 
+are reserved by the JoyLoL interpreter to signal ongoing garbage 
+collection, equality determination as well as printing. Since any handle 
+is potentially part of a cyclic structure, these meta-flags ensure garbage 
+collection, equality detection and printing do not fall into infinite 
+cycles. 
+
+All non-reserved meta-flags may be used by the CoAlgebra implementation 
+for its own internal purposes. Typically meta-flags might be used to 
+signal how to interpret the data stored in the third (data) part of the 
+handle. For the \type{Naturals} CoAlgebraic extension, a meta-flag will be 
+used to signal that the handle's data part is a pointer to a Gnu 
+Multi-precision integer, rather than to a double word integer. This allows 
+significant speed optimizations in the typical cases, but allows for full 
+data representations in rare but important cases. 
+
+All reserved meta-flags will be located in low order bits of the flag data 
+word. This ensures that any CoAlgebraic extension which makes use of 
+meta-flags can simple rotate the reserved flags off the end of the word 
+before making use of the non-reserved flags. In particular a CoAlgebraic 
+extension \emph{could} interpret its flags as an integer or pointer. Such 
+interpretations are private to each extension, and should \emph{not} be 
+relied upon by code which is not part of the code's own extension. 
+
+The third (data) part is a \emph{pair} of \type{CoAlgHandle*} pointers. 
+The \emph{most} common use of a \type{CoAlgHandle} will be as a list 
+\quote{pair}, which contains Lisp-like \type{car} and \type{cdr} pointers 
+to other lists. However, the data part of a handle, can be used in any way 
+in which an extension wishes to use them. For example the \type{Naturals} 
+extension, might use this pair of pointers as alternatively, a double word 
+integer, or as a pointer to a more complex data structure. 
+
+\setCHeaderStream{public}
 \startCHeader
-#ifndef JOYLOL_LISTS_H
-#define JOYLOL_LISTS_H
-
-// We mark Pairs/Atoms using the least significant three bits of the car
+// We mark CoAlgHandles using the least significant three bits of the car
 // pointer.
 //
 // The least significant bit is used as the mark-sweep marker.
@@ -18,73 +58,37 @@
 // The next least signficant bit is used as the equal-sweep marker.
 #define EQUAL_MARKER            0x4L
 
-// The higher bits are used as a pointer to either a CoAlg object:
-//#define AS_COALG(aPtr) ((CoAlgebra*)(((size_t)aPtr) & (~(MEM_ALIGNMENT))))
-//#define AS_TAG(aPtr)   ((size_t)aPtr)
+typedef struct coalgebra_handle_struct {
+  CoAlgebra*   coAlg;
+  size_t       tag;  // an arbitrary collection of bits
+  CoAlgHandle* car;
+  CoAlgHandle* cdr;
+} CoAlgHandle;
 
-// A Pair consists of a pair of pointers the car and cdr pointers,
-// pointing to another Pair/Atom.
-//
-// An Atom consists of a tag and a pointer pointing to either a
-// String/Symbol or a Function.
+typedef struct handle_block_struct {
+  CoAlgHandle* block;
+  struct handle_block_struct* nextBlock;
+} HandleBlock;
 
-typedef struct pair_atom_struct PairAtom; // pre-defined to break circular definition below
+typedef struct handle_memory_struct {
+  HandleBlock* rootHandleBlock;
+  CoAlgHandle* freeHandles;
+} HandleMemory;
 
-typedef struct pair_atom_struct {
-  CoAlgebra*        coAlg;
-  size_t            tag;
-  union {
-    Assertion*      assertion;
-    Boolean         boolean;
-    Context*        context;
-    Description*    description;
-    JoyLoLFunction* func;
-    Natural         natural;
-    Observation*    observation;
-    Pair            pair;
-    Symbol*         symbol;
-  };
-} PairAtom;
+HandleMemory* createHandleMemory(void);
 
-typedef struct list_block_struct {
-  PairAtom* block;
-  struct list_block_struct* nextBlock;
-} ListBlock;
-
-typedef struct list_memory_struct {
-  ListBlock* rootListBlock;
-  PairAtom*  freePairs;
-} ListMemory;
-
-ListMemory* createListMemory(void);
-
-extern PairAtom* newPairAtom(CoAlgebras* coAlgs);
-
-extern PairAtom* newPair(CoAlgebras* coAlgs, PairAtom* car, PairAtom* cdr);
-
-extern PairAtom* copyLoL(CoAlgebras* coAlgs, PairAtom* aLoL);
-
-#define equalLoL(lolA, lolB) equalLoLDebug(lolA, lolB, FALSE)
-extern size_t equalLoLDebug(PairAtom* lolA, PairAtom* lolB, size_t debugFlag);
-
-#endif
+extern CoAlgHandle* newHandle(CoAlgebras* coAlgs);
 \stopCHeader
 
-%\setCHeaderStream{private}
-\setCHeaderStream{unUsed}
+\setCHeaderStream{private}
 \startCHeader
-#define LIST_BLOCK_SIZE 1024
+#define HANDLE_BLOCK_SIZE 1024
 
-extern void collectGarbage(ListMemory* someListMemory);
-extern void addListBlock(ListMemory* someListMemory);
+extern void collectGarbage(HandleMemory* someHandleMemory);
+extern void addListBlock(HandleMemory* someHandleMemory);
 \stopCHeader
 
-\setCCodeStream{instance}
-\startCCode
-// do nothing!
-\stopCCode
-
-\setCCodeStream{unUsed}
+\setCCodeStream{coAlgHandles}
 \startCCode
 #include <stdlib.h>
 #include <string.h>

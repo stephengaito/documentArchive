@@ -2,7 +2,38 @@
 
 \section[title=Overview]
 
-\subsection[title=Goals]
+The whole of the JoyLoL language is oriented around the concept of lists. 
+For \emph{pure} JoyLoL, all CoAlgebras are implemented directly as lists 
+of lists. \emph{The only things there are, in \emph{pure} JoyLoL, are 
+lists}. 
+
+For the \emph{impure} version of JoyLoL, provided in this release, we 
+permit the existence of CoAlgebras which are implemented using 
+computational structures related to the underlying computer architecture 
+upon which the JoyLoL interpreter is running. Potentially, impure versions 
+of JoyLoL might run faster. However the cost of greater performance is the 
+greater possibility that the underlying implementation might not be as 
+rigorously proven correct as a pure version of JoyLoL. Equally 
+importantly, \emph{impure} versions of JoyLoL, allow, \quote{a bear of 
+little brain}, like myself, to think in terms of higher level concepts 
+while programming the fundamental algorithms in the theory associated with 
+JoyLoL. 
+
+Since no general purpose computer processor is designed as a pure list 
+processor, \emph{any} implementation of JoyLoL (pure or impure) will of 
+necessity contain non-list code which is used to \emph{implement} lists. 
+The purpose of this CoAlgebraic extension is to provide as simple and 
+opaque an implementation of lists as possible. 
+
+In fact, \emph{this} (core) CoAlgebraic extension does not actually 
+implement lists. The implementation of lists is reserved for the 
+\type{Pairs} CoAlgebraic extension developed in a separate document. 
+
+This \type{CoAlgs} CoAlgebraic extension provides the infrastructure with 
+which to both organize the currently loaded collection of CoAlgebras, as 
+well as provide \type{CoAlgHandle}s which represent individual instances 
+of any loaded CoAlgebra. Of particular importance is that these 
+\type{CoAlgHandle}s are automatically garbage collected. 
 
 The CoAlgebras \quote{extension} provides the basis upon which the whole 
 of the JoyLoL implementation is built. It provides a first class 
