@@ -4,7 +4,6 @@
 
 \setCHeaderStream{public}
 \setCCodeStream{coAlgebras}
-\addCTestInclude{<joylol/coAlgs.h>}
 
 In this section we concentrate on the C code required to implement the 
 kernel JoyLoL CoAlgebra. The CoAlgebra, \type{CoAlg}, is the base of the 
@@ -40,10 +39,7 @@ the interpreter's dictionary of words.
 \stopitemize
 
 \startCHeader
-typedef struct coalgebras_struct        CoAlgebras;
-typedef struct coalgebra_struct         CoAlgebra;
-typedef struct coalgebra_handle_struct  CoAlgHandle;
-typedef const char                      Symbol;
+typedef const char Symbol;
 
 typedef size_t (CoAlgRegister)(lua_State*);
 typedef size_t (CoAlgEquality)(CoAlgebra*,
@@ -54,12 +50,12 @@ typedef size_t (CoAlgEquality)(CoAlgebra*,
 typedef void *CoAlgData;
 
 typedef struct coalgebra_struct {
-  size_t          isA;
-  Symbol*         name;
-  CoAlgRegister*  registerFunc;
-  CoAlgEquality*  equalityFunc;
-  //CoAlgPrintStr*  printStrFunc;
-  CoAlgData       coAlgData;
+  size_t         isA;
+  Symbol*        name;
+  CoAlgRegister* registerFunc;
+  CoAlgEquality* equalityFunc;
+  //CoAlgPrintStr* printStrFunc;
+  CoAlgData      coAlgData;
 } CoAlgebra;
 \stopCHeader
 
@@ -136,7 +132,7 @@ should probably be accessible with as few memory accesses as possible.
 typedef struct coalgebras_struct {
   size_t       numCoAlgs;
   size_t       maxNumCoAlgs;
-  HandleMemory handleMemory;
+  HandleMemory hMem;
   CoAlgebra*   coAlgs;
 } CoAlgebras;
 

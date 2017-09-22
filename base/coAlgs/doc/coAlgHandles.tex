@@ -8,18 +8,19 @@ their implementation. While a programming \quote{handle} typically has no
 publicly accessible internal structure, our \type{CoAlgHandle}s have a 
 simple three part structure. 
 
-The first (type) part is a \type{CoAlgebra*} pointer to the data structure 
-which represents the CoAlgebra for which the handle is a handle. This 
-CoAlgebra pointer ensures that the implementation code knows what the 
-given handle, is a handle \emph{for}, as well as what it can \emph{do}. 
+\subsection[title=Type part] The first (type) part is a \type{CoAlgebra*} 
+pointer to the data structure which represents the CoAlgebra for which the 
+handle is a handle. This CoAlgebra pointer ensures that the implementation 
+code knows what the given handle, is a handle \emph{for}, as well as what 
+it can \emph{do}. 
 
-The second (flag) part is a collection of bits to provide useful 
-meta-flags associated with a handle. At least three of these meta-flags 
-are reserved by the JoyLoL interpreter to signal ongoing garbage 
-collection, equality determination as well as printing. Since any handle 
-is potentially part of a cyclic structure, these meta-flags ensure garbage 
-collection, equality detection and printing do not fall into infinite 
-cycles. 
+\subsection[title=Flag part] The second (flag) part is a collection of 
+bits to provide useful meta-flags associated with a handle. At least three 
+of these meta-flags are reserved by the JoyLoL interpreter to signal 
+ongoing garbage collection, equality determination as well as printing. 
+Since any handle is potentially part of a cyclic structure, these 
+meta-flags ensure garbage collection, equality detection and printing do 
+not fall into infinite cycles. 
 
 All non-reserved meta-flags may be used by the implementation of a 
 CoAlgebra extension for its own internal purposes. Typically meta-flags 
@@ -38,202 +39,200 @@ extension \emph{could} interpret its flags as an integer or pointer. Such
 interpretations are private to each extension, and should \emph{not} be 
 relied upon by code which is not part of the code's own extension. 
 
-The third (data) part is a union of the four typical ways a \emph{pair} of 
-words might be used. One important use case is as a pair of 
-\type{CoAlgHandle*} pointers. The \emph{most} common use of a 
-\type{CoAlgHandle} will be as a list \quote{pair}, which contains 
+As \quote{global} meta-flags we reserve the following three 
+\emph{low-order} bits together with a Mask of all three bits and the 
+number of reserverd bits to shift (left). 
+
+\startCHeader
+#define MARK_SWEEP_FLAG     0x1L
+#define PRINT_FLAG          0x2L
+#define EQUAL_FLAG          0x4L
+#define RESERVED_FLAG_MASK  0x7L
+#define RESERVED_FLAG_SHIFT 3
+\stopCHeader
+
+\subsection[title=Data part] The third (data) part is a union of the four 
+typical ways a \emph{pair} of words might be used. One important use case 
+is as a pair of \type{CoAlgHandle*} pointers. The \emph{most} common use 
+of a \type{CoAlgHandle} will be as a list \quote{pair}, which contains 
 Lisp-like \type{car} and \type{cdr} pointers to other lists. However, the 
 data part of a handle, can be used in any way in which an extension wishes 
 to use them. For example the \type{Naturals} extension, might use this 
 pair of words as alternatively, a double word integer, a pair of single 
 word integers, or as a pointer to a more complex data structure. 
 
-\setCHeaderStream{public}
-
-We begin the implementation by pre-defining the three most important 
-structures. We need to pre-define them here, since these three structures 
-are mutually recursive. 
-
-\startitemize
-
-\item A \type{CoAlgebras} represents the collection of all CoAlgebraic 
-extensions loaded into the current JoyLoL interpreter. Since all of the 
-parts of an JoyLoL interpreter is \emph{implemented} in one or other 
-CoAlgebraic extension, the \type{CoAlgebras} structure also represents a 
-running JoyLoL interpreter. 
-
-\startCHeader 
-typedef struct coalgebras_struct CoAlgebras;
-\stopCHeader 
-
-\item A \type{CoAlgebra} represents the standard (class) data and (class 
-or instance) methods associated with the implementation of a CoAlgebraic 
-extension. 
+We start by providing generic ANSI-C typedefs for each of these four 
+alternatives. 
 
 \startCHeader
-typedef struct coalgebra_struct CoAlgebra;
-\stopCHeader
+typedef struct two_pointers_struct {
+  CoAlgHandle* a;
+  CoAlgHandle* b;
+} TwoPointers;
 
-\item A \type{CoAlgHandle} represents a relatively opaque handle to one of 
-many possible \emph{instances} of a CoAlgebra. 
+typedef struct two_words_struct {
+  size_t a;
+  size_t b;
+} TwoWords;
 
-\startCHeader
-typedef struct coalgebra_handle_struct CoAlgHandle;
-\stopCHeader 
-\stopitemize
-
-\startCHeader
+typedef struct mixed_word_struct {
+  void* ptr;
+  size_t wrd;
+} MixedWords;
 
 #ifdef __LP64__
-#define DoubleWord uint128_t
+#define DoubleWord __uint128_t
 #else
 #define DoubleWord uint64_t
 #endif
 
 
+typedef union {
+  TwoPointers ptrs;
+  TwoWords    words;
+  MixedWords  mixed;
+  DoubleWord  dword;
+} HandleData;
+\stopCHeader
+
+Now using these typedefs we define a \type{CoAlgHandle} as:
+
+\startCHeader
 typedef struct coalgebra_handle_struct {
-  CoAlgebra*   coAlg;
-  size_t       tag;  // an arbitrary collection of bits
-  union {
-    struct {
-      CoAlgHandle* a;
-      CoAlgHandle* b;
-    } ptrs;
-    struct {
-      size_t a;
-      size_t b;
-    } words;
-    struct {
-      void* ptr;
-      size_t wrd;
-    } mixed;
-    DoubleWord dword;
-  };
+  CoAlgebra*   type;
+  size_t       flags;  // an arbitrary collection of bits
+  HandleData   data;
 } CoAlgHandle;
 \stopCHeader
 
-\startCHeader
-// We mark CoAlgHandles using the least significant three bits of the car
-// pointer.
-//
-// The least significant bit is used as the mark-sweep marker.
-#define MARK_SWEEP_MARKER       0x1L
-// The next least significant bit is used as the print-sweep marker.
-#define PRINT_MARKER            0x2L
-// The next least signficant bit is used as the equal-sweep marker.
-#define EQUAL_MARKER            0x4L
-\stopCHeader
+\section[title=Handle Memory]
+
+Since a JoyLoL interpreter is essentially a list processor, any JoyLoL 
+program will create (and orphan) a very large number of list \type{Pairs} 
+over the course of a computation. This means that we need to make the 
+allocation and eventual garbage collection of orphaned \type{CoAlgHandles} 
+as efficient as possible.
+
+We do this by defining a \type{HandleMemory} as a pair of pointers. The 
+first pointer points to a linked list of free handles. The second pointer 
+points to a linked list of \type{HandleBlock}s. 
 
 \startCHeader
-typedef struct handle_block_struct {
-  CoAlgHandle* block;
-  struct handle_block_struct* nextBlock;
-} HandleBlock;
+typedef struct handle_block_struct HandleBlock;
 
 typedef struct handle_memory_struct {
-  HandleBlock* rootHandleBlock;
   CoAlgHandle* freeHandles;
+  HandleBlock* rootHandleBlock;
 } HandleMemory;
 
-HandleMemory* createHandleMemory(void);
+typedef struct handle_block_struct {
+  CoAlgHandle* block;
+  HandleBlock* nextBlock;
+} HandleBlock;
+\stopCHeader
 
+\subsection[title=Allocating new handles]
+
+To allocate a new \type{CoAlgHandle} the first free handle is taken from 
+the linked list of free handles. If there are no remaining free handles, 
+then we first attempt to collect any garbage and then if this fails to get 
+any new free handles, a new \type{HandleBlock} is allocated together with 
+its collection of free handles. 
+
+\setCCodeStream{coAlgHandles}
+\startCHeader
 extern CoAlgHandle* newHandle(CoAlgebras* coAlgs);
 \stopCHeader
+
+\startCCode
+CoAlgHandle* newHandle(CoAlgebras* coAlgs) {
+  assert(coAlgs);
+  // ensure there are some free handles
+  if ( ! coAlgs->hMem.freeHandles ) collectGarbage(coAlgs);
+  if ( ! coAlgs->hMem.freeHandles ) addHandleBlock(coAlgs);
+  assert(coAlgs->hMem.freeHandles);
+
+  CoAlgHandle* aNewHandle = coAlgs->hMem.freeHandles;
+  coAlgs->hMem.freeHandles = aNewHandle->data.ptrs.b;
+
+  aNewHandle->type        = NULL;
+  aNewHandle->flags       = 0;
+  aNewHandle->data.ptrs.a = NULL;
+  aNewHandle->data.ptrs.b = NULL;
+
+  return aNewHandle;
+}
+\stopCCode
+
+\subsection[title=Allocating new Handle blocks]
 
 \setCHeaderStream{private}
 \startCHeader
 #define HANDLE_BLOCK_SIZE 1024
 
-extern void collectGarbage(HandleMemory* someHandleMemory);
-extern void addListBlock(HandleMemory* someHandleMemory);
+extern void addHandleBlock(CoAlgebras* coAlgs);
 \stopCHeader
 
-\setCCodeStream{unused}
-%\setCCodeStream{coAlgHandles}
+
 \startCCode
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+void addHandleBlock(CoAlgebras* coAlgs) {
+  DEBUG(FALSE, "addHandleBlock > %p %zu\n", 
+    coAlgs, (size_t)HANDLE_BLOCK_SIZE);
 
-#include "joylol/coAlgs.h"
-#include "joylol/coAlgs-private.h"
+  // obtain a new handle block
+  HandleBlock* aNewHandleBlock = 
+    (HandleBlock*)calloc(1, sizeof(HandleBlock));
+  assert( IS_MEM_ALIGNED(aNewHandleBlock) );
 
-ListMemory* createListMemory(void) {
-  ListMemory* someListMem = (ListMemory*) calloc(1, sizeof(ListMemory));
-  assert(someListMem);
-
-  // lazy initialization by addListBlock/newPairAtom
-  someListMem->rootListBlock = NULL;
-  someListMem->freePairs     = NULL;
-
-  return someListMem;
-}
-
-void addListBlock(ListMemory* someListMem) {
-  DEBUG(FALSE, "addListBlock > %p %zu\n", someListMem, (size_t)LIST_BLOCK_SIZE);
-
-  // obtain a new list block
-  ListBlock* aNewListBlock = (ListBlock*)calloc(1, sizeof(ListBlock));
-  assert( !( ((long int)aNewListBlock) & ((long int)0x7) ) );
-
-  // integrate this new list block into the linked list of
-  // list blocks
-  if ( someListMem->rootListBlock ) {
-    ListBlock *lastListBlock = someListMem->rootListBlock;
-    while ( lastListBlock->nextBlock ) {
-      lastListBlock = lastListBlock->nextBlock;
+  // integrate this new handle block into the linked list of
+  // handle blocks
+  if ( coAlgs->hMem.rootHandleBlock ) {
+    HandleBlock *lastHandleBlock = coAlgs->hMem.rootHandleBlock;
+    while ( lastHandleBlock->nextBlock ) {
+      lastHandleBlock = lastHandleBlock->nextBlock;
     }
-    assert(lastListBlock->nextBlock == NULL);
-    lastListBlock->nextBlock = aNewListBlock;
+    assert(lastHandleBlock->nextBlock == NULL);
+    lastHandleBlock->nextBlock = aNewHandleBlock;
   } else {
-    someListMem->rootListBlock = aNewListBlock;
+    coAlgs->hMem.rootHandleBlock = aNewHandleBlock;
   }
-  DEBUG(FALSE, "addListBlock = %p %p\n", someListMem, aNewListBlock);
+  DEBUG(FALSE, "addHandleBlock = %p %p\n", 
+    coAlgs, aNewHandleBlock);
 
-  // make sure this list block has some PairAtoms
-  aNewListBlock->block = (PairAtom*)calloc(LIST_BLOCK_SIZE, sizeof(PairAtom));
-  assert( aNewListBlock->block );
-  assert( !( ((long int)aNewListBlock->block) & ((long int)0x7) ) );
+  // make sure this handle block has some CoAlgHandles
+  aNewHandleBlock->block = 
+    (CoAlgHandle*)calloc(HANDLE_BLOCK_SIZE, sizeof(CoAlgHandle));
+  assert( aNewHandleBlock->block );
+  assert( IS_MEM_ALIGNED(aNewHandleBlock->block) );
 
-  // add these new pairAtoms to the free list
-  PairAtom* nextPairAtom = aNewListBlock->block;
-  PairAtom* lastPairAtom = nextPairAtom + LIST_BLOCK_SIZE - 1;
-  for ( ; nextPairAtom < lastPairAtom ; nextPairAtom++ ) {
-//    assert( !( ((long int)nextPairAtom) & ((long int)0x7) ) );
-    nextPairAtom->pair.car = NULL;
-    nextPairAtom->pair.cdr = nextPairAtom + 1;
+  // add these new CoAlgHandles to the free list
+  CoAlgHandle* nextHandle = aNewHandleBlock->block;
+  CoAlgHandle* lastHandle = nextHandle + HANDLE_BLOCK_SIZE - 1;
+  for ( ; nextHandle < lastHandle ; nextHandle++ ) {
+//    assert( IS_MEM_ALIGNED(nextPairAtom) );
+    nextHandle->data.ptrs.a = NULL;
+    nextHandle->data.ptrs.b = nextHandle + 1;
   }
-  nextPairAtom->pair.cdr = someListMem->freePairs;
-  someListMem->freePairs = aNewListBlock->block;
-  DEBUG(FALSE, "addListBlock < %p %p %p\n", someListMem,
-        aNewListBlock, aNewListBlock->block);
-}
-
-void collectGarbage(ListMemory* someListMem) {
-  DEBUG(FALSE, "collectGarbage %p\n", someListMem);
-  // add a garbage collection mark-sweep here
-}
-
-PairAtom* newPairAtom(CoAlgebras* coAlgs) {
-  assert(coAlgs);
-  assert(coAlgs->pairs);
-  ListMemory* someListMem = coAlgs->pairs->listMemory;
-  // ensure there are some list blocks
-  if ( ! someListMem->freePairs ) collectGarbage(someListMem);
-  if ( ! someListMem->freePairs ) addListBlock(someListMem);
-  assert(someListMem->freePairs);
-
-  PairAtom* aNewPairAtom = someListMem->freePairs;
-  someListMem->freePairs = aNewPairAtom->pair.cdr;
-
-  aNewPairAtom->coAlg    = NULL;
-  aNewPairAtom->pair.car = NULL;
-  aNewPairAtom->pair.cdr = NULL;
-
-  return aNewPairAtom;
+  nextHandle->data.ptrs.b = coAlgs->hMem.freeHandles;
+  coAlgs->hMem.freeHandles = aNewHandleBlock->block;
+  DEBUG(FALSE, "addHandleBlock < %p %p %p\n",
+    coAlgs, aNewHandleBlock, aNewHandleBlock->block);
 }
 \stopCCode
 
+\subsection[title=Garbage collection]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void collectGarbage(CoAlgebras* coAlgs);
+\stopCHeader
+
+\startCCode
+void collectGarbage(CoAlgebras* coAlgs) {
+  DEBUG(FALSE, "collectGarbage %p\n", coAlgs);
+  // add a garbage collection mark-sweep here
+}
+\stopCCode
 
 \starttyping
 #include <stdio.h>
@@ -266,15 +265,15 @@ void Test_newListBlock(CuTest* tc) {
   ListMemory* someListMem = createListMemory();
 
   CuAssertPtrNull(tc, someListMem->rootListBlock);
-  CuAssertPtrNull(tc, someListMem->freePairs);
+  CuAssertPtrNull(tc, someListMem->freeHandles);
 
   addListBlock(someListMem);
   CuAssertPtrNotNull(tc, someListMem->rootListBlock);
   CuAssertPtrNotNull(tc, someListMem->rootListBlock->block);
   CuAssertPtrNull(tc, someListMem->rootListBlock->nextBlock);
-  CuAssertPtrNotNull(tc, someListMem->freePairs);
+  CuAssertPtrNotNull(tc, someListMem->freeHandles);
 
-  // check to make sure freePairs list is correctly linked
+  // check to make sure freeHandles list is correctly linked
   PairAtom* nextPairAtom = someListMem->rootListBlock->block;
   PairAtom* lastPairAtom = nextPairAtom + LIST_BLOCK_SIZE - 1;
   for ( ; nextPairAtom < lastPairAtom ; nextPairAtom++ ) {
@@ -283,17 +282,17 @@ void Test_newListBlock(CuTest* tc) {
     CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, nextPairAtom + 1);
   }
   CuAssertPtrNull(tc, nextPairAtom->pair.cdr);
-  CuAssertPtrEquals(tc, someListMem->freePairs, someListMem->rootListBlock->block);
+  CuAssertPtrEquals(tc, someListMem->freeHandles, someListMem->rootListBlock->block);
 
   // add another list block
-  PairAtom* oldFreePairs = someListMem->freePairs;
+  PairAtom* oldFreeHandles = someListMem->freeHandles;
   addListBlock(someListMem);
   CuAssertPtrNotNull(tc, someListMem->rootListBlock->nextBlock);
   CuAssertPtrNotNull(tc, someListMem->rootListBlock->nextBlock->block);
   CuAssertPtrNull(tc, someListMem->rootListBlock->nextBlock->nextBlock);
-  CuAssertPtrNotNull(tc, someListMem->freePairs);
+  CuAssertPtrNotNull(tc, someListMem->freeHandles);
 
-  // check to make sure freePairs list is correctly linked
+  // check to make sure freeHandles list is correctly linked
   nextPairAtom = someListMem->rootListBlock->nextBlock->block;
   lastPairAtom = nextPairAtom + LIST_BLOCK_SIZE - 1;
   for ( ; nextPairAtom < lastPairAtom ; nextPairAtom++ ) {
@@ -301,8 +300,8 @@ void Test_newListBlock(CuTest* tc) {
     CuAssertPtrNull(tc, nextPairAtom->pair.car);
     CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, nextPairAtom + 1);
   }
-  CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, oldFreePairs);
-  CuAssertPtrEquals(tc, someListMem->freePairs, someListMem->rootListBlock->nextBlock->block);
+  CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, oldFreeHandles);
+  CuAssertPtrEquals(tc, someListMem->freeHandles, someListMem->rootListBlock->nextBlock->block);
 }
 
 void Test_newPairAtom(CuTest* tc) {
@@ -312,16 +311,16 @@ void Test_newPairAtom(CuTest* tc) {
   ListMemory* someListMem = coAlgs->pairs->listMemory;
   CuAssertPtrNotNull(tc, someListMem);
 
-  CuAssertPtrNotNull(tc, someListMem->freePairs);
-  PairAtom* oldFreePairs = someListMem->freePairs;
-  PairAtom* newFreePairs = someListMem->freePairs->pair.cdr;
+  CuAssertPtrNotNull(tc, someListMem->freeHandles);
+  PairAtom* oldFreeHandles = someListMem->freeHandles;
+  PairAtom* newfreeHandles = someListMem->freeHandles->pair.cdr;
 
   PairAtom* aNewPair = newPairAtom(coAlgs);
   CuAssertPtrNotNull(tc, aNewPair );
   CuAssertPtrNull(tc, aNewPair->pair.car);
   CuAssertPtrNull(tc, aNewPair->pair.cdr);
-  CuAssertPtrEquals(tc, oldFreePairs, aNewPair);
-  CuAssertPtrEquals(tc, newFreePairs, someListMem->freePairs);
+  CuAssertPtrEquals(tc, oldFreeHandles, aNewPair);
+  CuAssertPtrEquals(tc, newfreeHandles, someListMem->freeHandles);
 }
 
 void Test_printPairs(CuTest* tc) {

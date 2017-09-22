@@ -20,6 +20,7 @@ litProgs.targets{
   srcFiles = {
     'joylol/coAlgs.h',
     'joylol/coAlgs-private.h',
+    'coAlgHandles.c',
     'coAlgebras.c',
   },
   buildDir  = 'build',
@@ -36,6 +37,7 @@ joylol.targets{
   srcFiles = {
     'joylol/coAlgs.h',
     'joylol/coAlgs-private.h',
+    'coAlgHandles.c',
     'coAlgebras.c',
   },
   coAlgLibs = {
@@ -59,6 +61,7 @@ contests.targets{
   srcFiles = {
     'joylol/coAlgs.h',
     'joylol/coAlgs-private.h',
+    'coAlgHandles.c',
     'coAlgebras.c',
   },
   buildDir  = 'build',

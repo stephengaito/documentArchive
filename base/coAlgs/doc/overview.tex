@@ -20,7 +20,7 @@ while programming the fundamental algorithms in the theory associated with
 JoyLoL. 
 
 Since no general purpose computer processor is designed as a pure list 
-processor, \emph{any} implementation of JoyLoL (pure or impure) will of 
+processor, \emph{any implementation} of JoyLoL (pure or impure) will of 
 necessity contain non-list code which is used to \emph{implement} lists. 
 The purpose of this CoAlgebraic extension is to provide as simple and 
 transparent an implementation of lists as possible. 
@@ -38,6 +38,40 @@ of any loaded CoAlgebra. Of particular importance is that these
 The CoAlgebras \quote{extension} provides the basis upon which the whole 
 of the JoyLoL implementation is built. It provides a first class 
 interface. 
+
+\setCHeaderStream{public}
+
+We begin our implementation by pre-defining the three most important 
+structures. We need to pre-define them here, since these three structures 
+are mutually recursive. 
+
+\startitemize
+
+\item A \type{CoAlgebras} represents the collection of all CoAlgebraic 
+extensions loaded into the current JoyLoL interpreter. Since all of the 
+parts of any JoyLoL interpreter are \emph{implemented} in one or other 
+CoAlgebraic extension, the \type{CoAlgebras} structure also represents a 
+running JoyLoL interpreter. 
+
+\startCHeader 
+typedef struct coalgebras_struct CoAlgebras;
+\stopCHeader 
+
+\item A \type{CoAlgebra} represents the standard (class) data and (class 
+or instance) methods associated with the implementation of a CoAlgebraic 
+extension. 
+
+\startCHeader
+typedef struct coalgebra_struct CoAlgebra;
+\stopCHeader
+
+\item A \type{CoAlgHandle} represents a relatively opaque handle to one of 
+many possible \emph{instances} of a CoAlgebra. 
+
+\startCHeader
+typedef struct coalgebra_handle_struct CoAlgHandle;
+\stopCHeader 
+\stopitemize
 
 The memory extension provides a first class JoyLoL implementation of 
 \quote{memory}. A memory block has:
