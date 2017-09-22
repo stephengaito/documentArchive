@@ -173,8 +173,10 @@ size_t registerCoAlgebra(
     assert(coAlgs);
     setCoAlgebras(lstate, coAlgs);
     
-    coAlgs->numCoAlgs    = 0;
-    coAlgs->maxNumCoAlgs = JOYLOL_COALGS_INCREMENT;
+    coAlgs->numCoAlgs            = 0;
+    coAlgs->maxNumCoAlgs         = JOYLOL_COALGS_INCREMENT;
+    coAlgs->hMem.freeHandles     = NULL;
+    coAlgs->hMem.rootHandleBlock = NULL;
   }
   coAlgsVec = getCoAlgebrasVector(coAlgs);
   assert((((void*)coAlgsVec)-((void*)coAlgs)) == sizeof(CoAlgebras));
@@ -246,6 +248,8 @@ completely new CoAlgebras structure.
       fakeRegisterFunc, fakeEqualityFunc, fakeCoAlgData);
   CoAlgebras *coAlgs = getCoAlgebras(lstate);
   AssertPtrNotNull(coAlgs);
+  AssertPtrNull(coAlgs->hMem.freeHandles);
+  AssertPtrNull(coAlgs->hMem.rootHandleBlock);
   CoAlgebra *coAlgsVec = getCoAlgebrasVector(coAlgs);
   AssertIntEquals(
     (((void*)coAlgsVec)-((void*)coAlgs)),

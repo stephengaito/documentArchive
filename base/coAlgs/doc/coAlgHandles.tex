@@ -133,6 +133,8 @@ typedef struct handle_block_struct {
 
 \subsection[title=Allocating new handles]
 
+\startTestSuite[newHandle]
+
 To allocate a new \type{CoAlgHandle} the first free handle is taken from 
 the linked list of free handles. If there are no remaining free handles, 
 then we first attempt to collect any garbage and then if this fails to get 
@@ -164,7 +166,46 @@ CoAlgHandle* newHandle(CoAlgebras* coAlgs) {
 }
 \stopCCode
 
+\startTestCase[Allocate one new CoAlgHandle]
+\startCTest
+  CoAlgebras* coAlgs = getCoAlgebras(lstate);
+  AssertPtrNotNull(coAlgs);
+
+  AssertPtrNotNull(coAlgs->hMem.freeHandles);
+  CoAlgHandle* oldFreeHandles =
+    coAlgs->hMem.freeHandles;
+  CoAlgHandle* newfreeHandles = 
+    coAlgs->hMem.freeHandles->data.ptrs.b;
+
+  CoAlgHandle* aNewHandle = newHandle(coAlgs);
+  AssertPtrNotNull(aNewHandle );
+  AssertPtrNull(aNewHandle->data.ptrs.a);
+  AssertPtrNull(aNewHandle->data.ptrs.b);
+  AssertPtrEquals(oldFreeHandles, aNewHandle);
+  AssertPtrEquals(newfreeHandles, coAlgs->hMem.freeHandles);
+\stopCTest
+\stopTestCase
+
+\startTestCase[Allocate lots of new CoAlgHandles]
+
+\startCTest
+  CoAlgebras* coAlgs = getCoAlgebras(lstate);
+  AssertPtrNotNull(coAlgs);
+
+  CoAlgHandle* aNewHandle = NULL;
+  for ( size_t i = 0; i < 3*HANDLE_BLOCK_SIZE; i++ ) {
+    aNewHandle = newHandle(coAlgs);
+  }
+  AssertPtrNotNull(aNewHandle);
+  AssertPtrNull(aNewHandle->data.ptrs.a);
+  AssertPtrNull(aNewHandle->data.ptrs.b);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
 \subsection[title=Allocating new Handle blocks]
+
+\startTestSuite[addHandleBlock]
 
 \setCHeaderStream{private}
 \startCHeader
@@ -209,7 +250,7 @@ void addHandleBlock(CoAlgebras* coAlgs) {
   CoAlgHandle* nextHandle = aNewHandleBlock->block;
   CoAlgHandle* lastHandle = nextHandle + HANDLE_BLOCK_SIZE - 1;
   for ( ; nextHandle < lastHandle ; nextHandle++ ) {
-//    assert( IS_MEM_ALIGNED(nextPairAtom) );
+    assert( IS_MEM_ALIGNED(nextHandle) );
     nextHandle->data.ptrs.a = NULL;
     nextHandle->data.ptrs.b = nextHandle + 1;
   }
@@ -219,6 +260,57 @@ void addHandleBlock(CoAlgebras* coAlgs) {
     coAlgs, aNewHandleBlock, aNewHandleBlock->block);
 }
 \stopCCode
+
+\startTestCase[must add new handle block]
+\startCTest
+  // create the first list block and make sure it is 
+  // properly integrated into linked list of list blocks
+
+  CoAlgebras* coAlgs = getCoAlgebras(lstate);
+
+  AssertPtrNull(coAlgs->hMem.rootHandleBlock);
+  AssertPtrNull(coAlgs->hMem.freeHandles);
+
+  addHandleBlock(coAlgs);
+  AssertPtrNotNull(coAlgs->hMem.rootHandleBlock);
+  AssertPtrNotNull(coAlgs->hMem.rootHandleBlock->block);
+  AssertPtrNull(coAlgs->hMem.rootHandleBlock->nextBlock);
+  AssertPtrNotNull(coAlgs->hMem.freeHandles);
+
+  // check to make sure freeHandles list is correctly linked
+  CoAlgHandle* nextHandle = coAlgs->hMem.rootHandleBlock->block;
+  CoAlgHandle* lastHandle = nextHandle + HANDLE_BLOCK_SIZE - 1;
+  for ( ; nextHandle < lastHandle ; nextHandle++ ) {
+    AssertIntTrue(IS_MEM_ALIGNED(nextHandle));
+    AssertPtrNull(nextHandle->data.ptrs.a);
+    AssertPtrEquals(nextHandle->data.ptrs.b, nextHandle + 1);
+  }
+  AssertPtrNull(nextHandle->data.ptrs.b);
+  AssertPtrEquals(coAlgs->hMem.freeHandles,
+    coAlgs->hMem.rootHandleBlock->block);
+
+  // add another handle block
+  CoAlgHandle* oldFreeHandles = coAlgs->hMem.freeHandles;
+  addHandleBlock(coAlgs);
+  AssertPtrNotNull(coAlgs->hMem.rootHandleBlock->nextBlock);
+  AssertPtrNotNull(coAlgs->hMem.rootHandleBlock->nextBlock->block);
+  AssertPtrNull(coAlgs->hMem.rootHandleBlock->nextBlock->nextBlock);
+  AssertPtrNotNull(coAlgs->hMem.freeHandles);
+
+  // check to make sure freeHandles list is correctly linked
+  nextHandle = coAlgs->hMem.rootHandleBlock->nextBlock->block;
+  lastHandle = nextHandle + HANDLE_BLOCK_SIZE - 1;
+  for ( ; nextHandle < lastHandle ; nextHandle++ ) {
+    AssertIntTrue(IS_MEM_ALIGNED(nextHandle));
+    AssertPtrNull(nextHandle->data.ptrs.a);
+    AssertPtrEquals(nextHandle->data.ptrs.b, nextHandle + 1);
+  }
+  AssertPtrEquals(nextHandle->data.ptrs.b, oldFreeHandles);
+  AssertPtrEquals(coAlgs->hMem.freeHandles,
+    coAlgs->hMem.rootHandleBlock->nextBlock->block);
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \subsection[title=Garbage collection]
 
@@ -233,6 +325,8 @@ void collectGarbage(CoAlgebras* coAlgs) {
   // add a garbage collection mark-sweep here
 }
 \stopCCode
+
+Old unused CuTests.
 
 \starttyping
 #include <stdio.h>
@@ -258,71 +352,6 @@ void Test_createPairsCoAlgebra(CuTest* tc) {
   CuAssertPtrNotNull(tc, pairs->listMemory);
 }
 
-void Test_newListBlock(CuTest* tc) {
-  // create the first list block and make sure it is properly integrated
-  // into linked list of list blocks
-
-  ListMemory* someListMem = createListMemory();
-
-  CuAssertPtrNull(tc, someListMem->rootListBlock);
-  CuAssertPtrNull(tc, someListMem->freeHandles);
-
-  addListBlock(someListMem);
-  CuAssertPtrNotNull(tc, someListMem->rootListBlock);
-  CuAssertPtrNotNull(tc, someListMem->rootListBlock->block);
-  CuAssertPtrNull(tc, someListMem->rootListBlock->nextBlock);
-  CuAssertPtrNotNull(tc, someListMem->freeHandles);
-
-  // check to make sure freeHandles list is correctly linked
-  PairAtom* nextPairAtom = someListMem->rootListBlock->block;
-  PairAtom* lastPairAtom = nextPairAtom + LIST_BLOCK_SIZE - 1;
-  for ( ; nextPairAtom < lastPairAtom ; nextPairAtom++ ) {
-//    CuAssertTrue(tc, !( ((long int)nextPairAtom) & ((long int)0x7) ));
-    CuAssertPtrNull(tc, nextPairAtom->pair.car);
-    CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, nextPairAtom + 1);
-  }
-  CuAssertPtrNull(tc, nextPairAtom->pair.cdr);
-  CuAssertPtrEquals(tc, someListMem->freeHandles, someListMem->rootListBlock->block);
-
-  // add another list block
-  PairAtom* oldFreeHandles = someListMem->freeHandles;
-  addListBlock(someListMem);
-  CuAssertPtrNotNull(tc, someListMem->rootListBlock->nextBlock);
-  CuAssertPtrNotNull(tc, someListMem->rootListBlock->nextBlock->block);
-  CuAssertPtrNull(tc, someListMem->rootListBlock->nextBlock->nextBlock);
-  CuAssertPtrNotNull(tc, someListMem->freeHandles);
-
-  // check to make sure freeHandles list is correctly linked
-  nextPairAtom = someListMem->rootListBlock->nextBlock->block;
-  lastPairAtom = nextPairAtom + LIST_BLOCK_SIZE - 1;
-  for ( ; nextPairAtom < lastPairAtom ; nextPairAtom++ ) {
-//    CuAssertTrue(tc, !( ((long int)nextPairAtom) & ((long int)0x7) ));
-    CuAssertPtrNull(tc, nextPairAtom->pair.car);
-    CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, nextPairAtom + 1);
-  }
-  CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, oldFreeHandles);
-  CuAssertPtrEquals(tc, someListMem->freeHandles, someListMem->rootListBlock->nextBlock->block);
-}
-
-void Test_newPairAtom(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-  CuAssertPtrNotNull(tc, coAlgs->pairs);
-  ListMemory* someListMem = coAlgs->pairs->listMemory;
-  CuAssertPtrNotNull(tc, someListMem);
-
-  CuAssertPtrNotNull(tc, someListMem->freeHandles);
-  PairAtom* oldFreeHandles = someListMem->freeHandles;
-  PairAtom* newfreeHandles = someListMem->freeHandles->pair.cdr;
-
-  PairAtom* aNewPair = newPairAtom(coAlgs);
-  CuAssertPtrNotNull(tc, aNewPair );
-  CuAssertPtrNull(tc, aNewPair->pair.car);
-  CuAssertPtrNull(tc, aNewPair->pair.cdr);
-  CuAssertPtrEquals(tc, oldFreeHandles, aNewPair);
-  CuAssertPtrEquals(tc, newfreeHandles, someListMem->freeHandles);
-}
-
 void Test_printPairs(CuTest* tc) {
   CoAlgebras* coAlgs = createCoAlgebras();
   CuAssertPtrNotNull(tc, coAlgs);
@@ -334,18 +363,5 @@ void Test_printPairs(CuTest* tc) {
   CuAssertPtrNotNull(tc, aNewPair);
   CuAssertIntEquals(tc, printSizeDebug(aNewPair, FALSE), 28);
   CuAssertStrEquals(tc, printLoLDebug(aNewPair, FALSE), "( ( ) ) ( )");
-}
-
-void Test_allocateLotsOfPairAtoms(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-
-  PairAtom* aNewPair = NULL;
-  for ( size_t i = 0; i < 3*LIST_BLOCK_SIZE; i++ ) {
-    aNewPair = newPairAtom(coAlgs);
-  }
-  CuAssertPtrNotNull(tc, aNewPair);
-  CuAssertPtrNull(tc, aNewPair->pair.car);
-  CuAssertPtrNull(tc, aNewPair->pair.cdr);
 }
 \stoptyping
