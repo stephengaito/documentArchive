@@ -5,13 +5,13 @@
 Since the implementation of any particular CoAlgebraic extension will of 
 necessity make use of \type{CoAlgHandle}s, we \emph{begin} by providing 
 their implementation. While a programming \quote{handle} typically has no 
-publicly accessible internal structure, our \type{CoAlgHandle} have a 
+publicly accessible internal structure, our \type{CoAlgHandle}s have a 
 simple three part structure. 
 
 The first (type) part is a \type{CoAlgebra*} pointer to the data structure 
 which represents the CoAlgebra for which the handle is a handle. This 
 CoAlgebra pointer ensures that the implementation code knows what the 
-given handle, is a handle \emph{for}, as well as what is can \emph{do}. 
+given handle, is a handle \emph{for}, as well as what it can \emph{do}. 
 
 The second (flag) part is a collection of bits to provide useful 
 meta-flags associated with a handle. At least three of these meta-flags 
@@ -21,32 +21,97 @@ is potentially part of a cyclic structure, these meta-flags ensure garbage
 collection, equality detection and printing do not fall into infinite 
 cycles. 
 
-All non-reserved meta-flags may be used by the CoAlgebra implementation 
-for its own internal purposes. Typically meta-flags might be used to 
-signal how to interpret the data stored in the third (data) part of the 
-handle. For the \type{Naturals} CoAlgebraic extension, a meta-flag will be 
-used to signal that the handle's data part is a pointer to a Gnu 
-Multi-precision integer, rather than to a double word integer. This allows 
-significant speed optimizations in the typical cases, but allows for full 
-data representations in rare but important cases. 
+All non-reserved meta-flags may be used by the implementation of a 
+CoAlgebra extension for its own internal purposes. Typically meta-flags 
+might be used to signal how to interpret the data stored in the third 
+(data) part of the handle. For the \type{Naturals} CoAlgebraic extension, 
+a meta-flag will be used to signal that the handle's data part is a 
+pointer to a Gnu Multi-precision integer, rather than to a double word 
+integer. This allows significant speed optimizations in the typical cases, 
+but allows for full data representations in rare but important cases. 
 
 All reserved meta-flags will be located in low order bits of the flag data 
 word. This ensures that any CoAlgebraic extension which makes use of 
-meta-flags can simple rotate the reserved flags off the end of the word 
+meta-flags can simply rotate the reserved flags off the end of the word 
 before making use of the non-reserved flags. In particular a CoAlgebraic 
 extension \emph{could} interpret its flags as an integer or pointer. Such 
 interpretations are private to each extension, and should \emph{not} be 
 relied upon by code which is not part of the code's own extension. 
 
-The third (data) part is a \emph{pair} of \type{CoAlgHandle*} pointers. 
-The \emph{most} common use of a \type{CoAlgHandle} will be as a list 
-\quote{pair}, which contains Lisp-like \type{car} and \type{cdr} pointers 
-to other lists. However, the data part of a handle, can be used in any way 
-in which an extension wishes to use them. For example the \type{Naturals} 
-extension, might use this pair of pointers as alternatively, a double word 
-integer, or as a pointer to a more complex data structure. 
+The third (data) part is a union of the four typical ways a \emph{pair} of 
+words might be used. One important use case is as a pair of 
+\type{CoAlgHandle*} pointers. The \emph{most} common use of a 
+\type{CoAlgHandle} will be as a list \quote{pair}, which contains 
+Lisp-like \type{car} and \type{cdr} pointers to other lists. However, the 
+data part of a handle, can be used in any way in which an extension wishes 
+to use them. For example the \type{Naturals} extension, might use this 
+pair of words as alternatively, a double word integer, a pair of single 
+word integers, or as a pointer to a more complex data structure. 
 
 \setCHeaderStream{public}
+
+We begin the implementation by pre-defining the three most important 
+structures. We need to pre-define them here, since these three structures 
+are mutually recursive. 
+
+\startitemize
+
+\item A \type{CoAlgebras} represents the collection of all CoAlgebraic 
+extensions loaded into the current JoyLoL interpreter. Since all of the 
+parts of an JoyLoL interpreter is \emph{implemented} in one or other 
+CoAlgebraic extension, the \type{CoAlgebras} structure also represents a 
+running JoyLoL interpreter. 
+
+\startCHeader 
+typedef struct coalgebras_struct CoAlgebras;
+\stopCHeader 
+
+\item A \type{CoAlgebra} represents the standard (class) data and (class 
+or instance) methods associated with the implementation of a CoAlgebraic 
+extension. 
+
+\startCHeader
+typedef struct coalgebra_struct CoAlgebra;
+\stopCHeader
+
+\item A \type{CoAlgHandle} represents a relatively opaque handle to one of 
+many possible \emph{instances} of a CoAlgebra. 
+
+\startCHeader
+typedef struct coalgebra_handle_struct CoAlgHandle;
+\stopCHeader 
+\stopitemize
+
+\startCHeader
+
+#ifdef __LP64__
+#define DoubleWord uint128_t
+#else
+#define DoubleWord uint64_t
+#endif
+
+
+typedef struct coalgebra_handle_struct {
+  CoAlgebra*   coAlg;
+  size_t       tag;  // an arbitrary collection of bits
+  union {
+    struct {
+      CoAlgHandle* a;
+      CoAlgHandle* b;
+    } ptrs;
+    struct {
+      size_t a;
+      size_t b;
+    } words;
+    struct {
+      void* ptr;
+      size_t wrd;
+    } mixed;
+    DoubleWord dword;
+  };
+} CoAlgHandle;
+\stopCHeader
+
 \startCHeader
 // We mark CoAlgHandles using the least significant three bits of the car
 // pointer.
@@ -57,14 +122,9 @@ integer, or as a pointer to a more complex data structure.
 #define PRINT_MARKER            0x2L
 // The next least signficant bit is used as the equal-sweep marker.
 #define EQUAL_MARKER            0x4L
+\stopCHeader
 
-typedef struct coalgebra_handle_struct {
-  CoAlgebra*   coAlg;
-  size_t       tag;  // an arbitrary collection of bits
-  CoAlgHandle* car;
-  CoAlgHandle* cdr;
-} CoAlgHandle;
-
+\startCHeader
 typedef struct handle_block_struct {
   CoAlgHandle* block;
   struct handle_block_struct* nextBlock;
@@ -88,14 +148,15 @@ extern void collectGarbage(HandleMemory* someHandleMemory);
 extern void addListBlock(HandleMemory* someHandleMemory);
 \stopCHeader
 
-\setCCodeStream{coAlgHandles}
+\setCCodeStream{unused}
+%\setCCodeStream{coAlgHandles}
 \startCCode
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "coAlgs.h"
-#include "coAlgs-private.h"
+#include "joylol/coAlgs.h"
+#include "joylol/coAlgs-private.h"
 
 ListMemory* createListMemory(void) {
   ListMemory* someListMem = (ListMemory*) calloc(1, sizeof(ListMemory));
