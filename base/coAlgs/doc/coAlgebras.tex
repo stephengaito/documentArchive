@@ -151,6 +151,28 @@ extern size_t registerCoAlgebra(
 );
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgebras* createNewCoAlgebras(void);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+CoAlgebras* createNewCoAlgebras(void) {
+  // we need to create a new coAlgs structure...
+  //
+  CoAlgebras* coAlgs = (CoAlgebras*)
+    calloc(1, sizeofCoAlgebras(JOYLOL_COALGS_INCREMENT));
+  assert(coAlgs);
+    
+  coAlgs->numCoAlgs            = 0;
+  coAlgs->maxNumCoAlgs         = JOYLOL_COALGS_INCREMENT; 
+  coAlgs->hMem.freeHandles     = NULL;
+  coAlgs->hMem.rootHandleBlock = NULL; 
+  return coAlgs;
+}
+\stopCCode
+
 \startCCode
 size_t registerCoAlgebra(
   lua_State     *lstate,
@@ -166,17 +188,8 @@ size_t registerCoAlgebra(
   // if coAlgs is NULL, we create a new one
   // if coAlgs is too small we expand it
   if (!coAlgs) {
-    // we need to create a new coAlgs structure...
-    //
-    coAlgs = (CoAlgebras*)
-      calloc(1, sizeofCoAlgebras(JOYLOL_COALGS_INCREMENT));
-    assert(coAlgs);
+    coAlgs = createNewCoAlgebras();
     setCoAlgebras(lstate, coAlgs);
-    
-    coAlgs->numCoAlgs            = 0;
-    coAlgs->maxNumCoAlgs         = JOYLOL_COALGS_INCREMENT;
-    coAlgs->hMem.freeHandles     = NULL;
-    coAlgs->hMem.rootHandleBlock = NULL;
   }
   coAlgsVec = getCoAlgebrasVector(coAlgs);
   assert((((void*)coAlgsVec)-((void*)coAlgs)) == sizeof(CoAlgebras));

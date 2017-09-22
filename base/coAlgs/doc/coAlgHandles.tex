@@ -168,16 +168,34 @@ CoAlgHandle* newHandle(CoAlgebras* coAlgs) {
 
 \startTestCase[Allocate one new CoAlgHandle]
 \startCTest
-  CoAlgebras* coAlgs = getCoAlgebras(lstate);
+  CoAlgebras* coAlgs = createNewCoAlgebras();
   AssertPtrNotNull(coAlgs);
 
+  AssertPtrNull(coAlgs->hMem.freeHandles);
+  AssertPtrNull(coAlgs->hMem.rootHandleBlock);
+
+  // get one new handle to ensure our lazily
+  // initialized handle memory structures 
+  // are initialized...
+  CoAlgHandle* aNewHandle = newHandle(coAlgs);
+
   AssertPtrNotNull(coAlgs->hMem.freeHandles);
+  AssertPtrNotNull(coAlgs->hMem.rootHandleBlock);
+  AssertPtrNotNull(aNewHandle );
+  AssertPtrNull(aNewHandle->data.ptrs.a);
+  AssertPtrNull(aNewHandle->data.ptrs.b);
+  AssertPtrEquals(aNewHandle,
+    coAlgs->hMem.rootHandleBlock->block);
+
+  // now get one more handle to ensure
+  // we can properly deal with handle blocks/memory
+  
   CoAlgHandle* oldFreeHandles =
     coAlgs->hMem.freeHandles;
   CoAlgHandle* newfreeHandles = 
     coAlgs->hMem.freeHandles->data.ptrs.b;
 
-  CoAlgHandle* aNewHandle = newHandle(coAlgs);
+  aNewHandle = newHandle(coAlgs);
   AssertPtrNotNull(aNewHandle );
   AssertPtrNull(aNewHandle->data.ptrs.a);
   AssertPtrNull(aNewHandle->data.ptrs.b);
@@ -189,7 +207,7 @@ CoAlgHandle* newHandle(CoAlgebras* coAlgs) {
 \startTestCase[Allocate lots of new CoAlgHandles]
 
 \startCTest
-  CoAlgebras* coAlgs = getCoAlgebras(lstate);
+  CoAlgebras* coAlgs = createNewCoAlgebras();
   AssertPtrNotNull(coAlgs);
 
   CoAlgHandle* aNewHandle = NULL;
@@ -266,7 +284,7 @@ void addHandleBlock(CoAlgebras* coAlgs) {
   // create the first list block and make sure it is 
   // properly integrated into linked list of list blocks
 
-  CoAlgebras* coAlgs = getCoAlgebras(lstate);
+  CoAlgebras* coAlgs = createNewCoAlgebras();
 
   AssertPtrNull(coAlgs->hMem.rootHandleBlock);
   AssertPtrNull(coAlgs->hMem.freeHandles);
