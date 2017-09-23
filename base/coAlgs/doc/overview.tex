@@ -47,14 +47,12 @@ are mutually recursive.
 
 \startitemize
 
-\item A \type{CoAlgebras} represents the collection of all CoAlgebraic 
-extensions loaded into the current JoyLoL interpreter. Since all of the 
-parts of any JoyLoL interpreter are \emph{implemented} in one or other 
-CoAlgebraic extension, the \type{CoAlgebras} structure also represents a 
-running JoyLoL interpreter. 
+\item A \type{JoyLoLInterp} represents the JoyLoL interpreter. It includes 
+the collection of all loaded CoAlgebraic extensions, as well as the handle 
+memory. 
 
 \startCHeader 
-typedef struct coalgebras_struct CoAlgebras;
+typedef struct joylol_interpreter_struct JoyLoLInterp;
 \stopCHeader 
 
 \item A \type{CoAlgebra} represents the standard (class) data and (class 

@@ -79,45 +79,50 @@ location in memory. It is declared external in \type{coAlg.h} and is
 declared \emph{only} in the \type{coAlg.so} itself. 
 
 \startCHeader
-extern void* coAlgebrasKey;
+extern void* jInterpKey;
 
-extern CoAlgebras* getCoAlgebras(lua_State *lstate);
-extern void setCoAlgebras(lua_State *lstate, CoAlgebras* coAlgs);
+extern JoyLoLInterp* getJoyLoLInterp(lua_State *lstate);
 \stopCHeader
 
-\startCCode
-void* coAlgebrasKey = NULL;
+\setCHeaderStream{private}
+\startCHeader
+extern void setJoyLoLInterp(lua_State *lstate, JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
 
-CoAlgebras* getCoAlgebras(lua_State *lstate) {
-  lua_rawgetp(lstate, LUA_REGISTRYINDEX, (void *)&coAlgebrasKey);
-  CoAlgebras* coAlgs = (CoAlgebras*)lua_touserdata (lstate, -1);
+\startCCode
+void* jInterpKey = NULL;
+
+JoyLoLInterp* getJoyLoLinterp(lua_State *lstate) {
+  lua_rawgetp(lstate, LUA_REGISTRYINDEX, (void *)&jInterpKey);
+  JoyLoLInterp* jInterp = (JoyLoLInterp*)lua_touserdata (lstate, -1);
   lua_pop(lstate, 1);
-  return coAlgs;
+  return jInterp;
 }
 
-void setCoAlgebras(lua_State *lstate, CoAlgebras* coAlgs) {
-  lua_pushlightuserdata (lstate, (void *)coAlgs);
-  lua_rawsetp(lstate, LUA_REGISTRYINDEX, (void *)&coAlgebrasKey);
+void setJoyLoLInterp(lua_State *lstate, JoyLoLInterp* jInterp) {
+  lua_pushlightuserdata (lstate, (void *)jInterp);
+  lua_rawsetp(lstate, LUA_REGISTRYINDEX, (void *)&jInterpKey);
 }
 \stopCCode
 
 \startTestCase[should set and get a Lua-State global CoAlgebras LightUserData]
 
 \startCTest
-  CoAlgebras* luaCoAlgs = getCoAlgebras(lstate);
-  AssertPtrNull(luaCoAlgs);
-  CoAlgebras* coAlgs = (CoAlgebras*)0x100;
-  setCoAlgebras(lstate, coAlgs);
-  luaCoAlgs = getCoAlgebras(lstate);
-  AssertPtrEquals(luaCoAlgs, coAlgs);
-  CoAlgebras* newCoAlgs = (CoAlgebras*)0x200;
-  setCoAlgebras(lstate, newCoAlgs);
-  luaCoAlgs = getCoAlgebras(lstate);
-  AssertPtrNotEquals(luaCoAlgs, coAlgs);
-  AssertPtrEquals(luaCoAlgs, newCoAlgs);
-  setCoAlgebras(lstate, NULL);
-  luaCoAlgs = getCoAlgebras(lstate);
-  AssertPtrNull(luaCoAlgs);
+  JoyLoLInterp* luaJInterp = getJoyLoLInterp(lstate);
+  AssertPtrNull(luaJInterp);
+  JoyLoLInterp* jInterp = (JoyLoLInterp*)0x100;
+  setJoyLoLInterp(lstate, jInterp);
+  luaJInterp = getJoyLoLInterp(lstate);
+  AssertPtrEquals(luaJInterp, jInterp);
+  JoyLoLInterp* newJInterp = (JoyLoLInterp*)0x200;
+  setJoyLoLInterp(lstate, newJInterp);
+  luaJInterp = getJoyLoLInterp(lstate);
+  AssertPtrNotEquals(luaJInterp, jInterp);
+  AssertPtrEquals(luaJInterp, newJInterp);
+  setJoyLoLInterp(lstate, NULL);
+  luaJInterp = getJoyLoLInterp(lstate);
+  AssertPtrNull(luaJInterp);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -130,72 +135,109 @@ should probably be accessible with as few memory accesses as possible.
 
 \startCHeader
 typedef struct coalgebras_struct {
-  size_t       numCoAlgs;
-  size_t       maxNumCoAlgs;
-  HandleMemory hMem;
-  CoAlgebra*   coAlgs;
+  size_t     num;
+  size_t     maxNum;
+  CoAlgebra* vec;
 } CoAlgebras;
 
-#define getCoAlgebrasVector(coAlgs) \
-  (CoAlgebra*) (((void*)(coAlgs)) + sizeof(CoAlgebras))
-
-#define sizeofCoAlgebras(numCoAlgs) \
-  (sizeof(CoAlgebras) + sizeof(CoAlgebra)*(numCoAlgs))
+typedef struct joylol_interpreter_struct {
+  HandleMemory hMem;
+  CoAlgebras   coAlgs;
+} JoyLoLInterp;
   
 extern size_t registerCoAlgebra(
-  lua_State     *lstate,
-  Symbol        *name,
-  CoAlgRegister *registerFunc,
-  CoAlgEquality *equalityFunc,
-  CoAlgData      coAlgData
+  lua_State *lstate,
+  CoAlgebra *theCoAlgebra
 );
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern CoAlgebras* createNewCoAlgebras(void);
+extern JoyLoLInterp* newJoyLoLInterp(void);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-CoAlgebras* createNewCoAlgebras(void) {
-  // we need to create a new coAlgs structure...
+JoyLoLInterp* newJoyLoLInterp(void) {
+  // we need to create a new JoyLoLInterp structure...
   //
-  CoAlgebras* coAlgs = (CoAlgebras*)
-    calloc(1, sizeofCoAlgebras(JOYLOL_COALGS_INCREMENT));
-  assert(coAlgs);
+  JoyLoLInterp* jInterp = 
+    (JoyLoLInterp*) calloc(1, sizeof(JoyLoLInterp));
+  assert(jInterp);
     
-  coAlgs->numCoAlgs            = 0;
-  coAlgs->maxNumCoAlgs         = JOYLOL_COALGS_INCREMENT; 
-  coAlgs->hMem.freeHandles     = NULL;
-  coAlgs->hMem.rootHandleBlock = NULL; 
-  return coAlgs;
+  size_t maxNum =
+    NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT;
+  jInterp->coAlgs.num    = 0;
+  jInterp->coAlgs.maxNum = maxNum
+  jInterp->coAlgs.vec    =
+    (CoAlgebra**) calloc(maxNum, sizeof(CoAlgebra*));
+  
+  jInterp->hMem.freeHandles     = NULL;
+  jInterp->hMem.rootHandleBlock = NULL; 
+  return jInterp;
 }
 \stopCCode
 
+\startCHeader
+#define CoAlgsTag         0
+#define BooleansTag       1
+#define CFunctionsTag     2
+#define ContextsTag       3
+#define DictionariesTag   4
+#define LFunctionsTag     5
+#define PairsTag          6
+#define ParsersTag        7
+#define RendererTag       8
+#define StringsTag        9
+#define TextsTag          10
+#define NumRequiredCoAlgs 11
+
+// see: http://semver.org/
+//
+typedef struct coalg_version_struct {
+  size_t major;
+  size_t minor;
+  size_t patch;
+} CoAlgVersion;
+\stopCHeader
+
 \startCCode
+
+typedef struct required_coalgs_struct {
+  const char*  name;
+  CoAlgVersion version;
+} RequiredCoAlgs;
+
+RequiredCoAlgs requiredCoAlgs[] = {
+  {"CoAlgs",       {0, 1, 0 }},
+  {"Booleans",     {0, 1, 0 }},
+  {"CFunctions",   {0, 1, 0 }},
+  {"Contexts",     {0, 1, 0 }},
+  {"Dictionaries", {0, 1, 0 }},
+  {"LFunctions",   {0, 1, 0 }},
+  {"Pairs",        {0, 1, 0 }},
+  {"Parsers",      {0, 1, 0 }},
+  {"Renderer",     {0, 1, 0 }},
+  {"Strings",      {0, 1, 0 }},
+  {"Texts",        {0, 1, 0 }}
+};
+
 size_t registerCoAlgebra(
-  lua_State     *lstate,
-  Symbol        *name,
-  CoAlgRegister *registerFunc,
-  CoAlgEquality *equalityFunc,
-  CoAlgData     coAlgData
+  lua_State *lstate,
+  CoAlgebra *theCoAlgebra
 ) {
-  CoAlgebras* coAlgs    = getCoAlgebras(lstate);
-  CoAlgebra*  coAlgsVec = NULL;
-
-  // we follow a policy of lazy management of the coAlgs
-  // if coAlgs is NULL, we create a new one
-  // if coAlgs is too small we expand it
-  if (!coAlgs) {
-    coAlgs = createNewCoAlgebras();
-    setCoAlgebras(lstate, coAlgs);
+  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
+  
+  // we follow a policy of lazy management of the jInterp
+  // if jInterp is NULL, we create a new one
+  // if jInterp->coAlgs is too small we expand it
+  if (!jInterp) {
+    jInterp = newJoyLoLInterp();
+    setJoyLoLInterp(lstate, jInterp);
   }
-  coAlgsVec = getCoAlgebrasVector(coAlgs);
-  assert((((void*)coAlgsVec)-((void*)coAlgs)) == sizeof(CoAlgebras));
 
-  for(size_t i = 0; i < coAlgs->numCoAlgs; i++ ) {
-    if (strcmp(name, coAlgsVec[i].name) == 0) {
+  for(size_t i = 0; i < jInterp->coAlgs.num; i++ ) {
+    if (strcmp(name, jInterp->coAlgs.vec[i]->name) == 0) {
     
       // a coAlgebra with this name has already been registered. 
       // so return its index...
@@ -203,43 +245,38 @@ size_t registerCoAlgebra(
     }
   }
   
-  if (coAlgs->maxNumCoAlgs <= coAlgs->numCoAlgs) {
+  if (jInterp->coAlgs.maxNum <= jInterp->coAlgs.num) {
     // we need to expand the existing coAlgs structure...
     //  
-    CoAlgebras *oldCoAlgs  = coAlgs;
-    
-    size_t oldNumCoAlgs    = coAlgs->numCoAlgs;
-    size_t oldMaxNumCoAlgs = coAlgs->maxNumCoAlgs;
+    CoAlgVector oldCoAlgs;
+    oldCoAlgs.num    = jInterp->coAlgs.num;
+    oldCoAlgs.maxNum = jInterp->coAlgs.maxNum;
+    oldCoAlgs.vec    = jInterp->coAlgs.vec;
     
     size_t newMaxNumCoAlgs =
-      oldMaxNumCoAlgs + JOYLOL_COALGS_INCREMENT;
+      oldCoAlgs.maxNum + JOYLOL_COALGS_INCREMENT;
 
-    coAlgs = calloc(1, sizeofCoAlgebras(newMaxNumCoAlgs));
-    assert(coAlgs);
-    setCoAlgebras(lstate, coAlgs);
+    jInterp->coAlgs.vec =
+      calloc(newMaxNumCoAlgs, sizeof(CoAlgebra*));
+    assert(jInterp->coAlgs.vec);
     
-    if (oldCoAlgs) {
-      memcpy(coAlgs, oldCoAlgs,
-        sizeofCoAlgebras(oldNumCoAlgs));
-      free(oldCoAlgs);
+    if (oldCoAlgs.vec) {
+      memcpy(jInterp->coAlgs.vec,
+        oldCoAlgs.vec,
+        sizeof(CoAlgebra*)*oldCoAlgs.num);
+      free(oldCoAlgs.vec);
     }
     
-    coAlgs->numCoAlgs    = oldNumCoAlgs;
-    coAlgs->maxNumCoAlgs = newMaxNumCoAlgs;
-
-    coAlgsVec = getCoAlgebrasVector(coAlgs);
+    jInterp->coAlgs.num    = oldCoAlgs.num;
+    jInterp->coAlgs.maxNum = newMaxNumCoAlgs;
   }
-  assert((((void*)coAlgsVec)-((void*)coAlgs)) == sizeof(CoAlgebras));
   
-  size_t newCoAlg = coAlgs->numCoAlgs;
+  size_t newCoAlg = jInterp->coAlgs.num;
   
-  coAlgsVec[newCoAlg].isA           = newCoAlg;
-  coAlgsVec[newCoAlg].name          = strdup(name);
-  coAlgsVec[newCoAlg].registerFunc  = registerFunc;
-  coAlgsVec[newCoAlg].equalityFunc  = equalityFunc;
-  coAlgsVec[newCoAlg].coAlgData     = coAlgData;
+  jInterp->coAlgs.vec[newCoAlg]      = theCoAlgebra;
+  jInterp->coAlgs.vec[newCoAlg]->isA = newCoAlg;
   
-  coAlgs->numCoAlgs++;
+  jInterp->coAlgs.num++;
   
   return newCoAlg;
 }
