@@ -60,47 +60,47 @@ extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
 \CHeaderIncludeGuard{public}{JOYLOL_COALG_COALGS}
 \createCHeaderFile%
   {public}%
-  {joylol/coAlgs.h}%
+  {joylol/jInterps.h}%
   {}
 
 \CHeaderIncludeGuard{private}{JOYLOL_COALG_COALGS_PRIVATE}
 \createCHeaderFile%
   {private}%
-  {joylol/coAlgs-private.h}%
+  {joylol/jInterps-private.h}%
   {}
 
   
-\setCCodeStream{coAlgHandles}
-\prependCCode{coAlgHandles}
+\setCCodeStream{handles}
+\prependCCode{handles}
 \startCCode
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "joylol/coAlgs.h"
-#include "joylol/coAlgs-private.h"
+#include "joylol/jInterps.h"
+#include "joylol/jInterps-private.h"
 \stopCCode
 
 \createCCodeFile%
-  {coAlgHandles}%
-  {coAlgHandles.c}%
+  {handles}%
+  {handles.c}%
   {}
 
-\prependCCode{joyLoLInterp}
+\prependCCode{interpreter}
 \startCCode
 #include <stdlib.h>
 #include <assert.h>
 
-#include <joylol/coAlgs.h>
+#include <joylol/jInterps.h>
 \stopCCode
 
 Now each shared library needs to implement the following code to provide 
 an interface between the generic C-implementation and the Lua module for 
 the shared library. 
 
-\appendCCode{joyLoLInterp}
+\appendCCode{interpreter}
 \startCCode
-static int lua_coAlgs_getGitVersion (lua_State *lstate) {
+static int lua_jInterps_getGitVersion (lua_State *lstate) {
   const char* aKey   = lua_tostring(lstate, 1);
   const char* aValue = "no valid key provided";
   if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
@@ -108,10 +108,10 @@ static int lua_coAlgs_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_coAlgs(lua_State *lstate) {
+static size_t joylol_register_jInterps(lua_State *lstate) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "CoAlgs";
-  theCoAlg->registerFunc = joylol_register_coAlgs;
+  theCoAlg->name         = "JInterps";
+  theCoAlg->registerFunc = joylol_register_jInterps;
   theCoAlg->equalityFunc = NULL;
   theCoAlg->coAlgData    = NULL;
   registerCoAlgebra(lstate, theCoAlg);
@@ -121,34 +121,34 @@ static size_t joylol_register_coAlgs(lua_State *lstate) {
   return TRUE;
 }
 
-static const struct luaL_Reg lua_coAlgs [] = {
-  {"gitVersion", lua_coAlgs_getGitVersion},
+static const struct luaL_Reg lua_jInterps [] = {
+  {"gitVersion", lua_jInterps_getGitVersion},
   {NULL, NULL}
 };
 
-int luaopen_joylol_coAlgs (lua_State *lstate) {
-  joylol_register_coAlgs(lstate);
-  luaL_newlib(lstate, lua_coAlgs);
+int luaopen_joylol_jInterps (lua_State *lstate) {
+  joylol_register_jInterps(lstate);
+  luaL_newlib(lstate, lua_jInterps);
   return 1;
 }
 \stopCCode
 
 \createCCodeFile%
-  {joyLoLInterp}%
-  {joyLoLInterp.c}%
+  {interpreter}%
+  {interpreter.c}%
   {}
 
-\addCTestInclude{<joylol/coAlgs.h>}
-\addCTestInclude{<joylol/coAlgs-private.h>}
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/jInterps-private.h>}
 \createCTestFile%
   {default}%
   {allCTests.c}%
   {}
 
-\addMainDocument{coAlgs.tex}
+\addMainDocument{jInterps.tex}
 \addSubDocument{overview.tex} 
-\addSubDocument{coAlgHandles.tex}
-\addSubDocument{joyLoLInterp.tex} 
+\addSubDocument{handles.tex}
+\addSubDocument{interpreter.tex} 
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

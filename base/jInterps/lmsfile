@@ -10,18 +10,18 @@ lfs.mkdir('install/joylol')
 require 'lms.litProgs'
 
 litProgs.targets{
-  mainDoc  = 'coAlgs.tex',
+  mainDoc  = 'jInterps.tex',
   docFiles = {
     'overview.tex',
-    'coAlgHandles.tex',
-    'joyLoLInterp.tex',
+    'handles.tex',
+    'interpreter.tex',
     'conclusion.tex',
   },
   srcFiles = {
-    'joylol/coAlgs.h',
-    'joylol/coAlgs-private.h',
-    'coAlgHandles.c',
-    'joyLoLInterp.c',
+    'joylol/jInterps.h',
+    'joylol/jInterps-private.h',
+    'handles.c',
+    'interpreter.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',
@@ -32,13 +32,13 @@ require 'lms.joyLoL'
 
 joylol.targets{
   coAlgs = {
-    'coAlgs',
+    'jInterps',
   },
   srcFiles = {
-    'joylol/coAlgs.h',
-    'joylol/coAlgs-private.h',
-    'coAlgHandles.c',
-    'joyLoLInterp.c',
+    'joylol/jInterps.h',
+    'joylol/jInterps-private.h',
+    'handles.c',
+    'interpreter.c',
   },
   coAlgLibs = {
   },
@@ -51,18 +51,18 @@ contests.targets{
   testExecs = {
     'allCTests',
   },
-  mainDoc = 'coAlgs.tex',
+  mainDoc = 'jInterps.tex',
   docFiles = {
     'overview.tex',
-    'coAlgHandles.tex',
-    'joyLoLInterp.tex',
+    'handles.tex',
+    'interpreter.tex',
     'conclusion.tex',
   },
   srcFiles = {
-    'joylol/coAlgs.h',
-    'joylol/coAlgs-private.h',
-    'coAlgHandles.c',
-    'joyLoLInterp.c',
+    'joylol/jInterps.h',
+    'joylol/jInterps-private.h',
+    'handles.c',
+    'interpreter.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',

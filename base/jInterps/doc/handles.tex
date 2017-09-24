@@ -141,7 +141,7 @@ then we first attempt to collect any garbage and then if this fails to get
 any new free handles, a new \type{HandleBlock} is allocated together with 
 its collection of free handles. 
 
-\setCCodeStream{coAlgHandles}
+\setCCodeStream{handles}
 \startCHeader
 extern CoAlgHandle* newHandle(JoyLoLInterp* jInterp);
 \stopCHeader
