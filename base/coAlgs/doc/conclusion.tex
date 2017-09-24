@@ -86,7 +86,7 @@ extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
   {coAlgHandles.c}%
   {}
 
-\prependCCode{coAlgebras}
+\prependCCode{joyLoLInterp}
 \startCCode
 #include <stdlib.h>
 #include <assert.h>
@@ -98,7 +98,7 @@ Now each shared library needs to implement the following code to provide
 an interface between the generic C-implementation and the Lua module for 
 the shared library. 
 
-\appendCCode{coAlgebras}
+\appendCCode{joyLoLInterp}
 \startCCode
 static int lua_coAlgs_getGitVersion (lua_State *lstate) {
   const char* aKey   = lua_tostring(lstate, 1);
@@ -109,13 +109,12 @@ static int lua_coAlgs_getGitVersion (lua_State *lstate) {
 }
 
 static size_t joylol_register_coAlgs(lua_State *lstate) {
-  registerCoAlgebra(
-    lstate,
-    "CoAlgs",
-    joylol_register_coAlgs,
-    NULL, // no equality function
-    NULL  // no coAlg-data
-  );
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = "CoAlgs";
+  theCoAlg->registerFunc = joylol_register_coAlgs;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->coAlgData    = NULL;
+  registerCoAlgebra(lstate, theCoAlg);
   
   // in future... register CoAlgs words with JoyLoL dictionary. 
   
@@ -135,8 +134,8 @@ int luaopen_joylol_coAlgs (lua_State *lstate) {
 \stopCCode
 
 \createCCodeFile%
-  {coAlgebras}%
-  {coAlgebras.c}%
+  {joyLoLInterp}%
+  {joyLoLInterp.c}%
   {}
 
 \addCTestInclude{<joylol/coAlgs.h>}
@@ -149,7 +148,7 @@ int luaopen_joylol_coAlgs (lua_State *lstate) {
 \addMainDocument{coAlgs.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{coAlgHandles.tex}
-\addSubDocument{coAlgebras.tex} 
+\addSubDocument{joyLoLInterp.tex} 
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

@@ -14,14 +14,14 @@ litProgs.targets{
   docFiles = {
     'overview.tex',
     'coAlgHandles.tex',
-    'coAlgebras.tex',
+    'joyLoLInterp.tex',
     'conclusion.tex',
   },
   srcFiles = {
     'joylol/coAlgs.h',
     'joylol/coAlgs-private.h',
     'coAlgHandles.c',
-    'coAlgebras.c',
+    'joyLoLInterp.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',
@@ -38,7 +38,7 @@ joylol.targets{
     'joylol/coAlgs.h',
     'joylol/coAlgs-private.h',
     'coAlgHandles.c',
-    'coAlgebras.c',
+    'joyLoLInterp.c',
   },
   coAlgLibs = {
   },
@@ -55,14 +55,14 @@ contests.targets{
   docFiles = {
     'overview.tex',
     'coAlgHandles.tex',
-    'coAlgebras.tex',
+    'joyLoLInterp.tex',
     'conclusion.tex',
   },
   srcFiles = {
     'joylol/coAlgs.h',
     'joylol/coAlgs-private.h',
     'coAlgHandles.c',
-    'coAlgebras.c',
+    'joyLoLInterp.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',

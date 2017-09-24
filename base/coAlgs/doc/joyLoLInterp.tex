@@ -1,0 +1,575 @@
+% A ConTeXt document [master document: coAlgs.tex]
+
+\section[title=JoyLoL interpreter]
+
+\setCHeaderStream{public}
+\setCCodeStream{joyLoLInterp}
+
+In this section we concentrate on the C code required to implement the 
+kernel JoyLoL CoAlgebra. The CoAlgebra, \type{CoAlg}, is the base of the 
+JoyLoL interpreter. This CoAlgebra has two parts, a \quote{class} part, 
+and an \quote{instance} part. This class part manages the loading, 
+registration and listing of new \quote{external} CoAlgebras. The instance 
+part, discussed in the next section, manages the creation and removal of 
+CoAlgebra \quote{values} (more commonly know as \quote{object} instances). 
+
+
+The ANSI-C implementation of a CoAlgebra is as a simple \type{struct} 
+which contains the following items:
+
+\startitemize
+
+\item a \type{size_t} value which is unique for each registered CoAlgebra 
+and hence acting as a test for identity, 
+
+\item a \type{Symbol} value which provides a human readable \emph{name} 
+for the CoAlgebra, 
+
+\item a \type{C-function} which (recursively) tests for equality of two 
+CoAlgebra instances of given type of CoAlgebra.
+
+\item a \type{C-function} with (re)registers a given CoAlgebra with the 
+JoyLoL interpreter. This registration function's primary purpose is two 
+fold. It registers the CoAlgebra with the central collection of known 
+CoAlgebras (to be discussed in the next subsection, below), as well as 
+registers the individual JoyLoL functions provided by the CoAlgebra with 
+the interpreter's dictionary of words. 
+
+\stopitemize
+
+\startCHeader
+typedef const char Symbol;
+
+typedef size_t (CoAlgRegister)(lua_State*);
+typedef size_t (CoAlgEquality)(CoAlgebra*,
+                               CoAlgHandle*,
+                               CoAlgHandle*,
+                               size_t);
+//typedef size_t (CoAlgPrintStr)(CoAlgHandle*, char*, size_t);
+typedef void *CoAlgData;
+
+typedef struct coalgebra_struct {
+  size_t         isA;
+  Symbol*        name;
+  CoAlgRegister* registerFunc;
+  CoAlgEquality* equalityFunc;
+  //CoAlgPrintStr* printStrFunc;
+  CoAlgData      coAlgData;
+} CoAlgebra;
+\stopCHeader
+
+\component gitVersion-c
+
+\subsection[title=JoyLoLInterp structures]
+
+The \type{JoyLoLInterp} structure provides access to all of the CoAlgebras 
+known to a given JoyLoL interpreter. As such it will be accessed 
+repeatedly, so should probably be accessible with as few memory accesses 
+as possible. 
+
+\startCHeader
+typedef struct coalgebras_struct {
+  size_t      num;
+  size_t      maxNum;
+  CoAlgebra** vec;
+} CoAlgebras;
+
+typedef struct joylol_interpreter_struct {
+  HandleMemory hMem;
+  CoAlgebras   coAlgs;
+} JoyLoLInterp;
+\stopCHeader
+
+\subsection[title=Required CoAlgebraic extensions]
+
+For any given (impure) implementation of a JoyLoL interpreter, there will 
+be a collection of CoAlgebraic extensions \emph{required} for the 
+interpreter to function. By listing this collection of required 
+extensions, we can give each one a unique and well known integer 
+identifier, which can be used in the running code to quickly verify the 
+class type of a given \type{CoAlgHandle}. 
+
+The required extensions for this implementation is:
+
+\startCHeader
+#define CoAlgsTag         0
+#define BooleansTag       1
+#define CFunctionsTag     2
+#define ContextsTag       3
+#define DictionariesTag   4
+#define LFunctionsTag     5
+#define PairsTag          6
+#define ParsersTag        7
+#define RendererTag       8
+#define StringsTag        9
+#define TextsTag          10
+#define NumRequiredCoAlgs 11
+\stopCHeader
+
+Since each CoAlgebraic extension can be developed separately, we need to 
+ensure there is a strict \emph{semantic} version control. We use the 
+\type{CoAlgVersion} structure to contain the corresponding Major, Minor, 
+and Patch version numbers for a given extension. Since our JoyLoL 
+interpreter might depend upon specific aspects of extension's the 
+\quote{Application Programming Interface} (API), our list of required 
+extensions, below, also contains the minimum required compatible version 
+of the extension. 
+
+\startCHeader
+// see: http://semver.org/
+//
+typedef struct coalg_version_struct {
+  size_t major;
+  size_t minor;
+  size_t patch;
+} CoAlgVersion;
+\stopCHeader
+
+When each CoAlgebraic extension is registered, its name is compared to the 
+following list of required extensions. If a match is found then the 
+corresponding (and well known) index is used to store a pointer to the 
+\type{CoAlgebra} structure for the given extension. If a match is found 
+the extension's current version is compared to the minimally required 
+version. The registration of the extension is only accepted if these 
+versions are compatible. 
+
+\startCCode
+typedef struct required_coalgs_struct {
+  const char*  name;
+  CoAlgVersion version;
+} RequiredCoAlgs;
+
+RequiredCoAlgs requiredCoAlgs[] = {
+  {"CoAlgs",       {0, 1, 0 }},
+  {"Booleans",     {0, 1, 0 }},
+  {"CFunctions",   {0, 1, 0 }},
+  {"Contexts",     {0, 1, 0 }},
+  {"Dictionaries", {0, 1, 0 }},
+  {"LFunctions",   {0, 1, 0 }},
+  {"Pairs",        {0, 1, 0 }},
+  {"Parsers",      {0, 1, 0 }},
+  {"Renderer",     {0, 1, 0 }},
+  {"Strings",      {0, 1, 0 }},
+  {"Texts",        {0, 1, 0 }}
+};
+\stopCCode
+
+\startTestSuite[newJoyLoLInterp]
+
+To be able to either test or use a JoyLoL interpreter, we must first be 
+able to obtain a new one. The (privately defined) \type{newJoyLoLInterp} 
+creates a new \type{JoyLoLInterp} structure and ensures it is properly 
+initialized. Note that we \emph{could} have multiple instances of 
+\type{JoyLoLInterp} in a running program. 
+
+\setCHeaderStream{private}
+\startCHeader
+extern JoyLoLInterp* newJoyLoLInterp(void);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JoyLoLInterp* newJoyLoLInterp(void) {
+  // we need to create a new JoyLoLInterp structure...
+  //
+  JoyLoLInterp* jInterp = 
+    (JoyLoLInterp*) calloc(1, sizeof(JoyLoLInterp));
+  assert(jInterp);
+    
+  size_t maxNum =
+    NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT;
+  jInterp->coAlgs.num    = NumRequiredCoAlgs;
+  jInterp->coAlgs.maxNum = maxNum;
+  jInterp->coAlgs.vec    =
+    (CoAlgebra**) calloc(maxNum, sizeof(CoAlgebra*));
+  
+  jInterp->hMem.freeHandles     = NULL;
+  jInterp->hMem.rootHandleBlock = NULL; 
+  return jInterp;
+}
+\stopCCode
+
+\startTestCase[should create a valid JoyLoLInterp instance]
+
+\startCTest
+  JoyLoLInterp *jInterp = newJoyLoLInterp();
+  AssertPtrNotNull(jInterp);
+  
+  AssertIntEquals(jInterp->coAlgs.num,
+    NumRequiredCoAlgs);
+  AssertIntEquals(jInterp->coAlgs.maxNum,
+    NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT);
+  AssertPtrNotNull(jInterp->coAlgs.vec);
+  
+  AssertPtrNull(jInterp->hMem.freeHandles);
+  AssertPtrNull(jInterp->hMem.rootHandleBlock);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[set/get Lua-state global JoyLoLInterp LightUserData]
+
+We want the ability to have different JoyLoL interpreters for each Lua 
+state. However, we also need fast access to the C-implementations of the 
+loaded CoAlgebras registered with a given JoyLoL interpreter. To achieve 
+this we use the Lua Registry with the \quote{well-known} key 
+\type{joyLoLInterpKey}. We store a pointer to the JoyLoL interpreter 
+\type{JoyLoLInterp}, as a LightUserData, in the Lua registry under the key 
+\type{joyLoLInterpKey}, so that it is only accessible by the C 
+implementation of any CoAlgebra. This ensures that the pointer to 
+\type{JoyLoLInterp} is unique for any particular Lua state, but can be 
+different for each distinct Lua state. 
+
+This means that \type{joyLoLInterpKey} must be a symbol which is unique in 
+the loaded executable, but has no meaningful value \emph{other than} its 
+location in memory. It is declared external in \type{coAlg.h} and is 
+declared \emph{only} in the \type{coAlg.so} itself. 
+
+\startCHeader
+extern void* joyLoLInterpKey;
+
+extern JoyLoLInterp* getJoyLoLInterp(lua_State *lstate);
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void setJoyLoLInterp(lua_State *lstate, JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void* joyLoLInterpKey = NULL;
+
+JoyLoLInterp* getJoyLoLInterp(lua_State *lstate) {
+  lua_rawgetp(lstate, LUA_REGISTRYINDEX, (void *)&joyLoLInterpKey);
+  JoyLoLInterp* jInterp = (JoyLoLInterp*)lua_touserdata (lstate, -1);
+  lua_pop(lstate, 1);
+  return jInterp;
+}
+
+void setJoyLoLInterp(lua_State *lstate, JoyLoLInterp* jInterp) {
+  lua_pushlightuserdata (lstate, (void *)jInterp);
+  lua_rawsetp(lstate, LUA_REGISTRYINDEX, (void *)&joyLoLInterpKey);
+}
+\stopCCode
+
+\startTestCase[should set and get a Lua-State global JoyLoLInterp 
+LightUserData] 
+
+\startCTest
+  JoyLoLInterp* luaJInterp = getJoyLoLInterp(lstate);
+  AssertPtrNull(luaJInterp);
+  JoyLoLInterp* jInterp = (JoyLoLInterp*)0x100;
+  setJoyLoLInterp(lstate, jInterp);
+  luaJInterp = getJoyLoLInterp(lstate);
+  AssertPtrEquals(luaJInterp, jInterp);
+  JoyLoLInterp* newJInterp = (JoyLoLInterp*)0x200;
+  setJoyLoLInterp(lstate, newJInterp);
+  luaJInterp = getJoyLoLInterp(lstate);
+  AssertPtrNotEquals(luaJInterp, jInterp);
+  AssertPtrEquals(luaJInterp, newJInterp);
+  setJoyLoLInterp(lstate, NULL);
+  luaJInterp = getJoyLoLInterp(lstate);
+  AssertPtrNull(luaJInterp);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[createTheJoyLoLInterp]
+
+Having defined \type{newJoyLoLInterp} to create a new \type{JoyLoLInterp} 
+structure, as well as the \type{getJoyLoLInterp} and 
+\type{setJoyLoLInterp} to register a \emph{unique} \type{JoyLoLInterp} 
+structure with a given Lua state, we now need a \emph{public} way to 
+create \emph{and} register a \emph{unique} \type{JoLoLInterp}. 
+
+\startCHeader
+extern JoyLoLInterp *createTheJoyLoLInterp(lua_State *lstate);
+\stopCHeader
+
+\startCCode
+JoyLoLInterp *createTheJoyLoLInterp(lua_State *lstate) {
+  JoyLoLInterp *jInterp = newJoyLoLInterp();
+  setJoyLoLInterp(lstate, jInterp);
+  return jInterp;
+}
+\stopCCode
+
+\startTestCase[should create a unique JoyLoLInterp]
+
+\startCTest
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  AssertPtrNull(jInterp);
+  jInterp = createTheJoyLoLInterp(lstate);
+  AssertPtrNotNull(jInterp);
+  AssertPtrEquals(getJoyLoLInterp(lstate), jInterp);
+  // now unregister the JoyLoLInterp
+  setJoyLoLInterp(lstate, NULL);
+  AssertPtrNull(getJoyLoLInterp(lstate));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerCoAlgebra]
+
+\startCHeader
+extern size_t registerCoAlgebra(
+  lua_State *lstate,
+  CoAlgebra *theCoAlgebra
+);
+\stopCHeader
+
+\startCCode
+size_t registerCoAlgebra(
+  lua_State *lstate,
+  CoAlgebra *theCoAlg
+) {
+  assert(theCoAlg);
+  
+  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
+  
+  // we follow a policy of lazy management of the jInterp
+  // if jInterp is NULL, we create a new one
+  // if jInterp->coAlgs is too small we expand it
+  if (!jInterp) {
+    jInterp = createTheJoyLoLInterp(lstate);
+  }
+
+  for(size_t i = 0; i < jInterp->coAlgs.num; i++ ) {
+    if (jInterp->coAlgs.vec[i]) {
+      if (strcmp(theCoAlg->name,
+        jInterp->coAlgs.vec[i]->name) == 0) {
+    
+        // a coAlgebra with this name has already been registered. 
+        // so return its index...
+        return i;
+      }
+    }
+  }
+  // NEED TO CHECK if this is a REQUIRED extension....
+  
+  if (jInterp->coAlgs.maxNum <= jInterp->coAlgs.num) {
+    // we need to expand the existing coAlgs structure...
+    //  
+    CoAlgebras oldCoAlgs;
+    oldCoAlgs.num    = jInterp->coAlgs.num;
+    oldCoAlgs.maxNum = jInterp->coAlgs.maxNum;
+    oldCoAlgs.vec    = jInterp->coAlgs.vec;
+    
+    size_t newMaxNumCoAlgs =
+      oldCoAlgs.maxNum + JOYLOL_COALGS_INCREMENT;
+
+    jInterp->coAlgs.vec =
+      calloc(newMaxNumCoAlgs, sizeof(CoAlgebra*));
+    assert(jInterp->coAlgs.vec);
+    
+    if (oldCoAlgs.vec) {
+      memcpy(jInterp->coAlgs.vec,
+        oldCoAlgs.vec,
+        sizeof(CoAlgebra*)*oldCoAlgs.num);
+      free(oldCoAlgs.vec);
+    }
+    
+    jInterp->coAlgs.num    = oldCoAlgs.num;
+    jInterp->coAlgs.maxNum = newMaxNumCoAlgs;
+  }
+  
+  size_t newCoAlg = jInterp->coAlgs.num;
+  
+  jInterp->coAlgs.vec[newCoAlg]      = theCoAlg;
+  jInterp->coAlgs.vec[newCoAlg]->isA = newCoAlg;
+  
+  jInterp->coAlgs.num++;
+  
+  return newCoAlg;
+}
+\stopCCode
+
+\startTestCase[should create a new JoyLoLInterp]
+
+We start by adding one single \type{CoAlgebra}, this tests the creation of 
+a completely new \type{JoyLoLInterp} structure. 
+
+\startCTest
+  char*          coAlgName        = strdup("newCoAlgA");
+  char*          coAlgNameEnd     = coAlgName + strlen("newCoAlg");
+  CoAlgRegister* fakeRegisterFunc = (CoAlgRegister*) 0x100;
+  CoAlgEquality* fakeEqualityFunc = (CoAlgEquality*) 0x200;
+  CoAlgData*     fakeCoAlgData    = (CoAlgData*)     0x300;
+  
+  CoAlgebra* aCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  AssertPtrNotNull(aCoAlg);
+  aCoAlg->name         = strdup("newCoAlgA");
+  aCoAlg->registerFunc = fakeRegisterFunc;
+  aCoAlg->equalityFunc = fakeEqualityFunc;
+  aCoAlg->coAlgData    = fakeCoAlgData;
+  
+  size_t coAlgIdx = registerCoAlgebra(lstate, aCoAlg);
+  AssertIntEquals(coAlgIdx, NumRequiredCoAlgs);
+  
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  AssertPtrNotNull(jInterp);
+
+  CoAlgebra** coAlgsVec = jInterp->coAlgs.vec;
+  AssertPtrNotNull(coAlgsVec);
+  AssertIntEquals(coAlgsVec[coAlgIdx]->isA, NumRequiredCoAlgs);
+  AssertStrEquals(coAlgsVec[coAlgIdx]->name, "newCoAlgA");
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->registerFunc, fakeRegisterFunc);
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->equalityFunc, fakeEqualityFunc);
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->coAlgData,    fakeCoAlgData);
+\stopCTest
+
+Now we want to test the expansion of an existing CoAlgebras structure when 
+the existing one runs out of \quote{space}. 
+
+\startCTest
+  AssertIntTrue(JOYLOL_COALGS_INCREMENT < 26);
+  for(int i = 1; i < 26; i++) {
+    *coAlgNameEnd        = 'A' + i;
+    fakeRegisterFunc    += 1;
+    fakeEqualityFunc    += 1;
+    fakeCoAlgData       += 1;
+    aCoAlg               = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+    aCoAlg->name         = strdup(coAlgName);
+    aCoAlg->registerFunc = fakeRegisterFunc;
+    aCoAlg->equalityFunc = fakeEqualityFunc;
+    aCoAlg->coAlgData    = fakeCoAlgData;
+    
+    registerCoAlgebra(lstate, aCoAlg);
+    jInterp = getJoyLoLInterp(lstate);
+    AssertPtrNotNull(jInterp);
+
+    CoAlgebra** coAlgsVec = jInterp->coAlgs.vec;
+    AssertPtrNotNull(coAlgsVec);
+    size_t idx = NumRequiredCoAlgs + i;
+    AssertIntEquals(coAlgsVec[idx]->isA, idx);
+    AssertStrEquals(coAlgsVec[idx]->name, coAlgName);
+    AssertPtrEquals(coAlgsVec[idx]->registerFunc, fakeRegisterFunc);
+    AssertPtrEquals(coAlgsVec[idx]->equalityFunc, fakeEqualityFunc);
+    AssertPtrEquals(coAlgsVec[idx]->coAlgData,    fakeCoAlgData);
+  }
+\stopCTest
+
+Now we want to test the addition of CoAlgebra with an existing name does 
+not change the number of registered CoAlgebras but simple returns the 
+existing CoAlgebra index. 
+
+\startCTest
+  JoyLoLInterp* oldJInterp = getJoyLoLInterp(lstate);
+  size_t oldNumCoAlgs  = oldJInterp->coAlgs.num;
+  
+  *coAlgNameEnd        = 'A' + 5;
+  aCoAlg               = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  aCoAlg->name         = strdup(coAlgName);
+  aCoAlg->registerFunc = (CoAlgRegister*) 0x100 + 5;
+  aCoAlg->equalityFunc = (CoAlgEquality*) 0x200 + 5;
+  aCoAlg->coAlgData    = (CoAlgData*)     0x300 + 5;
+  
+  size_t anIndex = registerCoAlgebra(lstate, aCoAlg);
+  jInterp        = getJoyLoLInterp(lstate);
+  AssertIntEquals(anIndex, 5 + NumRequiredCoAlgs);
+  AssertPtrEquals(oldJInterp, jInterp);
+  AssertIntEquals(oldNumCoAlgs, jInterp->coAlgs.num);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[getGitVersion]
+
+We need a generic way of obtaining the git version of a given CoAlgebra. 
+We do this in two parts. In the \type{bin} directory of any (collection 
+of) CoAlgebra(s) there should be a pair of shell scripts. The 
+\type{gitHook.sh} is a \type{bash} shell script which is run at various 
+points in the git event cycle to capture the git version information into 
+either a C-header file or a Lua file. These files can then be loaded as 
+needed into either a C-implementation or required by Lua code, to provide 
+information about the version of a given code artefact. The \type{bin} 
+directory should also contain a \type{setupGitHooks} \type{bash} script 
+which copies the \type{gitHook.sh} script into the correct places in the 
+\type{.git} directory. 
+
+For CoAlgebras implemented in ANSI-C, the following function will take the 
+git version information in the \type{gitVersion.h} file which is 
+statically linked in a given CoAlgabra's shared library and return the 
+value associated with any valid key requested. 
+
+\startCHeader
+typedef struct keyValueStruct {
+  const char *key;
+  const char *value;
+} KeyValues;
+
+extern const char *getGitVersion(const KeyValues *gitVersion, 
+                                 const char* gitVersionKey);
+\stopCHeader
+
+\startCCode
+const char *getGitVersion(const KeyValues *gitVersion,
+                          const char* gitVersionKey) {
+  for(int i = 0 ; gitVersion[i].key ; i++) {
+    if (strcmp(gitVersionKey, gitVersion[i].key) == 0) {
+      return gitVersion[i].value;
+    }
+  }
+  return "key not found";
+}
+\stopCCode
+
+At the moment we can only (easily) test the \type{getGitVersion} function.
+
+\startTestCase[should get value associated with keys]
+\startCTest
+  static const KeyValues testKVs[] = {
+    { "key1", "value1" },
+    { "key2", "value2" },
+    { NULL,   NULL }
+  };
+  const char* aValue = getGitVersion(testKVs, "key1");
+  AssertPtrNotNull(aValue);
+  AssertStrEquals(aValue, "value1");
+  aValue = getGitVersion(testKVs, "key2");
+  AssertPtrNotNull(aValue);
+  AssertStrEquals(aValue, "value2");
+  aValue = getGitVersion(testKVs, "noKey");
+  AssertPtrNotNull(aValue);
+  AssertStrEquals(aValue, "key not found");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\subsection[title=Old tests]
+
+\starttyping
+  printf("\nStructure Sizes\n");
+  printf("              void* = %zu bytes\n", sizeof(void*));
+  printf("                int = %zu bytes\n", sizeof(int));
+  printf("           long int = %zu bytes\n", sizeof(long int));
+  printf("\n");
+
+  PairAtom aPairAtom;
+  printf("           PairAtom = %zu bytes\n", sizeof(PairAtom));
+  printf("     PairAtom.coAlg = %zu bytes\n", sizeof(aPairAtom.coAlg));
+  printf("       PairAtom.tag = %zu bytes\n", sizeof(aPairAtom.tag));
+  printf("      PairAtom.pair = %zu bytes\n", sizeof(aPairAtom.pair));
+  printf("  PairAtom.pair.car = %zu bytes\n", sizeof(aPairAtom.pair.car));
+  printf("  PairAtom.pair.cdr = %zu bytes\n", sizeof(aPairAtom.pair.cdr));
+  printf("   PairAtom.boolean = %zu bytes\n", sizeof(aPairAtom.boolean));
+  printf("    PairAtom.symbol = %zu bytes\n", sizeof(aPairAtom.symbol));
+  printf("      PairAtom.func = %zu bytes\n", sizeof(aPairAtom.func));
+  printf("   PairAtom.natural = %zu bytes\n", sizeof(aPairAtom.natural));
+  printf("\n");
+
+  ListBlock aListBlock;
+  printf("          ListBlock = %zu bytes\n", sizeof(ListBlock));
+  printf("    ListBlock.block = %zu bytes\n", sizeof(aListBlock.block));
+  printf("ListBlock.nextBlock = %zu bytes\n", sizeof(aListBlock.nextBlock));
+  printf("\n");
+\stoptyping
+
+%\startsyntax
+
+%\stopsyntax 
+
+%\startinitialization
+
+%\stopinitialization

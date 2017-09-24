@@ -143,19 +143,19 @@ its collection of free handles.
 
 \setCCodeStream{coAlgHandles}
 \startCHeader
-extern CoAlgHandle* newHandle(CoAlgebras* coAlgs);
+extern CoAlgHandle* newHandle(JoyLoLInterp* jInterp);
 \stopCHeader
 
 \startCCode
-CoAlgHandle* newHandle(CoAlgebras* coAlgs) {
-  assert(coAlgs);
+CoAlgHandle* newHandle(JoyLoLInterp* jInterp) {
+  assert(jInterp);
   // ensure there are some free handles
-  if ( ! coAlgs->hMem.freeHandles ) collectGarbage(coAlgs);
-  if ( ! coAlgs->hMem.freeHandles ) addHandleBlock(coAlgs);
-  assert(coAlgs->hMem.freeHandles);
+  if ( ! jInterp->hMem.freeHandles ) collectGarbage(jInterp);
+  if ( ! jInterp->hMem.freeHandles ) addHandleBlock(jInterp);
+  assert(jInterp->hMem.freeHandles);
 
-  CoAlgHandle* aNewHandle = coAlgs->hMem.freeHandles;
-  coAlgs->hMem.freeHandles = aNewHandle->data.ptrs.b;
+  CoAlgHandle* aNewHandle   = jInterp->hMem.freeHandles;
+  jInterp->hMem.freeHandles = aNewHandle->data.ptrs.b;
 
   aNewHandle->type        = NULL;
   aNewHandle->flags       = 0;
@@ -168,51 +168,51 @@ CoAlgHandle* newHandle(CoAlgebras* coAlgs) {
 
 \startTestCase[Allocate one new CoAlgHandle]
 \startCTest
-  CoAlgebras* coAlgs = createNewCoAlgebras();
-  AssertPtrNotNull(coAlgs);
+  JoyLoLInterp* jInterp = newJoyLoLInterp();
+  AssertPtrNotNull(jInterp);
 
-  AssertPtrNull(coAlgs->hMem.freeHandles);
-  AssertPtrNull(coAlgs->hMem.rootHandleBlock);
+  AssertPtrNull(jInterp->hMem.freeHandles);
+  AssertPtrNull(jInterp->hMem.rootHandleBlock);
 
   // get one new handle to ensure our lazily
   // initialized handle memory structures 
   // are initialized...
-  CoAlgHandle* aNewHandle = newHandle(coAlgs);
+  CoAlgHandle* aNewHandle = newHandle(jInterp);
 
-  AssertPtrNotNull(coAlgs->hMem.freeHandles);
-  AssertPtrNotNull(coAlgs->hMem.rootHandleBlock);
+  AssertPtrNotNull(jInterp->hMem.freeHandles);
+  AssertPtrNotNull(jInterp->hMem.rootHandleBlock);
   AssertPtrNotNull(aNewHandle );
   AssertPtrNull(aNewHandle->data.ptrs.a);
   AssertPtrNull(aNewHandle->data.ptrs.b);
   AssertPtrEquals(aNewHandle,
-    coAlgs->hMem.rootHandleBlock->block);
+    jInterp->hMem.rootHandleBlock->block);
 
   // now get one more handle to ensure
   // we can properly deal with handle blocks/memory
   
   CoAlgHandle* oldFreeHandles =
-    coAlgs->hMem.freeHandles;
+    jInterp->hMem.freeHandles;
   CoAlgHandle* newfreeHandles = 
-    coAlgs->hMem.freeHandles->data.ptrs.b;
+    jInterp->hMem.freeHandles->data.ptrs.b;
 
-  aNewHandle = newHandle(coAlgs);
+  aNewHandle = newHandle(jInterp);
   AssertPtrNotNull(aNewHandle );
   AssertPtrNull(aNewHandle->data.ptrs.a);
   AssertPtrNull(aNewHandle->data.ptrs.b);
   AssertPtrEquals(oldFreeHandles, aNewHandle);
-  AssertPtrEquals(newfreeHandles, coAlgs->hMem.freeHandles);
+  AssertPtrEquals(newfreeHandles, jInterp->hMem.freeHandles);
 \stopCTest
 \stopTestCase
 
 \startTestCase[Allocate lots of new CoAlgHandles]
 
 \startCTest
-  CoAlgebras* coAlgs = createNewCoAlgebras();
-  AssertPtrNotNull(coAlgs);
+  JoyLoLInterp* jInterp = newJoyLoLInterp();
+  AssertPtrNotNull(jInterp);
 
   CoAlgHandle* aNewHandle = NULL;
   for ( size_t i = 0; i < 3*HANDLE_BLOCK_SIZE; i++ ) {
-    aNewHandle = newHandle(coAlgs);
+    aNewHandle = newHandle(jInterp);
   }
   AssertPtrNotNull(aNewHandle);
   AssertPtrNull(aNewHandle->data.ptrs.a);
@@ -229,15 +229,16 @@ CoAlgHandle* newHandle(CoAlgebras* coAlgs) {
 \startCHeader
 #define HANDLE_BLOCK_SIZE 1024
 
-extern void addHandleBlock(CoAlgebras* coAlgs);
+extern void addHandleBlock(JoyLoLInterp* jInterp);
 \stopCHeader
 
 
 \startCCode
-void addHandleBlock(CoAlgebras* coAlgs) {
+void addHandleBlock(JoyLoLInterp* jInterp) {
   DEBUG(FALSE, "addHandleBlock > %p %zu\n", 
-    coAlgs, (size_t)HANDLE_BLOCK_SIZE);
-
+    jInterp, (size_t)HANDLE_BLOCK_SIZE);
+  assert(jInterp);
+  
   // obtain a new handle block
   HandleBlock* aNewHandleBlock = 
     (HandleBlock*)calloc(1, sizeof(HandleBlock));
@@ -245,18 +246,18 @@ void addHandleBlock(CoAlgebras* coAlgs) {
 
   // integrate this new handle block into the linked list of
   // handle blocks
-  if ( coAlgs->hMem.rootHandleBlock ) {
-    HandleBlock *lastHandleBlock = coAlgs->hMem.rootHandleBlock;
+  if ( jInterp->hMem.rootHandleBlock ) {
+    HandleBlock *lastHandleBlock = jInterp->hMem.rootHandleBlock;
     while ( lastHandleBlock->nextBlock ) {
       lastHandleBlock = lastHandleBlock->nextBlock;
     }
     assert(lastHandleBlock->nextBlock == NULL);
     lastHandleBlock->nextBlock = aNewHandleBlock;
   } else {
-    coAlgs->hMem.rootHandleBlock = aNewHandleBlock;
+    jInterp->hMem.rootHandleBlock = aNewHandleBlock;
   }
   DEBUG(FALSE, "addHandleBlock = %p %p\n", 
-    coAlgs, aNewHandleBlock);
+    jInterp, aNewHandleBlock);
 
   // make sure this handle block has some CoAlgHandles
   aNewHandleBlock->block = 
@@ -272,10 +273,10 @@ void addHandleBlock(CoAlgebras* coAlgs) {
     nextHandle->data.ptrs.a = NULL;
     nextHandle->data.ptrs.b = nextHandle + 1;
   }
-  nextHandle->data.ptrs.b = coAlgs->hMem.freeHandles;
-  coAlgs->hMem.freeHandles = aNewHandleBlock->block;
+  nextHandle->data.ptrs.b = jInterp->hMem.freeHandles;
+  jInterp->hMem.freeHandles = aNewHandleBlock->block;
   DEBUG(FALSE, "addHandleBlock < %p %p %p\n",
-    coAlgs, aNewHandleBlock, aNewHandleBlock->block);
+    jInterp, aNewHandleBlock, aNewHandleBlock->block);
 }
 \stopCCode
 
@@ -284,19 +285,20 @@ void addHandleBlock(CoAlgebras* coAlgs) {
   // create the first list block and make sure it is 
   // properly integrated into linked list of list blocks
 
-  CoAlgebras* coAlgs = createNewCoAlgebras();
+  JoyLoLInterp* jInterp = newJoyLoLInterp();
 
-  AssertPtrNull(coAlgs->hMem.rootHandleBlock);
-  AssertPtrNull(coAlgs->hMem.freeHandles);
+  AssertPtrNotNull(jInterp);
+  AssertPtrNull(jInterp->hMem.rootHandleBlock);
+  AssertPtrNull(jInterp->hMem.freeHandles);
 
-  addHandleBlock(coAlgs);
-  AssertPtrNotNull(coAlgs->hMem.rootHandleBlock);
-  AssertPtrNotNull(coAlgs->hMem.rootHandleBlock->block);
-  AssertPtrNull(coAlgs->hMem.rootHandleBlock->nextBlock);
-  AssertPtrNotNull(coAlgs->hMem.freeHandles);
+  addHandleBlock(jInterp);
+  AssertPtrNotNull(jInterp->hMem.rootHandleBlock);
+  AssertPtrNotNull(jInterp->hMem.rootHandleBlock->block);
+  AssertPtrNull(jInterp->hMem.rootHandleBlock->nextBlock);
+  AssertPtrNotNull(jInterp->hMem.freeHandles);
 
   // check to make sure freeHandles list is correctly linked
-  CoAlgHandle* nextHandle = coAlgs->hMem.rootHandleBlock->block;
+  CoAlgHandle* nextHandle = jInterp->hMem.rootHandleBlock->block;
   CoAlgHandle* lastHandle = nextHandle + HANDLE_BLOCK_SIZE - 1;
   for ( ; nextHandle < lastHandle ; nextHandle++ ) {
     AssertIntTrue(IS_MEM_ALIGNED(nextHandle));
@@ -304,19 +306,19 @@ void addHandleBlock(CoAlgebras* coAlgs) {
     AssertPtrEquals(nextHandle->data.ptrs.b, nextHandle + 1);
   }
   AssertPtrNull(nextHandle->data.ptrs.b);
-  AssertPtrEquals(coAlgs->hMem.freeHandles,
-    coAlgs->hMem.rootHandleBlock->block);
+  AssertPtrEquals(jInterp->hMem.freeHandles,
+    jInterp->hMem.rootHandleBlock->block);
 
   // add another handle block
-  CoAlgHandle* oldFreeHandles = coAlgs->hMem.freeHandles;
-  addHandleBlock(coAlgs);
-  AssertPtrNotNull(coAlgs->hMem.rootHandleBlock->nextBlock);
-  AssertPtrNotNull(coAlgs->hMem.rootHandleBlock->nextBlock->block);
-  AssertPtrNull(coAlgs->hMem.rootHandleBlock->nextBlock->nextBlock);
-  AssertPtrNotNull(coAlgs->hMem.freeHandles);
+  CoAlgHandle* oldFreeHandles = jInterp->hMem.freeHandles;
+  addHandleBlock(jInterp);
+  AssertPtrNotNull(jInterp->hMem.rootHandleBlock->nextBlock);
+  AssertPtrNotNull(jInterp->hMem.rootHandleBlock->nextBlock->block);
+  AssertPtrNull(jInterp->hMem.rootHandleBlock->nextBlock->nextBlock);
+  AssertPtrNotNull(jInterp->hMem.freeHandles);
 
   // check to make sure freeHandles list is correctly linked
-  nextHandle = coAlgs->hMem.rootHandleBlock->nextBlock->block;
+  nextHandle = jInterp->hMem.rootHandleBlock->nextBlock->block;
   lastHandle = nextHandle + HANDLE_BLOCK_SIZE - 1;
   for ( ; nextHandle < lastHandle ; nextHandle++ ) {
     AssertIntTrue(IS_MEM_ALIGNED(nextHandle));
@@ -324,8 +326,8 @@ void addHandleBlock(CoAlgebras* coAlgs) {
     AssertPtrEquals(nextHandle->data.ptrs.b, nextHandle + 1);
   }
   AssertPtrEquals(nextHandle->data.ptrs.b, oldFreeHandles);
-  AssertPtrEquals(coAlgs->hMem.freeHandles,
-    coAlgs->hMem.rootHandleBlock->nextBlock->block);
+  AssertPtrEquals(jInterp->hMem.freeHandles,
+    jInterp->hMem.rootHandleBlock->nextBlock->block);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -334,13 +336,14 @@ void addHandleBlock(CoAlgebras* coAlgs) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void collectGarbage(CoAlgebras* coAlgs);
+extern void collectGarbage(JoyLoLInterp* jInterp);
 \stopCHeader
 
 \startCCode
-void collectGarbage(CoAlgebras* coAlgs) {
-  DEBUG(FALSE, "collectGarbage %p\n", coAlgs);
+void collectGarbage(JoyLoLInterp* jInterp) {
+  DEBUG(FALSE, "collectGarbage %p\n", jInterp);
   // add a garbage collection mark-sweep here
+  assert(jInterp);
 }
 \stopCCode
 
