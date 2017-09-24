@@ -38,7 +38,7 @@ joylol.targets{
     'pairs.c',
   },
   coAlgLibs = {
-    'coAlgs',
+    'jInterps',
   },
   buildDir = 'build',
 }

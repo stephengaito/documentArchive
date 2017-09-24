@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <joylol/coAlgs.h>
+#include <joylol/jInterps.h>
 \stopCCode
 
 \appendCCode{default}
@@ -35,13 +35,12 @@ static int lua_strings_getGitVersion (lua_State *lstate) {
 }
 
 static size_t joylol_register_strings(lua_State *lstate) {
-  registerCoAlgebra(
-    lstate,
-    "Strings",
-    joylol_register_strings,
-    NULL, // no equality function
-    NULL  // no strings-data
-  );
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = "Strings";
+  theCoAlg->registerFunc = joylol_register_strings;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->coAlgData    = NULL;
+  registerCoAlgebra(lstate, theCoAlg);
   
   // in future... register Strings words with JoyLoL dictionary. 
   

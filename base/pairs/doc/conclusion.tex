@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <joylol/coAlgs.h>
+#include <joylol/jInterps.h>
 \stopCCode
 
 \appendCCode{default}
@@ -35,13 +35,12 @@ static int lua_pairs_getGitVersion (lua_State *lstate) {
 }
 
 static size_t joylol_register_pairs(lua_State *lstate) {
-  registerCoAlgebra(
-    lstate,
-    "Pairs",
-    joylol_register_pairs,
-    NULL, // no equality function
-    NULL  // no booleans-data
-  );
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = "Pairs";
+  theCoAlg->registerFunc = joylol_register_pairs;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->coAlgData    = NULL;
+  registerCoAlgebra(lstate, theCoAlg);
   
   // in future... register Pairs words with JoyLoL dictionary. 
   

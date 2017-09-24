@@ -38,7 +38,7 @@ joylol.targets{
     'booleans.c',
   },
   coAlgLibs = {
-    'coAlgs',
+    'jInterps',
   },
   buildDir = 'build',
 }

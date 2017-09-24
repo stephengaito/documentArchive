@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <joylol/coAlgs.h>
+#include <joylol/jInterps.h>
 \stopCCode
 
 \appendCCode{default}
@@ -35,13 +35,12 @@ static int lua_booleans_getGitVersion (lua_State *lstate) {
 }
 
 static size_t joylol_register_booleans(lua_State *lstate) {
-  registerCoAlgebra(
-    lstate,
-    "Booleans",
-    joylol_register_booleans,
-    NULL, // no equality function
-    NULL  // no booleans-data
-  );
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = "Booleans";
+  theCoAlg->registerFunc = joylol_register_booleans;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->coAlgData    = NULL;
+  registerCoAlgebra(lstate, theCoAlg);
   
   // in future... register Booleans words with JoyLoL dictionary. 
   
