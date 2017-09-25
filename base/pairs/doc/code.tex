@@ -12,3 +12,376 @@
 \preDataStack[aPair][]
 
 \stopJoyLoLWord
+
+\starttyping
+// pairs.h
+#ifndef JOYLOL_COALG_PAIRS_H
+#define JOYLOL_COALG_PAIRS_H
+
+typedef struct list_memory_struct ListMemory;
+
+typedef struct pair_struct {
+  PairAtom* car;
+  PairAtom* cdr;
+} Pair;
+
+typedef struct pairs_struct {
+  CoAlgebra super;
+  ListMemory* listMemory;
+  // other things
+} Pairs;
+
+extern Pairs* createPairsCoAlgebra(void);
+extern void initPairsCoAlgebra(CoAlgebras* coAlgs);
+
+extern PairAtom* newPair(CoAlgebras* coAlgs, PairAtom* car, PairAtom* cdr);
+
+extern PairAtom* copyLoL(CoAlgebras* coAlgs, PairAtom* aLoL);
+
+#define equalLoL(lolA, lolB) equalLoLDebug(lolA, lolB, FALSE)
+extern size_t equalLoLDebug(PairAtom* lolA, PairAtom* lolB, size_t debugFlag);
+
+extern size_t isPair(PairAtom* aLoL);
+extern size_t isAtom(PairAtom* aLoL);
+
+extern PairAtom* car(PairAtom* aLoL);
+extern PairAtom* cdr(PairAtom* aLoL);
+
+#define lolEqual(areEqual, lolA, lolB)		  \
+  if (areEqual && (lolA)) {			  \
+    assert((lolA)->coAlg);			  \
+    areEqual = ((lolA)->coAlg->equality)	  \
+      ((lolA)->coAlg, (lolA), (lolB), debugFlag); \
+  }
+
+#define lolPrintSize(lolSize, aLoL, defSize, type, selector, debugFlag)	\
+  if (aLoL) {								\
+    DEBUG(debugFlag, "%sCoAlg-printSize: -> %s(%p) %zu\n",		\
+          type, selector, aLoL, lolSize);				\
+    assert((aLoL)->coAlg);						\
+    lolSize += ((aLoL)->coAlg->printSize)((aLoL), debugFlag);		\
+    DEBUG(debugFlag, "%sCoAlg-printSize: <- %s(%p) %zu\n",		\
+          type, selector, aLoL, lolSize);				\
+  } else {								\
+    lolSize += defSize;							\
+  }
+
+#define lolPrintStr(printedOk, aLoL, opener, closer, buffer, bufferSize)\
+  if (aLoL) {								\
+    size_t isList = (aLoL)->coAlg->isA == PAIR_COALG;			\
+    if (isList) strcat(buffer, opener);					\
+    assert((aLoL)->coAlg);						\
+    printedOk = printedOk && 						\
+      ((aLoL)->coAlg->printStr)((aLoL), buffer, bufferSize);		\
+    if (isList) strcat(buffer, closer);					\
+  } else {								\
+    strcat(buffer, opener);						\
+    strcat(buffer, closer);						\
+  }
+
+#endif
+\stoptyping
+
+\starttyping
+// pairs.c
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/printer.h"
+
+static size_t equalityPairsCoAlg(CoAlgebra* klass,
+                                PairAtom* lolA, PairAtom* lolB,
+                                size_t debugFlag) {
+  DEBUG(debugFlag, "pairsCoAlg-equal klass:%p a:%p b:%p\n", klass, lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (lolA->coAlg != klass) return FALSE;
+  if (lolB->coAlg != klass) return FALSE;
+  size_t areEqual = TRUE;
+  lolEqual(areEqual, lolA->pair.car, lolB->pair.car);
+  lolEqual(areEqual, lolA->pair.cdr, lolB->pair.cdr);
+  return areEqual;
+}
+
+static size_t printSizePairsCoAlg(PairAtom* aLoL, size_t debugFlag) {
+  DEBUG(debugFlag, "pairsCoAlg-printSize: > %p\n", aLoL);
+  assert(aLoL);
+  assert(aLoL->coAlg);
+  assert(aLoL->coAlg->isA == PAIR_COALG);
+
+//  if ((AS_TAG(aLoL->coAlg) & PRINT_MARKER)) return 0;
+//  aLoL->coAlg = (CoAlgebra*)(AS_TAG(aLoL->coAlg) | PRINT_MARKER);
+
+  DEBUG(debugFlag, "pairsCoAlg-printSize: %p {%p:%zu}(%p, %p)\n", aLoL,
+        aLoL->coAlg, aLoL->tag, aLoL->pair.car, aLoL->pair.cdr);
+
+  size_t lolSize = 4;
+  lolPrintSize(lolSize, aLoL->pair.car, 4, "pairs", "car", debugFlag);
+  lolPrintSize(lolSize, aLoL->pair.cdr, 4, "pairs", "cdr", debugFlag);
+
+  DEBUG(debugFlag, "pairsCoAlg-printSize: < %zu %p\n", lolSize, aLoL);
+  return lolSize;
+}
+
+static size_t printStrPairsCoAlg(PairAtom* aLoL,
+                                 char* buffer, size_t bufferSize) {
+  assert(aLoL);
+  assert(aLoL->coAlg);
+  assert(aLoL->coAlg->isA == PAIR_COALG);
+
+//  if (!(AS_TAG(aLoL->coAlg) & PRINT_MARKER)) return TRUE;
+//  aLoL->coAlg = (CoAlgebra*)(AS_TAG(aLoL->coAlg) & (~ PRINT_MARKER));
+
+  size_t printedOk = TRUE;
+  lolPrintStr(printedOk, aLoL->pair.car, "( ", ") ", buffer, bufferSize);
+  lolPrintStr(printedOk, aLoL->pair.cdr, "", "", buffer, bufferSize);
+  return printedOk;
+}
+
+Pairs* createPairsCoAlgebra(void) {
+  Pairs* pairs  = (Pairs*) calloc(1, sizeof(Pairs));
+  initACoAlgebra((CoAlgebra*)pairs);
+  pairs->super.isA       = PAIR_COALG;
+  pairs->super.name      = "pair";
+  pairs->super.equality  = equalityPairsCoAlg;
+  pairs->super.printSize = printSizePairsCoAlg;
+  pairs->super.printStr  = printStrPairsCoAlg;
+  pairs->listMemory = createListMemory();       // lazy init
+  return pairs;
+}
+
+PairAtom* newPair(CoAlgebras* coAlgs, PairAtom* car, PairAtom* cdr) {
+  assert(coAlgs);
+  PairAtom* result = newPairAtom(coAlgs);
+  assert(result);
+  result->coAlg    = (CoAlgebra*)coAlgs->pairs;
+  result->tag      = 0;
+  result->pair.car = car;
+  result->pair.cdr = cdr;
+  return result;
+}
+
+PairAtom* car(PairAtom* aLoL) {
+  if (!aLoL) return NULL;
+  if (aLoL->coAlg && (aLoL->coAlg->isA != PAIR_COALG)) return aLoL;
+  return aLoL->pair.car;
+}
+
+PairAtom* cdr(PairAtom* aLoL) {
+  if (!aLoL) return NULL;
+  if (aLoL->coAlg && (aLoL->coAlg->isA != PAIR_COALG)) return NULL;
+  return aLoL->pair.cdr;
+}
+
+PairAtom* copyLoL(CoAlgebras* coAlgs, PairAtom* aLoL) {
+  if (!aLoL) return NULL;
+  if (isAtom(aLoL)) return aLoL;
+
+  return newPair(coAlgs,
+                 copyLoL(coAlgs, aLoL->pair.car),
+                 copyLoL(coAlgs, aLoL->pair.cdr));
+}
+
+size_t equalLoLDebug(PairAtom* lolA, PairAtom* lolB, size_t debugFlag) {
+  DEBUG(debugFlag, "equalLoL %p %p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (isAtom(lolA)) {
+    if (lolA->coAlg) {
+      return (lolA->coAlg->equality)(lolA->coAlg, lolA, lolB, debugFlag);
+    }
+    return FALSE;
+  }
+  //
+  if (!equalLoLDebug(lolA->pair.car, lolB->pair.car, debugFlag)) {
+    return FALSE;
+  }
+  return equalLoLDebug(lolA->pair.cdr, lolB->pair.cdr, debugFlag);
+}
+
+size_t isPair(PairAtom* aLoL) {
+  if (!aLoL) return FALSE;
+  if (aLoL->coAlg && (aLoL->coAlg->isA != PAIR_COALG)) return FALSE;
+  return TRUE;
+}
+
+size_t isAtom(PairAtom* aLoL) {
+  if (!aLoL) return FALSE;
+  if (aLoL->coAlg && (aLoL->coAlg->isA != PAIR_COALG)) return TRUE;
+  return FALSE;
+}
+
+static void isPairAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  popCtxDataInto(aCtx, top);
+  PairAtom* result = NULL;
+  if (isPair(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
+  else             result = newBoolean(aCtx->coAlgebras, FALSE);
+  pushCtxData(aCtx, result);
+}
+
+static void isAtomAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  popCtxDataInto(aCtx, top);
+  PairAtom* result = NULL;
+  if (isAtom(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
+  else             result = newBoolean(aCtx->coAlgebras, FALSE);
+  pushCtxData(aCtx, result);
+}
+
+static void popAP(Context* aCtx) {
+  popCtxData(aCtx);
+}
+
+static void popProcessAP(Context* aCtx) {
+  popCtxProcess(aCtx);
+}
+
+static void pop2ndAP(Context* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxData(aCtx);
+  pushCtxData(aCtx, top);
+}
+
+static void pop2ndProcessAP(Context* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcess(aCtx);
+  pushCtxProcess(aCtx, top);
+}
+
+void initPairsCoAlgebra(CoAlgebras* coAlgs) {
+  extendJoyLoL(coAlgs, "isPair",        isPairAP);
+  extendJoyLoL(coAlgs, "isAtom",        isAtomAP);
+  extendJoyLoL(coAlgs, "pop",           popAP);
+  extendJoyLoL(coAlgs, "popProcess",    popProcessAP);
+  extendJoyLoL(coAlgs, "pop2nd",        pop2ndAP);
+  extendJoyLoL(coAlgs, "pop2ndProcess", pop2ndProcessAP);
+}
+\stoptyping
+
+\starttyping
+// specs
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "CuTest.h"
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/lists_private.h"
+#include "joyLoL/printer.h"
+
+// suiteName: - Pairs CoAlgebra tests -
+
+void Test_createPairsCoAlgebra(CuTest* tc) {
+  CoAlgebras *coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Pairs* pairs = coAlgs->pairs;
+  CuAssertPtrNotNull(tc, pairs);
+
+  CuAssertPtrNotNull(tc, pairs->listMemory);
+}
+
+void Test_newListBlock(CuTest* tc) {
+  // create the first list block and make sure it is properly integrated
+  // into linked list of list blocks
+
+  ListMemory* someListMem = createListMemory();
+
+  CuAssertPtrNull(tc, someListMem->rootListBlock);
+  CuAssertPtrNull(tc, someListMem->freePairs);
+
+  addListBlock(someListMem);
+  CuAssertPtrNotNull(tc, someListMem->rootListBlock);
+  CuAssertPtrNotNull(tc, someListMem->rootListBlock->block);
+  CuAssertPtrNull(tc, someListMem->rootListBlock->nextBlock);
+  CuAssertPtrNotNull(tc, someListMem->freePairs);
+
+  // check to make sure freePairs list is correctly linked
+  PairAtom* nextPairAtom = someListMem->rootListBlock->block;
+  PairAtom* lastPairAtom = nextPairAtom + LIST_BLOCK_SIZE - 1;
+  for ( ; nextPairAtom < lastPairAtom ; nextPairAtom++ ) {
+//    CuAssertTrue(tc, !( ((long int)nextPairAtom) & ((long int)0x7) ));
+    CuAssertPtrNull(tc, nextPairAtom->pair.car);
+    CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, nextPairAtom + 1);
+  }
+  CuAssertPtrNull(tc, nextPairAtom->pair.cdr);
+  CuAssertPtrEquals(tc, someListMem->freePairs, someListMem->rootListBlock->block);
+
+  // add another list block
+  PairAtom* oldFreePairs = someListMem->freePairs;
+  addListBlock(someListMem);
+  CuAssertPtrNotNull(tc, someListMem->rootListBlock->nextBlock);
+  CuAssertPtrNotNull(tc, someListMem->rootListBlock->nextBlock->block);
+  CuAssertPtrNull(tc, someListMem->rootListBlock->nextBlock->nextBlock);
+  CuAssertPtrNotNull(tc, someListMem->freePairs);
+
+  // check to make sure freePairs list is correctly linked
+  nextPairAtom = someListMem->rootListBlock->nextBlock->block;
+  lastPairAtom = nextPairAtom + LIST_BLOCK_SIZE - 1;
+  for ( ; nextPairAtom < lastPairAtom ; nextPairAtom++ ) {
+//    CuAssertTrue(tc, !( ((long int)nextPairAtom) & ((long int)0x7) ));
+    CuAssertPtrNull(tc, nextPairAtom->pair.car);
+    CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, nextPairAtom + 1);
+  }
+  CuAssertPtrEquals(tc, nextPairAtom->pair.cdr, oldFreePairs);
+  CuAssertPtrEquals(tc, someListMem->freePairs, someListMem->rootListBlock->nextBlock->block);
+}
+
+void Test_newPairAtom(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  CuAssertPtrNotNull(tc, coAlgs->pairs);
+  ListMemory* someListMem = coAlgs->pairs->listMemory;
+  CuAssertPtrNotNull(tc, someListMem);
+
+  CuAssertPtrNotNull(tc, someListMem->freePairs);
+  PairAtom* oldFreePairs = someListMem->freePairs;
+  PairAtom* newFreePairs = someListMem->freePairs->pair.cdr;
+
+  PairAtom* aNewPair = newPairAtom(coAlgs);
+  CuAssertPtrNotNull(tc, aNewPair );
+  CuAssertPtrNull(tc, aNewPair->pair.car);
+  CuAssertPtrNull(tc, aNewPair->pair.cdr);
+  CuAssertPtrEquals(tc, oldFreePairs, aNewPair);
+  CuAssertPtrEquals(tc, newFreePairs, someListMem->freePairs);
+}
+
+void Test_printPairs(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  CuAssertPtrNotNull(tc, coAlgs->pairs);
+
+  PairAtom* aNewPair = newPair(coAlgs,
+                               newPair(coAlgs, NULL, NULL),
+                               newPair(coAlgs, NULL, NULL));
+  CuAssertPtrNotNull(tc, aNewPair);
+  CuAssertIntEquals(tc, printSizeDebug(aNewPair, FALSE), 28);
+  CuAssertStrEquals(tc, printLoLDebug(aNewPair, FALSE), "( ( ) ) ( )");
+}
+
+void Test_allocateLotsOfPairAtoms(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  PairAtom* aNewPair = NULL;
+  for ( size_t i = 0; i < 3*LIST_BLOCK_SIZE; i++ ) {
+    aNewPair = newPairAtom(coAlgs);
+  }
+  CuAssertPtrNotNull(tc, aNewPair);
+  CuAssertPtrNull(tc, aNewPair->pair.car);
+  CuAssertPtrNull(tc, aNewPair->pair.cdr);
+}
+
+\stoptyping

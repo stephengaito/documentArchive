@@ -1,0 +1,66 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('build/joylol')
+lfs.mkdir('install')
+lfs.mkdir('install/joylol')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'cFunctions.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/cFunctions.h',
+    'joylol/cFunctions-private.h',
+    'cFunctions.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets{
+  coAlgs = {
+    'cFunctions',
+  },
+  srcFiles = {
+    'joylol/cFunctions.h',
+    'joylol/cFunctions-private.h',
+    'cFunctions.c',
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+  buildDir = 'build',
+}
+
+require 'lms.contests'
+
+contests.targets{
+  testExecs = {
+    'allCTests',
+  },
+  mainDoc = 'cFunctions.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/cFunctions.h',
+    'joylol/cFunctions-private.h',
+    'cFunctions.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}

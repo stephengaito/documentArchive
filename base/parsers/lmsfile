@@ -1,0 +1,72 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('build/joylol')
+lfs.mkdir('install')
+lfs.mkdir('install/joylol')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'parsers.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'patterns.tex',
+    'captures.tex',
+    'joyLoLParser.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/parsers.h',
+    'joylol/parsers-private.h',
+    'parsers.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets{
+  coAlgs = {
+    'parsers',
+  },
+  srcFiles = {
+    'joylol/parsers.h',
+    'joylol/parsers-private.h',
+    'parsers.c',
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+  buildDir = 'build',
+}
+
+require 'lms.contests'
+
+contests.targets{
+  testExecs = {
+    'allCTests',
+  },
+  mainDoc = 'parsers.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'patterns.tex',
+    'captures.tex',
+    'joyLoLParser.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/parsers.h',
+    'joylol/parsers-private.h',
+    'parsers.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}

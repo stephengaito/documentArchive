@@ -1,0 +1,25 @@
+-- A Lua Make System file
+
+cmd = 'lms'
+if 0 < #arg then
+  arguments = table.concat(arg, ' ')
+  cmd = 'lms '..arguments
+end
+
+print('command run in each subDir = ['..cmd..']')
+
+lfs = require 'lfs'
+
+curDir = lfs.currentdir()
+for entry in lfs.dir('.') do
+  if not entry:match('^%..*$') and
+    (lfs.attributes(entry, 'mode') == 'directory') then
+    print('\n========================================================')
+    print('working in ['..entry..']')
+    lfs.chdir(entry)
+    os.execute('lms '..arguments)
+    lfs.chdir(curDir)
+  end
+end
+
+os.exit(0)

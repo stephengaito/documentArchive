@@ -43,6 +43,13 @@ local gitVersion = {
 #
 cp $gitVLua core/lua/doc
 cp $gitVC   base/booleans/doc
+cp $gitVC   base/cFunctions/doc
+cp $gitVC   base/contexts/doc
+cp $gitVC   base/dictionaries/doc
 cp $gitVC   base/jInterps/doc
+cp $gitVC   base/luaFunctions/doc
 cp $gitVC   base/pairs/doc
+cp $gitVC   base/parsers/doc
 cp $gitVC   base/strings/doc
+cp $gitVC   base/templates/doc
+cp $gitVC   base/texts/doc

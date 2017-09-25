@@ -1,0 +1,592 @@
+% A ConTeXt document [master document: parsers.tex]
+
+\dependsOn[jInterps]
+
+\component gitVersion-c
+
+\starttyping
+// parser.h
+#ifndef JOYLOL_PARSER_H
+#define JOYLOL_PARSER_H
+
+typedef struct text_struct Text;
+typedef struct pair_atom_struct PairAtom;
+
+extern PairAtom* parseOneSymbol(Text* aText);
+extern PairAtom* parseAllSymbols(Text* aText);
+
+#endif
+\stoptyping
+
+\starttyping
+// parser-private.h
+#ifndef JOYLOL_PARSER_PRIVATE_H
+#define JOYLOL_PARSER_PRIVATE_H
+
+extern PairAtom* parseList(Text* aText, char closingChar);
+extern char matchingListSymbol(const char* curSymbol);
+
+extern void reportMismatchedClosingSymbol(Text* aText,
+                                          char expected, char found);
+extern void reportUnmatchedClosingSymbol(Text* aText, char expected);
+
+#endif
+\stoptyping
+
+\starttyping
+// parser.c
+#include <string.h>
+#include <assert.h>
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/text.h"
+#include "joyLoL/parser.h"
+#include "joyLoL/parser_private.h"
+
+// The Parser parses a stream of characters obtained from a specific
+// text. Since one of the texts is backed by readline interaction with
+// a user, it is **critical** that nextSymbol ONLY get called when
+// the parser actually needs a nextSymbol (and NOT before).
+
+char matchingListSymbol(const char* curSymbol) {
+  if (1 < strlen(curSymbol)) return 0;
+
+  if (curSymbol[0] == '(') return ')';
+  if (curSymbol[0] == '[') return ']';
+  if (curSymbol[0] == '<') return '>';
+  if (curSymbol[0] == '{') return '}';
+
+  return 0;
+}
+
+size_t isClosingSymbol(const char* curSymbol) {
+  if (1 < strlen(curSymbol)) return 0;
+
+  if (curSymbol[0] == ')') return 1;
+  if (curSymbol[0] == ']') return 1;
+  if (curSymbol[0] == '>') return 1;
+  if (curSymbol[0] == '}') return 1;
+
+  return 0;
+}
+
+PairAtom* parseAllSymbols(Text* aText) {
+  DEBUG(FALSE, "parseAllSymbols %p]\n", aText);
+  return parseList(aText,0);
+}
+
+PairAtom* parseOneSymbol(Text* aText) {
+  DEBUG(FALSE, "parseOneSymbol %p\n", aText);
+  nextSymbol(aText);
+  if (!aText->sym) return NULL;
+
+  if (aText->sym->coAlg &&
+     (aText->sym->coAlg->isA != SYMBOL_COALG)) return aText->sym;
+
+  // check to see if this is an opening list symbol
+  char matchingSymbol = matchingListSymbol(aText->sym->symbol);
+  if (0 < matchingSymbol) {
+    return parseList(aText, matchingSymbol);
+  }
+  return aText->sym;
+}
+
+void reportMismatchedClosingSymbol(Text* aText, char expected, char found) {
+  if (expected == 0) return;
+
+  char message[100];
+  memset(message, 0, 100);
+  strcat(message, "closing list expected [");
+  message[strlen(message)] = expected;
+  strcat(message, "] but found [");
+  message[strlen(message)] = found;
+  strcat(message, "]");
+  reportError(aText, message);
+}
+
+void reportUnmatchedClosingSymbol(Text* aText, char expected) {
+  if (expected == 0) return;
+
+  char message[100];
+  memset(message, 0, 100);
+  strcat(message, "adding unmatched list closing [");
+  message[strlen(message)] = expected;
+  strcat(message, "]");
+  reportError(aText, message);
+}
+
+
+PairAtom* parseList(Text* aText, char closingChar) {
+  assert(aText);
+  DEBUG(FALSE, "parseList %p '%c'\n", aText, closingChar);
+
+  PairAtom* firstPair = NULL;
+  PairAtom* lastPair  = NULL;
+
+  while (!aText->completed) {
+
+    nextSymbol(aText);
+    DEBUG(FALSE, "parseList ns: %p\n", aText->sym);
+    if (!aText->sym) {
+      reportUnmatchedClosingSymbol(aText, closingChar);
+      return firstPair;
+    }
+
+    // check to see if this is a closing list symbol
+    if (isSymbol(aText->sym) &&
+        isClosingSymbol(aText->sym->symbol)) {
+      if (aText->sym->symbol[0] != closingChar) {
+        reportMismatchedClosingSymbol(aText, closingChar,
+                                      aText->sym->symbol[0]);
+      }
+      return firstPair;
+    }
+    assert(aText->coAlgebras);
+    PairAtom* aNewPair = newPair(aText->coAlgebras, NULL, NULL);
+
+    // check to see if this is an opening list symbol
+    if (isSymbol(aText->sym)) {
+      char matchingSymbol = matchingListSymbol(aText->sym->symbol);
+      if (0 < matchingSymbol) {
+        aNewPair->pair.car = parseList(aText, matchingSymbol);
+      } else aNewPair->pair.car = aText->sym;
+    } else aNewPair->pair.car = aText->sym;
+
+    if (!firstPair) firstPair     = aNewPair;
+    if (lastPair)   lastPair->pair.cdr = aNewPair;
+
+    lastPair = aNewPair;
+  }
+
+  if (0 < closingChar) reportUnmatchedClosingSymbol(aText, closingChar);
+  return firstPair;
+}
+\stoptyping
+
+\starttyping
+// specs
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "CuTest.h"
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/text.h"
+#include "joyLoL/dictionary.h"
+#include "joyLoL/parser.h"
+#include "joyLoL/parser_private.h"
+#include "joyLoL/printer.h"
+#include "joyLoL/printer_private.h"
+
+// suiteName: - Parser/Printer tests -
+
+void clearPrintSizeMarksDebug(PairAtom* aLoL, size_t debugFlag) {
+  if (!aLoL) return;
+
+  if (!(aLoL->tag & PRINT_MARKER)) return;
+  aLoL->tag = aLoL->tag & (~ PRINT_MARKER);
+
+  if (aLoL->coAlg && (aLoL->coAlg->isA != PAIR_COALG)) return;
+
+  clearPrintSizeMarksDebug(aLoL->pair.car, debugFlag);
+
+  if (aLoL->pair.cdr) {
+    clearPrintSizeMarksDebug(aLoL->pair.cdr, debugFlag);
+  }
+}
+
+void Test_matchingListSymbol(CuTest* tc) {
+  CuAssertIntEquals(tc, matchingListSymbol("("), ')');
+  CuAssertIntEquals(tc, matchingListSymbol("["), ']');
+  CuAssertIntEquals(tc, matchingListSymbol("{"), '}');
+  CuAssertIntEquals(tc, matchingListSymbol("<"), '>');
+  CuAssertIntEquals(tc, matchingListSymbol("#"), 0);
+  CuAssertIntEquals(tc, matchingListSymbol("silly"), 0);
+}
+
+void Test_printSizeOfNULL(CuTest* tc) {
+  CuAssertIntEquals(tc, printSize(NULL), 5);
+}
+
+// Parse and print a number of different "happy path" lists
+
+static Symbol* simpleList[] = {
+  "this is a simple list ;; this is a comment ",
+  NULL
+};
+
+void Test_parseSimpleListOneSymbolAtATime(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText = createTextFromArrayOfStrings(coAlgs, simpleList);
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "this");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "is");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "a");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "simple");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "list");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNull(tc, aLoL);
+  CuAssertTrue(tc, aText->completed);
+}
+
+static Symbol* simpleListWithSemiColons[] = {
+  " this ; is;a ;; this is a comment ",
+  " and;again ;; this is a second comment ",
+  NULL
+};
+
+void Test_parseSemiColonsOneSymbolAtATime(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText =
+    createTextFromArrayOfStrings(coAlgs, simpleListWithSemiColons);
+
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "this");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, ";");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "is");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, ";");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "a");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "and");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, ";");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "again");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNull(tc, aLoL);
+  CuAssertTrue(tc, aText->completed);
+}
+
+static Symbol* complexListWithSemiColons[] = {
+  " this ; is;a test with some semi-colons ;; this is a comment ",
+  " and;again;123;456;789 12;34 ;; this is a second comment ",
+  " and;one;more;time ;; this is a third comment ",
+  NULL
+};
+
+void Test_parseSemiColonsAllAtOnce(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText =
+    createTextFromArrayOfStrings(coAlgs, complexListWithSemiColons);
+
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseAllSymbols(aText);
+
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE),
+    "this ; is ; a test with some semi-colons and ; again ; 123 ; 456 ; 789 12 ; 34 and ; one ; more ; time");
+}
+
+void Test_parsePrintSimpleList(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText = createTextFromArrayOfStrings(coAlgs, simpleList);
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseAllSymbols(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertIntEquals(tc, printSize(aLoL), 46);
+  clearPrintSizeMarksDebug(aLoL, FALSE);
+  CuAssertStrEquals(tc, printLoL(aLoL), "this is a simple list");
+
+  PairAtom* lolCopy = copyLoL(coAlgs, aLoL);
+  CuAssertPtrNotEquals(tc, aLoL, lolCopy);
+  CuAssertTrue(tc, equalLoLDebug(aLoL, lolCopy, FALSE));
+}
+
+static Symbol* moreComplexList[] = {
+ " this ( is ( a ( more ( complex ( list () ) ) ) ) ) ;; this is a comment ",
+ NULL
+};
+
+void Test_parseComplextListOneSymbolAtATime(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText = createTextFromArrayOfStrings(coAlgs, moreComplexList);
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
+  CuAssertStrEquals(tc, aLoL->symbol, "this");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertPtrNotNull(tc, aLoL->coAlg);
+  CuAssertIntEquals(tc, aLoL->coAlg->isA, PAIR_COALG);
+  CuAssertStrEquals(tc, printLoL(aLoL),
+                    "is ( a ( more ( complex ( list ( ) ) ) ) )");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNull(tc, aLoL);
+  CuAssertTrue(tc, aText->completed);
+}
+
+void Test_parseComplexListFromSingleString(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText = createTextFromString(coAlgs, moreComplexList[0]);
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseAllSymbols(aText);
+
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE),
+    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) )");
+}
+
+void Test_parsePrintComplexList(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText = createTextFromArrayOfStrings(coAlgs, moreComplexList);
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseAllSymbols(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertIntEquals(tc, printSizeDebug(aLoL, FALSE), 104);
+  clearPrintSizeMarksDebug(aLoL, FALSE);
+  CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE),
+    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) )");
+
+  PairAtom* lolCopy = copyLoL(coAlgs, aLoL);
+  CuAssertPtrNotEquals(tc, aLoL, lolCopy);
+  CuAssertTrue(tc, equalLoLDebug(aLoL, lolCopy, FALSE));
+}
+
+static Symbol* differentList[] = {
+ " this is  a different ( ( () () () ) ( ( ( ) ) ) ) list ;; with a comment  ",
+ NULL
+};
+
+void Test_parsePrintDifferentList(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText = createTextFromArrayOfStrings(coAlgs, differentList);
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseAllSymbols(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertIntEquals(tc, printSizeDebug(aLoL, FALSE), 113);
+  clearPrintSizeMarksDebug(aLoL, FALSE);
+  CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE),
+    "this is a different ( ( ( ) ( ) ( ) ) ( ( ( ) ) ) ) list");
+}
+
+void Test_parsePrintNaturals(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText = createTextFromString(coAlgs, " 1234567890 not1234567890 ");
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertTrue(tc, isAtom(aLoL));
+  CuAssertTrue(tc, isNatural(aLoL));
+  CuAssertIntEquals(tc,  mpz_cmp_si(aLoL->natural, 1234567890), 0);
+  CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE), "1234567890");
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertTrue(tc, isAtom(aLoL));
+  CuAssertTrue(tc, isSymbol(aLoL));
+  CuAssertStrEquals(tc, aLoL->symbol, "not1234567890");
+}
+
+void Test_parseBoolean(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* mainDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, mainDic);
+
+  Text* aText = createTextFromString(coAlgs, " true false ");
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertTrue(tc, isAtom(aLoL));
+  CuAssertTrue(tc, isSymbol(aLoL));
+  CuAssertStrEquals(tc, aLoL->symbol, "true");
+  AVLNode* aNode = findSymbol(mainDic, aLoL->symbol);
+  CuAssertPtrNotNull(tc, aNode);
+  CuAssertPtrNotNull(tc, aNode->value);
+  CuAssertTrue(tc, isBoolean(aNode->value));
+  CuAssertTrue(tc, aNode->value->boolean);
+
+  aLoL = parseOneSymbol(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertTrue(tc, isAtom(aLoL));
+  CuAssertTrue(tc, isSymbol(aLoL));
+  CuAssertStrEquals(tc, aLoL->symbol, "false");
+  aNode = findSymbol(mainDic, aLoL->symbol);
+  CuAssertPtrNotNull(tc, aNode);
+  CuAssertPtrNotNull(tc, aNode->value);
+  CuAssertTrue(tc, isBoolean(aNode->value));
+  CuAssertFalse(tc, aNode->value->boolean);
+}
+
+void Test_printBoolean(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  PairAtom* aLoL = newBoolean(coAlgs, TRUE);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE), "true");
+
+  aLoL = newBoolean(coAlgs, FALSE);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE), "false");
+}
+
+/******
+
+// TODO move to context
+
+static Symbol* factorialStrs[] = {
+  " ( 0 =nat ) ( pop 1 ) ( dup 1 - factorial * ) ifte ",
+  NULL
+};
+
+void ignoreTest_defineFactorial(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Context* aCtx = createContext(anInterp);
+  CuAssertPtrNotNull(tc, aCtx);
+
+  Text* factorialText = createTextFromArrayOfStrings(coAlgs, factorialStrs);
+  CuAssertPtrNotNull(tc, factorialText);
+
+  PairAtom* factorialLoL = parseAllSymbols(factorialText);
+  CuAssertPtrNotNull(tc, factorialLoL);
+
+  defineJoyLoL(anInterp->coAlgebras, "factorial", factorialLoL);
+  freeText(factorialText);
+}
+******/
+
+// Parse and print some unhappy path lists
+
+static Symbol* incorrectMarkerList[] = {
+  " this ( is a list with incorrectly > matched list markers ",
+  NULL
+};
+
+void ignoreTest_parseIncorrectMarkerList(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText = createTextFromArrayOfStrings(coAlgs, incorrectMarkerList);
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseAllSymbols(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertIntEquals(tc, printSize(aLoL), 93);
+  clearPrintSizeMarksDebug(aLoL, FALSE);
+  CuAssertStrEquals(tc, printLoL(aLoL),
+    "this ( is a list with incorrectly ) matched list markers");
+}
+
+static Symbol* unmatchedMarkerList[] = {
+  " this ( is a list [ with unmatched list markers ",
+  NULL
+};
+
+void ignoreTest_parseUnmatchedMarkerList(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Text* aText = createTextFromArrayOfStrings(coAlgs, unmatchedMarkerList);
+  CuAssertPtrNotNull(tc, aText);
+
+  PairAtom* aLoL = parseAllSymbols(aText);
+  CuAssertPtrNotNull(tc, aLoL);
+  CuAssertIntEquals(tc, printSize(aLoL), 83);
+  clearPrintSizeMarksDebug(aLoL, FALSE);
+  CuAssertStrEquals(tc, printLoL(aLoL),
+    "this ( is a list ( with unmatched list markers ) )");
+}
+\stoptyping

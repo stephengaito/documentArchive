@@ -1,0 +1,23 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\startsection[title=Goals]
+
+JoyLoL Contexts form the kernel of the trampolined interpreter for JoyLoL. 
+
+A Context consists of the data and process stacks organized as two lists 
+of lists. The evaluation or interpretation of JoyLoL in the context of a 
+Context consists of taking the top item off the process stack and 
+\quote{performing} it. \quote{Performing} a given JoyLoL word, will result 
+in changes being made to both the data and process stacks. A Context is 
+interpreted in an eval loop, until there are no more JoyLoL words on the 
+process stack. 
+
+{\bf Question}: are threads (POSIX-threads/native-threads) identified with 
+contexts? Or are contexts the equivalent of \quote{green threads} (i.e. 
+\quote{threads} emulated by JoyLoL rather than identified with the 
+underlying Operating System's threads)? If contexts are not identified 
+with POSIX-threads then we will need to mutex contexts (green threads) as 
+\quote{data} structures, since it will be possible for multiple running 
+threads to alter the same context (as a data structure). If contexts are 
+identified with POSIX-threads, then there is no sense to our previous 
+(joyLoL20170316) commands to \quote{switch contexts}. 

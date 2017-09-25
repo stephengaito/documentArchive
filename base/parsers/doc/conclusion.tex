@@ -1,19 +1,19 @@
-% A ConTeXt document [master document: booleans.tex]
+% A ConTeXt document [master document: parsers.tex]
 
 \section[title=Conclusions]
 
 \addDocumentDirectory{doc}
 
-\CHeaderIncludeGuard{public}{JOYLOL_COALG_BOOLEANS}
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_PARSERS}
 \createCHeaderFile%
   {public}
-  {joylol/booleans.h}
+  {joylol/parsers.h}
   {}
 
-\CHeaderIncludeGuard{private}{JOYLOL_COALG_BOOLEANS_PRIVATE}
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_PARSERS_PRIVATE}
 \createCHeaderFile%
   {private}
-  {joylol/booleans-private.h}
+  {joylol/parsers-private.h}
   {}
 
 \prependCCode{default}
@@ -29,7 +29,7 @@
 
 \appendCCode{default}
 \startCCode
-static int lua_booleans_getGitVersion (lua_State *lstate) {
+static int lua_parsers_getGitVersion (lua_State *lstate) {
   const char* aKey   = lua_tostring(lstate, 1);
   const char* aValue = "no valid key provided";
   if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
@@ -37,35 +37,35 @@ static int lua_booleans_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_booleans(lua_State *lstate) {
+static size_t joylol_register_parsers(lua_State *lstate) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Booleans";
-  theCoAlg->registerFunc = joylol_register_booleans;
+  theCoAlg->name         = "Parsers";
+  theCoAlg->registerFunc = joylol_register_parsers;
   theCoAlg->equalityFunc = NULL;
   theCoAlg->coAlgData    = NULL;
   registerCoAlgebra(lstate, theCoAlg);
-  assert(theCoAlg->isA == BooleansTag);
+  assert(theCoAlg->isA == ParsersTag);
   
-  // in future... register Booleans words with JoyLoL dictionary. 
+  // in future... register Parsers words with JoyLoL dictionary. 
   
   return TRUE;
 }
 
-static const struct luaL_Reg lua_booleans [] = {
-  {"gitVersion", lua_booleans_getGitVersion},
+static const struct luaL_Reg lua_parsers [] = {
+  {"gitVersion", lua_parsers_getGitVersion},
   {NULL, NULL}
 };
 
-int luaopen_joylol_booleans (lua_State *lstate) {
-  joylol_register_booleans(lstate);
-  luaL_newlib(lstate, lua_booleans);
+int luaopen_joylol_parsers (lua_State *lstate) {
+  joylol_register_parsers(lstate);
+  luaL_newlib(lstate, lua_parsers);
   return 1;
 }
 \stopCCode
 
 \createCCodeFile%
   {default}%
-  {booleans.c}%
+  {parsers.c}%
   {}
 
 \createCTestFile%
@@ -73,9 +73,12 @@ int luaopen_joylol_booleans (lua_State *lstate) {
   {allCTests.c}%
   {}
 
-\addMainDocument{booleans.tex}
-\addSubDocument{overview.tex} 
+\addMainDocument{parsers.tex}
+\addSubDocument{overview.tex}
 \addSubDocument{code.tex}
+\addSubDocument{patterns.tex}
+\addSubDocument{captures.tex}
+\addSubDocument{joyLoLParser.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 
