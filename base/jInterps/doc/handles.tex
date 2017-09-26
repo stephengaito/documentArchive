@@ -1,6 +1,8 @@
 % A ConTeXt document [master document: coAlgs.tex]
 
 \section[title=CoAlgHandles]
+\setCHeaderStream{public}
+\setCCodeStream{handles}
 
 Since the implementation of any particular CoAlgebraic extension will of 
 necessity make use of \type{CoAlgHandle}s, we \emph{begin} by providing 
@@ -41,7 +43,7 @@ relied upon by code which is not part of the code's own extension.
 
 As \quote{global} meta-flags we reserve the following three 
 \emph{low-order} bits together with a Mask of all three bits and the 
-number of reserverd bits to shift (left). 
+number of reserved bits to shift (left). 
 
 \startCHeader
 #define MARK_SWEEP_FLAG     0x1L
@@ -103,6 +105,17 @@ typedef struct coalgebra_handle_struct {
   size_t       flags;  // an arbitrary collection of bits
   HandleData   data;
 } CoAlgHandle;
+\stopCHeader
+
+\section[title=isAtom isPair]
+
+A common requirement is to determine whether or not a given 
+\type{CoAlgHandle} is an \quote{atom} or a \quote{pair}. Quite simply we 
+define anything that is not an instance of \type{Pairs} an \quote{atom}.
+
+\startCHeader
+#define isAtom(aHandle) (((CoAlgebra*)(aHandle->type))->isA != PairsTag)
+#define isPair(aHandle) (((CoAlgebra*)(aHandle->type))->isA == PairsTag)
 \stopCHeader
 
 \section[title=Handle Memory]

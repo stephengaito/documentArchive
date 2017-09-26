@@ -22,6 +22,8 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/pairs.h>
+#include <joylol/pairs-private.h>
 \stopCCode
 
 \appendCCode{default}
@@ -64,6 +66,9 @@ int luaopen_joylol_pairs (lua_State *lstate) {
   {pairs.c}%
   {}
 
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/pairs.h>}
+\addCTestInclude{<joylol/pairs-private.h>}
 \createCTestFile%
   {default}%
   {allCTests.c}%
@@ -72,6 +77,7 @@ int luaopen_joylol_pairs (lua_State *lstate) {
 \addMainDocument{pairs.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 
