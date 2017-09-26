@@ -37,13 +37,14 @@ static int lua_booleans_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_booleans(lua_State *lstate) {
+static size_t joylol_register_booleans(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = "Booleans";
   theCoAlg->registerFunc = joylol_register_booleans;
   theCoAlg->equalityFunc = NULL;
+  theCoAlg->printFunc    = NULL;
   theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(lstate, theCoAlg);
+  registerCoAlgebra(jInterp, theCoAlg);
   assert(theCoAlg->isA == BooleansTag);
   
   // in future... register Booleans words with JoyLoL dictionary. 
@@ -57,7 +58,8 @@ static const struct luaL_Reg lua_booleans [] = {
 };
 
 int luaopen_joylol_booleans (lua_State *lstate) {
-  joylol_register_booleans(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  joylol_register_booleans(jInterp);
   luaL_newlib(lstate, lua_booleans);
   return 1;
 }
@@ -68,6 +70,10 @@ int luaopen_joylol_booleans (lua_State *lstate) {
   {booleans.c}%
   {}
 
+  
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/booleans.h>}
+\addCTestInclude{<joylol/booleans-private.h>}
 \createCTestFile%
   {default}%
   {allCTests.c}%
@@ -76,6 +82,7 @@ int luaopen_joylol_booleans (lua_State *lstate) {
 \addMainDocument{booleans.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

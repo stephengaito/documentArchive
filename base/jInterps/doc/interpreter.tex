@@ -38,7 +38,9 @@ the interpreter's dictionary of words.
 \stopitemize
 
 \startCHeader
+typedef size_t     Boolean;
 typedef const char Symbol;
+
 
 typedef size_t (CoAlgRegister)(JoyLoLInterp*);
 typedef size_t (CoAlgEquality)(CoAlgebra*,

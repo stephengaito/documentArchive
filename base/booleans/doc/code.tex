@@ -1,16 +1,10 @@
 % A ConTeXt document [master document: booleans.tex]
 
 \section[title=Code]
+\setCHeaderStream{public}
 
 \dependsOn[jInterps]
 %\dependsOn[context]
-
-\startCHeader
-typedef struct boolean_struct {
-  CoAlgebras super;
-  size_t     theBoolean;
-} Boolean;
-\stopCHeader
 
 \component gitVersion-c
 
@@ -18,28 +12,48 @@ typedef struct boolean_struct {
 
 \preDataStack[aBool][]
 
+\startTestSuite[newBoolean]
+
+\startCHeader
+extern CoAlgHandle* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean);
+\stopCHeader
+
+\startCCode
+CoAlgHandle* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
+  assert(coAlgs);
+  CoAlgHandle* result = newHandle(coAlgs);
+  assert(result);
+  result->type         = jInterp->coAlgs.vec[BooleanTag];
+  result->tag          = 0;
+  result->data.words.a = (aBoolean ? TRUE : FALSE);
+  result->data.words.b = 0;
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new boolean]
+
+\startCTest
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  AssertPtrNotNull(jInterp);
+
+  CoAlgHandle* aNewBoolean = newBoolean(jInterp, TRUE);
+  AssertPtrNotNull(aNewBoolean);
+  AssertPtrNotNull(aNewBoolean->type);
+  AssertIntEquals(aNewBoolean->type->isA, BooleansTag);
+  AssertIntTrue(aNewBoolean->data.words.a);
+  AssertIntZero(aNewBoolean->data.words.b);
+  AssertIntTrue(isAtom(aNewBoolean));
+  AssertIntTrue(isBoolean(aNewBoolean));
+  AssertIntFalse(isPair(aNewBoolean));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
 \starttyping
-#ifndef JOYLOL_COALG_BOOLEANS_H
-#define JOYLOL_COALG_BOOLEANS_H
-
-typedef size_t Boolean;
-
-typedef struct booleans_struct {
-  CoAlgebra super;
-  // other things
-} Booleans;
-
-extern Booleans* createBooleansCoAlgebra(void);
-extern void initBooleansCoAlgebra(CoAlgebras* coAlgs);
-
-extern PairAtom* newBoolean(CoAlgebras* coAlgs, size_t boolean);
-
-extern size_t isBoolean(PairAtom* aLoL);
-extern size_t isTrue(PairAtom* aLoL);
-extern size_t isFalse(PairAtom* aLoL);
-
-#endif
-
+extern size_t isBoolean(CoAlgHandle* aLoL);
+extern size_t isTrue(CoAlgHandle* aLoL);
+extern size_t isFalse(CoAlgHandle* aLoL);
 \stoptyping
 
 \starttyping
@@ -64,7 +78,7 @@ pushDataFalse(aCtx);
 #include "joyLoL/printer.h"
 
 static size_t equalityBoolCoAlg(CoAlgebra* klass,
-                                PairAtom* lolA, PairAtom* lolB,
+                                CoAlgHandle* lolA, CoAlgHandle* lolB,
                                 size_t debugFlag) {
   DEBUG(debugFlag, "boolCoAlg-equal klass:%p a:%p b:%p\n", klass, lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -76,7 +90,7 @@ static size_t equalityBoolCoAlg(CoAlgebra* klass,
   return TRUE;
 }
 
-static size_t printSizeBoolCoAlg(PairAtom* aLoL, size_t debugFlag) {
+static size_t printSizeBoolCoAlg(CoAlgHandle* aLoL, size_t debugFlag) {
   DEBUG(debugFlag, "boolCoAlg-printSize: %p\n", aLoL);
   assert(aLoL);
   assert(aLoL->coAlg);
@@ -85,7 +99,7 @@ static size_t printSizeBoolCoAlg(PairAtom* aLoL, size_t debugFlag) {
   return 6;
 }
 
-static size_t printStrBoolCoAlg(PairAtom* aLoL,
+static size_t printStrBoolCoAlg(CoAlgHandle* aLoL,
                                 char* buffer, size_t bufferSize) {
   assert(aLoL);
   assert(aLoL->coAlg);
@@ -96,34 +110,13 @@ static size_t printStrBoolCoAlg(PairAtom* aLoL,
   return TRUE;
 }
 
-Booleans* createBooleansCoAlgebra(void) {
-  Booleans* bools  = (Booleans*) calloc(1, sizeof(Booleans));
-  initACoAlgebra((CoAlgebra*)bools);
-  bools->super.isA       = BOOLEAN_COALG;
-  bools->super.name      = "boolean";
-  bools->super.equality  = equalityBoolCoAlg;
-  bools->super.printSize = printSizeBoolCoAlg;
-  bools->super.printStr  = printStrBoolCoAlg;
-  return bools;
-}
-
-PairAtom* newBoolean(CoAlgebras* coAlgs, size_t aBoolean) {
-  assert(coAlgs);
-  PairAtom* result = newPairAtom(coAlgs);
-  assert(result);
-  result->coAlg   = (CoAlgebra*)coAlgs->booleans;
-  result->tag     = 0;
-  result->boolean = (aBoolean ? TRUE : FALSE);
-  return result;
-}
-
-size_t isBoolean(PairAtom* aLoL) {
+size_t isBoolean(CoAlgHandle* aLoL) {
   if (!aLoL) return FALSE;
   if (aLoL->coAlg && (aLoL->coAlg->isA == BOOLEAN_COALG)) return TRUE;
   return FALSE;
 }
 
-size_t isTrue(PairAtom* aLoL) {
+size_t isTrue(CoAlgHandle* aLoL) {
   if (!aLoL) return FALSE;
   if (aLoL->coAlg &&
      (aLoL->coAlg->isA == BOOLEAN_COALG) &&
@@ -131,62 +124,13 @@ size_t isTrue(PairAtom* aLoL) {
   return TRUE;
 }
 
-size_t isFalse(PairAtom* aLoL) {
+size_t isFalse(CoAlgHandle* aLoL) {
   if (!aLoL) return TRUE;
   if (aLoL->coAlg &&
      (aLoL->coAlg->isA == BOOLEAN_COALG) &&
      (aLoL->boolean == FALSE)) return TRUE;
   return FALSE;
 }
-
-static void isBooleanAP(Context* aCtx) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  popCtxDataInto(aCtx, top);
-  PairAtom* result = NULL;
-  if (isBoolean(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
-  else                result = newBoolean(aCtx->coAlgebras, FALSE);
-  pushCtxData(aCtx, result);
-}
-
-static void ifteAP(Context* aCtx) {
-  popCtxDataInto(aCtx, topElse);
-  popCtxDataInto(aCtx, topThen);
-  popCtxDataInto(aCtx, topIf);
-  pushCtxProcess(aCtx, topElse); // save for later
-  pushCtxProcess(aCtx, topThen); // save for later
-  pushSymbolCtxProcess(aCtx, "ifteCont");
-  prependListCtxProcess(aCtx, topIf); // execute the if condition
-}
-
-static void ifteContAP(Context* aCtx) {
-  popCtxDataInto(aCtx, topIf);
-  popCtxProcessInto(aCtx, topThen);
-  popCtxProcessInto(aCtx, topElse);
-  if (isTrue(topIf)) {
-    prependListCtxProcess(aCtx, topThen);
-  } else {
-    prependListCtxProcess(aCtx, topElse);
-  }
-}
-
-void initBooleansCoAlgebra(CoAlgebras* coAlgebras) {
-  assert(coAlgebras);
-  assert(coAlgebras->symbols);
-  Dictionary* mainDic = coAlgebras->symbols->dictionary;
-  assert(mainDic);
-
-  AVLNode* true  = createSymbol(mainDic, "true");
-  true->value    = newBoolean(coAlgebras, TRUE);
-
-  AVLNode* false = createSymbol(mainDic, "false");
-  false->value   = newBoolean(coAlgebras, FALSE);
-
-  extendJoyLoL(coAlgebras, "isBoolean", isBooleanAP);
-  extendJoyLoL(coAlgebras, "ifte",      ifteAP);
-  extendJoyLoL(coAlgebras, "ifteCont",  ifteContAP);
-}
-
 \stoptyping
 
 \starttyping
@@ -210,31 +154,12 @@ void Test_createBooleansCoAlgebra(CuTest* tc) {
   CuAssertPtrNotNull(tc, coAlgs->booleans);
 }
 
-void Test_newBoolean(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-  CuAssertPtrNotNull(tc, coAlgs->booleans);
-
-  PairAtom* aNewBoolean = newBoolean(coAlgs, TRUE);
-  CuAssertPtrNotNull(tc, aNewBoolean);
-  CuAssertPtrNotNull(tc, aNewBoolean->coAlg);
-  CuAssertIntEquals(tc, aNewBoolean->coAlg->isA, BOOLEAN_COALG);
-  CuAssertTrue(tc, aNewBoolean->boolean);
-  CuAssertTrue(tc, isAtom(aNewBoolean));
-  CuAssertTrue(tc, isBoolean(aNewBoolean));
-  CuAssertFalse(tc, isContext(aNewBoolean));
-  CuAssertFalse(tc, isFunction(aNewBoolean));
-  CuAssertFalse(tc, isNatural(aNewBoolean));
-  CuAssertFalse(tc, isPair(aNewBoolean));
-  CuAssertFalse(tc, isSymbol(aNewBoolean));
-}
-
 void Test_printBooleans(CuTest* tc) {
   CoAlgebras* coAlgs = createCoAlgebras();
   CuAssertPtrNotNull(tc, coAlgs);
   CuAssertPtrNotNull(tc, coAlgs->booleans);
 
-  PairAtom* aNewBoolean = newBoolean(coAlgs, TRUE);
+  CoAlgHandle* aNewBoolean = newBoolean(coAlgs, TRUE);
   CuAssertPtrNotNull(tc, aNewBoolean);
   CuAssertIntEquals(tc, printSizeDebug(aNewBoolean, FALSE), 6);
   CuAssertStrEquals(tc, printLoLDebug(aNewBoolean, FALSE), "true");

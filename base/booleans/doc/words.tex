@@ -1,0 +1,63 @@
+% A ConTeXt document [master document: booleans.tex]
+
+\section[title=Words]
+
+\starttyping
+\startCCode
+static void isBooleanAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  popCtxDataInto(aCtx, top);
+  PairAtom* result = NULL;
+  if (isBoolean(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
+  else                result = newBoolean(aCtx->coAlgebras, FALSE);
+  pushCtxData(aCtx, result);
+}
+
+static void ifteAP(Context* aCtx) {
+  popCtxDataInto(aCtx, topElse);
+  popCtxDataInto(aCtx, topThen);
+  popCtxDataInto(aCtx, topIf);
+  pushCtxProcess(aCtx, topElse); // save for later
+  pushCtxProcess(aCtx, topThen); // save for later
+  pushSymbolCtxProcess(aCtx, "ifteCont");
+  prependListCtxProcess(aCtx, topIf); // execute the if condition
+}
+
+static void ifteContAP(Context* aCtx) {
+  popCtxDataInto(aCtx, topIf);
+  popCtxProcessInto(aCtx, topThen);
+  popCtxProcessInto(aCtx, topElse);
+  if (isTrue(topIf)) {
+    prependListCtxProcess(aCtx, topThen);
+  } else {
+    prependListCtxProcess(aCtx, topElse);
+  }
+}
+\stopCCode
+\stoptyping
+
+\setCHeaderStream{private}
+\startCHeader
+extern void initBooleansCoAlgebra(CoAlgebras* coAlgs);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void initBooleansCoAlgebra(CoAlgebras* coAlgebras) {
+  //assert(coAlgebras);
+  //assert(coAlgebras->symbols);
+  //Dictionary* mainDic = coAlgebras->symbols->dictionary;
+  //assert(mainDic);
+
+  //AVLNode* true  = createSymbol(mainDic, "true");
+  //true->value    = newBoolean(coAlgebras, TRUE);
+
+  //AVLNode* false = createSymbol(mainDic, "false");
+  //false->value   = newBoolean(coAlgebras, FALSE);
+
+  //extendJoyLoL(coAlgebras, "isBoolean", isBooleanAP);
+  //extendJoyLoL(coAlgebras, "ifte",      ifteAP);
+  //extendJoyLoL(coAlgebras, "ifteCont",  ifteContAP);
+}
+\stopCCode
