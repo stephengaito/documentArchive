@@ -45,7 +45,7 @@ static size_t joylol_register_pairs(JoyLoLInterp *jInterp) {
   theCoAlg->coAlgData    = NULL;
   registerCoAlgebra(jInterp, theCoAlg);
   
-  // in future... register Pairs words with JoyLoL dictionary. 
+  registerPairsWords(jInterp);
   
   return TRUE;
 }
@@ -57,7 +57,7 @@ static const struct luaL_Reg lua_pairs [] = {
 
 int luaopen_joylol_pairs (lua_State *lstate) {
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  joylol_register_pairs(lstate);
+  joylol_register_pairs(jInterp);
   luaL_newlib(lstate, lua_pairs);
   return 1;
 }

@@ -114,8 +114,11 @@ A common requirement is to determine whether or not a given
 define anything that is not an instance of \type{Pairs} an \quote{atom}.
 
 \startCHeader
-#define isAtom(aHandle) (((CoAlgebra*)(aHandle->type))->isA != PairsTag)
-#define isPair(aHandle) (((CoAlgebra*)(aHandle->type))->isA == PairsTag)
+#define isAtom(aHandle) \
+  ((aHandle) && (aHandle)->type && ((aHandle)->type->isA != PairsTag))
+  
+#define isPair(aHandle) \
+  ((aHandle) && (aHandle)->type && ((aHandle)->type->isA == PairsTag))
 \stopCHeader
 
 \section[title=Handle Memory]
