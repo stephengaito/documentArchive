@@ -10,19 +10,34 @@ print('command run in each subDir = ['..cmd..']')
 
 lfs = require 'lfs'
 
-curDir = lfs.currentdir()
+-- collect the list of subdirectories of base
+subDirs = { }
+
 for entry in lfs.dir('.') do
   if not entry:match('^%..*$') and
     (lfs.attributes(entry, 'mode') == 'directory') then
-    print('\n========================================================')
-    print('working in ['..entry..']')
-    lfs.chdir(entry)
-    if not os.execute(cmd) then
-      print('FAILED to run: ['..cmd..']')
-      os.exit(-1)
-    end
-    lfs.chdir(curDir)
+    table.insert(subDirs, entry)
   end
+end
+
+-- sort the list of subDirectories
+
+table.sort(subDirs)
+
+-- now walk through these subDirectories
+-- running the lms command on each one
+
+curDir = lfs.currentdir()
+os.execute('reset')
+for i, subDir in ipairs(subDirs) do
+  print('\n========================================================')
+  print('working in ['..subDir..']')
+  lfs.chdir(subDir)
+  if not os.execute(cmd) then
+    print('FAILED to run: ['..cmd..']')
+    os.exit(-1)
+  end
+  lfs.chdir(curDir)
 end
 
 os.exit(0)
