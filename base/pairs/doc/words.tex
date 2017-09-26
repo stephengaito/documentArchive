@@ -37,8 +37,8 @@ size_t equalLoLDebug(CoAlgHandle* lolA, CoAlgHandle* lolB, size_t debugFlag) {
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
   if (isAtom(lolA)) {
-    if (lolA->coAlg) {
-      return (lolA->coAlg->equality)(lolA->coAlg, lolA, lolB, debugFlag);
+    if (lolA->type) {
+      return (lolA->type->equalityFunc)(lolA->type, lolA, lolB, debugFlag);
     }
     return FALSE;
   }

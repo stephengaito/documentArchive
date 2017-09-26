@@ -40,12 +40,12 @@ the interpreter's dictionary of words.
 \startCHeader
 typedef const char Symbol;
 
-typedef size_t (CoAlgRegister)(lua_State*);
+typedef size_t (CoAlgRegister)(JoyLoLInterp*);
 typedef size_t (CoAlgEquality)(CoAlgebra*,
                                CoAlgHandle*,
                                CoAlgHandle*,
                                size_t);
-//typedef size_t (CoAlgPrintStr)(CoAlgHandle*, char*, size_t);
+typedef CoAlgHandle* (CoAlgPrint)(CoAlgHandle*);
 typedef void *CoAlgData;
 
 typedef struct coalgebra_struct {
@@ -53,7 +53,7 @@ typedef struct coalgebra_struct {
   Symbol*        name;
   CoAlgRegister* registerFunc;
   CoAlgEquality* equalityFunc;
-  //CoAlgPrintStr* printStrFunc;
+  CoAlgPrint*    printFunc;
   CoAlgData      coAlgData;
 } CoAlgebra;
 \stopCHeader
@@ -133,7 +133,7 @@ JoyLoLInterp* newJoyLoLInterp(void) {
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[set/get Lua-state global JoyLoLInterp LightUserData]
+\startTestSuite[get Lua-state global JoyLoLInterp LightUserData]
 
 We want the ability to have different JoyLoL interpreters for each Lua 
 state. However, we also need fast access to the C-implementations of the 
@@ -148,20 +148,14 @@ different for each distinct Lua state.
 
 This means that \type{joyLoLInterpKey} must be a symbol which is unique in 
 the loaded executable, but has no meaningful value \emph{other than} its 
-location in memory. It is declared external in \type{coAlg.h} and is 
-declared \emph{only} in the \type{coAlg.so} itself. 
+location in memory. It is declared external in \type{jInterp.h} and is 
+declared \emph{only} in the \type{jInterp.so} itself. 
 
 \startCHeader
 extern void* joyLoLInterpKey;
 
 extern JoyLoLInterp* getJoyLoLInterp(lua_State *lstate);
 \stopCHeader
-
-\setCHeaderStream{private}
-\startCHeader
-extern void setJoyLoLInterp(lua_State *lstate, JoyLoLInterp* jInterp);
-\stopCHeader
-\setCHeaderStream{public}
 
 \startCCode
 void* joyLoLInterpKey = NULL;
@@ -170,68 +164,29 @@ JoyLoLInterp* getJoyLoLInterp(lua_State *lstate) {
   lua_rawgetp(lstate, LUA_REGISTRYINDEX, (void *)&joyLoLInterpKey);
   JoyLoLInterp* jInterp = (JoyLoLInterp*)lua_touserdata (lstate, -1);
   lua_pop(lstate, 1);
-  return jInterp;
-}
-
-void setJoyLoLInterp(lua_State *lstate, JoyLoLInterp* jInterp) {
-  lua_pushlightuserdata (lstate, (void *)jInterp);
-  lua_rawsetp(lstate, LUA_REGISTRYINDEX, (void *)&joyLoLInterpKey);
-}
-\stopCCode
-
-\startTestCase[should set and get a Lua-State global JoyLoLInterp 
-LightUserData] 
-
-\startCTest
-  JoyLoLInterp* luaJInterp = getJoyLoLInterp(lstate);
-  AssertPtrNull(luaJInterp);
-  JoyLoLInterp* jInterp = (JoyLoLInterp*)0x100;
-  setJoyLoLInterp(lstate, jInterp);
-  luaJInterp = getJoyLoLInterp(lstate);
-  AssertPtrEquals(luaJInterp, jInterp);
-  JoyLoLInterp* newJInterp = (JoyLoLInterp*)0x200;
-  setJoyLoLInterp(lstate, newJInterp);
-  luaJInterp = getJoyLoLInterp(lstate);
-  AssertPtrNotEquals(luaJInterp, jInterp);
-  AssertPtrEquals(luaJInterp, newJInterp);
-  setJoyLoLInterp(lstate, NULL);
-  luaJInterp = getJoyLoLInterp(lstate);
-  AssertPtrNull(luaJInterp);
-\stopCTest
-\stopTestCase
-\stopTestSuite
-
-\startTestSuite[createTheJoyLoLInterp]
-
-Having defined \type{newJoyLoLInterp} to create a new \type{JoyLoLInterp} 
-structure, as well as the \type{getJoyLoLInterp} and 
-\type{setJoyLoLInterp} to register a \emph{unique} \type{JoyLoLInterp} 
-structure with a given Lua state, we now need a \emph{public} way to 
-create \emph{and} register a \emph{unique} \type{JoLoLInterp}. 
-
-\startCHeader
-extern JoyLoLInterp *createTheJoyLoLInterp(lua_State *lstate);
-\stopCHeader
-
-\startCCode
-JoyLoLInterp *createTheJoyLoLInterp(lua_State *lstate) {
-  JoyLoLInterp *jInterp = newJoyLoLInterp();
-  setJoyLoLInterp(lstate, jInterp);
+  if (!jInterp) {
+    // if jInterp has never been accessed before... 
+    // create it now...
+    jInterp = newJoyLoLInterp();
+    lua_pushlightuserdata (lstate, (void *)jInterp);
+    lua_rawsetp(lstate, LUA_REGISTRYINDEX, (void *)&joyLoLInterpKey);
+  }
   return jInterp;
 }
 \stopCCode
 
-\startTestCase[should create a unique JoyLoLInterp]
+\startTestCase[should get a Lua-State global JoyLoLInterp LightUserData] 
 
 \startCTest
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  AssertPtrNull(jInterp);
-  jInterp = createTheJoyLoLInterp(lstate);
+  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
   AssertPtrNotNull(jInterp);
-  AssertPtrEquals(getJoyLoLInterp(lstate), jInterp);
-  // now unregister the JoyLoLInterp
-  setJoyLoLInterp(lstate, NULL);
-  AssertPtrNull(getJoyLoLInterp(lstate));
+  AssertPtrNotNull(jInterp->coAlgs.vec);
+  AssertIntEquals(jInterp->coAlgs.num, NumRequiredCoAlgs);
+  AssertIntEquals(jInterp->coAlgs.maxNum,
+    NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT);
+  JoyLoLInterp * newJInterp = getJoyLoLInterp(lstate);
+  AssertPtrNotNull(newJInterp);
+  AssertPtrEquals(jInterp, newJInterp);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -240,27 +195,21 @@ JoyLoLInterp *createTheJoyLoLInterp(lua_State *lstate) {
 
 \startCHeader
 extern size_t registerCoAlgebra(
-  lua_State *lstate,
+  JoyLoLInterp *jInterp,
   CoAlgebra *theCoAlgebra
 );
 \stopCHeader
 
 \startCCode
 size_t registerCoAlgebra(
-  lua_State *lstate,
+  JoyLoLInterp *jInterp,
   CoAlgebra *theCoAlg
 ) {
+  assert(jInterp);
   assert(theCoAlg);
-  
-  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
-  
-  // we follow a policy of lazy management of the jInterp
-  // if jInterp is NULL, we create a new one
-  // if jInterp->coAlgs is too small we expand it
-  if (!jInterp) {
-    jInterp = createTheJoyLoLInterp(lstate);
-  }
 
+  // we follow a policy of lazy management of the jInterp
+  // if jInterp->coAlgs is too small we expand it
   for(size_t i = 0; i < jInterp->coAlgs.num; i++ ) {
     if (jInterp->coAlgs.vec[i]) {
       if (strcmp(theCoAlg->name,
@@ -311,12 +260,13 @@ size_t registerCoAlgebra(
 }
 \stopCCode
 
-\startTestCase[should create a new JoyLoLInterp]
+\startTestCase[should add a lots of CoAlgs to a JoyLoLInterp]
 
-We start by adding one single \type{CoAlgebra}, this tests the creation of 
-a completely new \type{JoyLoLInterp} structure. 
+We start by adding one single \type{CoAlgebra}. 
 
 \startCTest
+  JoyLoLInterp *jInterp = newJoyLoLInterp();
+
   char*          coAlgName        = strdup("newCoAlgA");
   char*          coAlgNameEnd     = coAlgName + strlen("newCoAlg");
   CoAlgRegister* fakeRegisterFunc = (CoAlgRegister*) 0x100;
@@ -330,12 +280,9 @@ a completely new \type{JoyLoLInterp} structure.
   aCoAlg->equalityFunc = fakeEqualityFunc;
   aCoAlg->coAlgData    = fakeCoAlgData;
   
-  size_t coAlgIdx = registerCoAlgebra(lstate, aCoAlg);
+  size_t coAlgIdx = registerCoAlgebra(jInterp, aCoAlg);
   AssertIntEquals(coAlgIdx, NumRequiredCoAlgs);
   
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  AssertPtrNotNull(jInterp);
-
   CoAlgebra** coAlgsVec = jInterp->coAlgs.vec;
   AssertPtrNotNull(coAlgsVec);
   AssertIntEquals(coAlgsVec[coAlgIdx]->isA, NumRequiredCoAlgs);
@@ -361,9 +308,7 @@ the existing one runs out of \quote{space}.
     aCoAlg->equalityFunc = fakeEqualityFunc;
     aCoAlg->coAlgData    = fakeCoAlgData;
     
-    registerCoAlgebra(lstate, aCoAlg);
-    jInterp = getJoyLoLInterp(lstate);
-    AssertPtrNotNull(jInterp);
+    registerCoAlgebra(jInterp, aCoAlg);
 
     CoAlgebra** coAlgsVec = jInterp->coAlgs.vec;
     AssertPtrNotNull(coAlgsVec);
@@ -381,9 +326,8 @@ not change the number of registered CoAlgebras but simple returns the
 existing CoAlgebra index. 
 
 \startCTest
-  JoyLoLInterp* oldJInterp = getJoyLoLInterp(lstate);
-  size_t oldNumCoAlgs  = oldJInterp->coAlgs.num;
-  
+  size_t oldNumCoAlgs  = jInterp->coAlgs.num;
+
   *coAlgNameEnd        = 'A' + 5;
   aCoAlg               = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   aCoAlg->name         = strdup(coAlgName);
@@ -391,10 +335,8 @@ existing CoAlgebra index.
   aCoAlg->equalityFunc = (CoAlgEquality*) 0x200 + 5;
   aCoAlg->coAlgData    = (CoAlgData*)     0x300 + 5;
   
-  size_t anIndex = registerCoAlgebra(lstate, aCoAlg);
-  jInterp        = getJoyLoLInterp(lstate);
+  size_t anIndex = registerCoAlgebra(jInterp, aCoAlg);
   AssertIntEquals(anIndex, 5 + NumRequiredCoAlgs);
-  AssertPtrEquals(oldJInterp, jInterp);
   AssertIntEquals(oldNumCoAlgs, jInterp->coAlgs.num);
 \stopCTest
 \stopTestCase

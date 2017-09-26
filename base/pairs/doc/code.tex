@@ -13,39 +13,6 @@
 
 \stopJoyLoLWord
 
-\startTestSuite[createPairsCoAlgebra]
-
-\setCHeaderStream{private}
-\startCHeader
-typedef struct pairs_struct {
-  CoAlgebra super;
-  // other things
-} Pairs;
-\stopCHeader
-
-\startCHeader
-extern Pairs* createPairsCoAlgebra(void);
-\stopCHeader
-
-\startCCode
-static size_t joylol_register_pairs(lua_State *lstate);
-
-Pairs* createPairsCoAlgebra(void) {
-  Pairs* pairs  = (Pairs*) calloc(1, sizeof(Pairs));
-  //initACoAlgebra((CoAlgebra*)pairs);
-  pairs->super.isA          = PairsTag;
-  pairs->super.name         = "Pairs";
-  pairs->super.registerFunc = joylol_register_pairs;
-  pairs->super.equalityFunc = NULL;
-//  pairs->super.equalityFunc = equalityPairsCoAlg;
-//  pairs->super.printSize = printSizePairsCoAlg;
-//  pairs->super.printStr  = printStrPairsCoAlg;
-//  pairs->listMemory = createListMemory();       // lazy init
-  pairs->super.coAlgData    = NULL;
-  return pairs;
-}
-\stopCCode
-
 \startTestSuite[newPair]
 
 \startCHeader
@@ -60,12 +27,11 @@ extern CoAlgHandle* newPair(
 CoAlgHandle* newPair(
   JoyLoLInterp* jInterp,
   CoAlgHandle* car,
-  CoAlgHandle* cdr
-) {
+  CoAlgHandle* cdr) {
   assert(jInterp);
   CoAlgHandle* result = newHandle(jInterp);
   assert(result);
-  result->type        = (CoAlgebra*)coAlgs->pairs;
+  result->type        = jInterp->coAlgs.vec[PairsTag];
   result->flags       = 0;
   result->data.ptrs.a = car;
   result->data.ptrs.b = cdr;
@@ -87,25 +53,8 @@ CoAlgHandle* newPair(
   AssertPtrEquals(lol->data.ptrs.a, lolA);
   AssertPtrEquals(lol->data.ptrs.b, lolB);  
 \stopCTest
-\stopTestCase
+\skipTestCase
 \stopTestSuite
-
-
-\startTestCase[should create a Pairs coAlg]
-
-\startCTest
-  Pairs *pairs = createPairsCoAlgebra();
-  AssertPtrNotNull(pairs);
-  
-  AssertIntEquals(pairs->super.isA, PairsTag);
-  AssertStrEquals(pairs->super.name, "Pairs");
-  AssertPtrNotNull(pairs->super.registerFunc);
-  AssertPtrNull(pairs->super.equalityFunc);
-  AssertPtrNull(pairs->super.coAlgData);  
-\stopCTest
-\stopTestCase
-\stopTestSuite
-
 
 \starttyping
 

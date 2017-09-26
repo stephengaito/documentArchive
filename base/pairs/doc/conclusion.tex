@@ -36,13 +36,14 @@ static int lua_pairs_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_pairs(lua_State *lstate) {
+static size_t joylol_register_pairs(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Pairs";
+  theCoAlg->name         = strdup("Pairs");
   theCoAlg->registerFunc = joylol_register_pairs;
   theCoAlg->equalityFunc = NULL;
+  theCoAlg->printFunc    = NULL;
   theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(lstate, theCoAlg);
+  registerCoAlgebra(jInterp, theCoAlg);
   
   // in future... register Pairs words with JoyLoL dictionary. 
   
@@ -55,6 +56,7 @@ static const struct luaL_Reg lua_pairs [] = {
 };
 
 int luaopen_joylol_pairs (lua_State *lstate) {
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
   joylol_register_pairs(lstate);
   luaL_newlib(lstate, lua_pairs);
   return 1;

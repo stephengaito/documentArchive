@@ -108,13 +108,14 @@ static int lua_jInterps_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_jInterps(lua_State *lstate) {
+static size_t joylol_register_jInterps(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "JInterps";
+  theCoAlg->name         = strdup("JInterps");
   theCoAlg->registerFunc = joylol_register_jInterps;
   theCoAlg->equalityFunc = NULL;
+  theCoAlg->printFunc    = NULL;
   theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(lstate, theCoAlg);
+  registerCoAlgebra(jInterp, theCoAlg);
   
   // in future... register CoAlgs words with JoyLoL dictionary. 
   
@@ -127,7 +128,8 @@ static const struct luaL_Reg lua_jInterps [] = {
 };
 
 int luaopen_joylol_jInterps (lua_State *lstate) {
-  joylol_register_jInterps(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  joylol_register_jInterps(jInterp);
   luaL_newlib(lstate, lua_jInterps);
   return 1;
 }
