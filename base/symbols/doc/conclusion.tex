@@ -22,50 +22,23 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
-\stopCCode
-
-\appendCCode{default}
-\startCCode
-static int lua_symbols_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
-static size_t joylol_register_symbols(JoyLoLInterp* jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Symbols";
-  theCoAlg->registerFunc = joylol_register_symbols;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printFunc    = NULL;
-  theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(jInterp, theCoAlg);
-
-  registerSymbolWords(jInterp);
-
-  return TRUE;
-}
-
-static const struct luaL_Reg lua_symbols [] = {
-  {"gitVersion", lua_symbols_getGitVersion},
-  {NULL, NULL}
-};
-
-int luaopen_joylol_symbols (lua_State *lstate) {
-  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
-  joylol_register_symbols(jInterp);
-  luaL_newlib(lstate, lua_symbols);
-  return 1;
-}
+#include <joylol/symbols.h>
+#include <joylol/symbols-private.h>
 \stopCCode
 
 \createCCodeFile%
   {default}%
-  {strings.c}%
+  {symbols.c}%
   {}
 
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/symbols-private.h>}
+\CTestsSetup\
+\startCTest
+  JoyLoLInterp *jInterp = newJoyLoLInterp();
+  registerSymbols(jInterp);
+\stopCTest
 \createCTestFile%
   {default}%
   {allCTests.c}%
@@ -75,6 +48,7 @@ int luaopen_joylol_symbols (lua_State *lstate) {
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
 \addSubDocument{words.tex}
+\addSubDocument{lua.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

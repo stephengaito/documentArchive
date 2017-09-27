@@ -1,0 +1,43 @@
+% A ConTeXt document [master document: jInterps.tex]
+
+\section[title=Lua functions]
+\setCCodeStream{lua}
+
+\component gitVersion-c
+
+\startCCode
+static int lua_jInterps_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  const char* aValue = "no valid key provided";
+  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
+  lua_pushstring(lstate, aValue);
+  return 1;
+}
+\stopCCode
+
+\startCCode
+static const struct luaL_Reg lua_jInterps [] = {
+  {"gitVersion", lua_jInterps_getGitVersion},
+  {NULL, NULL}
+};
+\stopCCode
+
+\startCCode
+static void registerJInterpsLuaInterface(lua_State *lstate) {
+  assert(lstate);
+  luaL_newlib(lstate, lua_jInterps);
+}
+\stopCCode
+
+Now each shared library needs to implement the following code to provide 
+an interface between the generic C-implementation and the Lua module for 
+the shared library. 
+
+\startCCode
+int luaopen_joylol_jInterps (lua_State *lstate) {
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  registerJInterps(jInterp);
+  registerJInterpsLuaInterface(lstate);
+  return 1;
+}
+\stopCCode

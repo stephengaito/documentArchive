@@ -1,0 +1,27 @@
+% A ConTeXt document [master document: symbols.tex]
+
+\section[title=Lua functions]
+
+\component gitVersion-c
+
+\startCCode
+static int lua_symbols_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  const char* aValue = "no valid key provided";
+  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
+  lua_pushstring(lstate, aValue);
+  return 1;
+}
+
+static const struct luaL_Reg lua_symbols [] = {
+  {"gitVersion", lua_symbols_getGitVersion},
+  {NULL, NULL}
+};
+
+int luaopen_joylol_symbols (lua_State *lstate) {
+  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
+  registerSymbols(jInterp);
+  luaL_newlib(lstate, lua_symbols);
+  return 1;
+}
+\stopCCode

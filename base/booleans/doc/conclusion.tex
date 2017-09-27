@@ -29,46 +29,10 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/booleans.h>
+#include <joylol/booleans-private.h>
 // dictionary
 // printer
-\stopCCode
-
-\appendCCode{default}
-\startCCode
-static int lua_booleans_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
-size_t joylol_register_booleans(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Booleans";
-  theCoAlg->registerFunc = joylol_register_booleans;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printFunc    = NULL;
-  theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(jInterp, theCoAlg);
-  assert(theCoAlg->isA == BooleansTag);
-  
-  registerBooleanWords(jInterp);
-  
-  return TRUE;
-}
-
-static const struct luaL_Reg lua_booleans [] = {
-  {"gitVersion", lua_booleans_getGitVersion},
-  {NULL, NULL}
-};
-
-int luaopen_joylol_booleans (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  joylol_register_booleans(jInterp);
-  luaL_newlib(lstate, lua_booleans);
-  return 1;
-}
 \stopCCode
 
 \createCCodeFile%
@@ -83,7 +47,7 @@ int luaopen_joylol_booleans (lua_State *lstate) {
 \CTestsSetup\
 \startCTest
   JoyLoLInterp *jInterp = newJoyLoLInterp();
-  joylol_register_booleans(jInterp);
+  registerBooleans(jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

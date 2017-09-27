@@ -21,10 +21,12 @@ extern CoAlgHandle* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean);
 \startCCode
 CoAlgHandle* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
   assert(jInterp);
+  
   CoAlgHandle* result = newHandle(jInterp);
   assert(result);
+  
   result->type         = jInterp->coAlgs.vec[BooleansTag];
-  result->flags          = 0;
+  result->flags        = 0;
   result->data.words.a = (aBoolean ? TRUE : FALSE);
   result->data.words.b = 0;
   return result;
@@ -34,7 +36,6 @@ CoAlgHandle* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
 \startTestCase[should create a new boolean]
 
 \startCTest
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
   AssertPtrNotNull(jInterp);
 
   CoAlgHandle* aNewBoolean = newBoolean(jInterp, TRUE);
@@ -63,6 +64,60 @@ size_t isBoolean(CoAlgHandle* aLoL) {
   return FALSE;
 }
 \stopCCode
+
+\startTestSuite[registerBooleans]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerBooleans(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerBooleans(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  assert(theCoAlg);
+  
+  theCoAlg->name         = BooleansName;
+  theCoAlg->registerFunc = registerBooleans;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->printFunc    = NULL;
+  theCoAlg->coAlgData    = NULL;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == BooleansTag);
+  assert(jInterp->coAlgs.vec[tag]);
+  assert(jInterp->coAlgs.vec[tag]->isA == BooleansTag);
+  
+  // check to see if this theCoAlg has been used
+  if (theCoAlg->isA == UnusedTag) {
+    free(theCoAlg);
+  }
+  
+  registerBooleanWords(jInterp);
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Booleans coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerBooleans
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs.vec[BooleansTag]);
+  CoAlgebra *coAlg = jInterp->coAlgs.vec[BooleansTag];
+//  AssertIntTrue(registerBooleans(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs.vec[BooleansTag]);
+  AssertPtrEquals(jInterp->coAlgs.vec[BooleansTag], coAlg);
+  AssertIntEquals(jInterp->coAlgs.vec[BooleansTag]->isA, BooleansTag);
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \starttyping
 extern size_t isTrue(CoAlgHandle* aLoL);

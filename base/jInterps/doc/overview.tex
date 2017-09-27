@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: coAlgs.tex]
+% A ConTeXt document [master document: jInterps.tex]
 
 \section[title=Overview]
 
@@ -137,18 +137,31 @@ The required extensions for this implementation is:
 
 \setCHeaderStream{public}
 \startCHeader
-#define CoAlgsTag         0
-#define BooleansTag       1
-#define CFunctionsTag     2
-#define ContextsTag       3
-#define DictionariesTag   4
-#define LuaFunctionsTag   5
-#define PairsTag          6
-#define ParsersTag        7
-#define StringsTag        8
-#define TemplatesTag      9
-#define TextsTag          10
-#define NumRequiredCoAlgs 11
+#define UnusedTag         0
+#define JInterpsTag       1
+#define BooleansTag       2
+#define CFunctionsTag     3
+#define ContextsTag       4
+#define DictionariesTag   5
+#define LuaFunctionsTag   6
+#define PairsTag          7
+#define ParsersTag        8
+#define SymbolsTag        9
+#define TemplatesTag      10
+#define TextsTag          11
+#define NumRequiredCoAlgs 12
+
+#define JInterpsName      "JoyLoLInterps"
+#define BooleansName      "Booleans"
+#define CFunctionsName    "CFunctions"
+#define ContextsName      "Contexts"
+#define DictionariesName  "Dictionaries"
+#define LuaFunctionsName  "LuaFunctions"
+#define PairsName         "Pairs"
+#define ParsersName       "Parsers"
+#define SymbolsName       "Symbols"
+#define TemplatesName     "Templates"
+#define TextsName         "Texts"
 \stopCHeader
 
 Since each CoAlgebraic extension can be developed separately, we need to 
@@ -182,20 +195,22 @@ versions are compatible.
 \startCCode
 typedef struct required_coalgs_struct {
   const char*  name;
+  size_t       tag;
   CoAlgVersion version;
 } RequiredCoAlgs;
 
 RequiredCoAlgs requiredCoAlgs[] = {
-  {"CoAlgs",       {0, 1, 0 }},
-  {"Booleans",     {0, 1, 0 }},
-  {"CFunctions",   {0, 1, 0 }},
-  {"Contexts",     {0, 1, 0 }},
-  {"Dictionaries", {0, 1, 0 }},
-  {"LFunctions",   {0, 1, 0 }},
-  {"Pairs",        {0, 1, 0 }},
-  {"Parsers",      {0, 1, 0 }},
-  {"Renderer",     {0, 1, 0 }},
-  {"Strings",      {0, 1, 0 }},
-  {"Texts",        {0, 1, 0 }}
+  { JInterpsName,     JInterpsTag,     {0, 1, 0 }},
+  { BooleansName,     BooleansTag,     {0, 1, 0 }},
+  { CFunctionsName,   CFunctionsTag,   {0, 1, 0 }},
+  { ContextsName,     ContextsTag,     {0, 1, 0 }},
+  { DictionariesName, DictionariesTag, {0, 1, 0 }},
+  { LuaFunctionsName, LuaFunctionsTag, {0, 1, 0 }},
+  { PairsName,        PairsTag,        {0, 1, 0 }},
+  { ParsersName,      ParsersTag,      {0, 1, 0 }},
+  { SymbolsName,      SymbolsTag,      {0, 1, 0 }},
+  { TemplatesName,    TemplatesTag,    {0, 1, 0 }},
+  { TextsName,        TextsTag,        {0, 1, 0 }},
+  { NULL,             0,               {0, 0, 0 }}
 };
 \stopCCode

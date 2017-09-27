@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: coAlgs.tex]
+% A ConTeXt document [master document: jInterps.tex]
 
 \section[title=JoyLoL interpreter]
 
@@ -42,11 +42,11 @@ typedef size_t     Boolean;
 typedef const char Symbol;
 
 
-typedef size_t (CoAlgRegister)(JoyLoLInterp*);
-typedef size_t (CoAlgEquality)(CoAlgebra*,
-                               CoAlgHandle*,
-                               CoAlgHandle*,
-                               size_t);
+typedef Boolean (CoAlgRegister)(JoyLoLInterp*);
+typedef Boolean (CoAlgEquality)(CoAlgebra*,
+                                CoAlgHandle*,
+                                CoAlgHandle*,
+                                Boolean);
 typedef CoAlgHandle* (CoAlgPrint)(CoAlgHandle*);
 typedef void *CoAlgData;
 
@@ -59,8 +59,6 @@ typedef struct coalgebra_struct {
   CoAlgData      coAlgData;
 } CoAlgebra;
 \stopCHeader
-
-\component gitVersion-c
 
 \subsection[title=JoyLoLInterp structures]
 
@@ -221,7 +219,18 @@ size_t registerCoAlgebra(
       }
     }
   }
-  // NEED TO CHECK if this is a REQUIRED extension....
+
+  // now check to see if this is a required coAlg
+  for (size_t i = 0; requiredCoAlgs[i].name; i++) {
+    if (strcmp(theCoAlg->name, requiredCoAlgs[i].name) == 0) {
+      size_t tag = requiredCoAlgs[i].tag;
+      if (!(jInterp->coAlgs.vec[tag])) {
+        jInterp->coAlgs.vec[tag] = theCoAlg;
+        theCoAlg->isA = tag;
+      }
+      return tag;
+    }
+  }
   
   if (jInterp->coAlgs.maxNum <= jInterp->coAlgs.num) {
     // we need to expand the existing coAlgs structure...
@@ -405,39 +414,58 @@ At the moment we can only (easily) test the \type{getGitVersion} function.
 \stopTestCase
 \stopTestSuite
 
-\subsection[title=Old tests]
+\startTestSuite[regiserJInterps]
 
-\starttyping
-  printf("\nStructure Sizes\n");
-  printf("              void* = %zu bytes\n", sizeof(void*));
-  printf("                int = %zu bytes\n", sizeof(int));
-  printf("           long int = %zu bytes\n", sizeof(long int));
-  printf("\n");
+\setCHeaderStream{private}
+\startCHeader
+Boolean registerJInterps(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
 
-  PairAtom aPairAtom;
-  printf("           PairAtom = %zu bytes\n", sizeof(PairAtom));
-  printf("     PairAtom.coAlg = %zu bytes\n", sizeof(aPairAtom.coAlg));
-  printf("       PairAtom.tag = %zu bytes\n", sizeof(aPairAtom.tag));
-  printf("      PairAtom.pair = %zu bytes\n", sizeof(aPairAtom.pair));
-  printf("  PairAtom.pair.car = %zu bytes\n", sizeof(aPairAtom.pair.car));
-  printf("  PairAtom.pair.cdr = %zu bytes\n", sizeof(aPairAtom.pair.cdr));
-  printf("   PairAtom.boolean = %zu bytes\n", sizeof(aPairAtom.boolean));
-  printf("    PairAtom.symbol = %zu bytes\n", sizeof(aPairAtom.symbol));
-  printf("      PairAtom.func = %zu bytes\n", sizeof(aPairAtom.func));
-  printf("   PairAtom.natural = %zu bytes\n", sizeof(aPairAtom.natural));
-  printf("\n");
+\startCCode
+Boolean registerJInterps(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  assert(theCoAlg);
+  
+  theCoAlg->name         = JInterpsName;
+  theCoAlg->registerFunc = registerJInterps;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->printFunc    = NULL;
+  theCoAlg->coAlgData    = NULL;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == JInterpsTag);
+  assert(jInterp->coAlgs.vec[tag]);
+  assert(jInterp->coAlgs.vec[tag]->isA == JInterpsTag);
+  
+  // check to see if this theCoAlg has been used
+  if (theCoAlg->isA == UnusedTag) {
+    free(theCoAlg);
+  }
+  
+  // need to register JoyLoL words
+  
+  return TRUE;
+}
+\stopCCode
 
-  ListBlock aListBlock;
-  printf("          ListBlock = %zu bytes\n", sizeof(ListBlock));
-  printf("    ListBlock.block = %zu bytes\n", sizeof(aListBlock.block));
-  printf("ListBlock.nextBlock = %zu bytes\n", sizeof(aListBlock.nextBlock));
-  printf("\n");
-\stoptyping
+\startTestCase[should register the JInterps coAlg]
 
-%\startsyntax
-
-%\stopsyntax 
-
-%\startinitialization
-
-%\stopinitialization
+\startCTest
+  // CTestsSetup has already created a jInterp 
+  // and run registerJInterps
+  //
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs.vec[JInterpsTag]);
+  CoAlgebra *coAlg = jInterp->coAlgs.vec[JInterpsTag];
+  size_t result = registerJInterps(jInterp);
+  AssertIntTrue(result);
+  AssertPtrNotNull(jInterp->coAlgs.vec[JInterpsTag]);
+  AssertPtrEquals(jInterp->coAlgs.vec[JInterpsTag], coAlg);
+  AssertIntEquals(jInterp->coAlgs.vec[JInterpsTag]->isA, JInterpsTag);
+\stopCTest
+\stopTestCase
+\stopTestSuite

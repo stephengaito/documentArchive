@@ -15,12 +15,13 @@ litProgs.targets{
     'overview.tex',
     'code.tex',
     'words.tex',
+    'lua.tex',
     'conclusion.tex',
   },
   srcFiles = {
     'joylol/symbols.h',
     'joylol/symbols-private.h',
-    'strings.c',
+    'symbols.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',
@@ -36,7 +37,7 @@ joylol.targets{
   srcFiles = {
     'joylol/symbols.h',
     'joylol/symbols-private.h',
-    'strings.c',
+    'symbols.c',
   },
   coAlgLibs = {
     'jInterps',
@@ -55,12 +56,13 @@ contests.targets{
     'overview.tex',
     'code.tex',
     'words.tex',
+    'lua.tex',
     'conclusion.tex',
   },
   srcFiles = {
     'joylol/symbols.h',
     'joylol/symbols-private.h',
-    'strings.c',
+    'symbols.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',

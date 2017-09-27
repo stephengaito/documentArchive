@@ -4,10 +4,10 @@
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-09-19",
-  commitShortHash = "47a24eb",
-  commitLongHash  = "47a24eb183f41fbacdab1ae09b29d422c0c79c57",
-  subject         = "added strings coAlg; moved build/joylol, install, install/joylol to t-lit-progs",
+  commitDate      = "2017-09-27",
+  commitShortHash = "8ada19b",
+  commitLongHash  = "8ada19b19c0c8dcfad16829db389b0d2861b1ae5",
+  subject         = "renamed strings to symbols; major refactor to get all coAlgs to compile",
   notes           = ""
 }
 
@@ -36,20 +36,28 @@ local joylolCPaths = {
 package.cpath = table.concat(joylolCPaths, ';')
 print(package.cpath)
 
-local coAlgs = require 'joylol.coAlgs'
+print('---------------------------------------------')
+print('JInterps')
+local coAlgs = require 'joylol.jInterps'
 
 print(coAlgs.gitVersion('authorName'))
 print(coAlgs.gitVersion('commitDate'))
 print(coAlgs.gitVersion('commitShortHash'))
 
+print('---------------------------------------------')
+print('Booleans')
 local booleans = require 'joylol.booleans'
 
 print(booleans.gitVersion('authorName'))
 print(booleans.gitVersion('commitDate'))
 print(booleans.gitVersion('commitShortHash'))
 
-local strings = require 'joylol.strings'
+print('---------------------------------------------')
+print('Symbols')
+local symbols = require 'joylol.symbols'
 
-print(strings.gitVersion('authorName'))
-print(strings.gitVersion('commitDate'))
-print(strings.gitVersion('commitShortHash'))
+print(symbols.gitVersion('authorName'))
+print(symbols.gitVersion('commitDate'))
+print(symbols.gitVersion('commitShortHash'))
+
+print('---------------------------------------------')

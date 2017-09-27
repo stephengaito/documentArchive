@@ -3,9 +3,6 @@
 lfs = require 'lfs'
 
 lfs.mkdir('build')
-lfs.mkdir('build/joylol')
-lfs.mkdir('install')
-lfs.mkdir('install/joylol')
 lfs.mkdir('lib')
 
 require 'lms.litProgs'
@@ -31,8 +28,3 @@ tInsert(installTargets, target{
   dependencies = { joylolDep },
   command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
 })
-
-target{'doc',     docTargets}
-target{'diff',    diffTargets}
-target{'install', installTargets}
-target{'default', buildTargets}

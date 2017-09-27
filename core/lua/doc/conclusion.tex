@@ -30,23 +30,32 @@ local joylolCPaths = {
 package.cpath = table.concat(joylolCPaths, ';')
 print(package.cpath)
 
-local coAlgs = require 'joylol.coAlgs'
+print('---------------------------------------------')
+print('JInterps')
+local coAlgs = require 'joylol.jInterps'
 
 print(coAlgs.gitVersion('authorName'))
 print(coAlgs.gitVersion('commitDate'))
 print(coAlgs.gitVersion('commitShortHash'))
 
+print('---------------------------------------------')
+print('Booleans')
 local booleans = require 'joylol.booleans'
 
 print(booleans.gitVersion('authorName'))
 print(booleans.gitVersion('commitDate'))
 print(booleans.gitVersion('commitShortHash'))
 
-local strings = require 'joylol.strings'
+print('---------------------------------------------')
+print('Symbols')
+local symbols = require 'joylol.symbols'
 
-print(strings.gitVersion('authorName'))
-print(strings.gitVersion('commitDate'))
-print(strings.gitVersion('commitShortHash'))
+print(symbols.gitVersion('authorName'))
+print(symbols.gitVersion('commitDate'))
+print(symbols.gitVersion('commitShortHash'))
+
+print('---------------------------------------------')
+
 \stopLuaCode
 
 \addDocumentDirectory{doc}

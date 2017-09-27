@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: coAlgs.tex]
+% A ConTeXt document [master document: jInterps.tex]
 
 \section[title=Conclusions]
 
@@ -69,7 +69,6 @@ extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
   {joylol/jInterps-private.h}%
   {}
 
-  
 \setCCodeStream{handles}
 \prependCCode{handles}
 \startCCode
@@ -92,47 +91,7 @@ extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
 #include <assert.h>
 
 #include <joylol/jInterps.h>
-\stopCCode
-
-Now each shared library needs to implement the following code to provide 
-an interface between the generic C-implementation and the Lua module for 
-the shared library. 
-
-\appendCCode{interpreter}
-\startCCode
-static int lua_jInterps_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
-static size_t joylol_register_jInterps(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = strdup("JInterps");
-  theCoAlg->registerFunc = joylol_register_jInterps;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printFunc    = NULL;
-  theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(jInterp, theCoAlg);
-  
-  // in future... register CoAlgs words with JoyLoL dictionary. 
-  
-  return TRUE;
-}
-
-static const struct luaL_Reg lua_jInterps [] = {
-  {"gitVersion", lua_jInterps_getGitVersion},
-  {NULL, NULL}
-};
-
-int luaopen_joylol_jInterps (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  joylol_register_jInterps(jInterp);
-  luaL_newlib(lstate, lua_jInterps);
-  return 1;
-}
+#include "joylol/jInterps-private.h"
 \stopCCode
 
 \createCCodeFile%
@@ -140,8 +99,45 @@ int luaopen_joylol_jInterps (lua_State *lstate) {
   {interpreter.c}%
   {}
 
+\setCCodeStream{words}
+\prependCCode{words}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jInterps.h"
+#include "joylol/jInterps-private.h"
+\stopCCode
+
+\createCCodeFile%
+  {words}%
+  {words.c}%
+  {}
+
+\setCCodeStream{lua}
+\prependCCode{lua}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jInterps.h"
+#include "joylol/jInterps-private.h"
+\stopCCode
+
+\createCCodeFile%
+  {lua}%
+  {lua.c}%
+  {}
+  
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/jInterps-private.h>}
+\CTestsSetup\
+\startCTest
+  JoyLoLInterp *jInterp = newJoyLoLInterp();
+  registerJInterps(jInterp);
+\stopCTest
 \createCTestFile%
   {default}%
   {allCTests.c}%
@@ -150,7 +146,9 @@ int luaopen_joylol_jInterps (lua_State *lstate) {
 \addMainDocument{jInterps.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{handles.tex}
-\addSubDocument{interpreter.tex} 
+\addSubDocument{interpreter.tex}
+\addSubDocument{words.tex}
+\addSubDocument{lua.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

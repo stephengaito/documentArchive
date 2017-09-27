@@ -6,8 +6,6 @@
 \dependsOn[jInterps]
 %\dependsOn[context]
 
-\component gitVersion-c
-
 \startJoyLoLWord[isString]
 
 \preDataStack[aString][]
@@ -16,6 +14,58 @@
 
 \startTestSuite[newString]
 
+\stopTestSuite
+
+\startTestSuite[registerSymbols]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerSymbols(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerSymbols(JoyLoLInterp* jInterp) {
+  assert(jInterp);
+  
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = "Symbols";
+  theCoAlg->registerFunc = registerSymbols;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->printFunc    = NULL;
+  theCoAlg->coAlgData    = NULL;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  
+  // sanity check...
+  assert(tag == SymbolsTag);
+  assert(jInterp->coAlgs.vec[tag]);
+  assert(jInterp->coAlgs.vec[tag]->isA == SymbolsTag);
+  
+  // check to see if this theCoAlg has been used
+  if (theCoAlg->isA == UnusedTag) {
+    free(theCoAlg);
+  }
+
+  registerSymbolWords(jInterp);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Symbols coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerSymbols
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs.vec[SymbolsTag]);
+  CoAlgebra *coAlg = jInterp->coAlgs.vec[SymbolsTag];
+  AssertIntTrue(registerSymbols(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs.vec[SymbolsTag]);
+  AssertPtrEquals(jInterp->coAlgs.vec[SymbolsTag], coAlg);
+  AssertIntEquals(jInterp->coAlgs.vec[SymbolsTag]->isA, SymbolsTag);
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \starttyping

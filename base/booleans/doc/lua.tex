@@ -1,0 +1,25 @@
+% A ConTeXt document [master document: booleans.tex]
+
+\section[title=Lua functions]
+
+\startCCode
+static int lua_booleans_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  const char* aValue = "no valid key provided";
+  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
+  lua_pushstring(lstate, aValue);
+  return 1;
+}
+
+static const struct luaL_Reg lua_booleans [] = {
+  {"gitVersion", lua_booleans_getGitVersion},
+  {NULL, NULL}
+};
+
+int luaopen_joylol_booleans (lua_State *lstate) {
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  registerBooleans(jInterp);
+  luaL_newlib(lstate, lua_booleans);
+  return 1;
+}
+\stopCCode
