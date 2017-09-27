@@ -358,7 +358,20 @@ extern void collectGarbage(JoyLoLInterp* jInterp);
 \startCCode
 void collectGarbage(JoyLoLInterp* jInterp) {
   DEBUG(FALSE, "collectGarbage %p\n", jInterp);
+  //
   // add a garbage collection mark-sweep here
+  //
+  // we will use a tri/quad colour mark-sweep algorithm
+  // similar to that used by LuaJIT v3.0
+  // see: http://wiki.luajit.org/New-Garbage-Collector
+  // see: https://en.wikipedia.org/wiki/Tracing_garbage_collection
+  // our "grey" list will be simply scanning a given 
+  // handle block for currently grey markings... and
+  // we keep a pointer to the current handle block and
+  // where in the block we last checked for grey markings.
+  // this means we can have an incremental mark/trace cycle
+  // which can be run in small increments in each call to eval.
+  //
   assert(jInterp);
 }
 \stopCCode
