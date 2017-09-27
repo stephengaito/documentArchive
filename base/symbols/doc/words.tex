@@ -1,0 +1,39 @@
+% A ConTeXt document [master document: symbols.tex]
+
+\section[title=Words]
+
+\starttyping
+static void isSymbolAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  popCtxDataInto(aCtx, top);
+  PairAtom* result = NULL;
+  if (isSymbol(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
+  else               result = newBoolean(aCtx->coAlgebras, FALSE);
+  pushCtxData(aCtx, result);
+}
+
+static void equalSymbolAP(Context* aCtx) {
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  size_t result = FALSE;
+  if (isSymbol(top1) && isSymbol(top2)) {
+    if (strcmp(top1->symbol, top2->symbol) == 0) result = TRUE;
+  }
+  DEBUG(FALSE, "equalSymbol: %zu\n", result);
+  pushCtxData(aCtx, newBoolean(aCtx->coAlgebras, result));
+}
+\stoptyping
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerSymbolWords(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerSymbolWords(JoyLoLInterp* jInterp) {
+  //extendJoyLoL(coAlgs, "isSymbol", isSymbolAP);
+  //extendJoyLoL(coAlgs, "=Sym",     equalSymbolAP);
+}
+\stopCCode

@@ -37,13 +37,13 @@ static int lua_texts_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_texts(lua_State *lstate) {
+static size_t joylol_register_texts(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = "Texts";
   theCoAlg->registerFunc = joylol_register_texts;
   theCoAlg->equalityFunc = NULL;
   theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(lstate, theCoAlg);
+  registerCoAlgebra(jInterp, theCoAlg);
   assert(theCoAlg->isA == TextsTag);
   
   // in future... register Texts words with JoyLoL dictionary. 
@@ -57,7 +57,8 @@ static const struct luaL_Reg lua_texts [] = {
 };
 
 int luaopen_joylol_texts (lua_State *lstate) {
-  joylol_register_texts(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  joylol_register_texts(jInterp);
   luaL_newlib(lstate, lua_texts);
   return 1;
 }

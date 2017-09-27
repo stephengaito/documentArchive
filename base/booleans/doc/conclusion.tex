@@ -10,6 +10,12 @@
   {joylol/booleans.h}
   {}
 
+\setCHeaderStream{private}
+\startCHeader
+extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
 \CHeaderIncludeGuard{private}{JOYLOL_COALG_BOOLEANS_PRIVATE}
 \createCHeaderFile%
   {private}
@@ -37,7 +43,7 @@ static int lua_booleans_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_booleans(JoyLoLInterp *jInterp) {
+size_t joylol_register_booleans(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = "Booleans";
   theCoAlg->registerFunc = joylol_register_booleans;
@@ -47,7 +53,7 @@ static size_t joylol_register_booleans(JoyLoLInterp *jInterp) {
   registerCoAlgebra(jInterp, theCoAlg);
   assert(theCoAlg->isA == BooleansTag);
   
-  // in future... register Booleans words with JoyLoL dictionary. 
+  registerBooleanWords(jInterp);
   
   return TRUE;
 }
@@ -74,6 +80,11 @@ int luaopen_joylol_booleans (lua_State *lstate) {
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/booleans-private.h>}
+\CTestsSetup\
+\startCTest
+  JoyLoLInterp *jInterp = newJoyLoLInterp();
+  joylol_register_booleans(jInterp);
+\stopCTest
 \createCTestFile%
   {default}%
   {allCTests.c}%

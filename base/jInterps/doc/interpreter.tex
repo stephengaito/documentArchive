@@ -90,11 +90,9 @@ creates a new \type{JoyLoLInterp} structure and ensures it is properly
 initialized. Note that we \emph{could} have multiple instances of 
 \type{JoyLoLInterp} in a running program. 
 
-\setCHeaderStream{private}
 \startCHeader
 extern JoyLoLInterp* newJoyLoLInterp(void);
 \stopCHeader
-\setCHeaderStream{public}
 
 \startCCode
 JoyLoLInterp* newJoyLoLInterp(void) {

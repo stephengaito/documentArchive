@@ -1,19 +1,19 @@
-% A ConTeXt document [master document: strings.tex]
+% A ConTeXt document [master document: symbols.tex]
 
 \section[title=Conclusions]
 
 \addDocumentDirectory{doc}
 
-\CHeaderIncludeGuard{public}{JOYLOL_COALG_STRINGS}
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_SYMBOLS}
 \createCHeaderFile%
   {public}
-  {joylol/strings.h}
+  {joylol/symbols.h}
   {}
 
-\CHeaderIncludeGuard{private}{JOYLOL_COALG_STRINGSS_PRIVATE}
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_SYMBOLS_PRIVATE}
 \createCHeaderFile%
   {private}
-  {joylol/strings-private.h}
+  {joylol/symbols-private.h}
   {}
 
 \prependCCode{default}
@@ -26,7 +26,7 @@
 
 \appendCCode{default}
 \startCCode
-static int lua_strings_getGitVersion (lua_State *lstate) {
+static int lua_symbols_getGitVersion (lua_State *lstate) {
   const char* aKey   = lua_tostring(lstate, 1);
   const char* aValue = "no valid key provided";
   if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
@@ -34,27 +34,29 @@ static int lua_strings_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_strings(lua_State *lstate) {
+static size_t joylol_register_symbols(JoyLoLInterp* jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Strings";
-  theCoAlg->registerFunc = joylol_register_strings;
+  theCoAlg->name         = "Symbols";
+  theCoAlg->registerFunc = joylol_register_symbols;
   theCoAlg->equalityFunc = NULL;
+  theCoAlg->printFunc    = NULL;
   theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(lstate, theCoAlg);
-  
-  // in future... register Strings words with JoyLoL dictionary. 
-  
+  registerCoAlgebra(jInterp, theCoAlg);
+
+  registerSymbolWords(jInterp);
+
   return TRUE;
 }
 
-static const struct luaL_Reg lua_strings [] = {
-  {"gitVersion", lua_strings_getGitVersion},
+static const struct luaL_Reg lua_symbols [] = {
+  {"gitVersion", lua_symbols_getGitVersion},
   {NULL, NULL}
 };
 
-int luaopen_joylol_strings (lua_State *lstate) {
-  joylol_register_strings(lstate);
-  luaL_newlib(lstate, lua_strings);
+int luaopen_joylol_symbols (lua_State *lstate) {
+  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
+  joylol_register_symbols(jInterp);
+  luaL_newlib(lstate, lua_symbols);
   return 1;
 }
 \stopCCode
@@ -69,9 +71,10 @@ int luaopen_joylol_strings (lua_State *lstate) {
   {allCTests.c}%
   {}
 
-\addMainDocument{strings.tex}
+\addMainDocument{symbols.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

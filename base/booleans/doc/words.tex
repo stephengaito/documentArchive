@@ -39,12 +39,12 @@ static void ifteContAP(Context* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void initBooleansCoAlgebra(CoAlgebras* coAlgs);
+extern void registerBooleanWords(JoyLoLInterp* jInterp);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void initBooleansCoAlgebra(CoAlgebras* coAlgebras) {
+void registerBooleanWords(JoyLoLInterp* jInterp) {
   //assert(coAlgebras);
   //assert(coAlgebras->symbols);
   //Dictionary* mainDic = coAlgebras->symbols->dictionary;

@@ -20,11 +20,11 @@ extern CoAlgHandle* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean);
 
 \startCCode
 CoAlgHandle* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
-  assert(coAlgs);
-  CoAlgHandle* result = newHandle(coAlgs);
+  assert(jInterp);
+  CoAlgHandle* result = newHandle(jInterp);
   assert(result);
-  result->type         = jInterp->coAlgs.vec[BooleanTag];
-  result->tag          = 0;
+  result->type         = jInterp->coAlgs.vec[BooleansTag];
+  result->flags          = 0;
   result->data.words.a = (aBoolean ? TRUE : FALSE);
   result->data.words.b = 0;
   return result;
@@ -50,8 +50,21 @@ CoAlgHandle* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
 \stopTestCase
 \stopTestSuite
 
-\starttyping
+\startTestSuite[isBoolean]
+
+\startCHeader
 extern size_t isBoolean(CoAlgHandle* aLoL);
+\stopCHeader
+
+\startCCode
+size_t isBoolean(CoAlgHandle* aLoL) {
+  if (!aLoL) return FALSE;
+  if (aLoL->type && (aLoL->type->isA == BooleansTag)) return TRUE;
+  return FALSE;
+}
+\stopCCode
+
+\starttyping
 extern size_t isTrue(CoAlgHandle* aLoL);
 extern size_t isFalse(CoAlgHandle* aLoL);
 \stoptyping
@@ -110,11 +123,6 @@ static size_t printStrBoolCoAlg(CoAlgHandle* aLoL,
   return TRUE;
 }
 
-size_t isBoolean(CoAlgHandle* aLoL) {
-  if (!aLoL) return FALSE;
-  if (aLoL->coAlg && (aLoL->coAlg->isA == BOOLEAN_COALG)) return TRUE;
-  return FALSE;
-}
 
 size_t isTrue(CoAlgHandle* aLoL) {
   if (!aLoL) return FALSE;

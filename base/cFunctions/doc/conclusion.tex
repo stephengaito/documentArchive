@@ -35,13 +35,14 @@ static int lua_cFunctions_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_cFunctions(lua_State *lstate) {
+static size_t joylol_register_cFunctions(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = "CFunctions";
   theCoAlg->registerFunc = joylol_register_cFunctions;
   theCoAlg->equalityFunc = NULL;
+  theCoAlg->printFunc    = NULL;
   theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(lstate, theCoAlg);
+  registerCoAlgebra(jInterp, theCoAlg);
   assert(theCoAlg->isA == CFunctionsTag);
   
   // in future... register CFunctions words with JoyLoL dictionary. 
@@ -55,7 +56,8 @@ static const struct luaL_Reg lua_cFunctions [] = {
 };
 
 int luaopen_joylol_cFunctions (lua_State *lstate) {
-  joylol_register_cFunctions(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  joylol_register_cFunctions(jInterp);
   luaL_newlib(lstate, lua_cFunctions);
   return 1;
 }

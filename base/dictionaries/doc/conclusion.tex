@@ -37,13 +37,14 @@ static int lua_dictionaries_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_dictionaries(lua_State *lstate) {
+static size_t joylol_register_dictionaries(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = "Dictionaries";
   theCoAlg->registerFunc = joylol_register_dictionaries;
   theCoAlg->equalityFunc = NULL;
+  theCoAlg->printFunc    = NULL;
   theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(lstate, theCoAlg);
+  registerCoAlgebra(jInterp, theCoAlg);
   assert(theCoAlg->isA == DictionariesTag);
   
   // in future... register Dictionaries words with JoyLoL dictionary. 
@@ -57,7 +58,8 @@ static const struct luaL_Reg lua_dictionaries [] = {
 };
 
 int luaopen_joylol_dictionaries (lua_State *lstate) {
-  joylol_register_dictionaries(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  joylol_register_dictionaries(jInterp);
   luaL_newlib(lstate, lua_dictionaries);
   return 1;
 }

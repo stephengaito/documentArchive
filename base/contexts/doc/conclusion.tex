@@ -35,13 +35,14 @@ static int lua_contexts_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_contexts(lua_State *lstate) {
+static size_t joylol_register_contexts(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = "Contexts";
   theCoAlg->registerFunc = joylol_register_contexts;
   theCoAlg->equalityFunc = NULL;
+  theCoAlg->printFunc    = NULL;
   theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(lstate, theCoAlg);
+  registerCoAlgebra(jInterp, theCoAlg);
   assert(theCoAlg->isA == ContextsTag);
   
   // in future... register Contexts words with JoyLoL dictionary. 
@@ -55,7 +56,8 @@ static const struct luaL_Reg lua_contexts [] = {
 };
 
 int luaopen_joylol_contexts (lua_State *lstate) {
-  joylol_register_contexts(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  joylol_register_contexts(jInterp);
   luaL_newlib(lstate, lua_contexts);
   return 1;
 }

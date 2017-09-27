@@ -1,16 +1,10 @@
-% A ConTeXt document [master document: strings.tex]
+% A ConTeXt document [master document: symbols.tex]
 
 \section[title=Code]
+\setCHeaderStream{public}
 
 \dependsOn[jInterps]
 %\dependsOn[context]
-
-\startCHeader
-typedef struct strings_struct {
-  CoAlgebras  super;
-  const char* theString;
-} Boolean;
-\stopCHeader
 
 \component gitVersion-c
 
@@ -20,25 +14,13 @@ typedef struct strings_struct {
 
 \stopJoyLoLWord
 
+\startTestSuite[newString]
+
+\stopTestSuite
+
 \starttyping
 // strings.h
-#ifndef JOYLOL_COALG_SYMBOLS_H
-#define JOYLOL_COALG_SYMBOLS_H
 
-typedef struct dictionary_struct Dictionary;
-
-typedef const char Symbol;
-
-typedef struct symbols_struct {
-  CoAlgebra super;
-  Dictionary* dictionary;
-  // other things
-} Symbols;
-
-extern Symbols* createSymbolsCoAlgebra(void);
-extern void initSymbolsCoAlgebra(CoAlgebras* coAlgs);
-
-extern PairAtom* newSymbol(CoAlgebras* coAlgs, const char* aSymbol);
 
 extern size_t isSymbol(PairAtom* aLoL);
 extern size_t symbolIs(PairAtom* aLoL, Symbol* aSymbol);
@@ -91,21 +73,6 @@ static size_t printStrSymbolCoAlg(PairAtom* aLoL,
   return TRUE;
 }
 
-Symbols* createSymbolsCoAlgebra(void) {
-  Symbols* symbols = (Symbols*) calloc(1, sizeof(Symbols));
-  initACoAlgebra((CoAlgebra*)symbols);
-
-  symbols->super.isA       = SYMBOL_COALG;
-  symbols->super.name      = "symbol";
-  symbols->super.equality  = equalitySymbolCoAlg;
-  symbols->super.printSize = printSizeSymbolCoAlg;
-  symbols->super.printStr  = printStrSymbolCoAlg;
-
-  symbols->dictionary = createDictionary();     // lazy init
-
-  return symbols;
-}
-
 PairAtom* newSymbol(CoAlgebras* coAlgs, const char* aSymbol) {
   assert(aSymbol);
   assert(coAlgs);
@@ -130,31 +97,7 @@ size_t symbolIs(PairAtom* aLoL, Symbol* aSymbol) {
   return FALSE;
 }
 
-static void isSymbolAP(Context* aCtx) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  popCtxDataInto(aCtx, top);
-  PairAtom* result = NULL;
-  if (isSymbol(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
-  else               result = newBoolean(aCtx->coAlgebras, FALSE);
-  pushCtxData(aCtx, result);
-}
 
-static void equalSymbolAP(Context* aCtx) {
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  size_t result = FALSE;
-  if (isSymbol(top1) && isSymbol(top2)) {
-    if (strcmp(top1->symbol, top2->symbol) == 0) result = TRUE;
-  }
-  DEBUG(FALSE, "equalSymbol: %zu\n", result);
-  pushCtxData(aCtx, newBoolean(aCtx->coAlgebras, result));
-}
-
-void initSymbolsCoAlgebra(CoAlgebras* coAlgs) {
-  extendJoyLoL(coAlgs, "isSymbol", isSymbolAP);
-  extendJoyLoL(coAlgs, "=Sym",     equalSymbolAP);
-}
 \stoptyping
 
 \starttyping

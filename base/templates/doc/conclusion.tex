@@ -37,13 +37,13 @@ static int lua_templates_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static size_t joylol_register_templates(lua_State *lstate) {
+static size_t joylol_register_templates(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = "Templates";
   theCoAlg->registerFunc = joylol_register_templates;
   theCoAlg->equalityFunc = NULL;
   theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(lstate, theCoAlg);
+  registerCoAlgebra(jInterp, theCoAlg);
   assert(theCoAlg->isA == TemplatesTag);
   
   // in future... register Templates words with JoyLoL dictionary. 
@@ -57,7 +57,8 @@ static const struct luaL_Reg lua_templates [] = {
 };
 
 int luaopen_joylol_templates (lua_State *lstate) {
-  joylol_register_templates(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  joylol_register_templates(jInterp);
   luaL_newlib(lstate, lua_templates);
   return 1;
 }
