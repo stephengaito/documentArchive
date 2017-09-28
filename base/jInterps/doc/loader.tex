@@ -1,0 +1,242 @@
+% A ConTeXt document [master document: jInterps.tex]
+
+\section[title=Loader functions]
+
+\startCHeader
+typedef struct loader_struct {
+  CoAlgHandle *paths;
+  CoAlgHandle *files;
+  CoAlgHandle *extensions;
+  Boolean      loadConfig;
+} JoyLoLLoader;
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void initLoader(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void initLoader(JoyLoLInterp *jInterp) {
+  jInterp->loader.paths      = NULL;
+  jInterp->loader.files      = NULL;
+  jInterp->loader.extensions = NULL;
+  jInterp->loader.loadConfig = TRUE;
+  
+  // initStandardLoadPaths
+  char userConfigPath[1000];
+  userConfigPath[0] = 0;
+  strcat(userConfigPath, getenv("HOME"));
+  //strcat(userConfigPath, secure_getenv("HOME"));
+  strcat(userConfigPath, "/.joyLoL");
+  char userPluginPath[1000];
+  userPluginPath[0] = 0;
+  strcat(userPluginPath, userConfigPath);
+  strcat(userPluginPath, "/plugins");
+
+  // allow absolute paths as a last resort
+  pushLoadPath(jInterps, ""); 
+  pushLoadPath(jInterps, JOYLOL_SYSTEM_PLUGINS_PATH);
+  pushLoadPath(jInterps, JOYLOL_SYSTEM_CONFIG_PATH);
+  pushLoadPath(jInterps, userPluginPath);
+  pushLoadPath(jInterps, userConfigPath);
+  pushLoadPath(jInterps, ".");
+
+  // allow absolute extensions as a last resort
+  pushLoadExtension(jInterps, "");
+  pushLoadExtension(jInterps, ".so");
+  pushLoadExtension(jInterps, ".lua");
+  pushLoadExtension(jInterps, ".joy");
+}
+\stopCCode
+
+\startCHeader
+void pushLoadPath(JoyLoLInterp* jInterp, const char* aLoadPath);
+\stopCHeader
+
+\startCCode
+void pushLoadPath(JoyLoLInterp* jInterp, const char* aLoadPath) {
+  assert(aLoadPath);
+  assert(jInterp);
+  assert(jInterp->contexts);
+  Loader* loader = jInterp->contexts->loader;
+  assert(loader);
+  loader->loadPaths =
+    newPair(jInterp, newSymbol(jInterp, aLoadPath), loader->loadPaths);
+}
+\stopCCode
+
+\startCHeader
+void pushLoadFile(JoyLoLInterp* jInterp, const char* aLoadFile);
+\stopCHeader
+
+\startCCode
+void pushLoadFile(JoyLoLInterp* jInterp, const char* aLoadFile) {
+  assert(aLoadFile);
+  assert(jInterp);
+  assert(jInterp->contexts);
+  Loader* loader = jInterp->contexts->loader;
+  assert(loader);
+  loader->loadFiles =
+    newPair(jInterp, newSymbol(jInterp, aLoadFile), loader->loadFiles);
+}
+\stopCCode
+
+\startCHeader
+void pushLoadExtension(JoyLoLInterp* jInterp, const char* aLoadExtension);
+\stopCHeader
+
+\startCCode
+void pushLoadExtension(JoyLoLInterp* jInterp, const char* aLoadExtension) {
+  assert(aLoadExtension);
+  assert(jInterp);
+  assert(jInterp->contexts);
+  Loader* loader = jInterp->contexts->loader;
+  assert(loader);
+  loader->loadExtensions =
+    newPair(jInterp, newSymbol(jInterp, aLoadExtension), loader->loadExtensions);
+}
+\stopCCode
+
+\starttyping
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <unistd.h>
+#include <dlfcn.h>
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/text.h"
+#include "joyLoL/eval.h"
+#include "joyLoL/loader.h"
+#include "joyLoL/loader_private.h"
+
+size_t loadATextFile(Context* aCtx, const char* filePath) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  DEBUG(FALSE, "loadATextFile [%s]\n", filePath);
+  FILE* inputFile = fopen(filePath, "r");
+  if (inputFile) {
+    if(aCtx->verbose) printf("(%s)\n", filePath);
+    Text* aText = createTextFromInputFile(aCtx->coAlgebras, inputFile);
+    evalTextInContext(aCtx, aText);
+    freeText(aText);
+    fclose(inputFile);
+    if (reportException(aCtx)) {
+      DEBUG(FALSE, "loadATextFile [%s] RAISED EXCEPTION\n", filePath);
+      return FALSE;
+    }
+    DEBUG(FALSE, "loadATextFile [%s] OK\n", filePath);
+    return TRUE; // we have loaded this file so return TRUE;
+  }
+  DEBUG(FALSE, "loadATextFile [%s] FAILED\n", filePath);
+  return FALSE;
+}
+
+size_t loadADSOFile(Context* aCtx, const char* fileName,
+                    const char* filePath) {
+  DEBUG(FALSE, "loadADSOFile {%s}[%s]\n", fileName, filePath);
+  void* dsoHandle = dlopen(filePath, RTLD_LAZY);
+  if (dsoHandle) {
+    if (aCtx->verbose) printf("(%s)\n", filePath);
+    char buffer[1000];
+    buffer[0] = 0;
+    strcat(buffer, fileName);
+    strcat(buffer, "_init");
+    size_t (*initFunc)(Context*) =
+      (size_t (*)(Context*)) dlsym(dsoHandle, buffer);
+    if (initFunc) {
+      size_t result = TRUE;
+      DEBUG(FALSE, "loadADSOFile calling %p with %p\n", initFunc, aCtx);
+      result = initFunc(aCtx);
+      DEBUG(FALSE, "loadADSOFile called %p with %p result = %zu\n",
+            initFunc, aCtx, result);
+      return result;
+    }
+  }
+  DEBUG(FALSE, "loadADSOFile {%s}[%s] no dsoHandle %p\n",
+        fileName, filePath, dsoHandle);
+  return FALSE;
+}
+
+size_t loadAFile(Context* aCtx, const char* aFileToLoad) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  assert(aCtx->coAlgebras->contexts);
+  Loader* loader = aCtx->coAlgebras->contexts->loader;
+  assert(loader);
+  if (!aFileToLoad) return FALSE;
+  if (!*aFileToLoad) return FALSE;
+
+  if (aCtx->verbose) printf("\t%s ", aFileToLoad);
+
+  PairAtom* aLoadPathList = loader->loadPaths;
+  while(aLoadPathList) {
+    PairAtom* aLoadPath = aLoadPathList->pair.car;
+    if (!isSymbol(aLoadPath)) continue;
+
+    PairAtom* aLoadExtensionList = loader->loadExtensions;
+    while(aLoadExtensionList) {
+      PairAtom* aLoadExtension = aLoadExtensionList->pair.car;
+      if (!isSymbol(aLoadExtension)) continue;
+
+      char buffer[1000];
+      buffer[0] = 0;
+      assert(isSymbol(aLoadPath));
+      strcat(buffer, aLoadPath->symbol);
+      strcat(buffer, "/");
+      strcat(buffer, aFileToLoad);
+      assert(isSymbol(aLoadExtension));
+      strcat(buffer, aLoadExtension->symbol);
+      DEBUG(FALSE, "trying to load: [%s]\n", buffer);
+
+      if (!access(buffer, R_OK)) {
+        if (strcmp(aLoadExtension->symbol, ".so") == 0) {
+          if (loadADSOFile(aCtx, aFileToLoad, buffer)) {
+            DEBUG(FALSE, "loaded: [%s]\n", buffer);
+            return TRUE;
+          }
+        } else if (loadATextFile(aCtx, buffer)) {
+          DEBUG(FALSE, "loaded: [%s]\n", buffer);
+          return TRUE;
+        }
+        // keep trying other paths/extensions ...
+      }
+      aLoadExtensionList = aLoadExtensionList->pair.cdr; // try the next ext
+    }
+    aLoadPathList = aLoadPathList->pair.cdr; // try the next load path
+  }
+  if(aCtx->verbose) printf("FAILED\n");
+  DEBUG(FALSE, "loadAFile: FAILED%s\n", "");
+  return FALSE; // we could not find this file in any of the load paths
+}
+
+size_t loadFiles(Context* aCtx, PairAtom* filesToLoad) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  assert(aCtx->coAlgebras->contexts);
+  Loader* loader = aCtx->coAlgebras->contexts->loader;
+  assert(loader);
+  if (!filesToLoad) return TRUE; // nothing to do...
+
+  DEBUG(FALSE, "loadFiles > %s:%p\n", filesToLoad->coAlg->name, filesToLoad);
+
+  if (isSymbol(filesToLoad)) { // try to load this file
+    return loadAFile(aCtx, filesToLoad->symbol);
+  }
+
+  // this is a Pair in the list of load files...
+  // ... walk down the list
+  if (loadFiles(aCtx, filesToLoad->pair.cdr)) {
+    // if all previous files have been loaded... load this one as well
+    return loadFiles(aCtx, filesToLoad->pair.car);
+  }
+  DEBUG(FALSE, "loadFiles < %p FAILED\n", filesToLoad);
+  return FALSE; // some previous file has failed to load...
+}
+
+
+\stoptyping
