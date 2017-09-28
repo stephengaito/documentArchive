@@ -26,43 +26,6 @@
 #include <joylol/pairs-private.h>
 \stopCCode
 
-\appendCCode{default}
-\startCCode
-static int lua_pairs_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
-static size_t joylol_register_pairs(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = strdup("Pairs");
-  theCoAlg->registerFunc = joylol_register_pairs;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printFunc    = NULL;
-  theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(jInterp, theCoAlg);
-  
-  registerPairsWords(jInterp);
-  
-  return TRUE;
-}
-
-static const struct luaL_Reg lua_pairs [] = {
-  {"gitVersion", lua_pairs_getGitVersion},
-  {NULL, NULL}
-};
-
-int luaopen_joylol_pairs (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  joylol_register_pairs(jInterp);
-  luaL_newlib(lstate, lua_pairs);
-  return 1;
-}
-\stopCCode
-
 \createCCodeFile%
   {default}%
   {pairs.c}%
@@ -71,6 +34,11 @@ int luaopen_joylol_pairs (lua_State *lstate) {
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/pairs.h>}
 \addCTestInclude{<joylol/pairs-private.h>}
+\CTestsSetup\
+\startCTest
+  JoyLoLInterp *jInterp = newJoyLoLInterp();
+  registerPairs(jInterp);
+\stopCTest
 \createCTestFile%
   {default}%
   {allCTests.c}%
@@ -79,6 +47,7 @@ int luaopen_joylol_pairs (lua_State *lstate) {
 \addMainDocument{pairs.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{lua.tex}
 \addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
