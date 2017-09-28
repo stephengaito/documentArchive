@@ -135,29 +135,6 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[addLuaPath]
-
-\startCHeader
-extern Boolean addLuaPath(
-  JoyLoLInterp *jInterp,
-  Symbol *aLuaPath
-);
-\startCHeader
-
-\startCCode
-Boolean addLuaPath(
-  JoyLoLInterp *jInterp,
-  Symbol *aLuaPath
-) {
-  assert(jInterp);
-  assert(jInterp->lstate);
-  lua_pushstring(jInterp->lstate, aLuaPath);
-  
-}
-\stopCCode
-
-\stopTestSuite
-
 \startTestSuite[get Lua-state global JoyLoLInterp LightUserData]
 
 We want the ability to have different JoyLoL interpreters for each Lua 
@@ -302,7 +279,7 @@ size_t registerCoAlgebra(
 We start by adding one single \type{CoAlgebra}. 
 
 \startCTest
-  JoyLoLInterp *jInterp = newJoyLoLInterp();
+  JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
 
   char*          coAlgName        = strdup("newCoAlgA");
   char*          coAlgNameEnd     = coAlgName + strlen("newCoAlg");

@@ -190,7 +190,7 @@ CoAlgHandle* newHandle(JoyLoLInterp* jInterp) {
 
 \startTestCase[Allocate one new CoAlgHandle]
 \startCTest
-  JoyLoLInterp* jInterp = newJoyLoLInterp();
+  JoyLoLInterp* jInterp = newJoyLoLInterp(lstate);
   AssertPtrNotNull(jInterp);
 
   AssertPtrNull(jInterp->hMem.freeHandles);
@@ -229,7 +229,7 @@ CoAlgHandle* newHandle(JoyLoLInterp* jInterp) {
 \startTestCase[Allocate lots of new CoAlgHandles]
 
 \startCTest
-  JoyLoLInterp* jInterp = newJoyLoLInterp();
+  JoyLoLInterp* jInterp = newJoyLoLInterp(lstate);
   AssertPtrNotNull(jInterp);
 
   CoAlgHandle* aNewHandle = NULL;
@@ -307,7 +307,7 @@ void addHandleBlock(JoyLoLInterp* jInterp) {
   // create the first list block and make sure it is 
   // properly integrated into linked list of list blocks
 
-  JoyLoLInterp* jInterp = newJoyLoLInterp();
+  JoyLoLInterp* jInterp = newJoyLoLInterp(lstate);
 
   AssertPtrNotNull(jInterp);
   AssertPtrNull(jInterp->hMem.rootHandleBlock);

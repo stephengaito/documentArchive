@@ -135,7 +135,7 @@ extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
 \addCTestInclude{<joylol/jInterps-private.h>}
 \CTestsSetup\
 \startCTest
-  JoyLoLInterp *jInterp = newJoyLoLInterp();
+  JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
   registerJInterps(jInterp);
 \stopCTest
 \createCTestFile%

@@ -3,6 +3,82 @@
 \section[title=Lua functions]
 \setCCodeStream{lua}
 
+\startTestSuite[addLuaPath and getLuaPath]
+
+\startCHeader
+extern Boolean addLuaPath(
+  JoyLoLInterp *jInterp,
+  Symbol *aLuaPath,
+  Boolean addToCPath
+);
+
+extern Symbol *getLuaPath(
+  JoyLoLInterp *jInterp,
+  Boolean getCPath
+);
+\stopCHeader
+
+\startCCode
+Boolean addLuaPath(
+  JoyLoLInterp *jInterp,
+  Symbol *aLuaPath,
+  Boolean addToCPath
+) {
+  assert(jInterp);
+  assert(jInterp->lstate);
+
+  char* path = "path";
+  if (addToCPath) {
+    path = "cpath";
+  }
+  
+  lua_State *lstate = jInterp->lstate;
+  luaL_Buffer lBuf;
+  luaL_buffinit(lstate, &lBuf);
+  luaL_addstring(&lBuf, aLuaPath);
+  luaL_addstring(&lBuf, ";");
+  lua_getglobal(lstate, "package");
+  lua_getfield(lstate, -1, path);
+  luaL_addvalue (&lBuf);
+  luaL_pushresult(&lBuf);
+  lua_setfield(lstate, -2, path);
+  lua_pop(lstate, 1);
+  return TRUE;
+}
+
+Symbol *getLuaPath(
+  JoyLoLInterp *jInterp,
+  Boolean getCPath
+) {
+  assert(jInterp);
+  assert(jInterp->lstate);
+
+  char* path = "path";
+  if (getCPath) {
+    path = "cpath";
+  }
+  
+  lua_State *lstate = jInterp->lstate;
+  lua_getglobal(lstate, "package");
+  lua_getfield(lstate, -1, path);
+  Symbol *result = strdup(lua_tostring(lstate, -1));
+  lua_pop(lstate, 2);
+  return result;
+}
+\stopCCode
+
+\startTestCase[should add and get package.path/package.cpath]
+
+\startCTest
+  Symbol *path = getLuaPath(jInterp, FALSE);
+  printf("path: %s\n", path);
+  addLuaPath(jInterp, "tests", FALSE);
+  path = getLuaPath(jInterp, FALSE);
+  printf("path: %s\n", path);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
 \component gitVersion-c
 
 \startCCode
