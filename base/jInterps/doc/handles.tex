@@ -67,10 +67,15 @@ We start by providing generic ANSI-C typedefs for each of these four
 alternatives. 
 
 \startCHeader
-typedef struct two_pointers_struct {
-  CoAlgHandle* a;
-  CoAlgHandle* b;
-} TwoPointers;
+typedef struct pairs_data_struct {
+  CoAlgHandle* car;
+  CoAlgHandle* cdr;
+} PairsData;
+
+typedef struct symbols_data_struct {
+  Symbol *str;
+  size_t  flags;
+} SymbolsData;
 
 typedef struct two_words_struct {
   size_t a;
@@ -90,7 +95,8 @@ typedef struct mixed_word_struct {
 
 
 typedef union {
-  TwoPointers ptrs;
+  PairsData   pairs;
+  SymbolsData sym;
   TwoWords    words;
   MixedWords  mixed;
   DoubleWord  dword;
@@ -171,12 +177,12 @@ CoAlgHandle* newHandle(JoyLoLInterp* jInterp) {
   assert(jInterp->hMem.freeHandles);
 
   CoAlgHandle* aNewHandle   = jInterp->hMem.freeHandles;
-  jInterp->hMem.freeHandles = aNewHandle->data.ptrs.b;
+  jInterp->hMem.freeHandles = aNewHandle->data.pairs.cdr;
 
   aNewHandle->type        = NULL;
   aNewHandle->flags       = 0;
-  aNewHandle->data.ptrs.a = NULL;
-  aNewHandle->data.ptrs.b = NULL;
+  aNewHandle->data.pairs.car = NULL;
+  aNewHandle->data.pairs.cdr = NULL;
 
   return aNewHandle;
 }
@@ -198,8 +204,8 @@ CoAlgHandle* newHandle(JoyLoLInterp* jInterp) {
   AssertPtrNotNull(jInterp->hMem.freeHandles);
   AssertPtrNotNull(jInterp->hMem.rootHandleBlock);
   AssertPtrNotNull(aNewHandle );
-  AssertPtrNull(aNewHandle->data.ptrs.a);
-  AssertPtrNull(aNewHandle->data.ptrs.b);
+  AssertPtrNull(aNewHandle->data.pairs.car);
+  AssertPtrNull(aNewHandle->data.pairs.cdr);
   AssertPtrEquals(aNewHandle,
     jInterp->hMem.rootHandleBlock->block);
 
@@ -209,12 +215,12 @@ CoAlgHandle* newHandle(JoyLoLInterp* jInterp) {
   CoAlgHandle* oldFreeHandles =
     jInterp->hMem.freeHandles;
   CoAlgHandle* newfreeHandles = 
-    jInterp->hMem.freeHandles->data.ptrs.b;
+    jInterp->hMem.freeHandles->data.pairs.cdr;
 
   aNewHandle = newHandle(jInterp);
   AssertPtrNotNull(aNewHandle );
-  AssertPtrNull(aNewHandle->data.ptrs.a);
-  AssertPtrNull(aNewHandle->data.ptrs.b);
+  AssertPtrNull(aNewHandle->data.pairs.car);
+  AssertPtrNull(aNewHandle->data.pairs.cdr);
   AssertPtrEquals(oldFreeHandles, aNewHandle);
   AssertPtrEquals(newfreeHandles, jInterp->hMem.freeHandles);
 \stopCTest
@@ -231,8 +237,8 @@ CoAlgHandle* newHandle(JoyLoLInterp* jInterp) {
     aNewHandle = newHandle(jInterp);
   }
   AssertPtrNotNull(aNewHandle);
-  AssertPtrNull(aNewHandle->data.ptrs.a);
-  AssertPtrNull(aNewHandle->data.ptrs.b);
+  AssertPtrNull(aNewHandle->data.pairs.car);
+  AssertPtrNull(aNewHandle->data.pairs.cdr);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -286,10 +292,10 @@ void addHandleBlock(JoyLoLInterp* jInterp) {
   CoAlgHandle* lastHandle = nextHandle + HANDLE_BLOCK_SIZE - 1;
   for ( ; nextHandle < lastHandle ; nextHandle++ ) {
     assert( IS_MEM_ALIGNED(nextHandle) );
-    nextHandle->data.ptrs.a = NULL;
-    nextHandle->data.ptrs.b = nextHandle + 1;
+    nextHandle->data.pairs.car = NULL;
+    nextHandle->data.pairs.cdr = nextHandle + 1;
   }
-  nextHandle->data.ptrs.b = jInterp->hMem.freeHandles;
+  nextHandle->data.pairs.cdr = jInterp->hMem.freeHandles;
   jInterp->hMem.freeHandles = aNewHandleBlock->block;
   DEBUG(FALSE, "addHandleBlock < %p %p %p\n",
     jInterp, aNewHandleBlock, aNewHandleBlock->block);
@@ -318,10 +324,10 @@ void addHandleBlock(JoyLoLInterp* jInterp) {
   CoAlgHandle* lastHandle = nextHandle + HANDLE_BLOCK_SIZE - 1;
   for ( ; nextHandle < lastHandle ; nextHandle++ ) {
     AssertIntTrue(IS_MEM_ALIGNED(nextHandle));
-    AssertPtrNull(nextHandle->data.ptrs.a);
-    AssertPtrEquals(nextHandle->data.ptrs.b, nextHandle + 1);
+    AssertPtrNull(nextHandle->data.pairs.car);
+    AssertPtrEquals(nextHandle->data.pairs.cdr, nextHandle + 1);
   }
-  AssertPtrNull(nextHandle->data.ptrs.b);
+  AssertPtrNull(nextHandle->data.pairs.cdr);
   AssertPtrEquals(jInterp->hMem.freeHandles,
     jInterp->hMem.rootHandleBlock->block);
 
@@ -338,10 +344,10 @@ void addHandleBlock(JoyLoLInterp* jInterp) {
   lastHandle = nextHandle + HANDLE_BLOCK_SIZE - 1;
   for ( ; nextHandle < lastHandle ; nextHandle++ ) {
     AssertIntTrue(IS_MEM_ALIGNED(nextHandle));
-    AssertPtrNull(nextHandle->data.ptrs.a);
-    AssertPtrEquals(nextHandle->data.ptrs.b, nextHandle + 1);
+    AssertPtrNull(nextHandle->data.pairs.car);
+    AssertPtrEquals(nextHandle->data.pairs.cdr, nextHandle + 1);
   }
-  AssertPtrEquals(nextHandle->data.ptrs.b, oldFreeHandles);
+  AssertPtrEquals(nextHandle->data.pairs.cdr, oldFreeHandles);
   AssertPtrEquals(jInterp->hMem.freeHandles,
     jInterp->hMem.rootHandleBlock->nextBlock->block);
 \stopCTest

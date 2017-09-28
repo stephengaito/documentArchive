@@ -68,15 +68,150 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
 \stopTestCase
 \stopTestSuite
 
-\starttyping
-// strings.h
+\startTestSuite[newSymbol]
 
+\startCHeader
+CoAlgHandle* newSymbol(JoyLoLInterp* jInterp, const char* aSymbol);
 
-extern size_t isSymbol(PairAtom* aLoL);
-extern size_t symbolIs(PairAtom* aLoL, Symbol* aSymbol);
+#define asSymbol(aHandle) ((aHandle)->data.sym.str)
+\stopCHeader
 
-#endif
-\stoptyping
+\startCCode
+CoAlgHandle* newSymbol(JoyLoLInterp* jInterp, const char* aSymbol) {
+  assert(aSymbol);
+  assert(jInterp);
+  CoAlgHandle* result = newHandle(jInterp);
+  assert(result);
+  result->type     = jInterp->coAlgs.vec[SymbolsTag];
+  result->flags    = 0;
+  asSymbol(result) = strdup(aSymbol);
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create some new symbols]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs.vec[SymbolsTag]);
+
+  const char* testStr = "test string";
+  CoAlgHandle* aNewSymbol = newSymbol(jInterp, testStr);
+  AssertPtrNotNull(aNewSymbol);
+  AssertPtrNotNull(aNewSymbol->type);
+  AssertIntEquals(aNewSymbol->type->isA, SymbolsTag);
+  AssertPtrNotNull(aNewSymbol->data.sym.str);
+  AssertPtrNotEquals((void*)aNewSymbol->data.sym.str, (void*)testStr);
+  AssertIntEquals(strcmp(asSymbol(aNewSymbol), testStr), 0);
+  AssertIntTrue(isSymbol(aNewSymbol));
+  AssertIntTrue(isAtom(aNewSymbol));
+  AssertIntFalse(isPair(aNewSymbol));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[isSymbol and symbolIs]
+
+\startCHeader
+extern Boolean isSymbol(CoAlgHandle *aLoL);
+\stopCHeader
+
+\startCCode
+Boolean isSymbol(CoAlgHandle *aLoL) {
+  if (aLoL &&
+      aLoL->type &&
+      (aLoL->type->isA == SymbolsTag)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+\stopCCode
+
+\startCHeader
+extern Boolean symbolIs(CoAlgHandle *aLoL, Symbol *aSymbol);
+\stopCHeader
+
+\startCCode
+Boolean symbolIs(CoAlgHandle *aLoL, Symbol *aSymbol) {
+  if (isSymbol(aLoL) &&
+      (strcmp(asSymbol(aLoL), aSymbol) == 0)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+\stopCCode
+
+\startTestCase[should return true if a symbol]
+
+\startCTest
+  CoAlgHandle *aSym = newSymbol(jInterp, "this is a test");
+  AssertIntTrue(isSymbol(aSym));
+  AssertIntTrue(symbolIs(aSym, "this is a test"));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if not a symbol]
+\startCTest
+  AssertIntFalse(isSymbol(NULL));
+  AssertIntFalse(symbolIs(NULL, "this is NOT a test"));
+  CoAlgHandle *aHandle = newHandle(jInterp);
+  AssertIntFalse(isSymbol(aHandle));
+  AssertIntFalse(symbolIs(aHandle, "this is NOT a test"));
+  CoAlgHandle *aSym = newSymbol(jInterp, "this is a test");
+  AssertIntFalse(symbolIs(aSym, "this is NOT a test"));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[symbol equality]
+
+\startCHeader
+Boolean symbolsEqualDebug(
+  CoAlgHandle* lolA,
+  CoAlgHandle* lolB,
+  Boolean debugFlag
+);
+
+#define symbolsEqual(lolA, lolB) \
+  symbolsEqualDebug(lolA, lolB, FALSE)
+\stopCHeader
+
+\startCCode
+Boolean symbolsEqualDebug(
+  CoAlgHandle* lolA,
+  CoAlgHandle* lolB,
+  Boolean debugFlag
+) {
+  DEBUG(debugFlag, "symbolsEqual a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA || !lolB) return FALSE;
+  if (lolA->type != lolB->type) return FALSE;
+  if (strcmp(asSymbol(lolA), asSymbol(lolB)) != 0) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should return true if symbols are equal]
+
+\startCTest
+  AssertIntTrue(symbolsEqual(NULL, NULL));
+  CoAlgHandle *symA = newSymbol(jInterp, "the same text");
+  CoAlgHandle *symB = newSymbol(jInterp, "the same text");
+  AssertIntTrue(symbolsEqual(symA, symB));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if symbols are not equal]
+
+\startCTest
+  CoAlgHandle *symA = newSymbol(jInterp, "text A");
+  CoAlgHandle *symB = newSymbol(jInterp, "text B");
+  AssertIntFalse(symbolsEqual(NULL, symB));
+  AssertIntFalse(symbolsEqual(symA, NULL));
+  AssertIntFalse(symbolsEqual(symA, symB));
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \starttyping
 // strings.c
@@ -90,20 +225,7 @@ extern size_t symbolIs(PairAtom* aLoL, Symbol* aSymbol);
 #include "joyLoL/printer.h"
 #include "joyLoL/dictionary.h"
 
-static size_t equalitySymbolCoAlg(CoAlgebra* klass,
-                                  PairAtom* lolA, PairAtom* lolB,
-                                  size_t debugFlag) {
-  DEBUG(debugFlag, "symbolCoAlg-equal klass:%p a:%p b:%p\n", klass, lolA, lolB);
-  if (!lolA && !lolB) return TRUE;
-  if (!lolA && lolB)  return FALSE;
-  if (lolA  && !lolB) return FALSE;
-  if (lolA->coAlg != klass) return FALSE;
-  if (lolB->coAlg != klass) return FALSE;
-  if (strcmp(lolA->symbol, lolB->symbol) != 0) return FALSE;
-  return TRUE;
-}
-
-static size_t printSizeSymbolCoAlg(PairAtom* aLoL, size_t debugFlag) {
+static size_t printSizeSymbolCoAlg(CoAlgHandle* aLoL, size_t debugFlag) {
   DEBUG(debugFlag, "symbolCoAlg-printSize: %p\n", aLoL);
   assert(aLoL);
   assert(aLoL->coAlg);
@@ -112,7 +234,7 @@ static size_t printSizeSymbolCoAlg(PairAtom* aLoL, size_t debugFlag) {
   return strlen(aLoL->symbol) + 1;
 }
 
-static size_t printStrSymbolCoAlg(PairAtom* aLoL,
+static size_t printStrSymbolCoAlg(CoAlgHandle* aLoL,
                                   char* buffer, size_t bufferSize) {
   assert(aLoL);
   assert(aLoL->coAlg);
@@ -122,32 +244,6 @@ static size_t printStrSymbolCoAlg(PairAtom* aLoL,
   strcat(buffer, " ");
   return TRUE;
 }
-
-PairAtom* newSymbol(CoAlgebras* coAlgs, const char* aSymbol) {
-  assert(aSymbol);
-  assert(coAlgs);
-  PairAtom* result = newPairAtom(coAlgs);
-  assert(result);
-  result->coAlg  = (CoAlgebra*)coAlgs->symbols;
-  result->tag    = 0;
-  result->symbol = strdup(aSymbol);
-  return result;
-}
-
-size_t isSymbol(PairAtom* aLoL) {
-  if (!aLoL) return FALSE;
-  if (aLoL->coAlg && (aLoL->coAlg->isA == SYMBOL_COALG)) return TRUE;
-  return FALSE;
-}
-
-size_t symbolIs(PairAtom* aLoL, Symbol* aSymbol) {
-  if (!aLoL) return FALSE;
-  if (!isSymbol(aLoL)) return FALSE;
-  if (strcmp(aLoL->symbol, aSymbol) == 0) return TRUE;
-  return FALSE;
-}
-
-
 \stoptyping
 
 \starttyping
@@ -166,33 +262,6 @@ size_t symbolIs(PairAtom* aLoL, Symbol* aSymbol) {
 
 // suiteName: - Symbols CoAlgebra tests -
 
-void Test_createSymbolsCoAlgebra(CuTest* tc) {
-  CoAlgebras *coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-  CuAssertPtrNotNull(tc, coAlgs->symbols);
-}
-
-void Test_newSymbol(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-  CuAssertPtrNotNull(tc, coAlgs->symbols);
-
-  const char* testStr = "test string";
-  PairAtom* aNewSymbol = newSymbol(coAlgs, testStr);
-  CuAssertPtrNotNull(tc, aNewSymbol);
-  CuAssertPtrNotNull(tc, aNewSymbol->coAlg);
-  CuAssertIntEquals(tc, aNewSymbol->coAlg->isA, SYMBOL_COALG);
-  CuAssertPtrNotNull(tc, aNewSymbol->symbol);
-  CuAssertPtrNotEquals(tc, (void*)aNewSymbol->symbol, (void*)testStr);
-  CuAssertIntEquals(tc, strcmp(aNewSymbol->symbol, testStr), 0);
-  CuAssertTrue(tc, isSymbol(aNewSymbol));
-  CuAssertTrue(tc, isAtom(aNewSymbol));
-  CuAssertFalse(tc, isBoolean(aNewSymbol));
-  CuAssertFalse(tc, isContext(aNewSymbol));
-  CuAssertFalse(tc, isFunction(aNewSymbol));
-  CuAssertFalse(tc, isNatural(aNewSymbol));
-  CuAssertFalse(tc, isPair(aNewSymbol));
-}
 
 void Test_printSymbols(CuTest* tc) {
   CoAlgebras* coAlgs = createCoAlgebras();
@@ -200,7 +269,7 @@ void Test_printSymbols(CuTest* tc) {
   CuAssertPtrNotNull(tc, coAlgs->symbols);
 
   const char* testStr = "test string";
-  PairAtom* aNewSymbol = newSymbol(coAlgs, testStr);
+  CoAlgHandle* aNewSymbol = newSymbol(coAlgs, testStr);
   CuAssertPtrNotNull(tc, aNewSymbol);
   CuAssertIntEquals(tc, printSizeDebug(aNewSymbol, FALSE), strlen(testStr)+1);
   CuAssertStrEquals(tc, printLoLDebug(aNewSymbol, FALSE), testStr);

@@ -15,6 +15,7 @@ subDirs = { }
 
 for entry in lfs.dir('.') do
   if not entry:match('^%..*$') and
+    not entry:match('^jInterps$') and
     (lfs.attributes(entry, 'mode') == 'directory') then
     table.insert(subDirs, entry)
   end
@@ -23,6 +24,11 @@ end
 -- sort the list of subDirectories
 
 table.sort(subDirs)
+
+-- Now add the critical coAlgs in 
+-- dependency order
+
+table.insert(subDirs, 1, 'jInterps')
 
 -- now walk through these subDirectories
 -- running the lms command on each one
