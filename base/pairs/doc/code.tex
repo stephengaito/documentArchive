@@ -172,23 +172,39 @@ CoAlgHandle* copyPair(
 \startTestCase[should make a correct copy]
 
 \startCTest
-  CoAlgHandle *pair   = newPair(jInterp, NULL, NULL);
-  CoAlgHandle *pairA  = newPair(jInterp, pair, NULL);
-  CoAlgHandle *pairB  = newPair(jInterp, NULL, pair);
+  CoAlgHandle *bool   = newBoolean(jInterp, TRUE);
+  CoAlgHandle *pairA  = newPair(jInterp, bool, NULL);
+  CoAlgHandle *pairB  = newPair(jInterp, pairA, bool);
   CoAlgHandle *aPair0 = newPair(jInterp, pairA, pairB);
   CoAlgHandle *aPair1 = copyPair(jInterp, aPair0);
+  AssertPtrNotNull(bool);
   AssertPtrNotNull(pairA);
   AssertPtrNotNull(pairB);
   AssertPtrNotNull(aPair0);
   AssertPtrNotNull(aPair1);
   AssertPtrNotNull(aPair1->type);
   AssertPtrEquals(aPair1->type, jInterp->coAlgs.vec[PairsTag]);
+
+  AssertPtrNotNull(asCar(aPair1));
   AssertPtrNotEquals(asCar(aPair1), pairA);
+
   AssertPtrNotNull(asCar(asCar(aPair1)));
+  AssertPtrEquals(asCar(asCar(aPair1)), bool);
+  AssertIntTrue(isBoolean(asCar(asCar(aPair1))));
+  AssertIntTrue(isTrue(asCar(asCar(aPair1))));
+
   AssertPtrNull(asCdr(asCar(aPair1)));
+
+  AssertPtrNotNull(asCdr(aPair1));
   AssertPtrNotEquals(asCdr(aPair1), pairB);
-  AssertPtrNull(asCar(asCdr(aPair1)));
+
+  AssertPtrNotNull(asCar(asCdr(aPair1)));
+  AssertIntTrue(isPair(asCar(asCdr(aPair1))));
+
   AssertPtrNotNull(asCdr(asCdr(aPair1)));
+  AssertPtrEquals(asCdr(asCdr(aPair1)), bool);
+  AssertIntTrue(isBoolean(asCdr(asCdr(aPair1))));
+  AssertIntTrue(isTrue(asCdr(asCdr(aPair1))));
 \stopCTest
 \stopTestCase
 \stopTestSuite

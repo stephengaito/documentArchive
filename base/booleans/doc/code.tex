@@ -16,6 +16,8 @@
 
 \startCHeader
 extern CoAlgHandle* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean);
+
+#define asBoolean(aLoL) ((aLoL)->data.words.a)
 \stopCHeader
 
 \startCCode
@@ -119,10 +121,47 @@ Boolean registerBooleans(JoyLoLInterp *jInterp) {
 \stopTestCase
 \stopTestSuite
 
-\starttyping
-extern size_t isTrue(CoAlgHandle* aLoL);
-extern size_t isFalse(CoAlgHandle* aLoL);
-\stoptyping
+\startTestSuite[isTrue and isFalse]
+
+\startCHeader
+extern Boolean isTrue(CoAlgHandle* aLoL);
+extern Boolean isFalse(CoAlgHandle* aLoL);
+\stopCHeader
+
+\startCCode
+Boolean isTrue(CoAlgHandle* aLoL) {
+  if (!aLoL) return FALSE;
+  if (!aLoL->type) return FALSE;
+  if (aLoL->type->isA != BooleansTag) return FALSE;
+  if (asBoolean(aLoL) == FALSE) return FALSE;
+  return TRUE;
+}
+
+Boolean isFalse(CoAlgHandle* aLoL) {
+  if (!aLoL) return TRUE;
+  if (aLoL->type &&
+     (aLoL->type->isA == BooleansTag) &&
+     (asBoolean(aLoL) == FALSE)) return TRUE;
+  return FALSE;
+}
+\stopCCode
+
+\startTestCase[should return appropriate boolean values]
+
+\startCTest
+  CoAlgHandle *aBool = newBoolean(jInterp, TRUE);
+  AssertPtrNotNull(aBool);
+  AssertIntTrue(asBoolean(aBool));
+  AssertIntTrue(isTrue(aBool));
+  AssertIntFalse(isFalse(aBool));
+  aBool = newBoolean(jInterp, FALSE);
+  AssertPtrNotNull(aBool);
+  AssertIntFalse(asBoolean(aBool));
+  AssertIntFalse(isTrue(aBool));
+  AssertIntTrue(isFalse(aBool));
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \starttyping
 \startCCode
@@ -178,22 +217,6 @@ static size_t printStrBoolCoAlg(CoAlgHandle* aLoL,
   return TRUE;
 }
 
-
-size_t isTrue(CoAlgHandle* aLoL) {
-  if (!aLoL) return FALSE;
-  if (aLoL->coAlg &&
-     (aLoL->coAlg->isA == BOOLEAN_COALG) &&
-     (aLoL->boolean == FALSE)) return FALSE;
-  return TRUE;
-}
-
-size_t isFalse(CoAlgHandle* aLoL) {
-  if (!aLoL) return TRUE;
-  if (aLoL->coAlg &&
-     (aLoL->coAlg->isA == BOOLEAN_COALG) &&
-     (aLoL->boolean == FALSE)) return TRUE;
-  return FALSE;
-}
 \stoptyping
 
 \starttyping
