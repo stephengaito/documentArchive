@@ -25,3 +25,30 @@ int luaopen_joylol_symbols (lua_State *lstate) {
   return 1;
 }
 \stopCCode
+
+In some instances, such as the typical \type{CTest} program 
+\type{allCTests}, this Lua module (which can be \type{require}d as a 
+shared library) is actually statically linked into the executable. In 
+these cases we need the ability to mimic the standard Lua \type{require} 
+process. The following \type{requireStaticallyLinkedSymbols} does just 
+this. 
+
+\startCHeader
+Boolean requireStaticallyLinkedSymbols(
+  lua_State *lstate
+);
+\stopCHeader
+
+\startCCode
+Boolean requireStaticallyLinkedSymbols(
+  lua_State *lstate
+) {
+  lua_getglobal(lstate, "package");
+  lua_getfield(lstate, -1, "loaded");
+  luaopen_joylol_symbols(lstate);
+  lua_setfield(lstate, -2, "joylol.symbols");
+  lua_setfield(lstate, -2, "loaded");
+  lua_pop(lstate, 1);
+  return TRUE;
+}
+\stopCCode
