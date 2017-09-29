@@ -64,6 +64,10 @@ contests.targets{
     'joylol/booleans-private.h',
     'booleans.c',
   },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',

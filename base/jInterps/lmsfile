@@ -74,6 +74,10 @@ contests.targets{
     'words.c',
     'lua.c',
   },
+  libDirs = {
+  },
+  libs = {
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',

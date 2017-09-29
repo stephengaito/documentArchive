@@ -64,6 +64,11 @@ contests.targets{
     'joylol/pairs-private.h',
     'pairs.c',
   },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/booleans',
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',

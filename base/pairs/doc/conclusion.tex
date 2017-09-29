@@ -32,12 +32,16 @@
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/pairs.h>}
 \addCTestInclude{<joylol/pairs-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/booleans}
 \CTestsSetup\
 \startCTest
-  JoyLoLInterp *jInterp = newJoyLoLInterp();
-  registerPairs(jInterp);
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedBooleans(lstate);
+  requireStaticallyLinkedPairs(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
 \stopCTest
 \createCTestFile%
   {default}%
