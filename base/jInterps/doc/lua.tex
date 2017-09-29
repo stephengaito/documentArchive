@@ -3,9 +3,15 @@
 \section[title=Lua functions]
 \setCCodeStream{lua}
 
-\startTestSuite[addLuaPath and getLuaPath]
+\startTestSuite[ set, add and get LuaPath]
 
 \startCHeader
+extern Boolean setLuaPath(
+  JoyLoLInterp *jInterp,
+  Symbol *aLuaPath,
+  Boolean addToCPath
+);
+
 extern Boolean addLuaPath(
   JoyLoLInterp *jInterp,
   Symbol *aLuaPath,
@@ -19,6 +25,27 @@ extern Symbol *getLuaPath(
 \stopCHeader
 
 \startCCode
+Boolean setLuaPath(
+  JoyLoLInterp *jInterp,
+  Symbol *aLuaPath,
+  Boolean addToCPath
+) {
+  assert(jInterp);
+  assert(jInterp->lstate);
+
+  char* path = "path";
+  if (addToCPath) {
+    path = "cpath";
+  }
+  
+  lua_State *lstate = jInterp->lstate;
+  lua_getglobal(lstate, "package");
+  lua_pushstring(lstate, aLuaPath);
+  lua_setfield(lstate, -2, path);
+  lua_pop(lstate, 1);
+  return TRUE;
+}
+
 Boolean addLuaPath(
   JoyLoLInterp *jInterp,
   Symbol *aLuaPath,
@@ -67,15 +94,96 @@ Symbol *getLuaPath(
 }
 \stopCCode
 
-\startTestCase[should add and get package.path/package.cpath]
+\startTestCase[should set, add and get package.path]
 
 \startCTest
-  Symbol *path = getLuaPath(jInterp, FALSE);
-  printf("path: %s\n", path);
+  Symbol *origPath = getLuaPath(jInterp, FALSE);
+  AssertPtrNotNull(origPath);
+  AssertPtrNotNull(strstr(origPath, "?.lua"));
+
   addLuaPath(jInterp, "tests", FALSE);
-  path = getLuaPath(jInterp, FALSE);
-  printf("path: %s\n", path);
+  Symbol *testPath = getLuaPath(jInterp, FALSE);
+  AssertPtrNotNull(testPath);
+
+  AssertIntZero(strncmp(testPath, "tests;", strlen("tests;")));
+  
+  setLuaPath(jInterp, origPath, FALSE);
+  free((void*)testPath);
+  testPath = getLuaPath(jInterp, FALSE);
+  AssertPtrNotNull(testPath);
+  AssertIntZero(strcmp(origPath, testPath));
+
+  free((void*)testPath);
+  free((void*)origPath);
 \stopCTest
+\stopTestCase
+
+\startTestCase[should set, add and get package.cpath]
+
+\startCTest
+  Symbol *origPath = getLuaPath(jInterp, TRUE);
+  AssertPtrNotNull(origPath);
+  AssertPtrNotNull(strstr(origPath, "?.so"));
+
+  addLuaPath(jInterp, "tests", TRUE);
+  Symbol *testPath = getLuaPath(jInterp, TRUE);
+  AssertPtrNotNull(testPath);
+
+  AssertIntZero(strncmp(testPath, "tests;", strlen("tests;")));
+  
+  setLuaPath(jInterp, origPath, TRUE);
+  free((void*)testPath);
+  testPath = getLuaPath(jInterp, TRUE);
+  AssertPtrNotNull(testPath);
+  AssertIntZero(strcmp(origPath, testPath));
+  
+  free((void*)testPath);
+  free((void*)origPath);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[require lua modules]
+
+\startCHeader
+extern Symbol *requireLuaModule(
+  JoyLoLInterp *jInterp,
+  Symbol *aLuaModule
+);
+\stopCHeader
+
+\startCCode
+Symbol *requireLuaModule(
+  JoyLoLInterp *jInterp,
+  Symbol *aLuaModule
+) {
+  assert(jInterp);
+  assert(jInterp->lstate);
+
+  Symbol *result = NULL;
+  lua_State *lstate = jInterp->lstate;
+  lua_getglobal(lstate, "require");
+  lua_pushstring(lstate, aLuaModule);
+  if (lua_pcall(lstate, 1, 1, 0)) {
+    // there was an error...
+    // so return a copy of the error message
+    result = strdup(lua_tostring(lstate, -1));
+  }
+  lua_pop(lstate, 1);
+  return result;
+}
+\stopCCode
+
+\startTestCase[should not be able to load 'noLuaModule']
+
+\startCTest
+  Symbol *result = requireLuaModule(jInterp, "noLuaModule");
+  AssertPtrNotNull(result);
+  Symbol *msg = "module 'noLuaModule' not found";
+  AssertIntZero(strncmp(result, msg, strlen(msg)));
+  free((void*)result);
+\stopCTest
+
 \stopTestCase
 \stopTestSuite
 
