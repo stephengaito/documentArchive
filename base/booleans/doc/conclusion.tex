@@ -46,8 +46,9 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 \addCTestInclude{<joylol/booleans-private.h>}
 \CTestsSetup\
 \startCTest
-  JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
-  registerBooleans(jInterp);
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedBooleans(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
 \stopCTest
 \createCTestFile%
   {default}%
@@ -57,6 +58,7 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 \addMainDocument{booleans.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{lua.tex}
 \addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
