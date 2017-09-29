@@ -46,7 +46,7 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 \addCTestInclude{<joylol/booleans-private.h>}
 \CTestsSetup\
 \startCTest
-  JoyLoLInterp *jInterp = newJoyLoLInterp();
+  JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
   registerBooleans(jInterp);
 \stopCTest
 \createCTestFile%
