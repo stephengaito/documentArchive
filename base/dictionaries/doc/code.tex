@@ -61,6 +61,90 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
 \stopTestSuite
 
 \starttyping
+#ifndef JOYLOL_DICTIONARY_H
+#define JOYLOL_DICTIONARY_H
+
+typedef struct pair_atom_struct PairAtom;
+typedef struct coalgebras_struct CoAlgebras;
+typedef struct dictionary_struct Dictionary;
+typedef struct avl_node_struct AVLNode;
+
+typedef struct avl_node_struct {
+  const char* symbol;
+  PairAtom*   preObs;
+  PairAtom*   value;
+  PairAtom*   postObs;
+  AVLNode*    left;
+  AVLNode*    right;
+  AVLNode*    previous;
+  AVLNode*    next;
+  size_t      height;
+  long        balance;
+} AVLNode;
+
+typedef struct dictionary_struct {
+  AVLNode*    dicRoot;
+  AVLNode*    firstSymbol;
+} Dictionary;
+
+extern Dictionary* createDictionary(void);
+
+extern AVLNode* newAVLNode(const char* aSymbol);
+
+extern AVLNode* findSymbol(Dictionary* aDic, const char* aSymbol);
+
+extern AVLNode* findLUBSymbol(Dictionary* aDic, const char* aSymbol);
+
+extern AVLNode* insertSymbol(Dictionary* aDic, const char* aSymbol);
+
+extern AVLNode* createSymbol(Dictionary* aDic, const char* aSymbol);
+
+extern PairAtom* createAtom(CoAlgebras* coAlgs, AVLNode* anAVLNode);
+
+extern PairAtom* getSymbol(CoAlgebras* coAlgs,
+                           Dictionary* aDic,
+                           const char* aSymbol);
+
+extern void listDefinitions(Dictionary* aDic, FILE* outFile);
+
+#endif
+\stoptyping
+
+\starttyping
+#ifndef JOYLOL_DICTIONARY_PRIVATE_H
+#define JOYLOL_DICTIONARY_PRIVATE_H
+
+extern AVLNode* findSymbolRecurse(Dictionary* aDic,
+                                  AVLNode* anAVLNode,
+                                  const char* aSymbol);
+
+extern AVLNode* findLUBSymbolRecurse(Dictionary* aDic,
+                                     AVLNode* anAVLNode,
+                                     const char* aSymbol);
+
+extern AVLNode* insertSymbolRecurse(Dictionary* aDic,
+                                    AVLNode* anAVLNode,
+                                    const char* aSymbol);
+
+
+extern void reCalculateAVLNodeHeightBalance(AVLNode* avlNode);
+extern size_t deepCalculateAVLNodeHeight(AVLNode* avlNode);
+
+extern AVLNode* rotateLeft(AVLNode* anAVLNode);
+extern AVLNode* rotateRight(AVLNode* anAVLNode);
+
+extern AVLNode* rotateLeftLeft(AVLNode* anAVLNode);
+extern AVLNode* rotateLeftRight(AVLNode* anAVLNode);
+extern AVLNode* rotateRightLeft(AVLNode* anAVLNode);
+extern AVLNode* rotateRightRight(AVLNode* anAVLNode);
+
+extern size_t checkAVLNode(AVLNode* anAVLNode, size_t debugFlag);
+extern char* printDictionary(AVLNode* anAVLNode);
+
+#endif
+\stoptyping
+
+\starttyping
 //dictionary.c
 #include <stdlib.h>
 #include <string.h>
