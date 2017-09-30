@@ -23,46 +23,10 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/dictionaries.h>
+#include <joylol/dictionaries-private.h>
 // dictionary
 // printer
-\stopCCode
-
-\appendCCode{default}
-\startCCode
-static int lua_dictionaries_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
-static size_t joylol_register_dictionaries(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Dictionaries";
-  theCoAlg->registerFunc = joylol_register_dictionaries;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printFunc    = NULL;
-  theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(jInterp, theCoAlg);
-  assert(theCoAlg->isA == DictionariesTag);
-  
-  // in future... register Dictionaries words with JoyLoL dictionary. 
-  
-  return TRUE;
-}
-
-static const struct luaL_Reg lua_dictionaries [] = {
-  {"gitVersion", lua_dictionaries_getGitVersion},
-  {NULL, NULL}
-};
-
-int luaopen_joylol_dictionaries (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  joylol_register_dictionaries(jInterp);
-  luaL_newlib(lstate, lua_dictionaries);
-  return 1;
-}
 \stopCCode
 
 \createCCodeFile%
@@ -70,6 +34,15 @@ int luaopen_joylol_dictionaries (lua_State *lstate) {
   {dictionaries.c}%
   {}
 
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
+\addCTestInclude{<joylol/dictionaries-private.h>}
+\CTestsSetup\
+\startCTest
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedDictionaries(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+\stopCTest
 \createCTestFile%
   {default}%
   {allCTests.c}%
@@ -78,6 +51,8 @@ int luaopen_joylol_dictionaries (lua_State *lstate) {
 \addMainDocument{dictionaries.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

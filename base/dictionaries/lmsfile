@@ -14,6 +14,8 @@ litProgs.targets{
   docFiles = {
     'overview.tex',
     'code.tex',
+    'lua.tex',
+    'words.tex',
     'conclusion.tex',
   },
   srcFiles = {
@@ -53,12 +55,18 @@ contests.targets{
   docFiles = {
     'overview.tex',
     'code.tex',
+    'lua.tex',
+    'words.tex',
     'conclusion.tex',
   },
   srcFiles = {
     'joylol/dictionaries.h',
     'joylol/dictionaries-private.h',
     'dictionaries.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
   },
   buildDir  = 'build',
   docDir    = 'doc',

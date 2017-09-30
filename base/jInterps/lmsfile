@@ -74,9 +74,9 @@ contests.targets{
     'words.c',
     'lua.c',
   },
-  libDirs = {
+  testLibDirs = {
   },
-  libs = {
+  testLibs = {
   },
   buildDir  = 'build',
   docDir    = 'doc',
