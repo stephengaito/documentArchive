@@ -13,7 +13,7 @@ litProgs.targets{
   mainDoc  = 'jInterps.tex',
   docFiles = {
     'overview.tex',
-    'handles.tex',
+    'objects.tex',
     'interpreter.tex',
     'words.tex',
     'lua.tex',
@@ -22,7 +22,7 @@ litProgs.targets{
   srcFiles = {
     'joylol/jInterps.h',
     'joylol/jInterps-private.h',
-    'handles.c',
+    'objects.c',
     'interpreter.c',
     'words.c',
     'lua.c',
@@ -41,7 +41,7 @@ joylol.targets{
   srcFiles = {
     'joylol/jInterps.h',
     'joylol/jInterps-private.h',
-    'handles.c',
+    'objects.c',
     'interpreter.c',
     'words.c',
     'lua.c',
@@ -60,7 +60,7 @@ contests.targets{
   mainDoc = 'jInterps.tex',
   docFiles = {
     'overview.tex',
-    'handles.tex',
+    'objects.tex',
     'interpreter.tex',
     'words.tex',
     'lua.tex',
@@ -69,7 +69,7 @@ contests.targets{
   srcFiles = {
     'joylol/jInterps.h',
     'joylol/jInterps-private.h',
-    'handles.c',
+    'objects.c',
     'interpreter.c',
     'words.c',
     'lua.c',

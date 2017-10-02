@@ -1,0 +1,394 @@
+% A ConTeXt document [master document: jInterps.tex]
+
+\section[title=CoAlgObjs]
+\setCHeaderStream{public}
+\setCCodeStream{objects}
+
+Since the implementation of any particular CoAlgebraic extension will of 
+necessity make use of instance specific data stored in a 
+\type{CoAlgObj}ect, we \emph{begin} by providing the implementation of 
+\type{CoAlgObj}. Together with any extension specific part, all of our 
+\type{CoAlgObj}s have the same three part base structure. 
+
+\subsection[title=Type part] The first (type) part is a \type{CoAlgebra*} 
+pointer to the data structure which represents the CoAlgebra for which the 
+\type{CoAlgObj} is an instance. This CoAlgebra pointer ensures that the 
+implementation code knows what the given instance, is an instance 
+\emph{for}, as well as what it can \emph{do}. 
+
+\subsection[title=Tag part] The second (tag) part is an unsigned integer 
+index into the \type{JoyLoLInterp}'s vector of registered 
+\type{CoAlgebra}s. While the tags of all the required \type{CoAlgebra}ic 
+extensions have been defined above and are, hence, \quote{well known}. 
+Tags for all non-required extensions are assigned as the extension is 
+registered with the interpreter. 
+
+\startCHeader
+#ifdef __LP64__
+typedef uint32_t TagType;
+#else
+typedef uint16_t TagType;
+#endif
+\stopCHeader
+
+\subsection[title=Flag part] The third (flag) part is a collection of 
+bits to provide useful meta-flags associated with a particula instance. At 
+least three of these meta-flags are reserved by the JoyLoL interpreter to 
+signal ongoing garbage collection, equality determination as well as 
+printing. Since any object is potentially part of a cyclic structure, 
+these meta-flags ensure garbage collection, equality detection and 
+printing do not fall into infinite cycles. 
+
+All non-reserved meta-flags may be used by the implementation of a 
+CoAlgebra extension for its own internal purposes. Typically meta-flags 
+might be used to signal how to interpret the data stored in the third 
+(data) part of the object. For the \type{Naturals} CoAlgebraic extension, 
+a meta-flag will be used to signal that the object's data part is a 
+pointer to a Gnu Multi-precision integer, rather than to a double word 
+integer. This allows significant speed optimizations in the typical cases, 
+but allows for full data representations in rare but important cases. 
+
+All reserved meta-flags will be located in low order bits of the flag data 
+word. This ensures that any CoAlgebraic extension which makes use of 
+meta-flags can simply rotate the reserved flags off the end of the word 
+before making use of the non-reserved flags. In particular a CoAlgebraic 
+extension \emph{could} interpret its flags as an integer or pointer. Such 
+interpretations are private to each extension, and should \emph{not} be 
+relied upon by code which is not part of the code's own extension. 
+
+As \quote{global} meta-flags we reserve the following three 
+\emph{low-order} bits together with a Mask of all three bits and the 
+number of reserved bits to shift (left). 
+
+\startCHeader
+#define MARK_SWEEP_FLAG     0x1L
+#define PRINT_FLAG          0x2L
+#define EQUAL_FLAG          0x4L
+#define RESERVED_FLAG_MASK  0x7L
+#define RESERVED_FLAG_SHIFT 3
+
+#ifdef __LP64__
+typedef uint32_t FlagsType;
+#else
+typedef uint16_t FlagsType;
+#endif
+\stopCHeader
+
+We can now define the \emph{base} \type{CoAlgObj} as:
+
+\startCHeader
+typedef struct coalgebra_object_struct {
+  CoAlgebra* type;
+  TagType    tag;
+  FlagsType  flags; // an arbitrary collection of bits
+} CoAlgObj;
+\stopCHeader
+
+\section[title=isAtom isPair]
+
+A common requirement is to determine whether or not a given 
+\type{CoAlgObj} is an \quote{atom} or a \quote{pair}. Quite simply we 
+define anything that is not an instance of \type{Pairs} an \quote{atom}.
+
+\startCHeader
+#define isAtom(anObject) \
+  ((anObject) && (anObject)->type && ((anObject)->type->isA != PairsTag))
+  
+#define isPair(anObject) \
+  ((anObject) && (anObject)->type && ((anObject)->type->isA == PairsTag))
+\stopCHeader
+
+\section[title=Object Memory]
+
+Since a JoyLoL interpreter is essentially a list processor, any JoyLoL 
+program will create (and orphan) a very large number of list \type{Pairs} 
+over the course of a computation. This means that we need to make the 
+allocation and eventual garbage collection of orphaned \type{CoAlgObjs} 
+as efficient as possible.
+
+We do this by defining a \type{ObjectMemory} as a pair of pointers. The 
+first pointer points to a linked list of free objects. The second pointer 
+points to a linked list of \type{ObjectBlock}s. 
+
+\startCHeader
+typedef struct object_block_struct ObjectBlock;
+
+typedef struct object_memory_struct {
+  CoAlgObj* freeObjects;
+  ObjectBlock* rootObjectBlock;
+} ObjectMemory;
+
+typedef struct object_block_struct {
+  CoAlgObj* block;
+  ObjectBlock* nextBlock;
+} ObjectBlock;
+\stopCHeader
+
+\subsection[title=Allocating new objects]
+
+\startTestSuite[newObject]
+
+To allocate a new \type{CoAlgObj} the first free object is taken from 
+the linked list of free objects. If there are no remaining free objects, 
+then we first attempt to collect any garbage and then if this fails to get 
+any new free objects, a new \type{ObjectBlock} is allocated together with 
+its collection of free objects. 
+
+\setCCodeStream{objects}
+\startCHeader
+extern CoAlgObj* newObject(JoyLoLInterp* jInterp);
+\stopCHeader
+
+\startCCode
+CoAlgObj* newObject(JoyLoLInterp* jInterp) {
+  assert(jInterp);
+  // ensure there are some free objects
+  if ( ! jInterp->hMem.freeObjects ) collectGarbage(jInterp);
+  if ( ! jInterp->hMem.freeObjects ) addObjectBlock(jInterp);
+  assert(jInterp->hMem.freeObjects);
+
+  CoAlgObj* aNewObject   = jInterp->hMem.freeObjects;
+  jInterp->hMem.freeObjects = (CoAlgebra*)(aNewObject->type);
+
+  aNewObject->type  = NULL;
+  aNewObject->tag   = 0;
+  aNewObject->flags = 0;
+
+  return aNewObject;
+}
+\stopCCode
+
+\startTestCase[Allocate one new CoAlgObj]
+\startCTest
+  JoyLoLInterp* jInterp = newJoyLoLInterp(lstate);
+  AssertPtrNotNull(jInterp);
+
+  AssertPtrNull(jInterp->hMem.freeObjects);
+  AssertPtrNull(jInterp->hMem.rootObjectBlock);
+
+  // get one new object to ensure our lazily
+  // initialized object memory structures 
+  // are initialized...
+  CoAlgObj* aNewObject = newObject(jInterp);
+
+  AssertPtrNotNull(jInterp->hMem.freeObjects);
+  AssertPtrNotNull(jInterp->hMem.rootObjectBlock);
+  AssertPtrNotNull(aNewObject );
+  AssertPtrEquals(aNewObject,
+    jInterp->hMem.rootObjectBlock->block);
+
+  // now get one more object to ensure
+  // we can properly deal with object blocks/memory
+  
+  CoAlgObj* oldFreeObjects =
+    jInterp->hMem.freeObjects;
+  CoAlgObj* newfreeObjects = 
+    (CoAlgObj*)jInterp->hMem.freeObjects->type;
+
+  aNewObject = newObject(jInterp);
+  AssertPtrNotNull(aNewObject );
+  AssertPtrNull(aNewObject->type);
+  AssertIntZero(aNewObject->tag);
+  AssertIntZero(aNewObject->flags);
+  AssertPtrEquals(oldFreeObjects, aNewObject);
+  AssertPtrEquals(newfreeObjects, jInterp->hMem.freeObjects);
+\stopCTest
+\stopTestCase
+
+\startTestCase[Allocate lots of new CoAlgObjs]
+
+\startCTest
+  JoyLoLInterp* jInterp = newJoyLoLInterp(lstate);
+  AssertPtrNotNull(jInterp);
+
+  CoAlgObj* aNewObject = NULL;
+  for ( size_t i = 0; i < 3*OBJECT_BLOCK_SIZE; i++ ) {
+    aNewObject = newObject(jInterp);
+  }
+  AssertPtrNotNull(aNewObject);
+  AssertPtrNull(aNewObject->type);
+  AssertIntZero(aNewObject->tag);
+  AssertIntZero(aNewObject->flags);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\subsection[title=Allocating new Object blocks]
+
+\startTestSuite[addObjectBlock]
+
+\setCHeaderStream{private}
+\startCHeader
+#define OBJECT_BLOCK_SIZE 1024
+
+extern void addObjectBlock(JoyLoLInterp* jInterp);
+\stopCHeader
+
+
+\startCCode
+void addObjectBlock(JoyLoLInterp* jInterp) {
+  DEBUG(FALSE, "addObjectBlock > %p %zu\n", 
+    jInterp, (size_t)OBJECT_BLOCK_SIZE);
+  assert(jInterp);
+  
+  // obtain a new object block
+  ObjectBlock* aNewObjectBlock = 
+    (ObjectBlock*)calloc(1, sizeof(ObjectBlock));
+  assert( IS_MEM_ALIGNED(aNewObjectBlock) );
+
+  // integrate this new object block into the linked list of
+  // object blocks
+  if ( jInterp->hMem.rootObjectBlock ) {
+    ObjectBlock *lastObjectBlock = jInterp->hMem.rootObjectBlock;
+    while ( lastObjectBlock->nextBlock ) {
+      lastObjectBlock = lastObjectBlock->nextBlock;
+    }
+    assert(lastObjectBlock->nextBlock == NULL);
+    lastObjectBlock->nextBlock = aNewObjectBlock;
+  } else {
+    jInterp->hMem.rootObjectBlock = aNewObjectBlock;
+  }
+  DEBUG(FALSE, "addObjectBlock = %p %p\n", 
+    jInterp, aNewObjectBlock);
+
+  // make sure this object block has some CoAlgObjs
+  aNewObjectBlock->block = 
+    (CoAlgObj*)calloc(OBJECT_BLOCK_SIZE, sizeof(CoAlgObj));
+  assert( aNewObjectBlock->block );
+  assert( IS_MEM_ALIGNED(aNewObjectBlock->block) );
+
+  // add these new CoAlgObjs to the free list
+  CoAlgObj* nextObject = aNewObjectBlock->block;
+  CoAlgObj* lastObject = nextObject + OBJECT_BLOCK_SIZE - 1;
+  for ( ; nextObject < lastObject ; nextObject++ ) {
+    assert( IS_MEM_ALIGNED(nextObject) );
+    nextObject->type = (CoAlgebra*)(nextObject + 1);
+  }
+  nextObject->type = (CoAlgebra*)(jInterp->hMem.freeObjects);
+  jInterp->hMem.freeObjects = aNewObjectBlock->block;
+  DEBUG(FALSE, "addObjectBlock < %p %p %p\n",
+    jInterp, aNewObjectBlock, aNewObjectBlock->block);
+}
+\stopCCode
+
+\startTestCase[must add new object block]
+\startCTest
+  // create the first list block and make sure it is 
+  // properly integrated into linked list of list blocks
+
+  JoyLoLInterp* jInterp = newJoyLoLInterp(lstate);
+
+  AssertPtrNotNull(jInterp);
+  AssertPtrNull(jInterp->hMem.rootObjectBlock);
+  AssertPtrNull(jInterp->hMem.freeObjects);
+
+  addObjectBlock(jInterp);
+  AssertPtrNotNull(jInterp->hMem.rootObjectBlock);
+  AssertPtrNotNull(jInterp->hMem.rootObjectBlock->block);
+  AssertPtrNull(jInterp->hMem.rootObjectBlock->nextBlock);
+  AssertPtrNotNull(jInterp->hMem.freeObjects);
+
+  // check to make sure freeObjects list is correctly linked
+  CoAlgObj* nextObject = jInterp->hMem.rootObjectBlock->block;
+  CoAlgObj* lastObject = nextObject + OBJECT_BLOCK_SIZE - 1;
+  for ( ; nextObject < lastObject ; nextObject++ ) {
+    AssertIntTrue(IS_MEM_ALIGNED(nextObject));
+    AssertIntZero(nextObject->tag);
+    AssertIntZero(nextObject->flags);
+    AssertPtrEquals(((CoAlgObj*)nextObject->type), nextObject + 1);
+  }
+  AssertPtrNull(nextObject->type);
+  AssertPtrEquals(jInterp->hMem.freeObjects,
+    jInterp->hMem.rootObjectBlock->block);
+
+  // add another object block
+  CoAlgObj* oldFreeObjects = jInterp->hMem.freeObjects;
+  addObjectBlock(jInterp);
+  AssertPtrNotNull(jInterp->hMem.rootObjectBlock->nextBlock);
+  AssertPtrNotNull(jInterp->hMem.rootObjectBlock->nextBlock->block);
+  AssertPtrNull(jInterp->hMem.rootObjectBlock->nextBlock->nextBlock);
+  AssertPtrNotNull(jInterp->hMem.freeObjects);
+
+  // check to make sure freeObjects list is correctly linked
+  nextObject = jInterp->hMem.rootObjectBlock->nextBlock->block;
+  lastObject = nextObject + OBJECT_BLOCK_SIZE - 1;
+  for ( ; nextObject < lastObject ; nextObject++ ) {
+    AssertIntTrue(IS_MEM_ALIGNED(nextObject));
+    AssertIntZero(nextObject->tag);
+    AssertIntZero(nextObject->flags);
+    AssertPtrEquals(((CoAlgObj*)nextObject->type), nextObject + 1);
+  }
+  AssertPtrEquals(((CoAlgObj*)nextObject->type), oldFreeObjects);
+  AssertPtrEquals(jInterp->hMem.freeObjects,
+    jInterp->hMem.rootObjectBlock->nextBlock->block);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\subsection[title=Garbage collection]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void collectGarbage(JoyLoLInterp* jInterp);
+\stopCHeader
+
+\startCCode
+void collectGarbage(JoyLoLInterp* jInterp) {
+  DEBUG(FALSE, "collectGarbage %p\n", jInterp);
+  //
+  // add a garbage collection mark-sweep here
+  //
+  // we will use a tri/quad colour mark-sweep algorithm
+  // similar to that used by LuaJIT v3.0
+  // see: http://wiki.luajit.org/New-Garbage-Collector
+  // see: https://en.wikipedia.org/wiki/Tracing_garbage_collection
+  // our "grey" list will be simply scanning a given 
+  // object block for currently grey markings... and
+  // we keep a pointer to the current object block and
+  // where in the block we last checked for grey markings.
+  // this means we can have an incremental mark/trace cycle
+  // which can be run in small increments in each call to eval.
+  //
+  assert(jInterp);
+}
+\stopCCode
+
+Old unused CuTests.
+
+\starttyping
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "CuTest.h"
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/lists_private.h"
+#include "joyLoL/printer.h"
+
+// suiteName: - Pairs CoAlgebra tests -
+
+void Test_createPairsCoAlgebra(CuTest* tc) {
+  CoAlgebras *coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Pairs* pairs = coAlgs->pairs;
+  CuAssertPtrNotNull(tc, pairs);
+
+  CuAssertPtrNotNull(tc, pairs->listMemory);
+}
+
+void Test_printPairs(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  CuAssertPtrNotNull(tc, coAlgs->pairs);
+
+  PairAtom* aNewPair = newPair(coAlgs,
+                               newPair(coAlgs, NULL, NULL),
+                               newPair(coAlgs, NULL, NULL));
+  CuAssertPtrNotNull(tc, aNewPair);
+  CuAssertIntEquals(tc, printSizeDebug(aNewPair, FALSE), 28);
+  CuAssertStrEquals(tc, printLoLDebug(aNewPair, FALSE), "( ( ) ) ( )");
+}
+\stoptyping

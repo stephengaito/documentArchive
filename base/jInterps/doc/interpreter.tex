@@ -39,10 +39,10 @@ the interpreter's dictionary of words.
 
 \startCHeader
 typedef Boolean (CoAlgRegister)(JoyLoLInterp*);
-typedef Boolean (CoAlgEquality)(CoAlgHandle*,
-                                CoAlgHandle*,
+typedef Boolean (CoAlgEquality)(CoAlgObj*,
+                                CoAlgObj*,
                                 Boolean);
-typedef CoAlgHandle* (CoAlgPrint)(CoAlgHandle*);
+typedef CoAlgObj* (CoAlgPrint)(CoAlgObj*);
 typedef void *CoAlgData;
 
 typedef struct coalgebra_struct {
@@ -73,7 +73,7 @@ typedef struct loader_struct Loader;
 
 typedef struct joylol_interpreter_struct {
   lua_State    *lstate;
-  HandleMemory hMem;
+  ObjectMemory hMem;
   CoAlgebras   coAlgs;
   Loader       *loader;
 } JoyLoLInterp;
@@ -108,8 +108,8 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   jInterp->coAlgs.vec    =
     (CoAlgebra**) calloc(maxNum, sizeof(CoAlgebra*));
   
-  jInterp->hMem.freeHandles     = NULL;
-  jInterp->hMem.rootHandleBlock = NULL; 
+  jInterp->hMem.freeObjects     = NULL;
+  jInterp->hMem.rootObjectBlock = NULL; 
   
   jInterp->loader = NULL;
   
@@ -129,8 +129,8 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
     NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT);
   AssertPtrNotNull(jInterp->coAlgs.vec);
   
-  AssertPtrNull(jInterp->hMem.freeHandles);
-  AssertPtrNull(jInterp->hMem.rootHandleBlock);
+  AssertPtrNull(jInterp->hMem.freeObjects);
+  AssertPtrNull(jInterp->hMem.rootObjectBlock);
 \stopCTest
 \stopTestCase
 \stopTestSuite
