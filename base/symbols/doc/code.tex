@@ -6,11 +6,14 @@
 \dependsOn[jInterps]
 %\dependsOn[context]
 
-\startJoyLoLWord[isString]
+\startCHeader
+typedef struct symbol_object_struct {
+  CoAlgObj super;
+  Symbol *sym;
+} SymbolObj;
 
-\preDataStack[aString][]
-
-\stopJoyLoLWord
+#define asSymbol(aObj) (((SymbolObj*)(aObj))->sym)
+\stopCHeader
 
 \startTestSuite[newString]
 
@@ -27,6 +30,7 @@ extern Boolean registerSymbols(JoyLoLInterp* jInterp);
 \startCCode
 Boolean registerSymbols(JoyLoLInterp* jInterp) {
   assert(jInterp);
+  assert(jInterp->coAlgs);
   
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = "Symbols";
@@ -38,13 +42,7 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   
   // sanity check...
   assert(tag == SymbolsTag);
-  assert(jInterp->coAlgs.vec[tag]);
-  assert(jInterp->coAlgs.vec[tag]->isA == SymbolsTag);
-  
-  // check to see if this theCoAlg has been used
-  if (theCoAlg->isA == UnusedTag) {
-    free(theCoAlg);
-  }
+  assert(jInterp->coAlgs[tag].sClass);
 
   registerSymbolWords(jInterp);
 
@@ -58,12 +56,12 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   // CTestsSetup has already created a jInterp
   // and run registerSymbols
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs.vec[SymbolsTag]);
-  CoAlgebra *coAlg = jInterp->coAlgs.vec[SymbolsTag];
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[SymbolsTag].sClass;
   AssertIntTrue(registerSymbols(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs.vec[SymbolsTag]);
-  AssertPtrEquals(jInterp->coAlgs.vec[SymbolsTag], coAlg);
-  AssertIntEquals(jInterp->coAlgs.vec[SymbolsTag]->isA, SymbolsTag);
+  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[SymbolsTag].sClass, coAlg);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -71,20 +69,21 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
 \startTestSuite[newSymbol]
 
 \startCHeader
-CoAlgHandle* newSymbol(JoyLoLInterp* jInterp, const char* aSymbol);
-
-#define asSymbol(aHandle) ((aHandle)->data.sym.str)
+SymbolObj* newSymbol(JoyLoLInterp* jInterp, const char* aSymbol);
 \stopCHeader
 
 \startCCode
-CoAlgHandle* newSymbol(JoyLoLInterp* jInterp, const char* aSymbol) {
+SymbolObj* newSymbol(JoyLoLInterp* jInterp, const char* aSymbol) {
   assert(aSymbol);
   assert(jInterp);
-  CoAlgHandle* result = newHandle(jInterp);
+  assert(jInterp->coAlgs);
+  
+  SymbolObj* result = (SymbolObj*)newObject(jInterp, SymbolsTag);
   assert(result);
-  result->type     = jInterp->coAlgs.vec[SymbolsTag];
-  result->flags    = 0;
-  asSymbol(result) = strdup(aSymbol);
+  result->super.type  = jInterp->coAlgs[SymbolsTag].sClass;
+  result->super.tag   = SymbolsTag;
+  result->super.flags = 0;
+  asSymbol(result)    = strdup(aSymbol);
   return result;
 }
 \stopCCode
@@ -93,19 +92,19 @@ CoAlgHandle* newSymbol(JoyLoLInterp* jInterp, const char* aSymbol) {
 
 \startCTest
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs.vec[SymbolsTag]);
+  AssertPtrNotNull(jInterp->coAlgs);
 
   const char* testStr = "test string";
-  CoAlgHandle* aNewSymbol = newSymbol(jInterp, testStr);
+  SymbolObj* aNewSymbol = newSymbol(jInterp, testStr);
   AssertPtrNotNull(aNewSymbol);
-  AssertPtrNotNull(aNewSymbol->type);
-  AssertIntEquals(aNewSymbol->type->isA, SymbolsTag);
-  AssertPtrNotNull(aNewSymbol->data.sym.str);
-  AssertPtrNotEquals((void*)aNewSymbol->data.sym.str, (void*)testStr);
+  AssertPtrNotNull(aNewSymbol->super.type);
+  AssertIntEquals(aNewSymbol->super.tag, SymbolsTag);
+  AssertPtrNotNull(asSymbol(aNewSymbol));
+  AssertPtrNotEquals(asSymbol(aNewSymbol), testStr);
   AssertIntEquals(strcmp(asSymbol(aNewSymbol), testStr), 0);
-  AssertIntTrue(isSymbol(aNewSymbol));
-  AssertIntTrue(isAtom(aNewSymbol));
-  AssertIntFalse(isPair(aNewSymbol));
+  AssertIntTrue(isSymbol((CoAlgObj*)aNewSymbol));
+  AssertIntTrue(isAtom((CoAlgObj*)aNewSymbol));
+  AssertIntFalse(isPair((CoAlgObj*)aNewSymbol));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -113,14 +112,14 @@ CoAlgHandle* newSymbol(JoyLoLInterp* jInterp, const char* aSymbol) {
 \startTestSuite[isSymbol and symbolIs]
 
 \startCHeader
-extern Boolean isSymbol(CoAlgHandle *aLoL);
+extern Boolean isSymbol(CoAlgObj *aLoL);
 \stopCHeader
 
 \startCCode
-Boolean isSymbol(CoAlgHandle *aLoL) {
+Boolean isSymbol(CoAlgObj *aLoL) {
   if (aLoL &&
       aLoL->type &&
-      (aLoL->type->isA == SymbolsTag)) {
+      (aLoL->tag == SymbolsTag)) {
     return TRUE;
   }
   return FALSE;
@@ -128,11 +127,11 @@ Boolean isSymbol(CoAlgHandle *aLoL) {
 \stopCCode
 
 \startCHeader
-extern Boolean symbolIs(CoAlgHandle *aLoL, Symbol *aSymbol);
+extern Boolean symbolIs(CoAlgObj *aLoL, Symbol *aSymbol);
 \stopCHeader
 
 \startCCode
-Boolean symbolIs(CoAlgHandle *aLoL, Symbol *aSymbol) {
+Boolean symbolIs(CoAlgObj *aLoL, Symbol *aSymbol) {
   if (isSymbol(aLoL) &&
       (strcmp(asSymbol(aLoL), aSymbol) == 0)) {
     return TRUE;
@@ -144,9 +143,9 @@ Boolean symbolIs(CoAlgHandle *aLoL, Symbol *aSymbol) {
 \startTestCase[should return true if a symbol]
 
 \startCTest
-  CoAlgHandle *aSym = newSymbol(jInterp, "this is a test");
-  AssertIntTrue(isSymbol(aSym));
-  AssertIntTrue(symbolIs(aSym, "this is a test"));
+  SymbolObj *aSym = newSymbol(jInterp, "this is a test");
+  AssertIntTrue(isSymbol((CoAlgObj*)aSym));
+  AssertIntTrue(symbolIs((CoAlgObj*)aSym, "this is a test"));
 \stopCTest
 \stopTestCase
 
@@ -154,11 +153,11 @@ Boolean symbolIs(CoAlgHandle *aLoL, Symbol *aSymbol) {
 \startCTest
   AssertIntFalse(isSymbol(NULL));
   AssertIntFalse(symbolIs(NULL, "this is NOT a test"));
-  CoAlgHandle *aHandle = newHandle(jInterp);
-  AssertIntFalse(isSymbol(aHandle));
-  AssertIntFalse(symbolIs(aHandle, "this is NOT a test"));
-  CoAlgHandle *aSym = newSymbol(jInterp, "this is a test");
-  AssertIntFalse(symbolIs(aSym, "this is NOT a test"));
+  CoAlgObj *aObj = newObject(jInterp, BooleansTag);
+  AssertIntFalse(isSymbol(aObj));
+  AssertIntFalse(symbolIs(aObj, "this is NOT a test"));
+  SymbolObj *aSym = newSymbol(jInterp, "this is a test");
+  AssertIntFalse(symbolIs((CoAlgObj*)aSym, "this is NOT a test"));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -167,8 +166,8 @@ Boolean symbolIs(CoAlgHandle *aLoL, Symbol *aSymbol) {
 
 \startCHeader
 Boolean symbolsEqualDebug(
-  CoAlgHandle* lolA,
-  CoAlgHandle* lolB,
+  CoAlgObj* lolA,
+  CoAlgObj* lolB,
   Boolean debugFlag
 );
 
@@ -178,14 +177,15 @@ Boolean symbolsEqualDebug(
 
 \startCCode
 Boolean symbolsEqualDebug(
-  CoAlgHandle* lolA,
-  CoAlgHandle* lolB,
+  CoAlgObj* lolA,
+  CoAlgObj* lolB,
   Boolean debugFlag
 ) {
   DEBUG(debugFlag, "symbolsEqual a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA || !lolB) return FALSE;
   if (lolA->type != lolB->type) return FALSE;
+  if (lolA->tag != SymbolsTag) return FALSE;
   if (strcmp(asSymbol(lolA), asSymbol(lolB)) != 0) return FALSE;
   return TRUE;
 }
@@ -195,20 +195,23 @@ Boolean symbolsEqualDebug(
 
 \startCTest
   AssertIntTrue(symbolsEqual(NULL, NULL));
-  CoAlgHandle *symA = newSymbol(jInterp, "the same text");
-  CoAlgHandle *symB = newSymbol(jInterp, "the same text");
-  AssertIntTrue(symbolsEqual(symA, symB));
+  printf("after NULL\n");
+  SymbolObj *symA = newSymbol(jInterp, "the same text");
+  printf("after first newSymbol\n");
+  SymbolObj *symB = newSymbol(jInterp, "the same text");
+  printf("after second newSymbol\n");
+  AssertIntTrue(symbolsEqualDebug((CoAlgObj*)symA, (CoAlgObj*)symB, TRUE));
 \stopCTest
 \stopTestCase
 
 \startTestCase[should return false if symbols are not equal]
 
 \startCTest
-  CoAlgHandle *symA = newSymbol(jInterp, "text A");
-  CoAlgHandle *symB = newSymbol(jInterp, "text B");
-  AssertIntFalse(symbolsEqual(NULL, symB));
-  AssertIntFalse(symbolsEqual(symA, NULL));
-  AssertIntFalse(symbolsEqual(symA, symB));
+  SymbolObj *symA = newSymbol(jInterp, "text A");
+  SymbolObj *symB = newSymbol(jInterp, "text B");
+  AssertIntFalse(symbolsEqual(NULL, (CoAlgObj*)symB));
+  AssertIntFalse(symbolsEqual((CoAlgObj*)symA, NULL));
+  AssertIntFalse(symbolsEqual((CoAlgObj*)symA, (CoAlgObj*)symB));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -225,7 +228,7 @@ Boolean symbolsEqualDebug(
 #include "joyLoL/printer.h"
 #include "joyLoL/dictionary.h"
 
-static size_t printSizeSymbolCoAlg(CoAlgHandle* aLoL, size_t debugFlag) {
+static size_t printSizeSymbolCoAlg(CoAlgObj* aLoL, size_t debugFlag) {
   DEBUG(debugFlag, "symbolCoAlg-printSize: %p\n", aLoL);
   assert(aLoL);
   assert(aLoL->coAlg);
@@ -234,7 +237,7 @@ static size_t printSizeSymbolCoAlg(CoAlgHandle* aLoL, size_t debugFlag) {
   return strlen(aLoL->symbol) + 1;
 }
 
-static size_t printStrSymbolCoAlg(CoAlgHandle* aLoL,
+static size_t printStrSymbolCoAlg(CoAlgObj* aLoL,
                                   char* buffer, size_t bufferSize) {
   assert(aLoL);
   assert(aLoL->coAlg);
@@ -269,7 +272,7 @@ void Test_printSymbols(CuTest* tc) {
   CuAssertPtrNotNull(tc, coAlgs->symbols);
 
   const char* testStr = "test string";
-  CoAlgHandle* aNewSymbol = newSymbol(coAlgs, testStr);
+  CoAlgObj* aNewSymbol = newSymbol(coAlgs, testStr);
   CuAssertPtrNotNull(tc, aNewSymbol);
   CuAssertIntEquals(tc, printSizeDebug(aNewSymbol, FALSE), strlen(testStr)+1);
   CuAssertStrEquals(tc, printLoLDebug(aNewSymbol, FALSE), testStr);
