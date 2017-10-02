@@ -92,10 +92,10 @@ define anything that is not an instance of \type{Pairs} an \quote{atom}.
 
 \startCHeader
 #define isAtom(anObject) \
-  ((anObject) && (anObject)->type && ((anObject)->type->isA != PairsTag))
+  ((anObject) && ((anObject)->tag != PairsTag))
   
 #define isPair(anObject) \
-  ((anObject) && (anObject)->type && ((anObject)->type->isA == PairsTag))
+  ((anObject) && ((anObject)->tag == PairsTag))
 \stopCHeader
 
 \section[title=Object Memory]
@@ -114,12 +114,14 @@ points to a linked list of \type{ObjectBlock}s.
 typedef struct object_block_struct ObjectBlock;
 
 typedef struct object_memory_struct {
-  CoAlgObj* freeObjects;
+  size_t       objSize;
+  CoAlgObj*    freeObjects;
   ObjectBlock* rootObjectBlock;
 } ObjectMemory;
 
 typedef struct object_block_struct {
-  CoAlgObj* block;
+  size_t       objSize;
+  CoAlgObj*    block;
   ObjectBlock* nextBlock;
 } ObjectBlock;
 \stopCHeader
@@ -136,22 +138,22 @@ its collection of free objects.
 
 \setCCodeStream{objects}
 \startCHeader
-extern CoAlgObj* newObject(JoyLoLInterp* jInterp);
+extern CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag);
 \stopCHeader
 
 \startCCode
-CoAlgObj* newObject(JoyLoLInterp* jInterp) {
+CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
   assert(jInterp);
   // ensure there are some free objects
-  if ( ! jInterp->hMem.freeObjects ) collectGarbage(jInterp);
-  if ( ! jInterp->hMem.freeObjects ) addObjectBlock(jInterp);
+  if ( ! jInterp->hMem.freeObjects ) collectGarbage(jInterp, aTag);
+  if ( ! jInterp->hMem.freeObjects ) addObjectBlock(jInterp, aTag);
   assert(jInterp->hMem.freeObjects);
 
   CoAlgObj* aNewObject   = jInterp->hMem.freeObjects;
   jInterp->hMem.freeObjects = (CoAlgebra*)(aNewObject->type);
 
   aNewObject->type  = NULL;
-  aNewObject->tag   = 0;
+  aNewObject->tag   = aTag;
   aNewObject->flags = 0;
 
   return aNewObject;
@@ -169,11 +171,14 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp) {
   // get one new object to ensure our lazily
   // initialized object memory structures 
   // are initialized...
-  CoAlgObj* aNewObject = newObject(jInterp);
+  CoAlgObj* aNewObject = newObject(jInterp, JInterpsTag);
 
   AssertPtrNotNull(jInterp->hMem.freeObjects);
   AssertPtrNotNull(jInterp->hMem.rootObjectBlock);
-  AssertPtrNotNull(aNewObject );
+  AssertPtrNotNull(aNewObject);
+  AssertPtrNull(aNewObject->type);
+  AssertIntEquals(aNewObject->tag, JInterpsTag);
+  AssertIntZero(aNewObject->flags);
   AssertPtrEquals(aNewObject,
     jInterp->hMem.rootObjectBlock->block);
 
@@ -185,10 +190,10 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp) {
   CoAlgObj* newfreeObjects = 
     (CoAlgObj*)jInterp->hMem.freeObjects->type;
 
-  aNewObject = newObject(jInterp);
-  AssertPtrNotNull(aNewObject );
+  aNewObject = newObject(jInterp, JInterpsTag);
+  AssertPtrNotNull(aNewObject);
   AssertPtrNull(aNewObject->type);
-  AssertIntZero(aNewObject->tag);
+  AssertIntEquals(aNewObject->tag, JInterpsTag);
   AssertIntZero(aNewObject->flags);
   AssertPtrEquals(oldFreeObjects, aNewObject);
   AssertPtrEquals(newfreeObjects, jInterp->hMem.freeObjects);
@@ -203,11 +208,11 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp) {
 
   CoAlgObj* aNewObject = NULL;
   for ( size_t i = 0; i < 3*OBJECT_BLOCK_SIZE; i++ ) {
-    aNewObject = newObject(jInterp);
+    aNewObject = newObject(jInterp, JInterpsTag);
   }
   AssertPtrNotNull(aNewObject);
   AssertPtrNull(aNewObject->type);
-  AssertIntZero(aNewObject->tag);
+  AssertIntEquals(aNewObject->tag, JInterpsTag);
   AssertIntZero(aNewObject->flags);
 \stopCTest
 \stopTestCase
@@ -221,14 +226,14 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp) {
 \startCHeader
 #define OBJECT_BLOCK_SIZE 1024
 
-extern void addObjectBlock(JoyLoLInterp* jInterp);
+extern void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag);
 \stopCHeader
 
 
 \startCCode
-void addObjectBlock(JoyLoLInterp* jInterp) {
-  DEBUG(FALSE, "addObjectBlock > %p %zu\n", 
-    jInterp, (size_t)OBJECT_BLOCK_SIZE);
+void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
+  DEBUG(FALSE, "addObjectBlock > %p %u %zu\n", 
+    jInterp, aTag, (size_t)OBJECT_BLOCK_SIZE);
   assert(jInterp);
   
   // obtain a new object block
@@ -282,7 +287,7 @@ void addObjectBlock(JoyLoLInterp* jInterp) {
   AssertPtrNull(jInterp->hMem.rootObjectBlock);
   AssertPtrNull(jInterp->hMem.freeObjects);
 
-  addObjectBlock(jInterp);
+  addObjectBlock(jInterp, JInterpsTag);
   AssertPtrNotNull(jInterp->hMem.rootObjectBlock);
   AssertPtrNotNull(jInterp->hMem.rootObjectBlock->block);
   AssertPtrNull(jInterp->hMem.rootObjectBlock->nextBlock);
@@ -303,7 +308,7 @@ void addObjectBlock(JoyLoLInterp* jInterp) {
 
   // add another object block
   CoAlgObj* oldFreeObjects = jInterp->hMem.freeObjects;
-  addObjectBlock(jInterp);
+  addObjectBlock(jInterp, JInterpsTag);
   AssertPtrNotNull(jInterp->hMem.rootObjectBlock->nextBlock);
   AssertPtrNotNull(jInterp->hMem.rootObjectBlock->nextBlock->block);
   AssertPtrNull(jInterp->hMem.rootObjectBlock->nextBlock->nextBlock);
@@ -329,11 +334,11 @@ void addObjectBlock(JoyLoLInterp* jInterp) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void collectGarbage(JoyLoLInterp* jInterp);
+extern void collectGarbage(JoyLoLInterp* jInterp, TagType aTag);
 \stopCHeader
 
 \startCCode
-void collectGarbage(JoyLoLInterp* jInterp) {
+void collectGarbage(JoyLoLInterp* jInterp, TagType aTag) {
   DEBUG(FALSE, "collectGarbage %p\n", jInterp);
   //
   // add a garbage collection mark-sweep here
