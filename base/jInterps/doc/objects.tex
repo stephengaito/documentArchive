@@ -129,7 +129,8 @@ typedef struct object_block_struct {
 
 \setCHeaderStream{private}
 \startCHeader
-#define OBJECT_BLOCK_SIZE 1024
+//#define OBJECT_BLOCK_SIZE 1024
+#define OBJECT_BLOCK_SIZE 4
 
 extern void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag);
 \stopCHeader
@@ -144,7 +145,7 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
 
   size_t objectSize = jInterp->coAlgs[aTag].sClass->objectSize;
 
-  DEBUG(FALSE, "addObjectBlock > %p %u %zu %zu\n", 
+  DEBUG(TRUE, "addObjectBlock > %p %u %zu %zu\n", 
     jInterp, aTag, objectSize, (size_t)OBJECT_BLOCK_SIZE);
   assert(jInterp);
   
@@ -154,7 +155,7 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
   assert( IS_MEM_ALIGNED(aNewObjectBlock) );
 
   aNewObjectBlock->objectSize = objectSize;
-  aNewObjectBLock->nextBlock  = NULL;
+  aNewObjectBlock->nextBlock  = NULL;
   
   // integrate this new object block into the linked list of
   // object blocks
@@ -168,7 +169,7 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
   } else {
     jInterp->coAlgs[aTag].oMem.rootObjectBlock = aNewObjectBlock;
   }
-  DEBUG(FALSE, "addObjectBlock = %p %p\n", 
+  DEBUG(TRUE, "addObjectBlock = %p %p\n", 
     jInterp, aNewObjectBlock);
 
   // make sure this object block has some CoAlgObjs
@@ -176,17 +177,22 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
     calloc(OBJECT_BLOCK_SIZE, objectSize);
   assert( aNewObjectBlock->block );
   assert( IS_MEM_ALIGNED(aNewObjectBlock->block) );
-
+  printf("block %p\n", aNewObjectBlock->block);
+  
   // add these new CoAlgObjs to the free list
   void* nextObject = aNewObjectBlock->block;
-  for (size_t i = 0 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
+  for (size_t i = 1 ; i < OBJECT_BLOCK_SIZE ; i++) {
     assert( IS_MEM_ALIGNED(nextObject) );
-    ((CoAlgObj*)nextObject)->type = (CoAlgebra*)(nextObject + objectSize);
+    printf("nextObject: %p %zx %p\n", nextObject, objectSize, nextObject + objectSize);
+    *(void**)nextObject = nextObject + objectSize;
+    printf("no: %p\n", *(void**)nextObject);
+    nextObject += objectSize;
   }
-  ((CoAlgObj*)nextObject)->type =
-    (CoAlgebra*)(jInterp->coAlgs[aTag].oMem.freeObjects);
+  *(void**)nextObject =
+    (void*)jInterp->coAlgs[aTag].oMem.freeObjects;
+  printf("lastObject %p %p\n",nextObject, *(void**)nextObject);
   jInterp->coAlgs[aTag].oMem.freeObjects = aNewObjectBlock->block;
-  DEBUG(FALSE, "addObjectBlock < %p %p %p\n",
+  DEBUG(TRUE, "addObjectBlock < %p %p %p\n",
     jInterp, aNewObjectBlock, aNewObjectBlock->block);
 }
 \stopCCode
@@ -321,7 +327,7 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
   TagType aTag = JInterpsTag;
   
   // a block has already been assigned from the last test
-  // so we simply through it away...
+  // so we simply throw it away...
   jInterp->coAlgs[aTag].oMem.freeObjects = NULL;
   jInterp->coAlgs[aTag].oMem.rootObjectBlock = NULL;
 
@@ -329,6 +335,7 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
   // initialized object memory structures 
   // are initialized...
   CoAlgObj* aNewObject = newObject(jInterp, aTag);
+  printf("aNewObject %p\n",aNewObject);
 
   printf("got new object\n");
   
@@ -350,6 +357,8 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
     (CoAlgObj*)jInterp->coAlgs[aTag].oMem.freeObjects->type;
 
   aNewObject = newObject(jInterp, JInterpsTag);
+  printf("aNewObject %p\n",aNewObject);
+
   AssertPtrNotNull(aNewObject);
   AssertPtrNull(aNewObject->type);
   AssertIntEquals(aNewObject->tag, JInterpsTag);
@@ -367,6 +376,7 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
   CoAlgObj* aNewObject = NULL;
   for ( size_t i = 0; i < 3*OBJECT_BLOCK_SIZE; i++ ) {
     aNewObject = newObject(jInterp, JInterpsTag);
+    printf("aNewObject %p\n",aNewObject);
   }
   AssertPtrNotNull(aNewObject);
   AssertPtrNull(aNewObject->type);

@@ -40,7 +40,11 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
 #define FALSE 0
 #endif
 
+#ifdef __LP64__
 #define MEM_ALIGNMENT ((size_t)0x7)
+#else
+#define MEM_ALIGNMENT ((size_t)0x3)
+#endif
 #define IS_MEM_ALIGNED(someMem) \
   (!( ((size_t)(someMem)) & (MEM_ALIGNMENT) ))
 
