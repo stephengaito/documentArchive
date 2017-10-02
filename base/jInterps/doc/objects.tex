@@ -114,19 +114,166 @@ points to a linked list of \type{ObjectBlock}s.
 typedef struct object_block_struct ObjectBlock;
 
 typedef struct object_memory_struct {
-  size_t       objSize;
   CoAlgObj*    freeObjects;
   ObjectBlock* rootObjectBlock;
 } ObjectMemory;
 
 typedef struct object_block_struct {
-  size_t       objSize;
-  CoAlgObj*    block;
+  size_t       objectSize;
+  void*        block;
   ObjectBlock* nextBlock;
 } ObjectBlock;
 \stopCHeader
 
-\subsection[title=Allocating new objects]
+\startTestSuite[addObjectBlock]
+
+\setCHeaderStream{private}
+\startCHeader
+#define OBJECT_BLOCK_SIZE 1024
+
+extern void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag);
+\stopCHeader
+
+
+\startCCode
+void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  assert(aTag < jInterp->numCoAlgs);
+  assert(jInterp->coAlgs[aTag].sClass);
+
+  size_t objectSize = jInterp->coAlgs[aTag].sClass->objectSize;
+
+  DEBUG(FALSE, "addObjectBlock > %p %u %zu %zu\n", 
+    jInterp, aTag, objectSize, (size_t)OBJECT_BLOCK_SIZE);
+  assert(jInterp);
+  
+  // obtain a new object block
+  ObjectBlock* aNewObjectBlock = 
+    (ObjectBlock*)calloc(1, sizeof(ObjectBlock));
+  assert( IS_MEM_ALIGNED(aNewObjectBlock) );
+
+  aNewObjectBlock->objectSize = objectSize;
+  aNewObjectBLock->nextBlock  = NULL;
+  
+  // integrate this new object block into the linked list of
+  // object blocks
+  if ( jInterp->coAlgs[aTag].oMem.rootObjectBlock ) {
+    ObjectBlock *lastObjectBlock = jInterp->coAlgs[aTag].oMem.rootObjectBlock;
+    while ( lastObjectBlock->nextBlock ) {
+      lastObjectBlock = lastObjectBlock->nextBlock;
+    }
+    assert(lastObjectBlock->nextBlock == NULL);
+    lastObjectBlock->nextBlock = aNewObjectBlock;
+  } else {
+    jInterp->coAlgs[aTag].oMem.rootObjectBlock = aNewObjectBlock;
+  }
+  DEBUG(FALSE, "addObjectBlock = %p %p\n", 
+    jInterp, aNewObjectBlock);
+
+  // make sure this object block has some CoAlgObjs
+  aNewObjectBlock->block = 
+    calloc(OBJECT_BLOCK_SIZE, objectSize);
+  assert( aNewObjectBlock->block );
+  assert( IS_MEM_ALIGNED(aNewObjectBlock->block) );
+
+  // add these new CoAlgObjs to the free list
+  void* nextObject = aNewObjectBlock->block;
+  for (size_t i = 0 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
+    assert( IS_MEM_ALIGNED(nextObject) );
+    ((CoAlgObj*)nextObject)->type = (CoAlgebra*)(nextObject + objectSize);
+  }
+  ((CoAlgObj*)nextObject)->type =
+    (CoAlgebra*)(jInterp->coAlgs[aTag].oMem.freeObjects);
+  jInterp->coAlgs[aTag].oMem.freeObjects = aNewObjectBlock->block;
+  DEBUG(FALSE, "addObjectBlock < %p %p %p\n",
+    jInterp, aNewObjectBlock, aNewObjectBlock->block);
+}
+\stopCCode
+
+\startTestCase[must add new object block]
+\startCTest
+  // create the first list block and make sure it is 
+  // properly integrated into linked list of list blocks
+
+  TagType aTag = JInterpsTag;
+    
+  AssertPtrNotNull(jInterp);
+  AssertPtrNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
+  AssertPtrNull(jInterp->coAlgs[aTag].oMem.freeObjects);
+
+  addObjectBlock(jInterp, aTag);
+  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
+  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->block);
+  AssertPtrNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock);
+  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
+
+  // check to make sure freeObjects list is correctly linked
+  void* nextObject  = jInterp->coAlgs[aTag].oMem.rootObjectBlock->block;
+  size_t objectSize = jInterp->coAlgs[aTag].oMem.rootObjectBlock->objectSize;
+  AssertIntEquals(objectSize, jInterp->coAlgs[aTag].sClass->objectSize);
+  
+  for ( size_t i = 0 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
+    AssertIntTrue(IS_MEM_ALIGNED(nextObject));
+    AssertIntZero(((CoAlgObj*)nextObject)->tag);
+    AssertIntZero(((CoAlgObj*)nextObject)->flags);
+    AssertPtrEquals(((CoAlgObj*)nextObject)->type, nextObject + objectSize);
+  }
+  AssertPtrNull(((CoAlgObj*)nextObject)->type);
+  AssertPtrEquals(jInterp->coAlgs[aTag].oMem.freeObjects,
+    jInterp->coAlgs[aTag].oMem.rootObjectBlock->block);
+
+  // add another object block
+  void* oldFreeObjects = jInterp->coAlgs[aTag].oMem.freeObjects;
+  addObjectBlock(jInterp, JInterpsTag);
+  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock);
+  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->block);
+  AssertPtrNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->nextBlock);
+  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
+
+  // check to make sure freeObjects list is correctly linked
+  nextObject = jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->block;
+
+  for (size_t i = 0 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
+    AssertIntTrue(IS_MEM_ALIGNED(nextObject));
+    AssertIntZero(((CoAlgObj*)nextObject)->tag);
+    AssertIntZero(((CoAlgObj*)nextObject)->flags);
+    AssertPtrEquals(((CoAlgObj*)nextObject)->type, nextObject + objectSize);
+  }
+  AssertPtrEquals(((CoAlgObj*)nextObject)->type, oldFreeObjects);
+  AssertPtrEquals(jInterp->coAlgs[aTag].oMem.freeObjects,
+    jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->block);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\subsection[title=Garbage collection]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void collectGarbage(JoyLoLInterp* jInterp, TagType aTag);
+\stopCHeader
+
+\startCCode
+void collectGarbage(JoyLoLInterp* jInterp, TagType aTag) {
+  DEBUG(FALSE, "collectGarbage %p\n", jInterp);
+  //
+  // add a garbage collection mark-sweep here
+  //
+  // we will use a tri/quad colour mark-sweep algorithm
+  // similar to that used by LuaJIT v3.0
+  // see: http://wiki.luajit.org/New-Garbage-Collector
+  // see: https://en.wikipedia.org/wiki/Tracing_garbage_collection
+  // our "grey" list will be simply scanning a given 
+  // object block for currently grey markings... and
+  // we keep a pointer to the current object block and
+  // where in the block we last checked for grey markings.
+  // this means we can have an incremental mark/trace cycle
+  // which can be run in small increments in each call to eval.
+  //
+  assert(jInterp);
+}
+\stopCCode
 
 \startTestSuite[newObject]
 
@@ -168,19 +315,23 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
 
 \startTestCase[Allocate one new CoAlgObj]
 \startCTest
-  JoyLoLInterp* jInterp = newJoyLoLInterp(lstate);
   AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
 
   TagType aTag = JInterpsTag;
   
-  AssertPtrNull(jInterp->coAlgs[aTag].oMem.freeObjects);
-  AssertPtrNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
+  // a block has already been assigned from the last test
+  // so we simply through it away...
+  jInterp->coAlgs[aTag].oMem.freeObjects = NULL;
+  jInterp->coAlgs[aTag].oMem.rootObjectBlock = NULL;
 
   // get one new object to ensure our lazily
   // initialized object memory structures 
   // are initialized...
   CoAlgObj* aNewObject = newObject(jInterp, aTag);
 
+  printf("got new object\n");
+  
   AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
   AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
   AssertPtrNotNull(aNewObject);
@@ -211,7 +362,6 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
 \startTestCase[Allocate lots of new CoAlgObjs]
 
 \startCTest
-  JoyLoLInterp* jInterp = newJoyLoLInterp(lstate);
   AssertPtrNotNull(jInterp);
 
   CoAlgObj* aNewObject = NULL;
@@ -225,152 +375,6 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
 \stopCTest
 \stopTestCase
 \stopTestSuite
-
-\subsection[title=Allocating new Object blocks]
-
-\startTestSuite[addObjectBlock]
-
-\setCHeaderStream{private}
-\startCHeader
-#define OBJECT_BLOCK_SIZE 1024
-
-extern void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag);
-\stopCHeader
-
-
-\startCCode
-void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
-  assert(jInterp);
-  assert(jInterp->coAlgs);
-  assert(aTag < jInterp->numCoAlgs);
-
-  DEBUG(FALSE, "addObjectBlock > %p %u %zu\n", 
-    jInterp, aTag, (size_t)OBJECT_BLOCK_SIZE);
-  assert(jInterp);
-  
-  // obtain a new object block
-  ObjectBlock* aNewObjectBlock = 
-    (ObjectBlock*)calloc(1, sizeof(ObjectBlock));
-  assert( IS_MEM_ALIGNED(aNewObjectBlock) );
-
-  // integrate this new object block into the linked list of
-  // object blocks
-  if ( jInterp->coAlgs[aTag].oMem.rootObjectBlock ) {
-    ObjectBlock *lastObjectBlock = jInterp->coAlgs[aTag].oMem.rootObjectBlock;
-    while ( lastObjectBlock->nextBlock ) {
-      lastObjectBlock = lastObjectBlock->nextBlock;
-    }
-    assert(lastObjectBlock->nextBlock == NULL);
-    lastObjectBlock->nextBlock = aNewObjectBlock;
-  } else {
-    jInterp->coAlgs[aTag].oMem.rootObjectBlock = aNewObjectBlock;
-  }
-  DEBUG(FALSE, "addObjectBlock = %p %p\n", 
-    jInterp, aNewObjectBlock);
-
-  // make sure this object block has some CoAlgObjs
-  aNewObjectBlock->block = 
-    (CoAlgObj*)calloc(OBJECT_BLOCK_SIZE, sizeof(CoAlgObj));
-  assert( aNewObjectBlock->block );
-  assert( IS_MEM_ALIGNED(aNewObjectBlock->block) );
-
-  // add these new CoAlgObjs to the free list
-  CoAlgObj* nextObject = aNewObjectBlock->block;
-  CoAlgObj* lastObject = nextObject + OBJECT_BLOCK_SIZE - 1;
-  for ( ; nextObject < lastObject ; nextObject++ ) {
-    assert( IS_MEM_ALIGNED(nextObject) );
-    nextObject->type = (CoAlgebra*)(nextObject + 1);
-  }
-  nextObject->type = (CoAlgebra*)(jInterp->coAlgs[aTag].oMem.freeObjects);
-  jInterp->coAlgs[aTag].oMem.freeObjects = aNewObjectBlock->block;
-  DEBUG(FALSE, "addObjectBlock < %p %p %p\n",
-    jInterp, aNewObjectBlock, aNewObjectBlock->block);
-}
-\stopCCode
-
-\startTestCase[must add new object block]
-\startCTest
-  // create the first list block and make sure it is 
-  // properly integrated into linked list of list blocks
-
-  TagType aTag = JInterpsTag;
-  
-  JoyLoLInterp* jInterp = newJoyLoLInterp(lstate);
-  
-  AssertPtrNotNull(jInterp);
-  AssertPtrNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
-  AssertPtrNull(jInterp->coAlgs[aTag].oMem.freeObjects);
-
-  addObjectBlock(jInterp, aTag);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->block);
-  AssertPtrNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
-
-  // check to make sure freeObjects list is correctly linked
-  CoAlgObj* nextObject = jInterp->coAlgs[aTag].oMem.rootObjectBlock->block;
-  CoAlgObj* lastObject = nextObject + OBJECT_BLOCK_SIZE - 1;
-  for ( ; nextObject < lastObject ; nextObject++ ) {
-    AssertIntTrue(IS_MEM_ALIGNED(nextObject));
-    AssertIntZero(nextObject->tag);
-    AssertIntZero(nextObject->flags);
-    AssertPtrEquals(((CoAlgObj*)nextObject->type), nextObject + 1);
-  }
-  AssertPtrNull(nextObject->type);
-  AssertPtrEquals(jInterp->coAlgs[aTag].oMem.freeObjects,
-    jInterp->coAlgs[aTag].oMem.rootObjectBlock->block);
-
-  // add another object block
-  CoAlgObj* oldFreeObjects = jInterp->coAlgs[aTag].oMem.freeObjects;
-  addObjectBlock(jInterp, JInterpsTag);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->block);
-  AssertPtrNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->nextBlock);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
-
-  // check to make sure freeObjects list is correctly linked
-  nextObject = jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->block;
-  lastObject = nextObject + OBJECT_BLOCK_SIZE - 1;
-  for ( ; nextObject < lastObject ; nextObject++ ) {
-    AssertIntTrue(IS_MEM_ALIGNED(nextObject));
-    AssertIntZero(nextObject->tag);
-    AssertIntZero(nextObject->flags);
-    AssertPtrEquals(((CoAlgObj*)nextObject->type), nextObject + 1);
-  }
-  AssertPtrEquals(((CoAlgObj*)nextObject->type), oldFreeObjects);
-  AssertPtrEquals(jInterp->coAlgs[aTag].oMem.freeObjects,
-    jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->block);
-\stopCTest
-\stopTestCase
-\stopTestSuite
-
-\subsection[title=Garbage collection]
-
-\setCHeaderStream{private}
-\startCHeader
-extern void collectGarbage(JoyLoLInterp* jInterp, TagType aTag);
-\stopCHeader
-
-\startCCode
-void collectGarbage(JoyLoLInterp* jInterp, TagType aTag) {
-  DEBUG(FALSE, "collectGarbage %p\n", jInterp);
-  //
-  // add a garbage collection mark-sweep here
-  //
-  // we will use a tri/quad colour mark-sweep algorithm
-  // similar to that used by LuaJIT v3.0
-  // see: http://wiki.luajit.org/New-Garbage-Collector
-  // see: https://en.wikipedia.org/wiki/Tracing_garbage_collection
-  // our "grey" list will be simply scanning a given 
-  // object block for currently grey markings... and
-  // we keep a pointer to the current object block and
-  // where in the block we last checked for grey markings.
-  // this means we can have an incremental mark/trace cycle
-  // which can be run in small increments in each call to eval.
-  //
-  assert(jInterp);
-}
-\stopCCode
 
 Old unused CuTests.
 

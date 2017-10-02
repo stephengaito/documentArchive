@@ -47,6 +47,7 @@ typedef void *CoAlgData;
 
 typedef struct coalgebra_struct {
   Symbol*        name;
+  size_t         objectSize;
   CoAlgRegister* registerFunc;
   CoAlgEquality* equalityFunc;
   CoAlgPrint*    printFunc;
@@ -439,6 +440,7 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
   assert(theCoAlg);
   
   theCoAlg->name         = JInterpsName;
+  theCoAlg->objectSize   = sizeof(JoyLoLInterp);
   theCoAlg->registerFunc = registerJInterps;
   theCoAlg->equalityFunc = NULL;
   theCoAlg->printFunc    = NULL;
