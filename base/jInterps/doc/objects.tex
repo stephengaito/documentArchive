@@ -134,7 +134,7 @@ typedef struct object_block_struct {
 
 extern void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag);
 \stopCHeader
-
+\setCHeaderStream{public}
 
 \startCCode
 void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
@@ -255,6 +255,7 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
 \startCHeader
 extern void collectGarbage(JoyLoLInterp* jInterp, TagType aTag);
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 void collectGarbage(JoyLoLInterp* jInterp, TagType aTag) {
@@ -285,7 +286,6 @@ then we first attempt to collect any garbage and then if this fails to get
 any new free objects, a new \type{ObjectBlock} is allocated together with 
 its collection of free objects. 
 
-\setCCodeStream{objects}
 \startCHeader
 extern CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag);
 \stopCHeader

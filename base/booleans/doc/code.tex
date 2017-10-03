@@ -84,6 +84,7 @@ Boolean registerBooleans(JoyLoLInterp *jInterp) {
   assert(theCoAlg);
   
   theCoAlg->name         = BooleansName;
+  theCoAlg->objectSize   = sizeof(CoAlgObj);
   theCoAlg->registerFunc = registerBooleans;
   theCoAlg->equalityFunc = NULL;
   theCoAlg->printFunc    = NULL;
@@ -112,6 +113,10 @@ Boolean registerBooleans(JoyLoLInterp *jInterp) {
 //  AssertIntTrue(registerBooleans(jInterp));
   AssertPtrNotNull(jInterp->coAlgs[BooleansTag].sClass);
   AssertPtrEquals(jInterp->coAlgs[BooleansTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[BooleansTag].sClass->objectSize,
+    sizeof(CoAlgObj)
+  )
 \stopCTest
 \stopTestCase
 \stopTestSuite

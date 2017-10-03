@@ -475,6 +475,10 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
   AssertIntTrue(result);
   AssertPtrNotNull(jInterp->coAlgs[JInterpsTag].sClass);
   AssertPtrEquals(jInterp->coAlgs[JInterpsTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[JInterpsTag].sClass->objectSize,
+    sizeof(JoyLoLInterp)
+  )
 \stopCTest
 \stopTestCase
 \stopTestSuite
