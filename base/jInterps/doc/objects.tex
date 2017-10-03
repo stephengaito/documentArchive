@@ -145,7 +145,7 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
 
   size_t objectSize = jInterp->coAlgs[aTag].sClass->objectSize;
 
-  DEBUG(TRUE, "addObjectBlock > %p %u %zu %zu\n", 
+  DEBUG(FALSE, "addObjectBlock > %p %u %zu %zu\n", 
     jInterp, aTag, objectSize, (size_t)OBJECT_BLOCK_SIZE);
   assert(jInterp);
   
@@ -169,7 +169,7 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
   } else {
     jInterp->coAlgs[aTag].oMem.rootObjectBlock = aNewObjectBlock;
   }
-  DEBUG(TRUE, "addObjectBlock = %p %p\n", 
+  DEBUG(FALSE, "addObjectBlock = %p %p\n", 
     jInterp, aNewObjectBlock);
 
   // make sure this object block has some CoAlgObjs
@@ -177,22 +177,18 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
     calloc(OBJECT_BLOCK_SIZE, objectSize);
   assert( aNewObjectBlock->block );
   assert( IS_MEM_ALIGNED(aNewObjectBlock->block) );
-  printf("block %p\n", aNewObjectBlock->block);
   
   // add these new CoAlgObjs to the free list
   void* nextObject = aNewObjectBlock->block;
   for (size_t i = 1 ; i < OBJECT_BLOCK_SIZE ; i++) {
     assert( IS_MEM_ALIGNED(nextObject) );
-    printf("nextObject: %p %zx %p\n", nextObject, objectSize, nextObject + objectSize);
     *(void**)nextObject = nextObject + objectSize;
-    printf("no: %p\n", *(void**)nextObject);
     nextObject += objectSize;
   }
   *(void**)nextObject =
     (void*)jInterp->coAlgs[aTag].oMem.freeObjects;
-  printf("lastObject %p %p\n",nextObject, *(void**)nextObject);
   jInterp->coAlgs[aTag].oMem.freeObjects = aNewObjectBlock->block;
-  DEBUG(TRUE, "addObjectBlock < %p %p %p\n",
+  DEBUG(FALSE, "addObjectBlock < %p %p %p\n",
     jInterp, aNewObjectBlock, aNewObjectBlock->block);
 }
 \stopCCode
@@ -219,13 +215,13 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
   size_t objectSize = jInterp->coAlgs[aTag].oMem.rootObjectBlock->objectSize;
   AssertIntEquals(objectSize, jInterp->coAlgs[aTag].sClass->objectSize);
   
-  for ( size_t i = 0 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
+  for ( size_t i = 1 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
     AssertIntTrue(IS_MEM_ALIGNED(nextObject));
     AssertIntZero(((CoAlgObj*)nextObject)->tag);
     AssertIntZero(((CoAlgObj*)nextObject)->flags);
-    AssertPtrEquals(((CoAlgObj*)nextObject)->type, nextObject + objectSize);
+    AssertPtrEquals( ((CoAlgObj*)nextObject)->type, nextObject + objectSize);
   }
-  AssertPtrNull(((CoAlgObj*)nextObject)->type);
+  AssertPtrNull(*((void**)nextObject));
   AssertPtrEquals(jInterp->coAlgs[aTag].oMem.freeObjects,
     jInterp->coAlgs[aTag].oMem.rootObjectBlock->block);
 
@@ -240,7 +236,7 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
   // check to make sure freeObjects list is correctly linked
   nextObject = jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->block;
 
-  for (size_t i = 0 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
+  for (size_t i = 1 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
     AssertIntTrue(IS_MEM_ALIGNED(nextObject));
     AssertIntZero(((CoAlgObj*)nextObject)->tag);
     AssertIntZero(((CoAlgObj*)nextObject)->flags);
@@ -335,9 +331,6 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
   // initialized object memory structures 
   // are initialized...
   CoAlgObj* aNewObject = newObject(jInterp, aTag);
-  printf("aNewObject %p\n",aNewObject);
-
-  printf("got new object\n");
   
   AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
   AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
@@ -357,7 +350,6 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
     (CoAlgObj*)jInterp->coAlgs[aTag].oMem.freeObjects->type;
 
   aNewObject = newObject(jInterp, JInterpsTag);
-  printf("aNewObject %p\n",aNewObject);
 
   AssertPtrNotNull(aNewObject);
   AssertPtrNull(aNewObject->type);
@@ -376,7 +368,6 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
   CoAlgObj* aNewObject = NULL;
   for ( size_t i = 0; i < 3*OBJECT_BLOCK_SIZE; i++ ) {
     aNewObject = newObject(jInterp, JInterpsTag);
-    printf("aNewObject %p\n",aNewObject);
   }
   AssertPtrNotNull(aNewObject);
   AssertPtrNull(aNewObject->type);
