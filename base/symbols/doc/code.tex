@@ -23,58 +23,6 @@ typedef struct symbol_object_struct {
 
 \stopTestSuite
 
-\startTestSuite[registerSymbols]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerSymbols(JoyLoLInterp* jInterp);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerSymbols(JoyLoLInterp* jInterp) {
-  assert(jInterp);
-  assert(jInterp->coAlgs);
-  
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Symbols";
-  theCoAlg->objectSize   = sizeof(SymbolObj);
-  theCoAlg->registerFunc = registerSymbols;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printFunc    = NULL;
-  theCoAlg->coAlgData    = NULL;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
-  
-  // sanity check...
-  assert(tag == SymbolsTag);
-  assert(jInterp->coAlgs[tag].sClass);
-
-  registerSymbolWords(jInterp);
-
-  return TRUE;
-}
-\stopCCode
-
-\startTestCase[should register the Symbols coAlg]
-
-\startCTest
-  // CTestsSetup has already created a jInterp
-  // and run registerSymbols
-  AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[SymbolsTag].sClass;
-  AssertIntTrue(registerSymbols(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[SymbolsTag].sClass, coAlg);
-  AssertIntEquals(
-    jInterp->coAlgs[SymbolsTag].sClass->objectSize,
-    sizeof(SymbolObj)
-  )
-\stopCTest
-\stopTestCase
-\stopTestSuite
-
 \startTestSuite[newSymbol]
 
 \startCHeader
@@ -173,6 +121,7 @@ Boolean symbolIs(CoAlgObj *aLoL, Symbol *aSymbol) {
 
 \startTestSuite[symbol equality]
 
+\setCHeaderStream{private}
 \startCHeader
 Boolean symbolsEqualDebug(
   CoAlgObj* lolA,
@@ -222,38 +171,109 @@ Boolean symbolsEqualDebug(
 \stopTestCase
 \stopTestSuite
 
-\starttyping
-// strings.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/printer.h"
-#include "joyLoL/dictionary.h"
+\startTestSuite[printing symbols]
 
-static size_t printSizeSymbolCoAlg(CoAlgObj* aLoL, size_t debugFlag) {
+\startCHeader
+extern size_t printSizeSymbolCoAlg(CoAlgObj* aLoL, size_t debugFlag);
+\stopCHeader
+
+\startCCode
+size_t printSizeSymbolCoAlg(CoAlgObj* aLoL, size_t debugFlag) {
   DEBUG(debugFlag, "symbolCoAlg-printSize: %p\n", aLoL);
   assert(aLoL);
-  assert(aLoL->coAlg);
-  assert(aLoL->coAlg->isA == SYMBOL_COALG);
-  DEBUG(debugFlag, "symbolCoAlg-printSize: [%s] %p\n", aLoL->symbol, aLoL);
-  return strlen(aLoL->symbol) + 1;
+  assert(aLoL->type);
+  assert(aLoL->tag == SymbolsTag);
+  DEBUG(debugFlag, "symbolCoAlg-printSize: [%s] %p\n", asSymbol(aLoL), aLoL);
+  return strlen(asSymbol(aLoL)) + 1;
 }
+\stopCCode
 
-static size_t printStrSymbolCoAlg(CoAlgObj* aLoL,
-                                  char* buffer, size_t bufferSize) {
+\startCHeader
+extern size_t printStrSymbolCoAlg(CoAlgObj* aLoL,
+                                  char* buffer, size_t bufferSize);
+\stopCHeader
+
+\startCCode
+Boolean printStrSymbolCoAlg(CoAlgObj* aLoL,
+                           char* buffer, size_t bufferSize) {
   assert(aLoL);
-  assert(aLoL->coAlg);
-  assert(aLoL->coAlg->isA == SYMBOL_COALG);
+  assert(aLoL->type);
+  assert(aLoL->tag == SymbolsTag);
 
-  strcat(buffer, aLoL->symbol);
+  strcat(buffer, asSymbol(aLoL));
   strcat(buffer, " ");
   return TRUE;
 }
-\stoptyping
+\stopCCode
+
+\startTestCase[should print symbols]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
+
+  const char* testStr = "test string";
+  CoAlgObj* aNewSymbol = newSymbol(jInterp, testStr);
+  AssertPtrNotNull(aNewSymbol);
+  AssertIntEquals(printSizeDebug(aNewSymbol, FALSE), strlen(testStr)+1);
+  AssertStrEquals(printLoLDebug(aNewSymbol, FALSE), testStr);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerSymbols]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerSymbols(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerSymbols(JoyLoLInterp* jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = "Symbols";
+  theCoAlg->objectSize   = sizeof(SymbolObj);
+  theCoAlg->registerFunc = registerSymbols;
+  theCoAlg->equalityFunc = symbolsEqualDebug;
+  theCoAlg->printSize    = printSizeSymbolCoAlg;
+  theCoAlg->printStr    = printStrSymbolCoAlg;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  
+  // sanity check...
+  assert(tag == SymbolsTag);
+  assert(jInterp->coAlgs[tag].sClass);
+
+  registerSymbolWords(jInterp);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Symbols coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerSymbols
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[SymbolsTag].sClass;
+  AssertIntTrue(registerSymbols(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[SymbolsTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[SymbolsTag].sClass->objectSize,
+    sizeof(SymbolObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
 
 \starttyping
 // specs
@@ -270,19 +290,6 @@ static size_t printStrSymbolCoAlg(CoAlgObj* aLoL,
 #include "joyLoL/printer.h"
 
 // suiteName: - Symbols CoAlgebra tests -
-
-
-void Test_printSymbols(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-  CuAssertPtrNotNull(tc, coAlgs->symbols);
-
-  const char* testStr = "test string";
-  CoAlgObj* aNewSymbol = newSymbol(coAlgs, testStr);
-  CuAssertPtrNotNull(tc, aNewSymbol);
-  CuAssertIntEquals(tc, printSizeDebug(aNewSymbol, FALSE), strlen(testStr)+1);
-  CuAssertStrEquals(tc, printLoLDebug(aNewSymbol, FALSE), testStr);
-}
 
 void Test_checkSymbolsSymbols(CuTest* tc) {
   CoAlgebras* coAlgs = createCoAlgebras();
