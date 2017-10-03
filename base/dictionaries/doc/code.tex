@@ -4,6 +4,7 @@
 \setCHeaderStream{public}
 
 \dependsOn[jInterps]
+\dependsOn[symbols]
 
 \startCHeader
 typedef struct dictionaries_object_struct DictObj;
@@ -156,131 +157,46 @@ DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym) {
 \stopTestCase
 \stopTestSuite
 
-\starttyping
+\startTestSuite[createSymbol]
 
-extern AVLNode* findSymbol(Dictionary* aDic, const char* aSymbol);
+\startCHeader
+DictObj* createSymbol(JoyLoLInterp *jInterp, Symbol* aSymbol);
+\stopCHeader
 
-extern AVLNode* findLUBSymbol(Dictionary* aDic, const char* aSymbol);
-
-extern AVLNode* insertSymbol(Dictionary* aDic, const char* aSymbol);
-
-extern AVLNode* createSymbol(Dictionary* aDic, const char* aSymbol);
-
-extern PairAtom* createAtom(CoAlgebras* coAlgs, AVLNode* anAVLNode);
-
-extern PairAtom* getSymbol(CoAlgebras* coAlgs,
-                           Dictionary* aDic,
-                           const char* aSymbol);
-
-extern void listDefinitions(Dictionary* aDic, FILE* outFile);
-
-#endif
-\stoptyping
-
-\starttyping
-#ifndef JOYLOL_DICTIONARY_PRIVATE_H
-#define JOYLOL_DICTIONARY_PRIVATE_H
-
-extern AVLNode* findSymbolRecurse(Dictionary* aDic,
-                                  AVLNode* anAVLNode,
-                                  const char* aSymbol);
-
-extern AVLNode* findLUBSymbolRecurse(Dictionary* aDic,
-                                     AVLNode* anAVLNode,
-                                     const char* aSymbol);
-
-extern AVLNode* insertSymbolRecurse(Dictionary* aDic,
-                                    AVLNode* anAVLNode,
-                                    const char* aSymbol);
-
-
-extern void reCalculateAVLNodeHeightBalance(AVLNode* avlNode);
-extern size_t deepCalculateAVLNodeHeight(AVLNode* avlNode);
-
-extern AVLNode* rotateLeft(AVLNode* anAVLNode);
-extern AVLNode* rotateRight(AVLNode* anAVLNode);
-
-extern AVLNode* rotateLeftLeft(AVLNode* anAVLNode);
-extern AVLNode* rotateLeftRight(AVLNode* anAVLNode);
-extern AVLNode* rotateRightLeft(AVLNode* anAVLNode);
-extern AVLNode* rotateRightRight(AVLNode* anAVLNode);
-
-extern size_t checkAVLNode(AVLNode* anAVLNode, size_t debugFlag);
-extern char* printDictionary(AVLNode* anAVLNode);
-
-#endif
-\stoptyping
-
-\starttyping
-//dictionary.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/dictionary_private.h"
-#include "joyLoL/printer.h"
-
-AVLNode* createSymbol(Dictionary* aDic, const char* aSymbol) {
-  assert(aDic);
+\startCCode
+DictObj* createSymbol(JoyLoLInterp *jInterp, Symbol* aSymbol) {
+  assert(jInterp);
   if (!aSymbol) return NULL;
-  AVLNode* aSym = findSymbol(aDic, aSymbol);
+  DictObj* aSym = findSymbol(jInterp, aSymbol);
   if (!aSym) {
-    aDic->dicRoot = insertSymbol(aDic, aSymbol);
-    aSym = findSymbol(aDic, aSymbol);
+    jInterp->dict.root = insertSymbol(jInterp, aSymbol);
+    aSym = findSymbol(jInterp, aSymbol);
   }
   return aSym;
 }
+\stopCCode
+\stopTestSuite
 
-PairAtom* getSymbol(CoAlgebras* coAlgs,
-                    Dictionary* aDic,
-                    const char* aSymbol) {
-  AVLNode* aSym = createSymbol(aDic, aSymbol);
-  return createAtom(coAlgs, aSym);
+\startCHeader
+extern CoAlgObj* getSymbol(JoyLoLInterp* jInterp,
+                           Symbol* aSymbol);
+\stopCHeader
+
+\startCCode
+CoAlgObj* getSymbol(JoyLoLInterp* jInterp,
+                    Symbol* aSymbol) {
+  DictObj* aSym = createSymbol(jInterp, aSymbol);
+  return newSymbol(jInterp, aSym->symbol);
 }
+\stopCCode
 
-PairAtom* createAtom(CoAlgebras* coAlgs, AVLNode* anAVLNode) {
-  assert(anAVLNode);
-  assert(coAlgs);
-  return newSymbol(coAlgs, anAVLNode->symbol);
-}
+\startCHeader
+extern void listDefinitions(JoyLoLInterp* jInterp, FILE* outFile);
+\stopCHeader
 
-void reCalculateAVLNodeHeightBalance(AVLNode* anAVLNode) {
-  if (!anAVLNode) return;
-
-  if (!anAVLNode->left && !anAVLNode->right) {
-    anAVLNode->height  = 1;
-    anAVLNode->balance = 0;
-  } else if (!anAVLNode->left) {
-    anAVLNode->height  =  1 + anAVLNode->right->height;
-    anAVLNode->balance = -1 - anAVLNode->right->height;
-  } else if (!anAVLNode->right) {
-    anAVLNode->height  = 1 + anAVLNode->left->height;
-    anAVLNode->balance = 1 + anAVLNode->left->height;
-  } else if (anAVLNode->left->height < anAVLNode->right->height) {
-    anAVLNode->height  = 1 + anAVLNode->right->height;
-    anAVLNode->balance = anAVLNode->left->height - anAVLNode->right->height;
-  } else {
-    anAVLNode->height  = 1 + anAVLNode->left->height;
-    anAVLNode->balance = anAVLNode->left->height - anAVLNode->right->height;
-  }
-}
-
-size_t deepCalculateAVLNodeHeight(AVLNode* anAVLNode) {
-  if (!anAVLNode) return 0;
-
-  size_t leftHeight = 1 + deepCalculateAVLNodeHeight(anAVLNode->left);
-  size_t rightHeight = 1 + deepCalculateAVLNodeHeight(anAVLNode->right);
-
-  if (leftHeight > rightHeight) return leftHeight;
-  return rightHeight;
-}
-
-void listDefinitions(Dictionary* aDic, FILE* outFile) {
-  AVLNode* curNode = aDic->firstSymbol;
+\startCCode
+void listDefinitions(JoyLoLInterp* jInterp, FILE* outFile) {
+  DictObj* curNode = jInterp->dict.firstSymbol;
   while(curNode) {
     if (curNode->value) {
       fprintf(outFile,"%s == %s\n",
@@ -289,438 +205,7 @@ void listDefinitions(Dictionary* aDic, FILE* outFile) {
     curNode = curNode->next;
   }
 }
-
-\stoptyping
-
-\starttyping
-//check
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/dictionary_private.h"
-
-// We implement our dictionary as an AVL binary tree using PairAtoms.
-//
-// Our implementation is inspired by:
-// The Crazy Programmer's "Program for AVL Tree in C" (Neeraj Mishra)
-// http://www.thecrazyprogrammer.com/2014/03/c-program-for-avl-tree-implementation.html
-// and by:
-// Jianye Hao's CSC2100B Tutorial 4 "Binary and AVL Trees in C"
-// https://www.cse.cuhk.edu.hk/irwin.king/_media/teaching/csc2100b/tu4.pdf
-//
-// At the moment we only insert and search (we never delete).
-//
-// ANY AVLTree node can be the root of a new dictionary.
-//
-
-size_t checkAVLNode(AVLNode* anAVLNode, size_t debugFlag) {
-  if (!anAVLNode) return TRUE;
-
-  DEBUG(debugFlag, "checkAVLNode %p %ld:%zu=%zu %s\n",
-        anAVLNode, anAVLNode->balance, anAVLNode->height,
-        deepCalculateAVLNodeHeight(anAVLNode),
-        printDictionary(anAVLNode));
-
-  if (anAVLNode->left) {
-    DEBUG(debugFlag, "car>-checkAVLNode %p\n", anAVLNode);
-    checkAVLNode(anAVLNode->left, debugFlag);
-    assert(0 < strcmp(anAVLNode->symbol,
-                      anAVLNode->left->symbol));
-    DEBUG(debugFlag, "car<-checkAVLNode %p\n", anAVLNode);
-  }
-
-  if (anAVLNode->right) {
-    DEBUG(debugFlag, "cdr>-checkAVLNode %p\n", anAVLNode);
-    checkAVLNode(anAVLNode->right, debugFlag);
-    assert(strcmp(anAVLNode->symbol,
-                  anAVLNode->right->symbol) < 0);
-    DEBUG(debugFlag, "cdr<-checkAVLNode %p\n", anAVLNode);
-  }
-
-  assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
-
-  return TRUE;
-}
-
-size_t printDicSize(AVLNode* anAVLNode) {
-  if (!anAVLNode) return 0;
-  return printDicSize(anAVLNode->left)
-    + printDicSize(anAVLNode->right)
-    + strlen(anAVLNode->symbol) + 20;
-}
-
-void printDicInto(AVLNode* anAVLNode, char* buffer, size_t bufferSize) {
-  if (!anAVLNode) return;
-  strcat(buffer, "[");
-  strcat(buffer, anAVLNode->symbol);
-  strcat(buffer, "] l:( ");
-  printDicInto(anAVLNode->left, buffer, bufferSize);
-  strcat(buffer, " ) r:( ");
-  printDicInto(anAVLNode->right, buffer, bufferSize);
-  strcat(buffer, " ) ");
-}
-
-char* printDictionary(AVLNode* anAVLNode) {
-  size_t bufferSize = printDicSize(anAVLNode) + 10;
-  char* buffer = (char*) calloc(bufferSize, sizeof(char));
-  assert(buffer);
-  printDicInto(anAVLNode, buffer, bufferSize);
-  buffer[strlen(buffer)-1] = 0;
-  return buffer;
-}
-\stoptyping
-
-\starttyping
-// find.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/dictionary_private.h"
-
-// We implement our dictionary as an AVL binary tree using PairAtoms.
-//
-// Our implementation is inspired by:
-// The Crazy Programmer's "Program for AVL Tree in C" (Neeraj Mishra)
-// http://www.thecrazyprogrammer.com/2014/03/c-program-for-avl-tree-implementation.html
-// and by:
-// Jianye Hao's CSC2100B Tutorial 4 "Binary and AVL Trees in C"
-// https://www.cse.cuhk.edu.hk/irwin.king/_media/teaching/csc2100b/tu4.pdf
-//
-// At the moment we only insert and search (we never delete).
-//
-// ANY AVLTree node can be the root of a new dictionary.
-//
-
-AVLNode* findSymbolRecurse(Dictionary* aDic,
-                           AVLNode* anAVLNode,
-                           const char* aSymbol) {
-  if (!anAVLNode) return NULL;
-  int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
-  if (aStrCmp < 0) {
-    // aSymbol < anAVLNode->symbol // search the LEFT subtree
-    return findSymbolRecurse(aDic, anAVLNode->left, aSymbol);
-  } else if (0 < aStrCmp) {
-    // aSymbol > anAVLNode->symbol // search the RIGHT subtree
-    return findSymbolRecurse(aDic, anAVLNode->right, aSymbol);
-  } else {
-    // aSymbol == anAVLNode->symbol // return this association pair
-    return anAVLNode;
-  }
-  return NULL;
-}
-
-AVLNode* findSymbol(Dictionary* aDic, const char* aSymbol) {
-  if (!aSymbol) return NULL;
-  assert(aDic);
-  return findSymbolRecurse(aDic, aDic->dicRoot, aSymbol);
-}
-
-AVLNode* findLUBSymbolRecurse(Dictionary* aDic,
-                              AVLNode* anAVLNode,
-                              const char* aSymbol) {
-  assert(aDic);
-  if (!anAVLNode) return aDic->firstSymbol;
-
-  DEBUG(FALSE, "findLUBSymbol %p {%s}[%s] %p %p\n",
-        anAVLNode, anAVLNode->symbol, aSymbol,
-        anAVLNode->left, anAVLNode->right);
-
-  int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
-  DEBUG(FALSE, "findLUBSymbol cmp: %d\n", aStrCmp);
-  if (aStrCmp < 0) {
-    // aSymbol < anAVLNode->symbol
-    // the current anAVLNode->symbol is an upper bound
-    // search the LEFT subtree for a smaller upper bound
-    if (anAVLNode->left) {
-      AVLNode* aNode = findLUBSymbolRecurse(aDic, anAVLNode->left, aSymbol);
-      if (!aNode) {
-        // there is nothing in the LEFT subtree which is an upper bound
-        // so return this node.
-        return anAVLNode;
-      }
-      // we have found a smaller upper bound... so return it
-      return aNode;
-    }
-    // there is nothing less than this node so return this node
-    return anAVLNode;
-    //
-  } else if (0 < aStrCmp) {
-    // anAVLNode->symbol < symbol
-    // the current anAVLNode->symbol is a lower bound
-    // search the RIGHT subtree for any upper bounds
-    if (anAVLNode->right) {
-      return findLUBSymbolRecurse(aDic, anAVLNode->right, aSymbol);
-    }
-    // there is nothing greater than this node so return NULL to signal failure
-    return NULL;
-    //
-  } else {
-    // aSymbol == anAVLNode->symbol
-    // the current anAVLNode->symbol is the lowest possible upper bound
-    // return it
-    return anAVLNode;
-    //
-  }
-  return aDic->firstSymbol;
-}
-
-AVLNode* findLUBSymbol(Dictionary* aDic, const char* aSymbol) {
-  assert(aDic);
-  if (!aSymbol) return aDic->firstSymbol;
-  return findLUBSymbolRecurse(aDic, aDic->dicRoot, aSymbol);
-}
-
-\stoptyping
-
-\starttyping
-//insert.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/dictionary_private.h"
-
-// We implement our dictionary as an AVL binary tree using AVLNodes.
-//
-// Our implementation is inspired by:
-// The Crazy Programmer's "Program for AVL Tree in C" (Neeraj Mishra)
-// http://www.thecrazyprogrammer.com/2014/03/c-program-for-avl-tree-implementation.html
-// and by:
-// Jianye Hao's CSC2100B Tutorial 4 "Binary and AVL Trees in C"
-// https://www.cse.cuhk.edu.hk/irwin.king/_media/teaching/csc2100b/tu4.pdf
-//
-// At the moment we only insert and search (we never delete).
-//
-// ANY AVLTree node can be the root of a new dictionary.
-//
-
-AVLNode* insertSymbolRecurse(Dictionary* aDic,
-                             AVLNode* anAVLNode,
-                             const char* aSymbol) {
-  if (!anAVLNode) return newAVLNode(aSymbol);
-
-  assert(aDic);
-
-  DEBUG(FALSE, "\ninsertSymbol %p <%s>[%s] %ld:%zu\n",
-        anAVLNode, anAVLNode->symbol, aSymbol,
-        anAVLNode->balance, anAVLNode->height);
-
-  DEBUG(FALSE, "insertSymbol strncmp %d\n",
-        strcmp(aSymbol, anAVLNode->symbol));
-
-  int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
-  if (aStrCmp < 0) {
-    // aSymbol < anAVLNode->symbol // insert in LEFT subtree
-    DEBUG(FALSE, ">-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
-          anAVLNode, aSymbol, anAVLNode->balance,
-          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
-          printDictionary(anAVLNode));
-    AVLNode* leftResult =
-      insertSymbolRecurse(aDic, anAVLNode->left, aSymbol);
-    assert(leftResult);
-    if (!anAVLNode->left) {
-      // we have inserted a new node ...
-      // ... insert this new node into the doubly linked list
-      //
-      AVLNode* oldPrevious               = anAVLNode->previous;
-      assert(aDic->firstSymbol);
-      if (oldPrevious) oldPrevious->next = leftResult;
-      else aDic->firstSymbol             = leftResult;
-      leftResult->next                   = anAVLNode;
-      leftResult->previous               = oldPrevious;
-      anAVLNode->previous                = leftResult;
-      //
-    }
-    anAVLNode->left = leftResult;
-    reCalculateAVLNodeHeightBalance(anAVLNode);
-    DEBUG(FALSE, "<-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
-          anAVLNode, aSymbol, anAVLNode->balance,
-          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
-          printDictionary(anAVLNode));
-    //
-    if (2 < anAVLNode->balance) {
-      assert(anAVLNode->left);
-      if (strcmp(aSymbol, anAVLNode->left->symbol) < 0) {
-        anAVLNode = rotateLeftLeft(anAVLNode);
-      } else {
-        anAVLNode = rotateLeftRight(anAVLNode);
-      }
-    }
-  } else if (0 < aStrCmp) {
-    // aSymbol > anAVLNode->symbol // insert in RIGHT subtree
-    DEBUG(FALSE, ">-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
-        anAVLNode, aSymbol, anAVLNode->balance,
-        anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
-        printDictionary(anAVLNode));
-    AVLNode* rightResult =
-      insertSymbolRecurse(aDic, anAVLNode->right, aSymbol);
-    if (!anAVLNode->right) {
-      // we have inserted a new node ...
-      // ... insert this new node into the doubly linked list
-      //
-      AVLNode* oldNext               = anAVLNode->next;
-      if (oldNext) oldNext->previous = rightResult;
-      rightResult->previous          = anAVLNode;
-      rightResult->next              = oldNext;
-      anAVLNode->next                = rightResult;
-      //
-    }
-    anAVLNode->right = rightResult;
-    reCalculateAVLNodeHeightBalance(anAVLNode);
-    DEBUG(FALSE, "<-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
-        anAVLNode, aSymbol, anAVLNode->balance,
-        anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
-        printDictionary(anAVLNode));
-    //
-    if (anAVLNode->balance < -2) {
-      assert(anAVLNode->right);
-      if (strcmp(aSymbol, anAVLNode->right->symbol) > 0) {
-        anAVLNode = rotateRightRight(anAVLNode);
-      } else {
-        anAVLNode = rotateRightLeft(anAVLNode);
-      }
-    }
-  } else {
-    // aSymbol == anAVLNode->symbol // nothing to do...
-    DEBUG(FALSE,"symols equal <%s>[%s]\n",
-          anAVLNode->symbol, aSymbol);
-  }
-
-  reCalculateAVLNodeHeightBalance(anAVLNode);
-  return anAVLNode;
-}
-
-AVLNode* insertSymbol(Dictionary* aDic, const char* aSymbol) {
-  assert(aSymbol);
-  assert(aDic);
-
-  // lazy initialization
-  if (!aDic->dicRoot) {
-    AVLNode* firstNode = newAVLNode(aSymbol);
-    aDic->dicRoot     = firstNode;
-    aDic->firstSymbol = firstNode;
-    return firstNode;
-  }
-
-  return insertSymbolRecurse(aDic, aDic->dicRoot, aSymbol);
-}
-
-\stoptyping
-
-\starttyping
-//rotate.c
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/dictionary_private.h"
-
-// We implement our dictionary as an AVL binary tree using AVLNodes.
-//
-// Our implementation is inspired by:
-// The Crazy Programmer's "Program for AVL Tree in C" (Neeraj Mishra)
-// http://www.thecrazyprogrammer.com/2014/03/c-program-for-avl-tree-implementation.html
-// and by:
-// Jianye Hao's CSC2100B Tutorial 4 "Binary and AVL Trees in C"
-// https://www.cse.cuhk.edu.hk/irwin.king/_media/teaching/csc2100b/tu4.pdf
-//
-// At the moment we only insert and search (we never delete).
-//
-// ANY AVLTree node can be the root of a new dictionary.
-//
-
-AVLNode* rotateLeft(AVLNode* anAVLNode) {
-  DEBUG(FALSE, ">-rotateLeft %p %ld:%zu=%zu %s\n",
-        anAVLNode, anAVLNode->balance, anAVLNode->height,
-        deepCalculateAVLNodeHeight(anAVLNode),
-        printDictionary(anAVLNode));
-  assert(anAVLNode->right);
-
-  AVLNode* newRoot = anAVLNode->right;
-  anAVLNode->right = newRoot->left;
-  newRoot->left    = anAVLNode;
-
-  reCalculateAVLNodeHeightBalance(anAVLNode);
-  reCalculateAVLNodeHeightBalance(newRoot);
-
-  DEBUG(FALSE, "<o-rotateLeft %p %ld:%zu=%zu %s\n",
-        anAVLNode, anAVLNode->balance, anAVLNode->height,
-        deepCalculateAVLNodeHeight(anAVLNode),
-        printDictionary(anAVLNode));
-  DEBUG(FALSE, "<n-rotateLeft %p %ld:%zu=%zu %s\n",
-        newRoot, newRoot->balance, newRoot->height,
-        deepCalculateAVLNodeHeight(newRoot),
-        printDictionary(newRoot));
-  assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
-  assert(newRoot->height == deepCalculateAVLNodeHeight(newRoot));
-  return newRoot;
-}
-
-AVLNode* rotateRight(AVLNode* anAVLNode) {
-  DEBUG(FALSE, ">-rotateRight %p %ld:%zu=%zu %s\n",
-        anAVLNode, anAVLNode->balance, anAVLNode->height,
-        deepCalculateAVLNodeHeight(anAVLNode),
-        printDictionary(anAVLNode));
-  assert(anAVLNode->left);
-
-  AVLNode* newRoot = anAVLNode->left;
-  anAVLNode->left = newRoot->right;
-  newRoot->right  = anAVLNode;
-
-  reCalculateAVLNodeHeightBalance(anAVLNode);
-  reCalculateAVLNodeHeightBalance(newRoot);
-
-  DEBUG(FALSE, "<o-rotateRight %p %ld:%zu=%zu %s\n",
-        anAVLNode, anAVLNode->balance, anAVLNode->height,
-        deepCalculateAVLNodeHeight(anAVLNode),
-        printDictionary(anAVLNode));
-  DEBUG(FALSE, "<n-rotateRight %p %ld:%zu=%zu %s\n",
-        newRoot, newRoot->balance, newRoot->height,
-        deepCalculateAVLNodeHeight(newRoot),
-        printDictionary(newRoot));
-  assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
-  assert(newRoot->height == deepCalculateAVLNodeHeight(newRoot));
-  return newRoot;
-}
-
-AVLNode* rotateLeftLeft(AVLNode* anAVLNode) {
-  DEBUG(FALSE, "LL %p %s\n", anAVLNode, printDictionary(anAVLNode));
-  return rotateRight(anAVLNode);
-}
-
-AVLNode* rotateLeftRight(AVLNode* anAVLNode) {
-  DEBUG(FALSE, "0-LR %p %s\n", anAVLNode, printDictionary(anAVLNode));
-  anAVLNode->left = rotateLeft(anAVLNode->left);
-  DEBUG(FALSE, "1-LR %p %s\n", anAVLNode, printDictionary(anAVLNode));
-  return rotateRight(anAVLNode);
-}
-
-AVLNode* rotateRightLeft(AVLNode* anAVLNode) {
-  DEBUG(FALSE, "0-RL %p %s\n", anAVLNode, printDictionary(anAVLNode));
-  anAVLNode->right = rotateRight(anAVLNode->right);
-  DEBUG(FALSE, "1-RL %p %s\n", anAVLNode, printDictionary(anAVLNode));
-  return rotateLeft(anAVLNode);
-}
-
-AVLNode* rotateRightRight(AVLNode* anAVLNode) {
-  DEBUG(FALSE, "RR %p %s\n", anAVLNode, printDictionary(anAVLNode));
-  return rotateLeft(anAVLNode);
-}
-
-\stoptyping
+\stopCCode
 
 \starttyping
 // specs

@@ -23,6 +23,7 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/symbols.h>
 #include <joylol/dictionaries.h>
 #include <joylol/dictionaries-private.h>
 // dictionary
@@ -35,11 +36,14 @@
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/dictionaries-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/symbols}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedSymbols(lstate);
   requireStaticallyLinkedDictionaries(lstate);
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
 \stopCTest
@@ -51,6 +55,10 @@
 \addMainDocument{dictionaries.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{find.tex}
+\addSubDocument{insert.tex}
+\addSubDocument{rotate.tex}
+\addSubDocument{check.tex}
 \addSubDocument{lua.tex}
 \addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 

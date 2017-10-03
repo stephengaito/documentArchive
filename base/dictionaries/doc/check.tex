@@ -1,0 +1,122 @@
+% A ConTeXt document [master document: dictionaries.tex]
+
+\section[title=Check]
+\setCHeaderStream{private}
+
+\startCHeader
+extern void reCalculateAVLNodeHeightBalance(DictObj* anAVLNode);
+\stopCHeader
+
+\startCCode
+void reCalculateAVLNodeHeightBalance(DictObj* anAVLNode) {
+  if (!anAVLNode) return;
+
+  if (!anAVLNode->left && !anAVLNode->right) {
+    anAVLNode->height  = 1;
+    anAVLNode->balance = 0;
+  } else if (!anAVLNode->left) {
+    anAVLNode->height  =  1 + anAVLNode->right->height;
+    anAVLNode->balance = -1 - anAVLNode->right->height;
+  } else if (!anAVLNode->right) {
+    anAVLNode->height  = 1 + anAVLNode->left->height;
+    anAVLNode->balance = 1 + anAVLNode->left->height;
+  } else if (anAVLNode->left->height < anAVLNode->right->height) {
+    anAVLNode->height  = 1 + anAVLNode->right->height;
+    anAVLNode->balance = anAVLNode->left->height - anAVLNode->right->height;
+  } else {
+    anAVLNode->height  = 1 + anAVLNode->left->height;
+    anAVLNode->balance = anAVLNode->left->height - anAVLNode->right->height;
+  }
+}
+\stopCCode
+
+\startCHeader
+extern size_t deepCalculateAVLNodeHeight(DictObj* anAVLNode);
+\stopCHeader
+
+\startCCode
+size_t deepCalculateAVLNodeHeight(DictObj* anAVLNode) {
+  if (!anAVLNode) return 0;
+
+  size_t leftHeight = 1 + deepCalculateAVLNodeHeight(anAVLNode->left);
+  size_t rightHeight = 1 + deepCalculateAVLNodeHeight(anAVLNode->right);
+
+  if (leftHeight > rightHeight) return leftHeight;
+  return rightHeight;
+}
+\stopCCode
+
+\startCHeader
+extern Boolean checkAVLNode(DictObj* anAVLNode, size_t debugFlag);
+\stopCHeader
+
+\startCCode
+Boolean checkAVLNode(DictObj* anAVLNode, size_t debugFlag) {
+  if (!anAVLNode) return TRUE;
+
+  DEBUG(debugFlag, "checkAVLNode %p %ld:%zu=%zu %s\n",
+        anAVLNode, anAVLNode->balance, anAVLNode->height,
+        deepCalculateAVLNodeHeight(anAVLNode),
+        printDictionary(anAVLNode));
+
+  if (anAVLNode->left) {
+    DEBUG(debugFlag, "car>-checkAVLNode %p\n", anAVLNode);
+    checkAVLNode(anAVLNode->left, debugFlag);
+    assert(0 < strcmp(anAVLNode->symbol,
+                      anAVLNode->left->symbol));
+    DEBUG(debugFlag, "car<-checkAVLNode %p\n", anAVLNode);
+  }
+
+  if (anAVLNode->right) {
+    DEBUG(debugFlag, "cdr>-checkAVLNode %p\n", anAVLNode);
+    checkAVLNode(anAVLNode->right, debugFlag);
+    assert(strcmp(anAVLNode->symbol,
+                  anAVLNode->right->symbol) < 0);
+    DEBUG(debugFlag, "cdr<-checkAVLNode %p\n", anAVLNode);
+  }
+
+  assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
+
+  return TRUE;
+}
+\stopCCode
+
+\startCCode
+size_t printDicSize(DictObj* anAVLNode) {
+  if (!anAVLNode) return 0;
+  return printDicSize(anAVLNode->left)
+    + printDicSize(anAVLNode->right)
+    + strlen(anAVLNode->symbol) + 20;
+}
+\stopCCode
+
+\startCCode
+void printDicInto(DictObj* anAVLNode, char* buffer, size_t bufferSize) {
+  if (!anAVLNode) return;
+  strcat(buffer, "[");
+  strcat(buffer, anAVLNode->symbol);
+  strcat(buffer, "] l:( ");
+  printDicInto(anAVLNode->left, buffer, bufferSize);
+  strcat(buffer, " ) r:( ");
+  printDicInto(anAVLNode->right, buffer, bufferSize);
+  strcat(buffer, " ) ");
+}
+\stopCCode
+
+\startCHeader
+char* printDictionary(DictObj* anAVLNode);
+\stopCHeader
+
+\startCCode
+char* printDictionary(DictObj* anAVLNode) {
+//  size_t bufferSize = printDicSize(anAVLNode) + 10;
+//  char* buffer = (char*) calloc(bufferSize, sizeof(char));
+//  assert(buffer);
+//  printDicInto(anAVLNode, buffer, bufferSize);
+//  buffer[strlen(buffer)-1] = 0;
+//  return buffer;
+  return "";
+}
+\stopCCode
+
+\setCHeaderStream{public}

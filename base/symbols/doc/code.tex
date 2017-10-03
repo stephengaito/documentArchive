@@ -11,9 +11,13 @@ typedef struct symbol_object_struct {
   CoAlgObj super;
   Symbol *sym;
 } SymbolObj;
+\stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
 #define asSymbol(aObj) (((SymbolObj*)(aObj))->sym)
 \stopCHeader
+\setCHeaderStream{public}
 
 \startTestSuite[newString]
 

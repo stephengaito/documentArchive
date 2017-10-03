@@ -1,0 +1,130 @@
+% A ConTeXt document [master document: dictionaries.tex]
+
+\section[title=Insert]
+
+\setCHeaderStream{private}
+\startCHeader
+extern DictObj* insertSymbolRecurse(JoyLoLInterp* jInterp,
+                                    DictObj* anAVLNode,
+                                    Symbol* aSymbol);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+DictObj* insertSymbolRecurse(JoyLoLInterp* jInterp,
+                             DictObj* anAVLNode,
+                             Symbol* aSymbol) {
+  if (!anAVLNode) return newDict(jInterp, aSymbol);
+
+  assert(jInterp);
+
+  DEBUG(FALSE, "\ninsertSymbol %p <%s>[%s] %ld:%zu\n",
+        anAVLNode, anAVLNode->symbol, aSymbol,
+        anAVLNode->balance, anAVLNode->height);
+
+  DEBUG(FALSE, "insertSymbol strncmp %d\n",
+        strcmp(aSymbol, anAVLNode->symbol));
+
+  int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
+  if (aStrCmp < 0) {
+    // aSymbol < anAVLNode->symbol // insert in LEFT subtree
+    DEBUG(FALSE, ">-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          printDictionary(anAVLNode));
+    DictObj* leftResult =
+      insertSymbolRecurse(jInterp, anAVLNode->left, aSymbol);
+    assert(leftResult);
+    if (!anAVLNode->left) {
+      // we have inserted a new node ...
+      // ... insert this new node into the doubly linked list
+      //
+      DictObj* oldPrevious               = anAVLNode->previous;
+      assert(jInterp->dict.firstSymbol);
+      if (oldPrevious) oldPrevious->next = leftResult;
+      else jInterp->dict.firstSymbol     = leftResult;
+      leftResult->next                   = anAVLNode;
+      leftResult->previous               = oldPrevious;
+      anAVLNode->previous                = leftResult;
+      //
+    }
+    anAVLNode->left = leftResult;
+    reCalculateAVLNodeHeightBalance(anAVLNode);
+    DEBUG(FALSE, "<-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          printDictionary(anAVLNode));
+    //
+    if (2 < anAVLNode->balance) {
+      assert(anAVLNode->left);
+      if (strcmp(aSymbol, anAVLNode->left->symbol) < 0) {
+        anAVLNode = rotateLeftLeft(anAVLNode);
+      } else {
+        anAVLNode = rotateLeftRight(anAVLNode);
+      }
+    }
+  } else if (0 < aStrCmp) {
+    // aSymbol > anAVLNode->symbol // insert in RIGHT subtree
+    DEBUG(FALSE, ">-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+        anAVLNode, aSymbol, anAVLNode->balance,
+        anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+        printDictionary(anAVLNode));
+    DictObj* rightResult =
+      insertSymbolRecurse(jInterp, anAVLNode->right, aSymbol);
+    if (!anAVLNode->right) {
+      // we have inserted a new node ...
+      // ... insert this new node into the doubly linked list
+      //
+      DictObj* oldNext               = anAVLNode->next;
+      if (oldNext) oldNext->previous = rightResult;
+      rightResult->previous          = anAVLNode;
+      rightResult->next              = oldNext;
+      anAVLNode->next                = rightResult;
+      //
+    }
+    anAVLNode->right = rightResult;
+    reCalculateAVLNodeHeightBalance(anAVLNode);
+    DEBUG(FALSE, "<-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+        anAVLNode, aSymbol, anAVLNode->balance,
+        anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+        printDictionary(anAVLNode));
+    //
+    if (anAVLNode->balance < -2) {
+      assert(anAVLNode->right);
+      if (strcmp(aSymbol, anAVLNode->right->symbol) > 0) {
+        anAVLNode = rotateRightRight(anAVLNode);
+      } else {
+        anAVLNode = rotateRightLeft(anAVLNode);
+      }
+    }
+  } else {
+    // aSymbol == anAVLNode->symbol // nothing to do...
+    DEBUG(FALSE,"symols equal <%s>[%s]\n",
+          anAVLNode->symbol, aSymbol);
+  }
+
+  reCalculateAVLNodeHeightBalance(anAVLNode);
+  return anAVLNode;
+}
+\stopCCode
+
+\startCHeader
+extern DictObj* insertSymbol(JoyLoLInterp* jInterp, Symbol* aSymbol);
+\stopCHeader
+
+\startCCode
+DictObj* insertSymbol(JoyLoLInterp* jInterp, Symbol* aSymbol) {
+  assert(aSymbol);
+  assert(jInterp);
+
+  // lazy initialization
+  if (!jInterp->dict.root) {
+    DictObj* firstNode = newDict(jInterp, aSymbol);
+    jInterp->dict.root        = firstNode;
+    jInterp->dict.firstSymbol = firstNode;
+    return firstNode;
+  }
+
+  return insertSymbolRecurse(jInterp, jInterp->dict.root, aSymbol);
+}
+\stopCCode
