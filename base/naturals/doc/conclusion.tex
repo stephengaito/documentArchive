@@ -1,0 +1,72 @@
+% A ConTeXt document [master document: symbols.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_NATURALS}
+\createCHeaderFile%
+  {public}
+  {joylol/naturals.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_NATURALS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/naturals-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <gmp.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/naturals.h>
+#include <joylol/naturals-private.h>
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {naturals.c}%
+  {}
+
+\addCTestInclude{<gmp.h>}
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/booleans.h>}
+\addCTestInclude{<joylol/naturals.h>}
+\addCTestInclude{<joylol/naturals-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/booleans}
+\addCTestLib{-lgmp}
+\CTestsSetup\
+\startCTest
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedBooleans(lstate);
+  requireStaticallyLinkedNaturals(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+\stopCTest
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{naturals.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{words.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{install}
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

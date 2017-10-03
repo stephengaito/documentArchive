@@ -1,0 +1,265 @@
+% A ConTeXt document [master document: symbols.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\startCHeader
+typedef mpz_t Natural;
+
+typedef struct natural_object_struct {
+  CoAlgObj super;
+  Natural  natural;
+} NaturalObj;
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+#define asNatural(aObj) (((NaturalObj*)(aObj))->natural)
+\stopCHeader
+\setCHeaderStream{public}
+
+\startTestSuite[newNatural]
+
+\startCHeader
+CoAlgObj* newNatural(JoyLoLInterp* jInterp, Symbol* aNatural);
+\stopCHeader
+
+\startCCode
+CoAlgObj* newNatural(JoyLoLInterp* jInterp, Symbol* aNatural) {
+  assert(aNatural);
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  CoAlgObj* result = newObject(jInterp, NaturalsTag);
+  assert(result);
+  result->type     = jInterp->coAlgs[NaturalsTag].sClass;
+  result->tag      = NaturalsTag;
+  result->flags    = 0;
+  if (aNatural) {
+    long success = mpz_set_str(asNatural(result), aNatural, 0);
+    assert(success == 0);
+  } else mpz_init(asNatural(result));
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create some new naturals]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+
+  const char* testNum = "12345";
+  CoAlgObj* aNewNat = newNatural(jInterp, testNum);
+  AssertPtrNotNull(aNewNat);
+  AssertPtrNotNull(aNewNat->type);
+  AssertIntEquals(aNewNat->tag, NaturalsTag);
+  AssertIntTrue(isAtom(aNewNat));
+  AssertIntFalse(isPair(aNewNat));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[isNatural]
+
+\startCHeader
+extern Boolean isNatural(CoAlgObj *aLoL);
+\stopCHeader
+
+\startCCode
+Boolean isNatural(CoAlgObj *aLoL) {
+  if (aLoL &&
+      aLoL->type &&
+      (aLoL->tag == NaturalsTag)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+\stopCCode
+
+\startTestCase[should return true if a natural]
+
+\startCTest
+  CoAlgObj *aNat = newNatural(jInterp, "12345");
+  AssertIntTrue(isNatural(aNat));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if not a symbol]
+\startCTest
+  AssertIntFalse(isNatural(NULL));
+  CoAlgObj *aObj = newObject(jInterp, BooleansTag);
+  AssertIntFalse(isNatural(aObj));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[natural equality]
+
+\setCHeaderStream{private}
+\startCHeader
+Boolean equalityNatCoAlgDebug(
+  CoAlgObj* lolA,
+  CoAlgObj* lolB,
+  Boolean debugFlag
+);
+
+#define equalityNatCoAlg(lolA, lolB) \
+  equalityNatCoAlgDebug(lolA, lolB, FALSE)
+\stopCHeader
+
+\startCCode
+Boolean equalityNatCoAlgDebug(CoAlgObj* lolA, CoAlgObj* lolB,
+                              size_t debugFlag) {
+  DEBUG(debugFlag, "natCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (lolA->type != lolB->type) return FALSE;
+  if (lolA->tag != NaturalsTag) return FALSE;
+  if (mpz_cmp(asNatural(lolA), asNatural(lolB)) != 0) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should return true if naturals are equal]
+
+\startCTest
+  AssertIntTrue(equalityNatCoAlg(NULL, NULL));
+  CoAlgObj *natA = newNatural(jInterp, "12345");
+  CoAlgObj *natB = newNatural(jInterp, "12345");
+  AssertIntTrue(equalityNatCoAlg(natA, natB));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if symbols are not equal]
+
+\startCTest
+  CoAlgObj *natA = newNatural(jInterp, "12346");
+  CoAlgObj *natB = newNatural(jInterp, "12345");
+  AssertIntFalse(equalityNatCoAlg(NULL, natB));
+  AssertIntFalse(equalityNatCoAlg(natA, NULL));
+  AssertIntFalse(equalityNatCoAlg(natA, natB));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+
+\startTestSuite[printing symbols]
+
+\startCHeader
+extern size_t printSizeNatCoAlg(CoAlgObj* aLoL, Boolean debugFlag);
+\stopCHeader
+
+\startCCode
+size_t printSizeNatCoAlg(CoAlgObj* aLoL, Boolean debugFlag) {
+  DEBUG(debugFlag, "natCoAlg-printSize: %p\n", aLoL);
+  assert(aLoL);
+  assert(aLoL->type);
+  assert(aLoL->tag == NaturalsTag);
+
+  char* mpztoa;
+  mpztoa = NULL;
+  long numChars = gmp_asprintf(&mpztoa, "%Zd ", asNatural(aLoL));
+  assert(0 < numChars);
+  DEBUG(debugFlag, "natCoAlg-printSize: nat[%s](%zu) %p\n",
+        mpztoa, (size_t)numChars, aLoL);
+  free(mpztoa);
+  return numChars;
+}
+\stopCCode
+
+\startCHeader
+extern Boolean printStrNatCoAlg(CoAlgObj* aLoL,
+                                char* buffer, size_t bufferSize);
+\stopCHeader
+
+\startCCode
+Boolean printStrNatCoAlg(CoAlgObj* aLoL,
+                         char* buffer, size_t bufferSize) {
+  assert(aLoL);
+  assert(aLoL->type);
+  assert(aLoL->tag == NaturalsTag);
+
+  char* mpztoa;
+  mpztoa = NULL;
+  long numChars = gmp_asprintf(&mpztoa, "%Zd ", asNatural(aLoL));
+  assert(0 < numChars);
+  strcat(buffer, mpztoa);
+  free(mpztoa);
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print symbols]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[NaturalsTag].sClass);
+
+  const char* testNum = "12345 ";
+  CoAlgObj* aNewNat = newNatural(jInterp, testNum);
+  AssertPtrNotNull(aNewNat);
+  AssertIntEquals(printSizeNatCoAlg(aNewNat, FALSE), strlen(testNum));
+  char buffer[100];
+  buffer[0] = 0;
+  printStrNatCoAlg(aNewNat, buffer, 100);
+  AssertStrEquals(buffer, testNum);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerSymbols]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerNaturals(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerNaturals(JoyLoLInterp* jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = "Naturals";
+  theCoAlg->objectSize   = sizeof(NaturalObj);
+  theCoAlg->registerFunc = registerNaturals;
+  theCoAlg->equalityFunc = equalityNatCoAlgDebug;
+  theCoAlg->printSize    = printSizeNatCoAlg;
+  theCoAlg->printStr     = printStrNatCoAlg;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  
+  // sanity check...
+  assert(tag == NaturalsTag);
+  assert(jInterp->coAlgs[tag].sClass);
+
+  registerNaturalWords(jInterp);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Naturals coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerSymbols
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(jInterp->coAlgs[NaturalsTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[NaturalsTag].sClass;
+  AssertIntTrue(registerNaturals(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs[NaturalsTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[NaturalsTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[NaturalsTag].sClass->objectSize,
+    sizeof(NaturalObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite
