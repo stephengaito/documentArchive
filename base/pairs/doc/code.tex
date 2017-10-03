@@ -6,11 +6,13 @@
 \dependsOn[jInterps]
 %\dependsOn[context]
 
-\startJoyLoLWord[isAPair]
-
-\preDataStack[aPair][]
-
-\stopJoyLoLWord
+\startCHeader
+typedef struct pairs_object_struct {
+  CoAlgObj  super;
+  CoAlgObj* car;
+  CoAlgObj* cdr;
+} PairsObj;
+\stopCHeader
 
 \startTestSuite[registerPairs]
 
@@ -26,6 +28,7 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = strdup("Pairs");
+  theCoAlg->objectSize   = sizeof(PairsObj);
   theCoAlg->registerFunc = registerPairs;
   theCoAlg->equalityFunc = pairsEqualDebug;
   theCoAlg->printFunc    = NULL;
@@ -34,14 +37,8 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   
   // sanity check...
   assert(tag == PairsTag);
-  assert(jInterp->coAlgs.vec[tag]);
-  assert(jInterp->coAlgs.vec[tag]->isA == PairsTag);
-  
-  // check to see if this theCoAlg has been used
-  if (theCoAlg->isA == UnusedTag) {
-    free(theCoAlg);
-  }
-  
+  assert(jInterp->coAlgs[tag].sClass);
+    
   registerPairsWords(jInterp);
   
   return TRUE;
@@ -54,12 +51,15 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   // CTestSetup has already created a jInterp
   // and run registerPairs
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs.vec[PairsTag]);
-  CoAlgebra *coAlg = jInterp->coAlgs.vec[PairsTag];
+  AssertPtrNotNull(jInterp->coAlgs[PairsTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[PairsTag].sClass;
   AssertIntTrue(registerPairs(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs.vec[PairsTag]);
-  AssertPtrEquals(jInterp->coAlgs.vec[PairsTag], coAlg);
-  AssertIntEquals(jInterp->coAlgs.vec[PairsTag]->isA, PairsTag);
+  AssertPtrNotNull(jInterp->coAlgs[PairsTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[PairsTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[PairsTag].sClass->objectSize,
+    sizeof(PairsObj)
+  );
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -67,29 +67,30 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
 \startTestSuite[newPair]
 
 \startCHeader
-extern CoAlgHandle* newPair(
+extern CoAlgObj* newPair(
   JoyLoLInterp* jInterp,
-  CoAlgHandle* car,
-  CoAlgHandle* cdr
+  CoAlgObj* car,
+  CoAlgObj* cdr
 );
 
-#define asCar(aLoL) ((aLoL)->data.pairs.car)
-#define asCdr(aLoL) ((aLoL)->data.pairs.cdr)
+#define asCar(aLoL) (((PairsObj*)(aLoL))->car)
+#define asCdr(aLoL) (((PairsObj*)(aLoL))->cdr)
 \stopCHeader
 
 \startCCode
-CoAlgHandle* newPair(
+CoAlgObj* newPair(
   JoyLoLInterp* jInterp,
-  CoAlgHandle* car,
-  CoAlgHandle* cdr
+  CoAlgObj* car,
+  CoAlgObj* cdr
 ) {
   assert(jInterp);
-  CoAlgHandle* result = newHandle(jInterp);
+  CoAlgObj* result = newObject(jInterp, PairsTag);
   assert(result);
-  result->type        = jInterp->coAlgs.vec[PairsTag];
-  result->flags       = 0;
-  asCar(result)       = car;
-  asCdr(result)       = cdr;
+  result->type  = jInterp->coAlgs[PairsTag].sClass;
+  result->tag   = PairsTag;
+  result->flags = 0;
+  asCar(result) = car;
+  asCdr(result) = cdr;
   return result;
 }
 \stopCCode
@@ -100,10 +101,11 @@ CoAlgHandle* newPair(
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
   AssertPtrNotNull(jInterp);
   
-  CoAlgHandle *lolA = newPair(jInterp, NULL, NULL);
-  CoAlgHandle *lolB = newPair(jInterp, NULL, NULL);
-  CoAlgHandle *lol  = newPair(jInterp, lolA, lolB);
-  AssertPtrEquals(lol->type, jInterp->coAlgs.vec[PairsTag]);
+  CoAlgObj *lolA = newPair(jInterp, NULL, NULL);
+  CoAlgObj *lolB = newPair(jInterp, NULL, NULL);
+  CoAlgObj *lol  = newPair(jInterp, lolA, lolB);
+  AssertPtrEquals(lol->type, jInterp->coAlgs[PairsTag].sClass);
+  AssertIntEquals(lol->tag, PairsTag);
   AssertIntZero(lol->flags);
   AssertPtrEquals(asCar(lol), lolA);
   AssertPtrEquals(asCdr(lol), lolB);  
@@ -114,20 +116,20 @@ CoAlgHandle* newPair(
 \startTestSuite[car and cdr]
 
 \startCHeader
-extern CoAlgHandle* car(CoAlgHandle* aLoL);
-extern CoAlgHandle* cdr(CoAlgHandle* aLoL);
+extern CoAlgObj* car(CoAlgObj* aLoL);
+extern CoAlgObj* cdr(CoAlgObj* aLoL);
 \stopCHeader
 
 \startCCode
-CoAlgHandle* car(CoAlgHandle* aLoL) {
+CoAlgObj* car(CoAlgObj* aLoL) {
   if (!aLoL) return NULL;
-  if (aLoL->type && (aLoL->type->isA != PairsTag)) return aLoL;
+  if (aLoL->type && (aLoL->tag != PairsTag)) return aLoL;
   return asCar(aLoL);
 }
 
-CoAlgHandle* cdr(CoAlgHandle* aLoL) {
+CoAlgObj* cdr(CoAlgObj* aLoL) {
   if (!aLoL) return NULL;
-  if (aLoL->type && (aLoL->type->isA != PairsTag)) return NULL;
+  if (aLoL->type && (aLoL->tag != PairsTag)) return NULL;
   return asCdr(aLoL);
 }
 \stopCCode
@@ -135,9 +137,9 @@ CoAlgHandle* cdr(CoAlgHandle* aLoL) {
 \startTestCase[should return the car and cdr]
 
 \startCTest
-  CoAlgHandle *pairA = newPair(jInterp, NULL, NULL);
-  CoAlgHandle *pairB = newPair(jInterp, NULL, NULL);
-  CoAlgHandle *aPair = newPair(jInterp, pairA, pairB);
+  CoAlgObj *pairA = newPair(jInterp, NULL, NULL);
+  CoAlgObj *pairB = newPair(jInterp, NULL, NULL);
+  CoAlgObj *aPair = newPair(jInterp, pairA, pairB);
   AssertPtrEquals(car(aPair), pairA);
   AssertPtrEquals(cdr(aPair), pairB);
 \stopCTest
@@ -147,16 +149,16 @@ CoAlgHandle* cdr(CoAlgHandle* aLoL) {
 \startTestSuite[copyPair]
 
 \startCHeader
-extern CoAlgHandle* copyPair(
+extern CoAlgObj* copyPair(
   JoyLoLInterp* jInterp,
-  CoAlgHandle* aLoL
+  CoAlgObj* aLoL
 );
 \stopCHeader
 
 \startCCode
-CoAlgHandle* copyPair(
+CoAlgObj* copyPair(
   JoyLoLInterp* jInterp,
-  CoAlgHandle* aLoL
+  CoAlgObj* aLoL
 ) {
   assert(jInterp);
   if (!aLoL) return NULL;
@@ -172,18 +174,18 @@ CoAlgHandle* copyPair(
 \startTestCase[should make a correct copy]
 
 \startCTest
-  CoAlgHandle *bool   = newBoolean(jInterp, TRUE);
-  CoAlgHandle *pairA  = newPair(jInterp, bool, NULL);
-  CoAlgHandle *pairB  = newPair(jInterp, pairA, bool);
-  CoAlgHandle *aPair0 = newPair(jInterp, pairA, pairB);
-  CoAlgHandle *aPair1 = copyPair(jInterp, aPair0);
+  CoAlgObj *bool   = newBoolean(jInterp, TRUE);
+  CoAlgObj *pairA  = newPair(jInterp, bool, NULL);
+  CoAlgObj *pairB  = newPair(jInterp, pairA, bool);
+  CoAlgObj *aPair0 = newPair(jInterp, pairA, pairB);
+  CoAlgObj *aPair1 = copyPair(jInterp, aPair0);
   AssertPtrNotNull(bool);
   AssertPtrNotNull(pairA);
   AssertPtrNotNull(pairB);
   AssertPtrNotNull(aPair0);
   AssertPtrNotNull(aPair1);
   AssertPtrNotNull(aPair1->type);
-  AssertPtrEquals(aPair1->type, jInterp->coAlgs.vec[PairsTag]);
+  AssertPtrEquals(aPair1->type, jInterp->coAlgs[PairsTag].sClass);
 
   AssertPtrNotNull(asCar(aPair1));
   AssertPtrNotEquals(asCar(aPair1), pairA);
@@ -214,8 +216,8 @@ CoAlgHandle* copyPair(
 
 \startCHeader
 extern Boolean pairsEqualDebug(
-  CoAlgHandle* lolA,
-  CoAlgHandle* lolB,
+  CoAlgObj* lolA,
+  CoAlgObj* lolB,
   Boolean debugFlag
 );
 #define pairsEqual(lolA, lolB) pairsEqualDebug(lolA, lolB, FALSE)
@@ -223,8 +225,8 @@ extern Boolean pairsEqualDebug(
 
 \startCCode
 Boolean pairsEqualDebug(
-  CoAlgHandle* lolA,
-  CoAlgHandle* lolB,
+  CoAlgObj* lolA,
+  CoAlgObj* lolB,
   Boolean debugFlag
 ) {
   DEBUG(debugFlag, "pairsEqual %p %p\n", lolA, lolB);
@@ -232,7 +234,7 @@ Boolean pairsEqualDebug(
   if (!lolA || !lolB) return FALSE;
   if (lolA->type != lolB->type) return FALSE;
   if (lolA->type && 
-      (lolA->type->isA != PairsTag)) {
+      (lolA->tag != PairsTag)) {
     return (lolA->type->equalityFunc)(lolA, lolB, debugFlag);
   }
   
@@ -245,8 +247,8 @@ Boolean pairsEqualDebug(
 
 \startTestCase[should return true if pairs are equal]
 \startCTest
-  CoAlgHandle *pairA = newPair(jInterp, NULL, NULL);
-  CoAlgHandle *pairB = newPair(jInterp, NULL, NULL);
+  CoAlgObj *pairA = newPair(jInterp, NULL, NULL);
+  CoAlgObj *pairB = newPair(jInterp, NULL, NULL);
   AssertIntTrue(pairsEqual(NULL, NULL));
   AssertIntTrue(pairsEqual(pairA, pairB));
   // need to test with NON-Pairs
@@ -255,8 +257,8 @@ Boolean pairsEqualDebug(
 
 \startTestCase[should return false if pairs are not equal]
 \startCTest
-  CoAlgHandle *pairA = newPair(jInterp, NULL,  NULL);
-  CoAlgHandle *pairB = newPair(jInterp, pairA, NULL);
+  CoAlgObj *pairA = newPair(jInterp, NULL,  NULL);
+  CoAlgObj *pairB = newPair(jInterp, pairA, NULL);
   AssertIntFalse(pairsEqual(pairA, pairB));
   // need to test with NON-Pairs
 \stopCTest
@@ -302,7 +304,7 @@ Boolean pairsEqualDebug(
 #include "joyLoL/printer.h"
 
 static size_t equalityPairsCoAlg(CoAlgebra* klass,
-                                CoAlgHandle* lolA, CoAlgHandle* lolB,
+                                CoAlgObj* lolA, CoAlgObj* lolB,
                                 size_t debugFlag) {
   DEBUG(debugFlag, "pairsCoAlg-equal klass:%p a:%p b:%p\n", klass, lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -316,7 +318,7 @@ static size_t equalityPairsCoAlg(CoAlgebra* klass,
   return areEqual;
 }
 
-static size_t printSizePairsCoAlg(CoAlgHandle* aLoL, size_t debugFlag) {
+static size_t printSizePairsCoAlg(CoAlgObj* aLoL, size_t debugFlag) {
   DEBUG(debugFlag, "pairsCoAlg-printSize: > %p\n", aLoL);
   assert(aLoL);
   assert(aLoL->coAlg);
@@ -336,7 +338,7 @@ static size_t printSizePairsCoAlg(CoAlgHandle* aLoL, size_t debugFlag) {
   return lolSize;
 }
 
-static size_t printStrPairsCoAlg(CoAlgHandle* aLoL,
+static size_t printStrPairsCoAlg(CoAlgObj* aLoL,
                                  char* buffer, size_t bufferSize) {
   assert(aLoL);
   assert(aLoL->coAlg);
@@ -374,7 +376,7 @@ void Test_printPairs(CuTest* tc) {
   CuAssertPtrNotNull(tc, coAlgs);
   CuAssertPtrNotNull(tc, coAlgs->pairs);
 
-  CoAlgHandle* aNewPair = newPair(coAlgs,
+  CoAlgObj* aNewPair = newPair(coAlgs,
                                newPair(coAlgs, NULL, NULL),
                                newPair(coAlgs, NULL, NULL));
   CuAssertPtrNotNull(tc, aNewPair);
