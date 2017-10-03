@@ -75,36 +75,88 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
 \stopTestCase
 \stopTestSuite
 
+\startTestSuite[newDict]
+
+\startCHeader
+extern DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym);
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+#define asSymbol(aNode)   ((DictObj*)(aNode))->symbol
+#define asPreObs(aNode)   ((DictObj*)(aNode))->preObs
+#define asValue(aNode)    ((DictObj*)(aNode))->value
+#define asPostObs(aNode)  ((DictObj*)(aNode))->postObs
+#define asLeft(aNode)     ((DictObj*)(aNode))->left
+#define asRight(aNode)    ((DictObj*)(aNode))->right
+#define asPrevious(aNode) ((DictObj*)(aNode))->previous
+#define asNext(aNode)     ((DictObj*)(aNode))->next
+#define asHeight(aNode)   ((DictObj*)(aNode))->height
+#define asBalance(aNode)  ((DictObj*)(aNode))->balance
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+// We implement our dictionary as an AVL binary tree using AVLNodes.
+//
+// Our implementation is inspired by:
+// The Crazy Programmer's "Program for AVL Tree in C" (Neeraj Mishra)
+// http://www.thecrazyprogrammer.com/2014/03/c-program-for-avl-tree-implementation.html
+// and by:
+// Jianye Hao's CSC2100B Tutorial 4 "Binary and AVL Trees in C"
+// https://www.cse.cuhk.edu.hk/irwin.king/_media/teaching/csc2100b/tu4.pdf
+//
+// At the moment we only insert and search (we never delete).
+//
+// ANY AVLTree node can be the root of a new dictionary.
+//
+
+DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  assert(DictionariesTag < jInterp->numCoAlgs);
+  assert(jInterp->coAlgs[DictionariesTag].sClass);
+  
+  assert(aSym);
+  
+  DEBUG(FALSE, "newAVLNode [%s]\n", aSym);
+  CoAlgObj* newNode   = newObject(jInterp, DictionariesTag);
+  asSymbol(newNode)   = strdup(aSym);
+  asPreObs(newNode)   = NULL;
+  asValue(newNode)    = NULL;
+  asPostObs(newNode)  = NULL;
+  asLeft(newNode)     = NULL;
+  asRight(newNode)    = NULL;
+  asPrevious(newNode) = NULL;
+  asNext(newNode)     = NULL;
+  asHeight(newNode)   = 1;
+  asBalance(newNode)  = 0;
+  return (DictObj*)newNode;
+}
+\stopCCode
+
+\startTestCase[should add a new dict object (AVL node)]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
+
+  DictObj* aNode = newDict(jInterp, "aNodeSymbol");
+  AssertPtrNotNull(aNode);
+  AssertPtrNotNull(asSymbol(aNode));
+  AssertStrEquals(asSymbol(aNode), "aNodeSymbol");
+  AssertPtrNull(asValue(aNode));
+  AssertPtrNull(asLeft(aNode));
+  AssertPtrNull(asRight(aNode));
+  AssertPtrNull(asPrevious(aNode));
+  AssertPtrNull(asNext(aNode));
+  AssertIntEquals(asHeight(aNode), 1);
+  AssertIntEquals(asBalance(aNode), 0);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
 \starttyping
-#ifndef JOYLOL_DICTIONARY_H
-#define JOYLOL_DICTIONARY_H
-
-typedef struct pair_atom_struct PairAtom;
-typedef struct coalgebras_struct CoAlgebras;
-typedef struct dictionary_struct Dictionary;
-typedef struct avl_node_struct AVLNode;
-
-typedef struct avl_node_struct {
-  const char* symbol;
-  PairAtom*   preObs;
-  PairAtom*   value;
-  PairAtom*   postObs;
-  AVLNode*    left;
-  AVLNode*    right;
-  AVLNode*    previous;
-  AVLNode*    next;
-  size_t      height;
-  long        balance;
-} AVLNode;
-
-typedef struct dictionary_struct {
-  AVLNode*    dicRoot;
-  AVLNode*    firstSymbol;
-} Dictionary;
-
-extern Dictionary* createDictionary(void);
-
-extern AVLNode* newAVLNode(const char* aSymbol);
 
 extern AVLNode* findSymbol(Dictionary* aDic, const char* aSymbol);
 
@@ -171,48 +223,6 @@ extern char* printDictionary(AVLNode* anAVLNode);
 #include "joyLoL/dictionary.h"
 #include "joyLoL/dictionary_private.h"
 #include "joyLoL/printer.h"
-
-// We implement our dictionary as an AVL binary tree using AVLNodes.
-//
-// Our implementation is inspired by:
-// The Crazy Programmer's "Program for AVL Tree in C" (Neeraj Mishra)
-// http://www.thecrazyprogrammer.com/2014/03/c-program-for-avl-tree-implementation.html
-// and by:
-// Jianye Hao's CSC2100B Tutorial 4 "Binary and AVL Trees in C"
-// https://www.cse.cuhk.edu.hk/irwin.king/_media/teaching/csc2100b/tu4.pdf
-//
-// At the moment we only insert and search (we never delete).
-//
-// ANY AVLTree node can be the root of a new dictionary.
-//
-
-Dictionary* createDictionary(void) {
-  Dictionary* aDic = (Dictionary*) calloc(1, sizeof(Dictionary));
-  assert(aDic);
-
-  // we now initialize lazily in the insertSymbol method
-  aDic->dicRoot     = NULL;
-  aDic->firstSymbol = NULL;
-
-  return aDic;
-}
-
-AVLNode* newAVLNode(const char* aSymbol) {
-  assert(aSymbol);
-  DEBUG(FALSE, "newAVLNode [%s]\n", aSymbol);
-  AVLNode* newNode  = (AVLNode*) calloc(1, sizeof(AVLNode));
-  newNode->symbol   = strdup(aSymbol);
-  newNode->preObs   = NULL;
-  newNode->value    = NULL;
-  newNode->postObs  = NULL;
-  newNode->left     = NULL;
-  newNode->right    = NULL;
-  newNode->previous = NULL;
-  newNode->next     = NULL;
-  newNode->height   = 1;
-  newNode->balance  = 0;
-  return newNode;
-}
 
 AVLNode* createSymbol(Dictionary* aDic, const char* aSymbol) {
   assert(aDic);
@@ -708,6 +718,371 @@ AVLNode* rotateRightLeft(AVLNode* anAVLNode) {
 AVLNode* rotateRightRight(AVLNode* anAVLNode) {
   DEBUG(FALSE, "RR %p %s\n", anAVLNode, printDictionary(anAVLNode));
   return rotateLeft(anAVLNode);
+}
+
+\stoptyping
+
+\starttyping
+// specs
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include "CuTest.h"
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/dictionary.h"
+#include "joyLoL/dictionary_private.h"
+#include "joyLoL/printer.h"
+
+// suiteName: - Dictionary tests -
+
+void Test_findSymbolInEmptyDictionary(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  CuAssertPtrNull(tc, findSymbolRecurse(aDic, NULL, "aSymbol"));
+}
+
+void Test_findSymbolInNonEmptyDictionary(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  AVLNode* aNode = newAVLNode("aNodeSymbol");
+  CuAssertPtrNotNull(tc, aNode);
+  AVLNode* foundAPair = findSymbolRecurse(aDic, aNode, "aNodeSymbol");
+  CuAssertPtrNotNull(tc, foundAPair);
+  CuAssertStrEquals(tc, foundAPair->symbol, "aNodeSymbol");
+}
+
+void Test_findSymbolNotInDictionary(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  AVLNode* aSimpleDic = newAVLNode("aNodeSymbol");
+  CuAssertPtrNotNull(tc, aSimpleDic);
+  CuAssertPtrNull(tc, findSymbolRecurse(aDic, aSimpleDic, "aSymbol"));
+}
+
+void Test_AVLNodeHeight(CuTest* tc) {
+  AVLNode* aNode = newAVLNode("20");
+  CuAssertPtrNotNull(tc, aNode);
+  CuAssertStrEquals(tc, printDictionary(aNode),
+  "[20] l:(  ) r:(  )");
+
+  CuAssertIntEquals(tc, aNode->height, 1);
+  reCalculateAVLNodeHeightBalance(aNode);
+  CuAssertIntEquals(tc, aNode->height, 1);
+  CuAssertIntEquals(tc, aNode->balance, 0);
+
+  aNode->left = newAVLNode("15");
+  CuAssertStrEquals(tc, printDictionary(aNode),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  )");
+  reCalculateAVLNodeHeightBalance(aNode);
+  CuAssertIntEquals(tc, aNode->height, 2);
+  CuAssertIntEquals(tc, aNode->balance, 2);
+
+  aNode->right = newAVLNode("25");
+  CuAssertStrEquals(tc, printDictionary(aNode),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  )");
+  reCalculateAVLNodeHeightBalance(aNode);
+  CuAssertIntEquals(tc, aNode->height, 2);
+  CuAssertIntEquals(tc, aNode->balance, 0);
+}
+
+void Test_insertSymbolInDictionary(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  AVLNode* aSimpleDic = newAVLNode("aNodeSymbol");
+  AVLNode* aNewDic = insertSymbolRecurse(aDic, aSimpleDic, "aNodeSymbol");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertPtrEquals(tc, aSimpleDic, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[aNodeSymbol] l:(  ) r:(  )");
+  CuAssertPtrNull(tc, aNewDic->next);
+  CuAssertPtrNull(tc, aNewDic->previous);
+  CuAssertTrue(tc, aDic->firstSymbol != aNewDic);
+  CuAssertTrue(tc, aDic->firstSymbol != aSimpleDic);
+}
+
+void Test_insertSymbolNotInDictionary(CuTest* tc) {
+  DEBUG(FALSE, "\n%s insert many symbols %s", "---------", "---------");
+
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  AVLNode* aSimpleDic = newAVLNode("20");
+  aDic->dicRoot     = aSimpleDic;
+  aDic->firstSymbol = aSimpleDic;
+
+  AVLNode* aNewDic = insertSymbolRecurse(aDic, aSimpleDic, "15");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertPtrEquals(tc, aSimpleDic, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  )");
+  //
+  // test insertion on the left into doubly linked list
+  //
+  CuAssertPtrNotNull(tc, aNewDic->previous);
+  CuAssertPtrNull(tc, aNewDic->next);
+  CuAssertPtrEquals(tc, aDic->firstSymbol, aNewDic->previous);
+  CuAssertPtrEquals(tc, aDic->firstSymbol->next, aNewDic);
+  CuAssertPtrNull(tc, aDic->firstSymbol->previous);
+  CuAssertPtrNull(tc, aNewDic->next);
+
+  // should invoke an LL
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "10");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  )");
+  //
+  // test insertion on the right into doubly linked list
+  // as well as a rotate right
+  //
+  CuAssertPtrNotNull(tc, aNewDic->previous);
+  CuAssertPtrNotNull(tc, aNewDic->next);
+  CuAssertPtrEquals(tc, aDic->firstSymbol, aNewDic->previous);
+  CuAssertPtrEquals(tc, aDic->firstSymbol->next, aNewDic);
+  CuAssertStrEquals(tc, aDic->firstSymbol->symbol, "10");
+  CuAssertStrEquals(tc, aNewDic->next->symbol, "20");
+  CuAssertPtrEquals(tc, aNewDic->next->previous, aNewDic);
+  CuAssertPtrNull(tc, aNewDic->next->next);
+
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "30");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [30] l:(  ) r:(  )  )  )");
+
+  // should invoke an RR
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "35");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [20] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  )");
+
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "25");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [20] l:(  ) r:( [25] l:(  ) r:(  )  )  ) r:( [35] l:(  ) r:(  )  )  )");
+
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "23");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [23] l:( [20] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  )  ) r:( [35] l:(  ) r:(  )  )  )");
+
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "22");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[23] l:( [15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [22] l:(  ) r:(  )  )  )  ) r:( [30] l:( [25] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  )");
+
+  // now try and find all of the symbols...
+  AVLNode* aNode = findSymbolRecurse(aDic, aNewDic, "15");
+  CuAssertPtrNotNull(tc, aNode);
+  CuAssertStrEquals(tc, aNode->symbol, "15");
+
+  aNode = findSymbolRecurse(aDic, aNewDic, "20");
+  CuAssertPtrNotNull(tc, aNode);
+  CuAssertStrEquals(tc, aNode->symbol, "20");
+
+  aNode = findSymbolRecurse(aDic, aNewDic, "23");
+  CuAssertPtrNotNull(tc, aNode);
+  CuAssertStrEquals(tc, aNode->symbol, "23");
+
+  checkAVLNode(aNewDic, FALSE);
+}
+
+void Test_insertSymbol_LL(CuTest* tc) {
+  DEBUG(FALSE, "\n%s should invoke an LL %s\n", "---------", "---------");
+
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  AVLNode* aSimpleDic = newAVLNode("20");
+  aDic->dicRoot     = aSimpleDic;
+  aDic->firstSymbol = aSimpleDic;
+
+  AVLNode* aNewDic = insertSymbolRecurse(aDic, aSimpleDic, "15");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertPtrEquals(tc, aSimpleDic, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  )");
+
+  // should invoke an LL
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "10");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  )");
+}
+
+void Test_insertSymbol_RR(CuTest* tc) {
+  DEBUG(FALSE, "\n%s should invoke an RR %s\n", "---------", "---------");
+
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  AVLNode* aSimpleDic = newAVLNode("20");
+  aDic->dicRoot     = aSimpleDic;
+  aDic->firstSymbol = aSimpleDic;
+
+  AVLNode* aNewDic = insertSymbolRecurse(aDic, aSimpleDic, "25");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertPtrEquals(tc, aSimpleDic, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[20] l:(  ) r:( [25] l:(  ) r:(  )  )");
+
+  // should invoke an RR
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "30");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[25] l:( [20] l:(  ) r:(  )  ) r:( [30] l:(  ) r:(  )  )");
+
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "35");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[25] l:( [20] l:(  ) r:(  )  ) r:( [30] l:(  ) r:( [35] l:(  ) r:(  )  )  )");
+}
+
+void Test_insertSymbol_LR(CuTest* tc) {
+  DEBUG(FALSE, "\n%s should invoke an LR %s\n", "---------", "---------");
+
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  AVLNode* aSimpleDic = newAVLNode("20");
+  aDic->dicRoot     = aSimpleDic;
+  aDic->firstSymbol = aSimpleDic;
+
+  AVLNode* aNewDic = insertSymbolRecurse(aDic, aSimpleDic, "15");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertPtrEquals(tc, aSimpleDic, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  )");
+
+  // should invoke an LR
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "17");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[17] l:( [15] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  )");
+}
+
+void Test_insertSymbol_RL(CuTest* tc) {
+  DEBUG(FALSE, "\n%s should invoke an RL %s\n", "---------", "---------");
+
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  AVLNode* aSimpleDic = newAVLNode("20");
+  aDic->dicRoot     = aSimpleDic;
+  aDic->firstSymbol = aSimpleDic;
+
+  AVLNode* aNewDic = insertSymbolRecurse(aDic, aSimpleDic, "25");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertPtrEquals(tc, aSimpleDic, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[20] l:(  ) r:( [25] l:(  ) r:(  )  )");
+
+  // should invoke an RL
+  aNewDic = insertSymbolRecurse(aDic, aNewDic, "22");
+  CuAssertPtrNotNull(tc, aNewDic);
+  CuAssertStrEquals(tc, printDictionary(aNewDic),
+  "[22] l:( [20] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  )");
+}
+
+void Test_insertSymbol_random(CuTest* tc) {
+
+  srand(time(NULL));
+
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  AVLNode* avlDic = newAVLNode("0");
+  aDic->dicRoot     = avlDic;
+  aDic->firstSymbol = avlDic;
+
+  for (int i = 0; i < 1000; i++) {
+    char itoa[100];
+    sprintf(itoa, "%d", rand() % 100);
+    avlDic = insertSymbolRecurse(aDic, avlDic, itoa);
+  }
+  checkAVLNode(avlDic, FALSE);
+
+//  printf("%s\n", printDictionary(avlDic));
+//  printf("avl node height: %zu\n", deepCalculateAVLNodeHeight(avlDic));
+//  printf("avl node height: %zu\n", avlDic->height);
+//  printf("avl node balance: %d\n", avlDic->balance);
+}
+
+
+void Test_insertSymbol_linear(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* aDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, aDic);
+
+  AVLNode* avlDic = newAVLNode("10");
+  aDic->dicRoot     = avlDic;
+  aDic->firstSymbol = avlDic;
+
+  for (int i = 10; i < 100; i++) {
+    char itoa[100];
+    sprintf(itoa, "%d", i);
+    avlDic = insertSymbolRecurse(aDic, avlDic, itoa);
+  }
+  checkAVLNode(avlDic, FALSE);
+
+//  printf("%s\n", printDictionary(avlDic));
+//  printf("avl node height: %zu\n", deepCalculateAVLNodeHeight(avlDic));
+//  printf("avl node height: %zu\n", avlDic->height);
+//  printf("avl node balance: %d\n", avlDic->balance);
+
+  CuAssertIntEquals(tc, avlDic->height, deepCalculateAVLNodeHeight(avlDic));
+  CuAssertIntEquals(tc, avlDic->height, 8);
+  CuAssertIntEquals(tc, avlDic->balance, -2);
 }
 
 \stoptyping
