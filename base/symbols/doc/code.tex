@@ -34,6 +34,7 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = "Symbols";
+  theCoAlg->objectSize   = sizeof(SymbolObj);
   theCoAlg->registerFunc = registerSymbols;
   theCoAlg->equalityFunc = NULL;
   theCoAlg->printFunc    = NULL;
@@ -62,6 +63,10 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   AssertIntTrue(registerSymbols(jInterp));
   AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
   AssertPtrEquals(jInterp->coAlgs[SymbolsTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[SymbolsTag].sClass->objectSize,
+    sizeof(SymbolObj)
+  )
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -195,12 +200,9 @@ Boolean symbolsEqualDebug(
 
 \startCTest
   AssertIntTrue(symbolsEqual(NULL, NULL));
-  printf("after NULL\n");
   SymbolObj *symA = newSymbol(jInterp, "the same text");
-  printf("after first newSymbol\n");
   SymbolObj *symB = newSymbol(jInterp, "the same text");
-  printf("after second newSymbol\n");
-  AssertIntTrue(symbolsEqualDebug((CoAlgObj*)symA, (CoAlgObj*)symB, TRUE));
+  AssertIntTrue(symbolsEqual((CoAlgObj*)symA, (CoAlgObj*)symB));
 \stopCTest
 \stopTestCase
 

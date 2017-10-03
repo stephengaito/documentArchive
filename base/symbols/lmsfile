@@ -64,6 +64,11 @@ contests.targets{
     'joylol/symbols-private.h',
     'symbols.c',
   },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/booleans',
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',
