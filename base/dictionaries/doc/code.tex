@@ -24,58 +24,6 @@ typedef struct dictionaries_object_struct {
 } DictObj;
 \stopCHeader
 
-\startTestSuite[registerDictionaries]
-
-\setCHeaderStream{private}
-\startCHeader
-Boolean registerDictionaries(JoyLoLInterp *jInterp);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerDictionaries(JoyLoLInterp *jInterp) {
-  assert(jInterp);
-  
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  assert(theCoAlg);
-  
-  theCoAlg->name         = "Dictionaries";
-  theCoAlg->objectSize   = sizeof(DictObj);
-  theCoAlg->registerFunc = registerDictionaries;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printFunc    = NULL;
-  theCoAlg->coAlgData    = NULL;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
-  
-  // do a sanity check...
-  assert(tag == DictionariesTag);
-  assert(jInterp->coAlgs[tag].sClass);
-  
-  registerDictionaryWords(jInterp);
-  
-  return TRUE;
-}
-\stopCCode
-
-\startTestCase[should register the Dictionaries coAlg]
-
-\startCTest
-  // CTestsSetup has already created a jInterp
-  // and run regiserDictionaries
-  AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[DictionariesTag].sClass;
-  AssertIntTrue(registerDictionaries(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[DictionariesTag].sClass, coAlg);
-  AssertIntEquals(
-    jInterp->coAlgs[DictionariesTag].sClass->objectSize, 
-    sizeof(DictObj)
-  );
-\stopCTest
-\stopTestCase
-\stopTestSuite
-
 \startTestSuite[newDict]
 
 \startCHeader
@@ -206,6 +154,127 @@ void listDefinitions(JoyLoLInterp* jInterp, FILE* outFile) {
   }
 }
 \stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+size_t printDictionaryCoAlgObjSize(CoAlgObj* anObj, Boolean debugFlag);
+size_t printDicSize(DictObj* anAVLNode, Boolean debugFlag);
+\stopCHeader
+
+\startCCode
+size_t printDictionaryCoAlgObjSize(CoAlgObj* anObj, Boolean debugFlag) {
+  if (!anObj) return 0;
+  if (anObj->tag != DictionariesTag) return 0;
+  return printDicSize((DictObj*)anObj, debugFlag);
+}
+
+size_t printDicSize(DictObj* anAVLNode, Boolean debugFlag) {
+  if (!anAVLNode) return 0;
+  return printDicSize(anAVLNode->left, debugFlag)
+    + printDicSize(anAVLNode->right, debugFlag)
+    + strlen(anAVLNode->symbol) + 20;
+}
+\stopCCode
+
+\startCHeader
+extern Boolean printDicionaryCoAlgObjInto(
+  CoAlgObj* anAVLNode, char* buffer, size_t bufferSize
+);
+extern Boolean printDicInto(
+  DictObj* anAVLNode, char* buffer, size_t bufferSize
+);
+\stopCHeader
+
+\startCCode
+Boolean printDictionaryCoAlgObjInto(
+  CoAlgObj* anAVLNode, char* buffer, size_t bufferSize
+) {
+  if (!anAVLNode) return FALSE;
+  if (anAVLNode->tag != DictionariesTag) return FALSE;
+  return printDicInto((DictObj*)anAVLNode, buffer, bufferSize);
+}
+
+Boolean printDicInto(DictObj* anAVLNode, char* buffer, size_t bufferSize) {
+  if (!anAVLNode) return TRUE;
+  strcat(buffer, "[");
+  strcat(buffer, anAVLNode->symbol);
+  strcat(buffer, "] l:( ");
+  printDicInto(anAVLNode->left, buffer, bufferSize);
+  strcat(buffer, " ) r:( ");
+  printDicInto(anAVLNode->right, buffer, bufferSize);
+  strcat(buffer, " ) ");
+  return TRUE;
+}
+\stopCCode
+
+\startCHeader
+char* printDictionaryDebug(DictObj* anAVLNode, Boolean debugFlag);
+#define printDictionary(anAVLNode) \
+  printDictionaryDebug(anAVLNode, FALSE)
+\stopCHeader
+
+\startCCode
+char* printDictionaryDebug(DictObj* anAVLNode, Boolean debugFlag) {
+  size_t bufferSize = printDicSize(anAVLNode, debugFlag) + 10;
+  char* buffer = (char*) calloc(bufferSize, sizeof(char));
+  assert(buffer);
+  printDicInto(anAVLNode, buffer, bufferSize);
+  buffer[strlen(buffer)-1] = 0;
+  return buffer;
+}
+\stopCCode
+
+\startTestSuite[registerDictionaries]
+
+\startCHeader
+Boolean registerDictionaries(JoyLoLInterp *jInterp);
+\stopCHeader
+
+\startCCode
+Boolean registerDictionaries(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  assert(theCoAlg);
+  
+  theCoAlg->name         = "Dictionaries";
+  theCoAlg->objectSize   = sizeof(DictObj);
+  theCoAlg->registerFunc = registerDictionaries;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->printSize    = printDictionaryCoAlgObjSize;
+  theCoAlg->printStr     = printDictionaryCoAlgObjInto;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == DictionariesTag);
+  assert(jInterp->coAlgs[tag].sClass);
+  
+  registerDictionaryWords(jInterp);
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Dictionaries coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run regiserDictionaries
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[DictionariesTag].sClass;
+  AssertIntTrue(registerDictionaries(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[DictionariesTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[DictionariesTag].sClass->objectSize, 
+    sizeof(DictObj)
+  );
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\setCHeaderStream{public}
 
 \starttyping
 // specs

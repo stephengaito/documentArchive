@@ -81,42 +81,4 @@ Boolean checkAVLNode(DictObj* anAVLNode, size_t debugFlag) {
 }
 \stopCCode
 
-\startCCode
-size_t printDicSize(DictObj* anAVLNode) {
-  if (!anAVLNode) return 0;
-  return printDicSize(anAVLNode->left)
-    + printDicSize(anAVLNode->right)
-    + strlen(anAVLNode->symbol) + 20;
-}
-\stopCCode
-
-\startCCode
-void printDicInto(DictObj* anAVLNode, char* buffer, size_t bufferSize) {
-  if (!anAVLNode) return;
-  strcat(buffer, "[");
-  strcat(buffer, anAVLNode->symbol);
-  strcat(buffer, "] l:( ");
-  printDicInto(anAVLNode->left, buffer, bufferSize);
-  strcat(buffer, " ) r:( ");
-  printDicInto(anAVLNode->right, buffer, bufferSize);
-  strcat(buffer, " ) ");
-}
-\stopCCode
-
-\startCHeader
-char* printDictionary(DictObj* anAVLNode);
-\stopCHeader
-
-\startCCode
-char* printDictionary(DictObj* anAVLNode) {
-//  size_t bufferSize = printDicSize(anAVLNode) + 10;
-//  char* buffer = (char*) calloc(bufferSize, sizeof(char));
-//  assert(buffer);
-//  printDicInto(anAVLNode, buffer, bufferSize);
-//  buffer[strlen(buffer)-1] = 0;
-//  return buffer;
-  return "";
-}
-\stopCCode
-
 \setCHeaderStream{public}
