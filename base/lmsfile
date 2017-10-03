@@ -10,12 +10,24 @@ print('command run in each subDir = ['..cmd..']')
 
 lfs = require 'lfs'
 
+-- the following coAlgebras MUST be loaded in order
+reqCoAlgs = {
+  'jInterps',
+  'pairs',
+  'symbols',
+  'naturals',
+  'dictionaries',
+  'texts',
+}
+
+reqCoAlgStr = '|'..table.concat(reqCoAlgs, '|')..'|'
+
 -- collect the list of subdirectories of base
 subDirs = { }
 
 for entry in lfs.dir('.') do
   if not entry:match('^%..*$') and
-    not entry:match('^jInterps$') and
+    not reqCoAlgStr:match('|'..entry..'|') and
     (lfs.attributes(entry, 'mode') == 'directory') then
     table.insert(subDirs, entry)
   end
@@ -28,14 +40,16 @@ table.sort(subDirs)
 -- Now add the critical coAlgs in 
 -- dependency order
 
-table.insert(subDirs, 1, 'jInterps')
+for i, aSubDir in ipairs(subDirs) do
+  table.insert(reqCoAlgs, aSubDir)
+end
 
 -- now walk through these subDirectories
 -- running the lms command on each one
 
 curDir = lfs.currentdir()
 os.execute('reset')
-for i, subDir in ipairs(subDirs) do
+for i, subDir in ipairs(reqCoAlgs) do
   print('\n========================================================')
   print('working in ['..subDir..']')
   lfs.chdir(subDir)

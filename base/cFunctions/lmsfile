@@ -60,6 +60,10 @@ contests.targets{
     'joylol/cFunctions-private.h',
     'cFunctions.c',
   },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',

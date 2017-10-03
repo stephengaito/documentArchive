@@ -25,6 +25,7 @@
 #include <joylol/jInterps.h>
 #include <joylol/dictionaries.h>
 #include <joylol/symbols.h>
+#include <joylol/naturals.h>
 #include <joylol/texts.h>
 #include <joylol/texts-private.h>
 \stopCCode
@@ -35,13 +36,19 @@
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
-\addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/naturals.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/texts.h>}
 \addCTestInclude{<joylol/texts-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/symbols}
+\addCTestLib{<HOME>/.joylol/joylol/naturals}
+\addCTestLib{-lgmp}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedSymbols(lstate);
+  requireStaticallyLinkedNaturals(lstate);
   requireStaticallyLinkedTexts(lstate);
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
 \stopCTest
