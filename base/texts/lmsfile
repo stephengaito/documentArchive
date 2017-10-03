@@ -14,6 +14,10 @@ litProgs.targets{
   docFiles = {
     'overview.tex',
     'code.tex',
+    'strings.tex',
+    'files.tex',
+    'lua.tex',
+    'words.tex',
     'conclusion.tex',
   },
   srcFiles = {
@@ -39,6 +43,8 @@ joylol.targets{
   },
   coAlgLibs = {
     'jInterps',
+    'dictionaries',
+    'symbols',
   },
   buildDir = 'build',
 }
@@ -53,12 +59,20 @@ contests.targets{
   docFiles = {
     'overview.tex',
     'code.tex',
+    'strings.tex',
+    'files.tex',
+    'lua.tex',
+    'words.tex',
     'conclusion.tex',
   },
   srcFiles = {
     'joylol/texts.h',
     'joylol/texts-private.h',
     'texts.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
   },
   buildDir  = 'build',
   docDir    = 'doc',

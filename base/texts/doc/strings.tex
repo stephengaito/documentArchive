@@ -1,0 +1,186 @@
+% A ConTeXt document [master document: texts.tex]
+
+\section[title=Strings]
+
+\startCCode
+// Texts are a collection of characters, which are used by the Parser
+// to extract successive symbols.
+//
+// Texts are created on one of three backing suppliers of characters:
+// 1. a single string
+// 2. a NULL terminated array of strings
+// 3. an external file
+// 4. a readline interaction with a user
+//
+// In all four cases, the Parser's nextSymbol method requests successive
+// **lines** of characters (deliminated by new-line-characters).
+//
+// It is critical, for correct interaction with the user via readline,
+// that the initial line is NOT obtained until actually requested by
+// the parser's nextSymbol method.
+//
+// It is also critical that once completed, none of the sources, get
+// asked for subsequent lines.
+//
+// When the text has been completed, the nextLine function ensures
+// that aText->curLine is NULL.
+
+/////////////////////////////////////////////////////////////////////////////
+// Text from array of strings
+//
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern void nextLineFromString(TextObj* aText);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void nextLineFromString(TextObj* aText) {
+  DEBUG(FALSE, "->nextLineFromString [%s]{%p:%p}\n",
+    aText->curLine, aText->curChar, aText->lastChar);
+  if (!aText) return;  // there is nothing we can do!
+  if (!aText->curLine) return; // there is nothing we can do!
+
+  // there is no next line so... we have already reached the end of the text
+  aText->completed  = TRUE;
+  aText->curLine    = NULL;
+  aText->curChar    = NULL;
+  aText->lastChar   = NULL;
+}
+\stopCCode
+
+\startCHeader
+extern TextObj* createTextFromString(JoyLoLInterp* jInterp,
+                                     Symbol* aString);
+\stopCHeader
+
+\startCCode
+TextObj* createTextFromString(JoyLoLInterp *jInterp,
+                              Symbol* aString) {
+  assert(jInterp);
+  assert(aString);
+
+  TextObj* aText = (TextObj*)newObject(jInterp, TextsTag);
+  assert(aText);
+  //
+  // array of strings specific initializations
+  //
+  aText->curLine   = aString;
+  aText->curChar   = aText->curLine;
+  aText->lastChar  = aText->curChar + strlen(aText->curLine);
+  aText->nextLine  = nextLineFromString;
+  //
+  // general initializations
+  //
+  aText->jInterp   = jInterp;
+  aText->completed = FALSE;
+  aText->sym       = NULL;
+  //
+  aText->inputFile = NULL;
+  //
+  aText->newPrompt       = NULL;
+  aText->continuePrompt  = NULL;
+  aText->curPrompt       = NULL;
+  //
+  aText->textLines  = NULL;
+  aText->curLineNum = 0;
+
+  return aText;
+}
+\stopCCode
+
+\starttyping
+// arrayOfStrings.c
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/text.h"
+#include "joyLoL/text_private.h"
+
+// Texts are a collection of characters, which are used by the Parser
+// to extract successive symbols.
+//
+// Texts are created on one of three backing suppliers of characters:
+// 1. a single string
+// 2. a NULL terminated array of strings
+// 3. an external file
+// 4. a readline interaction with a user
+//
+// In all four cases, the Parser's nextSymbol method requests successive
+// **lines** of characters (deliminated by new-line-characters).
+//
+// It is critical, for correct interaction with the user via readline,
+// that the initial line is NOT obtained until actually requested by
+// the parser's nextSymbol method.
+//
+// It is also critical that once completed, none of the sources, get
+// asked for subsequent lines.
+//
+// When the text has been completed, the nextLine function ensures
+// that aText->curLine is NULL.
+
+/////////////////////////////////////////////////////////////////////////////
+// Text from array of strings
+//
+
+void nextLineFromArray(Text* aText) {
+  DEBUG(FALSE, "->nextLineFromArray %s\n", "");
+  if (!aText) return;  // there is nothing we can do!
+  if (!aText->textLines) return; // there is nothing we can do!
+
+  if (!aText->textLines[aText->curLineNum]) {
+    // we have already reached the end of the text
+    aText->completed  = TRUE;
+    aText->curLine    = NULL;
+    aText->curChar    = NULL;
+    aText->lastChar   = NULL;
+    return;
+  }
+
+  aText->curLine  = aText->textLines[aText->curLineNum];
+
+  aText->curChar  = aText->curLine;
+
+  if (aText->curLine) {
+    aText->lastChar = aText->curChar + strlen(aText->curLine);
+  } else aText->lastChar = aText->curChar;
+
+  aText->curLineNum++;
+}
+
+Text* createTextFromArrayOfStrings(CoAlgebras* coAlgs,
+                                   const char* someTextLines[]) {
+  Text* aText = (Text*)calloc(1, sizeof(Text));
+  assert(aText);
+  //
+  // array of strings specific initializations
+  //
+  aText->textLines  = someTextLines;
+  aText->curLineNum = 0;
+  aText->nextLine   = nextLineFromArray;
+  //
+  // general initializations
+  //
+  assert(coAlgs);
+  aText->coAlgebras = coAlgs;
+  aText->completed  = FALSE;
+  aText->sym        = NULL;
+  aText->curLine    = NULL;
+  aText->curChar    = NULL;
+  aText->lastChar   = NULL;
+  //
+  aText->inputFile  = NULL;
+  //
+  aText->newPrompt       = NULL;
+  aText->continuePrompt  = NULL;
+  aText->curPrompt       = NULL;
+
+  return aText;
+}
+\stoptyping

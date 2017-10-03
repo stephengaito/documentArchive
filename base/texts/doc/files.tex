@@ -1,0 +1,108 @@
+% A ConTeXt document [master document: texts.tex]
+
+\section[title=Strings]
+
+\starttyping
+// files.c
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/text.h"
+#include "joyLoL/text_private.h"
+
+// Texts are a collection of characters, which are used by the Parser
+// to extract successive symbols.
+//
+// Texts are created on one of three backing suppliers of characters:
+// 1. a single string
+// 2. a NULL terminated array of strings
+// 3. an external file
+// 4. a readline interaction with a user
+//
+// In all four cases, the Parser's nextSymbol method requests successive
+// **lines** of characters (deliminated by new-line-characters).
+//
+// It is critical, for correct interaction with the user via readline,
+// that the initial line is NOT obtained until actually requested by
+// the parser's nextSymbol method.
+//
+// It is also critical that once completed, none of the sources, get
+// asked for subsequent lines.
+//
+// When the text has been completed, the nextLine function ensures
+// that aText->curLine is NULL.
+
+/////////////////////////////////////////////////////////////////////////////
+// Text from file
+//
+
+void nextLineFromFile(Text* aText) {
+  DEBUG(FALSE, "->nextLineFromFile %s\n", "");
+  if (!aText) return; // there is nothing we can do!
+  if (!aText->inputFile) return; // there is nothing we can do!
+
+  // getline returns alloc'ed memory so we need to free it here.
+  if (aText->curLine) free((void*)aText->curLine);
+
+  aText->curLine    = NULL;
+  aText->curChar    = NULL;
+  aText->lastChar   = NULL;
+
+  char *linePtr    = NULL;
+  size_t n         = 0;
+  if (!getline(&linePtr, &n, aText->inputFile) && n < 1) {
+    DEBUG(FALSE, "<-nextLineFromFile %s\n", "getline returned 0");
+    aText->completed = TRUE;
+    return;
+  }
+
+  if (feof(aText->inputFile)) {
+    // we have already reached the end of the text;
+    DEBUG(FALSE, "<-nextLineFromFile %s\n", "feof returned file end");
+    aText->completed = TRUE;
+    aText->curLine   = NULL;
+    aText->curChar   = NULL;
+    aText->lastChar  = NULL;
+    return;
+  }
+
+  aText->curLine    = linePtr;
+
+  aText->curChar    = aText->curLine;
+  aText->lastChar   = aText->curChar + strlen(aText->curLine);
+  DEBUG(FALSE, "<-nextLineFromFile [%s]\n", aText->curLine);
+}
+
+Text* createTextFromInputFile(CoAlgebras* coAlgs,
+                              FILE *anInputFile) {
+  Text* aText = (Text*)calloc(1, sizeof(Text));
+  assert(aText);
+  //
+  // external file specific initializations
+  //
+  aText->inputFile  = anInputFile;
+  aText->nextLine   = nextLineFromFile;
+  //
+  // general initializations
+  //
+  assert(coAlgs);
+  aText->coAlgebras = coAlgs;
+  aText->completed  = FALSE;
+  aText->sym        = NULL;
+  aText->curLine    = NULL;
+  aText->curChar    = NULL;
+  aText->lastChar   = NULL;
+  //
+  aText->textLines  = NULL;
+  aText->curLineNum = 0;
+  //
+  aText->newPrompt      = NULL;
+  aText->continuePrompt = NULL;
+  aText->curPrompt      = NULL;
+  return aText;
+}
+\stoptyping

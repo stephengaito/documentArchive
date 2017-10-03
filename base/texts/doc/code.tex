@@ -3,39 +3,31 @@
 \section[title=Code]
 
 \dependsOn[jInterps]
-%\dependsOn[context]
+\dependsOn[dictionaries]
+\dependsOn[symbols]
 
-\component gitVersion-c
+\setCHeaderStream{public}
+\startCHeader
+struct text_object_struct;
 
-\starttyping
-// texts.h
-#ifndef JOYLOL_TEXT_H
-#define JOYLOL_TEXT_H
+typedef void (NextLineFunc)(struct text_object_struct*);
 
-typedef struct list_memory_struct ListMemory;
-typedef struct pair_atom_struct PairAtom;
-typedef struct avl_node_struct AVLNode;
-typedef struct dictionary_struct Dictionary;
-
-struct text_struct;
-
-typedef void (NextLineFunc)(struct text_struct*);
-
-typedef struct text_struct {
+typedef struct text_object_struct {
+  CoAlgObj super;
   //
   // fields used by all backing types
   //
   size_t        completed;
-  PairAtom*     sym;
-  const char*   curLine;
-  const char*   curChar;
-  const char*   lastChar;
+  CoAlgObj*     sym;
+  Symbol*       curLine;
+  Symbol*       curChar;
+  Symbol*       lastChar;
   NextLineFunc* nextLine;
-  CoAlgebras*   coAlgebras;
+  JoyLoLInterp* jInterp;
   //
   // array of strings specific fields
   //
-  const char** textLines;
+  Symbol** textLines;
   size_t curLineNum;
   //
   // external file specific fields
@@ -44,15 +36,16 @@ typedef struct text_struct {
   //
   // readline specific fields
   //
-  const char* newPrompt;
-  const char* continuePrompt;
-  const char* curPrompt;
-  AVLNode*    curNode;
-  const char* curCompletionText;
-  size_t      curCompletionLen;
-} Text;
+  Symbol*  newPrompt;
+  Symbol*  continuePrompt;
+  Symbol*  curPrompt;
+  DictObj* curNode;
+  Symbol*  curCompletionText;
+  size_t   curCompletionLen;
+} TextObj;
+\stopCHeader
 
-
+\starttyping
 extern Text* createTextFromArrayOfStrings(CoAlgebras* coAlgs,
                                           const char* someTextLines[]);
 
@@ -61,18 +54,6 @@ extern Text* createTextFromString(CoAlgebras* coAlgs,
 
 extern Text* createTextFromInputFile(CoAlgebras* coAlgs,
                                      FILE *anInputFile);
-
-extern Text* createTextFromReadline(CoAlgebras* coAlgs);
-
-extern void freeText(Text* aText);
-
-extern void setReadlinePrompts(Text* aText,
-  const char* newPrompt, const char* continuePrompt);
-extern void clearReadlinePrompt(Text* aText);
-extern void saveReadlineHistory(Text* aText);
-
-extern void nextSymbol(Text* aText);
-extern void reportError(Text* aText, const char* message);
 
 #endif
 \stoptyping
@@ -85,25 +66,11 @@ extern void reportError(Text* aText, const char* message);
 extern void nextLineFromString(Text* aText);
 extern void nextLineFromArray(Text* aText);
 extern void nextLineFromFile(Text* aText);
-extern void nextLineFromReadline(Text* aText);
-extern void nextLineExit(Text* aText);
 
 #endif
 \stoptyping
 
-\starttyping
-// texts.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/text_private.h"
-#include "joyLoL/dictionary.h"
-
+\startCCode
 // Texts are a collection of characters, which are used by the Parser
 // to extract successive symbols.
 //
@@ -124,14 +91,28 @@ extern void nextLineExit(Text* aText);
 //
 // When the text has been completed, the nextLine function ensures
 // that aText->curLine is NULL.
+\stopCCode
 
-void freeText(Text* aText) {
+\startCHeader
+extern void freeText(TextObj* aText);
+\stopCHeader
+
+\startCCode
+void freeText(TextObj* aText) {
   if (!aText) return;
 
   free(aText);
 }
+\stopCCode
 
-void nextLineExit(Text* aText) {
+\setCHeaderStream{private}
+\startCHeader
+extern void nextLineExit(TextObj* aText);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void nextLineExit(TextObj* aText) {
   if (!aText) return; // there is nothing we can do!
   aText->sym       = NULL;
   aText->curLine   = NULL;
@@ -139,17 +120,20 @@ void nextLineExit(Text* aText) {
   aText->lastChar  = NULL;
   aText->completed = TRUE;
 }
+\stopCCode
 
 /////////////////////////////////////////////////////////////////////////////
 // nextSymbol
 //
 
-void nextSymbol(Text* aText) {
+\startCHeader
+extern void nextSymbol(TextObj* aText);
+\stopCHeader
+
+\startCCode
+void nextSymbol(TextObj* aText) {
   assert(aText);
-  assert(aText->coAlgebras);
-  assert(aText->coAlgebras->symbols);
-  Dictionary* mainDic = aText->coAlgebras->symbols->dictionary;
-  assert(mainDic);
+  assert(aText->jInterp);
 
   DEBUG(FALSE, "->nextSymbol [%s]{%s}\n", aText->curLine, aText->curChar);
   aText->sym = NULL;
@@ -261,21 +245,28 @@ void nextSymbol(Text* aText) {
     DEBUG(FALSE, "--nextSymbol == %s (natural)\n", aSymbol);
     // we have parsed a natural... so create a new natural
     //
-    aText->sym = newNatural(aText->coAlgebras, aSymbol);
+    aText->sym = newNatural(aText->jInterp, aSymbol);
     //
     DEBUG(FALSE, "<-nextSymbol %s (natural)\n", aSymbol);
   } else {
     // we have parsed a symbol... so create a new symbol
     //
-    AVLNode* aSym = createSymbol(mainDic, aSymbol);
-    aText->sym = createAtom(aText->coAlgebras, aSym);
+    DictObj* aSym = createSymbol(aText->jInterp, aSymbol);
+    aText->sym = newSymbol(aText->jInterp, aSym->symbol);
     //
-    DEBUG(FALSE, "<-nextSymbol [%s] (symbol)\n", aText->sym->symbol);
+    DEBUG(FALSE, "<-nextSymbol [%s] (symbol)\n",
+      ((SymbolObj*)(aText->sym))->sym);
   }
   free(aSymbol);
 }
+\stopCCode
 
-void reportError(Text *aText, const char* message) {
+\startCHeader
+extern void reportError(TextObj *aText, const char* message);
+\stopCHeader
+
+\startCCode
+void reportError(TextObj *aText, const char* message) {
   fprintf(stderr, "\n\n%s\n", message);
   if (aText->curLine) {
     fprintf(stderr, "while parsing\n");
@@ -285,13 +276,134 @@ void reportError(Text *aText, const char* message) {
     fprintf(stderr, "at end of text\n\n");
   }
 }
-\stoptyping
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityTextsCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
+                                  size_t debugFlag);
+\stopCHeader
+
+\startCCode
+Boolean equalityTextsCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
+                           size_t debugFlag) {
+  DEBUG(debugFlag, "textsCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (lolA->type != lolB->type) return FALSE;
+  if (lolA->tag  != TextsTag) return FALSE;
+  if (lolA != lolB) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing texts]
+
+\startCHeader
+extern size_t printSizeTextsCoAlg(CoAlgObj* aLoL, size_t debugFlag);
+\stopCHeader
+
+\startCCode
+size_t printSizeTextsCoAlg(CoAlgObj* aLoL, size_t debugFlag) {
+  DEBUG(debugFlag, "textsCoAlg-printSize: %p\n", aLoL);
+  assert(aLoL);
+  assert(aLoL->type);
+  assert(aLoL->tag == TextsTag);
+  return 10;
+}
+\stopCCode
+
+\startCHeader
+extern Boolean printStrTextsCoAlg(CoAlgObj* aLoL,
+                                 char* buffer, size_t bufferSize);
+\stopCHeader
+
+\startCCode
+Boolean printStrTextsCoAlg(CoAlgObj* aLoL,
+                          char* buffer, size_t bufferSize) {
+  assert(aLoL);
+  assert(aLoL->type);
+  assert(aLoL->tag == TextsTag);
+
+  strcat(buffer, "--texts-- ");
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print texts]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[TextsTag].sClass);
+
+  TextObj* aNewText = createTextFromString(jInterp, "a string");
+  AssertPtrNotNull(aNewText);
+  AssertIntEquals(printSizeDebug((CoAlgObj*)aNewText, FALSE), 6);
+  AssertStrEquals(printLoLDebug((CoAlgObj*)aNewText, FALSE), "true");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerTexts]
+
+\startCHeader
+extern Boolean registerTexts(JoyLoLInterp *jInterp);
+\stopCHeader
+
+\startCCode
+Boolean registerTexts(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  assert(theCoAlg);
+  
+  theCoAlg->name         = TextsName;
+  theCoAlg->objectSize   = sizeof(CoAlgObj);
+  theCoAlg->registerFunc = registerTexts;
+  theCoAlg->equalityFunc = equalityTextsCoAlg;
+  theCoAlg->printSize    = printSizeTextsCoAlg;
+  theCoAlg->printStr     = printStrTextsCoAlg;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == TextsTag);
+  assert(jInterp->coAlgs[tag].sClass);
+  
+  registerTextWords(jInterp);
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Texts coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerTexts
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(jInterp->coAlgs[TextsTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[TextsTag].sClass;
+//  AssertIntTrue(registerTexts(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs[TextsTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[TextsTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[TextsTag].sClass->objectSize,
+    sizeof(CoAlgObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \starttyping
-// arrayOfStrings.c
+//specs
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+
+#include "CuTest.h"
 
 #include "joyLoL/macros.h"
 #include "joyLoL/coAlg/coAlgs.h"
@@ -299,452 +411,317 @@ void reportError(Text *aText, const char* message) {
 #include "joyLoL/text.h"
 #include "joyLoL/text_private.h"
 
-// Texts are a collection of characters, which are used by the Parser
-// to extract successive symbols.
-//
-// Texts are created on one of three backing suppliers of characters:
-// 1. a single string
-// 2. a NULL terminated array of strings
-// 3. an external file
-// 4. a readline interaction with a user
-//
-// In all four cases, the Parser's nextSymbol method requests successive
-// **lines** of characters (deliminated by new-line-characters).
-//
-// It is critical, for correct interaction with the user via readline,
-// that the initial line is NOT obtained until actually requested by
-// the parser's nextSymbol method.
-//
-// It is also critical that once completed, none of the sources, get
-// asked for subsequent lines.
-//
-// When the text has been completed, the nextLine function ensures
-// that aText->curLine is NULL.
+// suiteName: - Text tests -
 
-/////////////////////////////////////////////////////////////////////////////
-// Text from array of strings
-//
+static Symbol* someLines[] = {
+  "  This is a first line  ",
+  "  This is a second line   ",
+  "",
+  " ([<{ }>]) ",
+  "     	",
+  "  This is the last line  ",
+  NULL
+};
 
-void nextLineFromArray(Text* aText) {
-  DEBUG(FALSE, "->nextLineFromArray %s\n", "");
-  if (!aText) return;  // there is nothing we can do!
-  if (!aText->textLines) return; // there is nothing we can do!
+void Test_createTextFromArrayOfStrings(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
 
-  if (!aText->textLines[aText->curLineNum]) {
-    // we have already reached the end of the text
-    aText->completed  = TRUE;
-    aText->curLine    = NULL;
-    aText->curChar    = NULL;
-    aText->lastChar   = NULL;
-    return;
-  }
-
-  aText->curLine  = aText->textLines[aText->curLineNum];
-
-  aText->curChar  = aText->curLine;
-
-  if (aText->curLine) {
-    aText->lastChar = aText->curChar + strlen(aText->curLine);
-  } else aText->lastChar = aText->curChar;
-
-  aText->curLineNum++;
+  Text* aText = createTextFromArrayOfStrings(coAlgs, someLines);
+  CuAssertPtrNotNull(tc, aText);
+  CuAssertPtrEquals(tc, (void*)aText->textLines, (void*)someLines);
+  CuAssertIntEquals(tc, aText->curLineNum, 0);
+  CuAssertPtrNull(tc, aText->curLine);
+  CuAssertPtrNull(tc, aText->curChar);
+  CuAssertPtrNull(tc, aText->lastChar);
+  aText->nextLine(aText);
+  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[0]);
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[0]);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[0]));
+  aText->nextLine(aText);
+  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[1]);
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[1]);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[1]));
+  aText->nextLine(aText);
+  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[2]);
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[2]);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[2]));
+  aText->nextLine(aText);
+  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[3]);
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[3]);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[3]));
+  aText->nextLine(aText);
+  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[4]);
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[4]);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[4]));
+  aText->nextLine(aText);
+  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[5]);
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[5]);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[5]));
+  aText->nextLine(aText);
+  CuAssertPtrEquals(tc, (void*)aText->curLine, NULL);
+  CuAssertPtrEquals(tc, (void*)aText->curChar, NULL);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar), 0);
+  aText->nextLine(aText);
+  CuAssertPtrEquals(tc, (void*)aText->curLine, NULL);
+  CuAssertPtrEquals(tc, (void*)aText->curChar, NULL);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar), 0);
 }
 
-Text* createTextFromArrayOfStrings(CoAlgebras* coAlgs,
-                                   const char* someTextLines[]) {
-  Text* aText = (Text*)calloc(1, sizeof(Text));
-  assert(aText);
-  //
-  // array of strings specific initializations
-  //
-  aText->textLines  = someTextLines;
-  aText->curLineNum = 0;
-  aText->nextLine   = nextLineFromArray;
-  //
-  // general initializations
-  //
-  assert(coAlgs);
-  aText->coAlgebras = coAlgs;
-  aText->completed  = FALSE;
-  aText->sym        = NULL;
-  aText->curLine    = NULL;
-  aText->curChar    = NULL;
-  aText->lastChar   = NULL;
-  //
-  aText->inputFile  = NULL;
-  //
-  aText->newPrompt       = NULL;
-  aText->continuePrompt  = NULL;
-  aText->curPrompt       = NULL;
+void Test_createTextFromInputFile(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
 
-  return aText;
-}
-\stoptyping
-
-\starttyping
-// files.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/text_private.h"
-
-// Texts are a collection of characters, which are used by the Parser
-// to extract successive symbols.
-//
-// Texts are created on one of three backing suppliers of characters:
-// 1. a single string
-// 2. a NULL terminated array of strings
-// 3. an external file
-// 4. a readline interaction with a user
-//
-// In all four cases, the Parser's nextSymbol method requests successive
-// **lines** of characters (deliminated by new-line-characters).
-//
-// It is critical, for correct interaction with the user via readline,
-// that the initial line is NOT obtained until actually requested by
-// the parser's nextSymbol method.
-//
-// It is also critical that once completed, none of the sources, get
-// asked for subsequent lines.
-//
-// When the text has been completed, the nextLine function ensures
-// that aText->curLine is NULL.
-
-/////////////////////////////////////////////////////////////////////////////
-// Text from file
-//
-
-void nextLineFromFile(Text* aText) {
-  DEBUG(FALSE, "->nextLineFromFile %s\n", "");
-  if (!aText) return; // there is nothing we can do!
-  if (!aText->inputFile) return; // there is nothing we can do!
-
-  // getline returns alloc'ed memory so we need to free it here.
-  if (aText->curLine) free((void*)aText->curLine);
-
-  aText->curLine    = NULL;
-  aText->curChar    = NULL;
-  aText->lastChar   = NULL;
-
-  char *linePtr    = NULL;
-  size_t n         = 0;
-  if (!getline(&linePtr, &n, aText->inputFile) && n < 1) {
-    DEBUG(FALSE, "<-nextLineFromFile %s\n", "getline returned 0");
-    aText->completed = TRUE;
-    return;
-  }
-
-  if (feof(aText->inputFile)) {
-    // we have already reached the end of the text;
-    DEBUG(FALSE, "<-nextLineFromFile %s\n", "feof returned file end");
-    aText->completed = TRUE;
-    aText->curLine   = NULL;
-    aText->curChar   = NULL;
-    aText->lastChar  = NULL;
-    return;
-  }
-
-  aText->curLine    = linePtr;
-
-  aText->curChar    = aText->curLine;
-  aText->lastChar   = aText->curChar + strlen(aText->curLine);
-  DEBUG(FALSE, "<-nextLineFromFile [%s]\n", aText->curLine);
+  FILE* inputFile = fopen("someLines.txt", "r");
+  Text* aText = createTextFromInputFile(coAlgs, inputFile);
+  CuAssertPtrNotNull(tc, aText);
+  CuAssertPtrNotNull(tc, aText->inputFile);
+  CuAssertPtrNull(tc, aText->curLine);
+  CuAssertPtrNull(tc, aText->curChar);
+  CuAssertPtrNull(tc, aText->lastChar);
+  aText->nextLine(aText);
+  CuAssertStrEquals(tc, aText->curLine, "  This is a first line  \n");
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)aText->curLine);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[0]) + 1);
+  aText->nextLine(aText);
+  CuAssertStrEquals(tc, aText->curLine, "  This is a second line   \n");
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)aText->curLine);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[1]) + 1);
+  aText->nextLine(aText);
+  CuAssertStrEquals(tc, aText->curLine, "\n");
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)aText->curLine);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[2]) + 1);
+  aText->nextLine(aText);
+  CuAssertStrEquals(tc, aText->curLine, " ([<{ }>]) \n");
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)aText->curLine);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[3]) + 1);
+  // these do not match litterally since file does not seem to have tabs
+  aText->nextLine(aText);
+//  CuAssertStrEquals(tc, aText->curLine, "     	\n");
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)aText->curLine);
+//  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+//                        strlen(someLines[4]) + 1);
+  aText->nextLine(aText);
+  CuAssertStrEquals(tc, aText->curLine, "  This is the last line  \n");
+  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)aText->curLine);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
+                        strlen(someLines[5]) + 1);
+  // the file has a couple more blank lines at the end
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  CuAssertPtrEquals(tc, (void*)aText->curLine, NULL);
+  CuAssertPtrEquals(tc, (void*)aText->curChar, NULL);
+  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar), 0);
+  fclose(inputFile);
 }
 
-Text* createTextFromInputFile(CoAlgebras* coAlgs,
-                              FILE *anInputFile) {
-  Text* aText = (Text*)calloc(1, sizeof(Text));
-  assert(aText);
-  //
-  // external file specific initializations
-  //
-  aText->inputFile  = anInputFile;
-  aText->nextLine   = nextLineFromFile;
-  //
-  // general initializations
-  //
-  assert(coAlgs);
-  aText->coAlgebras = coAlgs;
-  aText->completed  = FALSE;
-  aText->sym        = NULL;
-  aText->curLine    = NULL;
-  aText->curChar    = NULL;
-  aText->lastChar   = NULL;
-  //
-  aText->textLines  = NULL;
-  aText->curLineNum = 0;
-  //
-  aText->newPrompt      = NULL;
-  aText->continuePrompt = NULL;
-  aText->curPrompt      = NULL;
-  return aText;
-}
-\stoptyping
+void Test_nextSymbolArray(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
 
-\starttyping
-// readline.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+  Text* aText = createTextFromArrayOfStrings(coAlgs, someLines);
+  CuAssertPtrNotNull(tc, aText);
 
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/text_private.h"
-#include "joyLoL/dictionary.h"
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "This");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "is");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "a");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "first");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "line");
 
-// Texts are a collection of characters, which are used by the Parser
-// to extract successive symbols.
-//
-// Texts are created on one of three backing suppliers of characters:
-// 1. a single string
-// 2. a NULL terminated array of strings
-// 3. an external file
-// 4. a readline interaction with a user
-//
-// In all four cases, the Parser's nextSymbol method requests successive
-// **lines** of characters (deliminated by new-line-characters).
-//
-// It is critical, for correct interaction with the user via readline,
-// that the initial line is NOT obtained until actually requested by
-// the parser's nextSymbol method.
-//
-// It is also critical that once completed, none of the sources, get
-// asked for subsequent lines.
-//
-// When the text has been completed, the nextLine function ensures
-// that aText->curLine is NULL.
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "This");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "is");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "a");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "second");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "line");
 
-/////////////////////////////////////////////////////////////////////////////
-// Text from readline
-//
+  // " ([<{ }>]) "
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "(");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "[");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "<");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "{");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "}");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, ">");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "]");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, ")");
 
-void clearReadlinePrompt(struct text_struct* aText) {
-  aText->curPrompt = aText->newPrompt;
-}
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "This");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "is");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "the");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "last");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "line");
 
-void setReadlinePrompts(Text* aText,
-                        const char* newPrompt, const char* continuePrompt) {
-
-  if (newPrompt) aText->newPrompt = newPrompt;
-  else           aText->newPrompt = ">";
-
-  if (continuePrompt) aText->continuePrompt = continuePrompt;
-  else                aText->continuePrompt = ":";
-
-  clearReadlinePrompt(aText);
+  nextSymbol(aText);
+  CuAssertPtrNull(tc, aText->sym);
 }
 
-void saveReadlineHistory(Text* aText) {
-  write_history(".joyLoL-history");
+void Test_nextSymbolFile(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  FILE* inputFile = fopen("someLines.txt", "r");
+  Text* aText = createTextFromInputFile(coAlgs, inputFile);
+  CuAssertPtrNotNull(tc, aText);
+
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "This");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "is");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "a");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "first");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "line");
+
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "This");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "is");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "a");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "second");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "line");
+
+  // " ([<{ }>]) "
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "(");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "[");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "<");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "{");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "}");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, ">");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "]");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, ")");
+
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "This");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "is");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "the");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "last");
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "line");
+
+  nextSymbol(aText);
+  CuAssertPtrNull(tc, aText->sym);
+  fclose(inputFile);
 }
 
-void nextLineFromReadline(struct text_struct* aText) {
-  DEBUG(FALSE, "->nextLineFromReadline %s\n", "");
-  if (!aText) return; // there is nothing we can do!
+/* For later?
+void ignoreTest_nextSymbolHandleStrings(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
 
-  if (aText->completed) {
-    // we have reached the end of the interaction with the user
-    aText->completed = TRUE;
-    aText->curLine   = NULL;
-    aText->curChar   = NULL;
-    aText->lastChar  = NULL;
-    return;
-  }
+  Text* aText = createTextFromString(coAlgs, "this (is a test) (of strings)");
+  CuAssertPtrNotNull(tc, aText);
 
-  // readline returns alloc'ed memory so we free it here.
-  if (aText->curLine) free((void*)aText->curLine);
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "this");
 
-  aText->curLine  = NULL;
-  aText->curChar  = NULL;
-  aText->lastChar = NULL;
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "is a test");
 
-  aText->curLine = readline (aText->curPrompt);
+  nextSymbol(aText);
+  CuAssertPtrNotNull(tc, aText->sym);
+  CuAssertStrEquals(tc, aText->sym->symbol, "of strings");
 
-  if (!aText->curLine) {
-    aText->completed = TRUE;
-    return;
-  }
-
-  if (*aText->curLine) {
-    history_set_pos(0); // start at the begining
-    if (0 <= history_search (aText->curLine, -1)) { // search backwards
-      remove_history(where_history());
-    } else if (0 <= history_search (aText->curLine, 1)) { // search forwards
-      remove_history(where_history());
-    }
-    history_set_pos(0);
-    add_history (aText->curLine);
-  }
-
-  aText->curChar = aText->curLine;
-  aText->lastChar = aText->curChar + strlen(aText->curChar);
-
-  aText->curPrompt = aText->continuePrompt;
 }
-
-Text* currentReadLineText = NULL;
-
-char* dictionaryWalker(const char* text, int state) {
-  if (!currentReadLineText) return NULL;
-  if (!state) {
-
-    assert(currentReadLineText->coAlgebras);
-    assert(currentReadLineText->coAlgebras->symbols);
-    Dictionary* mainDic =
-      currentReadLineText->coAlgebras->symbols->dictionary;
-    assert(mainDic);
-
-    currentReadLineText->curNode = findLUBSymbol(mainDic, text);
-    DEBUG(FALSE, "dictionaryWalker-start %p\n",
-          currentReadLineText->curNode);
-  }
-  AVLNode* curNode = currentReadLineText->curNode;
-
-  if (!curNode) return NULL;
-
-  if (strncmp(curNode->symbol, text, strlen(text)) == 0) {
-    DEBUG(FALSE, "dictionaryWalker %p {%s}[%s]\n",
-          curNode, text, curNode->symbol);
-    currentReadLineText->curNode = curNode->next;
-    return strdup(curNode->symbol);
-  }
-
-  currentReadLineText->curNode = NULL;
-  return NULL;
-}
-
-char** dictionaryCompletion(const char* text, int start, int end) {
- return rl_completion_matches(text, dictionaryWalker);
-}
-
-Text* createTextFromReadline(CoAlgebras* coAlgs) {
-  Text* aText = (Text*)calloc(1, sizeof(Text));
-  assert(aText);
-  //
-  // readline specific initializations
-  //
-  using_history();
-  read_history(".joyLoL-history");
-  rl_readline_name = "joyLoL";
-  rl_attempted_completion_function = dictionaryCompletion;
-  setReadlinePrompts(aText, NULL, NULL);
-  aText->curNode = NULL;
-  aText->curCompletionText = NULL;
-  aText->curCompletionLen  = 0;
-  aText->nextLine = nextLineFromReadline;
-  //
-  // general initialization
-  //
-  assert(coAlgs);
-  aText->coAlgebras = coAlgs;
-  aText->completed  = FALSE;
-  aText->sym        = NULL;
-  aText->curLine    = NULL;
-  aText->curChar    = NULL;
-  aText->lastChar   = NULL;
-  //
-  aText->inputFile = NULL;
-  //
-  aText->textLines  = NULL;
-  aText->curLineNum = 0;
-
-  assert(!currentReadLineText); // there should not be more than one
-  currentReadLineText = aText;
-
-  return aText;
-}
-\stoptyping
-
-\starttyping
-// string.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/text_private.h"
-
-// Texts are a collection of characters, which are used by the Parser
-// to extract successive symbols.
-//
-// Texts are created on one of three backing suppliers of characters:
-// 1. a single string
-// 2. a NULL terminated array of strings
-// 3. an external file
-// 4. a readline interaction with a user
-//
-// In all four cases, the Parser's nextSymbol method requests successive
-// **lines** of characters (deliminated by new-line-characters).
-//
-// It is critical, for correct interaction with the user via readline,
-// that the initial line is NOT obtained until actually requested by
-// the parser's nextSymbol method.
-//
-// It is also critical that once completed, none of the sources, get
-// asked for subsequent lines.
-//
-// When the text has been completed, the nextLine function ensures
-// that aText->curLine is NULL.
-
-/////////////////////////////////////////////////////////////////////////////
-// Text from array of strings
-//
-
-void nextLineFromString(Text* aText) {
-  DEBUG(FALSE, "->nextLineFromString [%s]{%p:%p}\n",
-    aText->curLine, aText->curChar, aText->lastChar);
-  if (!aText) return;  // there is nothing we can do!
-  if (!aText->curLine) return; // there is nothing we can do!
-
-  // there is no next line so... we have already reached the end of the text
-  aText->completed  = TRUE;
-  aText->curLine    = NULL;
-  aText->curChar    = NULL;
-  aText->lastChar   = NULL;
-}
-
-Text* createTextFromString(CoAlgebras* coAlgs,
-                           const char* aString) {
-  assert(coAlgs);
-  assert(aString);
-
-  Text* aText = (Text*)calloc(1, sizeof(Text));
-  assert(aText);
-  //
-  // array of strings specific initializations
-  //
-  aText->curLine    = aString;
-  aText->curChar    = aText->curLine;
-  aText->lastChar   = aText->curChar + strlen(aText->curLine);
-  aText->nextLine   = nextLineFromString;
-  //
-  // general initializations
-  //
-  aText->coAlgebras = coAlgs;
-  aText->completed  = FALSE;
-  aText->sym        = NULL;
-  //
-  aText->inputFile = NULL;
-  //
-  aText->newPrompt       = NULL;
-  aText->continuePrompt  = NULL;
-  aText->curPrompt       = NULL;
-  //
-  aText->textLines  = NULL;
-  aText->curLineNum = 0;
-
-  return aText;
-}
+*/
 \stoptyping
