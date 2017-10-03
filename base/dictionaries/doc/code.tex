@@ -5,6 +5,23 @@
 
 \dependsOn[jInterps]
 
+\startCHeader
+typedef struct dictionaries_object_struct DictObj;
+
+typedef struct dictionaries_object_struct {
+  CoAlgObj  super;
+  Symbol*   symbol;
+  CoAlgObj* preObs;
+  CoAlgObj* value;
+  CoAlgObj* postObs;
+  DictObj*  left;
+  DictObj*  right;
+  DictObj*  previous;
+  DictObj*  next;
+  size_t    height;
+  long      balance;
+} DictObj;
+\stopCHeader
 
 \startTestSuite[registerDictionaries]
 
@@ -22,6 +39,7 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   assert(theCoAlg);
   
   theCoAlg->name         = "Dictionaries";
+  theCoAlg->objectSize   = sizeof(DictObj);
   theCoAlg->registerFunc = registerDictionaries;
   theCoAlg->equalityFunc = NULL;
   theCoAlg->printFunc    = NULL;
@@ -30,13 +48,7 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   
   // do a sanity check...
   assert(tag == DictionariesTag);
-  assert(jInterp->coAlgs.vec[tag]);
-  assert(jInterp->coAlgs.vec[tag]->isA == DictionariesTag);
-  
-  // check to see if this theCoAlg has been used
-  if (theCoAlg->isA == UnusedTag) {
-    free(theCoAlg);
-  }
+  assert(jInterp->coAlgs[tag].sClass);
   
   registerDictionaryWords(jInterp);
   
@@ -50,12 +62,15 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   // CTestsSetup has already created a jInterp
   // and run regiserDictionaries
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs.vec[DictionariesTag]);
-  CoAlgebra *coAlg = jInterp->coAlgs.vec[DictionariesTag];
+  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[DictionariesTag].sClass;
   AssertIntTrue(registerDictionaries(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs.vec[DictionariesTag]);
-  AssertPtrEquals(jInterp->coAlgs.vec[DictionariesTag], coAlg);
-  AssertIntEquals(jInterp->coAlgs.vec[DictionariesTag]->isA, DictionariesTag);
+  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[DictionariesTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[DictionariesTag].sClass->objectSize, 
+    sizeof(DictObj)
+  );
 \stopCTest
 \stopTestCase
 \stopTestSuite

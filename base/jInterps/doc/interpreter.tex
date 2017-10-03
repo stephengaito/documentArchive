@@ -69,6 +69,13 @@ typedef struct coalgebras_struct {
   ObjectMemory oMem;
 } CoAlgClass;
 
+typedef struct dictionaries_object_struct DictObj;
+
+typedef struct dictionary_struct {
+  DictObj *root;
+  DictObj *firstSymbol;
+} Dictionary;
+
 typedef struct loader_struct Loader;
 
 typedef struct joylol_interpreter_struct {
@@ -76,6 +83,7 @@ typedef struct joylol_interpreter_struct {
   size_t       numCoAlgs;
   size_t       maxNumCoAlgs;
   CoAlgClass*  coAlgs;
+  Dictionary   dict;
   Loader       *loader;
 } JoyLoLInterp;
 \stopCHeader
@@ -116,7 +124,9 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
     jInterp->coAlgs[i].oMem.rootObjectBlock = NULL; 
   }
   
-  jInterp->loader = NULL;
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+  jInterp->loader           = NULL;
   
   return jInterp;
 }
@@ -140,6 +150,10 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
     AssertPtrNull(jInterp->coAlgs[i].oMem.freeObjects);
     AssertPtrNull(jInterp->coAlgs[i].oMem.rootObjectBlock);
   }
+  
+  AssertPtrNull(jInterp->dict.root);
+  AssertPtrNull(jInterp->dict.firstSymbol);
+  AssertPtrNull(jInterp->loader);
 \stopCTest
 \stopTestCase
 \stopTestSuite
