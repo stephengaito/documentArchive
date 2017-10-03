@@ -2,6 +2,8 @@
 
 \section[title=Find]
 
+\startTestSuite[findSymbol]
+
 \setCHeaderStream{private}
 \startCHeader
 extern DictObj* findSymbolRecurse(JoyLoLInterp* jInterp,
@@ -41,6 +43,46 @@ DictObj* findSymbol(JoyLoLInterp* jInterp, Symbol* aSymbol) {
   return findSymbolRecurse(jInterp, jInterp->dict.root, aSymbol);
 }
 \stopCCode
+
+\startTestCase[should find Symbol In Empty Dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+  
+  AssertPtrNull(findSymbolRecurse(jInterp, NULL, "aSymbol"));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should find Symbol In Non Empty Dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+
+  DictObj* aNode = newDict(jInterp, "aNodeSymbol");
+  AssertPtrNotNull(aNode);
+  DictObj* foundAPair = findSymbolRecurse(jInterp, aNode, "aNodeSymbol");
+  AssertPtrNotNull(foundAPair);
+  AssertStrEquals(foundAPair->symbol, "aNodeSymbol");
+\stopCTest
+\stopTestCase
+
+\startTestCase[should find Symbol Not In Dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+
+  DictObj* aSimpleDic = newDict(jInterp, "aNodeSymbol");
+  AssertPtrNotNull(aSimpleDic);
+  AssertPtrNull(findSymbolRecurse(jInterp, aSimpleDic, "aSymbol"));
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \setCHeaderStream{private}
 \startCHeader

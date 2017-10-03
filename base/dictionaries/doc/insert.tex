@@ -2,6 +2,8 @@
 
 \section[title=Insert]
 
+\startTestSuite[insertSymbol]
+
 \setCHeaderStream{private}
 \startCHeader
 extern DictObj* insertSymbolRecurse(JoyLoLInterp* jInterp,
@@ -128,3 +130,285 @@ DictObj* insertSymbol(JoyLoLInterp* jInterp, Symbol* aSymbol) {
   return insertSymbolRecurse(jInterp, jInterp->dict.root, aSymbol);
 }
 \stopCCode
+
+\startTestCase[should insert Symbol In Dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+  
+  DictObj* aSimpleDic = newDict(jInterp, "aNodeSymbol");
+  DictObj* aNewDic = insertSymbolRecurse(jInterp, aSimpleDic, "aNodeSymbol");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[aNodeSymbol] l:(  ) r:(  )");
+  AssertPtrNull(aNewDic->next);
+  AssertPtrNull(aNewDic->previous);
+  AssertIntTrue(jInterp->dict.firstSymbol != aNewDic);
+  AssertIntTrue(jInterp->dict.firstSymbol != aSimpleDic);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should insert Symbol Not In Dictionary]
+\startCTest
+  DEBUG(FALSE, "\n%s insert many symbols %s", "---------", "---------");
+
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+
+  DictObj* aSimpleDic = newDict(jInterp, "20");
+  jInterp->dict.root        = aSimpleDic;
+  jInterp->dict.firstSymbol = aSimpleDic;
+
+  DictObj* aNewDic = insertSymbolRecurse(jInterp, aSimpleDic, "15");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  )");
+  //
+  // test insertion on the left into doubly linked list
+  //
+  AssertPtrNotNull(aNewDic->previous);
+  AssertPtrNull(aNewDic->next);
+  AssertPtrEquals(jInterp->dict.firstSymbol, aNewDic->previous);
+  AssertPtrEquals(jInterp->dict.firstSymbol->next, aNewDic);
+  AssertPtrNull(jInterp->dict.firstSymbol->previous);
+  AssertPtrNull(aNewDic->next);
+
+  // should invoke an LL
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "10");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  )");
+  //
+  // test insertion on the right into doubly linked list
+  // as well as a rotate right
+  //
+  AssertPtrNotNull(aNewDic->previous);
+  AssertPtrNotNull(aNewDic->next);
+  AssertPtrEquals(jInterp->dict.firstSymbol, aNewDic->previous);
+  AssertPtrEquals(jInterp->dict.firstSymbol->next, aNewDic);
+  AssertStrEquals(jInterp->dict.firstSymbol->symbol, "10");
+  AssertStrEquals(aNewDic->next->symbol, "20");
+  AssertPtrEquals(aNewDic->next->previous, aNewDic);
+  AssertPtrNull(aNewDic->next->next);
+
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "30");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [30] l:(  ) r:(  )  )  )");
+
+  // should invoke an RR
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "35");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [20] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  )");
+
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "25");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [20] l:(  ) r:( [25] l:(  ) r:(  )  )  ) r:( [35] l:(  ) r:(  )  )  )");
+
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "23");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [23] l:( [20] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  )  ) r:( [35] l:(  ) r:(  )  )  )");
+
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "22");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[23] l:( [15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [22] l:(  ) r:(  )  )  )  ) r:( [30] l:( [25] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  )");
+
+  // now try and find all of the symbols...
+  DictObj* aNode = findSymbolRecurse(jInterp, aNewDic, "15");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "15");
+
+  aNode = findSymbolRecurse(jInterp, aNewDic, "20");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "20");
+
+  aNode = findSymbolRecurse(jInterp, aNewDic, "23");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "23");
+
+  checkAVLNode(aNewDic, FALSE);
+\stopCTest
+\stopTestCase
+
+
+\startTestCase[should insert Symbol LL]
+\startCTest
+  DEBUG(FALSE, "\n%s should invoke an LL %s\n", "---------", "---------");
+
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+  
+  DictObj* aSimpleDic = newDict(jInterp,"20");
+  jInterp->dict.root        = aSimpleDic;
+  jInterp->dict.firstSymbol = aSimpleDic;
+
+  DictObj* aNewDic = insertSymbolRecurse(jInterp, aSimpleDic, "15");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  )");
+
+  // should invoke an LL
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "10");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  )");
+\stopCTest
+\stopTestCase
+
+\startTestCase[should insert Symbol RR]
+\startCTest
+  DEBUG(FALSE, "\n%s should invoke an RR %s\n", "---------", "---------");
+
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+
+  DictObj* aSimpleDic = newDict(jInterp,"20");
+  jInterp->dict.root        = aSimpleDic;
+  jInterp->dict.firstSymbol = aSimpleDic;
+
+  DictObj* aNewDic = insertSymbolRecurse(jInterp, aSimpleDic, "25");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[20] l:(  ) r:( [25] l:(  ) r:(  )  )");
+
+  // should invoke an RR
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "30");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[25] l:( [20] l:(  ) r:(  )  ) r:( [30] l:(  ) r:(  )  )");
+
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "35");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[25] l:( [20] l:(  ) r:(  )  ) r:( [30] l:(  ) r:( [35] l:(  ) r:(  )  )  )");
+\stopCTest
+\stopTestCase
+
+\startTestCase[should insert Symbol LR]
+\startCTest
+  DEBUG(FALSE, "\n%s should invoke an LR %s\n", "---------", "---------");
+
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+
+  DictObj* aSimpleDic = newDict(jInterp,"20");
+  jInterp->dict.root        = aSimpleDic;
+  jInterp->dict.firstSymbol = aSimpleDic;
+
+  DictObj* aNewDic = insertSymbolRecurse(jInterp, aSimpleDic, "15");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  )");
+
+  // should invoke an LR
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "17");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[17] l:( [15] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  )");
+\stopCTest
+\stopTestCase
+
+
+\startTestCase[should insert Symbol RL]
+\startCTest
+  DEBUG(FALSE, "\n%s should invoke an RL %s\n", "---------", "---------");
+
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+
+  DictObj* aSimpleDic = newDict(jInterp,"20");
+  jInterp->dict.root        = aSimpleDic;
+  jInterp->dict.firstSymbol = aSimpleDic;
+
+  DictObj* aNewDic = insertSymbolRecurse(jInterp, aSimpleDic, "25");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[20] l:(  ) r:( [25] l:(  ) r:(  )  )");
+
+  // should invoke an RL
+  aNewDic = insertSymbolRecurse(jInterp, aNewDic, "22");
+  AssertPtrNotNull(aNewDic);
+  AssertStrEquals(printDictionary(aNewDic),
+  "[22] l:( [20] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  )");
+\stopCTest
+\stopTestCase
+
+\startTestCase[should insert Symbol randomly]
+\startCTest
+
+  srand(time(NULL));
+
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+
+  DictObj* avlDic = newDict(jInterp,"0");
+  jInterp->dict.root        = avlDic;
+  jInterp->dict.firstSymbol = avlDic;
+
+  for (int i = 0; i < 1000; i++) {
+    char itoa[100];
+    sprintf(itoa, "%d", rand() % 100);
+    avlDic = insertSymbolRecurse(jInterp, avlDic, itoa);
+  }
+  checkAVLNode(avlDic, FALSE);
+
+//  printf("%s\n", printDictionary(avlDic));
+//  printf("avl node height: %zu\n", deepCalculateAVLNodeHeight(avlDic));
+//  printf("avl node height: %zu\n", avlDic->height);
+//  printf("avl node balance: %d\n", avlDic->balance);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should insert Symbol linearly]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  // ensure the global dictionary is empty
+  jInterp->dict.root        = NULL;
+  jInterp->dict.firstSymbol = NULL;
+
+  DictObj* avlDic = newDict(jInterp,"10");
+  jInterp->dict.root        = avlDic;
+  jInterp->dict.firstSymbol = avlDic;
+
+  for (int i = 10; i < 100; i++) {
+    char itoa[100];
+    sprintf(itoa, "%d", i);
+    avlDic = insertSymbolRecurse(jInterp, avlDic, itoa);
+  }
+  checkAVLNode(avlDic, FALSE);
+
+//  printf("%s\n", printDictionary(avlDic));
+//  printf("avl node height: %zu\n", deepCalculateAVLNodeHeight(avlDic));
+//  printf("avl node height: %zu\n", avlDic->height);
+//  printf("avl node balance: %d\n", avlDic->balance);
+
+  AssertIntEquals(avlDic->height, deepCalculateAVLNodeHeight(avlDic));
+  AssertIntEquals(avlDic->height, 8);
+  AssertIntEquals(avlDic->balance, -2);
+\stopCTest
+\stopTestCase
+\stopTestSuite

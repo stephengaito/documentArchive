@@ -3,6 +3,8 @@
 \section[title=Check]
 \setCHeaderStream{private}
 
+\startTestSuite[reCalculateAVLNodeHeight]
+
 \startCHeader
 extern void reCalculateAVLNodeHeightBalance(DictObj* anAVLNode);
 \stopCHeader
@@ -29,6 +31,37 @@ void reCalculateAVLNodeHeightBalance(DictObj* anAVLNode) {
   }
 }
 \stopCCode
+
+\startTestCase[should computer correct AVLNode heights]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  
+  DictObj* aNode = newDict(jInterp, "20");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(printDictionary(aNode),
+  "[20] l:(  ) r:(  )");
+
+  AssertIntEquals(aNode->height, 1);
+  reCalculateAVLNodeHeightBalance(aNode);
+  AssertIntEquals(aNode->height, 1);
+  AssertIntEquals(aNode->balance, 0);
+
+  aNode->left = newDict(jInterp, "15");
+  AssertStrEquals(printDictionary(aNode),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  )");
+  reCalculateAVLNodeHeightBalance(aNode);
+  AssertIntEquals(aNode->height, 2);
+  AssertIntEquals(aNode->balance, 2);
+
+  aNode->right = newDict(jInterp, "25");
+  AssertStrEquals(printDictionary(aNode),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  )");
+  reCalculateAVLNodeHeightBalance(aNode);
+  AssertIntEquals(aNode->height, 2);
+  AssertIntEquals(aNode->balance, 0);
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \startCHeader
 extern size_t deepCalculateAVLNodeHeight(DictObj* anAVLNode);
