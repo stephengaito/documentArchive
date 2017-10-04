@@ -2,45 +2,16 @@
 
 \section[title=Strings]
 
-\starttyping
-// files.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+\startTestSuite[texts from files]
 
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/text_private.h"
+\setCHeaderStream{private}
+\startCHeader
+extern void nextLineFromFile(TextObj* aText);
+\stopCHeader
+\setCHeaderStream{public}
 
-// Texts are a collection of characters, which are used by the Parser
-// to extract successive symbols.
-//
-// Texts are created on one of three backing suppliers of characters:
-// 1. a single string
-// 2. a NULL terminated array of strings
-// 3. an external file
-// 4. a readline interaction with a user
-//
-// In all four cases, the Parser's nextSymbol method requests successive
-// **lines** of characters (deliminated by new-line-characters).
-//
-// It is critical, for correct interaction with the user via readline,
-// that the initial line is NOT obtained until actually requested by
-// the parser's nextSymbol method.
-//
-// It is also critical that once completed, none of the sources, get
-// asked for subsequent lines.
-//
-// When the text has been completed, the nextLine function ensures
-// that aText->curLine is NULL.
-
-/////////////////////////////////////////////////////////////////////////////
-// Text from file
-//
-
-void nextLineFromFile(Text* aText) {
+\startCCode
+void nextLineFromFile(TextObj* aText) {
   DEBUG(FALSE, "->nextLineFromFile %s\n", "");
   if (!aText) return; // there is nothing we can do!
   if (!aText->inputFile) return; // there is nothing we can do!
@@ -76,10 +47,20 @@ void nextLineFromFile(Text* aText) {
   aText->lastChar   = aText->curChar + strlen(aText->curLine);
   DEBUG(FALSE, "<-nextLineFromFile [%s]\n", aText->curLine);
 }
+\stopCCode
 
-Text* createTextFromInputFile(CoAlgebras* coAlgs,
-                              FILE *anInputFile) {
-  Text* aText = (Text*)calloc(1, sizeof(Text));
+\startCHeader
+extern TextObj* createTextFromInputFile(JoyLoLInterp* jInterp,
+                                        FILE *anInputFile);
+\stopCHeader
+
+\startCCode
+TextObj* createTextFromInputFile(JoyLoLInterp* jInterp,
+                                 FILE *anInputFile) {
+  assert(jInterp);
+  assert(anInputFile);
+  
+  TextObj* aText = (TextObj*)newObject(jInterp, TextsTag);
   assert(aText);
   //
   // external file specific initializations
@@ -89,8 +70,7 @@ Text* createTextFromInputFile(CoAlgebras* coAlgs,
   //
   // general initializations
   //
-  assert(coAlgs);
-  aText->coAlgebras = coAlgs;
+  aText->jInterp    = jInterp;
   aText->completed  = FALSE;
   aText->sym        = NULL;
   aText->curLine    = NULL;
@@ -105,4 +85,154 @@ Text* createTextFromInputFile(CoAlgebras* coAlgs,
   aText->curPrompt      = NULL;
   return aText;
 }
-\stoptyping
+\stopCCode
+
+\startTestCase[ should create Text From Input File]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  FILE* inputFile = fopen("doc/someLines.txt", "r");
+  AssertPtrNotNull(inputFile);
+  
+  TextObj* aText = createTextFromInputFile(jInterp, inputFile);
+  AssertPtrNotNull(aText);
+  AssertPtrNotNull(aText->inputFile);
+  AssertPtrNull(aText->curLine);
+  AssertPtrNull(aText->curChar);
+  AssertPtrNull(aText->lastChar);
+  aText->nextLine(aText);
+  AssertStrEquals(aText->curLine, "  This is a first line  \n");
+  AssertPtrEquals((void*)aText->curChar, (void*)aText->curLine);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[0]) + 1);
+  aText->nextLine(aText);
+  AssertStrEquals(aText->curLine, "  This is a second line   \n");
+  AssertPtrEquals((void*)aText->curChar, (void*)aText->curLine);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[1]) + 1);
+  aText->nextLine(aText);
+  AssertStrEquals(aText->curLine, "\n");
+  AssertPtrEquals((void*)aText->curChar, (void*)aText->curLine);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[2]) + 1);
+  aText->nextLine(aText);
+  AssertStrEquals(aText->curLine, " ([<{ }>]) \n");
+  AssertPtrEquals((void*)aText->curChar, (void*)aText->curLine);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[3]) + 1);
+  // these do not match litterally since file does not seem to have tabs
+  aText->nextLine(aText);
+//  AssertStrEquals(aText->curLine, "     	\n");
+  AssertPtrEquals((void*)aText->curChar, (void*)aText->curLine);
+//  AssertIntEquals((aText->lastChar - aText->curChar),
+//                        strlen(someLines[4]) + 1);
+  aText->nextLine(aText);
+  AssertStrEquals(aText->curLine, "  This is the last line  \n");
+  AssertPtrEquals((void*)aText->curChar, (void*)aText->curLine);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[5]) + 1);
+  // the file has a couple more blank lines at the end
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  aText->nextLine(aText);
+  AssertPtrEquals((void*)aText->curLine, NULL);
+  AssertPtrEquals((void*)aText->curChar, NULL);
+  AssertIntEquals((aText->lastChar - aText->curChar), 0);
+  fclose(inputFile);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should get symbols using nextSymbol]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  FILE* inputFile = fopen("doc/someLines.txt", "r");
+  AssertPtrNotNull(inputFile);
+  
+  TextObj* aText = createTextFromInputFile(jInterp, inputFile);
+  AssertPtrNotNull(aText);
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "This");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "is");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "a");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "first");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "line");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "This");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "is");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "a");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "second");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "line");
+
+  // " ([<{ }>]) "
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "(");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "[");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "<");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "{");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "}");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), ">");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "]");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), ")");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "This");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "is");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "the");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "last");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "line");
+
+  nextSymbol(aText);
+  AssertPtrNull(aText->sym);
+  fclose(inputFile);
+\stopCTest
+\stopTestCase
+\stopTestSuite
