@@ -339,8 +339,8 @@ Boolean printStrTextsCoAlg(CoAlgObj* aLoL,
 
   TextObj* aNewText = createTextFromString(jInterp, "a string");
   AssertPtrNotNull(aNewText);
-  AssertIntEquals(printSizeDebug((CoAlgObj*)aNewText, FALSE), 6);
-  AssertStrEquals(printLoLDebug((CoAlgObj*)aNewText, FALSE), "true");
+  AssertIntEquals(printSizeDebug((CoAlgObj*)aNewText, FALSE), 10);
+  AssertStrEquals(printLoLDebug((CoAlgObj*)aNewText, FALSE), "--texts--");
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -701,27 +701,4 @@ void Test_nextSymbolFile(CuTest* tc) {
   CuAssertPtrNull(tc, aText->sym);
   fclose(inputFile);
 }
-
-/* For later?
-void ignoreTest_nextSymbolHandleStrings(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-
-  Text* aText = createTextFromString(coAlgs, "this (is a test) (of strings)");
-  CuAssertPtrNotNull(tc, aText);
-
-  nextSymbol(aText);
-  CuAssertPtrNotNull(tc, aText->sym);
-  CuAssertStrEquals(tc, aText->sym->symbol, "this");
-
-  nextSymbol(aText);
-  CuAssertPtrNotNull(tc, aText->sym);
-  CuAssertStrEquals(tc, aText->sym->symbol, "is a test");
-
-  nextSymbol(aText);
-  CuAssertPtrNotNull(tc, aText->sym);
-  CuAssertStrEquals(tc, aText->sym->symbol, "of strings");
-
-}
-*/
 \stoptyping

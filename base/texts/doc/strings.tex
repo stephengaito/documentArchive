@@ -24,11 +24,9 @@
 //
 // When the text has been completed, the nextLine function ensures
 // that aText->curLine is NULL.
-
-/////////////////////////////////////////////////////////////////////////////
-// Text from array of strings
-//
 \stopCCode
+
+\startTestSuite[texts from a string]
 
 \setCHeaderStream{private}
 \startCHeader
@@ -61,7 +59,7 @@ TextObj* createTextFromString(JoyLoLInterp *jInterp,
                               Symbol* aString) {
   assert(jInterp);
   assert(aString);
-
+  
   TextObj* aText = (TextObj*)newObject(jInterp, TextsTag);
   assert(aText);
   //
@@ -90,6 +88,60 @@ TextObj* createTextFromString(JoyLoLInterp *jInterp,
   return aText;
 }
 \stopCCode
+
+\startTestCase[nextSymbol should get next symbol]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromString(jInterp, "this (is a test) (of strings)");
+  AssertPtrNotNull(aText);
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "this");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "(");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "is");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "a");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "test");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), ")");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "(");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "of");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "strings");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), ")");
+
+  nextSymbol(aText);
+  AssertPtrNull(aText->sym);
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \starttyping
 // arrayOfStrings.c

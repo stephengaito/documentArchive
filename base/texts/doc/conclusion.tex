@@ -43,12 +43,14 @@
 \addCTestInclude{<joylol/texts-private.h>}
 \addCTestLib{<HOME>/.joylol/joylol/symbols}
 \addCTestLib{<HOME>/.joylol/joylol/naturals}
+\addCTestLib{<HOME>/.joylol/joylol/dictionaries}
 \addCTestLib{-lgmp}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedSymbols(lstate);
   requireStaticallyLinkedNaturals(lstate);
+  requireStaticallyLinkedDictionaries(lstate);
   requireStaticallyLinkedTexts(lstate);
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
 \stopCTest

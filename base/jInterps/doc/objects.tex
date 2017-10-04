@@ -306,7 +306,7 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
   CoAlgObj* aNewObject   = jInterp->coAlgs[aTag].oMem.freeObjects;
   jInterp->coAlgs[aTag].oMem.freeObjects = (CoAlgObj*)(aNewObject->type);
 
-  aNewObject->type  = NULL;
+  aNewObject->type  = jInterp->coAlgs[aTag].sClass;
   aNewObject->tag   = aTag;
   aNewObject->flags = 0;
 
@@ -334,7 +334,8 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
   AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
   AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
   AssertPtrNotNull(aNewObject);
-  AssertPtrNull(aNewObject->type);
+  AssertPtrNotNull(aNewObject->type);
+  AssertPtrEquals(aNewObject->type, jInterp->coAlgs[aTag].sClass);
   AssertIntEquals(aNewObject->tag, aTag);
   AssertIntZero(aNewObject->flags);
   AssertPtrEquals(aNewObject,
@@ -351,7 +352,8 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
   aNewObject = newObject(jInterp, JInterpsTag);
 
   AssertPtrNotNull(aNewObject);
-  AssertPtrNull(aNewObject->type);
+  AssertPtrNotNull(aNewObject->type);
+  AssertPtrEquals(aNewObject->type, jInterp->coAlgs[JInterpsTag].sClass);
   AssertIntEquals(aNewObject->tag, JInterpsTag);
   AssertIntZero(aNewObject->flags);
   AssertPtrEquals(oldFreeObjects, aNewObject);
@@ -369,7 +371,8 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
     aNewObject = newObject(jInterp, JInterpsTag);
   }
   AssertPtrNotNull(aNewObject);
-  AssertPtrNull(aNewObject->type);
+  AssertPtrNotNull(aNewObject->type);
+  AssertPtrEquals(aNewObject->type, jInterp->coAlgs[JInterpsTag].sClass);
   AssertIntEquals(aNewObject->tag, JInterpsTag);
   AssertIntZero(aNewObject->flags);
 \stopCTest
