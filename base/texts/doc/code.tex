@@ -360,7 +360,7 @@ Boolean registerTexts(JoyLoLInterp *jInterp) {
   assert(theCoAlg);
   
   theCoAlg->name         = TextsName;
-  theCoAlg->objectSize   = sizeof(CoAlgObj);
+  theCoAlg->objectSize   = sizeof(TextObj);
   theCoAlg->registerFunc = registerTexts;
   theCoAlg->equalityFunc = equalityTextsCoAlg;
   theCoAlg->printSize    = printSizeTextsCoAlg;
@@ -391,7 +391,7 @@ Boolean registerTexts(JoyLoLInterp *jInterp) {
   AssertPtrEquals(jInterp->coAlgs[TextsTag].sClass, coAlg);
   AssertIntEquals(
     jInterp->coAlgs[TextsTag].sClass->objectSize,
-    sizeof(CoAlgObj)
+    sizeof(TextObj)
   )
 \stopCTest
 \stopTestCase
@@ -412,67 +412,6 @@ Boolean registerTexts(JoyLoLInterp *jInterp) {
 #include "joyLoL/text_private.h"
 
 // suiteName: - Text tests -
-
-static Symbol* someLines[] = {
-  "  This is a first line  ",
-  "  This is a second line   ",
-  "",
-  " ([<{ }>]) ",
-  "     	",
-  "  This is the last line  ",
-  NULL
-};
-
-void Test_createTextFromArrayOfStrings(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-
-  Text* aText = createTextFromArrayOfStrings(coAlgs, someLines);
-  CuAssertPtrNotNull(tc, aText);
-  CuAssertPtrEquals(tc, (void*)aText->textLines, (void*)someLines);
-  CuAssertIntEquals(tc, aText->curLineNum, 0);
-  CuAssertPtrNull(tc, aText->curLine);
-  CuAssertPtrNull(tc, aText->curChar);
-  CuAssertPtrNull(tc, aText->lastChar);
-  aText->nextLine(aText);
-  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[0]);
-  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[0]);
-  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
-                        strlen(someLines[0]));
-  aText->nextLine(aText);
-  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[1]);
-  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[1]);
-  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
-                        strlen(someLines[1]));
-  aText->nextLine(aText);
-  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[2]);
-  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[2]);
-  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
-                        strlen(someLines[2]));
-  aText->nextLine(aText);
-  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[3]);
-  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[3]);
-  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
-                        strlen(someLines[3]));
-  aText->nextLine(aText);
-  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[4]);
-  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[4]);
-  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
-                        strlen(someLines[4]));
-  aText->nextLine(aText);
-  CuAssertPtrEquals(tc, (void*)aText->curLine, (void*)someLines[5]);
-  CuAssertPtrEquals(tc, (void*)aText->curChar, (void*)someLines[5]);
-  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar),
-                        strlen(someLines[5]));
-  aText->nextLine(aText);
-  CuAssertPtrEquals(tc, (void*)aText->curLine, NULL);
-  CuAssertPtrEquals(tc, (void*)aText->curChar, NULL);
-  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar), 0);
-  aText->nextLine(aText);
-  CuAssertPtrEquals(tc, (void*)aText->curLine, NULL);
-  CuAssertPtrEquals(tc, (void*)aText->curChar, NULL);
-  CuAssertIntEquals(tc, (aText->lastChar - aText->curChar), 0);
-}
 
 void Test_createTextFromInputFile(CuTest* tc) {
   CoAlgebras* coAlgs = createCoAlgebras();

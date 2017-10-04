@@ -294,6 +294,7 @@ CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   assert(aTag < jInterp->numCoAlgs);
+  assert(jInterp->coAlgs[aTag].sClass);
   
   // ensure there are some free objects
   if ( ! jInterp->coAlgs[aTag].oMem.freeObjects ) 
