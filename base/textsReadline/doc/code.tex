@@ -1,304 +1,12 @@
-% A ConTeXt document [master document: texts.tex]
+% A ConTeXt document [master document: textsReadline.tex]
 
 \section[title=Code]
+\setCHeaderStream{public}
 
 \dependsOn[jInterps]
-%\dependsOn[context]
+\dependsOn[texts]
 
-\component gitVersion-c
-
-\starttyping
-// texts.h
-#ifndef JOYLOL_TEXT_H
-#define JOYLOL_TEXT_H
-
-typedef struct list_memory_struct ListMemory;
-typedef struct pair_atom_struct PairAtom;
-typedef struct avl_node_struct AVLNode;
-typedef struct dictionary_struct Dictionary;
-
-struct text_struct;
-
-typedef void (NextLineFunc)(struct text_struct*);
-
-typedef struct text_struct {
-  //
-  // fields used by all backing types
-  //
-  size_t        completed;
-  PairAtom*     sym;
-  const char*   curLine;
-  const char*   curChar;
-  const char*   lastChar;
-  NextLineFunc* nextLine;
-  CoAlgebras*   coAlgebras;
-  //
-  // array of strings specific fields
-  //
-  const char** textLines;
-  size_t curLineNum;
-  //
-  // external file specific fields
-  //
-  FILE* inputFile;
-  //
-  // readline specific fields
-  //
-  const char* newPrompt;
-  const char* continuePrompt;
-  const char* curPrompt;
-  AVLNode*    curNode;
-  const char* curCompletionText;
-  size_t      curCompletionLen;
-} Text;
-
-
-extern Text* createTextFromArrayOfStrings(CoAlgebras* coAlgs,
-                                          const char* someTextLines[]);
-
-extern Text* createTextFromString(CoAlgebras* coAlgs,
-                                  const char* aString);
-
-extern Text* createTextFromInputFile(CoAlgebras* coAlgs,
-                                     FILE *anInputFile);
-
-extern Text* createTextFromReadline(CoAlgebras* coAlgs);
-
-extern void freeText(Text* aText);
-
-extern void setReadlinePrompts(Text* aText,
-  const char* newPrompt, const char* continuePrompt);
-extern void clearReadlinePrompt(Text* aText);
-extern void saveReadlineHistory(Text* aText);
-
-extern void nextSymbol(Text* aText);
-extern void reportError(Text* aText, const char* message);
-
-#endif
-\stoptyping
-
-\starttyping
-// texts-private.h
-#ifndef JOYLOL_TEXT_PRIVATE_H
-#define JOYLOL_TEXT_PRIVATE_H
-
-extern void nextLineFromString(Text* aText);
-extern void nextLineFromArray(Text* aText);
-extern void nextLineFromFile(Text* aText);
-extern void nextLineFromReadline(Text* aText);
-extern void nextLineExit(Text* aText);
-
-#endif
-\stoptyping
-
-\starttyping
-// texts.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/text_private.h"
-#include "joyLoL/dictionary.h"
-
-// Texts are a collection of characters, which are used by the Parser
-// to extract successive symbols.
-//
-// Texts are created on one of three backing suppliers of characters:
-// 1. a fixed array of strings
-// 2. an external file
-// 3. a readline interaction with a user
-//
-// In all three cases, the Parser's nextSymbol method requests successive
-// **lines** of characters (deliminated by new-line-characters).
-//
-// It is critical, for correct interaction with the user via readline,
-// that the initial line is NOT obtained until actually requested by
-// the parser's nextSymbol method.
-//
-// It is also critical that once completed, none of the sources, get
-// asked for subsequent lines.
-//
-// When the text has been completed, the nextLine function ensures
-// that aText->curLine is NULL.
-
-void freeText(Text* aText) {
-  if (!aText) return;
-
-  free(aText);
-}
-
-void nextLineExit(Text* aText) {
-  if (!aText) return; // there is nothing we can do!
-  aText->sym       = NULL;
-  aText->curLine   = NULL;
-  aText->curChar   = NULL;
-  aText->lastChar  = NULL;
-  aText->completed = TRUE;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// nextSymbol
-//
-
-void nextSymbol(Text* aText) {
-  assert(aText);
-  assert(aText->coAlgebras);
-  assert(aText->coAlgebras->symbols);
-  Dictionary* mainDic = aText->coAlgebras->symbols->dictionary;
-  assert(mainDic);
-
-  DEBUG(FALSE, "->nextSymbol [%s]{%s}\n", aText->curLine, aText->curChar);
-  aText->sym = NULL;
-
-  // ensure we have a non-empty line
-  while ((!aText->completed) && (aText->curChar == aText->lastChar)) {
-    aText->nextLine(aText);
-  }
-  if (!aText->curLine) {
-    DEBUG(FALSE, "<-nextSymbol End of Text %s\n","");
-    return; // we have exhausted this text
-  }
-
-  size_t      parsingNatural = TRUE;
-  const char* symStart = aText->curChar;
-  const char* symEnd   = aText->curChar;
-  const char* lastChar = aText->lastChar;
-  while (symStart == symEnd) {
-    while (symEnd < lastChar) {
-      if (*symEnd < 33) {
-        //
-        // white space
-        //
-        if (symStart != symEnd)  break; // we have found a symbol
-        //
-        // ignore whitespace (of any type)
-        //
-        symStart++;
-        symEnd++;
-        //
-      } else if (
-        *symEnd == '('  || *symEnd == ')'  ||
-        *symEnd == '<'  || *symEnd == '>'  ||
-        *symEnd == '['  || *symEnd == ']'  ||
-        *symEnd == '{'  || *symEnd == '}' ) {
-        //
-        // '(', ')', '<', '>', '[', ']'
-        //
-        if (symStart != symEnd) break; // we have found a symbol
-        //
-        // '(' ')' are symbols in their own right
-        //
-        parsingNatural = FALSE;
-        symEnd++;
-        break;
-        //
-      } else if ( *symEnd == ';') {
-        //
-        if (symStart != symEnd) break; // we have found a symbol
-        //
-        const char* symEndP1 = symEnd + 1;
-        if ( symEndP1 < lastChar && *symEndP1 == ';') {
-          //
-          // we have found the begining of a single line comment
-          // ... so restart search for the next symbol on the next line
-          //
-          aText->nextLine(aText);
-          if (!aText->curLine) return; // no more symbols
-          symStart = aText->curChar;
-          symEnd   = aText->curChar;
-          lastChar = aText->lastChar;
-        } else {
-          //
-          // ';' is a symbol in its own right
-          //
-          parsingNatural = FALSE;
-          symEnd++;
-          break;
-          //
-        }
-        //
-      } else {
-        //
-        // any other character is part of a symbol
-        //
-        // check to see if we are still parsing a natural
-        //
-        if ('0' <= *symEnd && *symEnd <= '9') {
-          // do nothing
-        } else {
-          parsingNatural = FALSE;
-        }
-        //
-        symEnd++;
-        //
-      }
-    }
-
-    if (symStart == symEnd) {
-      aText->nextLine(aText);
-      if (!aText->curLine) return; // no more symbols
-      symStart = aText->curChar;
-      symEnd   = aText->curChar;
-      lastChar = aText->lastChar;
-    }
-  }
-
-  aText->curChar = symEnd;
-  char* aSymbol = strndup(symStart, symEnd - symStart); // TODO this thrashes memory ;-(
-  DEBUG(FALSE, "--nextSymbol == [%s]\n", aSymbol);
-
-  // check to see if this is the exit or quit symbol ...
-  // ... and if so rest the nextLine function
-  if (strcmp(aSymbol, "exit") == 0 || strcmp(aSymbol, "quit") == 0) {
-    aText->nextLine = nextLineExit;
-  }
-
-  if (parsingNatural) {
-    DEBUG(FALSE, "--nextSymbol == %s (natural)\n", aSymbol);
-    // we have parsed a natural... so create a new natural
-    //
-    aText->sym = newNatural(aText->coAlgebras, aSymbol);
-    //
-    DEBUG(FALSE, "<-nextSymbol %s (natural)\n", aSymbol);
-  } else {
-    // we have parsed a symbol... so create a new symbol
-    //
-    AVLNode* aSym = createSymbol(mainDic, aSymbol);
-    aText->sym = createAtom(aText->coAlgebras, aSym);
-    //
-    DEBUG(FALSE, "<-nextSymbol [%s] (symbol)\n", aText->sym->symbol);
-  }
-  free(aSymbol);
-}
-
-void reportError(Text *aText, const char* message) {
-  fprintf(stderr, "\n\n%s\n", message);
-  if (aText->curLine) {
-    fprintf(stderr, "while parsing\n");
-    fprintf(stderr, "\t[%s]\n", aText->curLine);
-    fprintf(stderr, "at character %zu\n\n", aText->curChar - aText->curLine);
-  } else {
-    fprintf(stderr, "at end of text\n\n");
-  }
-}
-\stoptyping
-
-\starttyping
-// arrayOfStrings.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/text_private.h"
-
+\startCCode
 // Texts are a collection of characters, which are used by the Parser
 // to extract successive symbols.
 //
@@ -320,220 +28,17 @@ void reportError(Text *aText, const char* message) {
 //
 // When the text has been completed, the nextLine function ensures
 // that aText->curLine is NULL.
+\stopCCode
 
-/////////////////////////////////////////////////////////////////////////////
-// Text from array of strings
-//
-
-void nextLineFromArray(Text* aText) {
-  DEBUG(FALSE, "->nextLineFromArray %s\n", "");
-  if (!aText) return;  // there is nothing we can do!
-  if (!aText->textLines) return; // there is nothing we can do!
-
-  if (!aText->textLines[aText->curLineNum]) {
-    // we have already reached the end of the text
-    aText->completed  = TRUE;
-    aText->curLine    = NULL;
-    aText->curChar    = NULL;
-    aText->lastChar   = NULL;
-    return;
-  }
-
-  aText->curLine  = aText->textLines[aText->curLineNum];
-
-  aText->curChar  = aText->curLine;
-
-  if (aText->curLine) {
-    aText->lastChar = aText->curChar + strlen(aText->curLine);
-  } else aText->lastChar = aText->curChar;
-
-  aText->curLineNum++;
-}
-
-Text* createTextFromArrayOfStrings(CoAlgebras* coAlgs,
-                                   const char* someTextLines[]) {
-  Text* aText = (Text*)calloc(1, sizeof(Text));
-  assert(aText);
-  //
-  // array of strings specific initializations
-  //
-  aText->textLines  = someTextLines;
-  aText->curLineNum = 0;
-  aText->nextLine   = nextLineFromArray;
-  //
-  // general initializations
-  //
-  assert(coAlgs);
-  aText->coAlgebras = coAlgs;
-  aText->completed  = FALSE;
-  aText->sym        = NULL;
-  aText->curLine    = NULL;
-  aText->curChar    = NULL;
-  aText->lastChar   = NULL;
-  //
-  aText->inputFile  = NULL;
-  //
-  aText->newPrompt       = NULL;
-  aText->continuePrompt  = NULL;
-  aText->curPrompt       = NULL;
-
-  return aText;
-}
-\stoptyping
-
-\starttyping
-// files.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/text_private.h"
-
-// Texts are a collection of characters, which are used by the Parser
-// to extract successive symbols.
-//
-// Texts are created on one of three backing suppliers of characters:
-// 1. a single string
-// 2. a NULL terminated array of strings
-// 3. an external file
-// 4. a readline interaction with a user
-//
-// In all four cases, the Parser's nextSymbol method requests successive
-// **lines** of characters (deliminated by new-line-characters).
-//
-// It is critical, for correct interaction with the user via readline,
-// that the initial line is NOT obtained until actually requested by
-// the parser's nextSymbol method.
-//
-// It is also critical that once completed, none of the sources, get
-// asked for subsequent lines.
-//
-// When the text has been completed, the nextLine function ensures
-// that aText->curLine is NULL.
-
-/////////////////////////////////////////////////////////////////////////////
-// Text from file
-//
-
-void nextLineFromFile(Text* aText) {
-  DEBUG(FALSE, "->nextLineFromFile %s\n", "");
-  if (!aText) return; // there is nothing we can do!
-  if (!aText->inputFile) return; // there is nothing we can do!
-
-  // getline returns alloc'ed memory so we need to free it here.
-  if (aText->curLine) free((void*)aText->curLine);
-
-  aText->curLine    = NULL;
-  aText->curChar    = NULL;
-  aText->lastChar   = NULL;
-
-  char *linePtr    = NULL;
-  size_t n         = 0;
-  if (!getline(&linePtr, &n, aText->inputFile) && n < 1) {
-    DEBUG(FALSE, "<-nextLineFromFile %s\n", "getline returned 0");
-    aText->completed = TRUE;
-    return;
-  }
-
-  if (feof(aText->inputFile)) {
-    // we have already reached the end of the text;
-    DEBUG(FALSE, "<-nextLineFromFile %s\n", "feof returned file end");
-    aText->completed = TRUE;
-    aText->curLine   = NULL;
-    aText->curChar   = NULL;
-    aText->lastChar  = NULL;
-    return;
-  }
-
-  aText->curLine    = linePtr;
-
-  aText->curChar    = aText->curLine;
-  aText->lastChar   = aText->curChar + strlen(aText->curLine);
-  DEBUG(FALSE, "<-nextLineFromFile [%s]\n", aText->curLine);
-}
-
-Text* createTextFromInputFile(CoAlgebras* coAlgs,
-                              FILE *anInputFile) {
-  Text* aText = (Text*)calloc(1, sizeof(Text));
-  assert(aText);
-  //
-  // external file specific initializations
-  //
-  aText->inputFile  = anInputFile;
-  aText->nextLine   = nextLineFromFile;
-  //
-  // general initializations
-  //
-  assert(coAlgs);
-  aText->coAlgebras = coAlgs;
-  aText->completed  = FALSE;
-  aText->sym        = NULL;
-  aText->curLine    = NULL;
-  aText->curChar    = NULL;
-  aText->lastChar   = NULL;
-  //
-  aText->textLines  = NULL;
-  aText->curLineNum = 0;
-  //
-  aText->newPrompt      = NULL;
-  aText->continuePrompt = NULL;
-  aText->curPrompt      = NULL;
-  return aText;
-}
-\stoptyping
-
-\starttyping
-// readline.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/text_private.h"
-#include "joyLoL/dictionary.h"
-
-// Texts are a collection of characters, which are used by the Parser
-// to extract successive symbols.
-//
-// Texts are created on one of three backing suppliers of characters:
-// 1. a single string
-// 2. a NULL terminated array of strings
-// 3. an external file
-// 4. a readline interaction with a user
-//
-// In all four cases, the Parser's nextSymbol method requests successive
-// **lines** of characters (deliminated by new-line-characters).
-//
-// It is critical, for correct interaction with the user via readline,
-// that the initial line is NOT obtained until actually requested by
-// the parser's nextSymbol method.
-//
-// It is also critical that once completed, none of the sources, get
-// asked for subsequent lines.
-//
-// When the text has been completed, the nextLine function ensures
-// that aText->curLine is NULL.
-
-/////////////////////////////////////////////////////////////////////////////
-// Text from readline
-//
-
-void clearReadlinePrompt(struct text_struct* aText) {
+\startCCode
+static void clearReadlinePrompt(TextObj* aText) {
   aText->curPrompt = aText->newPrompt;
 }
 
-void setReadlinePrompts(Text* aText,
-                        const char* newPrompt, const char* continuePrompt) {
-
+static void setReadlinePrompts(TextObj* aText,
+                        const char* newPrompt,
+                        const char* continuePrompt
+) {
   if (newPrompt) aText->newPrompt = newPrompt;
   else           aText->newPrompt = ">";
 
@@ -542,13 +47,23 @@ void setReadlinePrompts(Text* aText,
 
   clearReadlinePrompt(aText);
 }
+\stopCCode
 
-void saveReadlineHistory(Text* aText) {
+
+\startCHeader
+extern void saveReadlineHistory(TextObj* aText);
+\stopCHeader
+
+\startCCode
+void saveReadlineHistory(TextObj* aText) {
   write_history(".joyLoL-history");
 }
+\stopCCode
 
-void nextLineFromReadline(struct text_struct* aText) {
-  DEBUG(FALSE, "->nextLineFromReadline %s\n", "");
+\startCCode
+static void nextLineFromReadline(TextObj* aText) {
+  assert(aText);
+  DEBUG(aText->debugFlag, "->nextLineFromReadline %s\n", "");
   if (!aText) return; // there is nothing we can do!
 
   if (aText->completed) {
@@ -575,7 +90,7 @@ void nextLineFromReadline(struct text_struct* aText) {
   }
 
   if (*aText->curLine) {
-    history_set_pos(0); // start at the begining
+    history_set_pos(0); // start at the beginning
     if (0 <= history_search (aText->curLine, -1)) { // search backwards
       remove_history(where_history());
     } else if (0 <= history_search (aText->curLine, 1)) { // search forwards
@@ -585,29 +100,30 @@ void nextLineFromReadline(struct text_struct* aText) {
     add_history (aText->curLine);
   }
 
-  aText->curChar = aText->curLine;
+  aText->curChar  = aText->curLine;
   aText->lastChar = aText->curChar + strlen(aText->curChar);
 
   aText->curPrompt = aText->continuePrompt;
 }
+\stopCCode
 
-Text* currentReadLineText = NULL;
+\startCCode
+static TextObj* currentReadLineText = NULL;
+\stopCCode
 
-char* dictionaryWalker(const char* text, int state) {
+\startCCode
+static char* dictionaryWalker(const char* text, int state) {
   if (!currentReadLineText) return NULL;
   if (!state) {
 
-    assert(currentReadLineText->coAlgebras);
-    assert(currentReadLineText->coAlgebras->symbols);
-    Dictionary* mainDic =
-      currentReadLineText->coAlgebras->symbols->dictionary;
-    assert(mainDic);
+    assert(currentReadLineText->jInterp);
 
-    currentReadLineText->curNode = findLUBSymbol(mainDic, text);
+    currentReadLineText->curNode =
+      findLUBSymbol(currentReadLineText->jInterp, text);
     DEBUG(FALSE, "dictionaryWalker-start %p\n",
           currentReadLineText->curNode);
   }
-  AVLNode* curNode = currentReadLineText->curNode;
+  DictObj* curNode = currentReadLineText->curNode;
 
   if (!curNode) return NULL;
 
@@ -622,12 +138,17 @@ char* dictionaryWalker(const char* text, int state) {
   return NULL;
 }
 
-char** dictionaryCompletion(const char* text, int start, int end) {
+static char** dictionaryCompletion(const char* text, int start, int end) {
  return rl_completion_matches(text, dictionaryWalker);
 }
+\stopCCode
 
-Text* createTextFromReadline(CoAlgebras* coAlgs) {
-  Text* aText = (Text*)calloc(1, sizeof(Text));
+\startCCode
+TextObj* createTextFromReadline(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(readlineTag);
+  
+  TextObj* aText = (TextObj*)newObject(jInterp, readlineTag);
   assert(aText);
   //
   // readline specific initializations
@@ -644,8 +165,8 @@ Text* createTextFromReadline(CoAlgebras* coAlgs) {
   //
   // general initialization
   //
-  assert(coAlgs);
-  aText->coAlgebras = coAlgs;
+
+  aText->jInterp    = jInterp;
   aText->completed  = FALSE;
   aText->sym        = NULL;
   aText->curLine    = NULL;
@@ -662,89 +183,60 @@ Text* createTextFromReadline(CoAlgebras* coAlgs) {
 
   return aText;
 }
-\stoptyping
+\stopCCode
 
-\starttyping
-// string.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+\startTestSuite[registerTextsReadline]
 
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/text_private.h"
+\startCHeader
+extern Boolean registerTextsReadline(JoyLoLInterp *jInterp);
+extern size_t readlineTag;
+\stopCHeader
 
-// Texts are a collection of characters, which are used by the Parser
-// to extract successive symbols.
-//
-// Texts are created on one of three backing suppliers of characters:
-// 1. a single string
-// 2. a NULL terminated array of strings
-// 3. an external file
-// 4. a readline interaction with a user
-//
-// In all four cases, the Parser's nextSymbol method requests successive
-// **lines** of characters (deliminated by new-line-characters).
-//
-// It is critical, for correct interaction with the user via readline,
-// that the initial line is NOT obtained until actually requested by
-// the parser's nextSymbol method.
-//
-// It is also critical that once completed, none of the sources, get
-// asked for subsequent lines.
-//
-// When the text has been completed, the nextLine function ensures
-// that aText->curLine is NULL.
+\startCCode
+size_t   readlineTag = 0;
 
-/////////////////////////////////////////////////////////////////////////////
-// Text from array of strings
-//
+size_t registerTextsReadline(JoyLoLInterp *jInterp) {
+  if (!readlineTag) {
+    // WE CAN ONLY register this coAlg ONCE
+    // (since readline itself can only be loaded once)
+    //
+    CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+    theCoAlg->name         = "TextsReadline";
+    theCoAlg->objectSize   = sizeof(TextObj);
+    theCoAlg->registerFunc = registerTextsReadline;
+    theCoAlg->equalityFunc = NULL;
+    theCoAlg->printSize    = NULL;
+    theCoAlg->printStr     = NULL;
+    readlineTag = registerCoAlgebra(jInterp, theCoAlg);
+  }
+  
+  // do a sanity check...
+  assert(readlineTag != UnusedTag);
+  assert(jInterp->coAlgs[readlineTag].sClass);
+  
+  registerTextReadlineWords(jInterp);
 
-void nextLineFromString(Text* aText) {
-  DEBUG(FALSE, "->nextLineFromString [%s]{%p:%p}\n",
-    aText->curLine, aText->curChar, aText->lastChar);
-  if (!aText) return;  // there is nothing we can do!
-  if (!aText->curLine) return; // there is nothing we can do!
-
-  // there is no next line so... we have already reached the end of the text
-  aText->completed  = TRUE;
-  aText->curLine    = NULL;
-  aText->curChar    = NULL;
-  aText->lastChar   = NULL;
+  return TRUE;
 }
+\stopCCode
 
-Text* createTextFromString(CoAlgebras* coAlgs,
-                           const char* aString) {
-  assert(coAlgs);
-  assert(aString);
+\startTestCase[should register the Texts coAlg]
 
-  Text* aText = (Text*)calloc(1, sizeof(Text));
-  assert(aText);
-  //
-  // array of strings specific initializations
-  //
-  aText->curLine    = aString;
-  aText->curChar    = aText->curLine;
-  aText->lastChar   = aText->curChar + strlen(aText->curLine);
-  aText->nextLine   = nextLineFromString;
-  //
-  // general initializations
-  //
-  aText->coAlgebras = coAlgs;
-  aText->completed  = FALSE;
-  aText->sym        = NULL;
-  //
-  aText->inputFile = NULL;
-  //
-  aText->newPrompt       = NULL;
-  aText->continuePrompt  = NULL;
-  aText->curPrompt       = NULL;
-  //
-  aText->textLines  = NULL;
-  aText->curLineNum = 0;
-
-  return aText;
-}
-\stoptyping
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerTextsReadline
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(jInterp->coAlgs[readlineTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[readlineTag].sClass;
+//  AssertIntTrue(registerTextsReadline(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs[readlineTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[readlineTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[readlineTag].sClass->objectSize,
+    sizeof(TextObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

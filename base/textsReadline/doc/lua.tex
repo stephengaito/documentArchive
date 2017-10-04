@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: texts.tex]
+% A ConTeXt document [master document: textsReadline.tex]
 
 \section[title=Lua interface]
 
@@ -18,9 +18,9 @@ static const struct luaL_Reg lua_texts [] = {
   {NULL, NULL}
 };
 
-int luaopen_joylol_texts (lua_State *lstate) {
+int luaopen_joylol_textsReadline (lua_State *lstate) {
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  registerTexts(jInterp);
+  registerTextsReadline(jInterp);
   luaL_newlib(lstate, lua_texts);
   return 1;
 }
@@ -30,22 +30,25 @@ In some instances, such as the typical \type{CTest} program
 \type{allCTests}, this Lua module (which can be \type{require}d as a 
 shared library) is actually statically linked into the executable. In 
 these cases we need the ability to mimic the standard Lua \type{require} 
-process. The following \type{requireStaticallyLinkedTexts} does just this. 
+process. The following \type{requireStaticallyLinkedTextsReadline} does 
+just this. 
 
+\setCHeaderStream{private}
 \startCHeader
-Boolean requireStaticallyLinkedTexts(
+Boolean requireStaticallyLinkedTextsReadline(
   lua_State *lstate
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-Boolean requireStaticallyLinkedTexts(
+Boolean requireStaticallyLinkedTextsReadline(
   lua_State *lstate
 ) {
   lua_getglobal(lstate, "package");
   lua_getfield(lstate, -1, "loaded");
-  luaopen_joylol_texts(lstate);
-  lua_setfield(lstate, -2, "joylol.texts");
+  luaopen_joylol_textsReadline(lstate);
+  lua_setfield(lstate, -2, "joylol.textsReadline");
   lua_setfield(lstate, -2, "loaded");
   lua_pop(lstate, 1);
   return TRUE;

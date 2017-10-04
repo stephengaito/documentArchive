@@ -46,30 +46,7 @@ typedef struct text_object_struct {
 } TextObj;
 \stopCHeader
 
-\starttyping
-extern Text* createTextFromArrayOfStrings(CoAlgebras* coAlgs,
-                                          const char* someTextLines[]);
 
-extern Text* createTextFromString(CoAlgebras* coAlgs,
-                                  const char* aString);
-
-extern Text* createTextFromInputFile(CoAlgebras* coAlgs,
-                                     FILE *anInputFile);
-
-#endif
-\stoptyping
-
-\starttyping
-// texts-private.h
-#ifndef JOYLOL_TEXT_PRIVATE_H
-#define JOYLOL_TEXT_PRIVATE_H
-
-extern void nextLineFromString(Text* aText);
-extern void nextLineFromArray(Text* aText);
-extern void nextLineFromFile(Text* aText);
-
-#endif
-\stoptyping
 
 \startCCode
 // Texts are a collection of characters, which are used by the Parser

@@ -4,16 +4,16 @@
 
 \addDocumentDirectory{doc}
 
-\CHeaderIncludeGuard{public}{JOYLOL_COALG_TEXTS}
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_TEXTS_READLINE}
 \createCHeaderFile%
   {public}
-  {joylol/texts.h}
+  {joylol/textsReadline.h}
   {}
 
-\CHeaderIncludeGuard{private}{JOYLOL_COALG_TEXTS_PRIVATE}
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_TEXTS_READLINE_PRIVATE}
 \createCHeaderFile%
   {private}
-  {joylol/texts-private.h}
+  {joylol/textsReadline-private.h}
   {}
 
 \prependCCode{default}
@@ -22,61 +22,51 @@
 #include <string.h>
 #include <assert.h>
 
+#include <readline/readline.h>
+#include <readline/history.h>
+
 #include <joylol/jInterps.h>
+#include <joylol/dictionaries.h>
+#include <joylol/texts.h>
+#include <joylol/textsReadline.h>
+#include <joylol/textsReadline-private.h>
 // dictionary
 // printer
 \stopCCode
 
-\appendCCode{default}
-\startCCode
-static int lua_texts_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
-static size_t joylol_register_texts(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Texts";
-  theCoAlg->registerFunc = joylol_register_texts;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(jInterp, theCoAlg);
-  assert(theCoAlg->isA == TextsTag);
-  
-  // in future... register Texts words with JoyLoL dictionary. 
-  
-  return TRUE;
-}
-
-static const struct luaL_Reg lua_texts [] = {
-  {"gitVersion", lua_texts_getGitVersion},
-  {NULL, NULL}
-};
-
-int luaopen_joylol_texts (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  joylol_register_texts(jInterp);
-  luaL_newlib(lstate, lua_texts);
-  return 1;
-}
-\stopCCode
-
 \createCCodeFile%
   {default}%
-  {texts.c}%
+  {textsReadline.c}%
   {}
 
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/textsReadline.h>}
+\addCTestInclude{<joylol/textsReadline-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/naturals}
+\addCTestLib{<HOME>/.joylol/joylol/dictionaries}
+\addCTestLib{<HOME>/.joylol/joylol/texts}
+\addCTestLib{-lreadline}
+\addCTestLib{-lgmp}
+\CTestsSetup\
+\startCTest
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedDictionaries(lstate);
+  requireStaticallyLinkedTexts(lstate);
+  requireStaticallyLinkedTextsReadline(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+\stopCTest
 \createCTestFile%
   {default}%
   {allCTests.c}%
   {}
 
-\addMainDocument{texts.tex}
+\addMainDocument{textsReadline.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 
