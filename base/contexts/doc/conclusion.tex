@@ -23,50 +23,24 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
-\stopCCode
-
-\appendCCode{default}
-\startCCode
-static int lua_contexts_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
-static size_t joylol_register_contexts(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Contexts";
-  theCoAlg->registerFunc = joylol_register_contexts;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printFunc    = NULL;
-  theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(jInterp, theCoAlg);
-  assert(theCoAlg->isA == ContextsTag);
-  
-  // in future... register Contexts words with JoyLoL dictionary. 
-  
-  return TRUE;
-}
-
-static const struct luaL_Reg lua_contexts [] = {
-  {"gitVersion", lua_contexts_getGitVersion},
-  {NULL, NULL}
-};
-
-int luaopen_joylol_contexts (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  joylol_register_contexts(jInterp);
-  luaL_newlib(lstate, lua_contexts);
-  return 1;
-}
+#include <joylol/contexts.h>
+#include <joylol/contexts-private.h>
 \stopCCode
 
 \createCCodeFile%
   {default}%
   {contexts.c}%
   {}
+
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/contexts.h>}
+\addCTestInclude{<joylol/contexts-private.h>}
+\CTestsSetup\
+\startCTest
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedContexts(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+\stopCTest
 
 \createCTestFile%
   {default}%
@@ -76,6 +50,8 @@ int luaopen_joylol_contexts (lua_State *lstate) {
 \addMainDocument{contexts.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

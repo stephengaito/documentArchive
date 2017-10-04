@@ -3,8 +3,7 @@
 \section[title=Code]
 
 \dependsOn[jInterps]
-
-\component gitVersion-c
+\setCHeaderStream{public}
 
 \starttyping
 \startJoyLoLWord[eval]
@@ -985,3 +984,54 @@ void initContextsCoAlgebra(CoAlgebras* coAlgs) {
   initContextsAPSupport(coAlgs);
 }
 \stoptyping
+
+\startTestSuite[registerContexts]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerContexts(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerContexts(JoyLoLInterp *jInterp) {
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = ContextsName;
+  theCoAlg->objectSize   = sizeof(CoAlgObj);
+  theCoAlg->registerFunc = registerContexts;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->printSize    = NULL;
+  theCoAlg->printStr     = NULL;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+
+  // do a sanity check...
+  assert(tag == BooleansTag);
+  assert(jInterp->coAlgs[tag].sClass);
+  
+  registerBooleanWords(jInterp);
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register contexts]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerContexts
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(jInterp->coAlgs[ContextsTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[ContextsTag].sClass;
+//  AssertIntTrue(registerContexts(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs[ContextsTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[ContextsTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[ContextsTag].sClass->objectSize,
+    sizeof(CoAlgObj)
+  )
+\stopCTest
+
+\stopTestCase
+\stopTestSuite

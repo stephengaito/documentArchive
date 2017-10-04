@@ -60,6 +60,10 @@ contests.targets{
     'joylol/luaFunctions-private.h',
     'luaFunctions.c',
   },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',
