@@ -5,8 +5,7 @@
 \dependsOn[jInterps]
 %\dependsOn[context]
 %\dependsOn[boolean]
-
-\component gitVersion-c
+\setCHeaderStream{public}
 
 \starttyping
 \startCHeader
@@ -152,16 +151,6 @@ size_t isFunction(PairAtom* aLoL) {
   return FALSE;
 }
 
-static void isFunctionAP(Context* aCtx) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  popCtxDataInto(aCtx, top);
-  PairAtom* result = NULL;
-  if (isFunction(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
-  else                 result = newBoolean(aCtx->coAlgebras, FALSE);
-  pushCtxData(aCtx, result);
-}
-
 void initFunctionsCoAlgebra(CoAlgebras* coAlgs) {
   extendJoyLoL(coAlgs, "isFunction", isFunctionAP);
 }
@@ -243,3 +232,53 @@ void Test_checkFunctionsSymbols(CuTest* tc) {
 }
 
 \stoptyping
+
+\startTestSuite[registerCFunctions]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerCFunctions(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerCFunctions(JoyLoLInterp *jInterp) {
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = CFunctionsName;
+  theCoAlg->objectSize   = sizeof(CoAlgObj);
+  theCoAlg->registerFunc = registerCFunctions;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->printSize    = NULL;
+  theCoAlg->printStr     = NULL;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+
+  // do a sanity check...
+  assert(tag == CFunctionsTag);
+  assert(jInterp->coAlgs[tag].sClass);
+  
+  registerCFunctionWords(jInterp);
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register cFunctions]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerCFunctions
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(jInterp->coAlgs[CFunctionsTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[CFunctionsTag].sClass;
+  //AssertIntTrue(registerCFunctions(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs[CFunctionsTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[CFunctionsTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[CFunctionsTag].sClass->objectSize,
+    sizeof(CoAlgObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

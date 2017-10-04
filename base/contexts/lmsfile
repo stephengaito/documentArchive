@@ -60,6 +60,10 @@ contests.targets{
     'joylol/contexts-private.h',
     'contexts.c',
   },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',

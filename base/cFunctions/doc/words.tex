@@ -1,0 +1,28 @@
+% A ConTeXt document [master document: cFunctions.tex]
+
+\section[title=JoyLoL words]
+
+\starttyping
+static void isFunctionAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  popCtxDataInto(aCtx, top);
+  PairAtom* result = NULL;
+  if (isFunction(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
+  else                 result = newBoolean(aCtx->coAlgebras, FALSE);
+  pushCtxData(aCtx, result);
+}
+\stoptyping
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerCFunctionWords(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerCFunctionWords(JoyLoLInterp* jInterp) {
+  assert(jInterp);
+  //extendJoyLoL(jInterp, "isFunction", isFunctionAP);
+}
+\stopCCode
