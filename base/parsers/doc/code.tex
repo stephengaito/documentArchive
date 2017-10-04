@@ -590,3 +590,53 @@ void ignoreTest_parseUnmatchedMarkerList(CuTest* tc) {
     "this ( is a list ( with unmatched list markers ) )");
 }
 \stoptyping
+
+\startTestSuite[registerParsers]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerParsers(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerParsers(JoyLoLInterp *jInterp) {
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = ParsersName;
+  theCoAlg->objectSize   = sizeof(CoAlgObj);
+  theCoAlg->registerFunc = registerParsers;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->printSize    = NULL;
+  theCoAlg->printStr     = NULL;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == ParsersTag);
+  assert(jInterp->coAlgs[tag].sClass);
+  
+  registerParserWords(jInterp);
+    
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Parsers coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerParsers
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(jInterp->coAlgs[ParsersTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[ParsersTag].sClass;
+//  AssertIntTrue(registerParsers(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs[ParsersTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[ParsersTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[ParsersTag].sClass->objectSize,
+    sizeof(CoAlgObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

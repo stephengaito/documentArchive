@@ -60,6 +60,10 @@ contests.targets{
     'joylol/templates-private.h',
     'templates.c',
   },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',

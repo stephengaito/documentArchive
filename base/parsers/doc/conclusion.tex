@@ -23,46 +23,10 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/parsers.h>
+#include <joylol/parsers-private.h>
 // dictionary
 // printer
-\stopCCode
-
-\appendCCode{default}
-\startCCode
-static int lua_parsers_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
-static size_t joylol_register_parsers(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Parsers";
-  theCoAlg->registerFunc = joylol_register_parsers;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printFunc    = NULL;
-  theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(jInterp, theCoAlg);
-  assert(theCoAlg->isA == ParsersTag);
-  
-  // in future... register Parsers words with JoyLoL dictionary. 
-  
-  return TRUE;
-}
-
-static const struct luaL_Reg lua_parsers [] = {
-  {"gitVersion", lua_parsers_getGitVersion},
-  {NULL, NULL}
-};
-
-int luaopen_joylol_parsers (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  joylol_register_parsers(jInterp);
-  luaL_newlib(lstate, lua_parsers);
-  return 1;
-}
 \stopCCode
 
 \createCCodeFile%
@@ -70,6 +34,15 @@ int luaopen_joylol_parsers (lua_State *lstate) {
   {parsers.c}%
   {}
 
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/parsers.h>}
+\addCTestInclude{<joylol/parsers-private.h>}
+\CTestsSetup\
+\startCTest
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedParsers(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+\stopCTest
 \createCTestFile%
   {default}%
   {allCTests.c}%
@@ -81,6 +54,8 @@ int luaopen_joylol_parsers (lua_State *lstate) {
 \addSubDocument{patterns.tex}
 \addSubDocument{captures.tex}
 \addSubDocument{joyLoLParser.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

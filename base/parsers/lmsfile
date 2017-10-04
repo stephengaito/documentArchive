@@ -17,6 +17,8 @@ litProgs.targets{
     'patterns.tex',
     'captures.tex',
     'joyLoLParser.tex',
+    'lua.tex',
+    'words.tex',
     'conclusion.tex',
   },
   srcFiles = {
@@ -59,6 +61,8 @@ contests.targets{
     'patterns.tex',
     'captures.tex',
     'joyLoLParser.tex',
+    'lua.tex',
+    'words.tex',
     'conclusion.tex',
   },
   srcFiles = {
