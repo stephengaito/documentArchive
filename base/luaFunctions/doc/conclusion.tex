@@ -23,50 +23,24 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
-\stopCCode
-
-\appendCCode{default}
-\startCCode
-static int lua_luaFunctions_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
-static size_t joylol_register_luaFunctions(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "LuaFunctions";
-  theCoAlg->registerFunc = joylol_register_luaFunctions;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printFunc    = NULL;
-  theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(jInterp, theCoAlg);
-  assert(theCoAlg->isA == LuaFunctionsTag);
-  
-  // in future... register LuaFunctions words with JoyLoL dictionary. 
-  
-  return TRUE;
-}
-
-static const struct luaL_Reg lua_luaFunctions [] = {
-  {"gitVersion", lua_luaFunctions_getGitVersion},
-  {NULL, NULL}
-};
-
-int luaopen_joylol_luaFunctions (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  joylol_register_luaFunctions(jInterp);
-  luaL_newlib(lstate, lua_luaFunctions);
-  return 1;
-}
+#include <joylol/luaFunctions.h>
+#include <joylol/luaFunctions-private.h>
 \stopCCode
 
 \createCCodeFile%
   {default}%
   {luaFunctions.c}%
   {}
+
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/luaFunctions.h>}
+\addCTestInclude{<joylol/luaFunctions-private.h>}
+\CTestsSetup\
+\startCTest
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedLuaFunctions(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+\stopCTest
 
 \createCTestFile%
   {default}%

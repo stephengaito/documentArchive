@@ -6,8 +6,6 @@
 %\dependsOn[context]
 %\dependsOn[boolean]
 
-\component gitVersion-c
-
 \starttyping
 \startCHeader
 
@@ -243,3 +241,53 @@ void Test_checkFunctionsSymbols(CuTest* tc) {
 }
 
 \stoptyping
+
+\startTestSuite[registerLuaFunctions]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerLuaFunctions(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = LuaFunctionsName;
+  theCoAlg->objectSize   = sizeof(CoAlgObj);
+  theCoAlg->registerFunc = registerLuaFunctions;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->printSize    = NULL;
+  theCoAlg->printStr     = NULL;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+
+  // do a sanity check...
+  assert(tag == LuaFunctionsTag);
+  assert(jInterp->coAlgs[tag].sClass);
+  
+  registerLuaFunctionWords(jInterp);
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the LuaFunctions coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerLuaFunctions
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(jInterp->coAlgs[LuaFunctionsTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[LuaFunctionsTag].sClass;
+//  AssertIntTrue(registerLuaFunctions(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs[LuaFunctionsTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[LuaFunctionsTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[LuaFunctionsTag].sClass->objectSize,
+    sizeof(CoAlgObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

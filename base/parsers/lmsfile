@@ -66,6 +66,10 @@ contests.targets{
     'joylol/parsers-private.h',
     'parsers.c',
   },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',
