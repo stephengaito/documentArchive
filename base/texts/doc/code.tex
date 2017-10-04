@@ -24,6 +24,7 @@ typedef struct text_object_struct {
   Symbol*       lastChar;
   NextLineFunc* nextLine;
   JoyLoLInterp* jInterp;
+  Boolean       debugFlag;
   //
   // array of strings specific fields
   //
@@ -135,7 +136,8 @@ void nextSymbol(TextObj* aText) {
   assert(aText);
   assert(aText->jInterp);
 
-  DEBUG(FALSE, "->nextSymbol [%s]{%s}\n", aText->curLine, aText->curChar);
+  DEBUG(aText->debugFlag,
+    "->nextSymbol [%s]{%s}\n", aText->curLine, aText->curChar);
   aText->sym = NULL;
 
   // ensure we have a non-empty line
@@ -143,17 +145,34 @@ void nextSymbol(TextObj* aText) {
     aText->nextLine(aText);
   }
   if (!aText->curLine) {
-    DEBUG(FALSE, "<-nextSymbol End of Text %s\n","");
+    DEBUG(aText->debugFlag, "<-nextSymbol End of Text %s\n","");
     return; // we have exhausted this text
   }
 
-  size_t      parsingNatural = TRUE;
-  const char* symStart = aText->curChar;
-  const char* symEnd   = aText->curChar;
-  const char* lastChar = aText->lastChar;
+  size_t  parsingNatural = TRUE;
+  Symbol* symStart       = aText->curChar;
+  Symbol* symEnd         = aText->curChar;
+  Symbol* lastChar       = aText->lastChar;
+  char    matchingQuote  = 0;
   while (symStart == symEnd) {
     while (symEnd < lastChar) {
-      if (*symEnd < 33) {
+      if (matchingQuote) {
+        if (*symEnd == matchingQuote) break; // we have found our quote
+        //
+        // we are in the middle of a quote
+        //
+        symEnd++;
+        parsingNatural = FALSE;
+        //
+      } else if (*symEnd == '\"' || *symEnd == '\'') {
+        //
+        // the beginning of a quote
+        //
+        symStart++;
+        matchingQuote = *symEnd;
+        symEnd++;
+        //
+      } else if (*symEnd < 33) {
         //
         // white space
         //
@@ -187,7 +206,7 @@ void nextSymbol(TextObj* aText) {
         const char* symEndP1 = symEnd + 1;
         if ( symEndP1 < lastChar && *symEndP1 == ';') {
           //
-          // we have found the begining of a single line comment
+          // we have found the beginning of a single line comment
           // ... so restart search for the next symbol on the next line
           //
           aText->nextLine(aText);
@@ -231,9 +250,10 @@ void nextSymbol(TextObj* aText) {
     }
   }
 
-  aText->curChar = symEnd;
   char* aSymbol = strndup(symStart, symEnd - symStart); // TODO this thrashes memory ;-(
-  DEBUG(FALSE, "--nextSymbol == [%s]\n", aSymbol);
+  if (matchingQuote && symEnd < lastChar) symEnd++; // skip ending quote
+  aText->curChar = symEnd;
+  DEBUG(aText->debugFlag, "--nextSymbol == [%s]\n", aSymbol);
 
   // check to see if this is the exit or quit symbol ...
   // ... and if so rest the nextLine function
@@ -242,19 +262,19 @@ void nextSymbol(TextObj* aText) {
   }
 
   if (parsingNatural) {
-    DEBUG(FALSE, "--nextSymbol == %s (natural)\n", aSymbol);
+    DEBUG(aText->debugFlag, "--nextSymbol == %s (natural)\n", aSymbol);
     // we have parsed a natural... so create a new natural
     //
     aText->sym = newNatural(aText->jInterp, aSymbol);
     //
-    DEBUG(FALSE, "<-nextSymbol %s (natural)\n", aSymbol);
+    DEBUG(aText->debugFlag, "<-nextSymbol %s (natural)\n", aSymbol);
   } else {
     // we have parsed a symbol... so create a new symbol
     //
     DictObj* aSym = createSymbol(aText->jInterp, aSymbol);
     aText->sym = newSymbol(aText->jInterp, aSym->symbol);
     //
-    DEBUG(FALSE, "<-nextSymbol [%s] (symbol)\n",
+    DEBUG(aText->debugFlag, "<-nextSymbol [%s] (symbol)\n",
       ((SymbolObj*)(aText->sym))->sym);
   }
   free(aSymbol);

@@ -75,6 +75,7 @@ TextObj* createTextFromString(JoyLoLInterp *jInterp,
   aText->jInterp   = jInterp;
   aText->completed = FALSE;
   aText->sym       = NULL;
+  aText->debugFlag = FALSE;
   //
   aText->inputFile = NULL;
   //
@@ -170,6 +171,31 @@ TextObj* createTextFromString(JoyLoLInterp *jInterp,
   AssertPtrNull(aText->sym);
 \stopCTest
 \stopTestCase
+
+\startTestCase[nextSymbol should deal with quotes]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromString(jInterp, "this \" is a test \" 'of strings'");
+  AssertPtrNotNull(aText);
+  
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "this");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), " is a test ");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "of strings");
+
+  nextSymbol(aText);
+  AssertPtrNull(aText->sym);
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[texts from an array of strings]
@@ -235,6 +261,7 @@ TextObj* createTextFromArrayOfStrings(JoyLoLInterp *jInterp,
   aText->curLine    = NULL;
   aText->curChar    = NULL;
   aText->lastChar   = NULL;
+  aText->debugFlag  = FALSE;
   //
   aText->inputFile  = NULL;
   //
