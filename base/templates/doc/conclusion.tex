@@ -23,45 +23,10 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/templates.h>
+#include <joylol/templates-private.h>
 // dictionary
 // printer
-\stopCCode
-
-\appendCCode{default}
-\startCCode
-static int lua_templates_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
-  return 1;
-}
-
-static size_t joylol_register_templates(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Templates";
-  theCoAlg->registerFunc = joylol_register_templates;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->coAlgData    = NULL;
-  registerCoAlgebra(jInterp, theCoAlg);
-  assert(theCoAlg->isA == TemplatesTag);
-  
-  // in future... register Templates words with JoyLoL dictionary. 
-  
-  return TRUE;
-}
-
-static const struct luaL_Reg lua_templates [] = {
-  {"gitVersion", lua_templates_getGitVersion},
-  {NULL, NULL}
-};
-
-int luaopen_joylol_templates (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-  joylol_register_templates(jInterp);
-  luaL_newlib(lstate, lua_templates);
-  return 1;
-}
 \stopCCode
 
 \createCCodeFile%
@@ -69,6 +34,15 @@ int luaopen_joylol_templates (lua_State *lstate) {
   {templates.c}%
   {}
 
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/templates.h>}
+\addCTestInclude{<joylol/templates-private.h>}
+\CTestsSetup\
+\startCTest
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedTemplates(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+\stopCTest
 \createCTestFile%
   {default}%
   {allCTests.c}%

@@ -1,8 +1,56 @@
-% A ConTeXt document [master document: booleans.tex]
+% A ConTeXt document [master document: templates.tex]
 
 \section[title=Code]
 
 \dependsOn[jInterps]
 %\dependsOn[context]
 
-\component gitVersion-c
+\startTestSuite[registerTemplates]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerTemplates(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerTemplates(JoyLoLInterp *jInterp) {
+  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  theCoAlg->name         = TemplatesName;
+  theCoAlg->objectSize   = sizeof(CoAlgObj);
+  theCoAlg->registerFunc = registerTemplates;
+  theCoAlg->equalityFunc = NULL;
+  theCoAlg->printSize    = NULL;
+  theCoAlg->printStr     = NULL;
+  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+
+  // do a sanity check...
+  assert(tag == TemplatesTag);
+  assert(jInterp->coAlgs[tag].sClass);
+  
+  registerTemplateWords(jInterp);
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Templates coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerTemplates
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(jInterp->coAlgs[TemplatesTag].sClass);
+  CoAlgebra *coAlg = jInterp->coAlgs[TemplatesTag].sClass;
+//  AssertIntTrue(registerTemplates(jInterp));
+  AssertPtrNotNull(jInterp->coAlgs[TemplatesTag].sClass);
+  AssertPtrEquals(jInterp->coAlgs[TemplatesTag].sClass, coAlg);
+  AssertIntEquals(
+    jInterp->coAlgs[TemplatesTag].sClass->objectSize,
+    sizeof(CoAlgObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite
