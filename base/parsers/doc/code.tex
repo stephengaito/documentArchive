@@ -1,56 +1,27 @@
 % A ConTeXt document [master document: parsers.tex]
 
 \dependsOn[jInterps]
+\dependsOn[texts]
+\dependsOn[symbols]
+\dependsOn[naturals]
+\dependsOn[pairs]
 
-\component gitVersion-c
+\setCHeaderStream{public}
 
-\starttyping
-// parser.h
-#ifndef JOYLOL_PARSER_H
-#define JOYLOL_PARSER_H
-
-typedef struct text_struct Text;
-typedef struct pair_atom_struct PairAtom;
-
-extern PairAtom* parseOneSymbol(Text* aText);
-extern PairAtom* parseAllSymbols(Text* aText);
-
-#endif
-\stoptyping
-
-\starttyping
-// parser-private.h
-#ifndef JOYLOL_PARSER_PRIVATE_H
-#define JOYLOL_PARSER_PRIVATE_H
-
-extern PairAtom* parseList(Text* aText, char closingChar);
-extern char matchingListSymbol(const char* curSymbol);
-
-extern void reportMismatchedClosingSymbol(Text* aText,
-                                          char expected, char found);
-extern void reportUnmatchedClosingSymbol(Text* aText, char expected);
-
-#endif
-\stoptyping
-
-\starttyping
-// parser.c
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/parser.h"
-#include "joyLoL/parser_private.h"
-
+\startCCode
 // The Parser parses a stream of characters obtained from a specific
 // text. Since one of the texts is backed by readline interaction with
 // a user, it is **critical** that nextSymbol ONLY get called when
 // the parser actually needs a nextSymbol (and NOT before).
+\stopCCode
 
-char matchingListSymbol(const char* curSymbol) {
+\setCHeaderStream{private}
+\startCHeader
+extern char matchingListSymbol(Symbol* curSymbol);
+\stopCHeader
+
+\startCCode
+char matchingListSymbol(Symbol* curSymbol) {
   if (1 < strlen(curSymbol)) return 0;
 
   if (curSymbol[0] == '(') return ')';
@@ -60,8 +31,14 @@ char matchingListSymbol(const char* curSymbol) {
 
   return 0;
 }
+\stopCCode
 
-size_t isClosingSymbol(const char* curSymbol) {
+\startCHeader
+extern size_t isClosingSymbol(Symbol* curSymbol);
+\stopCHeader
+
+\startCCode
+size_t isClosingSymbol(Symbol* curSymbol) {
   if (1 < strlen(curSymbol)) return 0;
 
   if (curSymbol[0] == ')') return 1;
@@ -71,29 +48,22 @@ size_t isClosingSymbol(const char* curSymbol) {
 
   return 0;
 }
+\stopCCode
 
-PairAtom* parseAllSymbols(Text* aText) {
-  DEBUG(FALSE, "parseAllSymbols %p]\n", aText);
-  return parseList(aText,0);
-}
+\startCHeader
+void reportMismatchedClosingSymbol(
+  TextObj* aText, 
+  char expected,
+  char found
+);
+\stopCHeader
 
-PairAtom* parseOneSymbol(Text* aText) {
-  DEBUG(FALSE, "parseOneSymbol %p\n", aText);
-  nextSymbol(aText);
-  if (!aText->sym) return NULL;
-
-  if (aText->sym->coAlg &&
-     (aText->sym->coAlg->isA != SYMBOL_COALG)) return aText->sym;
-
-  // check to see if this is an opening list symbol
-  char matchingSymbol = matchingListSymbol(aText->sym->symbol);
-  if (0 < matchingSymbol) {
-    return parseList(aText, matchingSymbol);
-  }
-  return aText->sym;
-}
-
-void reportMismatchedClosingSymbol(Text* aText, char expected, char found) {
+\startCCode
+void reportMismatchedClosingSymbol(
+  TextObj* aText,
+  char expected,
+  char found
+) {
   if (expected == 0) return;
 
   char message[100];
@@ -105,8 +75,20 @@ void reportMismatchedClosingSymbol(Text* aText, char expected, char found) {
   strcat(message, "]");
   reportError(aText, message);
 }
+\stopCCode
 
-void reportUnmatchedClosingSymbol(Text* aText, char expected) {
+\startCHeader
+void reportUnmatchedClosingSymbol(
+  TextObj* aText,
+  char expected
+);
+\stopCHeader
+
+\startCCode
+void reportUnmatchedClosingSymbol(
+  TextObj* aText,
+  char expected
+) {
   if (expected == 0) return;
 
   char message[100];
@@ -116,14 +98,25 @@ void reportUnmatchedClosingSymbol(Text* aText, char expected) {
   strcat(message, "]");
   reportError(aText, message);
 }
+\stopCCode
 
+\startCHeader
+extern CoAlgObj* parseList(
+  TextObj* aText,
+  char closingChar
+);
+\stopCHeader
 
-PairAtom* parseList(Text* aText, char closingChar) {
+\startCCode
+CoAlgObj* parseList(
+  TextObj* aText,
+  char closingChar
+) {
   assert(aText);
   DEBUG(FALSE, "parseList %p '%c'\n", aText, closingChar);
 
-  PairAtom* firstPair = NULL;
-  PairAtom* lastPair  = NULL;
+  CoAlgObj* firstPair = NULL;
+  CoAlgObj* lastPair  = NULL;
 
   while (!aText->completed) {
 
@@ -136,26 +129,26 @@ PairAtom* parseList(Text* aText, char closingChar) {
 
     // check to see if this is a closing list symbol
     if (isSymbol(aText->sym) &&
-        isClosingSymbol(aText->sym->symbol)) {
-      if (aText->sym->symbol[0] != closingChar) {
+        isClosingSymbol(asSymbol(aText->sym))) {
+      if (asSymbol(aText->sym)[0] != closingChar) {
         reportMismatchedClosingSymbol(aText, closingChar,
-                                      aText->sym->symbol[0]);
+                                      asSymbol(aText->sym)[0]);
       }
       return firstPair;
     }
-    assert(aText->coAlgebras);
-    PairAtom* aNewPair = newPair(aText->coAlgebras, NULL, NULL);
+    assert(aText->jInterp);
+    CoAlgObj* aNewPair = newPair(aText->jInterp, NULL, NULL);
 
     // check to see if this is an opening list symbol
     if (isSymbol(aText->sym)) {
-      char matchingSymbol = matchingListSymbol(aText->sym->symbol);
+      char matchingSymbol = matchingListSymbol(asSymbol(aText->sym));
       if (0 < matchingSymbol) {
-        aNewPair->pair.car = parseList(aText, matchingSymbol);
-      } else aNewPair->pair.car = aText->sym;
-    } else aNewPair->pair.car = aText->sym;
+        asCar(aNewPair) = parseList(aText, matchingSymbol);
+      } else asCar(aNewPair) = aText->sym;
+    } else asCar(aNewPair) = aText->sym;
 
-    if (!firstPair) firstPair     = aNewPair;
-    if (lastPair)   lastPair->pair.cdr = aNewPair;
+    if (!firstPair) firstPair       = aNewPair;
+    if (lastPair)   asCdr(lastPair) = aNewPair;
 
     lastPair = aNewPair;
   }
@@ -163,7 +156,42 @@ PairAtom* parseList(Text* aText, char closingChar) {
   if (0 < closingChar) reportUnmatchedClosingSymbol(aText, closingChar);
   return firstPair;
 }
-\stoptyping
+\stopCCode
+
+\setCHeaderStream{public}
+\startCHeader
+extern CoAlgObj* parseAllSymbols(TextObj* aText);
+\stopCHeader
+
+\startCCode
+CoAlgObj* parseAllSymbols(TextObj* aText) {
+  DEBUG(FALSE, "parseAllSymbols %p]\n", aText);
+  return parseList(aText, 0);
+}
+\stopCCode
+
+
+\startCHeader
+extern CoAlgObj* parseOneSymbol(TextObj* aText);
+\stopCHeader
+
+\startCCode
+CoAlgObj* parseOneSymbol(TextObj* aText) {
+  DEBUG(FALSE, "parseOneSymbol %p\n", aText);
+  nextSymbol(aText);
+  if (!aText->sym) return NULL;
+
+  if (aText->sym->type &&
+     (aText->sym->tag != SymbolsTag)) return aText->sym;
+
+  // check to see if this is an opening list symbol
+  char matchingSymbol = matchingListSymbol(asSymbol(aText->sym));
+  if (0 < matchingSymbol) {
+    return parseList(aText, matchingSymbol);
+  }
+  return aText->sym;
+}
+\stopCCode
 
 \starttyping
 // specs
@@ -185,7 +213,7 @@ PairAtom* parseList(Text* aText, char closingChar) {
 
 // suiteName: - Parser/Printer tests -
 
-void clearPrintSizeMarksDebug(PairAtom* aLoL, size_t debugFlag) {
+void clearPrintSizeMarksDebug(CoAlgObj* aLoL, size_t debugFlag) {
   if (!aLoL) return;
 
   if (!(aLoL->tag & PRINT_MARKER)) return;
@@ -227,7 +255,7 @@ void Test_parseSimpleListOneSymbolAtATime(CuTest* tc) {
   Text* aText = createTextFromArrayOfStrings(coAlgs, simpleList);
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseOneSymbol(aText);
+  CoAlgObj* aLoL = parseOneSymbol(aText);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertPtrNotNull(tc, aLoL->coAlg);
   CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
@@ -277,7 +305,7 @@ void Test_parseSemiColonsOneSymbolAtATime(CuTest* tc) {
 
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseOneSymbol(aText);
+  CoAlgObj* aLoL = parseOneSymbol(aText);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertPtrNotNull(tc, aLoL->coAlg);
   CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
@@ -346,7 +374,7 @@ void Test_parseSemiColonsAllAtOnce(CuTest* tc) {
 
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseAllSymbols(aText);
+  CoAlgObj* aLoL = parseAllSymbols(aText);
 
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE),
@@ -360,13 +388,13 @@ void Test_parsePrintSimpleList(CuTest* tc) {
   Text* aText = createTextFromArrayOfStrings(coAlgs, simpleList);
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseAllSymbols(aText);
+  CoAlgObj* aLoL = parseAllSymbols(aText);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertIntEquals(tc, printSize(aLoL), 46);
   clearPrintSizeMarksDebug(aLoL, FALSE);
   CuAssertStrEquals(tc, printLoL(aLoL), "this is a simple list");
 
-  PairAtom* lolCopy = copyLoL(coAlgs, aLoL);
+  CoAlgObj* lolCopy = copyLoL(coAlgs, aLoL);
   CuAssertPtrNotEquals(tc, aLoL, lolCopy);
   CuAssertTrue(tc, equalLoLDebug(aLoL, lolCopy, FALSE));
 }
@@ -383,7 +411,7 @@ void Test_parseComplextListOneSymbolAtATime(CuTest* tc) {
   Text* aText = createTextFromArrayOfStrings(coAlgs, moreComplexList);
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseOneSymbol(aText);
+  CoAlgObj* aLoL = parseOneSymbol(aText);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertPtrNotNull(tc, aLoL->coAlg);
   CuAssertIntEquals(tc, aLoL->coAlg->isA, SYMBOL_COALG);
@@ -408,7 +436,7 @@ void Test_parseComplexListFromSingleString(CuTest* tc) {
   Text* aText = createTextFromString(coAlgs, moreComplexList[0]);
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseAllSymbols(aText);
+  CoAlgObj* aLoL = parseAllSymbols(aText);
 
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE),
@@ -422,14 +450,14 @@ void Test_parsePrintComplexList(CuTest* tc) {
   Text* aText = createTextFromArrayOfStrings(coAlgs, moreComplexList);
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseAllSymbols(aText);
+  CoAlgObj* aLoL = parseAllSymbols(aText);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertIntEquals(tc, printSizeDebug(aLoL, FALSE), 104);
   clearPrintSizeMarksDebug(aLoL, FALSE);
   CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE),
     "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) )");
 
-  PairAtom* lolCopy = copyLoL(coAlgs, aLoL);
+  CoAlgObj* lolCopy = copyLoL(coAlgs, aLoL);
   CuAssertPtrNotEquals(tc, aLoL, lolCopy);
   CuAssertTrue(tc, equalLoLDebug(aLoL, lolCopy, FALSE));
 }
@@ -446,7 +474,7 @@ void Test_parsePrintDifferentList(CuTest* tc) {
   Text* aText = createTextFromArrayOfStrings(coAlgs, differentList);
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseAllSymbols(aText);
+  CoAlgObj* aLoL = parseAllSymbols(aText);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertIntEquals(tc, printSizeDebug(aLoL, FALSE), 113);
   clearPrintSizeMarksDebug(aLoL, FALSE);
@@ -461,7 +489,7 @@ void Test_parsePrintNaturals(CuTest* tc) {
   Text* aText = createTextFromString(coAlgs, " 1234567890 not1234567890 ");
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseOneSymbol(aText);
+  CoAlgObj* aLoL = parseOneSymbol(aText);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertTrue(tc, isAtom(aLoL));
   CuAssertTrue(tc, isNatural(aLoL));
@@ -486,7 +514,7 @@ void Test_parseBoolean(CuTest* tc) {
   Text* aText = createTextFromString(coAlgs, " true false ");
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseOneSymbol(aText);
+  CoAlgObj* aLoL = parseOneSymbol(aText);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertTrue(tc, isAtom(aLoL));
   CuAssertTrue(tc, isSymbol(aLoL));
@@ -513,7 +541,7 @@ void Test_printBoolean(CuTest* tc) {
   CoAlgebras* coAlgs = createCoAlgebras();
   CuAssertPtrNotNull(tc, coAlgs);
 
-  PairAtom* aLoL = newBoolean(coAlgs, TRUE);
+  CoAlgObj* aLoL = newBoolean(coAlgs, TRUE);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertStrEquals(tc, printLoLDebug(aLoL, FALSE), "true");
 
@@ -540,7 +568,7 @@ void ignoreTest_defineFactorial(CuTest* tc) {
   Text* factorialText = createTextFromArrayOfStrings(coAlgs, factorialStrs);
   CuAssertPtrNotNull(tc, factorialText);
 
-  PairAtom* factorialLoL = parseAllSymbols(factorialText);
+  CoAlgObj* factorialLoL = parseAllSymbols(factorialText);
   CuAssertPtrNotNull(tc, factorialLoL);
 
   defineJoyLoL(anInterp->coAlgebras, "factorial", factorialLoL);
@@ -562,7 +590,7 @@ void ignoreTest_parseIncorrectMarkerList(CuTest* tc) {
   Text* aText = createTextFromArrayOfStrings(coAlgs, incorrectMarkerList);
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseAllSymbols(aText);
+  CoAlgObj* aLoL = parseAllSymbols(aText);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertIntEquals(tc, printSize(aLoL), 93);
   clearPrintSizeMarksDebug(aLoL, FALSE);
@@ -582,7 +610,7 @@ void ignoreTest_parseUnmatchedMarkerList(CuTest* tc) {
   Text* aText = createTextFromArrayOfStrings(coAlgs, unmatchedMarkerList);
   CuAssertPtrNotNull(tc, aText);
 
-  PairAtom* aLoL = parseAllSymbols(aText);
+  CoAlgObj* aLoL = parseAllSymbols(aText);
   CuAssertPtrNotNull(tc, aLoL);
   CuAssertIntEquals(tc, printSize(aLoL), 83);
   clearPrintSizeMarksDebug(aLoL, FALSE);

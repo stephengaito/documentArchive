@@ -23,6 +23,9 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/symbols.h>
+#include <joylol/pairs.h>
+#include <joylol/texts.h>
 #include <joylol/parsers.h>
 #include <joylol/parsers-private.h>
 // dictionary
@@ -35,8 +38,12 @@
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/pairs.h>}
+\addCTestInclude{<joylol/texts.h>}
 \addCTestInclude{<joylol/parsers.h>}
 \addCTestInclude{<joylol/parsers-private.h>}
+\addCTestLib{-lgmp}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
