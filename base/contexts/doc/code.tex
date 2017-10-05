@@ -1005,10 +1005,10 @@ Boolean registerContexts(JoyLoLInterp *jInterp) {
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
 
   // do a sanity check...
-  assert(tag == BooleansTag);
+  assert(tag == ContextsTag);
   assert(jInterp->coAlgs[tag].sClass);
   
-  registerBooleanWords(jInterp);
+  registerContextWords(jInterp);
   
   return TRUE;
 }

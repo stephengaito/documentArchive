@@ -32,16 +32,16 @@ extern DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym);
 
 \setCHeaderStream{private}
 \startCHeader
-#define asSymbol(aNode)   ((DictObj*)(aNode))->symbol
-#define asPreObs(aNode)   ((DictObj*)(aNode))->preObs
-#define asValue(aNode)    ((DictObj*)(aNode))->value
-#define asPostObs(aNode)  ((DictObj*)(aNode))->postObs
-#define asLeft(aNode)     ((DictObj*)(aNode))->left
-#define asRight(aNode)    ((DictObj*)(aNode))->right
-#define asPrevious(aNode) ((DictObj*)(aNode))->previous
-#define asNext(aNode)     ((DictObj*)(aNode))->next
-#define asHeight(aNode)   ((DictObj*)(aNode))->height
-#define asBalance(aNode)  ((DictObj*)(aNode))->balance
+#define dictAsSymbol(aNode)   ((DictObj*)(aNode))->symbol
+#define dictAsPreObs(aNode)   ((DictObj*)(aNode))->preObs
+#define dictAsValue(aNode)    ((DictObj*)(aNode))->value
+#define dictAsPostObs(aNode)  ((DictObj*)(aNode))->postObs
+#define dictAsLeft(aNode)     ((DictObj*)(aNode))->left
+#define dictAsRight(aNode)    ((DictObj*)(aNode))->right
+#define dictAsPrevious(aNode) ((DictObj*)(aNode))->previous
+#define dictAsNext(aNode)     ((DictObj*)(aNode))->next
+#define dictAsHeight(aNode)   ((DictObj*)(aNode))->height
+#define dictAsBalance(aNode)  ((DictObj*)(aNode))->balance
 \stopCHeader
 \setCHeaderStream{public}
 
@@ -70,16 +70,16 @@ DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym) {
   
   DEBUG(FALSE, "newAVLNode [%s]\n", aSym);
   CoAlgObj* newNode   = newObject(jInterp, DictionariesTag);
-  asSymbol(newNode)   = strdup(aSym);
-  asPreObs(newNode)   = NULL;
-  asValue(newNode)    = NULL;
-  asPostObs(newNode)  = NULL;
-  asLeft(newNode)     = NULL;
-  asRight(newNode)    = NULL;
-  asPrevious(newNode) = NULL;
-  asNext(newNode)     = NULL;
-  asHeight(newNode)   = 1;
-  asBalance(newNode)  = 0;
+  dictAsSymbol(newNode)   = strdup(aSym);
+  dictAsPreObs(newNode)   = NULL;
+  dictAsValue(newNode)    = NULL;
+  dictAsPostObs(newNode)  = NULL;
+  dictAsLeft(newNode)     = NULL;
+  dictAsRight(newNode)    = NULL;
+  dictAsPrevious(newNode) = NULL;
+  dictAsNext(newNode)     = NULL;
+  dictAsHeight(newNode)   = 1;
+  dictAsBalance(newNode)  = 0;
   return (DictObj*)newNode;
 }
 \stopCCode
@@ -92,15 +92,15 @@ DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym) {
 
   DictObj* aNode = newDict(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aNode);
-  AssertPtrNotNull(asSymbol(aNode));
-  AssertStrEquals(asSymbol(aNode), "aNodeSymbol");
-  AssertPtrNull(asValue(aNode));
-  AssertPtrNull(asLeft(aNode));
-  AssertPtrNull(asRight(aNode));
-  AssertPtrNull(asPrevious(aNode));
-  AssertPtrNull(asNext(aNode));
-  AssertIntEquals(asHeight(aNode), 1);
-  AssertIntEquals(asBalance(aNode), 0);
+  AssertPtrNotNull(dictAsSymbol(aNode));
+  AssertStrEquals(dictAsSymbol(aNode), "aNodeSymbol");
+  AssertPtrNull(dictAsValue(aNode));
+  AssertPtrNull(dictAsLeft(aNode));
+  AssertPtrNull(dictAsRight(aNode));
+  AssertPtrNull(dictAsPrevious(aNode));
+  AssertPtrNull(dictAsNext(aNode));
+  AssertIntEquals(dictAsHeight(aNode), 1);
+  AssertIntEquals(dictAsBalance(aNode), 0);
 \stopCTest
 \stopTestCase
 \stopTestSuite

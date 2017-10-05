@@ -1,3 +1,14 @@
 % A ConTeXt document [master document: contexts.tex]
 
 \section[title=JoyLoL words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerContextWords(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerContextWords(JoyLoLInterp *jInterp) {
+}
+\stopCCode

@@ -141,7 +141,8 @@ size_t printSizeBoolCoAlg(CoAlgObj* aLoL, size_t debugFlag) {
   assert(aLoL);
   assert(aLoL->type);
   assert(aLoL->tag == BooleansTag);
-  DEBUG(debugFlag, "boolCoAlg-printSize: bool<%zu> %p\n", asBoolean(aLoL), aLoL);
+  DEBUG(debugFlag, "boolCoAlg-printSize: bool<%zu> %p\n",
+    ((size_t)(asBoolean(aLoL))), aLoL);
   return 6;
 }
 \stopCCode
