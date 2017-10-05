@@ -45,6 +45,7 @@ joylol.targets{
   coAlgLibs = {
     'jInterps',
     'texts',
+    'dictionaries',
     'symbols',
     'naturals',
     'pairs',

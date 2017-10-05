@@ -13,6 +13,8 @@
 // (or to use a hash table).
 \stopCCode
 
+\startTestSuite[compute print size]
+
 \startCHeader
 extern size_t printSizeDebug(
   CoAlgObj* aLoL,
@@ -38,6 +40,44 @@ size_t printSizeDebug(
   return result;
 }
 \stopCCode
+
+\startCHeader
+extern void clearPrintSizeMarksDebug(
+  CoAlgObj* aLoL,
+  Boolean debugFlag
+);
+\stopCHeader
+
+\startCCode
+// We need to know the structure of the PairsObj
+// 
+#include <joylol/pairs.h>
+
+void clearPrintSizeMarksDebug(
+  CoAlgObj* aLoL,
+  Boolean debugFlag
+) {
+  if (!aLoL) return;
+
+  if (!(aLoL->flags & PRINT_FLAG)) return;
+  aLoL->flags = aLoL->flags & (~ PRINT_FLAG);
+
+  if (aLoL->tag != PairsTag) return;
+
+  clearPrintSizeMarksDebug(asCar(aLoL), debugFlag);
+
+  if (asCdr(aLoL)) {
+    clearPrintSizeMarksDebug(asCdr(aLoL), debugFlag);
+  }
+}
+\stopCCode
+
+\startTestCase[printSize Of NULL]
+\startCTest
+  AssertIntEquals(printSize(NULL), 5);
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \startCHeader
 extern char* printLoLDebug(
