@@ -7,6 +7,7 @@
 \dependsOn[naturals]
 \dependsOn[pairs]
 
+\section[title=Code]
 \setCHeaderStream{public}
 
 \startCCode
@@ -15,6 +16,56 @@
 // a user, it is **critical** that nextSymbol ONLY get called when
 // the parser actually needs a nextSymbol (and NOT before).
 \stopCCode
+
+We start by providing some example strings that we want to be able to 
+parse. These will each be used as \type{CTest} examples below.
+
+\CTestsSetup\
+\startCTest
+static Symbol* simpleList[] = {
+  "this is a simple list ;; this is a comment ",
+  NULL
+};
+//
+static Symbol* simpleListWithSemiColons[] = {
+  " this ; is;a ;; this is a comment ",
+  " and;again ;; this is a second comment ",
+  NULL
+};
+//
+static Symbol* complexListWithSemiColons[] = {
+  " this ; is;a test with some semi-colons ;; this is a comment ",
+  " and;again;123;456;789 12;34 ;; this is a second comment ",
+  " and;one;more;time ;; this is a third comment ",
+  NULL
+};
+//
+static Symbol* moreComplexList[] = {
+  " this ( is ( a ( more ( complex ( list () ) ) ) ) ) ;; this is a comment ",
+  NULL
+};
+//
+static Symbol* differentList[] = {
+  " this is  a different ( ( () () () ) ( ( ( ) ) ) ) list ;; with a comment  ",
+  NULL
+};
+//
+//static Symbol* factorialStrs[] = {
+//  " ( 0 =nat ) ( pop 1 ) ( dup 1 - factorial * ) ifte ",
+//  NULL
+//};
+//
+//static Symbol* incorrectMarkerList[] = {
+//  " this ( is a list with incorrectly > matched list markers ",
+//  NULL
+//};
+//
+//static Symbol* unmatchedMarkerList[] = {
+//  " this ( is a list [ with unmatched list markers ",
+//  NULL
+//};
+//
+\stopCTest
 
 \startTestSuite[match list symbols]
 
@@ -200,14 +251,6 @@ CoAlgObj* parseOneSymbol(TextObj* aText) {
 }
 \stopCCode
 
-\CTestsSetup\
-\startCTest
-static Symbol* simpleList[] = {
-  "this is a simple list ;; this is a comment ",
-  NULL
-};
-\stopCTest
-
 \startTestCase[parse Simple List One Symbol At A Time]
 \startCTest
   AssertPtrNotNull(jInterp);
@@ -251,15 +294,6 @@ static Symbol* simpleList[] = {
   AssertIntTrue(aText->completed);
 \stopCTest
 \stopTestCase
-
-\CTestsSetup\
-\startCTest
-static Symbol* simpleListWithSemiColons[] = {
-  " this ; is;a ;; this is a comment ",
-  " and;again ;; this is a second comment ",
-  NULL
-};
-\stopCTest
 
 \startTestCase[parse SemiColons One Symbol At A Time]
 \startCTest
@@ -323,80 +357,12 @@ static Symbol* simpleListWithSemiColons[] = {
   AssertIntTrue(aText->completed);
 \stopCTest
 \stopTestCase
-\stopTestSuite
 
-\setCHeaderStream{public}
-\startCHeader
-extern CoAlgObj* parseAllSymbols(TextObj* aText);
-\stopCHeader
+\startTestCase[parse Complex List One Symbol At A Time]
+\startCTest
+  AssertPtrNotNull(jInterp);
 
-\startCCode
-CoAlgObj* parseAllSymbols(TextObj* aText) {
-  DEBUG(FALSE, "parseAllSymbols %p]\n", aText);
-  return parseList(aText, 0);
-}
-\stopCCode
-
-
-\starttyping
-
-// suiteName: - Parser/Printer tests -
-
-
-
-// Parse and print a number of different "happy path" lists
-
-static Symbol* complexListWithSemiColons[] = {
-  " this ; is;a test with some semi-colons ;; this is a comment ",
-  " and;again;123;456;789 12;34 ;; this is a second comment ",
-  " and;one;more;time ;; this is a third comment ",
-  NULL
-};
-
-void Test_parseSemiColonsAllAtOnce(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
-
-  Text* aText =
-    createTextFromArrayOfStrings(coAlgs, complexListWithSemiColons);
-
-  AssertPtrNotNull(aText);
-
-  CoAlgObj* aLoL = parseAllSymbols(aText);
-
-  AssertPtrNotNull(aLoL);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE),
-    "this ; is ; a test with some semi-colons and ; again ; 123 ; 456 ; 789 12 ; 34 and ; one ; more ; time");
-}
-
-void Test_parsePrintSimpleList(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
-
-  Text* aText = createTextFromArrayOfStrings(coAlgs, simpleList);
-  AssertPtrNotNull(aText);
-
-  CoAlgObj* aLoL = parseAllSymbols(aText);
-  AssertPtrNotNull(aLoL);
-  AssertIntEquals(printSize(aLoL), 46);
-  clearPrintSizeMarksDebug(aLoL, FALSE);
-  AssertStrEquals(printLoL(aLoL), "this is a simple list");
-
-  CoAlgObj* lolCopy = copyLoL(coAlgs, aLoL);
-  AssertPtrNotEquals(aLoL, lolCopy);
-  AssertTrue(equalLoLDebug(aLoL, lolCopy, FALSE));
-}
-
-static Symbol* moreComplexList[] = {
- " this ( is ( a ( more ( complex ( list () ) ) ) ) ) ;; this is a comment ",
- NULL
-};
-
-void Test_parseComplextListOneSymbolAtATime(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
-
-  Text* aText = createTextFromArrayOfStrings(coAlgs, moreComplexList);
+  TextObj* aText = createTextFromArrayOfStrings(jInterp, moreComplexList);
   AssertPtrNotNull(aText);
 
   CoAlgObj* aLoL = parseOneSymbol(aText);
@@ -410,88 +376,16 @@ void Test_parseComplextListOneSymbolAtATime(CuTest* tc) {
   AssertPtrNotNull(aLoL->type);
   AssertIntEquals(aLoL->tag, PairsTag);
   AssertStrEquals(printLoL(aLoL),
-                    "is ( a ( more ( complex ( list ( ) ) ) ) )");
+    "is ( a ( more ( complex ( list ( ) ) ) ) )");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNull(aLoL);
-  AssertTrue(aText->completed);
-}
+  AssertIntTrue(aText->completed);
+\stopCTest
+\stopTestCase
 
-void Test_parseComplexListFromSingleString(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
-
-  Text* aText = createTextFromString(coAlgs, moreComplexList[0]);
-  AssertPtrNotNull(aText);
-
-  CoAlgObj* aLoL = parseAllSymbols(aText);
-
-  AssertPtrNotNull(aLoL);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE),
-    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) )");
-}
-
-void Test_parsePrintComplexList(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
-
-  Text* aText = createTextFromArrayOfStrings(coAlgs, moreComplexList);
-  AssertPtrNotNull(aText);
-
-  CoAlgObj* aLoL = parseAllSymbols(aText);
-  AssertPtrNotNull(aLoL);
-  AssertIntEquals(printSizeDebug(aLoL, FALSE), 104);
-  clearPrintSizeMarksDebug(aLoL, FALSE);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE),
-    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) )");
-
-  CoAlgObj* lolCopy = copyLoL(coAlgs, aLoL);
-  AssertPtrNotEquals(aLoL, lolCopy);
-  AssertTrue(equalLoLDebug(aLoL, lolCopy, FALSE));
-}
-
-static Symbol* differentList[] = {
- " this is  a different ( ( () () () ) ( ( ( ) ) ) ) list ;; with a comment  ",
- NULL
-};
-
-void Test_parsePrintDifferentList(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
-
-  Text* aText = createTextFromArrayOfStrings(coAlgs, differentList);
-  AssertPtrNotNull(aText);
-
-  CoAlgObj* aLoL = parseAllSymbols(aText);
-  AssertPtrNotNull(aLoL);
-  AssertIntEquals(printSizeDebug(aLoL, FALSE), 113);
-  clearPrintSizeMarksDebug(aLoL, FALSE);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE),
-    "this is a different ( ( ( ) ( ) ( ) ) ( ( ( ) ) ) ) list");
-}
-
-void Test_parsePrintNaturals(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
-
-  Text* aText = createTextFromString(coAlgs, " 1234567890 not1234567890 ");
-  AssertPtrNotNull(aText);
-
-  CoAlgObj* aLoL = parseOneSymbol(aText);
-  AssertPtrNotNull(aLoL);
-  AssertTrue(isAtom(aLoL));
-  AssertTrue(isNatural(aLoL));
-  AssertIntEquals( mpz_cmp_si(aLoL->natural, 1234567890), 0);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE), "1234567890");
-
-  aLoL = parseOneSymbol(aText);
-  AssertPtrNotNull(aLoL);
-  AssertTrue(isAtom(aLoL));
-  AssertTrue(isSymbol(aLoL));
-  AssertStrEquals(asSymbol(aLoL), "not1234567890");
-}
-
-void Test_parseBoolean(CuTest* tc) {
+\startTestCase[parse Boolean and find it in main dictionary]
+\startCTest
   CoAlgebras* coAlgs = createCoAlgebras();
   AssertPtrNotNull(coAlgs);
   Symbols* symbols = coAlgs->symbols;
@@ -504,74 +398,165 @@ void Test_parseBoolean(CuTest* tc) {
 
   CoAlgObj* aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertTrue(isAtom(aLoL));
-  AssertTrue(isSymbol(aLoL));
+  AssertIntTrue(isAtom(aLoL));
+  AssertIntTrue(isSymbol(aLoL));
   AssertStrEquals(asSymbol(aLoL), "true");
   AVLNode* aNode = findSymbol(mainDic, asSymbol(aLoL));
   AssertPtrNotNull(aNode);
   AssertPtrNotNull(aNode->value);
-  AssertTrue(isBoolean(aNode->value));
-  AssertTrue(aNode->value->boolean);
+  AssertIntTrue(isBoolean(aNode->value));
+  AssertIntTrue(aNode->value->boolean);
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertTrue(isAtom(aLoL));
-  AssertTrue(isSymbol(aLoL));
+  AssertIntTrue(isAtom(aLoL));
+  AssertIntTrue(isSymbol(aLoL));
   AssertStrEquals(asSymbol(aLoL), "false");
   aNode = findSymbol(mainDic, asSymbol(aLoL));
   AssertPtrNotNull(aNode);
   AssertPtrNotNull(aNode->value);
-  AssertTrue(isBoolean(aNode->value));
+  AssertIntTrue(isBoolean(aNode->value));
   AssertFalse(aNode->value->boolean);
-}
+\stopCTest
+\skipTestCase
 
-void Test_printBoolean(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
+\startTestCase[parse Print Naturals]
+\startCTest
+  AssertPtrNotNull(jInterp);
 
-  CoAlgObj* aLoL = newBoolean(coAlgs, TRUE);
+  TextObj* aText =
+    createTextFromString(jInterp, " 1234567890 not1234567890 ");
+  AssertPtrNotNull(aText);
+
+  CoAlgObj* aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE), "true");
+  AssertIntTrue(isAtom(aLoL));
+  AssertIntTrue(isNatural(aLoL));
+  AssertIntEquals( mpz_cmp_si(aLoL->natural, 1234567890), 0);
+  AssertStrEquals(printLoLDebug(aLoL, FALSE), "1234567890");
 
-  aLoL = newBoolean(coAlgs, FALSE);
+  aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE), "false");
+  AssertIntTrue(isAtom(aLoL));
+  AssertIntTrue(isSymbol(aLoL));
+  AssertStrEquals(asSymbol(aLoL), "not1234567890");
+\stopCTest
+\skipTestCase
+\stopTestSuite
+
+\startTestSuite[parse all symbols]
+
+\setCHeaderStream{public}
+\startCHeader
+extern CoAlgObj* parseAllSymbols(TextObj* aText);
+\stopCHeader
+
+\startCCode
+CoAlgObj* parseAllSymbols(TextObj* aText) {
+  DEBUG(FALSE, "parseAllSymbols %p]\n", aText);
+  return parseList(aText, 0);
 }
+\stopCCode
 
-/******
+We begin by parsing and printing some strings which exercise \quote{happy 
+paths} in our parsing code. 
 
-// TODO move to context
+\startTestCase[parse SemiColons All At Once]
+\startCTest
+  AssertPtrNotNull(jInterp);
 
-static Symbol* factorialStrs[] = {
-  " ( 0 =nat ) ( pop 1 ) ( dup 1 - factorial * ) ifte ",
-  NULL
-};
+  TextObj* aText =
+    createTextFromArrayOfStrings(jInterp, complexListWithSemiColons);
 
-void ignoreTest_defineFactorial(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
-  Context* aCtx = createContext(anInterp);
-  AssertPtrNotNull(aCtx);
+  AssertPtrNotNull(aText);
 
-  Text* factorialText = createTextFromArrayOfStrings(coAlgs, factorialStrs);
-  AssertPtrNotNull(factorialText);
+  CoAlgObj* aLoL = parseAllSymbols(aText);
 
-  CoAlgObj* factorialLoL = parseAllSymbols(factorialText);
-  AssertPtrNotNull(factorialLoL);
+  AssertPtrNotNull(aLoL);
+  AssertStrEquals(printLoLDebug(aLoL, FALSE),
+    "this ; is ; a test with some semi-colons and ; again ; 123 ; 456 ; 789 12 ; 34 and ; one ; more ; time");
+\stopCTest
+\stopTestCase
 
-  defineJoyLoL(anInterp->coAlgebras, "factorial", factorialLoL);
-  freeText(factorialText);
-}
-******/
+\startTestCase[parse Print Simple List and test copyPairs]
+\startCTest
+  AssertPtrNotNull(jInterp);
 
-// Parse and print some unhappy path lists
+  TextObj* aText =
+    createTextFromArrayOfStrings(jInterp, simpleList);
+  AssertPtrNotNull(aText);
 
-static Symbol* incorrectMarkerList[] = {
-  " this ( is a list with incorrectly > matched list markers ",
-  NULL
-};
+  CoAlgObj* aLoL = parseAllSymbols(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntEquals(printSize(aLoL), 46);
+  clearPrintSizeMarksDebug(aLoL, FALSE);
+  AssertStrEquals(printLoL(aLoL), "this is a simple list");
 
-void ignoreTest_parseIncorrectMarkerList(CuTest* tc) {
+  CoAlgObj* lolCopy = copyPair(jInterp, aLoL);
+  AssertPtrNotEquals(aLoL, lolCopy);
+  AssertIntTrue(equalLoLDebug(aLoL, lolCopy, FALSE));
+\stopCTest
+\skipTestCase
+
+\startTestCase[parse Complex List From Single String]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromString(jInterp, moreComplexList[0]);
+  AssertPtrNotNull(aText);
+
+  CoAlgObj* aLoL = parseAllSymbols(aText);
+
+  AssertPtrNotNull(aLoL);
+  AssertStrEquals(printLoLDebug(aLoL, FALSE),
+    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) )");
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse Print Complex List]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromArrayOfStrings(jInterp, moreComplexList);
+  AssertPtrNotNull(aText);
+
+  CoAlgObj* aLoL = parseAllSymbols(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntEquals(printSizeDebug(aLoL, FALSE), 104);
+  clearPrintSizeMarksDebug(aLoL, FALSE);
+  AssertStrEquals(printLoLDebug(aLoL, FALSE),
+    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) )");
+
+  CoAlgObj* lolCopy = copyLoL(jInterp, aLoL);
+  AssertPtrNotEquals(aLoL, lolCopy);
+  AssertIntTrue(equalLoLDebug(aLoL, lolCopy, FALSE));
+\stopCTest
+\skipTestCase
+
+\startTestCase[parse Print Different List]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromArrayOfStrings(jInterp, differentList);
+  AssertPtrNotNull(aText);
+
+  CoAlgObj* aLoL = parseAllSymbols(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntEquals(printSizeDebug(aLoL, FALSE), 113);
+  clearPrintSizeMarksDebug(aLoL, FALSE);
+  AssertStrEquals(printLoLDebug(aLoL, FALSE),
+    "this is a different ( ( ( ) ( ) ( ) ) ( ( ( ) ) ) ) list");
+\stopCTest
+\stopTestCase
+
+Now we parse and print some strings which exercise \quote{unhappy paths} 
+in our parsing code. 
+
+\startTestCase[parse Incorrect Marker List]
+\startCTest
   CoAlgebras* coAlgs = createCoAlgebras();
   AssertPtrNotNull(coAlgs);
 
@@ -584,14 +569,11 @@ void ignoreTest_parseIncorrectMarkerList(CuTest* tc) {
   clearPrintSizeMarksDebug(aLoL, FALSE);
   AssertStrEquals(printLoL(aLoL),
     "this ( is a list with incorrectly ) matched list markers");
-}
+\stopCTest
+\ignoreTestCase
 
-static Symbol* unmatchedMarkerList[] = {
-  " this ( is a list [ with unmatched list markers ",
-  NULL
-};
-
-void ignoreTest_parseUnmatchedMarkerList(CuTest* tc) {
+\startTestCase[parse Unmatched Marker List]
+\startCTest
   CoAlgebras* coAlgs = createCoAlgebras();
   AssertPtrNotNull(coAlgs);
 
@@ -604,8 +586,9 @@ void ignoreTest_parseUnmatchedMarkerList(CuTest* tc) {
   clearPrintSizeMarksDebug(aLoL, FALSE);
   AssertStrEquals(printLoL(aLoL),
     "this ( is a list ( with unmatched list markers ) )");
-}
-\stoptyping
+\stopCTest
+\ignoreTestCase
+\stopTestSuite
 
 \startTestSuite[registerParsers]
 

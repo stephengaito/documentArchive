@@ -51,6 +51,21 @@ CoAlgObj* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
   AssertIntFalse(isPair(aNewBoolean));
 \stopCTest
 \stopTestCase
+
+\startTestCase[print Boolean]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  CoAlgObj* aLoL = newBoolean(jInterp, TRUE);
+  AssertPtrNotNull(aLoL);
+  AssertStrEquals(printLoLDebug(aLoL, FALSE), "true");
+
+  aLoL = newBoolean(jInterp, FALSE);
+  AssertPtrNotNull(aLoL);
+  AssertStrEquals(printLoLDebug(aLoL, FALSE), "false");
+\stopCTest
+\stopTestCase
+
 \stopTestSuite
 
 \startTestSuite[isBoolean]

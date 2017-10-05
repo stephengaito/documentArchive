@@ -1035,3 +1035,28 @@ Boolean registerContexts(JoyLoLInterp *jInterp) {
 
 \stopTestCase
 \stopTestSuite
+
+
+\starttyping
+/******
+
+// TODO move to context
+
+
+void ignoreTest_defineFactorial(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  AssertPtrNotNull(coAlgs);
+  Context* aCtx = createContext(anInterp);
+  AssertPtrNotNull(aCtx);
+
+  Text* factorialText = createTextFromArrayOfStrings(coAlgs, factorialStrs);
+  AssertPtrNotNull(factorialText);
+
+  CoAlgObj* factorialLoL = parseAllSymbols(factorialText);
+  AssertPtrNotNull(factorialLoL);
+
+  defineJoyLoL(anInterp->coAlgebras, "factorial", factorialLoL);
+  freeText(factorialText);
+}
+******/
+\stoptyping
