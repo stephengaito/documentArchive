@@ -172,45 +172,101 @@ CoAlgObj* popCtxData(ContextObj* aCtx) {
 }
 \stopCCode
 
-\starttyping
-void pushCtxProcess(ContextObj* aCtx, CoAlgObj* lolToPush) {
+\startCHeader
+extern void pushCtxProcess(
+  ContextObj* aCtx,
+  CoAlgObj* lolToPush
+);
+\stopCHeader
+
+\startCCode
+void pushCtxProcess(
+  ContextObj* aCtx,
+  CoAlgObj* lolToPush
+) {
   if (!aCtx) return;
   assert(aCtx->jInterp);
   aCtx->process = newPair(aCtx->jInterp, lolToPush, aCtx->process);
 }
+\stopCCode
 
-void pushSymbolCtxProcess(ContextObj* aCtx, const char* aSymbol) {
+\startCHeader
+extern void pushSymbolCtxProcess(
+  ContextObj* aCtx,
+  Symbol* aSymbol
+);
+\stopCHeader
+
+\startCCode
+void pushSymbolCtxProcess(
+  ContextObj* aCtx,
+  Symbol* aSymbol
+) {
   if (!aCtx) return;
   if (!aSymbol) return;
   assert(aCtx->jInterp);
-  CoAlgebras* coAlgs = aCtx->jInterp;
-
-  assert(coAlgs->symbols);
-  assert(coAlgs->symbols->dictionary);
 
   CoAlgObj* aSymbolPA =
-    getSymbol(coAlgs, coAlgs->symbols->dictionary, aSymbol);
+    getSymbol(aCtx->jInterp, aSymbol);
   if (!aSymbolPA) return;
-  aCtx->process = newPair(coAlgs, aSymbolPA, aCtx->process);
+  aCtx->process = newPair(aCtx->jInterp, aSymbolPA, aCtx->process);
 }
+\stopCCode
 
-void pushParsedArrayOfStringsCtxProcess(ContextObj* aCtx, Symbol* someStrings[]) {
+\startCHeader
+extern void pushParsedArrayOfStringsCtxProcess(
+  ContextObj* aCtx,
+  Symbol* someStrings[]
+);
+\stopCHeader
+
+\startCCode
+void pushParsedArrayOfStringsCtxProcess(
+  ContextObj* aCtx,
+  Symbol* someStrings[]
+) {
   if (!aCtx) return;
   if (!someStrings) return;
-  Text* aText = createTextFromArrayOfStrings(aCtx->jInterp, someStrings);
+  TextObj* aText =
+    createTextFromArrayOfStrings(aCtx->jInterp, someStrings);
   pushParsedTextCtxProcess(aCtx, aText);
   freeText(aText);
 }
+\stopCCode
 
-void pushParsedStringCtxProcess(ContextObj* aCtx, Symbol* aString) {
+\startCHeader
+extern void pushParsedStringCtxProcess(
+  ContextObj* aCtx,
+  Symbol* aString
+);
+\stopCHeader
+
+\startCCode
+void pushParsedStringCtxProcess(
+  ContextObj* aCtx,
+  Symbol* aString
+) {
   if (!aCtx) return;
   if (!aString) return;
-  Text* aText = createTextFromString(aCtx->jInterp, aString);
+  TextObj* aText =
+    createTextFromString(aCtx->jInterp, aString);
   pushParsedTextCtxProcess(aCtx, aText);
   freeText(aText);
 }
+\stopCCode
 
-void pushParsedTextCtxProcess(ContextObj* aCtx, Text* aText) {
+\startCHeader
+void pushParsedTextCtxProcess(
+  ContextObj* aCtx,
+  TextObj* aText
+);
+\stopCHeader
+
+\startCCode
+void pushParsedTextCtxProcess(
+  ContextObj* aCtx,
+  TextObj* aText
+) {
   if (!aCtx) return;
   if (!aText) return;
   assert(aCtx->jInterp);
@@ -218,8 +274,20 @@ void pushParsedTextCtxProcess(ContextObj* aCtx, Text* aText) {
   if (!aLoL) return;
   aCtx->process = newPair(aCtx->jInterp, aLoL, aCtx->process);
 }
+\stopCCode
 
-void prependListCtxProcess(ContextObj* aCtx, CoAlgObj* lolToPrepend) {
+\startCHeader
+extern void prependListCtxProcess(
+  ContextObj* aCtx,
+  CoAlgObj* lolToPrepend
+);
+\stopCHeader
+
+\startCCode
+void prependListCtxProcess(
+  ContextObj* aCtx,
+  CoAlgObj* lolToPrepend
+) {
   if (!aCtx) return;
   if (!lolToPrepend) return;
 
@@ -231,67 +299,107 @@ void prependListCtxProcess(ContextObj* aCtx, CoAlgObj* lolToPrepend) {
 
   // find end of lolToPrepend
   CoAlgObj* lolList = lolToPrepend;
-  while(lolList->pair.cdr && isPair(lolList->pair.cdr)) {
-    lolList = lolList->pair.cdr;
+  while(asCdr(lolList) && isPair(asCdr(lolList))) {
+    lolList = asCdr(lolList);
   }
 
   // ensure that if lolToPrepend ends in a non-pair we make it a pair
-  if (lolList->pair.cdr && !isPair(lolList->pair.cdr)) {
-    lolList->pair.cdr = newPair(aCtx->jInterp, lolList->pair.cdr, NULL);
-    assert(lolList->pair.cdr);
+  if (asCdr(lolList) && !isPair(asCdr(lolList))) {
+    asCdr(lolList) = newPair(aCtx->jInterp, asCdr(lolList), NULL);
+    assert(asCdr(lolList));
   }
 
   // place existing process stack at end of lolToPrepend
-  lolList->pair.cdr  = aCtx->process;
-  aCtx->process = lolToPrepend;
+  asCdr(lolList)  = aCtx->process;
+  aCtx->process   = lolToPrepend;
 }
+\stopCCode
 
+\startCHeader
+CoAlgObj* popCtxProcess(ContextObj* aCtx);
+\stopCHeader
+
+\startCCode
 CoAlgObj* popCtxProcess(ContextObj* aCtx) {
   if (!aCtx->process) return NULL;
 
-  CoAlgObj* poppedLoL = aCtx->process->pair.car;
-  aCtx->process       = aCtx->process->pair.cdr;
+  CoAlgObj* poppedLoL = asCar(aCtx->process);
+  aCtx->process       = asCdr(aCtx->process);
   return poppedLoL;
 }
+\stopCCode
 
-size_t extendJoyLoL(CoAlgebras* coAlgs,
-                    Symbol* definedName,
-                    JoyLoLFunction* aFunc) {
-  assert(coAlgs);
-  assert(coAlgs->symbols);
-  assert(coAlgs->symbols->dictionary);
-  AVLNode* aSym =
-    createSymbol(coAlgs->symbols->dictionary, definedName);
-  aSym->value = newJoyLoLFunc(coAlgs, aFunc);
+\starttyping
+\startCHeader
+Boolean extendJoyLoL(
+  JoyLoLInterp* jInterp,
+  Symbol* definedName,
+  JoyLoLFunction* aFunc
+);
+\stopCHeader
 
-  return TRUE;
-}
-
-size_t defineJoyLoL(CoAlgebras* coAlgs,
-                    Symbol* definedName,
-                    CoAlgObj* aLoL) {
-  assert(coAlgs);
-  assert(coAlgs->symbols);
-  assert(coAlgs->symbols->dictionary);
-  AVLNode* aSym =
-    createSymbol(coAlgs->symbols->dictionary, definedName);
-  aSym->value = copyLoL(coAlgs, aLoL);
+\startCCode
+Boolean extendJoyLoL(
+  JoyLoLInterp* jInterp,
+  Symbol* definedName,
+  JoyLoLFunction* aFunc
+) {
+  assert(jInterp);
+  DictObj* aSym =
+    createSymbol(jInterp, definedName);
+  aSym->value = newJoyLoLFunc(jInterp, aFunc);
 
   return TRUE;
 }
+\stopCCode
+\stoptyping
 
-size_t defineContext(CoAlgebras* coAlgs,
-                     Symbol* definedName,
-                     ContextObj* newCtx) {
+\startCHeader
+Boolean defineJoyLoL(
+  JoyLoLInterp* jInterp,
+  Symbol* definedName,
+  CoAlgObj* aLoL
+);
+\stopCHeader
+
+\startCCode
+Boolean defineJoyLoL(
+  JoyLoLInterp* jInterp,
+  Symbol* definedName,
+  CoAlgObj* aLoL
+) {
+  assert(jInterp);
+  DictObj* aSym =
+    createSymbol(jInterp, definedName);
+  aSym->value = copyLoL(jInterp, aLoL);
+
+  return TRUE;
+}
+\stopCCode
+
+\starttyping
+\startCHeader
+Boolean defineContext(
+  JoyLoLInterp* jInterp,
+  Symbol* definedName,
+  ContextObj* newCtx
+);
+\stopCHeader
+
+\startCCode
+Boolean defineContext(
+  JoyLoLInterp* jInterp,
+  Symbol* definedName,
+  ContextObj* newCtx
+) {
   DEBUG(FALSE, "defineContext %p [%s] %p\n",
-        coAlgs, definedName, newCtx);
-  assert(coAlgs);
-  assert(coAlgs->symbols);
-  assert(coAlgs->symbols->dictionary);
-  AVLNode* aSym =
-    createSymbol(coAlgs->symbols->dictionary, definedName);
-  aSym->value   = newContext(coAlgs, newCtx);
+        jInterp, definedName, newCtx);
+  assert(jInterp);
+  DictObj* aSym =
+    createSymbol(jInterp, definedName);
+  aSym->value   = newContext(jInterp, newCtx);
 
   return TRUE;
 }
+\stopCCode
 \stoptyping
