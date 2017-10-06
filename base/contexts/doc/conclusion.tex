@@ -23,7 +23,12 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/naturals.h>
+#include <joylol/symbols.h>
 #include <joylol/pairs.h>
+#include <joylol/texts.h>
+#include <joylol/parsers.h>
+#include <joylol/dictionaries.h>
 #include <joylol/contexts.h>
 #include <joylol/contexts-private.h>
 \stopCCode
@@ -34,12 +39,24 @@
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/naturals.h>}
+\addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/pairs.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/parsers.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/contexts.h>}
 \addCTestInclude{<joylol/contexts-private.h>}
+\addCTestLib{-lgmp}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedNaturals(lstate);
+  requireStaticallyLinkedSymbols(lstate);
+  requireStaticallyLinkedPairs(lstate);
+  requireStaticallyLinkedTexts(lstate);
+  requireStaticallyLinkedParsers(lstate);
+  requireStaticallyLinkedDictionaries(lstate);
   requireStaticallyLinkedContexts(lstate);
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
 \stopCTest
@@ -52,6 +69,7 @@
 \addMainDocument{contexts.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{core.tex}
 \addSubDocument{lua.tex}
 \addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 

@@ -14,6 +14,7 @@ litProgs.targets{
   docFiles = {
     'overview.tex',
     'code.tex',
+    'core.tex',
     'lua.tex',
     'words.tex',
     'conclusion.tex',
@@ -41,6 +42,12 @@ joylol.targets{
   },
   coAlgLibs = {
     'jInterps',
+    'naturals',
+    'symbols',
+    'pairs',
+    'texts',
+    'parsers',
+    'dictionaries',
   },
   buildDir = 'build',
 }
@@ -55,6 +62,7 @@ contests.targets{
   docFiles = {
     'overview.tex',
     'code.tex',
+    'core.tex',
     'lua.tex',
     'words.tex',
     'conclusion.tex',
@@ -67,6 +75,7 @@ contests.targets{
   testLibDirs = {
   },
   testLibs = {
+    '-lgmp',
   },
   buildDir  = 'build',
   docDir    = 'doc',
