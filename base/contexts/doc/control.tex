@@ -1,0 +1,189 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Context control code]
+
+// Operators
+
+static void failAP(Context* aCtx) {
+  assert(aCtx);
+  aCtx->data    = NULL;
+  aCtx->process = NULL;
+}
+
+// Combinators
+
+static void interpretAP(Context* aCtx) {
+  popCtxDataInto(aCtx, top);
+  prependListCtxProcess(aCtx, top);
+}
+
+static void forAP(Context* aCtx) {
+  popCtxProcessInto(aCtx, nextCommand);
+  if (symbolIs(nextCommand, "forDone")) {
+    // this for loop is done
+    DEBUG(FALSE, "forAP DONE%s\n", "");
+  } else {
+    DEBUG(FALSE, "forAP continue%s\n", "");
+    pushSymbolCtxProcess(aCtx, "for");
+    prependListCtxProcess(aCtx, nextCommand);
+  }
+}
+
+static void forDoneAP(Context* aCtx) {
+  // ignore
+}
+
+static void lispInterpretAP(Context* aCtx) {
+  popCtxDataInto(aCtx, top);
+  PairAtom* operationName = car(top);
+  PairAtom* operationBody = cdr(top);
+  pushCtxProcess(aCtx, operationName);
+  pushCtxProcess(aCtx, operationBody);
+}
+
+static void lispForAP(Context* aCtx) {
+  popCtxProcessInto(aCtx, nextCommand);
+  if (symbolIs(nextCommand, "forDone")) {
+    // this lisp for loop is done
+    DEBUG(FALSE, "lispForAP DONE%s\n", "");
+  } else {
+    DEBUG(FALSE, "lispForAP continue%s\n", "");
+    PairAtom* operationName = car(nextCommand);
+    PairAtom* operationBody = cdr(nextCommand);
+    pushSymbolCtxProcess(aCtx, "lispFor");
+    pushCtxProcess(aCtx, operationName);
+    pushCtxProcess(aCtx, operationBody);
+  }
+}
+
+static void exitAP(Context* aCtx) {
+  assert(aCtx);
+  aCtx->process = NULL;
+}
+
+static void tryAP(Context* aCtx) {
+  popCtxDataInto(aCtx, handlerExp);
+  popCtxDataInto(aCtx, tryExp);
+  pushCtxProcess(aCtx, handlerExp);
+  pushSymbolCtxProcess(aCtx, "tryHandler");
+  prependListCtxProcess(aCtx, tryExp);
+}
+
+static void raiseAP(Context* aCtx) {
+  assert(aCtx);
+  aCtx->exceptionRaised = TRUE;
+  popCtxDataInto(aCtx, raiseExp);
+  pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
+  prependListCtxProcess(aCtx, raiseExp);
+}
+
+static void raiseIfFalseAP(Context* aCtx) {
+  assert(aCtx);
+  popCtxDataInto(aCtx, condition);
+  popCtxProcessInto(aCtx, raiseExp);
+  if (isFalse(condition)) {
+    pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
+    prependListCtxProcess(aCtx, raiseExp);
+  }
+}
+
+static void findFirstTryHandlerAP(Context* aCtx) {
+  assert(aCtx);
+  if (aCtx->process) {
+    popCtxProcessInto(aCtx, aCommand);
+    if (isSymbol(aCommand) && (strcmp(aCommand->symbol, "tryHandler") == 0)) {
+      assert(aCtx);
+      aCtx->exceptionRaised = FALSE;
+      popCtxProcessInto(aCtx, handlerExp);
+      prependListCtxProcess(aCtx, handlerExp);
+      return;
+    }
+    pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
+  } else {
+    if (aCtx->parent) {
+      PairAtom* parentCtx = newContext(aCtx->coAlgebras, aCtx->parent);
+      pushSymbolCtxProcess(aCtx->parent, "raise");
+      pushCtxProcess(aCtx, parentCtx);
+    }
+  }
+}
+
+static void tryHandlerAP(Context* aCtx) {
+  popCtxProcessInto(aCtx, handlerExp);
+}
+
+void raiseException(Context* aCtx, Symbol* message) {
+  assert(aCtx);
+  pushSymbolCtxData(aCtx, message);
+  pushSymbolCtxProcess(aCtx, "raise");
+}
+
+size_t reportException(Context* aCtx) {
+  assert(aCtx);
+  if (!aCtx->exceptionRaised) return FALSE;
+  char* exceptionReport = printLoL(car(aCtx->data));
+  printf("\nUNHANDLED EXCEPTION: %s\n", exceptionReport);
+  if (exceptionReport) free(exceptionReport);
+  aCtx->exceptionRaised = FALSE;
+  return TRUE;
+}
+
+// Support
+
+static void defineAP(Context* aCtx) {
+  assert(aCtx);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isSymbol(top1)) return;
+  defineJoyLoL(aCtx->coAlgebras, top1->symbol, top2);
+}
+
+static void defineContextAP(Context* aCtx) {
+  popCtxDataInto(aCtx, contextName);
+  popCtxDataInto(aCtx, contextData);
+  popCtxDataInto(aCtx, contextProcess);
+  if (!isSymbol(contextName)) return;
+  Context* newCtx =
+    createContext(aCtx->coAlgebras, contextName->symbol,
+                  aCtx, contextData, contextProcess);
+  defineContext(aCtx->coAlgebras, contextName->symbol, newCtx);
+}
+
+static void newContextAP(Context* aCtx) {
+  popCtxDataInto(aCtx, contextData);
+  popCtxDataInto(aCtx, contextProcess);
+  Context* newCtx =
+    createContext(aCtx->coAlgebras, "anonymous",
+                  aCtx, contextData, contextProcess);
+  assert(newCtx);
+  PairAtom* newCtxLoL = newContext(aCtx->coAlgebras, newCtx);
+  assert(newCtxLoL);
+  pushCtxData(aCtx, newCtxLoL);
+}
+
+static void thisContextAP(Context* aCtx) {
+  PairAtom* thisCtx = newContext(aCtx->coAlgebras, aCtx);
+  assert(thisCtx);
+  pushCtxData(aCtx, thisCtx);
+}
+
+void initContextsAPControl(CoAlgebras* coAlgs) {
+  extendJoyLoL(coAlgs, "fail",                failAP);
+  extendJoyLoL(coAlgs, "i",                   interpretAP);
+  extendJoyLoL(coAlgs, "interpret",           interpretAP);
+  extendJoyLoL(coAlgs, "for",                 forAP);
+  extendJoyLoL(coAlgs, "forDone",             forDoneAP);
+  extendJoyLoL(coAlgs, "lispInterpret",       lispInterpretAP);
+  extendJoyLoL(coAlgs, "lispFor",             lispForAP);
+  extendJoyLoL(coAlgs, "define",              defineAP);
+  extendJoyLoL(coAlgs, "defineContext",       defineContextAP);
+  extendJoyLoL(coAlgs, "thisContext",         thisContextAP);
+  extendJoyLoL(coAlgs, "newContext",          newContextAP);
+  extendJoyLoL(coAlgs, "exit",                exitAP);
+  extendJoyLoL(coAlgs, "quit",                exitAP);
+  extendJoyLoL(coAlgs, "try",                 tryAP);
+  extendJoyLoL(coAlgs, "raise",               raiseAP);
+  extendJoyLoL(coAlgs, "raiseIfFalse",        raiseIfFalseAP);
+  extendJoyLoL(coAlgs, "findFirstTryHandler", findFirstTryHandlerAP);
+  extendJoyLoL(coAlgs, "tryHandler",          tryHandlerAP);
+}

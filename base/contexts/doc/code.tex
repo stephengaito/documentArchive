@@ -5,260 +5,51 @@
 \dependsOn[jInterps]
 \setCHeaderStream{public}
 
-\starttyping
-\startJoyLoLWord[eval]
+\startCHeader
+typedef struct context_object_struct ContextObj;
+typedef struct context_object_struct {
+  CoAlgObj      super;
+  JoyLoLInterp *jInterp;
+  Symbol       *name;
+  ContextObj   *parent;
+  CoAlgObj     *data;
+  CoAlgObj     *command;
+  CoAlgObj     *process;
+  CoAlgObj     *messages;
+  CoAlgObj     *listeners;
+  Boolean       exceptionRaised;
+  Boolean       showSpecifications;
+  Boolean       showStack;
+  Boolean       tracingOn;
+  Boolean       checkingOn;
+  Boolean       verbose;
+} ContextObj;
+\stopCHeader
 
-\startJoyLoLCode
-
-;; this is a comment
-#| 
-  This is a multi-line comment
-  and another line
-|#
-
-(test () ())
-
-\stopJoyLoLCode
-
+\startCHeader
+extern ContextObj* newContext(JoyLoLInterp *jInterp,
+                              Symbol       *name,
+                              ContextObj   *parent,
+                              CoAlgObj     *dataLoL,
+                              CoAlgObj     *processLoL
+);
+\stopCHeader
 \startCCode
+ContextObj* newContext(JoyLoLInterp *jInterp,
+                       Symbol       *name,
+                       ContextObj   *parent,
+                       CoAlgObj     *dataLoL,
+                       CoAlgObj     *processLoL
+) {
+  DEBUG(FALSE, "createContext %p [%s] %p %p %p\n",
+    jInterp, name, parent, dataLoL, processLoL);
+  assert(jInterp);
 
-void traceAction(const char* action, PairAtom* aLoL, PairAtom* command) {
-  char* lolStr = printLoL(aLoL);
-  if (command) {
-    char* commandStr = printLoL(command);
-    printf("%s: %s (%s)\\n", action, lolStr, commandStr);
-    free(commandStr);
-  } else {
-    printf("%s: %s\\n", action, lolStr);
-  }
-  free(lolStr);
-}
-
-void evalCommandInContext(Context* aCtx, PairAtom* command) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->symbols);
-  Dictionary* mainDic = aCtx->coAlgebras->symbols->dictionary;
-  assert(mainDic);
-  //
-  // if there is no command... there is nothing to do
-  //
-  if (!command) return;
-  //
-  DEBUG(FALSE, "evalCommandInContext > %p %p\\n", aCtx, command);
-  //
-  // push this command onto the top of the process stack
-  //
-  pushCtxProcess(aCtx, command);
-  //
-  while(aCtx->process) {
-    if (aCtx->tracingOn) printf("\\n ctx: %s\\n", aCtx->name);
-    //
-    // pop the next command off the process stack
-    //
-    command = popCtxProcess(aCtx);
-    aCtx->command = command;
-    //
-    if (isFunction(command)) {
-      //
-      // if the command is a function.. call the function
-      //
-      if (aCtx->tracingOn) traceAction("calling", command, NULL);
-      (command->func)(aCtx);
-      //
-    } else if (isContext(command)) {
-      //
-      // if the command is a context... switch to this contex
-      //
-      DEBUG(FALSE, "evalCommandInContext -> switching origCtx: %s\\n",
-            aCtx->name);
-      if (aCtx->tracingOn) traceAction("switching", command, NULL);
-      Context* switchCtx = command->context;
-      assert(switchCtx);
-
-      popCtxDataInto(aCtx, oldCtxTop);
-      pushCtxData(switchCtx, oldCtxTop);
-      switchCtx->tracingOn = aCtx->tracingOn;
-      aCtx = switchCtx;
-      DEBUG(FALSE, "evalCommandInContext <- switching newCtx: %s\\n",
-            aCtx->name);
-      //
-    } else if (!isSymbol(command)) {
-      //
-      // if the command is not a Symbol ...
-      //  ...  push it onto the top of the data stack
-      //
-      if (aCtx->tracingOn) traceAction("adding", command, NULL);
-      pushCtxData(aCtx, command);
-      //
-    } else {
-      //
-      // if the command is a symbol ...
-      //  ... look up the symbol's association in the dictionary
-      //
-      AVLNode* assoc = findSymbol(mainDic, command->symbol);
-      assert(assoc);
-      //
-      if (!assoc->value) {
-        //
-        // if the association is empty.. push this symbol onto the top
-        // of the data stack (re-evaluating this symbol would lead to an
-        // infinite loop)
-        //
-        if (aCtx->tracingOn) traceAction("adding", command, NULL);
-        pushCtxData(aCtx, command);
-        //
-      } else if (isPair(assoc->value)) {
-        //
-        // if the association is a LoL.. push this LoL onto the top of the
-        // process stack
-        //
-        if (aCtx->tracingOn) traceAction("evaluating", assoc->value, command);
-        assert(aCtx->coAlgebras);
-        prependListCtxProcess(aCtx, copyLoL(aCtx->coAlgebras, assoc->value));
-        //
-      } else if (isFunction(assoc->value)) {
-        //
-        // if the association is a function.. call the function
-        //
-        if (aCtx->tracingOn) traceAction("calling", command, NULL);
-        (assoc->value->func)(aCtx);
-        //
-      } else if (isContext(assoc->value)) {
-        //
-        // if the association is a context... switch to this contex
-        //
-        DEBUG(FALSE, "evalCommandInContext -> switching origCtx: %s\\n",
-              aCtx->name);
-        if (aCtx->tracingOn) traceAction("switching", command, NULL);
-        Context* switchCtx = assoc->value->context;
-        assert(switchCtx);
-
-        popCtxDataInto(aCtx, oldCtxTop);
-        pushCtxData(switchCtx, oldCtxTop);
-        switchCtx->tracingOn = aCtx->tracingOn;
-        aCtx = switchCtx;
-        DEBUG(FALSE, "evalCommandInContext <- switching newCtx: %s\\n",
-              aCtx->name);
-        //
-      } else {
-        //
-        // if the association is NOT a PairAtom or Function...
-        // ... push this new ATOM onto the top of the process stack
-        //
-        if (aCtx->tracingOn) traceAction("evaluating", assoc->value, command);
-        pushCtxProcess(aCtx, assoc->value);
-        //
-      }
-    }
-    if (aCtx->tracingOn) {
-      DEBUG(FALSE, "evalCommandInContext -> tracing%s\\n", "");
-      printf("d>>%s\\n", printLoL(aCtx->data));
-      printf("p>>%s\\n", printLoL(aCtx->process));
-      DEBUG(FALSE, "evalCommandInContext <- tracing%s\\n", "");
-    }
-  } // aCtx->process is empty
-  DEBUG(FALSE, "evalCommandInContext < %p %p\\n", aCtx, command);
-}
-
-void evalContext(Context* aCtx) {
-  popCtxProcessInto(aCtx, aCommand);
-  evalCommandInContext(aCtx, aCommand);
-}
-
-void evalTextInContext(Context* aCtx, Text* aText) {
-  DEBUG(FALSE, "evalTextInContext > %p %p\\n", aCtx, aText);
-  while(TRUE) {
-    PairAtom* aLoL = parseOneSymbol(aText);
-//    if (aCtx->showStack) printf("<%s\\n", printLoL(aLoL));
-    if (!aLoL) break;
-    evalCommandInContext(aCtx, aLoL);
-//    if (aCtx->showStack) printf(">%s\\n", printLoL(aCtx->data));
-    if (aCtx->exceptionRaised) break;
-  }
-  DEBUG(FALSE, "evalTextInContext < %p %p\\n", aCtx, aText);
-}
-
-void evalArrayOfStringsInContext(Context* aCtx,
-                                 const char* someStrings[]) {
-  DEBUG(FALSE, "evalStringInContext > %p %p\\n", aCtx, someStrings);
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  Text* stringText = createTextFromArrayOfStrings(aCtx->coAlgebras,
-                                                  someStrings);
-  evalTextInContext(aCtx, stringText);
-  freeText(stringText);
-  DEBUG(FALSE, "evalStringInContext < %p %p\\n", aCtx, someStrings);
-}
-
-void evalStringInContext(Context* aCtx, const char* aString) {
-  DEBUG(FALSE, "evalStringInContext > %p [%s]\\n", aCtx, aString);
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  Text* stringText = createTextFromString(aCtx->coAlgebras, aString);
-  evalTextInContext(aCtx, stringText);
-  freeText(stringText);
-  DEBUG(FALSE, "evalStringInContext < %p [%s]\\n", aCtx, aString);
-}
-
-void runREPLInContext(Context* aCtx) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  Text* aText = createTextFromReadline(aCtx->coAlgebras);
-  while(TRUE) {
-    DEBUG(FALSE, "runREPLInContext %p reading\\n", aCtx);
-    PairAtom* aLoL = parseOneSymbol(aText);
-    DEBUG(FALSE, "runREPLInContext %p read %p\\n", aCtx, aLoL);
-    //
-    if (!aLoL) break;
-    //
-    evalCommandInContext(aCtx, aLoL);
-    assert(!aCtx->process);
-    //
-    if (aCtx->showStack) {
-      DEBUG(FALSE, "runREPLInContext %p printing data %p\\n", aCtx, aCtx->data);
-      printf(">>%s\\n", printLoL(aCtx->data));
-      DEBUG(FALSE, "runREPLInContext %p printed data %p\\n", aCtx, aCtx->data);
-    }
-    //
-    reportException(aCtx); // report last exception if raised
-  }
-  saveReadlineHistory(aText);
-  DEBUG(FALSE, "runREPLInContext %p COMPLETED\\n", aCtx);
-}
-
-\stopCCode
-
-\stopJoyLoLWord
-
-\stoptyping
-
-\starttyping
-// contexts.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/printer.h"
-#include "joyLoL/text.h"
-#include "joyLoL/parser.h"
-
-Context* createContext(CoAlgebras* coAlgs,
-                       Symbol*   name,
-                       Context*  parent,
-                       PairAtom* dataLoL,
-                       PairAtom* processLoL) {
-  DEBUG(FALSE, "createContext %p [%s] %p %p\n", coAlgs, name, dataLoL, processLoL);
-  assert(coAlgs);
-
-  Context* context = (Context*) calloc(1, sizeof(Context));
+  ContextObj* context =
+    (ContextObj*) newObject(jInterp, ContextsTag);
   assert(context);
 
-  context->coAlgebras         = coAlgs;
+  context->jInterp            = jInterp;
   context->name               = name;
   context->parent             = parent;
   context->data               = dataLoL;
@@ -276,718 +67,147 @@ Context* createContext(CoAlgebras* coAlgs,
   return context;
 }
 
-PairAtom* newContext(CoAlgebras* coAlgs, Context* aCtx) {
-  assert(coAlgs);
-  PairAtom* aNewCtx = newPairAtom(coAlgs);
-  assert(aNewCtx);
-  aNewCtx->coAlg    = (CoAlgebra*)coAlgs->contexts;
-  aNewCtx->tag      = 0;
-  aNewCtx->context  = aCtx;
-  return aNewCtx;
-}
-
-void pushCtxData(Context* aCtx, PairAtom* lolToPush) {
-  if (!aCtx) return;
-  assert(aCtx->coAlgebras);
-  aCtx->data = newPair(aCtx->coAlgebras, lolToPush, aCtx->data);
-}
-
-void pushNullCtxData(Context* aCtx) {
-  if (!aCtx) return;
-  assert(aCtx->coAlgebras);
-  aCtx->data = newPair(aCtx->coAlgebras, NULL, aCtx->data);
-}
-
-void pushSymbolCtxData(Context* aCtx, Symbol* aSymbol) {
-  if (!aCtx) return;
-  if (!aSymbol) return;
-  assert(aCtx->coAlgebras);
-  CoAlgebras* coAlgs = aCtx->coAlgebras;
-
-  assert(coAlgs->symbols);
-  assert(coAlgs->symbols->dictionary);
-
-  PairAtom* aSymbolPA =
-    getSymbol(coAlgs, coAlgs->symbols->dictionary, aSymbol);
-  if (!aSymbolPA) return;
-  aCtx->data = newPair(coAlgs, aSymbolPA, aCtx->data);
-}
-
-void pushParsedArrayOfStringsCtxData(Context* aCtx, Symbol* someStrings[]) {
-  if (!aCtx) return;
-  if (!someStrings) return;
-  Text* aText = createTextFromArrayOfStrings(aCtx->coAlgebras, someStrings);
-  pushParsedTextCtxData(aCtx, aText);
-  freeText(aText);
-}
-
-void pushParsedStringCtxData(Context* aCtx, Symbol* aString) {
-  if (!aCtx) return;
-  if (!aString) return;
-  Text* aText = createTextFromString(aCtx->coAlgebras, aString);
-  pushParsedTextCtxData(aCtx, aText);
-  freeText(aText);
-}
-
-void pushParsedTextCtxData(Context* aCtx, Text* aText) {
-  if (!aCtx) return;
-  if (!aText) return;
-  assert(aCtx->coAlgebras);
-  PairAtom* aLoL = parseAllSymbols(aText);
-  if (!aLoL) return;
-  aCtx->data = newPair(aCtx->coAlgebras, aLoL, aCtx->data);
-}
-
-void prependListCtxData(Context* aCtx, PairAtom* lolToPrepend) {
-  if (!aCtx) return;
-  if (!lolToPrepend) return;
-
-  // ensure lolToPrepend is a list
-  if (!isPair(lolToPrepend)) {
-    lolToPrepend = newPair(aCtx->coAlgebras, lolToPrepend, NULL);
-    assert(lolToPrepend);
-  }
-
-  // find end of lolToPrepend
-  PairAtom* lolList = lolToPrepend;
-  while(lolList->pair.cdr && isPair(lolList->pair.cdr)) {
-    lolList = lolList->pair.cdr;
-  }
-
-  // ensure that if lolToPrepend ends in a non-pair we make it a pair
-  if (lolList->pair.cdr && !isPair(lolList->pair.cdr)) {
-    lolList->pair.cdr = newPair(aCtx->coAlgebras, lolList->pair.cdr, NULL);
-    assert(lolList->pair.cdr);
-  }
-
-  // place existing data stack at end of lolToPrepend
-  lolList->pair.cdr = aCtx->data;
-  aCtx->data   = lolToPrepend;
-}
-
-PairAtom* popCtxData(Context* aCtx) {
-  if (!aCtx) return NULL;
-  if (!aCtx->data) return NULL;
-
-  PairAtom* poppedLoL = aCtx->data->pair.car;
-  aCtx->data          = aCtx->data->pair.cdr;
-  return poppedLoL;
-}
-
-void pushCtxProcess(Context* aCtx, PairAtom* lolToPush) {
-  if (!aCtx) return;
-  assert(aCtx->coAlgebras);
-  aCtx->process = newPair(aCtx->coAlgebras, lolToPush, aCtx->process);
-}
-
-void pushSymbolCtxProcess(Context* aCtx, const char* aSymbol) {
-  if (!aCtx) return;
-  if (!aSymbol) return;
-  assert(aCtx->coAlgebras);
-  CoAlgebras* coAlgs = aCtx->coAlgebras;
-
-  assert(coAlgs->symbols);
-  assert(coAlgs->symbols->dictionary);
-
-  PairAtom* aSymbolPA =
-    getSymbol(coAlgs, coAlgs->symbols->dictionary, aSymbol);
-  if (!aSymbolPA) return;
-  aCtx->process = newPair(coAlgs, aSymbolPA, aCtx->process);
-}
-
-void pushParsedArrayOfStringsCtxProcess(Context* aCtx, Symbol* someStrings[]) {
-  if (!aCtx) return;
-  if (!someStrings) return;
-  Text* aText = createTextFromArrayOfStrings(aCtx->coAlgebras, someStrings);
-  pushParsedTextCtxProcess(aCtx, aText);
-  freeText(aText);
-}
-
-void pushParsedStringCtxProcess(Context* aCtx, Symbol* aString) {
-  if (!aCtx) return;
-  if (!aString) return;
-  Text* aText = createTextFromString(aCtx->coAlgebras, aString);
-  pushParsedTextCtxProcess(aCtx, aText);
-  freeText(aText);
-}
-
-void pushParsedTextCtxProcess(Context* aCtx, Text* aText) {
-  if (!aCtx) return;
-  if (!aText) return;
-  assert(aCtx->coAlgebras);
-  PairAtom* aLoL = parseAllSymbols(aText);
-  if (!aLoL) return;
-  aCtx->process = newPair(aCtx->coAlgebras, aLoL, aCtx->process);
-}
-
-void prependListCtxProcess(Context* aCtx, PairAtom* lolToPrepend) {
-  if (!aCtx) return;
-  if (!lolToPrepend) return;
-
-  // ensure lolToPrepend is a list
-  if (!isPair(lolToPrepend)) {
-    lolToPrepend = newPair(aCtx->coAlgebras, lolToPrepend, NULL);
-    assert(lolToPrepend);
-  }
-
-  // find end of lolToPrepend
-  PairAtom* lolList = lolToPrepend;
-  while(lolList->pair.cdr && isPair(lolList->pair.cdr)) {
-    lolList = lolList->pair.cdr;
-  }
-
-  // ensure that if lolToPrepend ends in a non-pair we make it a pair
-  if (lolList->pair.cdr && !isPair(lolList->pair.cdr)) {
-    lolList->pair.cdr = newPair(aCtx->coAlgebras, lolList->pair.cdr, NULL);
-    assert(lolList->pair.cdr);
-  }
-
-  // place existing process stack at end of lolToPrepend
-  lolList->pair.cdr  = aCtx->process;
-  aCtx->process = lolToPrepend;
-}
-
-PairAtom* popCtxProcess(Context* aCtx) {
-  if (!aCtx->process) return NULL;
-
-  PairAtom* poppedLoL = aCtx->process->pair.car;
-  aCtx->process       = aCtx->process->pair.cdr;
-  return poppedLoL;
-}
-
-size_t extendJoyLoL(CoAlgebras* coAlgs,
-                    Symbol* definedName,
-                    JoyLoLFunction* aFunc) {
-  assert(coAlgs);
-  assert(coAlgs->symbols);
-  assert(coAlgs->symbols->dictionary);
-  AVLNode* aSym =
-    createSymbol(coAlgs->symbols->dictionary, definedName);
-  aSym->value = newJoyLoLFunc(coAlgs, aFunc);
-
-  return TRUE;
-}
-
-size_t defineJoyLoL(CoAlgebras* coAlgs,
-                    Symbol* definedName,
-                    PairAtom* aLoL) {
-  assert(coAlgs);
-  assert(coAlgs->symbols);
-  assert(coAlgs->symbols->dictionary);
-  AVLNode* aSym =
-    createSymbol(coAlgs->symbols->dictionary, definedName);
-  aSym->value = copyLoL(coAlgs, aLoL);
-
-  return TRUE;
-}
-
-size_t defineContext(CoAlgebras* coAlgs,
-                     Symbol* definedName,
-                     Context* newCtx) {
-  DEBUG(FALSE, "defineContext %p [%s] %p\n",
-        coAlgs, definedName, newCtx);
-  assert(coAlgs);
-  assert(coAlgs->symbols);
-  assert(coAlgs->symbols->dictionary);
-  AVLNode* aSym =
-    createSymbol(coAlgs->symbols->dictionary, definedName);
-  aSym->value   = newContext(coAlgs, newCtx);
-
-  return TRUE;
-}
-\stoptyping
+#define asName(aLoL)      (((ContextObj*)(aLoL))->name)
+#define asData(aLoL)      (((ContextObj*)(aLoL))->data)
+#define asCommand(aLoL)   (((ContextObj*)(aLoL))->command)
+#define asProcess(aLoL)   (((ContextObj*)(aLoL))->process)
+#define asMessages(aLoL)  (((ContextObj*)(aLoL))->messages)
+#define asListeners(aLoL) (((ContextObj*)(aLoL))->listeners)
+\stopCCode
 
 \starttyping
-// contestsAPControl.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+\startJoyLoLWord[eval]
 
+\startJoyLoLCode
 
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/loader.h"
-#include "joyLoL/printer.h"
+;; this is a comment
+#| 
+  This is a multi-line comment
+  and another line
+|#
 
-// Operators
+(test () ())
 
-static void failAP(Context* aCtx) {
-  assert(aCtx);
-  aCtx->data    = NULL;
-  aCtx->process = NULL;
-}
-
-// Combinators
-
-static void interpretAP(Context* aCtx) {
-  popCtxDataInto(aCtx, top);
-  prependListCtxProcess(aCtx, top);
-}
-
-static void forAP(Context* aCtx) {
-  popCtxProcessInto(aCtx, nextCommand);
-  if (symbolIs(nextCommand, "forDone")) {
-    // this for loop is done
-    DEBUG(FALSE, "forAP DONE%s\n", "");
-  } else {
-    DEBUG(FALSE, "forAP continue%s\n", "");
-    pushSymbolCtxProcess(aCtx, "for");
-    prependListCtxProcess(aCtx, nextCommand);
-  }
-}
-
-static void forDoneAP(Context* aCtx) {
-  // ignore
-}
-
-static void lispInterpretAP(Context* aCtx) {
-  popCtxDataInto(aCtx, top);
-  PairAtom* operationName = car(top);
-  PairAtom* operationBody = cdr(top);
-  pushCtxProcess(aCtx, operationName);
-  pushCtxProcess(aCtx, operationBody);
-}
-
-static void lispForAP(Context* aCtx) {
-  popCtxProcessInto(aCtx, nextCommand);
-  if (symbolIs(nextCommand, "forDone")) {
-    // this lisp for loop is done
-    DEBUG(FALSE, "lispForAP DONE%s\n", "");
-  } else {
-    DEBUG(FALSE, "lispForAP continue%s\n", "");
-    PairAtom* operationName = car(nextCommand);
-    PairAtom* operationBody = cdr(nextCommand);
-    pushSymbolCtxProcess(aCtx, "lispFor");
-    pushCtxProcess(aCtx, operationName);
-    pushCtxProcess(aCtx, operationBody);
-  }
-}
-
-static void exitAP(Context* aCtx) {
-  assert(aCtx);
-  aCtx->process = NULL;
-}
-
-static void tryAP(Context* aCtx) {
-  popCtxDataInto(aCtx, handlerExp);
-  popCtxDataInto(aCtx, tryExp);
-  pushCtxProcess(aCtx, handlerExp);
-  pushSymbolCtxProcess(aCtx, "tryHandler");
-  prependListCtxProcess(aCtx, tryExp);
-}
-
-static void raiseAP(Context* aCtx) {
-  assert(aCtx);
-  aCtx->exceptionRaised = TRUE;
-  popCtxDataInto(aCtx, raiseExp);
-  pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
-  prependListCtxProcess(aCtx, raiseExp);
-}
-
-static void raiseIfFalseAP(Context* aCtx) {
-  assert(aCtx);
-  popCtxDataInto(aCtx, condition);
-  popCtxProcessInto(aCtx, raiseExp);
-  if (isFalse(condition)) {
-    pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
-    prependListCtxProcess(aCtx, raiseExp);
-  }
-}
-
-static void findFirstTryHandlerAP(Context* aCtx) {
-  assert(aCtx);
-  if (aCtx->process) {
-    popCtxProcessInto(aCtx, aCommand);
-    if (isSymbol(aCommand) && (strcmp(aCommand->symbol, "tryHandler") == 0)) {
-      assert(aCtx);
-      aCtx->exceptionRaised = FALSE;
-      popCtxProcessInto(aCtx, handlerExp);
-      prependListCtxProcess(aCtx, handlerExp);
-      return;
-    }
-    pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
-  } else {
-    if (aCtx->parent) {
-      PairAtom* parentCtx = newContext(aCtx->coAlgebras, aCtx->parent);
-      pushSymbolCtxProcess(aCtx->parent, "raise");
-      pushCtxProcess(aCtx, parentCtx);
-    }
-  }
-}
-
-static void tryHandlerAP(Context* aCtx) {
-  popCtxProcessInto(aCtx, handlerExp);
-}
-
-void raiseException(Context* aCtx, Symbol* message) {
-  assert(aCtx);
-  pushSymbolCtxData(aCtx, message);
-  pushSymbolCtxProcess(aCtx, "raise");
-}
-
-size_t reportException(Context* aCtx) {
-  assert(aCtx);
-  if (!aCtx->exceptionRaised) return FALSE;
-  char* exceptionReport = printLoL(car(aCtx->data));
-  printf("\nUNHANDLED EXCEPTION: %s\n", exceptionReport);
-  if (exceptionReport) free(exceptionReport);
-  aCtx->exceptionRaised = FALSE;
-  return TRUE;
-}
-
-// Support
-
-static void defineAP(Context* aCtx) {
-  assert(aCtx);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  if (!isSymbol(top1)) return;
-  defineJoyLoL(aCtx->coAlgebras, top1->symbol, top2);
-}
-
-static void defineContextAP(Context* aCtx) {
-  popCtxDataInto(aCtx, contextName);
-  popCtxDataInto(aCtx, contextData);
-  popCtxDataInto(aCtx, contextProcess);
-  if (!isSymbol(contextName)) return;
-  Context* newCtx =
-    createContext(aCtx->coAlgebras, contextName->symbol,
-                  aCtx, contextData, contextProcess);
-  defineContext(aCtx->coAlgebras, contextName->symbol, newCtx);
-}
-
-static void newContextAP(Context* aCtx) {
-  popCtxDataInto(aCtx, contextData);
-  popCtxDataInto(aCtx, contextProcess);
-  Context* newCtx =
-    createContext(aCtx->coAlgebras, "anonymous",
-                  aCtx, contextData, contextProcess);
-  assert(newCtx);
-  PairAtom* newCtxLoL = newContext(aCtx->coAlgebras, newCtx);
-  assert(newCtxLoL);
-  pushCtxData(aCtx, newCtxLoL);
-}
-
-static void thisContextAP(Context* aCtx) {
-  PairAtom* thisCtx = newContext(aCtx->coAlgebras, aCtx);
-  assert(thisCtx);
-  pushCtxData(aCtx, thisCtx);
-}
-
-void initContextsAPControl(CoAlgebras* coAlgs) {
-  extendJoyLoL(coAlgs, "fail",                failAP);
-  extendJoyLoL(coAlgs, "i",                   interpretAP);
-  extendJoyLoL(coAlgs, "interpret",           interpretAP);
-  extendJoyLoL(coAlgs, "for",                 forAP);
-  extendJoyLoL(coAlgs, "forDone",             forDoneAP);
-  extendJoyLoL(coAlgs, "lispInterpret",       lispInterpretAP);
-  extendJoyLoL(coAlgs, "lispFor",             lispForAP);
-  extendJoyLoL(coAlgs, "define",              defineAP);
-  extendJoyLoL(coAlgs, "defineContext",       defineContextAP);
-  extendJoyLoL(coAlgs, "thisContext",         thisContextAP);
-  extendJoyLoL(coAlgs, "newContext",          newContextAP);
-  extendJoyLoL(coAlgs, "exit",                exitAP);
-  extendJoyLoL(coAlgs, "quit",                exitAP);
-  extendJoyLoL(coAlgs, "try",                 tryAP);
-  extendJoyLoL(coAlgs, "raise",               raiseAP);
-  extendJoyLoL(coAlgs, "raiseIfFalse",        raiseIfFalseAP);
-  extendJoyLoL(coAlgs, "findFirstTryHandler", findFirstTryHandlerAP);
-  extendJoyLoL(coAlgs, "tryHandler",          tryHandlerAP);
-}
+\stopJoyLoLCode
 \stoptyping
 
-\starttyping
-//contextsAPSupport.c
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityContextsCoAlg(
+  CoAlgObj* lolA,
+  CoAlgObj* lolB,
+  Boolean debugFlag
+);
+\stopCHeader
 
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/loader.h"
-#include "joyLoL/printer.h"
-
-size_t isContext(PairAtom* aLoL) {
-  if (!aLoL) return FALSE;
-  if (aLoL->coAlg && (aLoL->coAlg->isA == CONTEXT_COALG)) return TRUE;
-  return FALSE;
-}
-
-static void isContextAP(Context* aCtx) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  popCtxDataInto(aCtx, top);
-  PairAtom* result = NULL;
-  if (isContext(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
-  else                result = newBoolean(aCtx->coAlgebras, FALSE);
-  pushCtxData(aCtx, result);
-}
-
-// Support
-static void showStackOnAP(Context* aCtx) {
-  assert(aCtx);
-  aCtx->showStack = TRUE;
-}
-
-static void showStackOffAP(Context* aCtx) {
-  assert(aCtx);
-  aCtx->showStack = FALSE;
-}
-
-static void showStackAP(Context* aCtx) {
-  assert(aCtx);
-  printf("d>>%s\n", printLoL(aCtx->data));
-  printf("p>>%s\n", printLoL(aCtx->process));
-}
-
-static void tracingOnAP(Context* aCtx) {
-  assert(aCtx);
-  aCtx->tracingOn = TRUE;
-}
-
-static void tracingOffAP(Context* aCtx) {
-  assert(aCtx);
-  aCtx->tracingOn = FALSE;
-}
-
-static void checkingOnAP(Context* aCtx) {
-  assert(aCtx);
-  aCtx->checkingOn = TRUE;
-}
-
-static void checkingOffAP(Context* aCtx) {
-  assert(aCtx);
-  aCtx->checkingOn = FALSE;
-}
-
-static void definitionsAP(Context* aCtx) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->symbols);
-  assert(aCtx->coAlgebras->symbols->dictionary);
-  listDefinitions(aCtx->coAlgebras->symbols->dictionary, stdout);
-}
-
-static void showLoadExtensionsAP(Context* aCtx) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->contexts);
-  Loader* loader = aCtx->coAlgebras->contexts->loader;
-  assert(loader);
-  PairAtom* extensionList = loader->loadExtensions;
-  while(extensionList) {
-    PairAtom* anExtension = extensionList->pair.car;
-    if (isSymbol(anExtension)) printf("%s\n", anExtension->symbol);
-    extensionList = extensionList->pair.cdr;
-  }
-}
-
-static void showLoadPathsAP(Context* aCtx) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->contexts);
-  Loader* loader = aCtx->coAlgebras->contexts->loader;
-  assert(loader);
-  PairAtom* pathList = loader->loadPaths;
-  while(pathList) {
-    PairAtom* aPath = pathList->pair.car;
-    if (isSymbol(aPath)) printf("%s\n", aPath->symbol);
-    pathList = pathList->pair.cdr;
-  }
-}
-
-static void showLoadFilesAP(Context* aCtx) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->contexts);
-  Loader* loader = aCtx->coAlgebras->contexts->loader;
-  assert(loader);
-  PairAtom* fileList = loader->loadFiles;
-  while(fileList) {
-    PairAtom* aFile = fileList->pair.car;
-    if (isSymbol(aFile)) printf("%s\n", aFile->symbol);
-    fileList = fileList->pair.cdr;
-  }
-}
-static void loadExtensionAP(Context* aCtx) {
-  assert(aCtx);
-  popCtxDataInto(aCtx, top);
-  if (!isSymbol(top)) return;
-  pushLoadExtension(aCtx->coAlgebras, top->symbol);
-}
-
-static void loadPathAP(Context* aCtx) {
-  assert(aCtx);
-  popCtxDataInto(aCtx, top);
-  if (!isSymbol(top)) return;
-  pushLoadPath(aCtx->coAlgebras, top->symbol);
-}
-
-static void loadFileAP(Context* aCtx) {
-  DEBUG(FALSE, "loadFileAP > %p\n", aCtx);
-  assert(aCtx);
-  popCtxDataInto(aCtx, top);
-  int oldVerboseFlag = aCtx->verbose;
-  aCtx->verbose = aCtx->showStack;
-  loadFiles(aCtx, top);
-  aCtx->verbose = oldVerboseFlag;
-  DEBUG(FALSE, "loadFileAP < %p\n", aCtx);
-}
-
-static void lispLoadFileAP(Context* aCtx) {
-  DEBUG(FALSE, "listLoadFileAP > %p\n", aCtx);
-  pushSymbolCtxProcess(aCtx, "lispInterpret");
-  loadFileAP(aCtx);
-  DEBUG(FALSE, "listLoadFileAP < %p\n", aCtx);
-}
-
-static void commentAP(Context* aCtx) {
-  popCtxDataInto(aCtx, top);
-}
-
-void initContextsAPSupport(CoAlgebras* coAlgs) {
-  extendJoyLoL(coAlgs, "isContext",           isContextAP);
-  extendJoyLoL(coAlgs, "definitions",         definitionsAP);
-  extendJoyLoL(coAlgs, "loadExtension",       loadExtensionAP);
-  extendJoyLoL(coAlgs, "loadPath",            loadPathAP);
-  extendJoyLoL(coAlgs, "load",                loadFileAP);
-  extendJoyLoL(coAlgs, "lispLoad",            lispLoadFileAP);
-  extendJoyLoL(coAlgs, "comment",             commentAP);
-  extendJoyLoL(coAlgs, "---",                 commentAP);
-  extendJoyLoL(coAlgs, "showLoadExtensions",  showLoadExtensionsAP);
-  extendJoyLoL(coAlgs, "showLoadPaths",       showLoadPathsAP);
-  extendJoyLoL(coAlgs, "showLoadFiles",       showLoadFilesAP);
-  extendJoyLoL(coAlgs, "showStack",           showStackAP);
-  extendJoyLoL(coAlgs, "showStackOn",         showStackOnAP);
-  extendJoyLoL(coAlgs, "showStackOff",        showStackOffAP);
-  extendJoyLoL(coAlgs, "tracingOn",           tracingOnAP);
-  extendJoyLoL(coAlgs, "tracingOff",          tracingOffAP);
-  extendJoyLoL(coAlgs, "checkingOn",          checkingOnAP);
-  extendJoyLoL(coAlgs, "checkingOff",         checkingOffAP);
-}
-\stoptyping
-
-\starttyping
-//contextsCoAlg.c
-
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/loader.h"
-#include "joyLoL/scheduler.h"
-
-static size_t equalityContextsCoAlg(CoAlgebra* klass,
-                                   PairAtom* lolA, PairAtom* lolB,
-                                   size_t debugFlag) {
-  DEBUG(debugFlag, "contextCoAlg->equal klass:%p a:%p b:%p\n",
-        klass, lolA, lolB);
+\startCCode
+Boolean equalityContextsCoAlg(
+  CoAlgObj* lolA,
+  CoAlgObj* lolB,
+  Boolean debugFlag
+) {
+  DEBUG(debugFlag, "contextCoAlg->equal a:%p b:%p\n",
+    lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
-  if (lolA->coAlg != klass) return FALSE;
-  if (lolB->coAlg != klass) return FALSE;
+  if (lolA->type != lolB->type) return FALSE;
+  if (lolA->tag != ContextsTag) return FALSE;
   size_t areEqual = TRUE;
-  lolEqual(areEqual, lolA->context->data,      lolB->context->data);
-  lolEqual(areEqual, lolA->context->command,   lolB->context->command);
-  lolEqual(areEqual, lolA->context->process,   lolB->context->process);
-  lolEqual(areEqual, lolA->context->messages,  lolB->context->messages);
-  lolEqual(areEqual, lolA->context->listeners, lolB->context->listeners);
+  lolEqual(areEqual, asData(lolA),      asData(lolB));
+  lolEqual(areEqual, asCommand(lolA),   asCommand(lolB));
+  lolEqual(areEqual, asProcess(lolA),   asProcess(lolB));
+  lolEqual(areEqual, asMessages(lolA),  asMessages(lolB));
+  lolEqual(areEqual, asListeners(lolA), asListeners(lolB));
   return areEqual;
 }
+\stopCCode
 
-static size_t printSizeContextsCoAlg(PairAtom* aLoL, size_t debugFlag) {
+\startCHeader
+extern Boolean printSizeContextsCoAlg(
+  CoAlgObj* aLoL,
+  Boolean debugFlag
+);
+\stopCHeader
+
+\startCCode
+Boolean printSizeContextsCoAlg(
+  CoAlgObj* aLoL,
+  Boolean debugFlag
+) {
   DEBUG(debugFlag, "contextCoAlg->printSize: > %p\n", aLoL);
   assert(aLoL);
-  assert(aLoL->coAlg);
-  assert(aLoL->coAlg->isA == CONTEXT_COALG);
+  assert(aLoL->type);
+  assert(aLoL->tag == ContextsTag);
 
-  if ((aLoL->tag & PRINT_MARKER)) return 0;
-  aLoL->tag |= PRINT_MARKER;
+//  if ((aLoL->tag & PRINT_MARKER)) return 0;
+//  aLoL->tag |= PRINT_MARKER;
 
-  DEBUG(debugFlag, "contextCoAlg-printSize: %p {%p:%zu} d:%p c:%p p:%p m:%p l:%p\n", aLoL,
-        aLoL->coAlg, aLoL->tag,
-        aLoL->context->data, aLoL->context->command, aLoL->context->process,
-        aLoL->context->messages, aLoL->context->listeners);
+  DEBUG(debugFlag, "contextCoAlg-printSize: %p {%p:%zu} d:%p c:%p p:%p m:%p l:%p\n",
+    aLoL, aLoL->type, (size_t)(aLoL->flags),
+    asData(aLoL), asCommand(aLoL), asProcess(aLoL),
+    asMessages(aLoL), asListeners(aLoL));
 
-  size_t lolSize = 12 + strlen(aLoL->context->name); // "\n[[ " and " ]]\n"
+  size_t lolSize = 12 + strlen(asName(aLoL)); // "\n[[ " and " ]]\n"
 
-  lolPrintSize(lolSize, aLoL->context->data, 6,
+  lolPrintSize(lolSize, asData(aLoL), 6,
                "context", "data",      debugFlag);
-  lolPrintSize(lolSize, aLoL->context->command, 6,
+  lolPrintSize(lolSize, asCommand(aLoL), 6,
                "context", "command",   debugFlag);
-  lolPrintSize(lolSize, aLoL->context->process, 6,
+  lolPrintSize(lolSize, asProcess(aLoL), 6,
                "context", "process",   debugFlag);
-  lolPrintSize(lolSize, aLoL->context->messages, 6,
+  lolPrintSize(lolSize, asMessages(aLoL), 6,
                "context", "messages",  debugFlag);
-  lolPrintSize(lolSize, aLoL->context->listeners, 6,
+  lolPrintSize(lolSize, asListeners(aLoL), 6,
                "context", "listeners", debugFlag);
 
   DEBUG(debugFlag, "contextCoAlg-printSize: < %zu %p\n", lolSize, aLoL);
   return lolSize;
 }
+\stopCCode
 
-static size_t printStrContextsCoAlg(PairAtom* aLoL,
-                                   char* buffer, size_t bufferSize) {
+\startCHeader
+extern Boolean printStrContextsCoAlg(
+  CoAlgObj* aLoL,
+  char* buffer,
+  size_t bufferSize
+);
+\stopCHeader
+
+\startCCode
+Boolean printStrContextsCoAlg(
+  CoAlgObj* aLoL,
+  char* buffer,
+  size_t bufferSize
+) {
   assert(aLoL);
-  assert(aLoL->coAlg);
-  assert(aLoL->coAlg->isA == CONTEXT_COALG);
+  assert(aLoL->type);
+  assert(aLoL->tag == ContextsTag);
 
-  if (!(aLoL->tag & PRINT_MARKER)) return TRUE;
-  aLoL->tag = aLoL->tag & (~ PRINT_MARKER);
+//  if (!(aLoL->tag & PRINT_MARKER)) return TRUE;
+//  aLoL->tag = aLoL->tag & (~ PRINT_MARKER);
 
   size_t printedOk = TRUE;
   strcat(buffer, "\n[");
-  strcat(buffer, aLoL->context->name);
+  strcat(buffer, asName(aLoL));
   strcat(buffer, "[ ");
-  lolPrintStr(printedOk, aLoL->context->data,
+  lolPrintStr(printedOk, asData(aLoL),
               "d:( ", ") ", buffer, bufferSize);
-  lolPrintStr(printedOk, aLoL->context->command,
+  lolPrintStr(printedOk, asCommand(aLoL),
               "c:( ", ") ", buffer, bufferSize);
-  lolPrintStr(printedOk, aLoL->context->process,
+  lolPrintStr(printedOk, asProcess(aLoL),
               "p:( ", ") ", buffer, bufferSize);
-  lolPrintStr(printedOk, aLoL->context->messages,
+  lolPrintStr(printedOk, asMessages(aLoL),
               "m:( ", ") ", buffer, bufferSize);
-  lolPrintStr(printedOk, aLoL->context->listeners,
+  lolPrintStr(printedOk, asListeners(aLoL),
               "l:( ", ") ", buffer, bufferSize);
   strcat(buffer, " ]]\n");
   return printedOk;
 }
-
-Contexts* createContextsCoAlgebra(void) {
-  Contexts* contexts  = (Contexts*) calloc(1, sizeof(Contexts));
-  initACoAlgebra((CoAlgebra*)contexts);
-  contexts->super.isA       = CONTEXT_COALG;
-  contexts->super.name      = "context";
-  contexts->super.equality  = equalityContextsCoAlg;
-  contexts->super.printSize = printSizeContextsCoAlg;
-  contexts->super.printStr  = printStrContextsCoAlg;
-
-  // create the "singleton" objects associated to contexts
-  contexts->loader          = createLoader();
-  contexts->scheduler       = createScheduler();
-  return contexts;
-}
-
-void initContextsCoAlgebra(CoAlgebras* coAlgs) {
-  initStandardLoadPaths(coAlgs);
-
-  initContextsAPControl(coAlgs);
-  initContextsAPSupport(coAlgs);
-}
-\stoptyping
+\stopCCode
 
 \startTestSuite[registerContexts]
 
-\setCHeaderStream{private}
 \startCHeader
 extern Boolean registerContexts(JoyLoLInterp *jInterp);
 \stopCHeader
@@ -997,11 +217,11 @@ extern Boolean registerContexts(JoyLoLInterp *jInterp);
 Boolean registerContexts(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = ContextsName;
-  theCoAlg->objectSize   = sizeof(CoAlgObj);
+  theCoAlg->objectSize   = sizeof(ContextObj);
   theCoAlg->registerFunc = registerContexts;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printSize    = NULL;
-  theCoAlg->printStr     = NULL;
+  theCoAlg->equalityFunc = equalityContextsCoAlg;
+  theCoAlg->printSize    = printSizeContextsCoAlg;
+  theCoAlg->printStr     = printStrContextsCoAlg;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
 
   // do a sanity check...
@@ -1029,7 +249,7 @@ Boolean registerContexts(JoyLoLInterp *jInterp) {
   AssertPtrEquals(jInterp->coAlgs[ContextsTag].sClass, coAlg);
   AssertIntEquals(
     jInterp->coAlgs[ContextsTag].sClass->objectSize,
-    sizeof(CoAlgObj)
+    sizeof(ContextObj)
   )
 \stopCTest
 

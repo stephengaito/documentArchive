@@ -1,0 +1,214 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Context core code]
+
+
+void pushCtxData(Context* aCtx, PairAtom* lolToPush) {
+  if (!aCtx) return;
+  assert(aCtx->coAlgebras);
+  aCtx->data = newPair(aCtx->coAlgebras, lolToPush, aCtx->data);
+}
+
+void pushNullCtxData(Context* aCtx) {
+  if (!aCtx) return;
+  assert(aCtx->coAlgebras);
+  aCtx->data = newPair(aCtx->coAlgebras, NULL, aCtx->data);
+}
+
+void pushSymbolCtxData(Context* aCtx, Symbol* aSymbol) {
+  if (!aCtx) return;
+  if (!aSymbol) return;
+  assert(aCtx->coAlgebras);
+  CoAlgebras* coAlgs = aCtx->coAlgebras;
+
+  assert(coAlgs->symbols);
+  assert(coAlgs->symbols->dictionary);
+
+  PairAtom* aSymbolPA =
+    getSymbol(coAlgs, coAlgs->symbols->dictionary, aSymbol);
+  if (!aSymbolPA) return;
+  aCtx->data = newPair(coAlgs, aSymbolPA, aCtx->data);
+}
+
+void pushParsedArrayOfStringsCtxData(Context* aCtx, Symbol* someStrings[]) {
+  if (!aCtx) return;
+  if (!someStrings) return;
+  Text* aText = createTextFromArrayOfStrings(aCtx->coAlgebras, someStrings);
+  pushParsedTextCtxData(aCtx, aText);
+  freeText(aText);
+}
+
+void pushParsedStringCtxData(Context* aCtx, Symbol* aString) {
+  if (!aCtx) return;
+  if (!aString) return;
+  Text* aText = createTextFromString(aCtx->coAlgebras, aString);
+  pushParsedTextCtxData(aCtx, aText);
+  freeText(aText);
+}
+
+void pushParsedTextCtxData(Context* aCtx, Text* aText) {
+  if (!aCtx) return;
+  if (!aText) return;
+  assert(aCtx->coAlgebras);
+  PairAtom* aLoL = parseAllSymbols(aText);
+  if (!aLoL) return;
+  aCtx->data = newPair(aCtx->coAlgebras, aLoL, aCtx->data);
+}
+
+void prependListCtxData(Context* aCtx, PairAtom* lolToPrepend) {
+  if (!aCtx) return;
+  if (!lolToPrepend) return;
+
+  // ensure lolToPrepend is a list
+  if (!isPair(lolToPrepend)) {
+    lolToPrepend = newPair(aCtx->coAlgebras, lolToPrepend, NULL);
+    assert(lolToPrepend);
+  }
+
+  // find end of lolToPrepend
+  PairAtom* lolList = lolToPrepend;
+  while(lolList->pair.cdr && isPair(lolList->pair.cdr)) {
+    lolList = lolList->pair.cdr;
+  }
+
+  // ensure that if lolToPrepend ends in a non-pair we make it a pair
+  if (lolList->pair.cdr && !isPair(lolList->pair.cdr)) {
+    lolList->pair.cdr = newPair(aCtx->coAlgebras, lolList->pair.cdr, NULL);
+    assert(lolList->pair.cdr);
+  }
+
+  // place existing data stack at end of lolToPrepend
+  lolList->pair.cdr = aCtx->data;
+  aCtx->data   = lolToPrepend;
+}
+
+PairAtom* popCtxData(Context* aCtx) {
+  if (!aCtx) return NULL;
+  if (!aCtx->data) return NULL;
+
+  PairAtom* poppedLoL = aCtx->data->pair.car;
+  aCtx->data          = aCtx->data->pair.cdr;
+  return poppedLoL;
+}
+
+void pushCtxProcess(Context* aCtx, PairAtom* lolToPush) {
+  if (!aCtx) return;
+  assert(aCtx->coAlgebras);
+  aCtx->process = newPair(aCtx->coAlgebras, lolToPush, aCtx->process);
+}
+
+void pushSymbolCtxProcess(Context* aCtx, const char* aSymbol) {
+  if (!aCtx) return;
+  if (!aSymbol) return;
+  assert(aCtx->coAlgebras);
+  CoAlgebras* coAlgs = aCtx->coAlgebras;
+
+  assert(coAlgs->symbols);
+  assert(coAlgs->symbols->dictionary);
+
+  PairAtom* aSymbolPA =
+    getSymbol(coAlgs, coAlgs->symbols->dictionary, aSymbol);
+  if (!aSymbolPA) return;
+  aCtx->process = newPair(coAlgs, aSymbolPA, aCtx->process);
+}
+
+void pushParsedArrayOfStringsCtxProcess(Context* aCtx, Symbol* someStrings[]) {
+  if (!aCtx) return;
+  if (!someStrings) return;
+  Text* aText = createTextFromArrayOfStrings(aCtx->coAlgebras, someStrings);
+  pushParsedTextCtxProcess(aCtx, aText);
+  freeText(aText);
+}
+
+void pushParsedStringCtxProcess(Context* aCtx, Symbol* aString) {
+  if (!aCtx) return;
+  if (!aString) return;
+  Text* aText = createTextFromString(aCtx->coAlgebras, aString);
+  pushParsedTextCtxProcess(aCtx, aText);
+  freeText(aText);
+}
+
+void pushParsedTextCtxProcess(Context* aCtx, Text* aText) {
+  if (!aCtx) return;
+  if (!aText) return;
+  assert(aCtx->coAlgebras);
+  PairAtom* aLoL = parseAllSymbols(aText);
+  if (!aLoL) return;
+  aCtx->process = newPair(aCtx->coAlgebras, aLoL, aCtx->process);
+}
+
+void prependListCtxProcess(Context* aCtx, PairAtom* lolToPrepend) {
+  if (!aCtx) return;
+  if (!lolToPrepend) return;
+
+  // ensure lolToPrepend is a list
+  if (!isPair(lolToPrepend)) {
+    lolToPrepend = newPair(aCtx->coAlgebras, lolToPrepend, NULL);
+    assert(lolToPrepend);
+  }
+
+  // find end of lolToPrepend
+  PairAtom* lolList = lolToPrepend;
+  while(lolList->pair.cdr && isPair(lolList->pair.cdr)) {
+    lolList = lolList->pair.cdr;
+  }
+
+  // ensure that if lolToPrepend ends in a non-pair we make it a pair
+  if (lolList->pair.cdr && !isPair(lolList->pair.cdr)) {
+    lolList->pair.cdr = newPair(aCtx->coAlgebras, lolList->pair.cdr, NULL);
+    assert(lolList->pair.cdr);
+  }
+
+  // place existing process stack at end of lolToPrepend
+  lolList->pair.cdr  = aCtx->process;
+  aCtx->process = lolToPrepend;
+}
+
+PairAtom* popCtxProcess(Context* aCtx) {
+  if (!aCtx->process) return NULL;
+
+  PairAtom* poppedLoL = aCtx->process->pair.car;
+  aCtx->process       = aCtx->process->pair.cdr;
+  return poppedLoL;
+}
+
+size_t extendJoyLoL(CoAlgebras* coAlgs,
+                    Symbol* definedName,
+                    JoyLoLFunction* aFunc) {
+  assert(coAlgs);
+  assert(coAlgs->symbols);
+  assert(coAlgs->symbols->dictionary);
+  AVLNode* aSym =
+    createSymbol(coAlgs->symbols->dictionary, definedName);
+  aSym->value = newJoyLoLFunc(coAlgs, aFunc);
+
+  return TRUE;
+}
+
+size_t defineJoyLoL(CoAlgebras* coAlgs,
+                    Symbol* definedName,
+                    PairAtom* aLoL) {
+  assert(coAlgs);
+  assert(coAlgs->symbols);
+  assert(coAlgs->symbols->dictionary);
+  AVLNode* aSym =
+    createSymbol(coAlgs->symbols->dictionary, definedName);
+  aSym->value = copyLoL(coAlgs, aLoL);
+
+  return TRUE;
+}
+
+size_t defineContext(CoAlgebras* coAlgs,
+                     Symbol* definedName,
+                     Context* newCtx) {
+  DEBUG(FALSE, "defineContext %p [%s] %p\n",
+        coAlgs, definedName, newCtx);
+  assert(coAlgs);
+  assert(coAlgs->symbols);
+  assert(coAlgs->symbols->dictionary);
+  AVLNode* aSym =
+    createSymbol(coAlgs->symbols->dictionary, definedName);
+  aSym->value   = newContext(coAlgs, newCtx);
+
+  return TRUE;
+}

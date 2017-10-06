@@ -171,6 +171,13 @@ extern Boolean equalLoLDebug(
 );
 
 #define equalLoL(lolA, lolB) equalLoLDebug(lolA, lolB, FALSE)
+
+#define lolEqual(areEqual, lolA, lolB)	    \
+  if (areEqual && (lolA)) {			            \
+    assert((lolA)->type);  			            \
+    areEqual = ((lolA)->type->equalityFunc)	\
+      ((lolA), (lolB), debugFlag);          \
+  }
 \stopCHeader
 
 \startCCode
@@ -219,14 +226,18 @@ Boolean equalLoLDebug(
 
 \setCHeaderStream{private}
 \startCHeader
-extern size_t printSizePairsCoAlg(CoAlgObj* aLoL, Boolean debugFlag);
+extern size_t printSizePairsCoAlg(
+  CoAlgObj* aLoL,
+  Boolean debugFlag
+);
 \stopCHeader
 
-\startCCode
+\setCHeaderStream{public}
+\startCHeader
 #define lolPrintSize(lolSize, aLoL, defSize, typeStr, selector, debugFlag)\
   if (aLoL) {								                                              \
     DEBUG(debugFlag, "%sCoAlg-printSize: -> %s(%p) %zu\n",		            \
-          typeStr, selector, aLoL, lolSize);				                          \
+          typeStr, selector, aLoL, lolSize);				                      \
     assert((aLoL)->type);						                                      \
     lolSize += ((aLoL)->type->printSize)((aLoL), debugFlag);		          \
     DEBUG(debugFlag, "%sCoAlg-printSize: <- %s(%p) %zu\n",		            \
@@ -234,7 +245,9 @@ extern size_t printSizePairsCoAlg(CoAlgObj* aLoL, Boolean debugFlag);
   } else {								                                                \
     lolSize += defSize;							                                      \
   }
+\stopCHeader
 
+\startCCode
 size_t printSizePairsCoAlg(CoAlgObj* aLoL, Boolean debugFlag) {
   DEBUG(debugFlag, "pairsCoAlg-printSize: > %p\n", aLoL);
   assert(aLoL);
@@ -256,12 +269,14 @@ size_t printSizePairsCoAlg(CoAlgObj* aLoL, Boolean debugFlag) {
 }
 \stopCCode
 
+\setCHeaderStream{private}
 \startCHeader
 extern Boolean printStrPairsCoAlg(CoAlgObj* aLoL,
                                   char* buffer, size_t bufferSize);
 \stopCHeader
 
-\startCCode
+\setCHeaderStream{public}
+\startCHeader
 #define lolPrintStr(printedOk, aLoL, opener, closer, buffer, bufferSize)\
   if (aLoL) {								                                            \
     size_t isList = (aLoL)->tag == PairsTag;        			              \
@@ -274,7 +289,9 @@ extern Boolean printStrPairsCoAlg(CoAlgObj* aLoL,
     strcat(buffer, opener);						                                  \
     strcat(buffer, closer);						                                  \
   }
-  
+\stopCHeader
+
+\startCCode
 Boolean printStrPairsCoAlg(CoAlgObj* aLoL,
                            char* buffer, size_t bufferSize) {
   assert(aLoL);
@@ -309,6 +326,7 @@ Boolean printStrPairsCoAlg(CoAlgObj* aLoL,
 
 \startTestSuite[registerPairs]
 
+\setCHeaderStream{private}
 \startCHeader
 extern Boolean registerPairs(JoyLoLInterp *jInterp);
 \stopCHeader
@@ -357,23 +375,3 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
 \stopTestSuite
 
 \setCHeaderStream{public}
-
-\starttyping
-// specs
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "CuTest.h"
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/lists_private.h"
-#include "joyLoL/printer.h"
-
-// suiteName: - Pairs CoAlgebra tests -
-
-
-\stoptyping

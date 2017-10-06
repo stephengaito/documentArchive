@@ -1,0 +1,162 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Code]
+
+size_t isContext(PairAtom* aLoL) {
+  if (!aLoL) return FALSE;
+  if (aLoL->coAlg && (aLoL->coAlg->isA == CONTEXT_COALG)) return TRUE;
+  return FALSE;
+}
+
+static void isContextAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  popCtxDataInto(aCtx, top);
+  PairAtom* result = NULL;
+  if (isContext(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
+  else                result = newBoolean(aCtx->coAlgebras, FALSE);
+  pushCtxData(aCtx, result);
+}
+
+// Support
+static void showStackOnAP(Context* aCtx) {
+  assert(aCtx);
+  aCtx->showStack = TRUE;
+}
+
+static void showStackOffAP(Context* aCtx) {
+  assert(aCtx);
+  aCtx->showStack = FALSE;
+}
+
+static void showStackAP(Context* aCtx) {
+  assert(aCtx);
+  printf("d>>%s\n", printLoL(aCtx->data));
+  printf("p>>%s\n", printLoL(aCtx->process));
+}
+
+static void tracingOnAP(Context* aCtx) {
+  assert(aCtx);
+  aCtx->tracingOn = TRUE;
+}
+
+static void tracingOffAP(Context* aCtx) {
+  assert(aCtx);
+  aCtx->tracingOn = FALSE;
+}
+
+static void checkingOnAP(Context* aCtx) {
+  assert(aCtx);
+  aCtx->checkingOn = TRUE;
+}
+
+static void checkingOffAP(Context* aCtx) {
+  assert(aCtx);
+  aCtx->checkingOn = FALSE;
+}
+
+static void definitionsAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  assert(aCtx->coAlgebras->symbols);
+  assert(aCtx->coAlgebras->symbols->dictionary);
+  listDefinitions(aCtx->coAlgebras->symbols->dictionary, stdout);
+}
+
+static void showLoadExtensionsAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  assert(aCtx->coAlgebras->contexts);
+  Loader* loader = aCtx->coAlgebras->contexts->loader;
+  assert(loader);
+  PairAtom* extensionList = loader->loadExtensions;
+  while(extensionList) {
+    PairAtom* anExtension = extensionList->pair.car;
+    if (isSymbol(anExtension)) printf("%s\n", anExtension->symbol);
+    extensionList = extensionList->pair.cdr;
+  }
+}
+
+static void showLoadPathsAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  assert(aCtx->coAlgebras->contexts);
+  Loader* loader = aCtx->coAlgebras->contexts->loader;
+  assert(loader);
+  PairAtom* pathList = loader->loadPaths;
+  while(pathList) {
+    PairAtom* aPath = pathList->pair.car;
+    if (isSymbol(aPath)) printf("%s\n", aPath->symbol);
+    pathList = pathList->pair.cdr;
+  }
+}
+
+static void showLoadFilesAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  assert(aCtx->coAlgebras->contexts);
+  Loader* loader = aCtx->coAlgebras->contexts->loader;
+  assert(loader);
+  PairAtom* fileList = loader->loadFiles;
+  while(fileList) {
+    PairAtom* aFile = fileList->pair.car;
+    if (isSymbol(aFile)) printf("%s\n", aFile->symbol);
+    fileList = fileList->pair.cdr;
+  }
+}
+static void loadExtensionAP(Context* aCtx) {
+  assert(aCtx);
+  popCtxDataInto(aCtx, top);
+  if (!isSymbol(top)) return;
+  pushLoadExtension(aCtx->coAlgebras, top->symbol);
+}
+
+static void loadPathAP(Context* aCtx) {
+  assert(aCtx);
+  popCtxDataInto(aCtx, top);
+  if (!isSymbol(top)) return;
+  pushLoadPath(aCtx->coAlgebras, top->symbol);
+}
+
+static void loadFileAP(Context* aCtx) {
+  DEBUG(FALSE, "loadFileAP > %p\n", aCtx);
+  assert(aCtx);
+  popCtxDataInto(aCtx, top);
+  int oldVerboseFlag = aCtx->verbose;
+  aCtx->verbose = aCtx->showStack;
+  loadFiles(aCtx, top);
+  aCtx->verbose = oldVerboseFlag;
+  DEBUG(FALSE, "loadFileAP < %p\n", aCtx);
+}
+
+static void lispLoadFileAP(Context* aCtx) {
+  DEBUG(FALSE, "listLoadFileAP > %p\n", aCtx);
+  pushSymbolCtxProcess(aCtx, "lispInterpret");
+  loadFileAP(aCtx);
+  DEBUG(FALSE, "listLoadFileAP < %p\n", aCtx);
+}
+
+static void commentAP(Context* aCtx) {
+  popCtxDataInto(aCtx, top);
+}
+
+void initContextsAPSupport(CoAlgebras* coAlgs) {
+  extendJoyLoL(coAlgs, "isContext",           isContextAP);
+  extendJoyLoL(coAlgs, "definitions",         definitionsAP);
+  extendJoyLoL(coAlgs, "loadExtension",       loadExtensionAP);
+  extendJoyLoL(coAlgs, "loadPath",            loadPathAP);
+  extendJoyLoL(coAlgs, "load",                loadFileAP);
+  extendJoyLoL(coAlgs, "lispLoad",            lispLoadFileAP);
+  extendJoyLoL(coAlgs, "comment",             commentAP);
+  extendJoyLoL(coAlgs, "---",                 commentAP);
+  extendJoyLoL(coAlgs, "showLoadExtensions",  showLoadExtensionsAP);
+  extendJoyLoL(coAlgs, "showLoadPaths",       showLoadPathsAP);
+  extendJoyLoL(coAlgs, "showLoadFiles",       showLoadFilesAP);
+  extendJoyLoL(coAlgs, "showStack",           showStackAP);
+  extendJoyLoL(coAlgs, "showStackOn",         showStackOnAP);
+  extendJoyLoL(coAlgs, "showStackOff",        showStackOffAP);
+  extendJoyLoL(coAlgs, "tracingOn",           tracingOnAP);
+  extendJoyLoL(coAlgs, "tracingOff",          tracingOffAP);
+  extendJoyLoL(coAlgs, "checkingOn",          checkingOnAP);
+  extendJoyLoL(coAlgs, "checkingOff",         checkingOffAP);
+}

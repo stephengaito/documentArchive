@@ -1,0 +1,210 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Evaluation]
+
+\startCCode
+void traceAction(const char* action, PairAtom* aLoL, PairAtom* command) {
+  char* lolStr = printLoL(aLoL);
+  if (command) {
+    char* commandStr = printLoL(command);
+    printf("%s: %s (%s)\\n", action, lolStr, commandStr);
+    free(commandStr);
+  } else {
+    printf("%s: %s\\n", action, lolStr);
+  }
+  free(lolStr);
+}
+
+void evalCommandInContext(Context* aCtx, PairAtom* command) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  assert(aCtx->coAlgebras->symbols);
+  Dictionary* mainDic = aCtx->coAlgebras->symbols->dictionary;
+  assert(mainDic);
+  //
+  // if there is no command... there is nothing to do
+  //
+  if (!command) return;
+  //
+  DEBUG(FALSE, "evalCommandInContext > %p %p\\n", aCtx, command);
+  //
+  // push this command onto the top of the process stack
+  //
+  pushCtxProcess(aCtx, command);
+  //
+  while(aCtx->process) {
+    if (aCtx->tracingOn) printf("\\n ctx: %s\\n", aCtx->name);
+    //
+    // pop the next command off the process stack
+    //
+    command = popCtxProcess(aCtx);
+    aCtx->command = command;
+    //
+    if (isFunction(command)) {
+      //
+      // if the command is a function.. call the function
+      //
+      if (aCtx->tracingOn) traceAction("calling", command, NULL);
+      (command->func)(aCtx);
+      //
+    } else if (isContext(command)) {
+      //
+      // if the command is a context... switch to this contex
+      //
+      DEBUG(FALSE, "evalCommandInContext -> switching origCtx: %s\\n",
+            aCtx->name);
+      if (aCtx->tracingOn) traceAction("switching", command, NULL);
+      Context* switchCtx = command->context;
+      assert(switchCtx);
+
+      popCtxDataInto(aCtx, oldCtxTop);
+      pushCtxData(switchCtx, oldCtxTop);
+      switchCtx->tracingOn = aCtx->tracingOn;
+      aCtx = switchCtx;
+      DEBUG(FALSE, "evalCommandInContext <- switching newCtx: %s\\n",
+            aCtx->name);
+      //
+    } else if (!isSymbol(command)) {
+      //
+      // if the command is not a Symbol ...
+      //  ...  push it onto the top of the data stack
+      //
+      if (aCtx->tracingOn) traceAction("adding", command, NULL);
+      pushCtxData(aCtx, command);
+      //
+    } else {
+      //
+      // if the command is a symbol ...
+      //  ... look up the symbol's association in the dictionary
+      //
+      AVLNode* assoc = findSymbol(mainDic, command->symbol);
+      assert(assoc);
+      //
+      if (!assoc->value) {
+        //
+        // if the association is empty.. push this symbol onto the top
+        // of the data stack (re-evaluating this symbol would lead to an
+        // infinite loop)
+        //
+        if (aCtx->tracingOn) traceAction("adding", command, NULL);
+        pushCtxData(aCtx, command);
+        //
+      } else if (isPair(assoc->value)) {
+        //
+        // if the association is a LoL.. push this LoL onto the top of the
+        // process stack
+        //
+        if (aCtx->tracingOn) traceAction("evaluating", assoc->value, command);
+        assert(aCtx->coAlgebras);
+        prependListCtxProcess(aCtx, copyLoL(aCtx->coAlgebras, assoc->value));
+        //
+      } else if (isFunction(assoc->value)) {
+        //
+        // if the association is a function.. call the function
+        //
+        if (aCtx->tracingOn) traceAction("calling", command, NULL);
+        (assoc->value->func)(aCtx);
+        //
+      } else if (isContext(assoc->value)) {
+        //
+        // if the association is a context... switch to this contex
+        //
+        DEBUG(FALSE, "evalCommandInContext -> switching origCtx: %s\\n",
+              aCtx->name);
+        if (aCtx->tracingOn) traceAction("switching", command, NULL);
+        Context* switchCtx = assoc->value->context;
+        assert(switchCtx);
+
+        popCtxDataInto(aCtx, oldCtxTop);
+        pushCtxData(switchCtx, oldCtxTop);
+        switchCtx->tracingOn = aCtx->tracingOn;
+        aCtx = switchCtx;
+        DEBUG(FALSE, "evalCommandInContext <- switching newCtx: %s\\n",
+              aCtx->name);
+        //
+      } else {
+        //
+        // if the association is NOT a PairAtom or Function...
+        // ... push this new ATOM onto the top of the process stack
+        //
+        if (aCtx->tracingOn) traceAction("evaluating", assoc->value, command);
+        pushCtxProcess(aCtx, assoc->value);
+        //
+      }
+    }
+    if (aCtx->tracingOn) {
+      DEBUG(FALSE, "evalCommandInContext -> tracing%s\\n", "");
+      printf("d>>%s\\n", printLoL(aCtx->data));
+      printf("p>>%s\\n", printLoL(aCtx->process));
+      DEBUG(FALSE, "evalCommandInContext <- tracing%s\\n", "");
+    }
+  } // aCtx->process is empty
+  DEBUG(FALSE, "evalCommandInContext < %p %p\\n", aCtx, command);
+}
+
+void evalContext(Context* aCtx) {
+  popCtxProcessInto(aCtx, aCommand);
+  evalCommandInContext(aCtx, aCommand);
+}
+
+void evalTextInContext(Context* aCtx, Text* aText) {
+  DEBUG(FALSE, "evalTextInContext > %p %p\\n", aCtx, aText);
+  while(TRUE) {
+    PairAtom* aLoL = parseOneSymbol(aText);
+//    if (aCtx->showStack) printf("<%s\\n", printLoL(aLoL));
+    if (!aLoL) break;
+    evalCommandInContext(aCtx, aLoL);
+//    if (aCtx->showStack) printf(">%s\\n", printLoL(aCtx->data));
+    if (aCtx->exceptionRaised) break;
+  }
+  DEBUG(FALSE, "evalTextInContext < %p %p\\n", aCtx, aText);
+}
+
+void evalArrayOfStringsInContext(Context* aCtx,
+                                 const char* someStrings[]) {
+  DEBUG(FALSE, "evalStringInContext > %p %p\\n", aCtx, someStrings);
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  Text* stringText = createTextFromArrayOfStrings(aCtx->coAlgebras,
+                                                  someStrings);
+  evalTextInContext(aCtx, stringText);
+  freeText(stringText);
+  DEBUG(FALSE, "evalStringInContext < %p %p\\n", aCtx, someStrings);
+}
+
+void evalStringInContext(Context* aCtx, const char* aString) {
+  DEBUG(FALSE, "evalStringInContext > %p [%s]\\n", aCtx, aString);
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  Text* stringText = createTextFromString(aCtx->coAlgebras, aString);
+  evalTextInContext(aCtx, stringText);
+  freeText(stringText);
+  DEBUG(FALSE, "evalStringInContext < %p [%s]\\n", aCtx, aString);
+}
+
+void runREPLInContext(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  Text* aText = createTextFromReadline(aCtx->coAlgebras);
+  while(TRUE) {
+    DEBUG(FALSE, "runREPLInContext %p reading\\n", aCtx);
+    PairAtom* aLoL = parseOneSymbol(aText);
+    DEBUG(FALSE, "runREPLInContext %p read %p\\n", aCtx, aLoL);
+    //
+    if (!aLoL) break;
+    //
+    evalCommandInContext(aCtx, aLoL);
+    assert(!aCtx->process);
+    //
+    if (aCtx->showStack) {
+      DEBUG(FALSE, "runREPLInContext %p printing data %p\\n", aCtx, aCtx->data);
+      printf(">>%s\\n", printLoL(aCtx->data));
+      DEBUG(FALSE, "runREPLInContext %p printed data %p\\n", aCtx, aCtx->data);
+    }
+    //
+    reportException(aCtx); // report last exception if raised
+  }
+  saveReadlineHistory(aText);
+  DEBUG(FALSE, "runREPLInContext %p COMPLETED\\n", aCtx);
+}
+\stopCCode
