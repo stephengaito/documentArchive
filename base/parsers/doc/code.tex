@@ -1,11 +1,12 @@
 % A ConTeXt document [master document: parsers.tex]
 
 \dependsOn[jInterps]
-\dependsOn[texts]
-\dependsOn[dictionaries]
+\dependsOn[booleans]
 \dependsOn[symbols]
 \dependsOn[naturals]
 \dependsOn[pairs]
+\dependsOn[dictionaries]
+\dependsOn[texts]
 
 \section[title=Code]
 \setCHeaderStream{public}
@@ -432,7 +433,7 @@ CoAlgObj* parseOneSymbol(TextObj* aText) {
   AssertPtrNotNull(aLoL);
   AssertIntTrue(isAtom(aLoL));
   AssertIntTrue(isNatural(aLoL));
-  AssertIntEquals( mpz_cmp_si(aLoL->natural, 1234567890), 0);
+  AssertIntEquals( mpz_cmp_si(asNatural(aLoL), 1234567890), 0);
   AssertStrEquals(printLoLDebug(aLoL, FALSE), "1234567890");
 
   aLoL = parseOneSymbol(aText);
@@ -441,7 +442,7 @@ CoAlgObj* parseOneSymbol(TextObj* aText) {
   AssertIntTrue(isSymbol(aLoL));
   AssertStrEquals(asSymbol(aLoL), "not1234567890");
 \stopCTest
-\skipTestCase
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[parse all symbols]
@@ -478,7 +479,7 @@ paths} in our parsing code.
 \stopCTest
 \stopTestCase
 
-\startTestCase[parse Print Simple List and test copyPairs]
+\startTestCase[parse Print Simple List and test copyLoLs]
 \startCTest
   AssertPtrNotNull(jInterp);
 
@@ -492,11 +493,11 @@ paths} in our parsing code.
   clearPrintSizeMarksDebug(aLoL, FALSE);
   AssertStrEquals(printLoL(aLoL), "this is a simple list");
 
-  CoAlgObj* lolCopy = copyPair(jInterp, aLoL);
+  CoAlgObj* lolCopy = copyLoL(jInterp, aLoL);
   AssertPtrNotEquals(aLoL, lolCopy);
   AssertIntTrue(equalLoLDebug(aLoL, lolCopy, FALSE));
 \stopCTest
-\skipTestCase
+\stopTestCase
 
 \startTestCase[parse Complex List From Single String]
 \startCTest
@@ -533,7 +534,7 @@ paths} in our parsing code.
   AssertPtrNotEquals(aLoL, lolCopy);
   AssertIntTrue(equalLoLDebug(aLoL, lolCopy, FALSE));
 \stopCTest
-\skipTestCase
+\stopTestCase
 
 \startTestCase[parse Print Different List]
 \startCTest

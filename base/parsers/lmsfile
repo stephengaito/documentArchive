@@ -44,11 +44,12 @@ joylol.targets{
   },
   coAlgLibs = {
     'jInterps',
-    'texts',
-    'dictionaries',
+    'booleans',
     'symbols',
     'naturals',
     'pairs',
+    'dictionaries',
+    'texts',
   },
   buildDir = 'build',
 }

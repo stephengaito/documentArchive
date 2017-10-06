@@ -96,17 +96,17 @@ CoAlgObj* cdr(CoAlgObj* aLoL) {
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[copyPair]
+\startTestSuite[copyLoL]
 
 \startCHeader
-extern CoAlgObj* copyPair(
+extern CoAlgObj* copyLoL(
   JoyLoLInterp* jInterp,
   CoAlgObj* aLoL
 );
 \stopCHeader
 
 \startCCode
-CoAlgObj* copyPair(
+CoAlgObj* copyLoL(
   JoyLoLInterp* jInterp,
   CoAlgObj* aLoL
 ) {
@@ -115,8 +115,8 @@ CoAlgObj* copyPair(
   if (isAtom(aLoL)) return aLoL;
 
   return newPair(jInterp,
-                 copyPair(jInterp, asCar(aLoL)),
-                 copyPair(jInterp, asCdr(aLoL))
+                 copyLoL(jInterp, asCar(aLoL)),
+                 copyLoL(jInterp, asCdr(aLoL))
                  );
 }
 \stopCCode
@@ -128,7 +128,7 @@ CoAlgObj* copyPair(
   CoAlgObj *pairA  = newPair(jInterp, bool, NULL);
   CoAlgObj *pairB  = newPair(jInterp, pairA, bool);
   CoAlgObj *aPair0 = newPair(jInterp, pairA, pairB);
-  CoAlgObj *aPair1 = copyPair(jInterp, aPair0);
+  CoAlgObj *aPair1 = copyLoL(jInterp, aPair0);
   AssertPtrNotNull(bool);
   AssertPtrNotNull(pairA);
   AssertPtrNotNull(pairB);
@@ -161,27 +161,25 @@ CoAlgObj* copyPair(
 \stopTestCase
 \stopTestSuite
 
-
 \startTestSuite[equalLoL]
 
-\setCHeaderStream{private}
 \startCHeader
-extern Boolean pairsEqualDebug(
+extern Boolean equalLoLDebug(
   CoAlgObj* lolA,
   CoAlgObj* lolB,
   Boolean debugFlag
 );
 
-#define pairsEqual(lolA, lolB) pairsEqualDebug(lolA, lolB, FALSE)
+#define equalLoL(lolA, lolB) equalLoLDebug(lolA, lolB, FALSE)
 \stopCHeader
 
 \startCCode
-Boolean pairsEqualDebug(
+Boolean equalLoLDebug(
   CoAlgObj* lolA,
   CoAlgObj* lolB,
   Boolean debugFlag
 ) {
-  DEBUG(debugFlag, "pairsEqual %p %p\n", lolA, lolB);
+  DEBUG(debugFlag, "equalLoL %p %p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA || !lolB) return FALSE;
   if (lolA->type != lolB->type) return FALSE;
@@ -190,10 +188,10 @@ Boolean pairsEqualDebug(
     return (lolA->type->equalityFunc)(lolA, lolB, debugFlag);
   }
   
-  if (!pairsEqualDebug(asCar(lolA), asCar(lolB), debugFlag)) {
+  if (!equalLoLDebug(asCar(lolA), asCar(lolB), debugFlag)) {
     return FALSE;
   }
-  return pairsEqualDebug(asCdr(lolA), asCdr(lolB), debugFlag);
+  return equalLoLDebug(asCdr(lolA), asCdr(lolB), debugFlag);
 }
 \stopCCode
 
@@ -201,8 +199,8 @@ Boolean pairsEqualDebug(
 \startCTest
   CoAlgObj *pairA = newPair(jInterp, NULL, NULL);
   CoAlgObj *pairB = newPair(jInterp, NULL, NULL);
-  AssertIntTrue(pairsEqual(NULL, NULL));
-  AssertIntTrue(pairsEqual(pairA, pairB));
+  AssertIntTrue(equalLoL(NULL, NULL));
+  AssertIntTrue(equalLoL(pairA, pairB));
   // need to test with NON-Pairs
 \stopCTest
 \stopTestCase
@@ -211,7 +209,7 @@ Boolean pairsEqualDebug(
 \startCTest
   CoAlgObj *pairA = newPair(jInterp, NULL,  NULL);
   CoAlgObj *pairB = newPair(jInterp, pairA, NULL);
-  AssertIntFalse(pairsEqual(pairA, pairB));
+  AssertIntFalse(equalLoL(pairA, pairB));
   // need to test with NON-Pairs
 \stopCTest
 \stopTestCase
@@ -219,6 +217,7 @@ Boolean pairsEqualDebug(
 
 \startTestSuite[printing pairs]
 
+\setCHeaderStream{private}
 \startCHeader
 extern size_t printSizePairsCoAlg(CoAlgObj* aLoL, Boolean debugFlag);
 \stopCHeader
@@ -323,7 +322,7 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   theCoAlg->name         = strdup("Pairs");
   theCoAlg->objectSize   = sizeof(PairsObj);
   theCoAlg->registerFunc = registerPairs;
-  theCoAlg->equalityFunc = pairsEqualDebug;
+  theCoAlg->equalityFunc = equalLoLDebug;
   theCoAlg->printSize    = printSizePairsCoAlg;
   theCoAlg->printStr     = printStrPairsCoAlg;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);

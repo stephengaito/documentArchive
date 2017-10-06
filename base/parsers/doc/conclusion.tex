@@ -23,6 +23,7 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/booleans.h>
 #include <joylol/symbols.h>
 #include <joylol/naturals.h>
 #include <joylol/pairs.h>
@@ -39,7 +40,9 @@
   {parsers.c}%
   {}
 
+\addCTestInclude{<gmp.h>}
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/naturals.h>}
 \addCTestInclude{<joylol/pairs.h>}
@@ -51,6 +54,7 @@
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedBooleans(lstate);
   requireStaticallyLinkedSymbols(lstate);
   requireStaticallyLinkedNaturals(lstate);
   requireStaticallyLinkedPairs(lstate);

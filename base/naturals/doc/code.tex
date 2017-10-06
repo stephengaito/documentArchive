@@ -14,13 +14,9 @@ typedef struct natural_object_struct {
   CoAlgObj super;
   Natural  natural;
 } NaturalObj;
-\stopCHeader
 
-\setCHeaderStream{private}
-\startCHeader
 #define asNatural(aObj) (((NaturalObj*)(aObj))->natural)
 \stopCHeader
-\setCHeaderStream{public}
 
 \startTestSuite[newNatural]
 
