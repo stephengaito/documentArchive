@@ -159,6 +159,10 @@ void prependListCtxData(
 
 \startCHeader
 extern CoAlgObj* popCtxData(ContextObj* aCtx);
+
+#define popCtxDataInto(aCtx, aVar)                              \
+CoAlgObj* aVar = popCtxData(aCtx);                              \
+if (aCtx->tracingOn) printf("%s = %s\n", #aVar, printLoL(aVar))
 \stopCHeader
 
 \startCCode
@@ -329,12 +333,11 @@ CoAlgObj* popCtxProcess(ContextObj* aCtx) {
 }
 \stopCCode
 
-\starttyping
 \startCHeader
 Boolean extendJoyLoL(
   JoyLoLInterp* jInterp,
   Symbol* definedName,
-  JoyLoLFunction* aFunc
+  CFunction* aFunc
 );
 \stopCHeader
 
@@ -342,17 +345,17 @@ Boolean extendJoyLoL(
 Boolean extendJoyLoL(
   JoyLoLInterp* jInterp,
   Symbol* definedName,
-  JoyLoLFunction* aFunc
+  CFunction* aFunc
 ) {
   assert(jInterp);
   DictObj* aSym =
     createSymbol(jInterp, definedName);
-  aSym->value = newJoyLoLFunc(jInterp, aFunc);
+  aSym->value =
+    (CoAlgObj*)newCFunction(jInterp, aFunc);
 
   return TRUE;
 }
 \stopCCode
-\stoptyping
 
 \startCHeader
 Boolean defineJoyLoL(

@@ -23,8 +23,10 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/booleans.h>
 #include <joylol/naturals.h>
 #include <joylol/symbols.h>
+#include <joylol/cFunctions.h>
 #include <joylol/pairs.h>
 #include <joylol/texts.h>
 #include <joylol/parsers.h>
@@ -39,8 +41,10 @@
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/naturals.h>}
 \addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
 \addCTestInclude{<joylol/pairs.h>}
 \addCTestInclude{<joylol/texts.h>}
 \addCTestInclude{<joylol/parsers.h>}
@@ -51,8 +55,10 @@
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedBooleans(lstate);
   requireStaticallyLinkedNaturals(lstate);
   requireStaticallyLinkedSymbols(lstate);
+  requireStaticallyLinkedCFunctions(lstate);
   requireStaticallyLinkedPairs(lstate);
   requireStaticallyLinkedTexts(lstate);
   requireStaticallyLinkedParsers(lstate);
@@ -70,6 +76,7 @@
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
 \addSubDocument{core.tex}
+\addSubDocument{support.tex}
 \addSubDocument{lua.tex}
 \addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
