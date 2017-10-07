@@ -7,213 +7,169 @@
 %\dependsOn[boolean]
 \setCHeaderStream{public}
 
-\starttyping
 \startCHeader
+typedef struct context_object_struct ContextObj;
+typedef void (CFunction)(ContextObj*);
 
-typedef void (CFunction)(Context*);
+typedef struct cFunction_object_struct {
+  CoAlgObj   super;
+  CFunction *func;
+} CFunctionObj;
 
-typedef struct cFunction_struct {
-  CoAlgebras super;
-  CFunction  theFunction;
-} CFunction;
-
+#define asCFunc(aLoL) (((CFunctionObj*)(aLoL))->func)
 \stopCHeader
 
-\startJoyLoLWord[isCFunction]
+\startTestSuite[newCFunction]
 
-\preProcessStack[aCFunc][]
-\postDataStack[isBoolean]
-
-\startCCode
-
-if (!aCFunc) then
-  pushDataFalse(aCtx);
-if (aCFunc->isA == CFUNCTIONS_COALG) then
-  pushDataTrue(aCtx);
-pushDataFalse(aCtx);
-
-\stopCCode
-
-\stopJoyLoLWord
-
-\startJoyLoLWord[executeCFunc]
-
-\preProcessStack[aCFunc][]
+\startCHeader
+CFunctionObj *newCFunction(
+  JoyLoLInterp *jInterp,
+  CFunction *aFunc
+);
+\stopCHeader
 
 \startCCode
-
-if (!aCFunc) then
-  raiseException(aCtx, "no atom (CFunction)");
-if (aCFunc->super.isA != CFUNCTIONS_COALG) then
-  raiseException(aCtx, "not a CFunction");
-if (!aCFunc->theFunction) then
-  raiseException(aCtx, "no CFunction found");
-
-(aCFunc->theFunction)(aCtx);
-
-\stopCCode
-
-\stopJoyLoLWord
-\stoptyping
-
-\starttyping
-#ifndef JOYLOL_COALG_FUNCTIONS_H
-#define JOYLOL_COALG_FUNCTIONS_H
-
-typedef struct context_struct Context;
-typedef void (JoyLoLFunction)(Context*);
-
-typedef struct functions_struct {
-  CoAlgebra super;
-  // other things
-} Functions;
-
-extern Functions* createFunctionsCoAlgebra(void);
-extern void initFunctionsCoAlgebra(CoAlgebras* coAlgs);
-
-extern PairAtom* newJoyLoLFunc(CoAlgebras* coAlgs, JoyLoLFunction *aJoyLoLFunc);
-
-extern size_t isFunction(PairAtom* aLoL);
-
-#endif
-\stoptyping
-
-\starttyping
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/printer.h"
-
-static size_t equalityFuncCoAlg(CoAlgebra* klass,
-                                PairAtom* lolA, PairAtom* lolB,
-                                size_t debugFlag) {
-  DEBUG(debugFlag, "funcCoAlg-equal klass:%p a:%p b:%p\n", klass, lolA, lolB);
-  if (!lolA && !lolB) return TRUE;
-  if (!lolA && lolB)  return FALSE;
-  if (lolA  && !lolB) return FALSE;
-  if (lolA->coAlg != klass) return FALSE;
-  if (lolB->coAlg != klass) return FALSE;
-  if (lolA->func != lolB->func) return FALSE;
-  return TRUE;
-}
-
-
-static size_t printSizeFuncCoAlg(PairAtom* aLoL, size_t debugFlag) {
-  DEBUG(debugFlag, "funcCoAlg-printSize: %p\n", aLoL);
-  assert(aLoL);
-  assert(aLoL->coAlg);
-  assert(aLoL->coAlg->isA == FUNCTION_COALG);
-  DEBUG(debugFlag, "funcCoAlg-printSize: func<%p> %p\n", aLoL->func, aLoL);
-  return 15;
-}
-
-static size_t printStrFuncCoAlg(PairAtom* aLoL,
-                               char* buffer, size_t bufferSize) {
-  assert(aLoL);
-  assert(aLoL->coAlg);
-  assert(aLoL->coAlg->isA == FUNCTION_COALG);
-
-  char ptoa[100];
-  sprintf(ptoa, "<%p> ", aLoL->func);
-  strcat(buffer, ptoa);
-  return TRUE;
-}
-
-Functions* createFunctionsCoAlgebra(void) {
-  Functions* funcs = (Functions*) calloc(1, sizeof(Functions));
-  initACoAlgebra((CoAlgebra*)funcs);
-
-  funcs->super.isA       = FUNCTION_COALG;
-  funcs->super.name      = "function";
-  funcs->super.equality  = equalityFuncCoAlg;
-  funcs->super.printSize = printSizeFuncCoAlg;
-  funcs->super.printStr  = printStrFuncCoAlg;
-  return funcs;
-}
-
-PairAtom* newJoyLoLFunc(CoAlgebras* coAlgs, JoyLoLFunction *aFunc) {
-  assert(coAlgs);
-  PairAtom* aNewFunc = newPairAtom(coAlgs);
+CFunctionObj *newCFunction(
+  JoyLoLInterp *jInterp,
+  CFunction *aFunc
+) {
+  assert(jInterp);
+  CFunctionObj* aNewFunc =
+    (CFunctionObj*)newObject(jInterp, CFunctionsTag);
   assert(aNewFunc);
-  aNewFunc->coAlg = (CoAlgebra*)coAlgs->functions;
-  aNewFunc->tag   = 0;
   aNewFunc->func  = aFunc;
   return aNewFunc;
 }
+\stopCCode
 
-size_t isFunction(PairAtom* aLoL) {
+\CTestsSetup\
+\startCTest
+  void testCFunction(ContextObj* aCtx) { }
+\stopCTest
+
+\startTestCase[should create a new CFunction]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  CFunctionObj *aNewFunc =
+    newCFunction(jInterp, testCFunction);
+  AssertPtrNotNull(aNewFunc);
+  AssertPtrNotEquals((void*)aNewFunc, (void*)testCFunction);
+  AssertPtrNotNull(aNewFunc->super.type);
+  AssertIntEquals(aNewFunc->super.tag, CFunctionsTag);
+  AssertPtrEquals(aNewFunc->func, testCFunction);
+  AssertIntTrue(isCFunction((CoAlgObj*)aNewFunc));
+  AssertIntTrue(isAtom((CoAlgObj*)aNewFunc));
+  AssertIntFalse(isPair((CoAlgObj*)aNewFunc));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startCHeader
+Boolean isCFunction(CoAlgObj* aLoL);
+\stopCHeader
+
+\startCCode
+Boolean isCFunction(CoAlgObj* aLoL) {
   if (!aLoL) return FALSE;
-  if (aLoL->coAlg && (aLoL->coAlg->isA == FUNCTION_COALG)) return TRUE;
+  if ((aLoL->tag == CFunctionsTag) && 
+       asCFunc(aLoL)) return TRUE;
   return FALSE;
 }
+\stopCCode
 
-void initFunctionsCoAlgebra(CoAlgebras* coAlgs) {
-  extendJoyLoL(coAlgs, "isFunction", isFunctionAP);
+\setCHeaderStream{private}
+\startCHeader
+Boolean equalityFuncCoAlg(
+  CoAlgObj* lolA,
+  CoAlgObj* lolB,
+  Boolean debugFlag
+);
+\stopCHeader
+
+\startCCode
+Boolean equalityFuncCoAlg(
+  CoAlgObj* lolA,
+  CoAlgObj* lolB,
+  Boolean debugFlag
+) {
+  DEBUG(debugFlag, "funcCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (lolA->type != lolB->type) return FALSE;
+  if (lolA->tag != CFunctionsTag) return FALSE;
+  if (asCFunc(lolA) != asCFunc(lolB)) return FALSE;
+  return TRUE;
 }
-\stoptyping
+\stopCCode
 
-\starttyping
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+\startTestSuite[print CFunction]
 
-#include "CuTest.h"
+\startCHeader
+extern size_t printSizeFuncCoAlg(
+  CoAlgObj* aLoL,
+  Boolean debugFlag
+);
+\stopCHeader
 
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/printer.h"
-
-// suiteName: - Functions CoAlgebra tests -
-
-void Test_createFunctionsCoAlgebra(CuTest* tc) {
-  CoAlgebras *coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-  CuAssertPtrNotNull(tc, coAlgs->functions);
+\startCCode
+size_t printSizeFuncCoAlg(
+  CoAlgObj* aLoL,
+  Boolean debugFlag
+) {
+  DEBUG(debugFlag, "funcCoAlg-printSize: %p\n", aLoL);
+  assert(aLoL);
+  assert(aLoL->tag == CFunctionsTag);
+  DEBUG(debugFlag, "funcCoAlg-printSize: func<%p> %p\n",
+    asCFunc(aLoL), aLoL);
+  return 15;
 }
+\stopCCode
 
-void testJoyLoLFunction(Context* aCtx) { }
+\startCHeader
+extern Boolean printStrFuncCoAlg(
+  CoAlgObj* aLoL,
+  char* buffer,
+  size_t bufferSize
+);
+\stopCHeader
 
+\startCCode
+Boolean printStrFuncCoAlg(
+  CoAlgObj* aLoL,
+  char* buffer,
+  size_t bufferSize
+) {
+  assert(aLoL);
+  assert(aLoL->tag == CFunctionsTag);
 
-void Test_newJoyLoLFunction(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-  CuAssertPtrNotNull(tc, coAlgs->functions);
-
-  PairAtom* aNewFunc = newJoyLoLFunc(coAlgs, testJoyLoLFunction);
-  CuAssertPtrNotNull(tc, aNewFunc);
-  CuAssertPtrNotEquals(tc, aNewFunc, testJoyLoLFunction);
-  CuAssertPtrNotNull(tc, aNewFunc->coAlg);
-  CuAssertIntEquals(tc, aNewFunc->coAlg->isA, FUNCTION_COALG);
-  CuAssertPtrEquals(tc, aNewFunc->func, testJoyLoLFunction);
-  CuAssertTrue(tc, isFunction(aNewFunc));
-  CuAssertTrue(tc, isAtom(aNewFunc));
-  CuAssertFalse(tc, isBoolean(aNewFunc));
-  CuAssertFalse(tc, isContext(aNewFunc));
-  CuAssertFalse(tc, isNatural(aNewFunc));
-  CuAssertFalse(tc, isPair(aNewFunc));
-  CuAssertFalse(tc, isSymbol(aNewFunc));
+  char ptoa[100];
+  sprintf(ptoa, "<%p> ", asCFunc(aLoL));
+  strcat(buffer, ptoa);
+  return TRUE;
 }
+\stopCCode
 
-void Test_printJoyLoLFuncion(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-  CuAssertPtrNotNull(tc, coAlgs->functions);
+\startTestCase[should print CFuncion]
+\startCTest
+  AssertPtrNotNull(jInterp);
 
   char buffer[100];
   buffer[0] = 0;
-  sprintf((char*)&buffer, "<%p>", testJoyLoLFunction);
+  sprintf((char*)&buffer, "<%p>", testCFunction);
 
-  PairAtom* aNewFunc = newJoyLoLFunc(coAlgs, testJoyLoLFunction);
-  CuAssertPtrNotNull(tc, aNewFunc);
-  CuAssertIntEquals(tc, printSizeDebug(aNewFunc, FALSE), 15);
-  CuAssertStrEquals(tc, printLoLDebug(aNewFunc, FALSE), buffer);
-}
+  CoAlgObj* aNewFunc =
+    (CoAlgObj*)newCFunction(jInterp, testCFunction);
+  AssertPtrNotNull(aNewFunc);
+  AssertIntEquals(printSizeDebug(aNewFunc, FALSE), 15);
+  AssertStrEquals(printLoLDebug(aNewFunc, FALSE), buffer);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\starttyping
+// suiteName: - Functions CoAlgebra tests -
 
 void Test_checkFunctionsSymbols(CuTest* tc) {
   CoAlgebras* coAlgs = createCoAlgebras();
@@ -230,7 +186,6 @@ void Test_checkFunctionsSymbols(CuTest* tc) {
   CuAssertPtrNotNull(tc, aNode->value);
   CuAssertTrue(tc, isFunction(aNode->value));
 }
-
 \stoptyping
 
 \startTestSuite[registerCFunctions]
@@ -245,11 +200,11 @@ extern Boolean registerCFunctions(JoyLoLInterp *jInterp);
 Boolean registerCFunctions(JoyLoLInterp *jInterp) {
   CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   theCoAlg->name         = CFunctionsName;
-  theCoAlg->objectSize   = sizeof(CoAlgObj);
+  theCoAlg->objectSize   = sizeof(CFunctionObj);
   theCoAlg->registerFunc = registerCFunctions;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printSize    = NULL;
-  theCoAlg->printStr     = NULL;
+  theCoAlg->equalityFunc = equalityFuncCoAlg;
+  theCoAlg->printSize    = printSizeFuncCoAlg;
+  theCoAlg->printStr     = printStrFuncCoAlg;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
 
   // do a sanity check...
@@ -277,7 +232,7 @@ Boolean registerCFunctions(JoyLoLInterp *jInterp) {
   AssertPtrEquals(jInterp->coAlgs[CFunctionsTag].sClass, coAlg);
   AssertIntEquals(
     jInterp->coAlgs[CFunctionsTag].sClass->objectSize,
-    sizeof(CoAlgObj)
+    sizeof(CFunctionObj)
   )
 \stopCTest
 \stopTestCase

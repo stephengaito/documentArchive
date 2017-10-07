@@ -18,6 +18,7 @@ reqCoAlgs = {
   'naturals',
   'dictionaries',
   'texts',
+  'parsers'
 }
 
 reqCoAlgStr = '|'..table.concat(reqCoAlgs, '|')..'|'
