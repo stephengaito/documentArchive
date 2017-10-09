@@ -1,0 +1,14 @@
+% A ConTeXt document [master document: stringBuffers.tex]
+
+\section[title=Words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerStringBufferWords(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerStringBufferWords(JoyLoLInterp* jInterp) {
+}
+\stopCCode

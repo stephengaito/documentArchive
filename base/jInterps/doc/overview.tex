@@ -147,10 +147,11 @@ The required extensions for this implementation is:
 #define NaturalsTag       7
 #define PairsTag          8
 #define ParsersTag        9
-#define SymbolsTag        10
-#define TemplatesTag      11
-#define TextsTag          12
-#define NumRequiredCoAlgs 13
+#define StringBuffersTag  10
+#define SymbolsTag        11
+#define TemplatesTag      12
+#define TextsTag          13
+#define NumRequiredCoAlgs 14
 
 #define JInterpsName      "JoyLoLInterps"
 #define BooleansName      "Booleans"
@@ -161,6 +162,7 @@ The required extensions for this implementation is:
 #define NaturalsName      "Naturals"
 #define PairsName         "Pairs"
 #define ParsersName       "Parsers"
+#define StringBuffersName "StringBuffers"
 #define SymbolsName       "Symbols"
 #define TemplatesName     "Templates"
 #define TextsName         "Texts"
@@ -202,19 +204,20 @@ typedef struct required_coalgs_struct {
 } RequiredCoAlgs;
 
 RequiredCoAlgs requiredCoAlgs[] = {
-  { JInterpsName,     JInterpsTag,     {0, 1, 0 }},
-  { BooleansName,     BooleansTag,     {0, 1, 0 }},
-  { CFunctionsName,   CFunctionsTag,   {0, 1, 0 }},
-  { ContextsName,     ContextsTag,     {0, 1, 0 }},
-  { DictionariesName, DictionariesTag, {0, 1, 0 }},
-  { LuaFunctionsName, LuaFunctionsTag, {0, 1, 0 }},
-  { NaturalsName,     NaturalsTag,     {0, 1, 0 }},
-  { PairsName,        PairsTag,        {0, 1, 0 }},
-  { ParsersName,      ParsersTag,      {0, 1, 0 }},
-  { SymbolsName,      SymbolsTag,      {0, 1, 0 }},
-  { TemplatesName,    TemplatesTag,    {0, 1, 0 }},
-  { TextsName,        TextsTag,        {0, 1, 0 }},
-  { NULL,             0,               {0, 0, 0 }}
+  { JInterpsName,      JInterpsTag,      {0, 1, 0 }},
+  { BooleansName,      BooleansTag,      {0, 1, 0 }},
+  { CFunctionsName,    CFunctionsTag,    {0, 1, 0 }},
+  { ContextsName,      ContextsTag,      {0, 1, 0 }},
+  { DictionariesName,  DictionariesTag,  {0, 1, 0 }},
+  { LuaFunctionsName,  LuaFunctionsTag,  {0, 1, 0 }},
+  { NaturalsName,      NaturalsTag,      {0, 1, 0 }},
+  { PairsName,         PairsTag,         {0, 1, 0 }},
+  { ParsersName,       ParsersTag,       {0, 1, 0 }},
+  { StringBuffersName, StringBuffersTag, {0, 1, 0 }},
+  { SymbolsName,       SymbolsTag,       {0, 1, 0 }},
+  { TemplatesName,     TemplatesTag,     {0, 1, 0 }},
+  { TextsName,         TextsTag,         {0, 1, 0 }},
+  { NULL,              0,                {0, 0, 0 }}
 };
 \stopCCode
 

@@ -1,0 +1,70 @@
+% A ConTeXt document [master document: stringBuffers.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_STRING_BUFFERS}
+\createCHeaderFile%
+  {public}
+  {joylol/stringBuffers.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_STRING_BUFFERS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/stringBuffers-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/symbols.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/stringBuffers-private.h>
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {stringBuffers.c}%
+  {}
+
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/booleans.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/stringBuffers-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/booleans}
+\CTestsSetup\
+\startCTest
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedBooleans(lstate);
+  requireStaticallyLinkedStringBuffers(lstate);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+\stopCTest
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{stringBuffers.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{words.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{install}
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

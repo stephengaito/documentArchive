@@ -1,0 +1,54 @@
+% A ConTeXt document [master document: stringBuffers.tex]
+
+\section[title=Lua functions]
+
+\component gitVersion-c
+
+\startCCode
+static int lua_stringBuffers_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  const char* aValue = "no valid key provided";
+  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
+  lua_pushstring(lstate, aValue);
+  return 1;
+}
+
+static const struct luaL_Reg lua_stringBuffers [] = {
+  {"gitVersion", lua_stringBuffers_getGitVersion},
+  {NULL, NULL}
+};
+
+int luaopen_joylol_stringBuffers (lua_State *lstate) {
+  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
+  registerStringBuffers(jInterp);
+  luaL_newlib(lstate, lua_stringBuffers);
+  return 1;
+}
+\stopCCode
+
+In some instances, such as the typical \type{CTest} program 
+\type{allCTests}, this Lua module (which can be \type{require}d as a 
+shared library) is actually statically linked into the executable. In 
+these cases we need the ability to mimic the standard Lua \type{require} 
+process. The following \type{requireStaticallyLinkedStringBuffers} does just 
+this. 
+
+\startCHeader
+Boolean requireStaticallyLinkedStringBuffers(
+  lua_State *lstate
+);
+\stopCHeader
+
+\startCCode
+Boolean requireStaticallyLinkedStringBuffers(
+  lua_State *lstate
+) {
+  lua_getglobal(lstate, "package");
+  lua_getfield(lstate, -1, "loaded");
+  luaopen_joylol_stringBuffers(lstate);
+  lua_setfield(lstate, -2, "joylol.stringBuffers");
+  lua_setfield(lstate, -2, "loaded");
+  lua_pop(lstate, 1);
+  return TRUE;
+}
+\stopCCode

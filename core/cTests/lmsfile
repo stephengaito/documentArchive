@@ -1,0 +1,52 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('build/joylol')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'cTestIO.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/cTestIO.h',
+    'joylol/cTestIO-private.h',
+    'cTestIO.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
+
+require 'lms.contests'
+
+contests.targets{
+  testExecs = {
+    'allCTests',
+  },
+  mainDoc = 'cTestIO.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/cTestIO.h',
+    'joylol/cTestIO-private.h',
+    'cTestIO.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
