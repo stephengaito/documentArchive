@@ -250,6 +250,32 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
 
 \subsection[title=Garbage collection]
 
+Given that we explicitly implement memory pools for all fixed sized 
+structures, the highest churn will be in the creation and release of small 
+strings through interactions directly with the user and with the template 
+engine. Since all strings used by JoyLoL will be part of the 
+\type{Symbols} CoAlgebraic extension, we have complete control over the 
+use of pointers to strings. This suggests that we allocate all 
+\quote{small strings} using our own implementation of a collection of 
+string pools. This allows us to periodically compact under-utilized pools 
+which are highly fragmented by copying strings to either completely new 
+string pools or inside existing string pools. By having a series of string 
+pools we have the ability to provide the pools with a generational 
+structure so that \quote{older} pools would tend to fragment less. 
+
+However before we implement this strategy we should begin by instrumenting 
+the use of small strings so we can gain an understanding of the spectrum of 
+string sizes. 
+
+\quote{Large strings} will tend to be produced as the output of either the 
+user interaction or the template engine. We can reduce churn in these 
+large strings by ensuring the user interaction interface and template 
+engine either uses a list of strings (which the interface/engine 
+implicitly concatenates), or uses an explicit string buffer. Initially any 
+such string buffer can be based upon GNU Lib C's open_memstream interface, 
+though we could directly implement our own string buffers should that be 
+needed. 
+
 \setCHeaderStream{private}
 \startCHeader
 extern void collectGarbage(JoyLoLInterp* jInterp, TagType aTag);
