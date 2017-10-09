@@ -38,11 +38,38 @@ CoAlgObj* newStringBuffer(JoyLoLInterp* jInterp) {
   
   CoAlgObj* result = newObject(jInterp, StringBuffersTag);
   assert(result);
+  asMemFile(result) = NULL;
   asBuffer(result)  = NULL;
   asBufSize(result) = 0;
-  asMemFile(result) =
-    open_memstream(&asBuffer(result), &asBufSize(result));
   return result;
+}
+\stopCCode
+
+\startCHeader
+extern void strBufClose(CoAlgObj* aLoL);
+\stopCHeader
+
+\startCCode
+void strBufClose(CoAlgObj* aLoL) {
+  if (asMemFile(aLoL)) fclose(asMemFile(aLoL));
+  if (asBuffer(aLoL))  free(asBuffer(aLoL));
+  asMemFile(aLoL) = NULL;
+  asBuffer(aLoL)  = NULL;
+  asBufSize(aLoL) = 0;
+}
+\stopCCode
+
+\startCHeader
+extern void strBufReOpen(CoAlgObj* aLoL);
+\stopCHeader
+
+\startCCode
+void strBufReOpen(CoAlgObj* aLoL) {
+  if (!isStringBuffer(aLoL)) return;
+  
+  if (asMemFile(aLoL)) strBufClose(aLoL);
+  asMemFile(aLoL) = 
+    open_memstream(&asBuffer(aLoL), &asBufSize(aLoL));
 }
 \stopCCode
 
@@ -55,12 +82,27 @@ CoAlgObj* newStringBuffer(JoyLoLInterp* jInterp) {
   AssertPtrNotNull(aStrBuf);
   AssertPtrNotNull(aStrBuf->type);
   AssertIntEquals(aStrBuf->tag, StringBuffersTag);
-  AssertPtrNotNull(asMemFile(aStrBuf));
+  AssertPtrNull(asMemFile(aStrBuf));
   AssertPtrNull(asBuffer(aStrBuf));
   AssertIntZero(asBufSize(aStrBuf));
   AssertIntTrue(isStringBuffer(aStrBuf));
   AssertIntTrue(isAtom(aStrBuf));
   AssertIntFalse(isPair(aStrBuf));
+  strBufReOpen(aStrBuf);
+  AssertPtrNotNull(asMemFile(aStrBuf));
+  AssertPtrNull(asBuffer(aStrBuf));
+  AssertStrEquals(getCString(aStrBuf), "");
+  AssertPtrNotNull(asBuffer(aStrBuf));
+  strBufClose(aStrBuf);
+  AssertPtrNull(asMemFile(aStrBuf));
+  AssertPtrNull(asBuffer(aStrBuf));
+  AssertIntZero(asBufSize(aStrBuf));
+  strBufPrintf(aStrBuf, "a test string");
+  AssertPtrNotNull(asMemFile(aStrBuf));
+  AssertStrEquals(getCString(aStrBuf), "a test string");
+  AssertPtrNotNull(asBuffer(aStrBuf));
+  AssertIntEquals(asBufSize(aStrBuf), 13);
+  strBufClose(aStrBuf); // need to release the FILE*
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -109,6 +151,7 @@ extern Symbol *getCString(CoAlgObj *aLol);
 \startCCode
 Symbol *getCString(CoAlgObj *aLoL) {
   if (!isStringBuffer(aLoL)) return NULL;
+  if (!asMemFile(aLoL)) strBufReOpen(aLoL);
   fflush(asMemFile(aLoL));
   return asBuffer(aLoL);
 }
@@ -144,6 +187,7 @@ Boolean strBufPrintf(
   ...
 ) {
   if (!isStringBuffer(aLoL)) return FALSE;
+  if (!asMemFile(aLoL)) strBufReOpen(aLoL);
   
   va_list printfArgs;
   va_start(printfArgs, format);
