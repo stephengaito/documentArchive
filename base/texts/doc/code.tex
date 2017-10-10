@@ -288,8 +288,9 @@ Boolean equalityTextsCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
-  if (lolA->type != lolB->type) return FALSE;
-  if (lolA->tag  != TextsTag) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != TextsTag) return FALSE;
   if (lolA != lolB) return FALSE;
   return TRUE;
 }
@@ -298,32 +299,21 @@ Boolean equalityTextsCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
 \startTestSuite[printing texts]
 
 \startCHeader
-extern size_t printSizeTextsCoAlg(CoAlgObj* aLoL, size_t debugFlag);
+extern Boolean printStrTextsCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
+);
 \stopCHeader
 
 \startCCode
-size_t printSizeTextsCoAlg(CoAlgObj* aLoL, size_t debugFlag) {
-  DEBUG(debugFlag, "textsCoAlg-printSize: %p\n", aLoL);
+Boolean printStrTextsCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
+) {
   assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == TextsTag);
-  return 10;
-}
-\stopCCode
+  assert(asTag(aLoL) == TextsTag);
 
-\startCHeader
-extern Boolean printStrTextsCoAlg(CoAlgObj* aLoL,
-                                 char* buffer, size_t bufferSize);
-\stopCHeader
-
-\startCCode
-Boolean printStrTextsCoAlg(CoAlgObj* aLoL,
-                          char* buffer, size_t bufferSize) {
-  assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == TextsTag);
-
-  strcat(buffer, "--texts-- ");
+  strBufPrintf(aStrBuf, "--texts-- ");
   return TRUE;
 }
 \stopCCode
@@ -336,8 +326,10 @@ Boolean printStrTextsCoAlg(CoAlgObj* aLoL,
 
   TextObj* aNewText = createTextFromString(jInterp, "a string");
   AssertPtrNotNull(aNewText);
-  AssertIntEquals(printSizeDebug((CoAlgObj*)aNewText, FALSE), 10);
-  AssertStrEquals(printLoLDebug((CoAlgObj*)aNewText, FALSE), "--texts--");
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printLoLDebug(aStrBuf, (CoAlgObj*)aNewText, FALSE);
+  AssertStrEquals(getCString(aStrBuf), "--texts-- ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -360,7 +352,6 @@ Boolean registerTexts(JoyLoLInterp *jInterp) {
   theCoAlg->objectSize   = sizeof(TextObj);
   theCoAlg->registerFunc = registerTexts;
   theCoAlg->equalityFunc = equalityTextsCoAlg;
-  theCoAlg->printSize    = printSizeTextsCoAlg;
   theCoAlg->printStr     = printStrTextsCoAlg;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
   

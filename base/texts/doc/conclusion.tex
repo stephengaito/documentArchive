@@ -37,11 +37,13 @@
 
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/naturals.h>}
 \addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/texts.h>}
 \addCTestInclude{<joylol/texts-private.h>}
 \addCTestLib{<HOME>/.joylol/joylol/symbols}
+\addCTestLib{<HOME>/.joylol/joylol/stringBuffers}
 \addCTestLib{<HOME>/.joylol/joylol/naturals}
 \addCTestLib{<HOME>/.joylol/joylol/dictionaries}
 \addCTestLib{-lgmp}
@@ -49,6 +51,7 @@
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedSymbols(lstate);
+  requireStaticallyLinkedStringBuffers(lstate);
   requireStaticallyLinkedNaturals(lstate);
   requireStaticallyLinkedDictionaries(lstate);
   requireStaticallyLinkedTexts(lstate);
