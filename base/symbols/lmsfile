@@ -68,6 +68,7 @@ contests.targets{
   },
   testLibs = {
     '<HOME>/.joylol/joylol/booleans',
+    '<HOME>/.joylol/joylol/stringBuffers',
   },
   buildDir  = 'build',
   docDir    = 'doc',

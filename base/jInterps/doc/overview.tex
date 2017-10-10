@@ -235,4 +235,10 @@ To be able to provide \quote{printing} of the structure of an arbitrary
 
 \startCHeader
 typedef struct string_buffer_object_struct StringBufferObj;
+
+extern Boolean strBufPrintf(
+  StringBufferObj   *aStrBuf,
+  const char        *format, 
+  ...
+);
 \stopCHeader

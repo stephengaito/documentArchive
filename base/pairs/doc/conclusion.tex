@@ -32,6 +32,8 @@
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/pairs.h>}
 \addCTestInclude{<joylol/pairs-private.h>}
@@ -39,6 +41,8 @@
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedSymbols(lstate);
+  requireStaticallyLinkedStringBuffers(lstate);
   requireStaticallyLinkedBooleans(lstate);
   requireStaticallyLinkedPairs(lstate);
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);

@@ -41,6 +41,8 @@ joylol.targets{
   },
   coAlgLibs = {
     'jInterps',
+    'symbols',
+    'stringBuffers',
   },
   buildDir = 'build',
 }

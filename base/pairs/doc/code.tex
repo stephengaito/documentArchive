@@ -4,6 +4,8 @@
 \setCHeaderStream{public}
 
 \dependsOn[jInterps]
+\dependsOn[symbols]
+\dependsOn[stringBuffers]
 %\dependsOn[context]
 
 \startCHeader
@@ -36,9 +38,6 @@ CoAlgObj* newPair(
   assert(jInterp);
   CoAlgObj* result = newObject(jInterp, PairsTag);
   assert(result);
-  result->type  = jInterp->coAlgs[PairsTag].sClass;
-  result->tag   = PairsTag;
-  result->flags = 0;
   asCar(result) = car;
   asCdr(result) = cdr;
   return result;
@@ -54,9 +53,9 @@ CoAlgObj* newPair(
   CoAlgObj *lolA = newPair(jInterp, NULL, NULL);
   CoAlgObj *lolB = newPair(jInterp, NULL, NULL);
   CoAlgObj *lol  = newPair(jInterp, lolA, lolB);
-  AssertPtrEquals(lol->type, jInterp->coAlgs[PairsTag].sClass);
-  AssertIntEquals(lol->tag, PairsTag);
-  AssertIntZero(lol->flags);
+  AssertPtrEquals(asType(lol), jInterp->coAlgs[PairsTag].sClass);
+  AssertIntEquals(asTag(lol), PairsTag);
+  AssertIntZero(asFlags(lol));
   AssertPtrEquals(asCar(lol), lolA);
   AssertPtrEquals(asCdr(lol), lolB);  
 \stopCTest
@@ -73,13 +72,13 @@ extern CoAlgObj* cdr(CoAlgObj* aLoL);
 \startCCode
 CoAlgObj* car(CoAlgObj* aLoL) {
   if (!aLoL) return NULL;
-  if (aLoL->type && (aLoL->tag != PairsTag)) return aLoL;
+  if (asTag(aLoL) != PairsTag) return aLoL;
   return asCar(aLoL);
 }
 
 CoAlgObj* cdr(CoAlgObj* aLoL) {
   if (!aLoL) return NULL;
-  if (aLoL->type && (aLoL->tag != PairsTag)) return NULL;
+  if (asTag(aLoL) != PairsTag) return NULL;
   return asCdr(aLoL);
 }
 \stopCCode
@@ -134,8 +133,8 @@ CoAlgObj* copyLoL(
   AssertPtrNotNull(pairB);
   AssertPtrNotNull(aPair0);
   AssertPtrNotNull(aPair1);
-  AssertPtrNotNull(aPair1->type);
-  AssertPtrEquals(aPair1->type, jInterp->coAlgs[PairsTag].sClass);
+  AssertPtrNotNull(asType(aPair1));
+  AssertPtrEquals(asType(aPair1), jInterp->coAlgs[PairsTag].sClass);
 
   AssertPtrNotNull(asCar(aPair1));
   AssertPtrNotEquals(asCar(aPair1), pairA);
@@ -174,8 +173,8 @@ extern Boolean equalLoLDebug(
 
 #define lolEqual(areEqual, lolA, lolB)	    \
   if (areEqual && (lolA)) {			            \
-    assert((lolA)->type);  			            \
-    areEqual = ((lolA)->type->equalityFunc)	\
+    assert(asType(lolA));  			            \
+    areEqual = (asType(lolA)->equalityFunc)	\
       ((lolA), (lolB), debugFlag);          \
   }
 \stopCHeader
@@ -189,10 +188,10 @@ Boolean equalLoLDebug(
   DEBUG(debugFlag, "equalLoL %p %p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA || !lolB) return FALSE;
-  if (lolA->type != lolB->type) return FALSE;
-  if (lolA->type && 
-     (lolA->tag != PairsTag)) {
-    return (lolA->type->equalityFunc)(lolA, lolB, debugFlag);
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (asType(lolA) && 
+     (asTag(lolA) != PairsTag)) {
+    return (asType(lolA)->equalityFunc)(lolA, lolB, debugFlag);
   }
   
   if (!equalLoLDebug(asCar(lolA), asCar(lolB), debugFlag)) {
@@ -226,84 +225,43 @@ Boolean equalLoLDebug(
 
 \setCHeaderStream{private}
 \startCHeader
-extern size_t printSizePairsCoAlg(
-  CoAlgObj* aLoL,
-  Boolean debugFlag
+extern Boolean printPairsCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
 );
 \stopCHeader
 
 \setCHeaderStream{public}
 \startCHeader
-#define lolPrintSize(lolSize, aLoL, defSize, typeStr, selector, debugFlag)\
-  if (aLoL) {								                                              \
-    DEBUG(debugFlag, "%sCoAlg-printSize: -> %s(%p) %zu\n",		            \
-          typeStr, selector, aLoL, lolSize);				                      \
-    assert((aLoL)->type);						                                      \
-    lolSize += ((aLoL)->type->printSize)((aLoL), debugFlag);		          \
-    DEBUG(debugFlag, "%sCoAlg-printSize: <- %s(%p) %zu\n",		            \
-          typeStr, selector, aLoL, lolSize);				                      \
-  } else {								                                                \
-    lolSize += defSize;							                                      \
+#define lolPrintStr(printedOk, aLoL, opener, closer, aStrBuf) \
+  if (aLoL) {								                                  \
+    size_t isList = asTag(aLoL) == PairsTag;        			    \
+    if (isList) strBufPrintf((aStrBuf), (opener));            \
+    assert(asType(aLoL));						                          \
+    (printedOk) = (printedOk) && 						                  \
+      (asType(aLoL)->printStr)((aStrBuf), (aLoL));		        \
+    if (isList) strBufPrintf((aStrBuf), (closer));            \
+  } else {								                                    \
+    strBufPrintf((aStrBuf), (opener));						            \
+    strBufPrintf((aStrBuf), (closer));						            \
   }
 \stopCHeader
 
 \startCCode
-size_t printSizePairsCoAlg(CoAlgObj* aLoL, Boolean debugFlag) {
-  DEBUG(debugFlag, "pairsCoAlg-printSize: > %p\n", aLoL);
+Boolean printPairsCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
+) {
   assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == PairsTag);
-
-//  if ((AS_TAG(aLoL->coAlg) & PRINT_MARKER)) return 0;
-//  aLoL->coAlg = (CoAlgebra*)(AS_TAG(aLoL->coAlg) | PRINT_MARKER);
-
-  DEBUG(debugFlag, "pairsCoAlg-printSize: %p {%p:%zu}(%p, %p)\n", aLoL,
-        aLoL->type, (size_t)(aLoL->tag), asCar(aLoL), asCdr(aLoL));
-
-  size_t lolSize = 4;
-  lolPrintSize(lolSize, asCar(aLoL), 4, "pairs", "car", debugFlag);
-  lolPrintSize(lolSize, asCdr(aLoL), 4, "pairs", "cdr", debugFlag);
-
-  DEBUG(debugFlag, "pairsCoAlg-printSize: < %zu %p\n", lolSize, aLoL);
-  return lolSize;
-}
-\stopCCode
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean printStrPairsCoAlg(CoAlgObj* aLoL,
-                                  char* buffer, size_t bufferSize);
-\stopCHeader
-
-\setCHeaderStream{public}
-\startCHeader
-#define lolPrintStr(printedOk, aLoL, opener, closer, buffer, bufferSize)\
-  if (aLoL) {								                                            \
-    size_t isList = (aLoL)->tag == PairsTag;        			              \
-    if (isList) strcat(buffer, opener);					                        \
-    assert((aLoL)->type);						                                    \
-    printedOk = printedOk && 						                                \
-      ((aLoL)->type->printStr)((aLoL), buffer, bufferSize);		          \
-    if (isList) strcat(buffer, closer);					                        \
-  } else {								                                              \
-    strcat(buffer, opener);						                                  \
-    strcat(buffer, closer);						                                  \
-  }
-\stopCHeader
-
-\startCCode
-Boolean printStrPairsCoAlg(CoAlgObj* aLoL,
-                           char* buffer, size_t bufferSize) {
-  assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == PairsTag);
+  assert(asType(aLoL));
+  assert(asTag(aLoL) == PairsTag);
 
 //  if (!(AS_TAG(aLoL->coAlg) & PRINT_MARKER)) return TRUE;
 //  aLoL->coAlg = (CoAlgebra*)(AS_TAG(aLoL->coAlg) & (~ PRINT_MARKER));
 
   size_t printedOk = TRUE;
-  lolPrintStr(printedOk, asCar(aLoL), "( ", ") ", buffer, bufferSize);
-  lolPrintStr(printedOk, asCdr(aLoL), "",   "",   buffer, bufferSize);
+  lolPrintStr(printedOk, asCar(aLoL), "( ", ") ", aStrBuf);
+  lolPrintStr(printedOk, asCdr(aLoL), "",   "",   aStrBuf);
   return printedOk;
 }
 \stopCCode
@@ -318,8 +276,10 @@ Boolean printStrPairsCoAlg(CoAlgObj* aLoL,
                                newPair(jInterp, NULL, NULL),
                                newPair(jInterp, NULL, NULL));
   AssertPtrNotNull(aNewPair);
-  AssertIntEquals(printSizeDebug(aNewPair, FALSE), 28);
-  AssertStrEquals(printLoLDebug(aNewPair, FALSE), "( ( ) ) ( )");
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printLoLDebug(aStrBuf, aNewPair, FALSE);
+  AssertStrEquals(getCString(aStrBuf), "( ( ) ) ( ) ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -341,8 +301,7 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   theCoAlg->objectSize   = sizeof(PairsObj);
   theCoAlg->registerFunc = registerPairs;
   theCoAlg->equalityFunc = equalLoLDebug;
-  theCoAlg->printSize    = printSizePairsCoAlg;
-  theCoAlg->printStr     = printStrPairsCoAlg;
+  theCoAlg->printStr     = printPairsCoAlg;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
   
   // sanity check...

@@ -36,12 +36,15 @@
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/symbols-private.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestLib{<HOME>/.joylol/joylol/booleans}
+\addCTestLib{<HOME>/.joylol/joylol/stringBuffers}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedBooleans(lstate);
   requireStaticallyLinkedSymbols(lstate);
+  requireStaticallyLinkedStringBuffers(lstate);
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
 \stopCTest
 \createCTestFile%
