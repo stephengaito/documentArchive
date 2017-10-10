@@ -257,7 +257,6 @@ Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
   theCoAlg->objectSize   = sizeof(CoAlgObj);
   theCoAlg->registerFunc = registerLuaFunctions;
   theCoAlg->equalityFunc = NULL;
-  theCoAlg->printSize    = NULL;
   theCoAlg->printStr     = NULL;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
 

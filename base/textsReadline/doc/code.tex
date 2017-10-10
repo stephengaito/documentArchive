@@ -205,7 +205,6 @@ size_t registerTextsReadline(JoyLoLInterp *jInterp) {
     theCoAlg->objectSize   = sizeof(TextObj);
     theCoAlg->registerFunc = registerTextsReadline;
     theCoAlg->equalityFunc = NULL;
-    theCoAlg->printSize    = NULL;
     theCoAlg->printStr     = NULL;
     readlineTag = registerCoAlgebra(jInterp, theCoAlg);
   }
