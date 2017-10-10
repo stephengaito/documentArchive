@@ -33,8 +33,8 @@ size_t printSizeDebug(
   DEBUG(debugFlag, "printSize-wrapper: > %p \n", aLoL);
   size_t result = 0;
   if (aLoL) {
-    assert(aLoL->type);
-    result = (aLoL->type->printSize)(aLoL, debugFlag);
+    assert(asType(aLoL));
+    result = (asType(aLoL)->printSize)(aLoL, debugFlag);
   } else result = 5;
   DEBUG(debugFlag, "printSize-wrapper: < %p %zu\n", aLoL, result);
   return result;
@@ -59,10 +59,10 @@ void clearPrintSizeMarksDebug(
 ) {
   if (!aLoL) return;
 
-  if (!(aLoL->flags & PRINT_FLAG)) return;
-  aLoL->flags = aLoL->flags & (~ PRINT_FLAG);
+  if (!(asFlags(aLoL) & PRINT_FLAG)) return;
+  asFlags(aLoL) = asFlags(aLoL) & (~ PRINT_FLAG);
 
-  if (aLoL->tag != PairsTag) return;
+  if (asTag(aLoL) != PairsTag) return;
 
   clearPrintSizeMarksDebug(asCar(aLoL), debugFlag);
 
@@ -104,8 +104,8 @@ char* printLoLDebug(
 
   DEBUG(debugFlag, "printLoL strlen(0) %zu %p\n", strlen(buffer), aLoL);
   if (aLoL) {
-    assert(aLoL->type);
-    Boolean result = (aLoL->type->printStr)(aLoL, buffer, bufferSize);
+    assert(asType(aLoL));
+    Boolean result = (asType(aLoL)->printStr)(aLoL, buffer, bufferSize);
     assert(result);
   } else strcat(buffer, "null ");
   DEBUG(debugFlag, "printLoL strlen(1) %zu %p\n", strlen(buffer), aLoL);

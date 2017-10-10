@@ -10,7 +10,6 @@
 \startCHeader
 typedef struct string_buffer_object_struct {
   CoAlgObj      super;
-  JoyLoLInterp *jInterp;
   FILE         *memFile;
   char         *buffer;
   size_t        bufSize;
@@ -19,7 +18,6 @@ typedef struct string_buffer_object_struct {
 
 \setCHeaderStream{private}
 \startCHeader
-#define bsAsJInterp(aLoL) (((StringBufferObj*)(aLoL))->jInterp)
 #define asMemFile(aLoL)   (((StringBufferObj*)(aLoL))->memFile)
 #define asBuffer(aLoL)    (((StringBufferObj*)(aLoL))->buffer)
 #define asBufSize(aLoL)   (((StringBufferObj*)(aLoL))->bufSize)
@@ -51,6 +49,8 @@ extern void strBufClose(CoAlgObj* aLoL);
 
 \startCCode
 void strBufClose(CoAlgObj* aLoL) {
+  if (!isStringBuffer(aLoL)) return;
+
   if (asMemFile(aLoL)) fclose(asMemFile(aLoL));
   if (asBuffer(aLoL))  free(asBuffer(aLoL));
   asMemFile(aLoL) = NULL;
@@ -66,7 +66,7 @@ extern void strBufReOpen(CoAlgObj* aLoL);
 \startCCode
 void strBufReOpen(CoAlgObj* aLoL) {
   if (!isStringBuffer(aLoL)) return;
-  
+
   if (asMemFile(aLoL)) strBufClose(aLoL);
   asMemFile(aLoL) = 
     open_memstream(&asBuffer(aLoL), &asBufSize(aLoL));
@@ -80,8 +80,8 @@ void strBufReOpen(CoAlgObj* aLoL) {
 
   CoAlgObj* aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
-  AssertPtrNotNull(aStrBuf->type);
-  AssertIntEquals(aStrBuf->tag, StringBuffersTag);
+  AssertPtrNotNull(asType(aStrBuf));
+  AssertIntEquals(asTag(aStrBuf), StringBuffersTag);
   AssertPtrNull(asMemFile(aStrBuf));
   AssertPtrNull(asBuffer(aStrBuf));
   AssertIntZero(asBufSize(aStrBuf));
@@ -110,21 +110,18 @@ void strBufReOpen(CoAlgObj* aLoL) {
 \startTestSuite[isStringBuffer]
 
 \startCHeader
-extern Boolean isStringBuffer(CoAlgObj *aLoL);
+#define isStringBuffer(aLoL)            \
+  (                                     \
+    (                                   \
+      (aLoL) &&                         \
+      asType(aLoL) &&                   \
+      (asTag(aLoL) == StringBuffersTag) \
+    ) ?                                 \
+    TRUE : FALSE                        \
+  )
 \stopCHeader
 
-\startCCode
-Boolean isStringBuffer(CoAlgObj *aLoL) {
-  if (aLoL &&
-      aLoL->type &&
-      (aLoL->tag == StringBuffersTag)) {
-    return TRUE;
-  }
-  return FALSE;
-}
-\stopCCode
-
-\startTestCase[should return true if a symbol]
+\startTestCase[should return true if a string buffer]
 
 \startCTest
   CoAlgObj *aStrBuf = newStringBuffer(jInterp);
@@ -133,7 +130,7 @@ Boolean isStringBuffer(CoAlgObj *aLoL) {
 \stopCTest
 \stopTestCase
 
-\startTestCase[should return false if not a symbol]
+\startTestCase[should return false if not a string buffer]
 \startCTest
   AssertIntFalse(isStringBuffer(NULL));
   CoAlgObj *aObj = newObject(jInterp, BooleansTag);
@@ -158,13 +155,19 @@ Symbol *getCString(CoAlgObj *aLoL) {
 \stopCCode
 
 \startCHeader
-extern CoAlgObj *getSymbol(CoAlgObj *aLoL);
+extern CoAlgObj *getSymbol(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *aLoL
+);
 \stopCHeader
 
 \startCCode
-CoAlgObj *getSymbol(CoAlgObj *aLoL) {
+CoAlgObj *getSymbol(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *aLoL
+) {
   if (!isStringBuffer(aLoL)) return NULL;
-  return newSymbol(bsAsJInterp(aLoL), getCString(aLoL));
+  return newSymbol(jInterp, getCString(aLoL));
 }
 \stopCCode
 
@@ -229,8 +232,8 @@ Boolean stringBuffersEqualDebug(
   DEBUG(debugFlag, "stringBuffersEqual a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA || !lolB) return FALSE;
-  if (lolA->type != lolB->type) return FALSE;
-  if (lolA->tag != StringBuffersTag) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (asTag(lolA)  != StringBuffersTag) return FALSE;
   if (strcmp(getCString(lolA), getCString(lolB)) != 0) return FALSE;
   return TRUE;
 }
@@ -272,8 +275,8 @@ extern size_t printSizeSymbolCoAlg(CoAlgObj* aLoL, size_t debugFlag);
 size_t printSizeSymbolCoAlg(CoAlgObj* aLoL, size_t debugFlag) {
   DEBUG(debugFlag, "symbolCoAlg-printSize: %p\n", aLoL);
   assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == StringBuffersTag);
+  assert(asType(aLoL));
+  assert(asTag(aLoL) == StringBuffersTag);
   DEBUG(debugFlag, "symbolCoAlg-printSize: [%s] %p\n", getCString(aLoL), aLoL);
   return strlen(getCString(aLoL)) + 1;
 }
@@ -288,8 +291,8 @@ extern size_t printStrSymbolCoAlg(CoAlgObj* aLoL,
 Boolean printStrSymbolCoAlg(CoAlgObj* aLoL,
                            char* buffer, size_t bufferSize) {
   assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == StringBuffersTag);
+  assert(asType(aLoL));
+  assert(asTag(aLoL) == StringBuffersTag);
 
   strcat(buffer, getCString(aLoL));
   strcat(buffer, " ");
