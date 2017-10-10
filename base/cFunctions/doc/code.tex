@@ -66,17 +66,19 @@ CFunctionObj *newCFunction(
 \stopTestSuite
 
 \startCHeader
-Boolean isCFunction(CoAlgObj* aLoL);
-\stopCHeader
+#define isCFunction(aLoL)               \
+  (                                     \
+    (                                   \
+      (aLoL) &&                         \
+      asType(aLoL) &&                   \
+      (asTag(aLoL) == CFunctionsTag) && \
+       asCFunc(aLoL)                    \
+    ) ?                                 \
+      TRUE :                            \
+      FALSE                             \
+  )
 
-\startCCode
-Boolean isCFunction(CoAlgObj* aLoL) {
-  if (!aLoL) return FALSE;
-  if ((aLoL->tag == CFunctionsTag) && 
-       asCFunc(aLoL)) return TRUE;
-  return FALSE;
-}
-\stopCCode
+\stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
@@ -97,8 +99,9 @@ Boolean equalityFuncCoAlg(
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
-  if (lolA->type != lolB->type) return FALSE;
-  if (lolA->tag != CFunctionsTag) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA) != CFunctionsTag) return FALSE;
   if (asCFunc(lolA) != asCFunc(lolB)) return FALSE;
   return TRUE;
 }
@@ -107,46 +110,23 @@ Boolean equalityFuncCoAlg(
 \startTestSuite[print CFunction]
 
 \startCHeader
-extern size_t printSizeFuncCoAlg(
-  CoAlgObj* aLoL,
-  Boolean debugFlag
+extern Boolean printFuncCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
 );
 \stopCHeader
 
 \startCCode
-size_t printSizeFuncCoAlg(
-  CoAlgObj* aLoL,
-  Boolean debugFlag
-) {
-  DEBUG(debugFlag, "funcCoAlg-printSize: %p\n", aLoL);
-  assert(aLoL);
-  assert(aLoL->tag == CFunctionsTag);
-  DEBUG(debugFlag, "funcCoAlg-printSize: func<%p> %p\n",
-    asCFunc(aLoL), aLoL);
-  return 15;
-}
-\stopCCode
-
-\startCHeader
-extern Boolean printStrFuncCoAlg(
-  CoAlgObj* aLoL,
-  char* buffer,
-  size_t bufferSize
-);
-\stopCHeader
-
-\startCCode
-Boolean printStrFuncCoAlg(
-  CoAlgObj* aLoL,
-  char* buffer,
-  size_t bufferSize
+Boolean printFuncCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
 ) {
   assert(aLoL);
-  assert(aLoL->tag == CFunctionsTag);
+  assert(asTag(aLoL) == CFunctionsTag);
 
   char ptoa[100];
   sprintf(ptoa, "<%p> ", asCFunc(aLoL));
-  strcat(buffer, ptoa);
+  strBufPrintf(aStrBuf, ptoa);
   return TRUE;
 }
 \stopCCode
@@ -157,13 +137,17 @@ Boolean printStrFuncCoAlg(
 
   char buffer[100];
   buffer[0] = 0;
-  sprintf((char*)&buffer, "<%p>", testCFunction);
+  sprintf((char*)&buffer, "<%p> ", testCFunction);
 
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+  
   CoAlgObj* aNewFunc =
     (CoAlgObj*)newCFunction(jInterp, testCFunction);
   AssertPtrNotNull(aNewFunc);
-  AssertIntEquals(printSizeDebug(aNewFunc, FALSE), 15);
-  AssertStrEquals(printLoLDebug(aNewFunc, FALSE), buffer);
+  printLoLDebug(aStrBuf, aNewFunc, FALSE);
+  AssertStrEquals(getCString(aStrBuf), buffer);
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -203,8 +187,7 @@ Boolean registerCFunctions(JoyLoLInterp *jInterp) {
   theCoAlg->objectSize   = sizeof(CFunctionObj);
   theCoAlg->registerFunc = registerCFunctions;
   theCoAlg->equalityFunc = equalityFuncCoAlg;
-  theCoAlg->printSize    = printSizeFuncCoAlg;
-  theCoAlg->printStr     = printStrFuncCoAlg;
+  theCoAlg->printStr     = printFuncCoAlg;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
 
   // do a sanity check...
