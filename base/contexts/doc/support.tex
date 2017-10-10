@@ -42,8 +42,16 @@ static void showStackOffAP(ContextObj* aCtx) {
 \startCCode
 static void showStackAP(ContextObj* aCtx) {
   assert(aCtx);
-  printf("d>>%s\n", printLoL(aCtx->data));
-  printf("p>>%s\n", printLoL(aCtx->process));
+  assert(aCtx->jInterp);
+  StringBufferObj *aStrBuf =
+    newStringBuffer(aCtx->jInterp);
+  strBufPrintf(aStrBuf, "d>>");
+  printLoL(aStrBuf, aCtx->data);
+  strBufPrintf(aStrBuf, "\np>>");
+  printLoL(aStrBuf, aCtx->process);
+  strBufPrintf(aStrBuf, "\n");
+  printf("%s", getCString(aStrBuf));
+  strBufClose(aStrBuf);
 }
 \stopCCode
 
@@ -78,7 +86,12 @@ static void checkingOffAP(ContextObj* aCtx) {
 \startCCode
 static void definitionsAP(ContextObj* aCtx) {
   assert(aCtx);
-  listDefinitions(aCtx->jInterp, stdout);
+  assert(aCtx->jInterp);
+  StringBufferObj *aStrBuf = 
+    newStringBuffer(aCtx->jInterp);
+  listDefinitions(aCtx->jInterp, aStrBuf);
+  printf("%s", getCString(aStrBuf));
+  strBufClose(aStrBuf);
 }
 \stopCCode
 

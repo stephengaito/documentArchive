@@ -6,6 +6,7 @@
 \dependsOn[booleans]
 \dependsOn[naturals]
 \dependsOn[symbols]
+\dependsOn[stringBuffers]
 \dependsOn[cFunctions]
 \dependsOn[pairs]
 \dependsOn[texts]
@@ -119,8 +120,9 @@ Boolean equalityContextsCoAlg(
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
-  if (lolA->type != lolB->type) return FALSE;
-  if (lolA->tag != ContextsTag) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA) != ContextsTag) return FALSE;
   size_t areEqual = TRUE;
   lolEqual(areEqual, asData(lolA),      asData(lolB));
   lolEqual(areEqual, asCommand(lolA),   asCommand(lolB));
@@ -132,84 +134,37 @@ Boolean equalityContextsCoAlg(
 \stopCCode
 
 \startCHeader
-extern Boolean printSizeContextsCoAlg(
-  CoAlgObj* aLoL,
-  Boolean debugFlag
+extern Boolean printContextsCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
 );
 \stopCHeader
 
 \startCCode
-Boolean printSizeContextsCoAlg(
-  CoAlgObj* aLoL,
-  Boolean debugFlag
-) {
-  DEBUG(debugFlag, "contextCoAlg->printSize: > %p\n", aLoL);
-  assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == ContextsTag);
-
-//  if ((aLoL->tag & PRINT_MARKER)) return 0;
-//  aLoL->tag |= PRINT_MARKER;
-
-  DEBUG(debugFlag, "contextCoAlg-printSize: %p {%p:%zu} d:%p c:%p p:%p m:%p l:%p\n",
-    aLoL, aLoL->type, (size_t)(aLoL->flags),
-    asData(aLoL), asCommand(aLoL), asProcess(aLoL),
-    asMessages(aLoL), asListeners(aLoL));
-
-  size_t lolSize = 12 + strlen(asName(aLoL)); // "\n[[ " and " ]]\n"
-
-  lolPrintSize(lolSize, asData(aLoL), 6,
-               "context", "data",      debugFlag);
-  lolPrintSize(lolSize, asCommand(aLoL), 6,
-               "context", "command",   debugFlag);
-  lolPrintSize(lolSize, asProcess(aLoL), 6,
-               "context", "process",   debugFlag);
-  lolPrintSize(lolSize, asMessages(aLoL), 6,
-               "context", "messages",  debugFlag);
-  lolPrintSize(lolSize, asListeners(aLoL), 6,
-               "context", "listeners", debugFlag);
-
-  DEBUG(debugFlag, "contextCoAlg-printSize: < %zu %p\n", lolSize, aLoL);
-  return lolSize;
-}
-\stopCCode
-
-\startCHeader
-extern Boolean printStrContextsCoAlg(
-  CoAlgObj* aLoL,
-  char* buffer,
-  size_t bufferSize
-);
-\stopCHeader
-
-\startCCode
-Boolean printStrContextsCoAlg(
-  CoAlgObj* aLoL,
-  char* buffer,
-  size_t bufferSize
+Boolean printContextsCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
 ) {
   assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == ContextsTag);
+  assert(asType(aLoL));
+  assert(asTag(aLoL) == ContextsTag);
 
 //  if (!(aLoL->tag & PRINT_MARKER)) return TRUE;
 //  aLoL->tag = aLoL->tag & (~ PRINT_MARKER);
 
   size_t printedOk = TRUE;
-  strcat(buffer, "\n[");
-  strcat(buffer, asName(aLoL));
-  strcat(buffer, "[ ");
+  strBufPrintf(aStrBuf, "\n[%s[ ", asName(aLoL));
   lolPrintStr(printedOk, asData(aLoL),
-              "d:( ", ") ", buffer, bufferSize);
+              "d:( ", ") ", aStrBuf);
   lolPrintStr(printedOk, asCommand(aLoL),
-              "c:( ", ") ", buffer, bufferSize);
+              "c:( ", ") ", aStrBuf);
   lolPrintStr(printedOk, asProcess(aLoL),
-              "p:( ", ") ", buffer, bufferSize);
+              "p:( ", ") ", aStrBuf);
   lolPrintStr(printedOk, asMessages(aLoL),
-              "m:( ", ") ", buffer, bufferSize);
+              "m:( ", ") ", aStrBuf);
   lolPrintStr(printedOk, asListeners(aLoL),
-              "l:( ", ") ", buffer, bufferSize);
-  strcat(buffer, " ]]\n");
+              "l:( ", ") ", aStrBuf);
+  strBufPrintf(aStrBuf, " ]]\n");
   return printedOk;
 }
 \stopCCode
@@ -228,8 +183,7 @@ Boolean registerContexts(JoyLoLInterp *jInterp) {
   theCoAlg->objectSize   = sizeof(ContextObj);
   theCoAlg->registerFunc = registerContexts;
   theCoAlg->equalityFunc = equalityContextsCoAlg;
-  theCoAlg->printSize    = printSizeContextsCoAlg;
-  theCoAlg->printStr     = printStrContextsCoAlg;
+  theCoAlg->printStr     = printContextsCoAlg;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
 
   // do a sanity check...

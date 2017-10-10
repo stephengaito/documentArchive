@@ -160,9 +160,14 @@ void prependListCtxData(
 \startCHeader
 extern CoAlgObj* popCtxData(ContextObj* aCtx);
 
-#define popCtxDataInto(aCtx, aVar)                              \
-CoAlgObj* aVar = popCtxData(aCtx);                              \
-if (aCtx->tracingOn) printf("%s = %s\n", #aVar, printLoL(aVar))
+#define popCtxDataInto(aCtx, aVar)                            \
+CoAlgObj* aVar = popCtxData(aCtx);                            \
+if (aCtx->tracingOn) {                                        \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx->jInterp);  \
+  printLoL(aStrBuf, aVar);                                    \
+  printf("%s = %s\n", #aVar, getCString(aStrBuf));            \
+  strBufClose(aStrBuf);                                       \
+}
 \stopCHeader
 
 \startCCode

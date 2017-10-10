@@ -46,6 +46,7 @@ joylol.targets{
     'booleans',
     'naturals',
     'symbols',
+    'stringBuffers',
     'cFunctions',
     'pairs',
     'texts',
