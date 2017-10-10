@@ -34,14 +34,17 @@
 
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/booleans.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/naturals.h>}
 \addCTestInclude{<joylol/naturals-private.h>}
 \addCTestLib{<HOME>/.joylol/joylol/booleans}
+\addCTestLib{<HOME>/.joylol/joylol/stringBuffers}
 \addCTestLib{-lgmp}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedBooleans(lstate);
+  requireStaticallyLinkedStringBuffers(lstate);
   requireStaticallyLinkedNaturals(lstate);
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
 \stopCTest

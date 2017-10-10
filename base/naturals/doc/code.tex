@@ -32,9 +32,6 @@ CoAlgObj* newNatural(JoyLoLInterp* jInterp, Symbol* aNatural) {
   
   CoAlgObj* result = newObject(jInterp, NaturalsTag);
   assert(result);
-  result->type     = jInterp->coAlgs[NaturalsTag].sClass;
-  result->tag      = NaturalsTag;
-  result->flags    = 0;
   if (aNatural) {
     long success = mpz_set_str(asNatural(result), aNatural, 0);
     assert(success == 0);
@@ -52,8 +49,8 @@ CoAlgObj* newNatural(JoyLoLInterp* jInterp, Symbol* aNatural) {
   const char* testNum = "12345";
   CoAlgObj* aNewNat = newNatural(jInterp, testNum);
   AssertPtrNotNull(aNewNat);
-  AssertPtrNotNull(aNewNat->type);
-  AssertIntEquals(aNewNat->tag, NaturalsTag);
+  AssertPtrNotNull(asType(aNewNat));
+  AssertIntEquals(asTag(aNewNat), NaturalsTag);
   AssertIntTrue(isAtom(aNewNat));
   AssertIntFalse(isPair(aNewNat));
 \stopCTest
@@ -63,19 +60,17 @@ CoAlgObj* newNatural(JoyLoLInterp* jInterp, Symbol* aNatural) {
 \startTestSuite[isNatural]
 
 \startCHeader
-extern Boolean isNatural(CoAlgObj *aLoL);
+#define isNatural(aLoL)             \
+  (                                 \
+    (                               \
+      (aLoL) &&                     \
+      asType(aLoL) &&               \
+      (asTag(aLoL) == NaturalsTag)  \
+    ) ?                             \
+      TRUE :                        \
+      FALSE                         \
+  )
 \stopCHeader
-
-\startCCode
-Boolean isNatural(CoAlgObj *aLoL) {
-  if (aLoL &&
-      aLoL->type &&
-      (aLoL->tag == NaturalsTag)) {
-    return TRUE;
-  }
-  return FALSE;
-}
-\stopCCode
 
 \startTestCase[should return true if a natural]
 
@@ -115,8 +110,9 @@ Boolean equalityNatCoAlgDebug(CoAlgObj* lolA, CoAlgObj* lolB,
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
-  if (lolA->type != lolB->type) return FALSE;
-  if (lolA->tag != NaturalsTag) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA) != NaturalsTag) return FALSE;
   if (mpz_cmp(asNatural(lolA), asNatural(lolB)) != 0) return FALSE;
   return TRUE;
 }
@@ -148,44 +144,25 @@ Boolean equalityNatCoAlgDebug(CoAlgObj* lolA, CoAlgObj* lolB,
 \startTestSuite[printing symbols]
 
 \startCHeader
-extern size_t printSizeNatCoAlg(CoAlgObj* aLoL, Boolean debugFlag);
+extern Boolean printNatCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
+);
 \stopCHeader
 
 \startCCode
-size_t printSizeNatCoAlg(CoAlgObj* aLoL, Boolean debugFlag) {
-  DEBUG(debugFlag, "natCoAlg-printSize: %p\n", aLoL);
+Boolean printNatCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
+) {
   assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == NaturalsTag);
+  assert(asTag(aLoL) == NaturalsTag);
 
   char* mpztoa;
   mpztoa = NULL;
   long numChars = gmp_asprintf(&mpztoa, "%Zd ", asNatural(aLoL));
   assert(0 < numChars);
-  DEBUG(debugFlag, "natCoAlg-printSize: nat[%s](%zu) %p\n",
-        mpztoa, (size_t)numChars, aLoL);
-  free(mpztoa);
-  return numChars;
-}
-\stopCCode
-
-\startCHeader
-extern Boolean printStrNatCoAlg(CoAlgObj* aLoL,
-                                char* buffer, size_t bufferSize);
-\stopCHeader
-
-\startCCode
-Boolean printStrNatCoAlg(CoAlgObj* aLoL,
-                         char* buffer, size_t bufferSize) {
-  assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == NaturalsTag);
-
-  char* mpztoa;
-  mpztoa = NULL;
-  long numChars = gmp_asprintf(&mpztoa, "%Zd ", asNatural(aLoL));
-  assert(0 < numChars);
-  strcat(buffer, mpztoa);
+  strBufPrintf(aStrBuf, mpztoa);
   free(mpztoa);
   return TRUE;
 }
@@ -200,11 +177,10 @@ Boolean printStrNatCoAlg(CoAlgObj* aLoL,
   const char* testNum = "12345 ";
   CoAlgObj* aNewNat = newNatural(jInterp, testNum);
   AssertPtrNotNull(aNewNat);
-  AssertIntEquals(printSizeNatCoAlg(aNewNat, FALSE), strlen(testNum));
-  char buffer[100];
-  buffer[0] = 0;
-  printStrNatCoAlg(aNewNat, buffer, 100);
-  AssertStrEquals(buffer, testNum);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printNatCoAlg(aStrBuf, aNewNat);
+  AssertStrEquals(getCString(aStrBuf), testNum);
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -227,8 +203,7 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   theCoAlg->objectSize   = sizeof(NaturalObj);
   theCoAlg->registerFunc = registerNaturals;
   theCoAlg->equalityFunc = equalityNatCoAlgDebug;
-  theCoAlg->printSize    = printSizeNatCoAlg;
-  theCoAlg->printStr     = printStrNatCoAlg;
+  theCoAlg->printStr     = printNatCoAlg;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
   
   // sanity check...
