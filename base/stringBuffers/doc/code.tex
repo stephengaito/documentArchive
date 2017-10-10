@@ -140,7 +140,7 @@ void strBufReOpen(StringBufferObj* aStrBuf) {
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[getCString and getSymbol]
+\startTestSuite[getCString and strBufGetAsSymbol]
 
 \startCHeader
 extern Symbol *getCString(StringBufferObj *aStrBuf);
@@ -156,14 +156,14 @@ Symbol *getCString(StringBufferObj *aStrBuf) {
 \stopCCode
 
 \startCHeader
-extern CoAlgObj *getSymbol(
+extern CoAlgObj *strBufGetAsSymbol(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf
 );
 \stopCHeader
 
 \startCCode
-CoAlgObj *getSymbol(
+CoAlgObj *strBufGetAsSymbol(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf
 ) {

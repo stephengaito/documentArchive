@@ -5,6 +5,7 @@
 
 \dependsOn[jInterps]
 \dependsOn[symbols]
+\dependsOn[stringBuffers]
 
 \startCHeader
 typedef struct dictionaries_object_struct DictObj;
@@ -92,6 +93,8 @@ DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym) {
 
   DictObj* aNode = newDict(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aNode);
+  AssertPtrNotNull(asType(aNode));
+  AssertIntEquals(asTag(aNode), DictionariesTag)
   AssertPtrNotNull(dictAsSymbol(aNode));
   AssertStrEquals(dictAsSymbol(aNode), "aNodeSymbol");
   AssertPtrNull(dictAsValue(aNode));
@@ -139,16 +142,23 @@ CoAlgObj* getSymbol(JoyLoLInterp* jInterp,
 \stopCCode
 
 \startCHeader
-extern void listDefinitions(JoyLoLInterp* jInterp, FILE* outFile);
+extern void listDefinitions(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf
+);
 \stopCHeader
 
 \startCCode
-void listDefinitions(JoyLoLInterp* jInterp, FILE* outFile) {
+void listDefinitions(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf
+) {
   DictObj* curNode = jInterp->dict.firstSymbol;
   while(curNode) {
     if (curNode->value) {
-      fprintf(outFile,"%s == %s\n",
-              curNode->symbol, printLoL(curNode->value));
+      strBufPrintf(aStrBuf,"%s == ", curNode->symbol);
+      printLoL(aStrBuf, curNode->value);
+      strBufPrintf(aStrBuf,"\n");
     }
     curNode = curNode->next;
   }
@@ -157,70 +167,37 @@ void listDefinitions(JoyLoLInterp* jInterp, FILE* outFile) {
 
 \setCHeaderStream{private}
 \startCHeader
-size_t printDictionaryCoAlgObjSize(CoAlgObj* anObj, Boolean debugFlag);
-size_t printDicSize(DictObj* anAVLNode, Boolean debugFlag);
-\stopCHeader
-
-\startCCode
-size_t printDictionaryCoAlgObjSize(CoAlgObj* anObj, Boolean debugFlag) {
-  if (!anObj) return 0;
-  if (anObj->tag != DictionariesTag) return 0;
-  return printDicSize((DictObj*)anObj, debugFlag);
-}
-
-size_t printDicSize(DictObj* anAVLNode, Boolean debugFlag) {
-  if (!anAVLNode) return 0;
-  return printDicSize(anAVLNode->left, debugFlag)
-    + printDicSize(anAVLNode->right, debugFlag)
-    + strlen(anAVLNode->symbol) + 20;
-}
-\stopCCode
-
-\startCHeader
 extern Boolean printDicionaryCoAlgObjInto(
-  CoAlgObj* anAVLNode, char* buffer, size_t bufferSize
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *anAVLNode
 );
 extern Boolean printDicInto(
-  DictObj* anAVLNode, char* buffer, size_t bufferSize
+  StringBufferObj *aStrBuf,
+  DictObj         *anAVLNode
 );
 \stopCHeader
 
 \startCCode
 Boolean printDictionaryCoAlgObjInto(
-  CoAlgObj* anAVLNode, char* buffer, size_t bufferSize
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *anAVLNode
 ) {
   if (!anAVLNode) return FALSE;
-  if (anAVLNode->tag != DictionariesTag) return FALSE;
-  return printDicInto((DictObj*)anAVLNode, buffer, bufferSize);
+  if (asTag(anAVLNode) != DictionariesTag) return FALSE;
+  return printDicInto(aStrBuf, (DictObj*)anAVLNode);
 }
 
-Boolean printDicInto(DictObj* anAVLNode, char* buffer, size_t bufferSize) {
+Boolean printDicInto(
+  StringBufferObj *aStrBuf,
+  DictObj         *anAVLNode
+) {
   if (!anAVLNode) return TRUE;
-  strcat(buffer, "[");
-  strcat(buffer, anAVLNode->symbol);
-  strcat(buffer, "] l:( ");
-  printDicInto(anAVLNode->left, buffer, bufferSize);
-  strcat(buffer, " ) r:( ");
-  printDicInto(anAVLNode->right, buffer, bufferSize);
-  strcat(buffer, " ) ");
+  strBufPrintf(aStrBuf, "[%s] l:( ", anAVLNode->symbol);
+  printDicInto(aStrBuf, anAVLNode->left);
+  strBufPrintf(aStrBuf, " ) r:( ");
+  printDicInto(aStrBuf, anAVLNode->right);
+  strBufPrintf(aStrBuf, " ) ");
   return TRUE;
-}
-\stopCCode
-
-\startCHeader
-char* printDictionaryDebug(DictObj* anAVLNode, Boolean debugFlag);
-#define printDictionary(anAVLNode) \
-  printDictionaryDebug(anAVLNode, FALSE)
-\stopCHeader
-
-\startCCode
-char* printDictionaryDebug(DictObj* anAVLNode, Boolean debugFlag) {
-  size_t bufferSize = printDicSize(anAVLNode, debugFlag) + 10;
-  char* buffer = (char*) calloc(bufferSize, sizeof(char));
-  assert(buffer);
-  printDicInto(anAVLNode, buffer, bufferSize);
-  buffer[strlen(buffer)-1] = 0;
-  return buffer;
 }
 \stopCCode
 
@@ -241,7 +218,6 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   theCoAlg->objectSize   = sizeof(DictObj);
   theCoAlg->registerFunc = registerDictionaries;
   theCoAlg->equalityFunc = NULL;
-  theCoAlg->printSize    = printDictionaryCoAlgObjSize;
   theCoAlg->printStr     = printDictionaryCoAlgObjInto;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
   

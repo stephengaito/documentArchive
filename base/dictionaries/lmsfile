@@ -46,6 +46,7 @@ joylol.targets{
   coAlgLibs = {
     'jInterps',
     'symbols',
+    'stringBuffers',
   },
   buildDir = 'build',
 }
@@ -76,7 +77,6 @@ contests.targets{
   testLibDirs = {
   },
   testLibs = {
-    '<HOME>/.joylol/joylol/symbols',
   },
   buildDir  = 'build',
   docDir    = 'doc',

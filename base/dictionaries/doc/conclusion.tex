@@ -24,6 +24,7 @@
 
 #include <joylol/jInterps.h>
 #include <joylol/symbols.h>
+#include <joylol/stringBuffers.h>
 #include <joylol/dictionaries.h>
 #include <joylol/dictionaries-private.h>
 // dictionary
@@ -38,13 +39,14 @@
 \addCTestInclude{<time.h>}
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/dictionaries-private.h>}
-\addCTestLib{<HOME>/.joylol/joylol/symbols}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedSymbols(lstate);
+  requireStaticallyLinkedStringBuffers(lstate);
   requireStaticallyLinkedDictionaries(lstate);
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
 \stopCTest

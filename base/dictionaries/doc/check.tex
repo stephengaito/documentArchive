@@ -35,11 +35,16 @@ void reCalculateAVLNodeHeightBalance(DictObj* anAVLNode) {
 \startTestCase[should computer correct AVLNode heights]
 \startCTest
   AssertPtrNotNull(jInterp);
+
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
   
   DictObj* aNode = newDict(jInterp, "20");
   AssertPtrNotNull(aNode);
-  AssertStrEquals(printDictionary(aNode),
-  "[20] l:(  ) r:(  )");
+  printDicInto(aStrBuf, aNode);
+  AssertStrEquals(getCString(aStrBuf),
+  "[20] l:(  ) r:(  ) ");
+  strBufClose(aStrBuf);
 
   AssertIntEquals(aNode->height, 1);
   reCalculateAVLNodeHeightBalance(aNode);
@@ -47,15 +52,19 @@ void reCalculateAVLNodeHeightBalance(DictObj* anAVLNode) {
   AssertIntEquals(aNode->balance, 0);
 
   aNode->left = newDict(jInterp, "15");
-  AssertStrEquals(printDictionary(aNode),
-  "[20] l:( [15] l:(  ) r:(  )  ) r:(  )");
+  printDicInto(aStrBuf, aNode);
+  AssertStrEquals(getCString(aStrBuf),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  ) ");
+  strBufClose(aStrBuf);
   reCalculateAVLNodeHeightBalance(aNode);
   AssertIntEquals(aNode->height, 2);
   AssertIntEquals(aNode->balance, 2);
 
   aNode->right = newDict(jInterp, "25");
-  AssertStrEquals(printDictionary(aNode),
-  "[20] l:( [15] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  )");
+  printDicInto(aStrBuf, aNode);
+  AssertStrEquals(getCString(aStrBuf),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  ) ");
+  strBufClose(aStrBuf);
   reCalculateAVLNodeHeightBalance(aNode);
   AssertIntEquals(aNode->height, 2);
   AssertIntEquals(aNode->balance, 0);
@@ -80,29 +89,42 @@ size_t deepCalculateAVLNodeHeight(DictObj* anAVLNode) {
 \stopCCode
 
 \startCHeader
-extern Boolean checkAVLNode(DictObj* anAVLNode, size_t debugFlag);
+extern Boolean checkAVLNode(
+  JoyLoLInterp *jInterp,
+  DictObj      *anAVLNode,
+  Boolean       debugFlag
+);
 \stopCHeader
 
 \startCCode
-Boolean checkAVLNode(DictObj* anAVLNode, size_t debugFlag) {
+Boolean checkAVLNode(
+  JoyLoLInterp *jInterp,
+  DictObj      *anAVLNode, 
+  Boolean       debugFlag
+) {
   if (!anAVLNode) return TRUE;
-
-  DEBUG(debugFlag, "checkAVLNode %p %ld:%zu=%zu %s\n",
-        anAVLNode, anAVLNode->balance, anAVLNode->height,
-        deepCalculateAVLNodeHeight(anAVLNode),
-        printDictionary(anAVLNode));
+  if (debugFlag) {
+    StringBufferObj *aStrBuf = 
+      newStringBuffer(jInterp);
+    printDicInto(aStrBuf, anAVLNode);
+    DEBUG(debugFlag, "checkAVLNode %p %ld:%zu=%zu %s\n",
+          anAVLNode, anAVLNode->balance, anAVLNode->height,
+          deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
 
   if (anAVLNode->left) {
-    DEBUG(debugFlag, "car>-checkAVLNode %p\n", anAVLNode);
-    checkAVLNode(anAVLNode->left, debugFlag);
-    assert(0 < strcmp(anAVLNode->symbol,
+      DEBUG(debugFlag, "car>-checkAVLNode %p\n", anAVLNode);
+      checkAVLNode(jInterp, anAVLNode->left, debugFlag);
+      assert(0 < strcmp(anAVLNode->symbol,
                       anAVLNode->left->symbol));
     DEBUG(debugFlag, "car<-checkAVLNode %p\n", anAVLNode);
   }
 
   if (anAVLNode->right) {
     DEBUG(debugFlag, "cdr>-checkAVLNode %p\n", anAVLNode);
-    checkAVLNode(anAVLNode->right, debugFlag);
+    checkAVLNode(jInterp, anAVLNode->right, debugFlag);
     assert(strcmp(anAVLNode->symbol,
                   anAVLNode->right->symbol) < 0);
     DEBUG(debugFlag, "cdr<-checkAVLNode %p\n", anAVLNode);
