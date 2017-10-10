@@ -43,9 +43,9 @@ CoAlgObj* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
 
   CoAlgObj* aNewBoolean = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aNewBoolean);
-  AssertPtrNotNull(aNewBoolean->type);
-  AssertIntEquals(aNewBoolean->tag, BooleansTag);
-  AssertIntTrue(aNewBoolean->flags);
+  AssertPtrNotNull(asType(aNewBoolean));
+  AssertIntEquals(asTag(aNewBoolean), BooleansTag);
+  AssertIntTrue(asFlags(aNewBoolean));
   AssertIntTrue(isAtom(aNewBoolean));
   AssertIntTrue(isBoolean(aNewBoolean));
   AssertIntFalse(isPair(aNewBoolean));
@@ -56,13 +56,20 @@ CoAlgObj* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
 \startCTest
   AssertPtrNotNull(jInterp);
 
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+
   CoAlgObj* aLoL = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aLoL);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE), "true");
+  printLoLDebug(aStrBuf, aLoL, FALSE);
+  AssertStrEquals(getCString(aStrBuf), "true ");
+  strBufClose(aStrBuf);
 
   aLoL = newBoolean(jInterp, FALSE);
   AssertPtrNotNull(aLoL);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE), "false");
+  printLoLDebug(aStrBuf, aLoL, FALSE);
+  AssertStrEquals(getCString(aStrBuf), "false ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 
@@ -71,16 +78,17 @@ CoAlgObj* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
 \startTestSuite[isBoolean]
 
 \startCHeader
-extern size_t isBoolean(CoAlgObj* aLoL);
+#define isBoolean(aLoL)             \
+  (                                 \
+    (                               \
+      (aLoL) &&                     \
+      asType(aLoL) &&               \
+      (asTag(aLoL) == BooleansTag)  \
+    ) ?                             \
+      TRUE :                        \
+      FALSE                         \
+  )
 \stopCHeader
-
-\startCCode
-size_t isBoolean(CoAlgObj* aLoL) {
-  if (!aLoL) return FALSE;
-  if (aLoL->type && (aLoL->tag == BooleansTag)) return TRUE;
-  return FALSE;
-}
-\stopCCode
 
 \startTestSuite[isTrue and isFalse]
 
@@ -92,16 +100,16 @@ extern Boolean isFalse(CoAlgObj* aLoL);
 \startCCode
 Boolean isTrue(CoAlgObj* aLoL) {
   if (!aLoL) return FALSE;
-  if (!aLoL->type) return FALSE;
-  if (aLoL->tag != BooleansTag) return FALSE;
+  if (!asType(aLoL)) return FALSE;
+  if (asTag(aLoL) != BooleansTag) return FALSE;
   if (asBoolean(aLoL) == FALSE) return FALSE;
   return TRUE;
 }
 
 Boolean isFalse(CoAlgObj* aLoL) {
   if (!aLoL) return TRUE;
-  if (aLoL->type &&
-     (aLoL->tag == BooleansTag) &&
+  if (asType(aLoL) &&
+     (asTag(aLoL) == BooleansTag) &&
      (asBoolean(aLoL) == FALSE)) return TRUE;
   return FALSE;
 }
@@ -137,8 +145,9 @@ Boolean equalityBoolCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
-  if (lolA->type != lolB->type) return FALSE;
-  if (lolA->tag  != BooleansTag) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != BooleansTag) return FALSE;
   if (asBoolean(lolA) != asBoolean(lolB)) return FALSE;
   return TRUE;
 }
@@ -147,35 +156,22 @@ Boolean equalityBoolCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
 \startTestSuite[printing booleans]
 
 \startCHeader
-extern size_t printSizeBoolCoAlg(CoAlgObj* aLoL, size_t debugFlag);
+extern Boolean printBoolCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
+);
 \stopCHeader
 
 \startCCode
-size_t printSizeBoolCoAlg(CoAlgObj* aLoL, size_t debugFlag) {
-  DEBUG(debugFlag, "boolCoAlg-printSize: %p\n", aLoL);
+Boolean printBoolCoAlg(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
+) {
   assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == BooleansTag);
-  DEBUG(debugFlag, "boolCoAlg-printSize: bool<%zu> %p\n",
-    ((size_t)(asBoolean(aLoL))), aLoL);
-  return 6;
-}
-\stopCCode
+  assert(asTag(aLoL) == BooleansTag);
 
-\startCHeader
-extern Boolean printStrBoolCoAlg(CoAlgObj* aLoL,
-                                 char* buffer, size_t bufferSize);
-\stopCHeader
-
-\startCCode
-Boolean printStrBoolCoAlg(CoAlgObj* aLoL,
-                          char* buffer, size_t bufferSize) {
-  assert(aLoL);
-  assert(aLoL->type);
-  assert(aLoL->tag == BooleansTag);
-
-  if (asBoolean(aLoL)) strcat(buffer, "true ");
-  else strcat(buffer, "false ");
+  if (asBoolean(aLoL)) strBufPrintf(aStrBuf, "true ");
+  else strBufPrintf(aStrBuf, "false ");
   return TRUE;
 }
 \stopCCode
@@ -186,15 +182,20 @@ Boolean printStrBoolCoAlg(CoAlgObj* aLoL,
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[BooleansTag].sClass);
 
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+  
   CoAlgObj* aNewBoolean = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aNewBoolean);
-  AssertIntEquals(printSizeDebug(aNewBoolean, FALSE), 6);
-  AssertStrEquals(printLoLDebug(aNewBoolean, FALSE), "true");
-
+  printLoLDebug(aStrBuf, aNewBoolean, FALSE);
+  AssertStrEquals(getCString(aStrBuf), "true ");
+  strBufClose(aStrBuf);
+  
   aNewBoolean = newBoolean(jInterp, FALSE);
-  AssertPtrNotNull(aNewBoolean);
-  AssertIntEquals(printSizeDebug(aNewBoolean, FALSE), 6);
-  AssertStrEquals(printLoLDebug(aNewBoolean, FALSE), "false");
+  AssertPtrNotNull(aNewBoolean);  
+  printLoLDebug(aStrBuf, aNewBoolean, FALSE);
+  AssertStrEquals(getCString(aStrBuf), "false ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -217,8 +218,7 @@ Boolean registerBooleans(JoyLoLInterp *jInterp) {
   theCoAlg->objectSize   = sizeof(CoAlgObj);
   theCoAlg->registerFunc = registerBooleans;
   theCoAlg->equalityFunc = equalityBoolCoAlg;
-  theCoAlg->printSize    = printSizeBoolCoAlg;
-  theCoAlg->printStr     = printStrBoolCoAlg;
+  theCoAlg->printStr     = printBoolCoAlg;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
   
   // do a sanity check...

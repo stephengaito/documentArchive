@@ -42,11 +42,14 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 
   
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/booleans-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/stringBuffers}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedStringBuffers(lstate);
   requireStaticallyLinkedBooleans(lstate);
   JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
 \stopCTest
