@@ -13,105 +13,30 @@
 // (or to use a hash table).
 \stopCCode
 
-\startTestSuite[compute print size]
-
 \startCHeader
-extern size_t printSizeDebug(
-  CoAlgObj* aLoL,
-  Boolean debugFlag
+extern void printLoLDebug(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL,
+  Boolean          debugFlag
 );
 
-#define printSize(aLoL)      \
-  printSizeDebug(aLoL, FALSE)
+#define printLoL(aStrBuf, aLoL)       \
+  printLoLDebug(aStrBuf,  aLoL, FALSE)
 \stopCHeader
 
 \startCCode
-size_t printSizeDebug(
-  CoAlgObj* aLoL,
-  Boolean debugFlag
-) {  
-  DEBUG(debugFlag, "printSize-wrapper: > %p \n", aLoL);
-  size_t result = 0;
-  if (aLoL) {
-    assert(asType(aLoL));
-    result = (asType(aLoL)->printSize)(aLoL, debugFlag);
-  } else result = 5;
-  DEBUG(debugFlag, "printSize-wrapper: < %p %zu\n", aLoL, result);
-  return result;
-}
-\stopCCode
-
-\startCHeader
-extern void clearPrintSizeMarksDebug(
-  CoAlgObj* aLoL,
-  Boolean debugFlag
-);
-\stopCHeader
-
-\startCCode
-// We need to know the structure of the PairsObj
-// 
-#include <joylol/pairs.h>
-
-void clearPrintSizeMarksDebug(
-  CoAlgObj* aLoL,
-  Boolean debugFlag
-) {
-  if (!aLoL) return;
-
-  if (!(asFlags(aLoL) & PRINT_FLAG)) return;
-  asFlags(aLoL) = asFlags(aLoL) & (~ PRINT_FLAG);
-
-  if (asTag(aLoL) != PairsTag) return;
-
-  clearPrintSizeMarksDebug(asCar(aLoL), debugFlag);
-
-  if (asCdr(aLoL)) {
-    clearPrintSizeMarksDebug(asCdr(aLoL), debugFlag);
-  }
-}
-\stopCCode
-
-\startTestCase[printSize Of NULL]
-\startCTest
-  AssertIntEquals(printSize(NULL), 5);
-\stopCTest
-\stopTestCase
-\stopTestSuite
-
-\startCHeader
-extern char* printLoLDebug(
-  CoAlgObj* aLoL,
-  Boolean debugFlag
-);
-
-#define printLoL(aLoL)      \
-  printLoLDebug(aLoL, FALSE)
-\stopCHeader
-
-\startCCode
-char* printLoLDebug(
-  CoAlgObj* aLoL, 
-  Boolean debugFlag
+void printLoLDebug(
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL, 
+  Boolean          debugFlag
 ) {
   //  debugFlag = TRUE;
-  DEBUG(debugFlag, "printLoL %p\n", aLoL);
-  size_t bufferSize = printSizeDebug(aLoL, debugFlag) + 10;
-  DEBUG(debugFlag, "printLoL size:%zu %p\n", bufferSize, aLoL);
+  DEBUG(debugFlag, "printLoL %p %p\n", aStrBuf, aLoL);
 
-  char* buffer = (char*) calloc(bufferSize, sizeof(char));
-  assert(buffer);
-
-  DEBUG(debugFlag, "printLoL strlen(0) %zu %p\n", strlen(buffer), aLoL);
   if (aLoL) {
     assert(asType(aLoL));
-    Boolean result = (asType(aLoL)->printStr)(aLoL, buffer, bufferSize);
+    Boolean result = (asType(aLoL)->printStr)(aStrBuf, aLoL);
     assert(result);
-  } else strcat(buffer, "null ");
-  DEBUG(debugFlag, "printLoL strlen(1) %zu %p\n", strlen(buffer), aLoL);
-
-  buffer[strlen(buffer)-1] = 0; // remove the trailing space
-
-  return buffer;
+  }
 }
 \stopCCode

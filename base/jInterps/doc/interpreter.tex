@@ -42,8 +42,8 @@ typedef Boolean (CoAlgRegister)(JoyLoLInterp*);
 typedef Boolean (CoAlgEquality)(CoAlgObj*,
                                 CoAlgObj*,
                                 Boolean);
-typedef size_t  (CoAlgPrintSize)(CoAlgObj*, Boolean);
-typedef Boolean (CoAlgPrintStr)(CoAlgObj*, char*, size_t);
+typedef Boolean (CoAlgPrintStr)(StringBufferObj*,
+                                CoAlgObj*);
 typedef void*   CoAlgData;
 
 typedef struct coalgebra_struct {
@@ -51,7 +51,6 @@ typedef struct coalgebra_struct {
   size_t          objectSize;
   CoAlgRegister*  registerFunc;
   CoAlgEquality*  equalityFunc;
-  CoAlgPrintSize* printSize;
   CoAlgPrintStr*  printStr;
 } CoAlgebra;
 \stopCHeader
@@ -307,15 +306,13 @@ We start by adding one single \type{CoAlgebra}.
   char*           coAlgNameEnd      = coAlgName + strlen("newCoAlg");
   CoAlgRegister*  fakeRegisterFunc  = (CoAlgRegister*)  0x100;
   CoAlgEquality*  fakeEqualityFunc  = (CoAlgEquality*)  0x200;
-  CoAlgPrintSize* fakePrintSizeFunc = (CoAlgPrintSize*) 0x300;
-  CoAlgPrintStr*  fakePrintStrFunc  = (CoAlgPrintStr*)  0x400;
+  CoAlgPrintStr*  fakePrintStrFunc  = (CoAlgPrintStr*)  0x300;
   
   CoAlgebra* aCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
   AssertPtrNotNull(aCoAlg);
   aCoAlg->name         = strdup("newCoAlgA");
   aCoAlg->registerFunc = fakeRegisterFunc;
   aCoAlg->equalityFunc = fakeEqualityFunc;
-  aCoAlg->printSize    = fakePrintSizeFunc;
   aCoAlg->printStr     = fakePrintStrFunc;
   
   size_t coAlgIdx = registerCoAlgebra(jInterp, aCoAlg);
@@ -326,7 +323,6 @@ We start by adding one single \type{CoAlgebra}.
   AssertStrEquals(coAlgsVec[coAlgIdx].sClass->name, "newCoAlgA");
   AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->registerFunc, fakeRegisterFunc);
   AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->equalityFunc, fakeEqualityFunc);
-  AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->printSize,    fakePrintSizeFunc);
   AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->printStr,     fakePrintStrFunc);
 \stopCTest
 
@@ -339,13 +335,11 @@ the existing one runs out of \quote{space}.
     *coAlgNameEnd        = 'A' + i;
     fakeRegisterFunc    += 1;
     fakeEqualityFunc    += 1;
-    fakePrintSizeFunc   += 1;
     fakePrintStrFunc    += 1;
     aCoAlg               = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
     aCoAlg->name         = strdup(coAlgName);
     aCoAlg->registerFunc = fakeRegisterFunc;
     aCoAlg->equalityFunc = fakeEqualityFunc;
-    aCoAlg->printSize    = fakePrintSizeFunc;
     aCoAlg->printStr     = fakePrintStrFunc;
     
     registerCoAlgebra(jInterp, aCoAlg);
@@ -356,7 +350,6 @@ the existing one runs out of \quote{space}.
     AssertStrEquals(coAlgsVec[idx].sClass->name, coAlgName);
     AssertPtrEquals(coAlgsVec[idx].sClass->registerFunc, fakeRegisterFunc);
     AssertPtrEquals(coAlgsVec[idx].sClass->equalityFunc, fakeEqualityFunc);
-    AssertPtrEquals(coAlgsVec[idx].sClass->printSize,    fakePrintSizeFunc);
     AssertPtrEquals(coAlgsVec[idx].sClass->printStr,     fakePrintStrFunc);
   }
 \stopCTest
@@ -373,8 +366,7 @@ existing CoAlgebra index.
   aCoAlg->name         = strdup(coAlgName);
   aCoAlg->registerFunc = (CoAlgRegister*)  0x100 + 5;
   aCoAlg->equalityFunc = (CoAlgEquality*)  0x200 + 5;
-  aCoAlg->printSize    = (CoAlgPrintSize*) 0x300 + 5;
-  aCoAlg->printStr     = (CoAlgPrintStr*)  0x400 + 5;
+  aCoAlg->printStr     = (CoAlgPrintStr*)  0x300 + 5;
   
   size_t anIndex = registerCoAlgebra(jInterp, aCoAlg);
   AssertIntEquals(anIndex, 5 + NumRequiredCoAlgs);
@@ -465,7 +457,6 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
   theCoAlg->objectSize   = sizeof(JoyLoLInterp);
   theCoAlg->registerFunc = registerJInterps;
   theCoAlg->equalityFunc = NULL;
-  theCoAlg->printSize    = NULL;
   theCoAlg->printStr     = NULL;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
   
