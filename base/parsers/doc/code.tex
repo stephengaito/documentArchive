@@ -241,7 +241,7 @@ CoAlgObj* parseOneSymbol(TextObj* aText) {
   if (!aText->sym) return NULL;
 
   if (aText->sym->type &&
-     (aText->sym->tag != SymbolsTag)) return aText->sym;
+     (asTag(aText->sym) != SymbolsTag)) return aText->sym;
 
   // check to see if this is an opening list symbol
   char matchingSymbol = matchingListSymbol(asSymbol(aText->sym));
@@ -262,32 +262,32 @@ CoAlgObj* parseOneSymbol(TextObj* aText) {
 
   CoAlgObj* aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "this");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "is");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "a");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "simple");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "list");
 
   aLoL = parseOneSymbol(aText);
@@ -307,50 +307,50 @@ CoAlgObj* parseOneSymbol(TextObj* aText) {
 
   CoAlgObj* aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "this");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), ";");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "is");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), ";");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "a");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "and");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), ";");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "again");
 
   aLoL = parseOneSymbol(aText);
@@ -368,16 +368,19 @@ CoAlgObj* parseOneSymbol(TextObj* aText) {
 
   CoAlgObj* aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, SymbolsTag);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
   AssertStrEquals(asSymbol(aLoL), "this");
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
-  AssertPtrNotNull(aLoL->type);
-  AssertIntEquals(aLoL->tag, PairsTag);
-  AssertStrEquals(printLoL(aLoL),
-    "is ( a ( more ( complex ( list ( ) ) ) ) )");
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), PairsTag);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf),
+    "is ( a ( more ( complex ( list ( ) ) ) ) ) ");
+  strBufClose(aStrBuf);
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNull(aLoL);
@@ -434,7 +437,10 @@ CoAlgObj* parseOneSymbol(TextObj* aText) {
   AssertIntTrue(isAtom(aLoL));
   AssertIntTrue(isNatural(aLoL));
   AssertIntEquals( mpz_cmp_si(asNatural(aLoL), 1234567890), 0);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE), "1234567890");
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp);
+  printLoLDebug(aStrBuf, aLoL, FALSE);
+  AssertStrEquals(getCString(aStrBuf), "1234567890 ");
+  strBufClose(aStrBuf);
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
@@ -474,8 +480,11 @@ paths} in our parsing code.
   CoAlgObj* aLoL = parseAllSymbols(aText);
 
   AssertPtrNotNull(aLoL);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE),
-    "this ; is ; a test with some semi-colons and ; again ; 123 ; 456 ; 789 12 ; 34 and ; one ; more ; time");
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printLoLDebug(aStrBuf, aLoL, FALSE);
+  AssertStrEquals(getCString(aStrBuf),
+    "this ; is ; a test with some semi-colons and ; again ; 123 ; 456 ; 789 12 ; 34 and ; one ; more ; time ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 
@@ -489,9 +498,10 @@ paths} in our parsing code.
 
   CoAlgObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
-  AssertIntEquals(printSize(aLoL), 46);
-  clearPrintSizeMarksDebug(aLoL, FALSE);
-  AssertStrEquals(printLoL(aLoL), "this is a simple list");
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf), "this is a simple list ");
+  strBufClose(aStrBuf);
 
   CoAlgObj* lolCopy = copyLoL(jInterp, aLoL);
   AssertPtrNotEquals(aLoL, lolCopy);
@@ -510,8 +520,11 @@ paths} in our parsing code.
   CoAlgObj* aLoL = parseAllSymbols(aText);
 
   AssertPtrNotNull(aLoL);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE),
-    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) )");
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf),
+    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 
@@ -525,11 +538,12 @@ paths} in our parsing code.
 
   CoAlgObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
-  AssertIntEquals(printSizeDebug(aLoL, FALSE), 104);
-  clearPrintSizeMarksDebug(aLoL, FALSE);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE),
-    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) )");
-
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf),
+    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ");
+  strBufClose(aStrBuf);
+  
   CoAlgObj* lolCopy = copyLoL(jInterp, aLoL);
   AssertPtrNotEquals(aLoL, lolCopy);
   AssertIntTrue(equalLoLDebug(aLoL, lolCopy, FALSE));
@@ -546,10 +560,11 @@ paths} in our parsing code.
 
   CoAlgObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
-  AssertIntEquals(printSizeDebug(aLoL, FALSE), 113);
-  clearPrintSizeMarksDebug(aLoL, FALSE);
-  AssertStrEquals(printLoLDebug(aLoL, FALSE),
-    "this is a different ( ( ( ) ( ) ( ) ) ( ( ( ) ) ) ) list");
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf),
+    "this is a different ( ( ( ) ( ) ( ) ) ( ( ( ) ) ) ) list ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 
@@ -566,10 +581,11 @@ in our parsing code.
 
   CoAlgObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
-  AssertIntEquals(printSize(aLoL), 93);
-  clearPrintSizeMarksDebug(aLoL, FALSE);
-  AssertStrEquals(printLoL(aLoL),
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf),
     "this ( is a list with incorrectly ) matched list markers");
+  strBufClose(aStrBuf);
 \stopCTest
 \ignoreTestCase
 
@@ -583,10 +599,11 @@ in our parsing code.
 
   CoAlgObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
-  AssertIntEquals(printSize(aLoL), 83);
-  clearPrintSizeMarksDebug(aLoL, FALSE);
-  AssertStrEquals(printLoL(aLoL),
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf),
     "this ( is a list ( with unmatched list markers ) )");
+  strBufClose(aStrBuf);
 \stopCTest
 \ignoreTestCase
 \stopTestSuite
@@ -606,7 +623,6 @@ Boolean registerParsers(JoyLoLInterp *jInterp) {
   theCoAlg->objectSize   = sizeof(CoAlgObj);
   theCoAlg->registerFunc = registerParsers;
   theCoAlg->equalityFunc = NULL;
-  theCoAlg->printSize    = NULL;
   theCoAlg->printStr     = NULL;
   size_t tag = registerCoAlgebra(jInterp, theCoAlg);
   

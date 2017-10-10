@@ -44,18 +44,21 @@
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/naturals.h>}
 \addCTestInclude{<joylol/pairs.h>}
 \addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/texts.h>}
 \addCTestInclude{<joylol/parsers.h>}
 \addCTestInclude{<joylol/parsers-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/stringBuffers}
 \addCTestLib{-lgmp}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedBooleans(lstate);
   requireStaticallyLinkedSymbols(lstate);
+  requireStaticallyLinkedStringBuffers(lstate);
   requireStaticallyLinkedNaturals(lstate);
   requireStaticallyLinkedPairs(lstate);
   requireStaticallyLinkedDictionaries(lstate);
