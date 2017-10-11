@@ -1,10 +1,7 @@
 % A ConTeXt document [master document: textsReadline.tex]
 
-\section[title=Code]
+\section[title= Readline code]
 \setCHeaderStream{public}
-
-\dependsOn[jInterps]
-\dependsOn[texts]
 
 \startCCode
 // Texts are a collection of characters, which are used by the Parser
@@ -49,13 +46,8 @@ static void setReadlinePrompts(TextObj* aText,
 }
 \stopCCode
 
-
-\startCHeader
-extern void saveReadlineHistory(TextObj* aText);
-\stopCHeader
-
 \startCCode
-void saveReadlineHistory(TextObj* aText) {
+static void saveReadlineHistory(TextObj* aText) {
   write_history(".joyLoL-history");
 }
 \stopCCode
@@ -144,7 +136,7 @@ static char** dictionaryCompletion(const char* text, int start, int end) {
 \stopCCode
 
 \startCCode
-TextObj* createTextFromReadline(JoyLoLInterp *jInterp) {
+static TextObj* createTextFromReadline(JoyLoLInterp *jInterp) {
   assert(jInterp);
   assert(readlineTag);
   
@@ -185,57 +177,34 @@ TextObj* createTextFromReadline(JoyLoLInterp *jInterp) {
 }
 \stopCCode
 
-\startTestSuite[registerTextsReadline]
-
 \startCHeader
-extern Boolean registerTextsReadline(JoyLoLInterp *jInterp);
-extern size_t readlineTag;
+extern void runREPLInContext(Context* aCtx);
 \stopCHeader
 
 \startCCode
-size_t   readlineTag = 0;
-
-size_t registerTextsReadline(JoyLoLInterp *jInterp) {
-  if (!readlineTag) {
-    // WE CAN ONLY register this coAlg ONCE
-    // (since readline itself can only be loaded once)
+void runREPLInContext(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  Text* aText = createTextFromReadline(aCtx->coAlgebras);
+  while(TRUE) {
+    DEBUG(FALSE, "runREPLInContext %p reading\\n", aCtx);
+    PairAtom* aLoL = parseOneSymbol(aText);
+    DEBUG(FALSE, "runREPLInContext %p read %p\\n", aCtx, aLoL);
     //
-    CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-    theCoAlg->name         = "TextsReadline";
-    theCoAlg->objectSize   = sizeof(TextObj);
-    theCoAlg->registerFunc = registerTextsReadline;
-    theCoAlg->equalityFunc = NULL;
-    theCoAlg->printStr     = NULL;
-    readlineTag = registerCoAlgebra(jInterp, theCoAlg);
+    if (!aLoL) break;
+    //
+    evalCommandInContext(aCtx, aLoL);
+    assert(!aCtx->process);
+    //
+    if (aCtx->showStack) {
+      DEBUG(FALSE, "runREPLInContext %p printing data %p\\n", aCtx, aCtx->data);
+      printf(">>%s\\n", printLoL(aCtx->data));
+      DEBUG(FALSE, "runREPLInContext %p printed data %p\\n", aCtx, aCtx->data);
+    }
+    //
+    reportException(aCtx); // report last exception if raised
   }
-  
-  // do a sanity check...
-  assert(readlineTag != UnusedTag);
-  assert(jInterp->coAlgs[readlineTag].sClass);
-  
-  registerTextReadlineWords(jInterp);
-
-  return TRUE;
+  saveReadlineHistory(aText);
+  DEBUG(FALSE, "runREPLInContext %p COMPLETED\\n", aCtx);
 }
 \stopCCode
-
-\startTestCase[should register the Texts coAlg]
-
-\startCTest
-  // CTestsSetup has already created a jInterp
-  // and run registerTextsReadline
-  
-  AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[readlineTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[readlineTag].sClass;
-//  AssertIntTrue(registerTextsReadline(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[readlineTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[readlineTag].sClass, coAlg);
-  AssertIntEquals(
-    jInterp->coAlgs[readlineTag].sClass->objectSize,
-    sizeof(TextObj)
-  )
-\stopCTest
-\stopTestCase
-\stopTestSuite

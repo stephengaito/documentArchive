@@ -3,7 +3,11 @@
 lfs = require 'lfs'
 
 lfs.mkdir('build')
-lfs.mkdir('lib')
+lfs.mkdir('build/joylol')
+lfs.mkdir('build/joylol/core')
+lfs.mkdir('install')
+lfs.mkdir('install/joylol')
+lfs.mkdir('install/joylol/core')
 
 require 'lms.litProgs'
 
@@ -11,18 +15,24 @@ litProgs.targets{
   mainDoc  = 'joylol.tex',
   docFiles = {
     'overview.tex',
+    'luaMain.tex',
+    'readline.tex',
+    'luaInterface.tex',
     'conclusion.tex',
   },
   srcFiles = {
-    'joylol',
+    'joylol.lua',
+    'joylol/core/lua.h',
+    'joylol/core/lua-private.h',
+    'textsReadline.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',
-  moduleDir = 'lib',
+  moduleDir = 'install',
 }
 
 local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}
-local joylolDep    = makePath{'build', 'joylol'}
+local joylolDep    = makePath{'build', 'joylol.lua'}
 tInsert(installTargets, target{
   target       = joylolTarget,
   dependencies = { joylolDep },

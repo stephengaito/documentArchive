@@ -1,0 +1,27 @@
+% A ConTeXt document [master document: textsReadline.tex]
+
+\section[title=Lua interface]
+
+\component gitVersion-c
+
+\startCCode
+static int lua_core_lua_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  const char* aValue = "no valid key provided";
+  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
+  lua_pushstring(lstate, aValue);
+  return 1;
+}
+
+static const struct luaL_Reg lua_core_lua [] = {
+  {"gitVersion", lua_core_lua_getGitVersion},
+  {NULL, NULL}
+};
+
+int luaopen_joylol_core_lua (lua_State *lstate) {
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  //registerTextsReadline(jInterp);
+  luaL_newlib(lstate, lua_core_lua);
+  return 1;
+}
+\stopCCode

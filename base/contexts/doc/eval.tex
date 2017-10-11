@@ -8,6 +8,7 @@ void traceAction(const char* action, PairAtom* aLoL, PairAtom* command) {
   if (command) {
     char* commandStr = printLoL(command);
     printf("%s: %s (%s)\\n", action, lolStr, commandStr);
+    // buildLoL(action, ": ", lolStr, " (", command,")\\n")
     free(commandStr);
   } else {
     printf("%s: %s\\n", action, lolStr);
@@ -180,31 +181,5 @@ void evalStringInContext(Context* aCtx, const char* aString) {
   evalTextInContext(aCtx, stringText);
   freeText(stringText);
   DEBUG(FALSE, "evalStringInContext < %p [%s]\\n", aCtx, aString);
-}
-
-void runREPLInContext(Context* aCtx) {
-  assert(aCtx);
-  assert(aCtx->coAlgebras);
-  Text* aText = createTextFromReadline(aCtx->coAlgebras);
-  while(TRUE) {
-    DEBUG(FALSE, "runREPLInContext %p reading\\n", aCtx);
-    PairAtom* aLoL = parseOneSymbol(aText);
-    DEBUG(FALSE, "runREPLInContext %p read %p\\n", aCtx, aLoL);
-    //
-    if (!aLoL) break;
-    //
-    evalCommandInContext(aCtx, aLoL);
-    assert(!aCtx->process);
-    //
-    if (aCtx->showStack) {
-      DEBUG(FALSE, "runREPLInContext %p printing data %p\\n", aCtx, aCtx->data);
-      printf(">>%s\\n", printLoL(aCtx->data));
-      DEBUG(FALSE, "runREPLInContext %p printed data %p\\n", aCtx, aCtx->data);
-    }
-    //
-    reportException(aCtx); // report last exception if raised
-  }
-  saveReadlineHistory(aText);
-  DEBUG(FALSE, "runREPLInContext %p COMPLETED\\n", aCtx);
 }
 \stopCCode

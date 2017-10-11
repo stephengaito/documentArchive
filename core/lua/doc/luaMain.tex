@@ -1,6 +1,6 @@
 % A ConTeXt document [master document: joylol.tex]
 
-\startchapter[title=Preamble]
+\chapter[title=Lua main]
 
 \prependLuaCode{default}
 
@@ -30,63 +30,138 @@ local joylolCPaths = {
 package.cpath = table.concat(joylolCPaths, ';')
 print(package.cpath)
 
-print('---------------------------------------------')
-print('JInterps')
-local coAlgs = require 'joylol.jInterps'
-
-print(coAlgs.gitVersion('authorName'))
-print(coAlgs.gitVersion('commitDate'))
-print(coAlgs.gitVersion('commitShortHash'))
-
-print('---------------------------------------------')
-print('Booleans')
-local booleans = require 'joylol.booleans'
-
-print(booleans.gitVersion('authorName'))
-print(booleans.gitVersion('commitDate'))
-print(booleans.gitVersion('commitShortHash'))
-
-print('---------------------------------------------')
-print('Symbols')
-local symbols = require 'joylol.symbols'
-
-print(symbols.gitVersion('authorName'))
-print(symbols.gitVersion('commitDate'))
-print(symbols.gitVersion('commitShortHash'))
-
-print('---------------------------------------------')
+require 'joylol'
 
 \stopLuaCode
 
-\addDocumentDirectory{doc}
+\starttyping
+static void showVersionsAP(Context* aCtx) {
+  fprintf(stdout, "\n");
+  reportMainVersions(stdout);
+  fprintf(stdout, "\n");
+  reportLibVersions(stdout);
+  fprintf(stdout, "\n");
+}
 
-\createLuaCodeFile%
-  {default}%
-  {joylol}%
-  {!/usr/bin/env texlua}
+int main(int argc, char** argv) {
 
-\addMainDocument{joylol.tex}
-\addSubDocument{overview.tex}
-\addSubDocument{conclusion.tex}
-\addConTeXtModuleDirectory{lib}
+  CoAlgebras* coAlgs = createCoAlgebras();
+  assert(coAlgs);
+  extendJoyLoL(coAlgs, "showVersions", showVersionsAP);
 
-\ensureDirectoryExists{lib}
+  Contexts* contexts = coAlgs->contexts;
+  assert(contexts);
 
-\startLmsfile
-local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}
-local joylolDep    = makePath{'build', 'joylol'}
-tInsert(installTargets, target{
-  target       = joylolTarget,
-  dependencies = { joylolDep },
-  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
-})
-\stopLmsfile
+  Loader* loader     = contexts->loader;
+  assert(loader);
 
-\compileLmsfile{default}
+  Context* aCtx      = createContext(coAlgs, "joyLoL", NULL, NULL, NULL);
 
-\createLmsfileFile%
-  {default}%
-  {lmsfile}%
-  {-- A Lua Make System file}
+  getJoyLoLOptions(aCtx, argc, argv);
 
-\stopchapter
+  aCtx->showStack = FALSE;
+  if (optind < argc) {
+    while (optind < argc) {
+      DEBUG(FALSE, "adding load file: [%s] (%d - %d)\n", argv[optind], optind, argc);
+      pushLoadFile(coAlgs, argv[optind++]);
+    }
+    if (aCtx->verbose) printf("loading...\n");
+    if (!loadFiles(aCtx, loader->loadFiles)) return -1;
+    return 0;
+  }
+
+  if (aCtx->verbose) printf("loading...\n");
+  if (!loadFiles(aCtx, loader->loadFiles)) return -1;
+
+  if (aCtx->verbose) {
+    printf("Welcome to JoyLoL v0.1 ( %s ; %s )\n",
+           getMainVersionShortHash(),
+           getMainVersionShortDate());
+  }
+  aCtx->showStack = TRUE;
+  runREPLInContext(aCtx);
+  return 0;
+}
+\stoptyping
+
+\starttyping
+static char* shortOptions = "hil:p:qv";
+
+static struct option longOptions[] = {
+  { "help",    no_argument,       0, 'h' },
+  { "ignore",  no_argument,       0, 'i' },
+  { "load",    required_argument, 0, 'l' },
+  { "path",    required_argument, 0, 'p' },
+  { "quiet",   no_argument,       0, 'q' },
+  { "verbose", no_argument,       0, 'v' },
+  { 0, 0, 0, 0}
+};
+
+static char* helpText[] = {
+  "usage: joyLoL [options] [files to load]",
+  "",
+  "options: ",
+  " -h --help        prints this help text and exits",
+  " -i --ignore      ignores default configuration file (~.joyLoL)",
+  " -l --load <file> loads the file <file>",
+  " -p --path <path> adds <path> to the list of load paths",
+  " -q --quiet       toggles verbose off",
+  " -v --verbose     toggles verbose on",
+  "",
+  "files to load:",
+  "  Any remaining options are treated as files to be loaded.",
+  "  If there are no remaining options, joyLoL enters the read,",
+  "  eval, print loop.",
+  0
+};
+
+
+void getJoyLoLOptions(Context* aCtx, int argc, char** argv) {
+  int optionLetter;
+  int optionIndex;
+  int loadConfiguration = TRUE;
+
+  assert(aCtx);
+  CoAlgebras* coAlgs = aCtx->coAlgebras;
+  assert(coAlgs);
+  assert(coAlgs->contexts);
+  Loader* loader = coAlgs->contexts->loader;
+  assert(loader);
+
+  while(TRUE) {
+    optionLetter = getopt_long(argc, argv,
+                               shortOptions, longOptions,
+                               &optionIndex);
+
+    if (optionLetter < 0) break;
+
+    switch(optionLetter) {
+      case 'h' : {
+        char** curLine = helpText;
+        while(*curLine) {
+          printf("%s\n", *curLine);
+          curLine++;
+        }
+        exit(0);
+      }
+      case 'i' :
+        loadConfiguration = FALSE;
+        break;
+      case 'l' :
+        pushLoadFile(coAlgs, optarg);
+        break;
+      case 'p' :
+        pushLoadPath(coAlgs, optarg);
+        break;
+      case 'q' :
+        aCtx->verbose = FALSE;
+        break;
+      case 'v' :
+        aCtx->verbose = TRUE;
+        break;
+    }
+  }
+
+  if (loadConfiguration) pushLoadFile(coAlgs, "config");
+}
+\stoptyping

@@ -4,16 +4,21 @@
 
 \addDocumentDirectory{doc}
 
-\CHeaderIncludeGuard{public}{JOYLOL_COALG_TEXTS_READLINE}
+\createLuaCodeFile%
+  {default}%
+  {joylol.lua}%
+  {!/usr/bin/env texlua}
+
+\CHeaderIncludeGuard{public}{JOYLOL_CORE_LUA}
 \createCHeaderFile%
   {public}
-  {joylol/textsReadline.h}
+  {joylol/core/lua.h}
   {}
 
-\CHeaderIncludeGuard{private}{JOYLOL_COALG_TEXTS_READLINE_PRIVATE}
+\CHeaderIncludeGuard{private}{JOYLOL_CORE_LUA_PRIVATE}
 \createCHeaderFile%
   {private}
-  {joylol/textsReadline-private.h}
+  {joylol/core/lua-private.h}
   {}
 
 \prependCCode{default}
@@ -28,8 +33,8 @@
 #include <joylol/jInterps.h>
 #include <joylol/dictionaries.h>
 #include <joylol/texts.h>
-#include <joylol/textsReadline.h>
-#include <joylol/textsReadline-private.h>
+#include <joylol/core/lua.h>
+#include <joylol/core/lua-private.h>
 // dictionary
 // printer
 \stopCCode
@@ -39,40 +44,29 @@
   {textsReadline.c}%
   {}
 
-\addCTestInclude{<joylol/jInterps.h>}
-\addCTestInclude{<joylol/dictionaries.h>}
-\addCTestInclude{<joylol/texts.h>}
-\addCTestInclude{<joylol/textsReadline.h>}
-\addCTestInclude{<joylol/textsReadline-private.h>}
-\addCTestLib{<HOME>/.joylol/joylol/naturals}
-\addCTestLib{<HOME>/.joylol/joylol/dictionaries}
-\addCTestLib{<HOME>/.joylol/joylol/texts}
-\addCTestLib{-lreadline}
-\addCTestLib{-lgmp}
-\CTestsSetup\
-\startCTest
-  requireStaticallyLinkedJInterps(lstate);
-  requireStaticallyLinkedDictionaries(lstate);
-  requireStaticallyLinkedTexts(lstate);
-  requireStaticallyLinkedTextsReadline(lstate);
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
-\stopCTest
-\createCTestFile%
-  {default}%
-  {allCTests.c}%
-  {}
-
-\addMainDocument{textsReadline.tex}
+\ensureDirectoryExists{build/joylol}
+\ensureDirectoryExists{build/joylol/core}
+\ensureDirectoryExists{install}
+\ensureDirectoryExists{install/joylol}
+\ensureDirectoryExists{install/joylol/core}
+  
+\addMainDocument{joylol.tex}
 \addSubDocument{overview.tex} 
-\addSubDocument{code.tex}
-\addSubDocument{lua.tex}
-\addSubDocument{words.tex}
+\addSubDocument{luaMain.tex}
+\addSubDocument{readline.tex}
+\addSubDocument{luaInterface.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 
-\addCTestTargets{default}
-
-\addJoyLoLTargets{default}
+\startLmsfile
+local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}
+local joylolDep    = makePath{'build', 'joylol.lua'}
+tInsert(installTargets, target{
+  target       = joylolTarget,
+  dependencies = { joylolDep },
+  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
+})
+\stopLmsfile
 
 \compileLmsfile{default}
 
