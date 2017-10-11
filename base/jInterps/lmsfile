@@ -17,10 +17,12 @@ litProgs.targets{
     'interpreter.tex',
     'printer.tex',
     'words.tex',
-    'lua.tex',
+    'luaInterface.tex',
+    'luaScript.tex',
     'conclusion.tex',
   },
   srcFiles = {
+    'joylol.lua',
     'joylol/jInterps.h',
     'joylol/jInterps-private.h',
     'objects.c',
@@ -40,6 +42,7 @@ joylol.targets{
     'jInterps',
   },
   srcFiles = {
+    'joylol.lua',
     'joylol/jInterps.h',
     'joylol/jInterps-private.h',
     'objects.c',
@@ -65,10 +68,12 @@ contests.targets{
     'interpreter.tex',
     'printer.tex',
     'words.tex',
-    'lua.tex',
+    'luaInterface.tex',
+    'luaScript.tex',
     'conclusion.tex',
   },
   srcFiles = {
+    'joylol.lua',
     'joylol/jInterps.h',
     'joylol/jInterps-private.h',
     'objects.c',
@@ -84,3 +89,11 @@ contests.targets{
   docDir    = 'doc',
   moduleDir = 'install',
 }
+
+local joylolTarget = makePath{getEnv('HOME'), '.joylol', 'joylol.lua'}
+local joylolDep    = makePath{'build', 'joylol.lua'}
+tInsert(installTargets, target{
+  target       = joylolTarget,
+  dependencies = { joylolDep },
+  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
+})

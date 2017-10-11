@@ -4,6 +4,11 @@
 
 \addDocumentDirectory{doc}
 
+\createLuaCodeFile%
+  {default}%
+  {joylol.lua}%
+  {-- A Lua file}
+
 Before we actually we write out the \type{CoAlgs} C-header file, provide 
 some standard definitions, the most important of which deal with 
 memory allocation and alignment as well as a simple \type{DEBUG} system. 
@@ -153,9 +158,20 @@ extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
 \addSubDocument{interpreter.tex}
 \addSubDocument{printer.tex}
 \addSubDocument{words.tex}
-\addSubDocument{lua.tex}
+\addSubDocument{luaInterface.tex}
+\addSubDocument{luaScript.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
+
+\startLmsfile
+local joylolTarget = makePath{getEnv('HOME'), '.joylol', 'joylol.lua'}
+local joylolDep    = makePath{'build', 'joylol.lua'}
+tInsert(installTargets, target{
+  target       = joylolTarget,
+  dependencies = { joylolDep },
+  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
+})
+\stopLmsfile
 
 \addCTestTargets{default}
 
