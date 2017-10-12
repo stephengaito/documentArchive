@@ -172,7 +172,9 @@ implementation of any CoAlgebra. This ensures that the pointer to
 different for each distinct Lua state. 
 
 This means that \type{joyLoLInterpKey} must be a unique value, but has no 
-meaningful value \emph{other than} its uniqueness.
+meaningful value \emph{other than} its uniqueness. To do this we 
+transliterate the first 4 characters of the string \quote{JoyLoLInterpKey} 
+into hexadecimal using the standard \type{ASCII} character codes. 
 
 \startCHeader
 //                         J o y L o L I n t e r p K e y
