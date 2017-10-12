@@ -78,9 +78,9 @@ We can now define the \emph{base} \type{CoAlgObj} as:
 
 \startCHeader
 typedef struct coalgebra_object_struct {
-  CoAlgebra* type;
-  TagType    tag;
-  FlagsType  flags; // an arbitrary collection of bits
+  CoAlgClass *type;
+  TagType     tag;
+  FlagsType   flags; // an arbitrary collection of bits
 } CoAlgObj;
 
 #define asType(aLoL)  (((CoAlgObj*)(aLoL))->type)

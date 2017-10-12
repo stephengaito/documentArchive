@@ -35,7 +35,7 @@ void printLoLDebug(
 
   if (aLoL) {
     assert(asType(aLoL));
-    Boolean result = (asType(aLoL)->printStr)(aStrBuf, aLoL);
+    Boolean result = (asType(aLoL)->printFunc)(aStrBuf, aLoL);
     assert(result);
   }
 }

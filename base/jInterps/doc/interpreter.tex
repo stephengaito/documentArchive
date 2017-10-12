@@ -42,17 +42,39 @@ typedef Boolean (CoAlgRegister)(JoyLoLInterp*);
 typedef Boolean (CoAlgEquality)(CoAlgObj*,
                                 CoAlgObj*,
                                 Boolean);
-typedef Boolean (CoAlgPrintStr)(StringBufferObj*,
-                                CoAlgObj*);
+typedef Boolean (CoAlgPrint)(StringBufferObj*,
+                             CoAlgObj*);
+typedef CoAlgObj* (CoAlgCopy)(JoyLoLInterp*,
+                              CoAlgObj*);
+typedef Boolean (CoAlgRelease)(JoyLoLInterp*,
+                               CoAlgObj*);
 typedef void*   CoAlgData;
 
-typedef struct coalgebra_struct {
-  Symbol*         name;
+typedef struct coalg_class_struct {
+  Symbol         *name;
   size_t          objectSize;
-  CoAlgRegister*  registerFunc;
-  CoAlgEquality*  equalityFunc;
-  CoAlgPrintStr*  printStr;
-} CoAlgebra;
+  CoAlgRegister  *registerFunc;
+  CoAlgEquality  *equalityFunc;
+  CoAlgPrint     *printFunc;
+  CoAlgCopy      *copyFunc;
+  CoAlgRelease   *releaseFunc;
+} CoAlgClass;
+
+typedef CoAlgObj* (JInterpNewObject)(
+  JoyLoLInterp *jInterp,
+  TagType       aTag
+);
+
+typedef size_t (JInterpRegisterCoAlgClass)(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *theCoAlgClass
+);
+
+typedef struct joylolinterp_class_struct {
+  CoAlgClass                 super;
+  JInterpNewObject          *newObjectFunc;
+  JInterpRegisterCoAlgClass *registerCoAlgClassFunc;
+} JoyLoLInterpClass;
 \stopCHeader
 
 \subsection[title=JoyLoLInterp structures]
@@ -63,11 +85,11 @@ repeatedly, so should probably be accessible with as few memory accesses
 as possible. 
 
 \startCHeader
-typedef struct coalgebras_struct {
-  CoAlgebra*   sClass; // static part
+typedef struct coalg_vecItem_struct {
+  CoAlgClass  *sClass; // static part
   void*        dClass; // dynamic part
   ObjectMemory oMem;
-} CoAlgClass;
+} CoAlgVecItem;
 
 typedef struct dictionaries_object_struct DictObj;
 
@@ -80,12 +102,15 @@ typedef struct loader_struct Loader;
 
 typedef struct joylol_interpreter_struct {
   lua_State    *lstate;
-  size_t       numCoAlgs;
-  size_t       maxNumCoAlgs;
-  CoAlgClass*  coAlgs;
-  Dictionary   dict;
+  size_t        numCoAlgs;
+  size_t        maxNumCoAlgs;
+  CoAlgVecItem *coAlgs;
+  Dictionary    dict;
   Loader       *loader;
 } JoyLoLInterp;
+
+#define getJInterpClass(jInterp)                                  \
+  ((JoyLoLInterpClass*)((jInterp)->coAlgs[JInterpsTag].sClass))
 \stopCHeader
 
 \startTestSuite[newJoyLoLInterp]
@@ -96,16 +121,17 @@ creates a new \type{JoyLoLInterp} structure and ensures it is properly
 initialized. Note that we \emph{could} have multiple instances of 
 \type{JoyLoLInterp} in a running program. 
 
+\setCHeaderStream{private}
 \startCHeader
 extern JoyLoLInterp* newJoyLoLInterp(lua_State *lstate);
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   // we need to create a new JoyLoLInterp structure...
   //
-  JoyLoLInterp* jInterp = 
-    (JoyLoLInterp*) calloc(1, sizeof(JoyLoLInterp));
+  JoyLoLInterp* jInterp = joyLoLCalloc(1, JoyLoLInterp);
   assert(jInterp);
   
   jInterp->lstate = lstate;
@@ -114,8 +140,7 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
     NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT;
   jInterp->numCoAlgs    = NumRequiredCoAlgs;
   jInterp->maxNumCoAlgs = maxNum;
-  jInterp->coAlgs    =
-    (CoAlgClass*) calloc(maxNum, sizeof(CoAlgClass));
+  jInterp->coAlgs    = joyLoLCalloc(maxNum, CoAlgVecItem);
   
   for (size_t i = 0; i < jInterp->maxNumCoAlgs; i++) {
     jInterp->coAlgs[i].sClass               = NULL;
@@ -236,14 +261,14 @@ into hexadecimal using the standard \type{ASCII} character codes.
 \startCHeader
 extern size_t registerCoAlgebra(
   JoyLoLInterp *jInterp,
-  CoAlgebra *theCoAlgebra
+  CoAlgClass   *theCoAlgebra
 );
 \stopCHeader
 
 \startCCode
 size_t registerCoAlgebra(
   JoyLoLInterp *jInterp,
-  CoAlgebra *theCoAlg
+  CoAlgClass *theCoAlg
 ) {
   assert(jInterp);
   assert(jInterp->coAlgs);
@@ -277,15 +302,15 @@ size_t registerCoAlgebra(
   if (jInterp->maxNumCoAlgs <= jInterp->numCoAlgs) {
     // we need to expand the existing coAlgs structure...
     //  
-    size_t oldnumCoAlgs    = jInterp->numCoAlgs;
-    size_t oldmaxNumCoAlgs = jInterp->maxNumCoAlgs;
-    CoAlgClass *oldcoAlgs  = jInterp->coAlgs;
+    size_t oldnumCoAlgs     = jInterp->numCoAlgs;
+    size_t oldmaxNumCoAlgs  = jInterp->maxNumCoAlgs;
+    CoAlgVecItem *oldcoAlgs = jInterp->coAlgs;
     
     size_t newMaxNumCoAlgs =
       oldmaxNumCoAlgs + JOYLOL_COALGS_INCREMENT;
 
     jInterp->coAlgs =
-      (CoAlgClass*)calloc(newMaxNumCoAlgs, sizeof(CoAlgClass));
+      joyLoLCalloc(newMaxNumCoAlgs, CoAlgVecItem);
     assert(jInterp->coAlgs);
     
     if (oldcoAlgs) {
@@ -320,24 +345,24 @@ We start by adding one single \type{CoAlgebra}.
   char*           coAlgNameEnd      = coAlgName + strlen("newCoAlg");
   CoAlgRegister*  fakeRegisterFunc  = (CoAlgRegister*)  0x100;
   CoAlgEquality*  fakeEqualityFunc  = (CoAlgEquality*)  0x200;
-  CoAlgPrintStr*  fakePrintStrFunc  = (CoAlgPrintStr*)  0x300;
+  CoAlgPrint*     fakePrintFunc     = (CoAlgPrint*)     0x300;
   
-  CoAlgebra* aCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  CoAlgClass* aCoAlg   = joyLoLCalloc(1, CoAlgClass);
   AssertPtrNotNull(aCoAlg);
   aCoAlg->name         = strdup("newCoAlgA");
   aCoAlg->registerFunc = fakeRegisterFunc;
   aCoAlg->equalityFunc = fakeEqualityFunc;
-  aCoAlg->printStr     = fakePrintStrFunc;
+  aCoAlg->printFunc    = fakePrintFunc;
   
   size_t coAlgIdx = registerCoAlgebra(jInterp, aCoAlg);
   AssertIntEquals(coAlgIdx, NumRequiredCoAlgs);
   
-  CoAlgClass* coAlgsVec = jInterp->coAlgs;
+  CoAlgVecItem* coAlgsVec = jInterp->coAlgs;
   AssertPtrNotNull(coAlgsVec);
   AssertStrEquals(coAlgsVec[coAlgIdx].sClass->name, "newCoAlgA");
   AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->registerFunc, fakeRegisterFunc);
   AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->equalityFunc, fakeEqualityFunc);
-  AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->printStr,     fakePrintStrFunc);
+  AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->printFunc,    fakePrintFunc);
 \stopCTest
 
 Now we want to test the expansion of an existing CoAlgebras structure when 
@@ -349,22 +374,22 @@ the existing one runs out of \quote{space}.
     *coAlgNameEnd        = 'A' + i;
     fakeRegisterFunc    += 1;
     fakeEqualityFunc    += 1;
-    fakePrintStrFunc    += 1;
-    aCoAlg               = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+    fakePrintFunc       += 1;
+    aCoAlg               = joyLoLCalloc(1, CoAlgClass);
     aCoAlg->name         = strdup(coAlgName);
     aCoAlg->registerFunc = fakeRegisterFunc;
     aCoAlg->equalityFunc = fakeEqualityFunc;
-    aCoAlg->printStr     = fakePrintStrFunc;
+    aCoAlg->printFunc    = fakePrintFunc;
     
     registerCoAlgebra(jInterp, aCoAlg);
 
-    CoAlgClass* coAlgsVec = jInterp->coAlgs;
+    CoAlgVecItem* coAlgsVec = jInterp->coAlgs;
     AssertPtrNotNull(coAlgsVec);
     size_t idx = NumRequiredCoAlgs + i;
     AssertStrEquals(coAlgsVec[idx].sClass->name, coAlgName);
     AssertPtrEquals(coAlgsVec[idx].sClass->registerFunc, fakeRegisterFunc);
     AssertPtrEquals(coAlgsVec[idx].sClass->equalityFunc, fakeEqualityFunc);
-    AssertPtrEquals(coAlgsVec[idx].sClass->printStr,     fakePrintStrFunc);
+    AssertPtrEquals(coAlgsVec[idx].sClass->printFunc,    fakePrintFunc);
   }
 \stopCTest
 
@@ -376,11 +401,11 @@ existing CoAlgebra index.
   size_t oldNumCoAlgs  = jInterp->numCoAlgs;
 
   *coAlgNameEnd        = 'A' + 5;
-  aCoAlg               = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  aCoAlg               = joyLoLCalloc(1, CoAlgClass);
   aCoAlg->name         = strdup(coAlgName);
   aCoAlg->registerFunc = (CoAlgRegister*)  0x100 + 5;
   aCoAlg->equalityFunc = (CoAlgEquality*)  0x200 + 5;
-  aCoAlg->printStr     = (CoAlgPrintStr*)  0x300 + 5;
+  aCoAlg->printFunc    = (CoAlgPrint*)     0x300 + 5;
   
   size_t anIndex = registerCoAlgebra(jInterp, aCoAlg);
   AssertIntEquals(anIndex, 5 + NumRequiredCoAlgs);
@@ -414,21 +439,15 @@ typedef struct keyValueStruct {
   const char *value;
 } KeyValues;
 
-extern const char *getGitVersion(const KeyValues *gitVersion, 
-                                 const char* gitVersionKey);
-\stopCHeader
-
-\startCCode
-const char *getGitVersion(const KeyValues *gitVersion,
-                          const char* gitVersionKey) {
-  for(int i = 0 ; gitVersion[i].key ; i++) {
-    if (strcmp(gitVersionKey, gitVersion[i].key) == 0) {
-      return gitVersion[i].value;
-    }
+#define getGitVersionInto(gitVersion, gitVersionKey, theValue)  \
+  Symbol* theValue = "key not found";                           \
+  for(size_t i = 0 ; gitVersion[i].key ; i++) {                 \
+    if (strcmp(gitVersionKey, gitVersion[i].key) == 0) {        \
+      theValue = gitVersion[i].value;                           \
+      break;                                                    \
+    }                                                           \
   }
-  return "key not found";
-}
-\stopCCode
+\stopCHeader
 
 At the moment we can only (easily) test the \type{getGitVersion} function.
 
@@ -439,15 +458,15 @@ At the moment we can only (easily) test the \type{getGitVersion} function.
     { "key2", "value2" },
     { NULL,   NULL }
   };
-  const char* aValue = getGitVersion(testKVs, "key1");
-  AssertPtrNotNull(aValue);
-  AssertStrEquals(aValue, "value1");
-  aValue = getGitVersion(testKVs, "key2");
-  AssertPtrNotNull(aValue);
-  AssertStrEquals(aValue, "value2");
-  aValue = getGitVersion(testKVs, "noKey");
-  AssertPtrNotNull(aValue);
-  AssertStrEquals(aValue, "key not found");
+  getGitVersionInto(testKVs, "key1", aValue0);
+  AssertPtrNotNull(aValue0);
+  AssertStrEquals(aValue0, "value1");
+  getGitVersionInto(testKVs, "key2", aValue1);
+  AssertPtrNotNull(aValue1);
+  AssertStrEquals(aValue1, "value2");
+  getGitVersionInto(testKVs, "noKey", aValue2);
+  AssertPtrNotNull(aValue2);
+  AssertStrEquals(aValue2, "key not found");
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -464,15 +483,17 @@ Boolean registerJInterps(JoyLoLInterp *jInterp);
 Boolean registerJInterps(JoyLoLInterp *jInterp) {
   assert(jInterp);
   
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  JoyLoLInterpClass* theCoAlg =
+    joyLoLCalloc(1, JoyLoLInterpClass);
   assert(theCoAlg);
   
-  theCoAlg->name         = JInterpsName;
-  theCoAlg->objectSize   = sizeof(JoyLoLInterp);
-  theCoAlg->registerFunc = registerJInterps;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printStr     = NULL;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  theCoAlg->super.name         = JInterpsName;
+  theCoAlg->super.objectSize   = sizeof(JoyLoLInterp);
+  theCoAlg->super.registerFunc = registerJInterps;
+  theCoAlg->super.equalityFunc = NULL;
+  theCoAlg->super.printFunc    = NULL;
+  size_t tag =
+    registerCoAlgebra(jInterp, (CoAlgClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == JInterpsTag);
@@ -495,15 +516,15 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
   AssertIntTrue(JInterpsTag < jInterp->numCoAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[JInterpsTag].sClass);
+  AssertPtrNotNull(getJInterpClass(jInterp));
   
-  CoAlgebra *coAlg = jInterp->coAlgs[JInterpsTag].sClass;
+  JoyLoLInterpClass *jInterpClass = getJInterpClass(jInterp);
   size_t result = registerJInterps(jInterp);
   AssertIntTrue(result);
-  AssertPtrNotNull(jInterp->coAlgs[JInterpsTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[JInterpsTag].sClass, coAlg);
+  AssertPtrNotNull(getJInterpClass(jInterp));
+  AssertPtrEquals(getJInterpClass(jInterp), jInterpClass);
   AssertIntEquals(
-    jInterp->coAlgs[JInterpsTag].sClass->objectSize,
+    getJInterpClass(jInterp)->super.objectSize,
     sizeof(JoyLoLInterp)
   )
 \stopCTest

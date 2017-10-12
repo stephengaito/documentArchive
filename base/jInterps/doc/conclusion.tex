@@ -53,9 +53,8 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
 #define IS_MEM_ALIGNED(someMem) \
   (!( ((size_t)(someMem)) & (MEM_ALIGNMENT) ))
 
-extern void* joyLoLCalloc0(size_t numItems, size_t sizeOfItem);
 #define joyLoLCalloc(numItems, itemType) \
-  (itemType*)joyLoLCalloc0((numItems), sizeof(itemType))
+  (itemType*)calloc((numItems), sizeof(itemType))
 
 #ifndef NDEBUG
 #include <stdio.h>
