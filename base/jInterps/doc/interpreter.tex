@@ -316,7 +316,7 @@ size_t registerCoAlgebra(
     if (oldcoAlgs) {
       memcpy(jInterp->coAlgs,
         oldcoAlgs,
-        sizeof(CoAlgClass)*oldnumCoAlgs);
+        sizeof(CoAlgVecItem)*oldnumCoAlgs);
       free(oldcoAlgs);
     }
     
@@ -340,7 +340,6 @@ We start by adding one single \type{CoAlgebra}.
 
 \startCTest
   JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
-
   char*           coAlgName         = strdup("newCoAlgA");
   char*           coAlgNameEnd      = coAlgName + strlen("newCoAlg");
   CoAlgRegister*  fakeRegisterFunc  = (CoAlgRegister*)  0x100;
@@ -353,10 +352,10 @@ We start by adding one single \type{CoAlgebra}.
   aCoAlg->registerFunc = fakeRegisterFunc;
   aCoAlg->equalityFunc = fakeEqualityFunc;
   aCoAlg->printFunc    = fakePrintFunc;
-  
+
   size_t coAlgIdx = registerCoAlgebra(jInterp, aCoAlg);
   AssertIntEquals(coAlgIdx, NumRequiredCoAlgs);
-  
+
   CoAlgVecItem* coAlgsVec = jInterp->coAlgs;
   AssertPtrNotNull(coAlgsVec);
   AssertStrEquals(coAlgsVec[coAlgIdx].sClass->name, "newCoAlgA");
@@ -370,7 +369,7 @@ the existing one runs out of \quote{space}.
 
 \startCTest
   AssertIntTrue(JOYLOL_COALGS_INCREMENT < 26);
-  for(int i = 1; i < 26; i++) {
+  for(size_t i = 1; i < 26; i++) {
     *coAlgNameEnd        = 'A' + i;
     fakeRegisterFunc    += 1;
     fakeEqualityFunc    += 1;
@@ -380,7 +379,7 @@ the existing one runs out of \quote{space}.
     aCoAlg->registerFunc = fakeRegisterFunc;
     aCoAlg->equalityFunc = fakeEqualityFunc;
     aCoAlg->printFunc    = fakePrintFunc;
-    
+
     registerCoAlgebra(jInterp, aCoAlg);
 
     CoAlgVecItem* coAlgsVec = jInterp->coAlgs;
