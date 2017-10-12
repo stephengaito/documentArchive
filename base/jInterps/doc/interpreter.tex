@@ -86,8 +86,8 @@ as possible.
 
 \startCHeader
 typedef struct coalg_vecItem_struct {
-  CoAlgClass  *sClass; // static part
-  void*        dClass; // dynamic part
+  CoAlgClass   *sClass; // static part
+  void         *dClass; // dynamic part
   ObjectMemory oMem;
 } CoAlgVecItem;
 
@@ -105,12 +105,57 @@ typedef struct joylol_interpreter_struct {
   size_t        numCoAlgs;
   size_t        maxNumCoAlgs;
   CoAlgVecItem *coAlgs;
-  Dictionary    dict;
+  Dictionary   dict;
   Loader       *loader;
 } JoyLoLInterp;
 
-#define getJInterpClass(jInterp)                                  \
-  ((JoyLoLInterpClass*)((jInterp)->coAlgs[JInterpsTag].sClass))
+#define getCoAlgClass(jInterp, aTag)        \
+  (                                         \
+    assert(jInterp),                        \
+    assert(aTag),                           \
+    assert((jInterp)->coAlgs),              \
+    assert((jInterp)->coAlgs[aTag].sClass), \
+    ((jInterp)->coAlgs[aTag].sClass)        \
+  )
+  
+#define getJInterpClass(jInterp)                            \
+  ((JoyLoLInterpClass*)getCoAlgClass(jInterp, JInterpsTag))
+  
+#define getBooleansClass(jInterp)                           \
+  ((BooleansClass*)getCoAlgClass(jInterp, BooleansTag))
+
+#define getCFunctionsClass(jInterp)                         \
+  ((CFunctionsClass*)getCoAlgClass(jInterp, CFunctionsTag))
+
+#define getContextsClass(jInterp)                           \
+  ((ContextsClass*)getCoAlgClass(jInterp, ContextsTag))
+
+#define getDictionariesJInterpClass(jInterp)                \
+  ((DictionariesClass*)getCoAlgClass(jInterp, DictionariesTag))
+
+#define getLuaFunctionClass(jInterp)                        \
+  ((LuaFunctionsClass*)getCoAlgClass(jInterp, LuaFunctionsTag))
+
+#define getNaturalsClass(jInterp)                           \
+  ((NaturalsClass*)getCoAlgClass(jInterp, NaturalsTag))
+
+#define getPairsClass(jInterp)                              \
+  ((PairsClass*)getCoAlgClass(jInterp, PairsTag))
+
+#define getParsersClass(jInterp)                            \
+  ((ParsersClass*)getCoAlgClass(jInterp, ParsersTag))
+
+#define getStringBuffersClass(jInterp)                      \
+  ((StringBuffersClass*)getCoAlgClass(jInterp, StringBuffersTag))
+
+#define getSymbolsClass(jInterp)                            \
+  ((SymbolsClass*)getCoAlgClass(jInterp, SymbolsTag))
+  
+#define getTemplatesClass(jInterp)                          \
+  ((TemplatesClass*)getCoAlgClass(jInterp, TemplatesTag))
+
+#define getTextsClass(jInterp)                              \
+  ((TextsClass*)getCoAlgClass(jInterp, TextsTag))
 \stopCHeader
 
 \startTestSuite[newJoyLoLInterp]
@@ -261,9 +306,7 @@ into hexadecimal using the standard \type{ASCII} character codes.
 \startCHeader
 #define registerCoAlgClass(jInterp, aTag)                              \
   (                                                                    \
-    assert(jInterp),                                                   \
-    assert(jInterp->coAlgs),                                           \
-    assert(getJInterpClass(jInterp)),                                  \
+    assert(getJInterpClass(jInterp)->registerCoAlgClassFunc),          \
     (getJInterpClass(jInterp)->registerCoAlgClassFunc)(jInterp, aTag)  \
   )
 \stopCHeader

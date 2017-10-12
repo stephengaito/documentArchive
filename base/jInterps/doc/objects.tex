@@ -318,9 +318,7 @@ its collection of free objects.
 \startCHeader
 #define newObject(jInterp, aTag)                              \
   (                                                           \
-    assert(jInterp),                                          \
-    assert(jInterp->coAlgs),                                  \
-    assert(getJInterpClass(jInterp)),                         \
+    assert(getJInterpClass(jInterp)->newObjectFunc),          \
     (getJInterpClass(jInterp)->newObjectFunc)(jInterp, aTag)  \
   )
 \stopCHeader
