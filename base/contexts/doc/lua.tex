@@ -19,7 +19,7 @@ static const struct luaL_Reg lua_contexts [] = {
 };
 
 int luaopen_joylol_contexts (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   registerContexts(jInterp);
   luaL_newlib(lstate, lua_contexts);
   return 1;

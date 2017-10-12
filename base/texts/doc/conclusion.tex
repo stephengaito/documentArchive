@@ -55,7 +55,7 @@
   requireStaticallyLinkedNaturals(lstate);
   requireStaticallyLinkedDictionaries(lstate);
   requireStaticallyLinkedTexts(lstate);
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

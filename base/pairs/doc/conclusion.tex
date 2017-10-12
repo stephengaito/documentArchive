@@ -45,7 +45,7 @@
   requireStaticallyLinkedStringBuffers(lstate);
   requireStaticallyLinkedBooleans(lstate);
   requireStaticallyLinkedPairs(lstate);
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

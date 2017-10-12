@@ -19,7 +19,7 @@ static const struct luaL_Reg lua_templates [] = {
 };
 
 int luaopen_joylol_templates (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   registerTemplates(jInterp);
   luaL_newlib(lstate, lua_templates);
   return 1;

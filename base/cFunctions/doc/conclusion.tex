@@ -42,7 +42,7 @@
   requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedStringBuffers(lstate);
   requireStaticallyLinkedCFunctions(lstate);
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
 
 \createCTestFile%

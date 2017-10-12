@@ -19,7 +19,7 @@ static const struct luaL_Reg lua_stringBuffers [] = {
 };
 
 int luaopen_joylol_stringBuffers (lua_State *lstate) {
-  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   registerStringBuffers(jInterp);
   luaL_newlib(lstate, lua_stringBuffers);
   return 1;

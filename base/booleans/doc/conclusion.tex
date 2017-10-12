@@ -51,7 +51,7 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
   requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedStringBuffers(lstate);
   requireStaticallyLinkedBooleans(lstate);
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

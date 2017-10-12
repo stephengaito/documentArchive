@@ -41,7 +41,7 @@
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedTemplates(lstate);
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

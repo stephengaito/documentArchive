@@ -20,7 +20,7 @@ static const struct luaL_Reg lua_luaFunctions [] = {
 };
 
 int luaopen_joylol_luaFunctions (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   registerLuaFunctions(jInterp);
   luaL_newlib(lstate, lua_luaFunctions);
   return 1;

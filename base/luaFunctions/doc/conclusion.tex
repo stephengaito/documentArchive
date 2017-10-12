@@ -39,7 +39,7 @@
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedLuaFunctions(lstate);
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
 
 \createCTestFile%

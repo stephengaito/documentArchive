@@ -19,7 +19,7 @@ static const struct luaL_Reg lua_parsers [] = {
 };
 
 int luaopen_joylol_parsers (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   registerParsers(jInterp);
   luaL_newlib(lstate, lua_parsers);
   return 1;

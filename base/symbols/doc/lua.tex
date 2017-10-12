@@ -19,7 +19,7 @@ static const struct luaL_Reg lua_symbols [] = {
 };
 
 int luaopen_joylol_symbols (lua_State *lstate) {
-  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   registerSymbols(jInterp);
   luaL_newlib(lstate, lua_symbols);
   return 1;

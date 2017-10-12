@@ -17,7 +17,7 @@ static const struct luaL_Reg lua_booleans [] = {
 };
 
 int luaopen_joylol_booleans (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   registerBooleans(jInterp);
   luaL_newlib(lstate, lua_booleans);
   return 1;
