@@ -171,46 +171,44 @@ implementation of any CoAlgebra. This ensures that the pointer to
 \type{JoyLoLInterp} is unique for any particular Lua state, but can be 
 different for each distinct Lua state. 
 
-This means that \type{joyLoLInterpKey} must be a symbol which is unique in 
-the loaded executable, but has no meaningful value \emph{other than} its 
-location in memory. It is declared external in \type{jInterp.h} and is 
-declared \emph{only} in the \type{jInterp.so} itself. 
+This means that \type{joyLoLInterpKey} must be a unique value, but has no 
+meaningful value \emph{other than} its uniqueness.
 
 \startCHeader
-extern void* joyLoLInterpKey;
+//                         J o y L o L I n t e r p K e y
+#define joyLoLInterpKey 0x4A6F794CL
 
-extern JoyLoLInterp* getJoyLoLInterp(lua_State *lstate);
-\stopCHeader
-
-\startCCode
-void* joyLoLInterpKey = NULL;
-
-JoyLoLInterp* getJoyLoLInterp(lua_State *lstate) {
-  lua_rawgetp(lstate, LUA_REGISTRYINDEX, (void *)&joyLoLInterpKey);
-  JoyLoLInterp* jInterp = (JoyLoLInterp*)lua_touserdata (lstate, -1);
-  lua_pop(lstate, 1);
-  if (!jInterp) {
-    // if jInterp has never been accessed before... 
-    // create it now...
-    jInterp = newJoyLoLInterp(lstate);
-    lua_pushlightuserdata (lstate, (void *)jInterp);
-    lua_rawsetp(lstate, LUA_REGISTRYINDEX, (void *)&joyLoLInterpKey);
+#define getJoyLoLInterpInto(lstate, jInterp)        \
+  lua_rawgetp(                                      \
+    lstate,                                         \
+    LUA_REGISTRYINDEX,                              \
+    (void *)joyLoLInterpKey                         \
+  );                                                \
+  JoyLoLInterp* jInterp =                           \
+    (JoyLoLInterp*)lua_touserdata (lstate, -1);     \
+  lua_pop(lstate, 1);                               \
+  if (!jInterp) {                                   \
+    jInterp = newJoyLoLInterp(lstate);              \
+    lua_pushlightuserdata(lstate, (void *)jInterp); \
+    lua_rawsetp(                                    \
+      lstate,                                       \
+      LUA_REGISTRYINDEX,                            \
+      (void *)joyLoLInterpKey                       \
+    );                                              \
   }
-  return jInterp;
-}
-\stopCCode
+\stopCHeader
 
 \startTestCase[should get a Lua-State global JoyLoLInterp LightUserData] 
 
 \startCTest
-  JoyLoLInterp* jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   AssertPtrNotNull(jInterp);
   AssertPtrEquals(jInterp->lstate, lstate);
   AssertPtrNotNull(jInterp->coAlgs);
   AssertIntEquals(jInterp->numCoAlgs, NumRequiredCoAlgs);
   AssertIntEquals(jInterp->maxNumCoAlgs,
     NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT);
-  JoyLoLInterp * newJInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, newJInterp);
   AssertPtrNotNull(newJInterp);
   AssertPtrEquals(jInterp, newJInterp);
 \stopCTest
