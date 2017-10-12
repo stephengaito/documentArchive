@@ -316,11 +316,29 @@ any new free objects, a new \type{ObjectBlock} is allocated together with
 its collection of free objects. 
 
 \startCHeader
-extern CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag);
+#define newObject(jInterp, aTag)                              \
+  (                                                           \
+    assert(jInterp),                                          \
+    assert(jInterp->coAlgs),                                  \
+    assert(getJInterpClass(jInterp)),                         \
+    (getJInterpClass(jInterp)->newObjectFunc)(jInterp, aTag)  \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgObj* newObjectImpl(
+  JoyLoLInterp* jInterp,
+  TagType aTag
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-CoAlgObj* newObject(JoyLoLInterp* jInterp, TagType aTag) {
+CoAlgObj* newObjectImpl(
+  JoyLoLInterp* jInterp,
+  TagType aTag
+) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   assert(aTag < jInterp->numCoAlgs);
