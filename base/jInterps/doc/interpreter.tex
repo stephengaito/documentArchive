@@ -180,25 +180,39 @@ into hexadecimal using the standard \type{ASCII} character codes.
 //                         J o y L o L I n t e r p K e y
 #define joyLoLInterpKey 0x4A6F794CL
 
-#define getJoyLoLInterpInto(lstate, jInterp)        \
-  lua_rawgetp(                                      \
-    lstate,                                         \
-    LUA_REGISTRYINDEX,                              \
-    (void *)joyLoLInterpKey                         \
-  );                                                \
-  JoyLoLInterp* jInterp =                           \
-    (JoyLoLInterp*)lua_touserdata (lstate, -1);     \
-  lua_pop(lstate, 1);                               \
-  if (!jInterp) {                                   \
-    jInterp = newJoyLoLInterp(lstate);              \
-    lua_pushlightuserdata(lstate, (void *)jInterp); \
-    lua_rawsetp(                                    \
-      lstate,                                       \
-      LUA_REGISTRYINDEX,                            \
-      (void *)joyLoLInterpKey                       \
-    );                                              \
+#define getJoyLoLInterpInto(lstate, jInterp)      \
+  lua_rawgetp(                                    \
+    lstate,                                       \
+    LUA_REGISTRYINDEX,                            \
+    (void *)joyLoLInterpKey                       \
+  );                                              \
+  JoyLoLInterp* jInterp =                         \
+    (JoyLoLInterp*)lua_touserdata (lstate, -1);   \
+  lua_pop(lstate, 1);                             \
+  if (!jInterp) {                                 \
+    fprintf(stderr, "\nERROR:\n");                \
+    fprintf(stderr,                               \
+      "  Could not get the Lua registered\n");    \
+    fprintf(stderr,                               \
+      "  JoyLoLInterp instance!\n");              \
+    fprintf(stderr,                               \
+      "  Have you required joylol.jInterps?\n");  \
   }
 \stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+#define setJoyLoLInterpInto(lstate, jInterp)      \
+  JoyLoLInterp *jInterp =                         \
+    newJoyLoLInterp(lstate);                      \
+  lua_pushlightuserdata(lstate, (void *)jInterp); \
+  lua_rawsetp(                                    \
+    lstate,                                       \
+    LUA_REGISTRYINDEX,                            \
+    (void *)joyLoLInterpKey                       \
+  )
+\stopCHeader
+\setCHeaderStream{public}
 
 \startTestCase[should get a Lua-State global JoyLoLInterp LightUserData] 
 

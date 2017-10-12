@@ -6,114 +6,109 @@
 \startTestSuite[ set, add and get LuaPath]
 
 \startCHeader
-extern Boolean setLuaPath(
-  JoyLoLInterp *jInterp,
-  Symbol *aLuaPath,
-  Boolean addToCPath
-);
+#define setLuaPath(lstate, aLuaPath, addToCPath)  \
+  lua_getglobal(lstate, "package");               \
+  lua_pushstring(lstate, aLuaPath);               \
+  lua_setfield(lstate, -2,                        \
+    (addToCPath ? "cpath" : "path"));             \
+  lua_pop(lstate, 1)
 
-extern Boolean addLuaPath(
-  JoyLoLInterp *jInterp,
-  Symbol *aLuaPath,
-  Boolean addToCPath
-);
+#define addLuaPath(lstate, aLuaPath, addToCPath)              \
+for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
+  luaL_Buffer lBuf;                                           \
+  luaL_buffinit(lstate, &lBuf);                               \
+  luaL_addstring(&lBuf, aLuaPath);                            \
+  luaL_addstring(&lBuf, ";");                                 \
+  lua_getglobal(lstate, "package");                           \
+  lua_getfield(lstate, -1,                                    \
+    (addToCPath ? "cpath" : "path"));                         \
+  luaL_addvalue (&lBuf);                                      \
+  luaL_pushresult(&lBuf);                                     \
+  lua_setfield(lstate, -2,                                    \
+    (addToCPath ? "cpath" : "path"));                         \
+  lua_pop(lstate, 1);                                         \
+}
 
-extern Symbol *getLuaPath(
-  JoyLoLInterp *jInterp,
-  Boolean getCPath
-);
+#define getLuaPathInto(lstate, result, getCPath)  \
+  lua_getglobal(lstate, "package");               \
+  lua_getfield(lstate, -1,                        \
+    (getCPath ? "cpath" : "path"));               \
+  Symbol *result =                                \
+    strdup(lua_tostring(lstate, -1));             \
+  lua_pop(lstate, 2)
+
+#define PATH_BUFFER_SIZE  8000
+
+#define buildCWDPathInto(buffer, aDir)                  \
+  char *buffer = (char*)calloc(1, PATH_BUFFER_SIZE);    \
+  if (!getcwd(buffer, PATH_BUFFER_SIZE)) {              \
+    fprintf(stderr, "\nERROR:\n");                      \
+    fprintf(stderr, "  Path buffer size too small\n");  \
+    fprintf(stderr, "  while building CWD path\n\n");   \
+    exit(-1);                                           \
+  }                                                     \
+  strncat(buffer, "/",                                  \
+    PATH_BUFFER_SIZE - strlen(buffer) - 1);             \
+  strncat(buffer, aDir,                                 \
+    PATH_BUFFER_SIZE - strlen(buffer) - 1)
+
+#define addBuildLuaPath(lstate)            \
+  buildCWDPathInto(buildLuaPath,           \
+    "build/?.lua");                        \
+  addLuaPath(lstate, buildLuaPath, FALSE); \
+  free(buildLuaPath);                      \
+  buildCWDPathInto(buildCPath,             \
+    "build/?.so");                         \
+  addLuaPath(lstate, buildCPath, TRUE);    \
+  free(buildCPath)
+  
+#define buildHomePathInto(buffer, homeBuffer, aDir)     \
+  char *buffer = (char*)calloc(1, PATH_BUFFER_SIZE);    \
+  char *homeBuffer = getenv("HOME");                    \
+  if (!homeBuffer) {                                    \
+    fprintf(stderr, "\nERROR:\n");                      \
+    fprintf(stderr, "  Environment variable 'HOME'\n"); \
+    fprintf(stderr, "  is empty!\n\n");                 \
+    exit(-1);                                           \
+  }                                                     \
+  strncat(buffer, homeBuffer,                           \
+    PATH_BUFFER_SIZE - strlen(buffer) - 1);             \
+  strncat(buffer, "/",                                  \
+    PATH_BUFFER_SIZE - strlen(buffer) - 1);             \
+  strncat(buffer, aDir,                                 \
+    PATH_BUFFER_SIZE - strlen(buffer) - 1)
+
+#define addJoyLoLLuaPath(lstate)                 \
+  buildHomePathInto(joyLoLLuaPath, homeLuaPath,  \
+    ".joylol/?.lua");                            \
+  addLuaPath(lstate, joyLoLLuaPath, FALSE);      \
+  free(joyLoLLuaPath);                           \
+  buildHomePathInto(joyLoLCPath, homeCPath,      \
+    ".joylol/?.so");                             \
+  addLuaPath(lstate, joyLoLCPath, TRUE);         \
+  free(joyLoLCPath)
 \stopCHeader
-
-\startCCode
-Boolean setLuaPath(
-  JoyLoLInterp *jInterp,
-  Symbol *aLuaPath,
-  Boolean addToCPath
-) {
-  assert(jInterp);
-  assert(jInterp->lstate);
-
-  char* path = "path";
-  if (addToCPath) {
-    path = "cpath";
-  }
-  
-  lua_State *lstate = jInterp->lstate;
-  lua_getglobal(lstate, "package");
-  lua_pushstring(lstate, aLuaPath);
-  lua_setfield(lstate, -2, path);
-  lua_pop(lstate, 1);
-  return TRUE;
-}
-
-Boolean addLuaPath(
-  JoyLoLInterp *jInterp,
-  Symbol *aLuaPath,
-  Boolean addToCPath
-) {
-  assert(jInterp);
-  assert(jInterp->lstate);
-
-  char* path = "path";
-  if (addToCPath) {
-    path = "cpath";
-  }
-  
-  lua_State *lstate = jInterp->lstate;
-  luaL_Buffer lBuf;
-  luaL_buffinit(lstate, &lBuf);
-  luaL_addstring(&lBuf, aLuaPath);
-  luaL_addstring(&lBuf, ";");
-  lua_getglobal(lstate, "package");
-  lua_getfield(lstate, -1, path);
-  luaL_addvalue (&lBuf);
-  luaL_pushresult(&lBuf);
-  lua_setfield(lstate, -2, path);
-  lua_pop(lstate, 1);
-  return TRUE;
-}
-
-Symbol *getLuaPath(
-  JoyLoLInterp *jInterp,
-  Boolean getCPath
-) {
-  assert(jInterp);
-  assert(jInterp->lstate);
-
-  char* path = "path";
-  if (getCPath) {
-    path = "cpath";
-  }
-  
-  lua_State *lstate = jInterp->lstate;
-  lua_getglobal(lstate, "package");
-  lua_getfield(lstate, -1, path);
-  Symbol *result = strdup(lua_tostring(lstate, -1));
-  lua_pop(lstate, 2);
-  return result;
-}
-\stopCCode
 
 \startTestCase[should set, add and get package.path]
 
 \startCTest
-  Symbol *origPath = getLuaPath(jInterp, FALSE);
+  getLuaPathInto(lstate, origPath, FALSE);
   AssertPtrNotNull(origPath);
   AssertPtrNotNull(strstr(origPath, "?.lua"));
 
-  addLuaPath(jInterp, "tests", FALSE);
-  Symbol *testPath = getLuaPath(jInterp, FALSE);
+  addLuaPath(lstate, "tests", FALSE);
+  getLuaPathInto(lstate, testPath, FALSE);
   AssertPtrNotNull(testPath);
 
   AssertIntZero(strncmp(testPath, "tests;", strlen("tests;")));
   
-  setLuaPath(jInterp, origPath, FALSE);
-  free((void*)testPath);
-  testPath = getLuaPath(jInterp, FALSE);
-  AssertPtrNotNull(testPath);
-  AssertIntZero(strcmp(origPath, testPath));
+  setLuaPath(lstate, origPath, FALSE);
+  getLuaPathInto(lstate, newTestPath, FALSE);
+  AssertPtrNotNull(newTestPath);
+  AssertIntZero(strcmp(origPath, newTestPath));
 
   free((void*)testPath);
+  free((void*)newTestPath);
   free((void*)origPath);
 \stopCTest
 \stopTestCase
@@ -121,23 +116,23 @@ Symbol *getLuaPath(
 \startTestCase[should set, add and get package.cpath]
 
 \startCTest
-  Symbol *origPath = getLuaPath(jInterp, TRUE);
+  getLuaPathInto(lstate, origPath, TRUE);
   AssertPtrNotNull(origPath);
   AssertPtrNotNull(strstr(origPath, "?.so"));
 
-  addLuaPath(jInterp, "tests", TRUE);
-  Symbol *testPath = getLuaPath(jInterp, TRUE);
+  addLuaPath(lstate, "tests", TRUE);
+  getLuaPathInto(lstate, testPath, TRUE);
   AssertPtrNotNull(testPath);
 
   AssertIntZero(strncmp(testPath, "tests;", strlen("tests;")));
   
-  setLuaPath(jInterp, origPath, TRUE);
-  free((void*)testPath);
-  testPath = getLuaPath(jInterp, TRUE);
-  AssertPtrNotNull(testPath);
-  AssertIntZero(strcmp(origPath, testPath));
+  setLuaPath(lstate, origPath, TRUE);
+  getLuaPathInto(lstate, newTestPath, TRUE);
+  AssertPtrNotNull(newTestPath);
+  AssertIntZero(strcmp(origPath, newTestPath));
   
   free((void*)testPath);
+  free((void*)newTestPath);
   free((void*)origPath);
 \stopCTest
 \stopTestCase
@@ -146,45 +141,22 @@ Symbol *getLuaPath(
 \startTestSuite[require lua modules]
 
 \startCHeader
-extern Symbol *requireLuaModule(
-  JoyLoLInterp *jInterp,
-  Symbol *aLuaModule
-);
+#define requireLuaModule(lstate, aLuaModule)              \
+  lua_getglobal(lstate, "require");                       \
+  lua_pushstring(lstate, aLuaModule);                     \
+  if (lua_pcall(lstate, 1, 1, 0)) {                       \
+    /* there was an error...                              \
+     * so return a copy of the error message              \
+     */                                                   \
+    fprintf(stderr, "Failed to load [%s]\n", aLuaModule); \
+    fprintf(stderr, "Error:\n");                          \
+    fprintf(stderr, "%s\n", lua_tostring(lstate, -1));    \
+    lua_close(lstate);                                    \
+    exit(-1);                                             \
+  }                                                       \
+  lua_pop(lstate, 1)
 \stopCHeader
 
-\startCCode
-Symbol *requireLuaModule(
-  JoyLoLInterp *jInterp,
-  Symbol *aLuaModule
-) {
-  assert(jInterp);
-  assert(jInterp->lstate);
-
-  Symbol *result = NULL;
-  lua_State *lstate = jInterp->lstate;
-  lua_getglobal(lstate, "require");
-  lua_pushstring(lstate, aLuaModule);
-  if (lua_pcall(lstate, 1, 1, 0)) {
-    // there was an error...
-    // so return a copy of the error message
-    result = strdup(lua_tostring(lstate, -1));
-  }
-  lua_pop(lstate, 1);
-  return result;
-}
-\stopCCode
-
-\startTestCase[should not be able to load 'noLuaModule']
-
-\startCTest
-  Symbol *result = requireLuaModule(jInterp, "noLuaModule");
-  AssertPtrNotNull(result);
-  Symbol *msg = "module 'noLuaModule' not found";
-  AssertIntZero(strncmp(result, msg, strlen(msg)));
-  free((void*)result);
-\stopCTest
-
-\stopTestCase
 \stopTestSuite
 
 \component gitVersion-c
@@ -219,7 +191,7 @@ the shared library.
 
 \startCCode
 int luaopen_joylol_jInterps (lua_State *lstate) {
-  getJoyLoLInterpInto(lstate, jInterp);
+  setJoyLoLInterpInto(lstate, jInterp);
   registerJInterps(jInterp);
   registerJInterpsLuaInterface(lstate);
   return 1;
