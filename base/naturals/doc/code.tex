@@ -143,15 +143,19 @@ Boolean equalityNatCoAlgDebug(CoAlgObj* lolA, CoAlgObj* lolB,
 
 \startTestSuite[printing symbols]
 
+\setCHeaderStream{private}
 \startCHeader
 extern Boolean printNatCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean printNatCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 ) {
@@ -162,7 +166,7 @@ Boolean printNatCoAlg(
   mpztoa = NULL;
   long numChars = gmp_asprintf(&mpztoa, "%Zd ", asNatural(aLoL));
   assert(0 < numChars);
-  strBufPrintf(aStrBuf, mpztoa);
+  strBufPrintf(jInterp, aStrBuf, mpztoa);
   free(mpztoa);
   return TRUE;
 }
@@ -178,14 +182,20 @@ Boolean printNatCoAlg(
   CoAlgObj* aNewNat = newNatural(jInterp, testNum);
   AssertPtrNotNull(aNewNat);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printNatCoAlg(aStrBuf, aNewNat);
-  AssertStrEquals(getCString(aStrBuf), testNum);
-  strBufClose(aStrBuf);
+  printNatCoAlg(jInterp, aStrBuf, aNewNat);
+  AssertStrEquals(getCString(jInterp, aStrBuf), testNum);
+  strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
 
 \startTestSuite[registerSymbols]
+
+\startCHeader
+typedef struct naturals_class_struct {
+  CoAlgClass super;
+} NaturalsClass;
+\stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
@@ -198,13 +208,15 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Naturals";
-  theCoAlg->objectSize   = sizeof(NaturalObj);
-  theCoAlg->registerFunc = registerNaturals;
-  theCoAlg->equalityFunc = equalityNatCoAlgDebug;
-  theCoAlg->printStr     = printNatCoAlg;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  NaturalsClass* theCoAlg      = joyLoLCalloc(1, NaturalsClass);
+  theCoAlg->super.name         = "Naturals";
+  theCoAlg->super.objectSize   = sizeof(NaturalObj);
+  theCoAlg->super.registerFunc = registerNaturals;
+  theCoAlg->super.equalityFunc = equalityNatCoAlgDebug;
+  theCoAlg->super.printFunc    = printNatCoAlg;
+  
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   
   // sanity check...
   assert(tag == NaturalsTag);
@@ -223,13 +235,13 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   // and run registerSymbols
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[NaturalsTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[NaturalsTag].sClass;
+  AssertPtrNotNull(getNaturalsClass(jInterp));
+  NaturalsClass *coAlg = getNaturalsClass(jInterp);
   AssertIntTrue(registerNaturals(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[NaturalsTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[NaturalsTag].sClass, coAlg);
+  AssertPtrNotNull(getNaturalsClass(jInterp));
+  AssertPtrEquals(getNaturalsClass(jInterp), coAlg);
   AssertIntEquals(
-    jInterp->coAlgs[NaturalsTag].sClass->objectSize,
+    getNaturalsClass(jInterp)->super.objectSize,
     sizeof(NaturalObj)
   )
 \stopCTest

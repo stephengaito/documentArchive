@@ -67,8 +67,6 @@ contests.targets{
   testLibDirs = {
   },
   testLibs = {
-    '<HOME>/.joylol/joylol/booleans',
-    '<HOME>/.joylol/joylol/stringBuffers',
     '-lgmp',
   },
   buildDir  = 'build',
