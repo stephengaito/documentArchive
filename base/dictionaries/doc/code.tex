@@ -156,9 +156,9 @@ void listDefinitions(
   DictObj* curNode = jInterp->dict.firstSymbol;
   while(curNode) {
     if (curNode->value) {
-      strBufPrintf(aStrBuf,"%s == ", curNode->symbol);
-      printLoL(aStrBuf, curNode->value);
-      strBufPrintf(aStrBuf,"\n");
+      strBufPrintf(jInterp, aStrBuf,"%s == ", curNode->symbol);
+      printLoL(jInterp, aStrBuf, curNode->value);
+      strBufPrintf(jInterp, aStrBuf,"\n");
     }
     curNode = curNode->next;
   }
@@ -168,10 +168,12 @@ void listDefinitions(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printDicionaryCoAlgObjInto(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *anAVLNode
 );
 extern Boolean printDicInto(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   DictObj         *anAVLNode
 );
@@ -179,24 +181,26 @@ extern Boolean printDicInto(
 
 \startCCode
 Boolean printDictionaryCoAlgObjInto(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *anAVLNode
 ) {
   if (!anAVLNode) return FALSE;
   if (asTag(anAVLNode) != DictionariesTag) return FALSE;
-  return printDicInto(aStrBuf, (DictObj*)anAVLNode);
+  return printDicInto(jInterp, aStrBuf, (DictObj*)anAVLNode);
 }
 
 Boolean printDicInto(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   DictObj         *anAVLNode
 ) {
   if (!anAVLNode) return TRUE;
-  strBufPrintf(aStrBuf, "[%s] l:( ", anAVLNode->symbol);
-  printDicInto(aStrBuf, anAVLNode->left);
-  strBufPrintf(aStrBuf, " ) r:( ");
-  printDicInto(aStrBuf, anAVLNode->right);
-  strBufPrintf(aStrBuf, " ) ");
+  strBufPrintf(jInterp, aStrBuf, "[%s] l:( ", anAVLNode->symbol);
+  printDicInto(jInterp, aStrBuf, anAVLNode->left);
+  strBufPrintf(jInterp, aStrBuf, " ) r:( ");
+  printDicInto(jInterp, aStrBuf, anAVLNode->right);
+  strBufPrintf(jInterp, aStrBuf, " ) ");
   return TRUE;
 }
 \stopCCode
@@ -204,22 +208,34 @@ Boolean printDicInto(
 \startTestSuite[registerDictionaries]
 
 \startCHeader
-Boolean registerDictionaries(JoyLoLInterp *jInterp);
+typedef struct dictionaries_class_struct {
+  CoAlgClass super;
+  
+} DictionariesClass;
 \stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerDictionaries(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   assert(jInterp);
   
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  DictionariesClass* theCoAlg =
+    joyLoLCalloc(1, DictionariesClass);
   assert(theCoAlg);
   
-  theCoAlg->name         = "Dictionaries";
-  theCoAlg->objectSize   = sizeof(DictObj);
-  theCoAlg->registerFunc = registerDictionaries;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printStr     = printDictionaryCoAlgObjInto;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  theCoAlg->super.name         = "Dictionaries";
+  theCoAlg->super.objectSize   = sizeof(DictObj);
+  theCoAlg->super.registerFunc = registerDictionaries;
+  theCoAlg->super.equalityFunc = NULL;
+  theCoAlg->super.printFunc    = printDictionaryCoAlgObjInto;
+  
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == DictionariesTag);
@@ -237,13 +253,14 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   // CTestsSetup has already created a jInterp
   // and run regiserDictionaries
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[DictionariesTag].sClass;
+  AssertPtrNotNull(getDictionariesClass(jInterp));
+  DictionariesClass *coAlg =
+    getDictionariesClass(jInterp);
   AssertIntTrue(registerDictionaries(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[DictionariesTag].sClass, coAlg);
+  AssertPtrNotNull(getDictionariesClass(jInterp));
+  AssertPtrEquals(getDictionariesClass(jInterp), coAlg);
   AssertIntEquals(
-    jInterp->coAlgs[DictionariesTag].sClass->objectSize, 
+    getDictionariesClass(jInterp)->super.objectSize, 
     sizeof(DictObj)
   );
 \stopCTest

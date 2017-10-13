@@ -23,8 +23,8 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
-#include <joylol/symbols.h>
 #include <joylol/stringBuffers.h>
+#include <joylol/symbols.h>
 #include <joylol/dictionaries.h>
 #include <joylol/dictionaries-private.h>
 // dictionary
@@ -38,15 +38,16 @@
 
 \addCTestInclude{<time.h>}
 \addCTestInclude{<joylol/jInterps.h>}
-\addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/dictionaries-private.h>}
 \CTestsSetup\
 \startCTest
-  requireStaticallyLinkedJInterps(lstate);
-  requireStaticallyLinkedSymbols(lstate);
-  requireStaticallyLinkedStringBuffers(lstate);
+  addJoyLoLLuaPath(lstate);
+  requireLuaModule(lstate, "joylol.jInterps");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.symbols");
   requireStaticallyLinkedDictionaries(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
