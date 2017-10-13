@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/stringBuffers.h>
 #include <joylol/pairs.h>
 #include <joylol/pairs-private.h>
 \stopCCode
@@ -32,18 +33,18 @@
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
-\addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/pairs.h>}
 \addCTestInclude{<joylol/pairs-private.h>}
-\addCTestLib{<HOME>/.joylol/joylol/booleans}
 \CTestsSetup\
 \startCTest
-  requireStaticallyLinkedJInterps(lstate);
-  requireStaticallyLinkedSymbols(lstate);
-  requireStaticallyLinkedStringBuffers(lstate);
-  requireStaticallyLinkedBooleans(lstate);
+  addJoyLoLLuaPath(lstate);
+  requireLuaModule(lstate, "joylol.jInterps");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.booleans");
   requireStaticallyLinkedPairs(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest

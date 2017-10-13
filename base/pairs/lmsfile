@@ -69,7 +69,6 @@ contests.targets{
   testLibDirs = {
   },
   testLibs = {
-    '<HOME>/.joylol/joylol/booleans',
   },
   buildDir  = 'build',
   docDir    = 'doc',
