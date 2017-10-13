@@ -142,9 +142,15 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
 
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/jInterps-private.h>}
+\addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestLib{<HOME>/.joylol/joylol/symbols}
+\addCTestLib{<HOME>/.joylol/joylol/stringBuffers}
 \CTestsSetup\
 \startCTest
   requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedSymbols(lstate);
+  requireStaticallyLinkedStringBuffers(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
 \createCTestFile%
@@ -156,7 +162,7 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
 \addSubDocument{overview.tex} 
 \addSubDocument{objects.tex}
 \addSubDocument{interpreter.tex}
-\addSubDocument{printer.tex}
+%\addSubDocument{printer.tex}
 \addSubDocument{words.tex}
 \addSubDocument{luaInterface.tex}
 \addSubDocument{luaScript.tex}

@@ -11,15 +11,38 @@
 \startTestSuite[newBoolean]
 
 \startCHeader
-extern CoAlgObj* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean);
+typedef CoAlgObj* (NewBoolean)(
+  JoyLoLInterp*,
+  Boolean
+);
+
+#define newBoolean(jInterp, aBool)      \
+  (                                     \
+    assert(getBooleansClass(jInterp)    \
+      ->newBooleanFunc),                \
+    (getBooleansClass(jInterp)          \
+      ->newBooleanFunc(jInterp, aBool)) \
+  )
 
 #define BOOLEAN_FLAG_MASK 0x8L
 
 #define asBoolean(aLoL) (((aLoL)->flags) & BOOLEAN_FLAG_MASK)
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgObj* newBooleanImpl(
+  JoyLoLInterp* jInterp,
+  Boolean aBoolean
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-CoAlgObj* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
+CoAlgObj* newBooleanImpl(
+  JoyLoLInterp* jInterp,
+  Boolean aBoolean
+) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
@@ -61,15 +84,15 @@ CoAlgObj* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
 
   CoAlgObj* aLoL = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aLoL);
-  printLoLDebug(aStrBuf, aLoL, FALSE);
-  AssertStrEquals(getCString(aStrBuf), "true ");
-  strBufClose(aStrBuf);
+  printLoLDebug(jInterp, aStrBuf, aLoL, FALSE);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "true ");
+  strBufClose(jInterp, aStrBuf);
 
   aLoL = newBoolean(jInterp, FALSE);
   AssertPtrNotNull(aLoL);
-  printLoLDebug(aStrBuf, aLoL, FALSE);
-  AssertStrEquals(getCString(aStrBuf), "false ");
-  strBufClose(aStrBuf);
+  printLoLDebug(jInterp, aStrBuf, aLoL, FALSE);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "false ");
+  strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
 
@@ -93,12 +116,32 @@ CoAlgObj* newBoolean(JoyLoLInterp* jInterp, Boolean aBoolean) {
 \startTestSuite[isTrue and isFalse]
 
 \startCHeader
-extern Boolean isTrue(CoAlgObj* aLoL);
-extern Boolean isFalse(CoAlgObj* aLoL);
+typedef Boolean (AssertBoolValue)(
+  CoAlgObj* aLoL
+);
+
+#define isTrue(jInterp, aLoL)                     \
+  (                                               \
+    assert(getBooleansClass(jInterp)->isTrueFunc),\
+    (getBooleansClass(jInterp)->isTrueFunc(aLoL)) \
+  )
+
+#define isFalse(jInterp, aLoL)                     \
+  (                                                \
+    assert(getBooleansClass(jInterp)->isFalseFunc),\
+    (getBooleansClass(jInterp)->isFalseFunc(aLoL)) \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean isTrueImpl(CoAlgObj* aLoL);
+extern Boolean isFalseImpl(CoAlgObj* aLoL);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-Boolean isTrue(CoAlgObj* aLoL) {
+Boolean isTrueImpl(CoAlgObj* aLoL) {
   if (!aLoL) return FALSE;
   if (!asType(aLoL)) return FALSE;
   if (asTag(aLoL) != BooleansTag) return FALSE;
@@ -106,7 +149,7 @@ Boolean isTrue(CoAlgObj* aLoL) {
   return TRUE;
 }
 
-Boolean isFalse(CoAlgObj* aLoL) {
+Boolean isFalseImpl(CoAlgObj* aLoL) {
   if (!aLoL) return TRUE;
   if (asType(aLoL) &&
      (asTag(aLoL) == BooleansTag) &&
@@ -121,13 +164,13 @@ Boolean isFalse(CoAlgObj* aLoL) {
   CoAlgObj *aBool = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aBool);
   AssertIntTrue(asBoolean(aBool));
-  AssertIntTrue(isTrue(aBool));
-  AssertIntFalse(isFalse(aBool));
+  AssertIntTrue(isTrue(jInterp, aBool));
+  AssertIntFalse(isFalse(jInterp, aBool));
   aBool = newBoolean(jInterp, FALSE);
   AssertPtrNotNull(aBool);
   AssertIntFalse(asBoolean(aBool));
-  AssertIntFalse(isTrue(aBool));
-  AssertIntTrue(isFalse(aBool));
+  AssertIntFalse(isTrue(jInterp, aBool));
+  AssertIntTrue(isFalse(jInterp, aBool));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -157,6 +200,7 @@ Boolean equalityBoolCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
 
 \startCHeader
 extern Boolean printBoolCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 );
@@ -164,14 +208,15 @@ extern Boolean printBoolCoAlg(
 
 \startCCode
 Boolean printBoolCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == BooleansTag);
 
-  if (asBoolean(aLoL)) strBufPrintf(aStrBuf, "true ");
-  else strBufPrintf(aStrBuf, "false ");
+  if (asBoolean(aLoL)) strBufPrintf(jInterp, aStrBuf, "true ");
+  else strBufPrintf(jInterp, aStrBuf, "false ");
   return TRUE;
 }
 \stopCCode
@@ -187,15 +232,15 @@ Boolean printBoolCoAlg(
   
   CoAlgObj* aNewBoolean = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aNewBoolean);
-  printLoLDebug(aStrBuf, aNewBoolean, FALSE);
-  AssertStrEquals(getCString(aStrBuf), "true ");
-  strBufClose(aStrBuf);
+  printLoLDebug(jInterp, aStrBuf, aNewBoolean, FALSE);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "true ");
+  strBufClose(jInterp, aStrBuf);
   
   aNewBoolean = newBoolean(jInterp, FALSE);
   AssertPtrNotNull(aNewBoolean);  
-  printLoLDebug(aStrBuf, aNewBoolean, FALSE);
-  AssertStrEquals(getCString(aStrBuf), "false ");
-  strBufClose(aStrBuf);
+  printLoLDebug(jInterp, aStrBuf, aNewBoolean, FALSE);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "false ");
+  strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -203,23 +248,40 @@ Boolean printBoolCoAlg(
 \startTestSuite[registerBooleans]
 
 \startCHeader
+typedef struct booleans_class_struct {
+  CoAlgClass       super;
+  NewBoolean      *newBooleanFunc;
+  AssertBoolValue *isTrueFunc;
+  AssertBoolValue *isFalseFunc;
+} BooleansClass;
+
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
 extern Boolean registerBooleans(JoyLoLInterp *jInterp);
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean registerBooleans(JoyLoLInterp *jInterp) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  BooleansClass* theCoAlg
+    = joyLoLCalloc(1, BooleansClass);
   assert(theCoAlg);
   
-  theCoAlg->name         = BooleansName;
-  theCoAlg->objectSize   = sizeof(CoAlgObj);
-  theCoAlg->registerFunc = registerBooleans;
-  theCoAlg->equalityFunc = equalityBoolCoAlg;
-  theCoAlg->printStr     = printBoolCoAlg;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  theCoAlg->super.name         = BooleansName;
+  theCoAlg->super.objectSize   = sizeof(CoAlgObj);
+  theCoAlg->super.registerFunc = registerBooleans;
+  theCoAlg->super.equalityFunc = equalityBoolCoAlg;
+  theCoAlg->super.printFunc    = printBoolCoAlg;
+  theCoAlg->newBooleanFunc     = newBooleanImpl;
+  theCoAlg->isTrueFunc         = isTrueImpl;
+  theCoAlg->isFalseFunc        = isFalseImpl;
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == BooleansTag);
@@ -238,13 +300,13 @@ Boolean registerBooleans(JoyLoLInterp *jInterp) {
   // and run registerBooleans
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[BooleansTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[BooleansTag].sClass;
-//  AssertIntTrue(registerBooleans(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[BooleansTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[BooleansTag].sClass, coAlg);
+  AssertPtrNotNull(getBooleansClass(jInterp));
+  BooleansClass *coAlg = getBooleansClass(jInterp);
+  registerBooleans(jInterp);
+  AssertPtrNotNull(getBooleansClass(jInterp));
+  AssertPtrEquals(getBooleansClass(jInterp), coAlg);
   AssertIntEquals(
-    jInterp->coAlgs[BooleansTag].sClass->objectSize,
+    getBooleansClass(jInterp)->super.objectSize,
     sizeof(CoAlgObj)
   )
 \stopCTest

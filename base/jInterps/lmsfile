@@ -15,7 +15,6 @@ litProgs.targets{
     'overview.tex',
     'objects.tex',
     'interpreter.tex',
-    'printer.tex',
     'words.tex',
     'luaInterface.tex',
     'luaScript.tex',
@@ -66,7 +65,6 @@ contests.targets{
     'overview.tex',
     'objects.tex',
     'interpreter.tex',
-    'printer.tex',
     'words.tex',
     'luaInterface.tex',
     'luaScript.tex',
@@ -84,6 +82,8 @@ contests.targets{
   testLibDirs = {
   },
   testLibs = {
+    '<HOME>/.joylol/joylol/symbols',
+    '<HOME>/.joylol/joylol/stringBuffers',
   },
   buildDir  = 'build',
   docDir    = 'doc',

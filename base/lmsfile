@@ -13,8 +13,8 @@ lfs = require 'lfs'
 -- the following coAlgebras MUST be loaded in order
 reqCoAlgs = {
   'jInterps',
-  'symbols',
   'stringBuffers',
+  'symbols',
   'pairs',
   'naturals',
   'dictionaries',

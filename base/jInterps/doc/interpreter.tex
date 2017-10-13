@@ -38,16 +38,33 @@ the interpreter's dictionary of words.
 \stopitemize
 
 \startCHeader
-typedef Boolean (CoAlgRegister)(JoyLoLInterp*);
-typedef Boolean (CoAlgEquality)(CoAlgObj*,
-                                CoAlgObj*,
-                                Boolean);
-typedef Boolean (CoAlgPrint)(StringBufferObj*,
-                             CoAlgObj*);
-typedef CoAlgObj* (CoAlgCopy)(JoyLoLInterp*,
-                              CoAlgObj*);
-typedef Boolean (CoAlgRelease)(JoyLoLInterp*,
-                               CoAlgObj*);
+typedef Boolean (CoAlgRegister)(
+  JoyLoLInterp*
+);
+
+typedef Boolean (CoAlgEquality)(
+  CoAlgObj*,
+  CoAlgObj*,
+  Boolean
+);
+
+typedef struct string_buffer_object_struct StringBufferObj;
+typedef Boolean (CoAlgPrint)(
+  JoyLoLInterp*,
+  StringBufferObj*,
+  CoAlgObj*
+);
+
+typedef CoAlgObj* (CoAlgCopy)(
+  JoyLoLInterp*,
+  CoAlgObj*
+);
+
+typedef Boolean (CoAlgRelease)(
+  JoyLoLInterp*,
+  CoAlgObj*
+);
+
 typedef void*   CoAlgData;
 
 typedef struct coalg_class_struct {
@@ -117,43 +134,55 @@ typedef struct joylol_interpreter_struct {
     assert((jInterp)->coAlgs[aTag].sClass), \
     ((jInterp)->coAlgs[aTag].sClass)        \
   )
-  
+
 #define getJInterpClass(jInterp)                            \
   ((JoyLoLInterpClass*)getCoAlgClass(jInterp, JInterpsTag))
-  
+
+typedef struct booleans_class_struct BooleansClass;
 #define getBooleansClass(jInterp)                           \
   ((BooleansClass*)getCoAlgClass(jInterp, BooleansTag))
 
+typedef struct cFunctions_class_struct CFunctionsClass;
 #define getCFunctionsClass(jInterp)                         \
   ((CFunctionsClass*)getCoAlgClass(jInterp, CFunctionsTag))
 
+typedef struct contexts_class_struct ContextsClass;
 #define getContextsClass(jInterp)                           \
   ((ContextsClass*)getCoAlgClass(jInterp, ContextsTag))
 
+typedef struct dictionaries_class_struct DictionariesClass;
 #define getDictionariesJInterpClass(jInterp)                \
   ((DictionariesClass*)getCoAlgClass(jInterp, DictionariesTag))
 
+typedef struct luaFunctions_class_struct LuaFunctionsClass;
 #define getLuaFunctionClass(jInterp)                        \
   ((LuaFunctionsClass*)getCoAlgClass(jInterp, LuaFunctionsTag))
 
+typedef struct naturals_class_struct NaturalsClass;
 #define getNaturalsClass(jInterp)                           \
   ((NaturalsClass*)getCoAlgClass(jInterp, NaturalsTag))
 
+typedef struct pairs_class_struct PairsClass;
 #define getPairsClass(jInterp)                              \
   ((PairsClass*)getCoAlgClass(jInterp, PairsTag))
 
+typedef struct parsers_class_struct ParsersClass;
 #define getParsersClass(jInterp)                            \
   ((ParsersClass*)getCoAlgClass(jInterp, ParsersTag))
 
+typedef struct stringBuffers_class_struct StringBuffersClass;
 #define getStringBuffersClass(jInterp)                      \
   ((StringBuffersClass*)getCoAlgClass(jInterp, StringBuffersTag))
 
+typedef struct symbols_class_struct SymbolsClass;
 #define getSymbolsClass(jInterp)                            \
   ((SymbolsClass*)getCoAlgClass(jInterp, SymbolsTag))
   
+typedef struct templates_class_struct TemplatesClass;
 #define getTemplatesClass(jInterp)                          \
   ((TemplatesClass*)getCoAlgClass(jInterp, TemplatesTag))
 
+typedef struct texts_class_struct TextsClass;
 #define getTextsClass(jInterp)                              \
   ((TextsClass*)getCoAlgClass(jInterp, TextsTag))
 \stopCHeader

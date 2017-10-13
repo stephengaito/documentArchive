@@ -29,6 +29,7 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/stringBuffers.h>
 #include <joylol/booleans.h>
 #include <joylol/booleans-private.h>
 // dictionary
@@ -45,11 +46,11 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/booleans-private.h>}
-\addCTestLib{<HOME>/.joylol/joylol/stringBuffers}
 \CTestsSetup\
 \startCTest
-  requireStaticallyLinkedJInterps(lstate);
-  requireStaticallyLinkedStringBuffers(lstate);
+  addJoyLoLLuaPath(lstate);
+  requireLuaModule(lstate, "joylol.jInterps");
+  requireLuaModule(lstate, "joylol.stringBuffers");
   requireStaticallyLinkedBooleans(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest

@@ -22,14 +22,36 @@ typedef struct symbol_object_struct {
 \startTestSuite[newSymbol]
 
 \startCHeader
-CoAlgObj* newSymbol(JoyLoLInterp* jInterp, const char* aSymbol);
+typedef CoAlgObj *(NewSymbol)(
+  JoyLoLInterp*,
+  Symbol*
+);
+
+#define newSymbol(jInterp, aSymbol)       \
+  (                                       \
+    assert(getSymbolsClass(jInterp)       \
+      ->newSymbolFunc),                   \
+    (getSymbolsClass(jInterp)             \
+      ->newSymbolFunc(jInterp, aSymbol))  \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgObj *newSymbolImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-CoAlgObj* newSymbol(JoyLoLInterp* jInterp, const char* aSymbol) {
+CoAlgObj* newSymbolImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSymbol
+) {
   assert(aSymbol);
   assert(jInterp);
-  assert(jInterp->coAlgs);
   
   CoAlgObj* result = newObject(jInterp, SymbolsTag);
   assert(result);
@@ -168,6 +190,7 @@ Boolean symbolsEqualDebug(
 
 \startCHeader
 extern size_t printSymbolCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrObj,
   CoAlgObj        *aLoL
 );
@@ -175,13 +198,14 @@ extern size_t printSymbolCoAlg(
 
 \startCCode
 Boolean printSymbolCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == SymbolsTag);
 
-  strBufPrintf(aStrBuf, "%s ", asSymbol(aLoL));
+  strBufPrintf(jInterp, aStrBuf, "%s ", asSymbol(aLoL));
   return TRUE;
 }
 \stopCCode
@@ -197,14 +221,22 @@ Boolean printSymbolCoAlg(
   
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
   
-  printLoLDebug(aStrBuf, aNewSymbol, FALSE);
-  AssertStrEquals(getCString(aStrBuf), "test string ");
-  strBufClose(aStrBuf);
+  printLoLDebug(jInterp, aStrBuf, aNewSymbol, FALSE);
+  AssertStrEquals(getCString(jInterp, aStrBuf),
+    "test string ");
+  strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
 
 \startTestSuite[registerSymbols]
+
+\startCHeader
+typedef struct symbols_class_struct {
+  CoAlgClass  super;
+  NewSymbol  *newSymbolFunc;
+} SymbolsClass;
+\stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
@@ -217,13 +249,15 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = "Symbols";
-  theCoAlg->objectSize   = sizeof(SymbolObj);
-  theCoAlg->registerFunc = registerSymbols;
-  theCoAlg->equalityFunc = symbolsEqualDebug;
-  theCoAlg->printStr    = printSymbolCoAlg;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  SymbolsClass* theCoAlg = joyLoLCalloc(1, SymbolsClass);
+  theCoAlg->super.name         = "Symbols";
+  theCoAlg->super.objectSize   = sizeof(SymbolObj);
+  theCoAlg->super.registerFunc = registerSymbols;
+  theCoAlg->super.equalityFunc = symbolsEqualDebug;
+  theCoAlg->super.printFunc    = printSymbolCoAlg;
+  theCoAlg->newSymbolFunc      = newSymbolImpl;
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   
   // sanity check...
   assert(tag == SymbolsTag);
@@ -242,13 +276,13 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   // and run registerSymbols
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[SymbolsTag].sClass;
+  AssertPtrNotNull(getSymbolsClass(jInterp));
+  SymbolsClass *coAlg = getSymbolsClass(jInterp);
   AssertIntTrue(registerSymbols(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[SymbolsTag].sClass, coAlg);
+  AssertPtrNotNull(getSymbolsClass(jInterp));
+  AssertPtrEquals(getSymbolsClass(jInterp), coAlg);
   AssertIntEquals(
-    jInterp->coAlgs[SymbolsTag].sClass->objectSize,
+    getSymbolsClass(jInterp)->super.objectSize,
     sizeof(SymbolObj)
   )
 \stopCTest

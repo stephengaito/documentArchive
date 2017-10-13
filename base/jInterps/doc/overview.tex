@@ -235,17 +235,3 @@ meaning to various typical variable uses.
 typedef size_t     Boolean;
 typedef const char Symbol;
 \stopCHeader
-
-To be able to provide \quote{printing} of the structure of an arbitrary 
-\type{CoAlgObj}ect, we provide the following typedef of 
-\type{StringBufferObj} as a very forward definition at this point. 
-
-\startCHeader
-typedef struct string_buffer_object_struct StringBufferObj;
-
-extern Boolean strBufPrintf(
-  StringBufferObj   *aStrBuf,
-  const char        *format, 
-  ...
-);
-\stopCHeader
