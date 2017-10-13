@@ -300,6 +300,7 @@ Boolean equalityTextsCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
 
 \startCHeader
 extern Boolean printStrTextsCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 );
@@ -307,13 +308,14 @@ extern Boolean printStrTextsCoAlg(
 
 \startCCode
 Boolean printStrTextsCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == TextsTag);
 
-  strBufPrintf(aStrBuf, "--texts-- ");
+  strBufPrintf(jInterp, aStrBuf, "--texts-- ");
   return TRUE;
 }
 \stopCCode
@@ -327,9 +329,9 @@ Boolean printStrTextsCoAlg(
   TextObj* aNewText = createTextFromString(jInterp, "a string");
   AssertPtrNotNull(aNewText);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoLDebug(aStrBuf, (CoAlgObj*)aNewText, FALSE);
-  AssertStrEquals(getCString(aStrBuf), "--texts-- ");
-  strBufClose(aStrBuf);
+  printLoLDebug(jInterp, aStrBuf, (CoAlgObj*)aNewText, FALSE);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "--texts-- ");
+  strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -337,23 +339,33 @@ Boolean printStrTextsCoAlg(
 \startTestSuite[registerTexts]
 
 \startCHeader
+typedef struct texts_class_struct {
+  CoAlgClass super;
+} TextsClass;
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
 extern Boolean registerTexts(JoyLoLInterp *jInterp);
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean registerTexts(JoyLoLInterp *jInterp) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
+  TextsClass* theCoAlg = joyLoLCalloc(1, TextsClass);
   assert(theCoAlg);
   
-  theCoAlg->name         = TextsName;
-  theCoAlg->objectSize   = sizeof(TextObj);
-  theCoAlg->registerFunc = registerTexts;
-  theCoAlg->equalityFunc = equalityTextsCoAlg;
-  theCoAlg->printStr     = printStrTextsCoAlg;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  theCoAlg->super.name         = TextsName;
+  theCoAlg->super.objectSize   = sizeof(TextObj);
+  theCoAlg->super.registerFunc = registerTexts;
+  theCoAlg->super.equalityFunc = equalityTextsCoAlg;
+  theCoAlg->super.printFunc    = printStrTextsCoAlg;
+  
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == TextsTag);
@@ -372,13 +384,13 @@ Boolean registerTexts(JoyLoLInterp *jInterp) {
   // and run registerTexts
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[TextsTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[TextsTag].sClass;
-//  AssertIntTrue(registerTexts(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[TextsTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[TextsTag].sClass, coAlg);
+  AssertPtrNotNull(getTextsClass(jInterp));
+  TextsClass *coAlg = getTextsClass(jInterp);
+  AssertIntTrue(registerTexts(jInterp));
+  AssertPtrNotNull(getTextsClass(jInterp));
+  AssertPtrEquals(getTextsClass(jInterp), coAlg);
   AssertIntEquals(
-    jInterp->coAlgs[TextsTag].sClass->objectSize,
+    getTextsClass(jInterp)->super.objectSize,
     sizeof(TextObj)
   )
 \stopCTest

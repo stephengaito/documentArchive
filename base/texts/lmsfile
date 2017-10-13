@@ -73,10 +73,6 @@ contests.targets{
   testLibDirs = {
   },
   testLibs = {
-    '<HOME>/.joylol/joylol/symbols',
-    '<HOME>/.joylol/joylol/stringBuffers',
-    '<HOME>/.joylol/joylol/naturals',
-    '<HOME>/.joylol/joylol/dictionaries',
     '-lgmp',
   },
   buildDir  = 'build',

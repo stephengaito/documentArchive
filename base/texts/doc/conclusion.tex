@@ -23,9 +23,10 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
-#include <joylol/dictionaries.h>
+#include <joylol/stringBuffers.h>
 #include <joylol/symbols.h>
 #include <joylol/naturals.h>
+#include <joylol/dictionaries.h>
 #include <joylol/texts.h>
 #include <joylol/texts-private.h>
 \stopCCode
@@ -36,24 +37,21 @@
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
-\addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/naturals.h>}
 \addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/texts.h>}
 \addCTestInclude{<joylol/texts-private.h>}
-\addCTestLib{<HOME>/.joylol/joylol/symbols}
-\addCTestLib{<HOME>/.joylol/joylol/stringBuffers}
-\addCTestLib{<HOME>/.joylol/joylol/naturals}
-\addCTestLib{<HOME>/.joylol/joylol/dictionaries}
 \addCTestLib{-lgmp}
 \CTestsSetup\
 \startCTest
-  requireStaticallyLinkedJInterps(lstate);
-  requireStaticallyLinkedSymbols(lstate);
-  requireStaticallyLinkedStringBuffers(lstate);
-  requireStaticallyLinkedNaturals(lstate);
-  requireStaticallyLinkedDictionaries(lstate);
+  addJoyLoLLuaPath(lstate);
+  requireLuaModule(lstate, "joylol.jInterps");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.naturals");
+  requireLuaModule(lstate, "joylol.dictionaries");
   requireStaticallyLinkedTexts(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
