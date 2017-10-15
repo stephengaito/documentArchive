@@ -17,10 +17,33 @@ reqCoAlgs = {
   'symbols',
   'pairs',
   'naturals',
+  'booleans',
   'dictionaries',
   'texts',
   'parsers'
 }
+
+-- ensure the .joylol directories exist
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'include'
+})
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'include',
+  'joylol'
+})
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'joylol'
+})
+
 
 reqCoAlgStr = '|'..table.concat(reqCoAlgs, '|')..'|'
 

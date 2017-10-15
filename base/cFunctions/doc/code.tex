@@ -111,6 +111,7 @@ Boolean equalityFuncCoAlg(
 
 \startCHeader
 extern Boolean printFuncCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 );
@@ -118,6 +119,7 @@ extern Boolean printFuncCoAlg(
 
 \startCCode
 Boolean printFuncCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 ) {
@@ -126,7 +128,7 @@ Boolean printFuncCoAlg(
 
   char ptoa[100];
   sprintf(ptoa, "<%p> ", asCFunc(aLoL));
-  strBufPrintf(aStrBuf, ptoa);
+  strBufPrintf(jInterp, aStrBuf, ptoa);
   return TRUE;
 }
 \stopCCode
@@ -145,9 +147,9 @@ Boolean printFuncCoAlg(
   CoAlgObj* aNewFunc =
     (CoAlgObj*)newCFunction(jInterp, testCFunction);
   AssertPtrNotNull(aNewFunc);
-  printLoLDebug(aStrBuf, aNewFunc, FALSE);
-  AssertStrEquals(getCString(aStrBuf), buffer);
-  strBufClose(aStrBuf);
+  printLoLDebug(jInterp, aStrBuf, aNewFunc, FALSE);
+  AssertStrEquals(getCString(jInterp, aStrBuf), buffer);
+  strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -174,6 +176,13 @@ void Test_checkFunctionsSymbols(CuTest* tc) {
 
 \startTestSuite[registerCFunctions]
 
+\startCHeader
+typedef struct cFunctions_class_struct {
+  CoAlgClass super;
+  
+} CFunctionsClass;
+\stopCHeader
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerCFunctions(JoyLoLInterp *jInterp);
@@ -182,13 +191,18 @@ extern Boolean registerCFunctions(JoyLoLInterp *jInterp);
 
 \startCCode
 Boolean registerCFunctions(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = CFunctionsName;
-  theCoAlg->objectSize   = sizeof(CFunctionObj);
-  theCoAlg->registerFunc = registerCFunctions;
-  theCoAlg->equalityFunc = equalityFuncCoAlg;
-  theCoAlg->printStr     = printFuncCoAlg;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  assert(jInterp);
+  
+  CFunctionsClass* theCoAlg    =
+    joyLoLCalloc(1, CFunctionsClass);
+  theCoAlg->super.name         = CFunctionsName;
+  theCoAlg->super.objectSize   = sizeof(CFunctionObj);
+  theCoAlg->super.registerFunc = registerCFunctions;
+  theCoAlg->super.equalityFunc = equalityFuncCoAlg;
+  theCoAlg->super.printFunc    = printFuncCoAlg;
+  
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
 
   // do a sanity check...
   assert(tag == CFunctionsTag);
@@ -208,13 +222,14 @@ Boolean registerCFunctions(JoyLoLInterp *jInterp) {
   
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[CFunctionsTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[CFunctionsTag].sClass;
-  //AssertIntTrue(registerCFunctions(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[CFunctionsTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[CFunctionsTag].sClass, coAlg);
+  AssertPtrNotNull(getCFunctionsClass(jInterp));
+  CFunctionsClass *coAlg =
+    getCFunctionsClass(jInterp);
+  AssertIntTrue(registerCFunctions(jInterp));
+  AssertPtrNotNull(getCFunctionsClass(jInterp));
+  AssertPtrEquals(getCFunctionsClass(jInterp), coAlg);
   AssertIntEquals(
-    jInterp->coAlgs[CFunctionsTag].sClass->objectSize,
+    getCFunctionsClass(jInterp)->super.objectSize,
     sizeof(CFunctionObj)
   )
 \stopCTest
