@@ -39,7 +39,8 @@
 \addCTestInclude{<joylol/templates-private.h>}
 \CTestsSetup\
 \startCTest
-  requireStaticallyLinkedJInterps(lstate);
+  addJoyLoLLuaPath(lstate);
+  requireLuaModule(lstate, "joylol.jInterps");
   requireStaticallyLinkedTemplates(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
@@ -51,6 +52,8 @@
 \addMainDocument{templates.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 

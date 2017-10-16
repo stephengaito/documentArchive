@@ -1,11 +1,18 @@
 % A ConTeXt document [master document: templates.tex]
 
 \section[title=Code]
+\setCHeaderStream{public}
 
 \dependsOn[jInterps]
 %\dependsOn[context]
 
 \startTestSuite[registerTemplates]
+
+\startCHeader
+typedef struct templates_class_struct {
+  CoAlgClass super;
+} TemplatesClass;
+\stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
@@ -15,13 +22,18 @@ extern Boolean registerTemplates(JoyLoLInterp *jInterp);
 
 \startCCode
 Boolean registerTemplates(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = TemplatesName;
-  theCoAlg->objectSize   = sizeof(CoAlgObj);
-  theCoAlg->registerFunc = registerTemplates;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printStr     = NULL;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  assert(jInterp);
+  
+  TemplatesClass* theCoAlg =
+    joyLoLCalloc(1, TemplatesClass);
+  theCoAlg->super.name         = TemplatesName;
+  theCoAlg->super.objectSize   = sizeof(CoAlgObj);
+  theCoAlg->super.registerFunc = registerTemplates;
+  theCoAlg->super.equalityFunc = NULL;
+  theCoAlg->super.printFunc    = NULL;
+  
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
 
   // do a sanity check...
   assert(tag == TemplatesTag);
@@ -41,13 +53,14 @@ Boolean registerTemplates(JoyLoLInterp *jInterp) {
   
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[TemplatesTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[TemplatesTag].sClass;
-//  AssertIntTrue(registerTemplates(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[TemplatesTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[TemplatesTag].sClass, coAlg);
+  AssertPtrNotNull(getTemplatesClass(jInterp));
+  TemplatesClass *coAlg =
+    getTemplatesClass(jInterp);
+  AssertIntTrue(registerTemplates(jInterp));
+  AssertPtrNotNull(getTemplatesClass(jInterp));
+  AssertPtrEquals(getTemplatesClass(jInterp), coAlg);
   AssertIntEquals(
-    jInterp->coAlgs[TemplatesTag].sClass->objectSize,
+    getTemplatesClass(jInterp)->super.objectSize,
     sizeof(CoAlgObj)
   )
 \stopCTest
