@@ -50,13 +50,34 @@ void nextLineFromFile(TextObj* aText) {
 \stopCCode
 
 \startCHeader
-extern TextObj* createTextFromInputFile(JoyLoLInterp* jInterp,
-                                        FILE *anInputFile);
+typedef TextObj *(CreateTextFromInputFile)(
+  JoyLoLInterp *jInterp,
+  FILE         *anInputFile
+);
+
+#define createTextFromInputFile(jInterp, aFile)       \
+  (                                                   \
+    assert(getTextsClass(jInterp)                     \
+      ->createTextFromInputFileFunc),                 \
+    (getTextsClass(jInterp)                           \
+      ->createTextFromInputFileFunc(jInterp, aFile))  \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern TextObj* createTextFromInputFileImpl(
+  JoyLoLInterp* jInterp,
+  FILE *anInputFile
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-TextObj* createTextFromInputFile(JoyLoLInterp* jInterp,
-                                 FILE *anInputFile) {
+TextObj* createTextFromInputFileImpl(
+  JoyLoLInterp* jInterp,
+  FILE *anInputFile
+) {
   assert(jInterp);
   assert(anInputFile);
   

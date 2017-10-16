@@ -72,11 +72,32 @@ typedef struct text_object_struct {
 \stopCCode
 
 \startCHeader
-extern void freeText(TextObj* aText);
+typedef void (FreeText)(
+  TextObj *aText
+);
+
+#define freeText(aText)                   \
+  (                                       \
+    assert(aText),                        \
+    assert(getTextsClass(aText->jInterp)  \
+      ->freeTextFunc),                    \
+    (getTextsClass(aText->jInterp)        \
+      ->freeTextFunc(aText))              \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern void freeTextImpl(
+  TextObj* aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-void freeText(TextObj* aText) {
+void freeTextImpl(
+  TextObj* aText
+) {
   if (!aText) return;
 
   free(aText);
@@ -105,11 +126,32 @@ void nextLineExit(TextObj* aText) {
 //
 
 \startCHeader
-extern void nextSymbol(TextObj* aText);
+typedef void (NextSymbol)(
+  TextObj *aText
+);
+
+#define nextSymbol(aText)                 \
+  (                                       \
+    assert(aText),                        \
+    assert(getTextsClass(aText->jInterp)  \
+      ->nextSymbolFunc),                  \
+    (getTextsClass(aText->jInterp)        \
+      ->nextSymbolFunc(aText))            \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern void nextSymbolImpl(
+  TextObj* aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-void nextSymbol(TextObj* aText) {
+void nextSymbolImpl(
+  TextObj* aText
+) {
   assert(aText);
   assert(aText->jInterp);
 
@@ -259,11 +301,35 @@ void nextSymbol(TextObj* aText) {
 \stopCCode
 
 \startCHeader
-extern void reportError(TextObj *aText, const char* message);
+typedef void (ReportError)(
+  TextObj *aText,
+  Symbol  *message
+);
+
+#define reportError(aText, message)       \
+  (                                       \
+    assert(aText),                        \
+    assert(getTextsClass(aText->jInerp)   \
+      ->reportErrorFunc),                 \
+    (getTextsClass(aText->jInterp)        \
+      ->reportErrorFunc(aText, message))  \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern void reportErrorImpl(
+  TextObj *aText,
+  Symbol  *message
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-void reportError(TextObj *aText, const char* message) {
+void reportErrorImpl(
+  TextObj *aText,
+  Symbol  *message
+) {
   fprintf(stderr, "\n\n%s\n", message);
   if (aText->curLine) {
     fprintf(stderr, "while parsing\n");
@@ -340,18 +406,28 @@ Boolean printStrTextsCoAlg(
 
 \startCHeader
 typedef struct texts_class_struct {
-  CoAlgClass super;
+  CoAlgClass                    super;
+  NextSymbol                   *nextSymbolFunc;
+  ReportError                  *reportErrorFunc;
+  FreeText                     *freeTextFunc;
+  CreateTextFromInputFile      *createTextFromInputFileFunc;
+  CreateTextFromString         *createTextFromStringFunc;
+  CreateTextFromArrayOfStrings *createTextFromArrayOfStringsFunc;
 } TextsClass;
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern Boolean registerTexts(JoyLoLInterp *jInterp);
+extern Boolean registerTexts(
+  JoyLoLInterp *jInterp
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-Boolean registerTexts(JoyLoLInterp *jInterp) {
+Boolean registerTexts(
+  JoyLoLInterp *jInterp
+) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
@@ -363,7 +439,16 @@ Boolean registerTexts(JoyLoLInterp *jInterp) {
   theCoAlg->super.registerFunc = registerTexts;
   theCoAlg->super.equalityFunc = equalityTextsCoAlg;
   theCoAlg->super.printFunc    = printStrTextsCoAlg;
-  
+  theCoAlg->nextSymbolFunc     = nextSymbolImpl;
+  theCoAlg->reportErrorFunc    = reportErrorImpl;
+  theCoAlg->freeTextFunc       = freeTextImpl;
+  theCoAlg->createTextFromInputFileFunc = 
+    createTextFromInputFileImpl;
+  theCoAlg->createTextFromStringFunc =
+    createTextFromStringImpl;
+  theCoAlg->createTextFromArrayOfStringsFunc =
+    createTextFromArrayOfStringsImpl;
+
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   

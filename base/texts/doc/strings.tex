@@ -54,13 +54,34 @@ void nextLineFromString(TextObj* aText) {
 \stopCCode
 
 \startCHeader
-extern TextObj* createTextFromString(JoyLoLInterp* jInterp,
-                                     Symbol* aString);
+typedef TextObj *(CreateTextFromString)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aString
+);
+
+#define createTextFromString(jInterp, aString)      \
+  (                                                 \
+    assert(getTextsClass(jInterp)                   \
+      ->createTextFromStringFunc),                  \
+    (getTextsClass(jInterp)                         \
+      ->createTextFromStringFunc(jInterp, aString)) \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern TextObj* createTextFromStringImpl(
+  JoyLoLInterp* jInterp,
+  Symbol* aString
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-TextObj* createTextFromString(JoyLoLInterp *jInterp,
-                              Symbol* aString) {
+TextObj* createTextFromStringImpl(
+  JoyLoLInterp *jInterp,
+  Symbol* aString
+) {
   assert(jInterp);
   assert(aString);
   
@@ -238,13 +259,34 @@ void nextLineFromArray(TextObj* aText) {
 \stopCCode
 
 \startCHeader
-extern TextObj* createTextFromArrayOfStrings(JoyLoLInterp* jInterp,
-                                             Symbol* someTextLines[]);
+typedef TextObj *(CreateTextFromArrayOfStrings)(
+  JoyLoLInterp *jInterp,
+  Symbol       *someTextLines[]
+);
+
+#define createTextFromArrayOfStrings(jInterp, textLines)      \
+  (                                                           \
+    assert(getTextsClass(jInterp)                             \
+      ->createTextFromArrayOfStringsFunc),                    \
+    (getTextsClass(jInterp)                                   \
+      ->createTextFromArrayOfStringsFunc(jInterp, textLines)) \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern TextObj* createTextFromArrayOfStringsImpl(
+  JoyLoLInterp* jInterp,
+  Symbol* someTextLines[]
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-TextObj* createTextFromArrayOfStrings(JoyLoLInterp *jInterp,
-                                      Symbol* someTextLines[]) {
+TextObj* createTextFromArrayOfStringsImpl(
+  JoyLoLInterp *jInterp,
+  Symbol* someTextLines[]
+) {
   assert(jInterp);
   assert(someTextLines);
   
