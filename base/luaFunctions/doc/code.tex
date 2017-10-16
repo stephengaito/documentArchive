@@ -1,6 +1,7 @@
 % A ConTeXt document [master document: luaFunctions.tex]
 
 \section[title=Code]
+\setCHeaderStream{public}
 
 \dependsOn[jInterps]
 %\dependsOn[context]
@@ -244,6 +245,12 @@ void Test_checkFunctionsSymbols(CuTest* tc) {
 
 \startTestSuite[registerLuaFunctions]
 
+\startCHeader
+typedef struct luaFunctions_class_struct {
+  CoAlgClass super;
+} LuaFunctionsClass;
+\stopCHeader
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerLuaFunctions(JoyLoLInterp *jInterp);
@@ -252,13 +259,18 @@ extern Boolean registerLuaFunctions(JoyLoLInterp *jInterp);
 
 \startCCode
 Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = LuaFunctionsName;
-  theCoAlg->objectSize   = sizeof(CoAlgObj);
-  theCoAlg->registerFunc = registerLuaFunctions;
-  theCoAlg->equalityFunc = NULL;
-  theCoAlg->printStr     = NULL;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  assert(jInterp);
+  
+  LuaFunctionsClass* theCoAlg =
+    joyLoLCalloc(1, LuaFunctionsClass);
+  theCoAlg->super.name         = LuaFunctionsName;
+  theCoAlg->super.objectSize   = sizeof(CoAlgObj);
+  theCoAlg->super.registerFunc = registerLuaFunctions;
+  theCoAlg->super.equalityFunc = NULL;
+  theCoAlg->super.printFunc    = NULL;
+  
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
 
   // do a sanity check...
   assert(tag == LuaFunctionsTag);
@@ -278,13 +290,14 @@ Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
   
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[LuaFunctionsTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[LuaFunctionsTag].sClass;
-//  AssertIntTrue(registerLuaFunctions(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[LuaFunctionsTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[LuaFunctionsTag].sClass, coAlg);
+  AssertPtrNotNull(getLuaFunctionsClass(jInterp));
+  LuaFunctionsClass *coAlg =
+    getLuaFunctionsClass(jInterp);
+  AssertIntTrue(registerLuaFunctions(jInterp));
+  AssertPtrNotNull(getLuaFunctionsClass(jInterp));
+  AssertPtrEquals(getLuaFunctionsClass(jInterp), coAlg);
   AssertIntEquals(
-    jInterp->coAlgs[LuaFunctionsTag].sClass->objectSize,
+    getLuaFunctionsClass(jInterp)->super.objectSize,
     sizeof(CoAlgObj)
   )
 \stopCTest

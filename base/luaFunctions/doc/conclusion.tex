@@ -37,7 +37,8 @@
 \addCTestInclude{<joylol/luaFunctions-private.h>}
 \CTestsSetup\
 \startCTest
-  requireStaticallyLinkedJInterps(lstate);
+  addJoyLoLLuaPath(lstate);
+  requireLuaModule(lstate, "joylol.jInterps");
   requireStaticallyLinkedLuaFunctions(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
@@ -50,6 +51,8 @@
 \addMainDocument{luaFunctions.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
 \addSubDocument{conclusion.tex} 
 \addConTeXtModuleDirectory{install}
 
