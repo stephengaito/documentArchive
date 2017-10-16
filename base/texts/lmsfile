@@ -73,7 +73,6 @@ contests.targets{
   testLibDirs = {
   },
   testLibs = {
-    '-lgmp',
   },
   buildDir  = 'build',
   docDir    = 'doc',

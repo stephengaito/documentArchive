@@ -23,6 +23,9 @@ litProgs.targets{
     'joylol/naturals-private.h',
     'naturals.c',
   },
+  cCodeLibs = {
+    '-lgmp',
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',
@@ -67,7 +70,6 @@ contests.targets{
   testLibDirs = {
   },
   testLibs = {
-    '-lgmp',
   },
   buildDir  = 'build',
   docDir    = 'doc',

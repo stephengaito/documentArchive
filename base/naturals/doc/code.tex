@@ -21,11 +21,34 @@ typedef struct natural_object_struct {
 \startTestSuite[newNatural]
 
 \startCHeader
-CoAlgObj* newNatural(JoyLoLInterp* jInterp, Symbol* aNatural);
+typedef CoAlgObj *(NewNatural)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aNatural
+);
+
+#define newNatural(jInterp, aNatural)       \
+  (                                         \
+    assert(getNaturalsClass(jInterp)        \
+      ->newNaturalFunc),                    \
+    (getNaturalsClass(jInterp)              \
+      ->newNaturalFunc(jInterp, aNatural))  \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgObj* newNaturalImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aNatural
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-CoAlgObj* newNatural(JoyLoLInterp* jInterp, Symbol* aNatural) {
+CoAlgObj* newNaturalImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aNatural
+) {
   assert(aNatural);
   assert(jInterp);
   assert(jInterp->coAlgs);
@@ -194,6 +217,7 @@ Boolean printNatCoAlg(
 \startCHeader
 typedef struct naturals_class_struct {
   CoAlgClass super;
+  NewNatural *newNaturalFunc;
 } NaturalsClass;
 \stopCHeader
 
@@ -214,7 +238,8 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   theCoAlg->super.registerFunc = registerNaturals;
   theCoAlg->super.equalityFunc = equalityNatCoAlgDebug;
   theCoAlg->super.printFunc    = printNatCoAlg;
-  
+  theCoAlg->newNaturalFunc     = newNaturalImpl;
+
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   

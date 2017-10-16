@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: symbols.tex]
+% A ConTeXt document [master document: naturals.tex]
 
 \section[title=Conclusions]
 
@@ -28,17 +28,20 @@
 #include <joylol/naturals-private.h>
 \stopCCode
 
+\addCCodeLib{-lgmp}
+
 \createCCodeFile%
   {default}%
   {naturals.c}%
   {}
 
+\addCTestInclude{<gmp.h>}
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/naturals.h>}
 \addCTestInclude{<joylol/naturals-private.h>}
-\addCTestLib{-lgmp}
+%\addCTestLib{-lgmp}
 \CTestsSetup\
 \startCTest
   addJoyLoLLuaPath(lstate);
