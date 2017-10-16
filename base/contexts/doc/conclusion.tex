@@ -56,15 +56,17 @@
 \addCTestLib{-lgmp}
 \CTestsSetup\
 \startCTest
-  requireStaticallyLinkedJInterps(lstate);
-  requireStaticallyLinkedBooleans(lstate);
-  requireStaticallyLinkedNaturals(lstate);
-  requireStaticallyLinkedSymbols(lstate);
-  requireStaticallyLinkedCFunctions(lstate);
-  requireStaticallyLinkedPairs(lstate);
-  requireStaticallyLinkedTexts(lstate);
-  requireStaticallyLinkedParsers(lstate);
-  requireStaticallyLinkedDictionaries(lstate);
+  addJoyLoLLuaPath(lstate);
+  requireLuaModule(lstate, "joylol.jInterps");
+  requireLuaModule(lstate, "joylol.booleans");
+  requireLuaModule(lstate, "joylol.naturals");
+  requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.cFunctions");
+  requireLuaModule(lstate, "joylol.pairs");
+  requireLuaModule(lstate, "joylol.texts");
+  requireLuaModule(lstate, "joylol.parsers");
+  requireLuaModule(lstate, "joylol.dictionaries");
   requireStaticallyLinkedContexts(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest

@@ -160,13 +160,15 @@ void prependListCtxData(
 \startCHeader
 extern CoAlgObj* popCtxData(ContextObj* aCtx);
 
-#define popCtxDataInto(aCtx, aVar)                            \
-CoAlgObj* aVar = popCtxData(aCtx);                            \
-if (aCtx->tracingOn) {                                        \
-  StringBufferObj *aStrBuf = newStringBuffer(aCtx->jInterp);  \
-  printLoL(jInterp, aStrBuf, aVar);                                    \
-  printf("%s = %s\n", #aVar, getCString(jInterp, aStrBuf));            \
-  strBufClose(jInterp, aStrBuf);                                       \
+#define popCtxDataInto(aCtx, aVar)                          \
+assert(aCtx);                                               \
+CoAlgObj* aVar = popCtxData(aCtx);                          \
+if (aCtx->tracingOn) {                                      \
+  JoyLoLInterp *jInterp = aCtx->jInterp;                    \
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);      \
+  printLoL(jInterp, aStrBuf, aVar);                         \
+  printf("%s = %s\n", #aVar, getCString(jInterp, aStrBuf)); \
+  strBufClose(jInterp, aStrBuf);                            \
 }
 \stopCHeader
 

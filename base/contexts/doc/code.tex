@@ -135,6 +135,7 @@ Boolean equalityContextsCoAlg(
 
 \startCHeader
 extern Boolean printContextsCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 );
@@ -142,9 +143,11 @@ extern Boolean printContextsCoAlg(
 
 \startCCode
 Boolean printContextsCoAlg(
+  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   CoAlgObj        *aLoL
 ) {
+  assert(jInterp);
   assert(aLoL);
   assert(asType(aLoL));
   assert(asTag(aLoL) == ContextsTag);
@@ -153,18 +156,18 @@ Boolean printContextsCoAlg(
 //  aLoL->tag = aLoL->tag & (~ PRINT_MARKER);
 
   size_t printedOk = TRUE;
-  strBufPrintf(aStrBuf, "\n[%s[ ", asName(aLoL));
-  lolPrintStr(printedOk, asData(aLoL),
+  strBufPrintf(jInterp, aStrBuf, "\n[%s[ ", asName(aLoL));
+  lolPrintStr(jInterp, printedOk, asData(aLoL),
               "d:( ", ") ", aStrBuf);
-  lolPrintStr(printedOk, asCommand(aLoL),
+  lolPrintStr(jInterp, printedOk, asCommand(aLoL),
               "c:( ", ") ", aStrBuf);
-  lolPrintStr(printedOk, asProcess(aLoL),
+  lolPrintStr(jInterp, printedOk, asProcess(aLoL),
               "p:( ", ") ", aStrBuf);
-  lolPrintStr(printedOk, asMessages(aLoL),
+  lolPrintStr(jInterp, printedOk, asMessages(aLoL),
               "m:( ", ") ", aStrBuf);
-  lolPrintStr(printedOk, asListeners(aLoL),
+  lolPrintStr(jInterp, printedOk, asListeners(aLoL),
               "l:( ", ") ", aStrBuf);
-  strBufPrintf(aStrBuf, " ]]\n");
+  strBufPrintf(jInterp, aStrBuf, " ]]\n");
   return printedOk;
 }
 \stopCCode

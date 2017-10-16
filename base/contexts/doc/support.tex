@@ -51,7 +51,7 @@ static void showStackAP(ContextObj* aCtx) {
   strBufPrintf(jInterp, aStrBuf, "\np>>");
   printLoL(jInterp, aStrBuf, aCtx->process);
   strBufPrintf(jInterp, aStrBuf, "\n");
-  printf("%s", getCString(jInterp, jInterp, aStrBuf));
+  printf("%s", getCString(jInterp, aStrBuf));
   strBufClose(jInterp, aStrBuf);
 }
 \stopCCode
