@@ -97,11 +97,34 @@ CoAlgObj* newSymbolImpl(
 \stopCHeader
 
 \startCHeader
-extern Boolean symbolIs(CoAlgObj *aLoL, Symbol *aSymbol);
+typedef Boolean (SymbolIs)(
+  CoAlgObj *aLoL,
+  Symbol   *aSymbol
+);
+
+#define symbolIs(jInterp, aLoL, aSymbol)  \
+  (                                       \
+    assert(getSymbolsClass(jInterp)       \
+      ->symbolIsFunc),                    \
+    (getSymbolsClass(jInterp)             \
+      ->symbolIsFunc(aLoL, aSymbol))      \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean symbolIsImpl(
+  CoAlgObj *aLoL, 
+  Symbol *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-Boolean symbolIs(CoAlgObj *aLoL, Symbol *aSymbol) {
+Boolean symbolIsImpl(
+  CoAlgObj *aLoL,
+  Symbol *aSymbol
+) {
   if (isSymbol(aLoL) &&
       (strcmp(asSymbol(aLoL), aSymbol) == 0)) {
     return TRUE;
@@ -115,19 +138,19 @@ Boolean symbolIs(CoAlgObj *aLoL, Symbol *aSymbol) {
 \startCTest
   CoAlgObj *aSym = newSymbol(jInterp, "this is a test");
   AssertIntTrue(isSymbol(aSym));
-  AssertIntTrue(symbolIs(aSym, "this is a test"));
+  AssertIntTrue(symbolIs(jInterp, aSym, "this is a test"));
 \stopCTest
 \stopTestCase
 
 \startTestCase[should return false if not a symbol]
 \startCTest
   AssertIntFalse(isSymbol(NULL));
-  AssertIntFalse(symbolIs(NULL, "this is NOT a test"));
+  AssertIntFalse(symbolIs(jInterp, NULL, "this is NOT a test"));
   CoAlgObj *aObj = newObject(jInterp, BooleansTag);
   AssertIntFalse(isSymbol(aObj));
-  AssertIntFalse(symbolIs(aObj, "this is NOT a test"));
+  AssertIntFalse(symbolIs(jInterp, aObj, "this is NOT a test"));
   CoAlgObj *aSym = newSymbol(jInterp, "this is a test");
-  AssertIntFalse(symbolIs(aSym, "this is NOT a test"));
+  AssertIntFalse(symbolIs(jInterp, aSym, "this is NOT a test"));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -189,6 +212,7 @@ Boolean symbolsEqualDebug(
 
 \startTestSuite[printing symbols]
 
+\setCHeaderStream{private}
 \startCHeader
 extern size_t printSymbolCoAlg(
   JoyLoLInterp    *jInterp,
@@ -196,6 +220,7 @@ extern size_t printSymbolCoAlg(
   CoAlgObj        *aLoL
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean printSymbolCoAlg(
@@ -236,6 +261,7 @@ Boolean printSymbolCoAlg(
 typedef struct symbols_class_struct {
   CoAlgClass  super;
   NewSymbol  *newSymbolFunc;
+  SymbolIs   *symbolIsFunc;
 } SymbolsClass;
 \stopCHeader
 
@@ -257,6 +283,8 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   theCoAlg->super.equalityFunc = symbolsEqualDebug;
   theCoAlg->super.printFunc    = printSymbolCoAlg;
   theCoAlg->newSymbolFunc      = newSymbolImpl;
+  theCoAlg->symbolIsFunc       = symbolIsImpl;
+
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   
