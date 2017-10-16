@@ -121,8 +121,14 @@ void raiseException(Context* aCtx, Symbol* message) {
 size_t reportException(Context* aCtx) {
   assert(aCtx);
   if (!aCtx->exceptionRaised) return FALSE;
-  char* exceptionReport = printLoL(car(aCtx->data));
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  StringBufferObj *aStrBuf = 
+    newStringBuffer(jInterp);
+  char* exceptionReport = 
+    printLoL(jInterp, aStrBuf,car(aCtx->data));
   printf("\nUNHANDLED EXCEPTION: %s\n", exceptionReport);
+  strBufClose(jInterp, aStrBuf);
   if (exceptionReport) free(exceptionReport);
   aCtx->exceptionRaised = FALSE;
   return TRUE;

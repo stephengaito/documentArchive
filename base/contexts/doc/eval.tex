@@ -3,17 +3,22 @@
 \section[title=Evaluation]
 
 \startCCode
-void traceAction(const char* action, PairAtom* aLoL, PairAtom* command) {
-  char* lolStr = printLoL(aLoL);
+void traceAction(
+  JoyLoLInterp *jInterp,
+  Symbol* action,
+  PairAtom* aLoL,
+  PairAtom* command
+) {
+  assert(jInterp);
+  StringBufferObj *aStrBuf =
+    newStringBuffer(jInterp);
+  strBufPrintf(jInterp, aStrBuf, "%s: ", action);
+  printLoL(jInterp, aStrBuf, aLoL);
   if (command) {
-    char* commandStr = printLoL(command);
-    printf("%s: %s (%s)\\n", action, lolStr, commandStr);
-    // buildLoL(action, ": ", lolStr, " (", command,")\\n")
-    free(commandStr);
-  } else {
-    printf("%s: %s\\n", action, lolStr);
+    printLoL(jInterp, aStrBuf, command);
   }
-  free(lolStr);
+  printf("%s\\n", getCString(jInterp, aStrBuf));
+  strBufClose(aStrBuf);
 }
 
 void evalCommandInContext(Context* aCtx, PairAtom* command) {

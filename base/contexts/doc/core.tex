@@ -164,9 +164,9 @@ extern CoAlgObj* popCtxData(ContextObj* aCtx);
 CoAlgObj* aVar = popCtxData(aCtx);                            \
 if (aCtx->tracingOn) {                                        \
   StringBufferObj *aStrBuf = newStringBuffer(aCtx->jInterp);  \
-  printLoL(aStrBuf, aVar);                                    \
-  printf("%s = %s\n", #aVar, getCString(aStrBuf));            \
-  strBufClose(aStrBuf);                                       \
+  printLoL(jInterp, aStrBuf, aVar);                                    \
+  printf("%s = %s\n", #aVar, getCString(jInterp, aStrBuf));            \
+  strBufClose(jInterp, aStrBuf);                                       \
 }
 \stopCHeader
 

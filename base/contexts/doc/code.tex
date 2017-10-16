@@ -172,19 +172,29 @@ Boolean printContextsCoAlg(
 \startTestSuite[registerContexts]
 
 \startCHeader
+typedef struct contexts_class_struct {
+  CoAlgClass super;
+} ContextsClass;
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
 extern Boolean registerContexts(JoyLoLInterp *jInterp);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 Boolean registerContexts(JoyLoLInterp *jInterp) {
-  CoAlgebra* theCoAlg    = (CoAlgebra*) calloc(1, sizeof(CoAlgebra));
-  theCoAlg->name         = ContextsName;
-  theCoAlg->objectSize   = sizeof(ContextObj);
-  theCoAlg->registerFunc = registerContexts;
-  theCoAlg->equalityFunc = equalityContextsCoAlg;
-  theCoAlg->printStr     = printContextsCoAlg;
-  size_t tag = registerCoAlgebra(jInterp, theCoAlg);
+  ContextsClass* theCoAlg    = 
+    joyLoLCalloc(1, ContextsClass);
+  theCoAlg->super.name         = ContextsName;
+  theCoAlg->super.objectSize   = sizeof(ContextObj);
+  theCoAlg->super.registerFunc = registerContexts;
+  theCoAlg->super.equalityFunc = equalityContextsCoAlg;
+  theCoAlg->super.printFunc    = printContextsCoAlg;
+  
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
 
   // do a sanity check...
   assert(tag == ContextsTag);
@@ -204,13 +214,13 @@ Boolean registerContexts(JoyLoLInterp *jInterp) {
   
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
-  AssertPtrNotNull(jInterp->coAlgs[ContextsTag].sClass);
-  CoAlgebra *coAlg = jInterp->coAlgs[ContextsTag].sClass;
-//  AssertIntTrue(registerContexts(jInterp));
-  AssertPtrNotNull(jInterp->coAlgs[ContextsTag].sClass);
-  AssertPtrEquals(jInterp->coAlgs[ContextsTag].sClass, coAlg);
+  AssertPtrNotNull(getContextsClass(jInterp));
+  ContextsClass *coAlg = getContextsClass(jInterp);
+  AssertIntTrue(registerContexts(jInterp));
+  AssertPtrNotNull(getContextsClass(jInterp));
+  AssertPtrEquals(getContextsClass(jInterp), coAlg);
   AssertIntEquals(
-    jInterp->coAlgs[ContextsTag].sClass->objectSize,
+    getContextsClass(jInterp)->super.objectSize,
     sizeof(ContextObj)
   )
 \stopCTest
