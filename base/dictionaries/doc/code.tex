@@ -28,11 +28,27 @@ typedef struct dictionaries_object_struct {
 \startTestSuite[newDict]
 
 \startCHeader
-extern DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym);
+typedef DictObj *(NewDict)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSym
+);
+
+#define newDict(jInterp, aSym)            \
+  (                                       \
+    assert(getDictionariesClass(jInterp)  \
+      ->newDictFunc),                     \
+    (getDictionariesClass(jInterp)        \
+      ->newDictFunc(jInterp, aSym))       \
+  )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
+extern DictObj *newDictImpl(
+  JoyLoLInterp *jInterp,
+  Symbol *aSym
+);
+
 #define dictAsSymbol(aNode)   ((DictObj*)(aNode))->symbol
 #define dictAsPreObs(aNode)   ((DictObj*)(aNode))->preObs
 #define dictAsValue(aNode)    ((DictObj*)(aNode))->value
@@ -61,7 +77,10 @@ extern DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym);
 // ANY AVLTree node can be the root of a new dictionary.
 //
 
-DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym) {
+DictObj *newDictImpl(
+  JoyLoLInterp *jInterp,
+  Symbol *aSym
+) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   assert(DictionariesTag < jInterp->numCoAlgs);
@@ -111,11 +130,34 @@ DictObj *newDict(JoyLoLInterp *jInterp, Symbol *aSym) {
 \startTestSuite[createSymbol]
 
 \startCHeader
-DictObj* createSymbol(JoyLoLInterp *jInterp, Symbol* aSymbol);
+typedef DictObj *(CreateSymbol)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSymbol
+);
+
+#define createSymbol(jInterp, aSymbol)      \
+  (                                         \
+    assert(getDictionariesClass(jInterp)    \
+      ->createSymbolFunc),                  \
+    (getDictionariesClass(jInterp)          \
+      ->createSymbolFunc(jInterp, aSymbol)) \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern DictObj* createSymbolImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-DictObj* createSymbol(JoyLoLInterp *jInterp, Symbol* aSymbol) {
+DictObj* createSymbolImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSymbol
+) {
   assert(jInterp);
   if (!aSymbol) return NULL;
   DictObj* aSym = findSymbol(jInterp, aSymbol);
@@ -129,27 +171,65 @@ DictObj* createSymbol(JoyLoLInterp *jInterp, Symbol* aSymbol) {
 \stopTestSuite
 
 \startCHeader
-extern CoAlgObj* getSymbol(JoyLoLInterp* jInterp,
-                           Symbol* aSymbol);
+typedef CoAlgObj *(GetSymbol)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSymbol
+);
+
+#define getSymbol(jInterp, aSymbol)       \
+  (                                       \
+    assert(getDictionariesClass(jInterp)  \
+      ->getSymbolFunc),                   \
+    (getDictionariesClass(jInterp)        \
+      ->getSymbolFunc(jInterp, aSymbol))  \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgObj* getSymbolImpl(
+  JoyLoLInterp* jInterp,
+  Symbol* aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-CoAlgObj* getSymbol(JoyLoLInterp* jInterp,
-                    Symbol* aSymbol) {
+CoAlgObj* getSymbolImpl(
+  JoyLoLInterp* jInterp,
+  Symbol* aSymbol
+) {
   DictObj* aSym = createSymbol(jInterp, aSymbol);
   return newSymbol(jInterp, aSym->symbol);
 }
 \stopCCode
 
 \startCHeader
-extern void listDefinitions(
+typedef void (ListDefinitions)(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf
+);
+
+#define listDefinitions(jInterp, aStrBuf)       \
+  (                                             \
+    assert(getDictionariesClass(jInterp)        \
+      ->listDefinitionsFunc),                   \
+    (getDictionariesClass(jInterp)              \
+      ->listDefinitionsFunc(jInterp, aStrBuf))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void listDefinitionsImpl(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void listDefinitions(
+void listDefinitionsImpl(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf
 ) {
@@ -210,7 +290,11 @@ Boolean printDicInto(
 \startCHeader
 typedef struct dictionaries_class_struct {
   CoAlgClass super;
-  
+  NewDict       *newDictFunc;
+  CreateSymbol  *createSymbolFunc;
+  GetSymbol     *getSymbolFunc;
+  FindSymbol    *findSymbolFunc;
+  FindLUBSymbol *findLUBSymbolFunc;
 } DictionariesClass;
 \stopCHeader
 
@@ -233,7 +317,11 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   theCoAlg->super.registerFunc = registerDictionaries;
   theCoAlg->super.equalityFunc = NULL;
   theCoAlg->super.printFunc    = printDictionaryCoAlgObjInto;
-  
+  theCoAlg->newDictFunc        = newDictImpl;
+  theCoAlg->createSymbolFunc   = createSymbolImpl;
+  theCoAlg->getSymbolFunc      = getSymbolImpl;
+  theCoAlg->findSymbolFunc     = findSymbolImpl;
+  theCoAlg->findLUBSymbolFunc  = findLUBSymbolImpl;
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   

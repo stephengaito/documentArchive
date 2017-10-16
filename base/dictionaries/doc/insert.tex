@@ -6,16 +6,20 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictObj* insertSymbolRecurse(JoyLoLInterp* jInterp,
-                                    DictObj* anAVLNode,
-                                    Symbol* aSymbol);
+extern DictObj* insertSymbolRecurse(
+  JoyLoLInterp* jInterp,
+  DictObj* anAVLNode,
+  Symbol* aSymbol
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-DictObj* insertSymbolRecurse(JoyLoLInterp* jInterp,
-                             DictObj* anAVLNode,
-                             Symbol* aSymbol) {
+DictObj* insertSymbolRecurse(
+  JoyLoLInterp* jInterp,
+  DictObj* anAVLNode,
+  Symbol* aSymbol
+) {
   if (!anAVLNode) return newDict(jInterp, aSymbol);
   Boolean debugFlag = FALSE;
 
@@ -129,12 +133,20 @@ DictObj* insertSymbolRecurse(JoyLoLInterp* jInterp,
 }
 \stopCCode
 
+\setCHeaderStream{private}
 \startCHeader
-extern DictObj* insertSymbol(JoyLoLInterp* jInterp, Symbol* aSymbol);
+extern DictObj* insertSymbol(
+  JoyLoLInterp* jInterp,
+  Symbol* aSymbol
+);
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-DictObj* insertSymbol(JoyLoLInterp* jInterp, Symbol* aSymbol) {
+DictObj* insertSymbol(
+  JoyLoLInterp* jInterp,
+  Symbol* aSymbol
+) {
   assert(aSymbol);
   assert(jInterp);
 
