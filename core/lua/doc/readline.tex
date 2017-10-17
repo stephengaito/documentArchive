@@ -185,6 +185,13 @@ extern void runREPLInContext(Context* aCtx);
 void runREPLInContext(Context* aCtx) {
   assert(aCtx);
   assert(aCtx->coAlgebras);
+  if (aCtx->verbose) {
+    printf("Welcome to JoyLoL v0.1 ( %s ; %s )\n",
+      getMainVersionShortHash(),
+      getMainVersionShortDate()
+    );
+  }
+  aCtx->showStack = TRUE;
   Text* aText = createTextFromReadline(aCtx->coAlgebras);
   while(TRUE) {
     DEBUG(FALSE, "runREPLInContext %p reading\\n", aCtx);
@@ -208,3 +215,13 @@ void runREPLInContext(Context* aCtx) {
   DEBUG(FALSE, "runREPLInContext %p COMPLETED\\n", aCtx);
 }
 \stopCCode
+
+\starttyping
+static void showVersionsAP(Context* aCtx) {
+  fprintf(stdout, "\n");
+  reportMainVersions(stdout);
+  fprintf(stdout, "\n");
+  reportLibVersions(stdout);
+  fprintf(stdout, "\n");
+}
+\stoptyping

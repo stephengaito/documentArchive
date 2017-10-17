@@ -7,14 +7,52 @@
 \startCCode
 static int lua_core_lua_getGitVersion (lua_State *lstate) {
   const char* aKey   = lua_tostring(lstate, 1);
-  const char* aValue = "no valid key provided";
-  if (aKey) aValue = getGitVersion(gitVersionKeyValues, aKey);
-  lua_pushstring(lstate, aValue);
+  if (aKey) {
+    getGitVersionInto(gitVersionKeyValues, aKey, aValue);
+    lua_pushstring(lstate, aValue);
+  } else {
+    lua_pushstring(lstate, "no valid key provided");
+  }
   return 1;
 }
 
+static int lua_core_lua_setVerbose(lua_State *lstate) {
+  Boolean verbose = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  jInterp->rootCtx->verbose = verbose;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_core_lua_pushLoadPath(lua_State *lstate) {
+  Symbol *aPath = lua_tostring(lstate, 1);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  pushLoadPath(jInterp->loader, aPath);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_core_lua_loadFile(lua_State *lstate) {
+  Symbol *aFile = lua_tostring(lstate, 1);
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  loadFile(jInterp->loader, aFile);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_core_lua_runREPL(lua_State *lstate) {
+  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  runREPLInContext(jInterp->rootCtx);
+  return 0;
+}
+
 static const struct luaL_Reg lua_core_lua [] = {
-  {"gitVersion", lua_core_lua_getGitVersion},
+  { "gitVersion",   lua_core_lua_getGitVersion },
+  { "setVerbose",   lua_core_lua_setVerbose    },
+  { "pushLoadPath", lua_core_lua_pushLoadPath  },
+  { "loadFile",     lua_core_lua_loadFile      },
+  { "runREPL",      lua_core_lua_runREPL       },
   {NULL, NULL}
 };
 

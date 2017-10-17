@@ -19,7 +19,6 @@ local joylolPaths = {
   package.path
 }
 package.path = table.concat(joylolPaths, ';')
-print(package.path)
 
 local joylolCPaths = {
   os.getenv('HOME')..'/.joylol/?.so',
@@ -28,76 +27,12 @@ local joylolCPaths = {
   package.path
 }
 package.cpath = table.concat(joylolCPaths, ';')
-print(package.cpath)
 
 require 'joylol'
 
-\stopLuaCode
+joylol = require 'joylol.core.lua'
 
-\starttyping
-static void showVersionsAP(Context* aCtx) {
-  fprintf(stdout, "\n");
-  reportMainVersions(stdout);
-  fprintf(stdout, "\n");
-  reportLibVersions(stdout);
-  fprintf(stdout, "\n");
-}
-
-int main(int argc, char** argv) {
-
-  CoAlgebras* coAlgs = createCoAlgebras();
-  assert(coAlgs);
-  extendJoyLoL(coAlgs, "showVersions", showVersionsAP);
-
-  Contexts* contexts = coAlgs->contexts;
-  assert(contexts);
-
-  Loader* loader     = contexts->loader;
-  assert(loader);
-
-  Context* aCtx      = createContext(coAlgs, "joyLoL", NULL, NULL, NULL);
-
-  getJoyLoLOptions(aCtx, argc, argv);
-
-  aCtx->showStack = FALSE;
-  if (optind < argc) {
-    while (optind < argc) {
-      DEBUG(FALSE, "adding load file: [%s] (%d - %d)\n", argv[optind], optind, argc);
-      pushLoadFile(coAlgs, argv[optind++]);
-    }
-    if (aCtx->verbose) printf("loading...\n");
-    if (!loadFiles(aCtx, loader->loadFiles)) return -1;
-    return 0;
-  }
-
-  if (aCtx->verbose) printf("loading...\n");
-  if (!loadFiles(aCtx, loader->loadFiles)) return -1;
-
-  if (aCtx->verbose) {
-    printf("Welcome to JoyLoL v0.1 ( %s ; %s )\n",
-           getMainVersionShortHash(),
-           getMainVersionShortDate());
-  }
-  aCtx->showStack = TRUE;
-  runREPLInContext(aCtx);
-  return 0;
-}
-\stoptyping
-
-\starttyping
-static char* shortOptions = "hil:p:qv";
-
-static struct option longOptions[] = {
-  { "help",    no_argument,       0, 'h' },
-  { "ignore",  no_argument,       0, 'i' },
-  { "load",    required_argument, 0, 'l' },
-  { "path",    required_argument, 0, 'p' },
-  { "quiet",   no_argument,       0, 'q' },
-  { "verbose", no_argument,       0, 'v' },
-  { 0, 0, 0, 0}
-};
-
-static char* helpText[] = {
+helpText = {
   "usage: joyLoL [options] [files to load]",
   "",
   "options: ",
@@ -111,57 +46,41 @@ static char* helpText[] = {
   "files to load:",
   "  Any remaining options are treated as files to be loaded.",
   "  If there are no remaining options, joyLoL enters the read,",
-  "  eval, print loop.",
-  0
-};
-
-
-void getJoyLoLOptions(Context* aCtx, int argc, char** argv) {
-  int optionLetter;
-  int optionIndex;
-  int loadConfiguration = TRUE;
-
-  assert(aCtx);
-  CoAlgebras* coAlgs = aCtx->coAlgebras;
-  assert(coAlgs);
-  assert(coAlgs->contexts);
-  Loader* loader = coAlgs->contexts->loader;
-  assert(loader);
-
-  while(TRUE) {
-    optionLetter = getopt_long(argc, argv,
-                               shortOptions, longOptions,
-                               &optionIndex);
-
-    if (optionLetter < 0) break;
-
-    switch(optionLetter) {
-      case 'h' : {
-        char** curLine = helpText;
-        while(*curLine) {
-          printf("%s\n", *curLine);
-          curLine++;
-        }
-        exit(0);
-      }
-      case 'i' :
-        loadConfiguration = FALSE;
-        break;
-      case 'l' :
-        pushLoadFile(coAlgs, optarg);
-        break;
-      case 'p' :
-        pushLoadPath(coAlgs, optarg);
-        break;
-      case 'q' :
-        aCtx->verbose = FALSE;
-        break;
-      case 'v' :
-        aCtx->verbose = TRUE;
-        break;
-    }
-  }
-
-  if (loadConfiguration) pushLoadFile(coAlgs, "config");
+  "  eval, print loop."
 }
-\stoptyping
+
+loadConfiguration = true
+loadFiles         = { }
+  
+while(0 < arg) do
+  anArg = table.remove(arg, 1)
+  if anArg:match('-h') then
+    print(table.concat(helpText, '\n'))
+    os.exit(0);
+  elseif anArg:match('-i') then
+    loadConfiguration = false
+  elseif anArg:match('-l') then
+    optArg = table.remove(arg, 1)
+    table.insert(loadFiles, optArg)
+  elseif anArg:match('-p') then
+    optArg = table.remove(arg, 1)
+    joyLoL.pushLoadPath(optArg)
+  elseif anArg:match('-q') then
+    joyLoL.setVerbose(false)
+  elseif anArg:match('-v') then
+    joyLoL.setVerbose(true)
+  else
+    optArg = table.remove(arg, 1)
+    table.insert(loadFiles, optArg)
+  end
+end
+
+if (loadConfiguration) joyLoL.loadFile("config")
+
+for i, aFile in ipairs(loadFiles) do
+  joyLoL.loadFile(aFile)
+end
+
+joyLoL.runREPL();
+
+\stopLuaCode
