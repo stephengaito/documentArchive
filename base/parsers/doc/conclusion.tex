@@ -52,18 +52,17 @@
 \addCTestInclude{<joylol/texts.h>}
 \addCTestInclude{<joylol/parsers.h>}
 \addCTestInclude{<joylol/parsers-private.h>}
-\addCTestLib{<HOME>/.joylol/joylol/stringBuffers}
-\addCTestLib{-lgmp}
 \CTestsSetup\
 \startCTest
-  requireStaticallyLinkedJInterps(lstate);
-  requireStaticallyLinkedBooleans(lstate);
-  requireStaticallyLinkedSymbols(lstate);
-  requireStaticallyLinkedStringBuffers(lstate);
-  requireStaticallyLinkedNaturals(lstate);
-  requireStaticallyLinkedPairs(lstate);
-  requireStaticallyLinkedDictionaries(lstate);
-  requireStaticallyLinkedTexts(lstate);
+  addJoyLoLLuaPath(lstate);
+  requireLuaModule(lstate, "joylol.jInterps");
+  requireLuaModule(lstate, "joylol.booleans");
+  requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.naturals");
+  requireLuaModule(lstate, "joylol.pairs");
+  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.texts");
   requireStaticallyLinkedParsers(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest

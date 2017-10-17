@@ -72,11 +72,16 @@ static Symbol* differentList[] = {
 
 \setCHeaderStream{private}
 \startCHeader
-extern char matchingListSymbol(Symbol* curSymbol);
+extern char matchingListSymbol(
+  Symbol* curSymbol
+);
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-char matchingListSymbol(Symbol* curSymbol) {
+char matchingListSymbol(
+  Symbol* curSymbol
+) {
   if (1 < strlen(curSymbol)) return 0;
 
   if (curSymbol[0] == '(') return ')';
@@ -88,12 +93,18 @@ char matchingListSymbol(Symbol* curSymbol) {
 }
 \stopCCode
 
+\setCHeaderStream{private}
 \startCHeader
-extern size_t isClosingSymbol(Symbol* curSymbol);
+extern size_t isClosingSymbol(
+  Symbol* curSymbol
+);
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-size_t isClosingSymbol(Symbol* curSymbol) {
+size_t isClosingSymbol(
+  Symbol* curSymbol
+) {
   if (1 < strlen(curSymbol)) return 0;
 
   if (curSymbol[0] == ')') return 1;
@@ -105,6 +116,7 @@ size_t isClosingSymbol(Symbol* curSymbol) {
 }
 \stopCCode
 
+\setCHeaderStream{private}
 \startCHeader
 void reportMismatchedClosingSymbol(
   TextObj* aText, 
@@ -112,6 +124,7 @@ void reportMismatchedClosingSymbol(
   char found
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 void reportMismatchedClosingSymbol(
@@ -132,12 +145,14 @@ void reportMismatchedClosingSymbol(
 }
 \stopCCode
 
+\setCHeaderStream{private}
 \startCHeader
 void reportUnmatchedClosingSymbol(
   TextObj* aText,
   char expected
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 void reportUnmatchedClosingSymbol(
@@ -167,12 +182,14 @@ void reportUnmatchedClosingSymbol(
 \stopTestCase
 \stopTestSuite
 
+\setCHeaderStream{private}
 \startCHeader
 extern CoAlgObj* parseList(
   TextObj* aText,
   char closingChar
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 CoAlgObj* parseList(
@@ -230,11 +247,32 @@ CoAlgObj* parseList(
 \startTestSuite[parse one symbol]
 
 \startCHeader
-extern CoAlgObj* parseOneSymbol(TextObj* aText);
+typedef CoAlgObj *(ParseOneSymbol)(
+  TextObj *aText
+);
+
+#define parseOneSymbol(aText)               \
+  (                                         \
+    assert(aText),                          \
+    assert(getParsersClass(aText->jInterp)  \
+      ->parseOneSymbolFunc),                \
+    (getParsersClass(aText->jInterp)        \
+      ->parseOneSymbolFunc(aText))          \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgObj* parseOneSymbolImpl(
+  TextObj* aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-CoAlgObj* parseOneSymbol(TextObj* aText) {
+CoAlgObj* parseOneSymbolImpl(
+  TextObj* aText
+) {
   assert(aText);
   DEBUG(aText->debugFlag, "parseOneSymbol %p\n", aText);
   nextSymbol(aText);
@@ -453,13 +491,33 @@ CoAlgObj* parseOneSymbol(TextObj* aText) {
 
 \startTestSuite[parse all symbols]
 
-\setCHeaderStream{public}
 \startCHeader
-extern CoAlgObj* parseAllSymbols(TextObj* aText);
+typedef CoAlgObj *(ParseAllSymbols)(
+  TextObj *aText
+);
+
+#define parseAllSymbols(aText)              \
+  (                                         \
+    assert(aText),                          \
+    assert(getParsersClass(aText->jInterp)  \
+      ->parseAllSymbolsFunc),               \
+    (getParsersClass(aText->jInterp)        \
+      ->parseAllSymbolsFunc(aText))         \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgObj* parseAllSymbolsImpl(
+  TextObj* aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-CoAlgObj* parseAllSymbols(TextObj* aText) {
+CoAlgObj* parseAllSymbolsImpl(
+  TextObj* aText
+) {
   DEBUG(FALSE, "parseAllSymbols %p]\n", aText);
   return parseList(aText, 0);
 }
@@ -612,26 +670,34 @@ in our parsing code.
 
 \startCHeader
 typedef struct parsers_class_struct {
-  CoAlgClass super;
+  CoAlgClass       super;
+  ParseOneSymbol  *parseOneSymbolFunc;
+  ParseAllSymbols *parseAllSymbolsFunc;
 } ParsersClass;
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern Boolean registerParsers(JoyLoLInterp *jInterp);
+extern Boolean registerParsers(
+  JoyLoLInterp *jInterp
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-Boolean registerParsers(JoyLoLInterp *jInterp) {
+Boolean registerParsers(
+  JoyLoLInterp *jInterp
+) {
   assert(jInterp);
   
-  ParsersClass* theCoAlg       = joyLoLCalloc(1, ParsersClass);
-  theCoAlg->super.name         = ParsersName;
-  theCoAlg->super.objectSize   = sizeof(CoAlgObj);
-  theCoAlg->super.registerFunc = registerParsers;
-  theCoAlg->super.equalityFunc = NULL;
-  theCoAlg->super.printFunc    = NULL;
+  ParsersClass* theCoAlg        = joyLoLCalloc(1, ParsersClass);
+  theCoAlg->super.name          = ParsersName;
+  theCoAlg->super.objectSize    = sizeof(CoAlgObj);
+  theCoAlg->super.registerFunc  = registerParsers;
+  theCoAlg->super.equalityFunc  = NULL;
+  theCoAlg->super.printFunc     = NULL;
+  theCoAlg->parseOneSymbolFunc  = parseOneSymbolImpl;
+  theCoAlg->parseAllSymbolsFunc = parseAllSymbolsImpl;
   
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);

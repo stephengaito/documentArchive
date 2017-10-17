@@ -365,6 +365,7 @@ Boolean equalityTextsCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
 
 \startTestSuite[printing texts]
 
+\setCHeaderStream{private}
 \startCHeader
 extern Boolean printStrTextsCoAlg(
   JoyLoLInterp    *jInterp,
@@ -372,6 +373,7 @@ extern Boolean printStrTextsCoAlg(
   CoAlgObj        *aLoL
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean printStrTextsCoAlg(
