@@ -1,16 +1,35 @@
 % A ConTeXt document [master document: contexts.tex]
 
 \section[title=Context core code]
+\setCHeaderStream{public}
 
 \startCHeader
-extern void pushCtxData(
+typedef void (PushCtx)(
+  ContextObj *aCtx,
+  CoAlgObj   *lolToPush
+);
+
+#define pushCtxData(aCtx, lolToPush)        \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->pushCtxDataFunc),                   \
+    (getContextsClass(aCtx->jInterp)        \
+      ->pushCtxDataFunc(aCtx, lolToPush))   \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushCtxDataImpl(
   ContextObj* aCtx,
   CoAlgObj* lolToPush
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void pushCtxData(
+void pushCtxDataImpl(
   ContextObj* aCtx,
   CoAlgObj* lolToPush
 ) {
@@ -21,11 +40,32 @@ void pushCtxData(
 \stopCCode
 
 \startCHeader
-extern void pushNullCtxData(ContextObj* aCtx);
+typedef void (PushNullCtx)(
+  ContextObj *aCtx
+);
+
+#define pushNullCtxData(aCtx)               \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->pushNullCtxDataFunc),               \
+    (getContextsClass(aCtx->jInterp)        \
+      ->pushNullCtxDataFunc(aCtx))          \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern void pushNullCtxDataImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-void pushNullCtxData(ContextObj* aCtx) {
+void pushNullCtxDataImpl(
+  ContextObj* aCtx
+) {
   if (!aCtx) return;
   assert(aCtx->jInterp);
   aCtx->data = newPair(aCtx->jInterp, NULL, aCtx->data);
@@ -33,14 +73,32 @@ void pushNullCtxData(ContextObj* aCtx) {
 \stopCCode
 
 \startCHeader
-extern void pushSymbolCtxData(
+typedef void (PushSymbolCtx)(
+  ContextObj *aCtx,
+  Symbol     *aSymbol
+);
+
+#define pushSymbolCtxData(aCtx, aSymbol)      \
+  (                                           \
+    assert(aCtx),                             \
+    assert(getContextsClass(aCtx->jInterp)    \
+      ->pushSymbolCtxDataFunc),               \
+    (getContextsClass(aCtx-jInterp)           \
+      ->pushSymbolCtxDataFunc(aCtx, aSymbol)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushSymbolCtxDataImpl(
   ContextObj* aCtx,
   Symbol* aSymbol
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void pushSymbolCtxData(
+void pushSymbolCtxDataImpl(
   ContextObj* aCtx,
   Symbol* aSymbol
 ) {
@@ -56,14 +114,34 @@ void pushSymbolCtxData(
 \stopCCode
 
 \startCHeader
-extern void pushParsedArrayOfStringsCtxData(
+typedef void (PushParsedArrayOfStringsCtx)(
+  ContextObj *aCtx,
+  Symbol     *someStrings[]
+);
+
+#define pushParsedArrayOfStringsCtxData(      \
+  aCtx, someStrings)                          \
+  (                                           \
+    assert(aCtx),                             \
+    assert(getContextsClass(aCtx->jInterp)    \
+      ->pushParsedArrayOfStringsCtxDataFunc), \
+    (getContextsClass(aCtx->jInterp)          \
+      ->pushParsedArrayOfStringsCtxDataFunc(  \
+        aCtx, someStrings))                   \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedArrayOfStringsCtxDataImpl(
   ContextObj* aCtx,
   Symbol* someStrings[]
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void pushParsedArrayOfStringsCtxData(
+void pushParsedArrayOfStringsCtxDataImpl(
   ContextObj* aCtx,
   Symbol* someStrings[]
 ) {
@@ -77,14 +155,32 @@ void pushParsedArrayOfStringsCtxData(
 \stopCCode
 
 \startCHeader
-extern void pushParsedStringCtxData(
+typedef void (PushParsedStringCtx)(
+  ContextObj *aCtx,
+  Symbol     *aString
+);
+
+#define pushParsedStringCtxData(aCtx, aString)      \
+  (                                                 \
+    assert(aCtx),                                   \
+    assert(getContextsClass(aCtx->jInterp)          \
+      ->pushParsedStringCtxDataFunc),               \
+    (getContextsClass(aCtx->jInterp)                \
+      ->pushParsedStringCtxDataFunc(aCtx, aSring))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedStringCtxDataImpl(
   ContextObj* aCtx,
   Symbol* aString
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void pushParsedStringCtxData(
+void pushParsedStringCtxDataImpl(
   ContextObj* aCtx,
   Symbol* aString
 ) {
@@ -98,14 +194,32 @@ void pushParsedStringCtxData(
 \stopCCode
 
 \startCHeader
-extern void pushParsedTextCtxData(
+typedef void (PushParsedTextCtx)(
+  ContextObj *aCtx,
+  TextObj    *aTex
+);
+
+#define pushParsedTextCtxData(aCtx, aText)      \
+  (                                             \
+    assert(aCtx),                               \
+    assert(getContextsClass(aCtx->jInterp)      \
+      ->pushParsedTextCtxDataFunc),             \
+    (getContextsClass(aCtx->jInterp)            \
+      ->pushParsedTextCtxDataFunc(aCtx, aText)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedTextCtxDataImpl(
   ContextObj* aCtx,
   TextObj* aText
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void pushParsedTextCtxData(
+void pushParsedTextCtxDataImpl(
   ContextObj* aCtx,
   TextObj* aText
 ) {
@@ -119,14 +233,32 @@ void pushParsedTextCtxData(
 \stopCCode
 
 \startCHeader
-extern void prependListCtxData(
+typedef void (PrependListCtx)(
+  ContextObj *aCtx,
+  CoAlgObj   *lolToPrepend
+);
+
+#define prependListCtxData(aCtx, lolToPrepend)      \
+  (                                                 \
+    asset(aCtx),                                    \
+    assert(getContextsClass(aCtx->jInterp)          \
+      ->prependListCtxDataFunc),                    \
+    (getContextsClass(aCtx->jInterp)                \
+      ->prependListCtxDataFunc(aCtx, lolToPrepend)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void prependListCtxDataImpl(
   ContextObj* aCtx,
   CoAlgObj* lolToPrepend
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void prependListCtxData(
+void prependListCtxDataImpl(
   ContextObj* aCtx,
   CoAlgObj* lolToPrepend
 ) {
@@ -158,7 +290,18 @@ void prependListCtxData(
 \stopCCode
 
 \startCHeader
-extern CoAlgObj* popCtxData(ContextObj* aCtx);
+typedef CoAlgObj *(PopCtx)(
+  ContextObj *aCtx
+);
+
+#define popCtxData(aCtx)                    \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->popCtxDataFunc),                    \
+    (getContextsClass(aCtx->jInterp)        \
+      ->popCtxDataFunc(aCtx))               \
+  )
 
 #define popCtxDataInto(aCtx, aVar)                          \
 assert(aCtx);                                               \
@@ -172,8 +315,18 @@ if (aCtx->tracingOn) {                                      \
 }
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgObj* popCtxDataImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-CoAlgObj* popCtxData(ContextObj* aCtx) {
+CoAlgObj* popCtxDataImpl(
+  ContextObj* aCtx
+) {
   if (!aCtx) return NULL;
   if (!aCtx->data) return NULL;
 
@@ -184,14 +337,27 @@ CoAlgObj* popCtxData(ContextObj* aCtx) {
 \stopCCode
 
 \startCHeader
-extern void pushCtxProcess(
+#define pushCtxProcess(aCtx, lolToPush)        \
+  (                                            \
+    assert(aCtx),                              \
+    assert(getContextsClass(aCtx->jInterp)     \
+      ->pushCtxProcessFunc),                   \
+    (getContextsClass(aCtx->jInterp)           \
+      ->pushCtxProcessFunc(aCtx, lolToPush))   \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushCtxProcessImpl(
   ContextObj* aCtx,
   CoAlgObj* lolToPush
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void pushCtxProcess(
+void pushCtxProcessImpl(
   ContextObj* aCtx,
   CoAlgObj* lolToPush
 ) {
@@ -202,14 +368,27 @@ void pushCtxProcess(
 \stopCCode
 
 \startCHeader
-extern void pushSymbolCtxProcess(
+#define pushSymbolCtxProcess(aCtx, aSymbol)      \
+  (                                              \
+    assert(aCtx),                                \
+    assert(getContextsClass(aCtx->jInterp)       \
+      ->pushSymbolCtxProcessFunc),               \
+    (getContextsClass(aCtx-jInterp)              \
+      ->pushSymbolCtxProcessFunc(aCtx, aSymbol)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushSymbolCtxProcessImpl(
   ContextObj* aCtx,
   Symbol* aSymbol
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void pushSymbolCtxProcess(
+void pushSymbolCtxProcessImpl(
   ContextObj* aCtx,
   Symbol* aSymbol
 ) {
@@ -225,14 +404,29 @@ void pushSymbolCtxProcess(
 \stopCCode
 
 \startCHeader
-extern void pushParsedArrayOfStringsCtxProcess(
+#define pushParsedArrayOfStringsCtxProcess(      \
+  aCtx, someStrings)                             \
+  (                                              \
+    assert(aCtx),                                \
+    assert(getContextsClass(aCtx->jInterp)       \
+      ->pushParsedArrayOfStringsCtxProcessFunc), \
+    (getContextsClass(aCtx->jInterp)             \
+      ->pushParsedArrayOfStringsCtxProcessFunc(  \
+        aCtx, someStrings))                      \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedArrayOfStringsCtxProcessImpl(
   ContextObj* aCtx,
   Symbol* someStrings[]
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void pushParsedArrayOfStringsCtxProcess(
+void pushParsedArrayOfStringsCtxProcessImpl(
   ContextObj* aCtx,
   Symbol* someStrings[]
 ) {
@@ -246,14 +440,27 @@ void pushParsedArrayOfStringsCtxProcess(
 \stopCCode
 
 \startCHeader
-extern void pushParsedStringCtxProcess(
+#define pushParsedStringCtxProcess(aCtx, aString)      \
+  (                                                    \
+    assert(aCtx),                                      \
+    assert(getContextsClass(aCtx->jInterp)             \
+      ->pushParsedStringCtxProcessFunc),               \
+    (getContextsClass(aCtx->jInterp)                   \
+      ->pushParsedStringCtxProcessFunc(aCtx, aSring))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedStringCtxProcessImpl(
   ContextObj* aCtx,
   Symbol* aString
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void pushParsedStringCtxProcess(
+void pushParsedStringCtxProcessImpl(
   ContextObj* aCtx,
   Symbol* aString
 ) {
@@ -267,14 +474,27 @@ void pushParsedStringCtxProcess(
 \stopCCode
 
 \startCHeader
-void pushParsedTextCtxProcess(
+#define pushParsedTextCtxProcess(aCtx, aText)      \
+  (                                                \
+    assert(aCtx),                                  \
+    assert(getContextsClass(aCtx->jInterp)         \
+      ->pushParsedTextCtxProcessFunc),             \
+    (getContextsClass(aCtx->jInterp)               \
+      ->pushParsedTextCtxProcessFunc(aCtx, aText)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedTextCtxProcessImpl(
   ContextObj* aCtx,
   TextObj* aText
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void pushParsedTextCtxProcess(
+void pushParsedTextCtxProcessImpl(
   ContextObj* aCtx,
   TextObj* aText
 ) {
@@ -288,14 +508,27 @@ void pushParsedTextCtxProcess(
 \stopCCode
 
 \startCHeader
-extern void prependListCtxProcess(
+#define prependListCtxProcess(aCtx, lolToPrepend)      \
+  (                                                    \
+    asset(aCtx),                                       \
+    assert(getContextsClass(aCtx->jInterp)             \
+      ->prependListCtxProcessFunc),                    \
+    (getContextsClass(aCtx->jInterp)                   \
+      ->prependListCtxProcessFunc(aCtx, lolToPrepend)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void prependListCtxProcessImpl(
   ContextObj* aCtx,
   CoAlgObj* lolToPrepend
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-void prependListCtxProcess(
+void prependListCtxProcessImpl(
   ContextObj* aCtx,
   CoAlgObj* lolToPrepend
 ) {
@@ -327,11 +560,39 @@ void prependListCtxProcess(
 \stopCCode
 
 \startCHeader
-CoAlgObj* popCtxProcess(ContextObj* aCtx);
+#define popCtxProcess(aCtx)                    \
+  (                                            \
+    assert(aCtx),                              \
+    assert(getContextsClass(aCtx->jInterp)     \
+      ->popCtxProcessFunc),                    \
+    (getContextsClass(aCtx->jInterp)           \
+      ->popCtxProcessFunc(aCtx))               \
+  )
+
+#define popCtxProcessInto(aCtx, aVar)                       \
+assert(aCtx);                                               \
+CoAlgObj* aVar = popCtxProcess(aCtx);                       \
+if (aCtx->tracingOn) {                                      \
+  JoyLoLInterp *jInterp = aCtx->jInterp;                    \
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);      \
+  printLoL(jInterp, aStrBuf, aVar);                         \
+  printf("%s = %s\n", #aVar, getCString(jInterp, aStrBuf)); \
+  strBufClose(jInterp, aStrBuf);                            \
+}
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgObj* popCtxProcessImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-CoAlgObj* popCtxProcess(ContextObj* aCtx) {
+CoAlgObj* popCtxProcessImpl(
+  ContextObj* aCtx
+) {
   if (!aCtx->process) return NULL;
 
   CoAlgObj* poppedLoL = asCar(aCtx->process);
@@ -341,18 +602,36 @@ CoAlgObj* popCtxProcess(ContextObj* aCtx) {
 \stopCCode
 
 \startCHeader
-Boolean extendJoyLoL(
-  JoyLoLInterp* jInterp,
-  Symbol* definedName,
-  CFunction* aFunc
+typedef Boolean (ExtendJoyLoL)(
+  JoyLoLInterp *jInterp,
+  Symbol       *definedName,
+  CFunction    *aFunc
 );
+
+#define extendJoyLoL(jInterp, definedName, aFunc)       \
+  (                                                     \
+    assert(getContextsClass(jInterp)                    \
+      ->extendJoyLoLFunc),                              \
+    (getContextsClass(jInterp)                          \
+      ->extendJoyLoLFunc(jInterp, definedName, aFunc))  \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean extendJoyLoLImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *definedName,
+  CFunction    *aFunc
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-Boolean extendJoyLoL(
-  JoyLoLInterp* jInterp,
-  Symbol* definedName,
-  CFunction* aFunc
+Boolean extendJoyLoLImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *definedName,
+  CFunction    *aFunc
 ) {
   assert(jInterp);
   DictObj* aSym =
@@ -365,18 +644,36 @@ Boolean extendJoyLoL(
 \stopCCode
 
 \startCHeader
-Boolean defineJoyLoL(
-  JoyLoLInterp* jInterp,
-  Symbol* definedName,
-  CoAlgObj* aLoL
+typedef Boolean (DefineJoyLoL)(
+  JoyLoLInterp *jInterp,
+  Symbol       *definedName,
+  CoAlgObj     *aLoL
 );
+
+#define defineJoyLoL(jInterp, definedName, aLoL)      \
+  (                                                   \
+    assert(getContextsClass(jInterp)                  \
+      ->defineJoyLoLFunc),                            \
+    (getContextsClass(jInterp)                        \
+      ->defineJoyLoLFunc(jInterp, definedName, aLoL)) \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean defineJoyLoLImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *definedName,
+  CoAlgObj     *aLoL
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-Boolean defineJoyLoL(
-  JoyLoLInterp* jInterp,
-  Symbol* definedName,
-  CoAlgObj* aLoL
+Boolean defineJoyLoLImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *definedName,
+  CoAlgObj     *aLoL
 ) {
   assert(jInterp);
   DictObj* aSym =
@@ -389,7 +686,7 @@ Boolean defineJoyLoL(
 
 \starttyping
 \startCHeader
-Boolean defineContext(
+extern Boolean defineContext(
   JoyLoLInterp* jInterp,
   Symbol* definedName,
   ContextObj* newCtx

@@ -3,16 +3,16 @@
 \section[title=Supporting JoyLoL words]
 
 \startCHeader
-extern Boolean isContext(CoAlgObj *aLoL);
+#define isContext(aLoL)           \
+  (                               \
+    (                             \
+      (aLoL) &&                   \
+      (aLoL->tag == ContextsTag)  \
+    ) ?                           \
+      TRUE :                      \
+      FALSE                       \
+  )
 \stopCHeader
-
-\startCCode
-Boolean isContext(CoAlgObj *aLoL) {
-  if (!aLoL) return FALSE;
-  if (aLoL->tag == ContextsTag) return TRUE;
-  return FALSE;
-}
-\stopCCode
 
 \startCCode
 static void isContextAP(ContextObj* aCtx) {
@@ -179,9 +179,11 @@ static void commentAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\setCHeaderStream{private}
 \startCHeader
 extern void initContextsAPSupport(JoyLoLInterp *jInterp);
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 void initContextsAPSupport(JoyLoLInterp *jInterp) {

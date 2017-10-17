@@ -36,19 +36,44 @@ typedef struct context_object_struct {
 \stopCHeader
 
 \startCHeader
-extern ContextObj* newContext(JoyLoLInterp *jInterp,
-                              Symbol       *name,
-                              ContextObj   *parent,
-                              CoAlgObj     *dataLoL,
-                              CoAlgObj     *processLoL
+typedef ContextObj *(NewContext)(
+  JoyLoLInterp *jInterp,
+  Symbol       *name,
+  ContextObj   *parent,
+  CoAlgObj     *dataLoL,
+  CoAlgObj     *processLoL
+);
+
+#define newContext(jInterp, name, parent,     \
+  dataLoL, processLoL)                        \
+  (                                           \
+    assert(getContextsClass(jInterp)          \
+      ->newContextFunc),                      \
+    (getContextsClass(jInterp)                \
+      ->newContextFunc(jInterp, name, parent, \
+        dataLoL, processLoL))                 \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern ContextObj* newContextImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *name,
+  ContextObj   *parent,
+  CoAlgObj     *dataLoL,
+  CoAlgObj     *processLoL
 );
 \stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-ContextObj* newContext(JoyLoLInterp *jInterp,
-                       Symbol       *name,
-                       ContextObj   *parent,
-                       CoAlgObj     *dataLoL,
-                       CoAlgObj     *processLoL
+ContextObj* newContextImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *name,
+  ContextObj   *parent,
+  CoAlgObj     *dataLoL,
+  CoAlgObj     *processLoL
 ) {
   DEBUG(FALSE, "createContext %p [%s] %p %p %p\n",
     jInterp, name, parent, dataLoL, processLoL);
@@ -84,22 +109,6 @@ ContextObj* newContext(JoyLoLInterp *jInterp,
 #define asListeners(aLoL) (((ContextObj*)(aLoL))->listeners)
 \stopCCode
 
-\starttyping
-\startJoyLoLWord[eval]
-
-\startJoyLoLCode
-
-;; this is a comment
-#| 
-  This is a multi-line comment
-  and another line
-|#
-
-(test () ())
-
-\stopJoyLoLCode
-\stoptyping
-
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean equalityContextsCoAlg(
@@ -108,6 +117,7 @@ extern Boolean equalityContextsCoAlg(
   Boolean debugFlag
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean equalityContextsCoAlg(
@@ -133,6 +143,7 @@ Boolean equalityContextsCoAlg(
 }
 \stopCCode
 
+\setCHeaderStream{private}
 \startCHeader
 extern Boolean printContextsCoAlg(
   JoyLoLInterp    *jInterp,
@@ -140,6 +151,7 @@ extern Boolean printContextsCoAlg(
   CoAlgObj        *aLoL
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean printContextsCoAlg(
@@ -176,25 +188,84 @@ Boolean printContextsCoAlg(
 
 \startCHeader
 typedef struct contexts_class_struct {
-  CoAlgClass super;
+  CoAlgClass      super;
+  NewContext     *newContextFunc;
+  PushCtx        *pushCtxDataFunc; 
+  PushNullCtx    *pushNullCtxDataFunc;
+  PushSymbolCtx  *pushSymbolCtxDataFunc;
+  PushParsedArrayOfStringsCtx 
+    *pushParsedArrayOfStringsCtxDataFunc;
+  PushParsedStringCtx
+    *pushParsedStringCtxDataFunc;
+  PushParsedTextCtx
+    *pushParsedTextCtxDataFunc;
+  PrependListCtx *prependListCtxDataFunc;
+  PopCtx         *popCtxDataFunc;
+  PushCtx        *pushCtxProcessFunc;
+  PushNullCtx    *pushNullCtxProcessFunc;
+  PushSymbolCtx  *pushSymbolCtxProcessFunc;
+  PushParsedArrayOfStringsCtx
+    *pushParsedArrayOfStringsCtxProcessFunc;
+  PushParsedStringCtx
+    *pushParsedStringCtxProcessFunc;
+  PushParsedTextCtx
+    *pushParsedTextCtxProcessFunc;
+  PrependListCtx *prependListCtxProcessFunc;
+  PopCtx         *popCtxProcessFunc;
+  ExtendJoyLoL   *extendJoyLoLFunc;
+  DefineJoyLoL   *defineJoyLoLFunc;
 } ContextsClass;
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern Boolean registerContexts(JoyLoLInterp *jInterp);
+extern Boolean registerContexts(
+  JoyLoLInterp *jInterp
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-Boolean registerContexts(JoyLoLInterp *jInterp) {
+Boolean registerContexts(
+  JoyLoLInterp *jInterp
+) {
   ContextsClass* theCoAlg    = 
     joyLoLCalloc(1, ContextsClass);
-  theCoAlg->super.name         = ContextsName;
-  theCoAlg->super.objectSize   = sizeof(ContextObj);
-  theCoAlg->super.registerFunc = registerContexts;
-  theCoAlg->super.equalityFunc = equalityContextsCoAlg;
-  theCoAlg->super.printFunc    = printContextsCoAlg;
+  theCoAlg->super.name             = ContextsName;
+  theCoAlg->super.objectSize       = sizeof(ContextObj);
+  theCoAlg->super.registerFunc     = registerContexts;
+  theCoAlg->super.equalityFunc     = equalityContextsCoAlg;
+  theCoAlg->super.printFunc        = printContextsCoAlg;
+  theCoAlg->newContextFunc         = newContextImpl;
+  
+  theCoAlg->pushCtxDataFunc        = pushCtxDataImpl;
+  theCoAlg->pushNullCtxDataFunc    = pushNullCtxDataImpl;
+  theCoAlg->pushSymbolCtxDataFunc  = pushSymbolCtxDataImpl;
+  theCoAlg->pushParsedArrayOfStringsCtxDataFunc =
+    pushParsedArrayOfStringsCtxDataImpl;
+  theCoAlg->pushParsedStringCtxDataFunc =
+    pushParsedStringCtxDataImpl;
+  theCoAlg->pushParsedTextCtxDataFunc =
+    pushParsedTextCtxDataImpl;
+  theCoAlg->prependListCtxDataFunc = prependListCtxDataImpl;
+  theCoAlg->popCtxDataFunc         = popCtxDataImpl;
+  
+  theCoAlg->pushCtxProcessFunc     = pushCtxProcessImpl;
+  theCoAlg->pushNullCtxProcessFunc = NULL;
+  theCoAlg->pushSymbolCtxProcessFunc =
+    pushSymbolCtxProcessImpl;
+  theCoAlg->pushParsedArrayOfStringsCtxProcessFunc =
+    pushParsedArrayOfStringsCtxProcessImpl;
+  theCoAlg->pushParsedStringCtxProcessFunc =
+    pushParsedStringCtxProcessImpl;
+  theCoAlg->pushParsedTextCtxProcessFunc =
+    pushParsedTextCtxProcessImpl;
+  theCoAlg->prependListCtxProcessFunc =
+    prependListCtxProcessImpl;
+  theCoAlg->popCtxProcessFunc      = popCtxProcessImpl;
+  
+  theCoAlg->extendJoyLoLFunc       = extendJoyLoLImpl;
+  theCoAlg->defineJoyLoLFunc       = defineJoyLoLImpl;
   
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
