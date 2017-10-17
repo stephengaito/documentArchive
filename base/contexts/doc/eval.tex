@@ -3,11 +3,11 @@
 \section[title=Evaluation]
 
 \startCCode
-void traceAction(
+static void traceAction(
   JoyLoLInterp *jInterp,
-  Symbol* action,
-  PairAtom* aLoL,
-  PairAtom* command
+  Symbol       *action,
+  CoAlgObj     *aLoL,
+  CoAlgObj     *command
 ) {
   assert(jInterp);
   StringBufferObj *aStrBuf =
@@ -18,15 +18,43 @@ void traceAction(
     printLoL(jInterp, aStrBuf, command);
   }
   printf("%s\\n", getCString(jInterp, aStrBuf));
-  strBufClose(aStrBuf);
+  strBufClose(jInterp, aStrBuf);
 }
+\stopCCode
 
-void evalCommandInContext(Context* aCtx, PairAtom* command) {
+\startCHeader
+typedef void (EvalCommandInContext)(
+  ContextObj *aCtx,
+  CoAlgObj   *command
+);
+
+#define evalCommandInContext(aCtx, aCommand)      \
+  (                                               \
+    assert(aCtx),                                 \
+    assert(getContextsClass(aCtx->jInterp)        \
+      ->evalCommandInContextFunc),                \
+    (getContextsClass(aCtx->jInterp)              \
+      ->evalCommandInContextFunc(aCtx, aCommand)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+void evalCommandInContextImpl(
+  ContextObj *aCtx,
+  CoAlgObj   *command
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void evalCommandInContextImpl(
+  ContextObj *aCtx,
+  CoAlgObj   *command
+) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->symbols);
-  Dictionary* mainDic = aCtx->coAlgebras->symbols->dictionary;
-  assert(mainDic);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   //
   // if there is no command... there is nothing to do
   //
@@ -46,21 +74,23 @@ void evalCommandInContext(Context* aCtx, PairAtom* command) {
     command = popCtxProcess(aCtx);
     aCtx->command = command;
     //
-    if (isFunction(command)) {
+    if (isCFunction(command)) {
       //
       // if the command is a function.. call the function
       //
-      if (aCtx->tracingOn) traceAction("calling", command, NULL);
-      (command->func)(aCtx);
+      if (aCtx->tracingOn) 
+        traceAction(jInterp, "calling", command, NULL);
+      (asCFunc(command))(aCtx);
       //
     } else if (isContext(command)) {
       //
-      // if the command is a context... switch to this contex
+      // if the command is a context... switch to this context
       //
       DEBUG(FALSE, "evalCommandInContext -> switching origCtx: %s\\n",
             aCtx->name);
-      if (aCtx->tracingOn) traceAction("switching", command, NULL);
-      Context* switchCtx = command->context;
+      if (aCtx->tracingOn)
+        traceAction(jInterp, "switching", command, NULL);
+      ContextObj* switchCtx = (ContextObj*)command;
       assert(switchCtx);
 
       popCtxDataInto(aCtx, oldCtxTop);
@@ -75,7 +105,8 @@ void evalCommandInContext(Context* aCtx, PairAtom* command) {
       // if the command is not a Symbol ...
       //  ...  push it onto the top of the data stack
       //
-      if (aCtx->tracingOn) traceAction("adding", command, NULL);
+      if (aCtx->tracingOn)
+        traceAction(jInterp, "adding", command, NULL);
       pushCtxData(aCtx, command);
       //
     } else {
@@ -83,7 +114,7 @@ void evalCommandInContext(Context* aCtx, PairAtom* command) {
       // if the command is a symbol ...
       //  ... look up the symbol's association in the dictionary
       //
-      AVLNode* assoc = findSymbol(mainDic, command->symbol);
+      DictObj* assoc = findSymbol(jInterp, asSymbol(command));
       assert(assoc);
       //
       if (!assoc->value) {
@@ -92,7 +123,8 @@ void evalCommandInContext(Context* aCtx, PairAtom* command) {
         // of the data stack (re-evaluating this symbol would lead to an
         // infinite loop)
         //
-        if (aCtx->tracingOn) traceAction("adding", command, NULL);
+        if (aCtx->tracingOn)
+          traceAction(jInterp, "adding", command, NULL);
         pushCtxData(aCtx, command);
         //
       } else if (isPair(assoc->value)) {
@@ -100,16 +132,18 @@ void evalCommandInContext(Context* aCtx, PairAtom* command) {
         // if the association is a LoL.. push this LoL onto the top of the
         // process stack
         //
-        if (aCtx->tracingOn) traceAction("evaluating", assoc->value, command);
-        assert(aCtx->coAlgebras);
-        prependListCtxProcess(aCtx, copyLoL(aCtx->coAlgebras, assoc->value));
+        if (aCtx->tracingOn)
+          traceAction(jInterp, "evaluating", assoc->value, command);
+        prependListCtxProcess(aCtx,
+          copyLoL(jInterp, assoc->value));
         //
-      } else if (isFunction(assoc->value)) {
+      } else if (isCFunction(assoc->value)) {
         //
         // if the association is a function.. call the function
         //
-        if (aCtx->tracingOn) traceAction("calling", command, NULL);
-        (assoc->value->func)(aCtx);
+        if (aCtx->tracingOn)
+          traceAction(jInterp, "calling", command, NULL);
+        (asCFunc(assoc->value))(aCtx);
         //
       } else if (isContext(assoc->value)) {
         //
@@ -117,8 +151,9 @@ void evalCommandInContext(Context* aCtx, PairAtom* command) {
         //
         DEBUG(FALSE, "evalCommandInContext -> switching origCtx: %s\\n",
               aCtx->name);
-        if (aCtx->tracingOn) traceAction("switching", command, NULL);
-        Context* switchCtx = assoc->value->context;
+        if (aCtx->tracingOn)
+          traceAction(jInterp, "switching", command, NULL);
+        ContextObj* switchCtx = (ContextObj*)(assoc->value);
         assert(switchCtx);
 
         popCtxDataInto(aCtx, oldCtxTop);
@@ -133,30 +168,95 @@ void evalCommandInContext(Context* aCtx, PairAtom* command) {
         // if the association is NOT a PairAtom or Function...
         // ... push this new ATOM onto the top of the process stack
         //
-        if (aCtx->tracingOn) traceAction("evaluating", assoc->value, command);
+        if (aCtx->tracingOn)
+          traceAction(jInterp, "evaluating", assoc->value, command);
         pushCtxProcess(aCtx, assoc->value);
         //
       }
     }
     if (aCtx->tracingOn) {
       DEBUG(FALSE, "evalCommandInContext -> tracing%s\\n", "");
-      printf("d>>%s\\n", printLoL(aCtx->data));
-      printf("p>>%s\\n", printLoL(aCtx->process));
+      StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+      strBufPrintf(jInterp, aStrBuf, "d>>");
+      printLoL(jInterp, aStrBuf, aCtx->data);
+      strBufPrintf(jInterp, aStrBuf, "\\n");
+      strBufPrintf(jInterp, aStrBuf, "p>>");
+      printLoL(jInterp, aStrBuf, aCtx->process);
+      strBufPrintf(jInterp, aStrBuf, "\\n");
+      printf("%s", getCString(jInterp, aStrBuf));
+      strBufClose(jInterp, aStrBuf);
       DEBUG(FALSE, "evalCommandInContext <- tracing%s\\n", "");
     }
   } // aCtx->process is empty
   DEBUG(FALSE, "evalCommandInContext < %p %p\\n", aCtx, command);
 }
+\stopCCode
 
-void evalContext(Context* aCtx) {
+\startCHeader
+typedef void (EvalContext)(
+  ContextObj *aCtx
+);
+
+#define evalContext(aCtx)                   \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->evalContextFunc),                   \
+    (getContextsClass(aCtx->jInterp)        \
+      ->evalContextFunc(aCtx))              \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+void evalContextImpl(
+  ContextObj *aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void evalContextImpl(
+  ContextObj *aCtx
+) {
   popCtxProcessInto(aCtx, aCommand);
   evalCommandInContext(aCtx, aCommand);
 }
+\stopCCode
 
-void evalTextInContext(Context* aCtx, Text* aText) {
+\startCHeader
+typedef void (EvalTextInContext)(
+  ContextObj *aCtx,
+  TextObj    *aText
+);
+
+#define evalTextInContext(aCtx, aText)      \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->evalTextInContextFunc),             \
+    (getContextsClass(aCtx->jInterp)        \
+      ->evalTextInContextFunc(aCtx, aText)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void evalTextInContextImpl(
+  ContextObj *aCtx,
+  TextObj    *aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void evalTextInContextImpl(
+  ContextObj *aCtx,
+  TextObj    *aText
+) {
   DEBUG(FALSE, "evalTextInContext > %p %p\\n", aCtx, aText);
   while(TRUE) {
-    PairAtom* aLoL = parseOneSymbol(aText);
+    CoAlgObj* aLoL = parseOneSymbol(aText);
 //    if (aCtx->showStack) printf("<%s\\n", printLoL(aLoL));
     if (!aLoL) break;
     evalCommandInContext(aCtx, aLoL);
@@ -165,24 +265,64 @@ void evalTextInContext(Context* aCtx, Text* aText) {
   }
   DEBUG(FALSE, "evalTextInContext < %p %p\\n", aCtx, aText);
 }
+\stopCCode
 
-void evalArrayOfStringsInContext(Context* aCtx,
-                                 const char* someStrings[]) {
+
+\startCHeader
+typedef void (EvalArrayOfStringsInContext)(
+  ContextObj *aCtx,
+  Symbol     *someStrings[]
+);
+
+#define evalArrayOfStringsInContext(aCtx, someStrings)      \
+  (                                                         \
+    assert(aCtx),                                           \
+    assert(getContextsClass(aCtx->jInterp)                  \
+      ->evalArrayOfStringsInContextFunc),                   \
+    (getContextsClass(aCtx->jInterp)                        \
+      ->evalArrayOfStringsInContextFunc(aCtx, someStrings)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void evalArrayOfStringsInContextImpl(
+  ContextObj *aCtx,
+  Symbol     *someStrings[]
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void evalArrayOfStringsInContextImpl(
+  ContextObj *aCtx,
+  Symbol     *someStrings[]
+) {
   DEBUG(FALSE, "evalStringInContext > %p %p\\n", aCtx, someStrings);
   assert(aCtx);
-  assert(aCtx->coAlgebras);
-  Text* stringText = createTextFromArrayOfStrings(aCtx->coAlgebras,
-                                                  someStrings);
+  TextObj* stringText =
+    createTextFromArrayOfStrings(
+      aCtx->jInterp,
+      someStrings
+    );
   evalTextInContext(aCtx, stringText);
   freeText(stringText);
   DEBUG(FALSE, "evalStringInContext < %p %p\\n", aCtx, someStrings);
 }
+\stopCCode
 
-void evalStringInContext(Context* aCtx, const char* aString) {
+\startCCode
+void evalStringInContext(
+  ContextObj *aCtx,
+  Symbol     *aString
+) {
   DEBUG(FALSE, "evalStringInContext > %p [%s]\\n", aCtx, aString);
   assert(aCtx);
-  assert(aCtx->coAlgebras);
-  Text* stringText = createTextFromString(aCtx->coAlgebras, aString);
+  TextObj* stringText =
+    createTextFromString(
+      aCtx->jInterp,
+      aString
+    );
   evalTextInContext(aCtx, stringText);
   freeText(stringText);
   DEBUG(FALSE, "evalStringInContext < %p [%s]\\n", aCtx, aString);

@@ -240,7 +240,7 @@ typedef void (PrependListCtx)(
 
 #define prependListCtxData(aCtx, lolToPrepend)      \
   (                                                 \
-    asset(aCtx),                                    \
+    assert(aCtx),                                   \
     assert(getContextsClass(aCtx->jInterp)          \
       ->prependListCtxDataFunc),                    \
     (getContextsClass(aCtx->jInterp)                \
@@ -510,7 +510,7 @@ void pushParsedTextCtxProcessImpl(
 \startCHeader
 #define prependListCtxProcess(aCtx, lolToPrepend)      \
   (                                                    \
-    asset(aCtx),                                       \
+    assert(aCtx),                                      \
     assert(getContextsClass(aCtx->jInterp)             \
       ->prependListCtxProcessFunc),                    \
     (getContextsClass(aCtx->jInterp)                   \

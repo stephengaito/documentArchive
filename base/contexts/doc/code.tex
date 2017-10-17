@@ -33,6 +33,7 @@ typedef struct context_object_struct {
   Boolean       checkingOn;
   Boolean       verbose;
 } ContextObj;
+
 \stopCHeader
 
 \startCHeader
@@ -214,6 +215,13 @@ typedef struct contexts_class_struct {
   PopCtx         *popCtxProcessFunc;
   ExtendJoyLoL   *extendJoyLoLFunc;
   DefineJoyLoL   *defineJoyLoLFunc;
+  EvalCommandInContext
+    *evalCommandInContextFunc;
+  EvalContext    *evalContextFunc;
+  EvalTextInContext
+    *evalTextInContextFunc;
+  EvalArrayOfStringsInContext
+    *evalArrayOfStringsInContextFunc;
 } ContextsClass;
 \stopCHeader
 
@@ -266,6 +274,13 @@ Boolean registerContexts(
   
   theCoAlg->extendJoyLoLFunc       = extendJoyLoLImpl;
   theCoAlg->defineJoyLoLFunc       = defineJoyLoLImpl;
+  
+  theCoAlg->evalCommandInContextFunc =
+    evalCommandInContextImpl;
+  theCoAlg->evalContextFunc        = evalContextImpl;
+  theCoAlg->evalTextInContextFunc  = evalTextInContextImpl;
+  theCoAlg->evalArrayOfStringsInContextFunc =
+    evalArrayOfStringsInContextImpl;
   
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
