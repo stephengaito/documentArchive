@@ -28,7 +28,7 @@ static int lua_core_lua_setVerbose(lua_State *lstate) {
 static int lua_core_lua_pushLoadPath(lua_State *lstate) {
   Symbol *aPath = lua_tostring(lstate, 1);
   getJoyLoLInterpInto(lstate, jInterp);
-  pushLoadPath(jInterp->loader, aPath);
+  pushLoadPath(jInterp, aPath);
   lua_pop(lstate, 1);
   return 0;
 }
@@ -36,7 +36,7 @@ static int lua_core_lua_pushLoadPath(lua_State *lstate) {
 static int lua_core_lua_loadFile(lua_State *lstate) {
   Symbol *aFile = lua_tostring(lstate, 1);
   getJoyLoLInterpInto(lstate, jInterp);
-  loadFile(jInterp->loader, aFile);
+  loadAFile(jInterp->rootCtx, aFile);
   lua_pop(lstate, 1);
   return 0;
 }

@@ -215,6 +215,8 @@ typedef struct contexts_class_struct {
   PopCtx         *popCtxProcessFunc;
   ExtendJoyLoL   *extendJoyLoLFunc;
   DefineJoyLoL   *defineJoyLoLFunc;
+  ReportException
+    *reportExceptionFunc;
   EvalCommandInContext
     *evalCommandInContextFunc;
   EvalContext    *evalContextFunc;
@@ -274,6 +276,8 @@ Boolean registerContexts(
   
   theCoAlg->extendJoyLoLFunc       = extendJoyLoLImpl;
   theCoAlg->defineJoyLoLFunc       = defineJoyLoLImpl;
+  
+  theCoAlg->reportExceptionFunc    = reportExceptionImpl;
   
   theCoAlg->evalCommandInContextFunc =
     evalCommandInContextImpl;

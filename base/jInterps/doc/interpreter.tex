@@ -116,6 +116,7 @@ typedef struct dictionary_struct {
 } Dictionary;
 
 typedef struct loader_object_struct LoaderObj;
+typedef struct context_object_struct ContextObj;
 
 typedef struct joylol_interpreter_struct {
   lua_State    *lstate;
@@ -124,6 +125,7 @@ typedef struct joylol_interpreter_struct {
   CoAlgVecItem *coAlgs;
   Dictionary    dict;
   LoaderObj    *loader;
+  ContextObj   *rootCtx;
 } JoyLoLInterp;
 
 #define getCoAlgClass(jInterp, aTag)        \
@@ -230,6 +232,7 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   jInterp->dict.root        = NULL;
   jInterp->dict.firstSymbol = NULL;
   jInterp->loader           = NULL;
+  jInterp->rootCtx          = NULL;
   
   return jInterp;
 }

@@ -5,9 +5,11 @@ lfs = require 'lfs'
 lfs.mkdir('build')
 lfs.mkdir('build/joylol')
 lfs.mkdir('build/joylol/core')
+lfs.mkdir('build/core')
 lfs.mkdir('install')
 lfs.mkdir('install/joylol')
 lfs.mkdir('install/joylol/core')
+lfs.mkdir('install/core')
 lfs.mkdir('build/joylol')
 lfs.mkdir('install')
 lfs.mkdir('install/joylol')
@@ -27,7 +29,7 @@ litProgs.targets{
     'joylol.lua',
     'joylol/core/lua.h',
     'joylol/core/lua-private.h',
-    'textsReadline.c',
+    'lua.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',
@@ -44,7 +46,7 @@ joylol.targets{
     'joylol.lua',
     'joylol/core/lua.h',
     'joylol/core/lua-private.h',
-    'textsReadline.c',
+    'lua.c',
   },
   coAlgLibs = {
   },

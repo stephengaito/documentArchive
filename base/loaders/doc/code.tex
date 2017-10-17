@@ -49,7 +49,7 @@ LoaderObj *newLoaderImpl(
   pushLoadPath(jInterp, ""); 
   pushLoadPath(jInterp, JOYLOL_SYSTEM_COALG_PATH);
   pushLoadPath(jInterp, JOYLOL_SYSTEM_CONFIG_PATH);
-  pushLoadPath(jInterp, JOYLOL_USER_COALG_PATH);
+//  pushLoadPath(jInterp, JOYLOL_USER_COALG_PATH);
   pushLoadPath(jInterp, ".");
 
   // init standard load extensions
@@ -199,12 +199,13 @@ typedef Boolean (LoadAFile)(
   Symbol     *aFileToLoad
 );
 
-#define loadAFile(jInterp, aFileToLoad)       \
-  (                                           \
-    assert(getLoadersClass(jInterp)           \
-      ->loadAFileFunc),                       \
-    (getLoadersClass(jInterp)                 \
-      ->loadAFileFunc(jInterp, aFileToLoad))  \
+#define loadAFile(aCtx, aFileToLoad)       \
+  (                                        \
+    assert(aCtx),                          \
+    assert(getLoadersClass(aCtx->jInterp)  \
+      ->loadAFileFunc),                    \
+    (getLoadersClass(aCtx->jInterp)        \
+      ->loadAFileFunc(aCtx, aFileToLoad))  \
   )
 \stopCHeader
 

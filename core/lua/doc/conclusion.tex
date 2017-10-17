@@ -37,6 +37,7 @@
 #include <joylol/texts.h>
 #include <joylol/parsers.h>
 #include <joylol/contexts.h>
+#include <joylol/loaders.h>
 #include <joylol/core/lua.h>
 #include <joylol/core/lua-private.h>
 // dictionary
@@ -45,14 +46,17 @@
 
 \createCCodeFile%
   {default}%
-  {textsReadline.c}%
+  {lua.c}%
   {}
 
 \ensureDirectoryExists{build/joylol}
 \ensureDirectoryExists{build/joylol/core}
+\ensureDirectoryExists{build/core}
+
 \ensureDirectoryExists{install}
 \ensureDirectoryExists{install/joylol}
 \ensureDirectoryExists{install/joylol/core}
+\ensureDirectoryExists{install/core}
   
 \addMainDocument{joylol.tex}
 \addSubDocument{overview.tex} 
