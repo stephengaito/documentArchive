@@ -126,16 +126,16 @@ The required extensions for this implementation is:
 
 \setCHeaderStream{public}
 \startCHeader
-#define UnusedTag         0
-#define JInterpsTag       1
-#define BooleansTag       2
-#define CFunctionsTag     3
-#define ContextsTag       4
-#define DictionariesTag   5
-#define LoadersTag        6
-#define LuaFunctionsTag   7
-#define NaturalsTag       8
-#define PairsTag          9
+#define UnusedTag          0
+#define JInterpsTag        1
+#define BooleansTag        2
+#define CFunctionsTag      3
+#define ContextsTag        4
+#define DictionariesTag    5
+#define LoadersTag         6
+#define LuaFunctionsTag    7
+#define NaturalsTag        8
+#define PairsTag           9
 #define ParsersTag        10
 #define StringBuffersTag  11
 #define SymbolsTag        12
@@ -214,10 +214,29 @@ RequiredCoAlgs requiredCoAlgs[] = {
 \stopCCode
 
 \startLuaCode
-require 'joylol.jInterps'
-require 'joylol.stringBuffers'
-require 'joylol.booleans'
-require 'joylol.cFunctions'
+local joylol = { }
+
+-- load all required CoAlgebraic extensions -- creation phase
+
+joylol.jInterps      = require 'joylol.jInterps'       --  1
+joylol.booleans      = require 'joylol.booleans'       --  2
+joylol.cFunctions    = require 'joylol.cFunctions'     --  3
+joylol.contexts      = require 'joylol.contexts'       --  4
+joylol.dictionaries  = require 'joylol.dictionaries'   --  5
+joylol.loaders       = require 'joylol.loaders'        --  6
+joylol.luaFunctions  = require 'joylol.luaFunctions'   --  7
+joylol.naturals      = require 'joylol.naturals'       --  8
+joylol.pairs         = require 'joylol.pairs'          --  9
+joylol.parsers       = require 'joylol.parsers'        -- 10
+joylol.stringBuffers = require 'joylol.stringBuffers'  -- 11
+joylol.symbols       = require 'joylol.symbols'        -- 12
+joylol.templates     = require 'joylol.templates'      -- 13
+joylol.texts         = require 'joylol.texts'          -- 14
+
+-- load all required CoAlgebraic extensions -- initialization phase
+
+joylol.jInterps.initializeAllRequired()
+
 \stopLuaCode
 
 Finally we provide a number of semi-standard typdefs to provide a semantic 
