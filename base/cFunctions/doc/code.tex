@@ -22,14 +22,31 @@ typedef struct cFunction_object_struct {
 \startTestSuite[newCFunction]
 
 \startCHeader
-CFunctionObj *newCFunction(
+typedef CFunctionObj *(NewCFunction)(
+  JoyLoLInterp *jInterp,
+  CFunction    *aFunc
+);
+
+#define newCFunction(jInterp, aFunc)      \
+  (                                       \
+    assert(getCFunctionsClass(jInterp)    \
+      ->newCFunctionFunc),                \
+    (getCFunctionsClass(jInterp)          \
+      ->newCFunctionFunc(jInterp, aFunc)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern CFunctionObj *newCFunctionImpl(
   JoyLoLInterp *jInterp,
   CFunction *aFunc
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
-CFunctionObj *newCFunction(
+CFunctionObj *newCFunctionImpl(
   JoyLoLInterp *jInterp,
   CFunction *aFunc
 ) {
@@ -88,6 +105,7 @@ Boolean equalityFuncCoAlg(
   Boolean debugFlag
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean equalityFuncCoAlg(
@@ -109,6 +127,7 @@ Boolean equalityFuncCoAlg(
 
 \startTestSuite[print CFunction]
 
+\setCHeaderStream{private}
 \startCHeader
 extern Boolean printFuncCoAlg(
   JoyLoLInterp    *jInterp,
@@ -116,6 +135,7 @@ extern Boolean printFuncCoAlg(
   CoAlgObj        *aLoL
 );
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean printFuncCoAlg(
@@ -178,8 +198,8 @@ void Test_checkFunctionsSymbols(CuTest* tc) {
 
 \startCHeader
 typedef struct cFunctions_class_struct {
-  CoAlgClass super;
-  
+  CoAlgClass    super;
+  NewCFunction *newCFunctionFunc;
 } CFunctionsClass;
 \stopCHeader
 
@@ -200,6 +220,7 @@ Boolean registerCFunctions(JoyLoLInterp *jInterp) {
   theCoAlg->super.registerFunc = registerCFunctions;
   theCoAlg->super.equalityFunc = equalityFuncCoAlg;
   theCoAlg->super.printFunc    = printFuncCoAlg;
+  theCoAlg->newCFunctionFunc   = newCFunctionImpl;
   
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
