@@ -2,6 +2,7 @@
 
 \section[title=Context control code]
 
+\starttyping
 // Operators
 
 static void failAP(Context* aCtx) {
@@ -117,23 +118,51 @@ void raiseException(Context* aCtx, Symbol* message) {
   pushSymbolCtxData(aCtx, message);
   pushSymbolCtxProcess(aCtx, "raise");
 }
+\stoptyping
 
-size_t reportException(Context* aCtx) {
+\startCHeader
+typedef Boolean (ReportException)(
+  ContextObj* aCtx
+);
+
+#define reportException(aCtx)               \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->reportExceptionFunc),               \
+    (getContextsClass(aCtx->jInterp)        \
+      ->reportExceptionFunc(aCtx))          \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean reportExceptionImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean reportExceptionImpl(
+  ContextObj* aCtx
+) {
   assert(aCtx);
   if (!aCtx->exceptionRaised) return FALSE;
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   StringBufferObj *aStrBuf = 
     newStringBuffer(jInterp);
-  char* exceptionReport = 
-    printLoL(jInterp, aStrBuf,car(aCtx->data));
-  printf("\nUNHANDLED EXCEPTION: %s\n", exceptionReport);
+  printLoL(jInterp, aStrBuf, aCtx->data);
+  printf("\nUNHANDLED EXCEPTION: %s\n",
+    getCString(jInterp, aStrBuf));
   strBufClose(jInterp, aStrBuf);
-  if (exceptionReport) free(exceptionReport);
   aCtx->exceptionRaised = FALSE;
   return TRUE;
 }
+\stopCCode
 
+\starttyping
 // Support
 
 static void defineAP(Context* aCtx) {
@@ -193,3 +222,4 @@ void initContextsAPControl(CoAlgebras* coAlgs) {
   extendJoyLoL(coAlgs, "findFirstTryHandler", findFirstTryHandlerAP);
   extendJoyLoL(coAlgs, "tryHandler",          tryHandlerAP);
 }
+\stoptyping
