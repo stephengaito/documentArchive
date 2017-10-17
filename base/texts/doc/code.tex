@@ -309,7 +309,7 @@ typedef void (ReportError)(
 #define reportError(aText, message)       \
   (                                       \
     assert(aText),                        \
-    assert(getTextsClass(aText->jInerp)   \
+    assert(getTextsClass(aText->jInterp)  \
       ->reportErrorFunc),                 \
     (getTextsClass(aText->jInterp)        \
       ->reportErrorFunc(aText, message))  \
@@ -346,6 +346,7 @@ void reportErrorImpl(
 extern Boolean equalityTextsCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
                                   size_t debugFlag);
 \stopCHeader
+\setCHeaderStream{public}
 
 \startCCode
 Boolean equalityTextsCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
