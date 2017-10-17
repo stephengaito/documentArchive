@@ -138,9 +138,8 @@ static char** dictionaryCompletion(const char* text, int start, int end) {
 \startCCode
 static TextObj* createTextFromReadline(JoyLoLInterp *jInterp) {
   assert(jInterp);
-  assert(readlineTag);
   
-  TextObj* aText = (TextObj*)newObject(jInterp, readlineTag);
+  TextObj* aText = (TextObj*)newObject(jInterp, TextsTag);
   assert(aText);
   //
   // readline specific initializations
@@ -178,24 +177,30 @@ static TextObj* createTextFromReadline(JoyLoLInterp *jInterp) {
 \stopCCode
 
 \startCHeader
-extern void runREPLInContext(Context* aCtx);
+extern void runREPLInContext(
+  ContextObj* aCtx
+);
 \stopCHeader
 
 \startCCode
-void runREPLInContext(Context* aCtx) {
+void runREPLInContext(
+  ContextObj* aCtx
+) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
   if (aCtx->verbose) {
     printf("Welcome to JoyLoL v0.1 ( %s ; %s )\n",
-      getMainVersionShortHash(),
-      getMainVersionShortDate()
+      "hash", //getMainVersionShortHash(),
+      "date" //getMainVersionShortDate()
     );
   }
   aCtx->showStack = TRUE;
-  Text* aText = createTextFromReadline(aCtx->coAlgebras);
+  TextObj* aText = createTextFromReadline(jInterp);
   while(TRUE) {
     DEBUG(FALSE, "runREPLInContext %p reading\\n", aCtx);
-    PairAtom* aLoL = parseOneSymbol(aText);
+    CoAlgObj* aLoL = parseOneSymbol(aText);
     DEBUG(FALSE, "runREPLInContext %p read %p\\n", aCtx, aLoL);
     //
     if (!aLoL) break;
@@ -205,7 +210,10 @@ void runREPLInContext(Context* aCtx) {
     //
     if (aCtx->showStack) {
       DEBUG(FALSE, "runREPLInContext %p printing data %p\\n", aCtx, aCtx->data);
-      printf(">>%s\\n", printLoL(aCtx->data));
+      StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+      printLoL(jInterp, aStrBuf, aCtx->data);
+      printf(">>%s\\n", getCString(jInterp, aStrBuf));
+      strBufClose(jInterp, aStrBuf);
       DEBUG(FALSE, "runREPLInContext %p printed data %p\\n", aCtx, aCtx->data);
     }
     //

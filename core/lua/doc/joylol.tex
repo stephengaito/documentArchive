@@ -1,10 +1,15 @@
 % A ConTeXt document
 
 \usemodule[t-diSimp]
-\usemodule[t-literate-progs]
+\usemodule[t-joylol-coalg]
 
-\startproduct
-\startdocument[title=The core JoyLoL based on Lua]
+\startJoyLoLCoAlg[title=The core JoyLoL based on Lua][core/lua]
+
+\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
+src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
+(Stephen Gaito)}, year=2017] 
+
+\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
 
 \component overview
 
@@ -16,5 +21,4 @@
 
 \component conclusion
 
-\stopdocument
-\stopproduct
+\stopJoyLoLCoAlg

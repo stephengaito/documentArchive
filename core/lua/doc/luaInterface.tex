@@ -19,7 +19,7 @@ static int lua_core_lua_getGitVersion (lua_State *lstate) {
 static int lua_core_lua_setVerbose(lua_State *lstate) {
   Boolean verbose = 
     (lua_toboolean(lstate, 1) ? TRUE : FALSE);
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   jInterp->rootCtx->verbose = verbose;
   lua_pop(lstate, 1);
   return 0;
@@ -27,7 +27,7 @@ static int lua_core_lua_setVerbose(lua_State *lstate) {
 
 static int lua_core_lua_pushLoadPath(lua_State *lstate) {
   Symbol *aPath = lua_tostring(lstate, 1);
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   pushLoadPath(jInterp->loader, aPath);
   lua_pop(lstate, 1);
   return 0;
@@ -35,14 +35,14 @@ static int lua_core_lua_pushLoadPath(lua_State *lstate) {
 
 static int lua_core_lua_loadFile(lua_State *lstate) {
   Symbol *aFile = lua_tostring(lstate, 1);
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   loadFile(jInterp->loader, aFile);
   lua_pop(lstate, 1);
   return 0;
 }
 
 static int lua_core_lua_runREPL(lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   runREPLInContext(jInterp->rootCtx);
   return 0;
 }
@@ -57,7 +57,7 @@ static const struct luaL_Reg lua_core_lua [] = {
 };
 
 int luaopen_joylol_core_lua (lua_State *lstate) {
-  JoyLoLInterp *jInterp = getJoyLoLInterp(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
   //registerTextsReadline(jInterp);
   luaL_newlib(lstate, lua_core_lua);
   return 1;

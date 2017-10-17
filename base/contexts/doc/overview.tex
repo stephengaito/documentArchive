@@ -21,3 +21,8 @@ with POSIX-threads then we will need to mutex contexts (green threads) as
 threads to alter the same context (as a data structure). If contexts are 
 identified with POSIX-threads, then there is no sense to our previous 
 (joyLoL20170316) commands to \quote{switch contexts}. 
+
+\setCHeaderStream{public}
+\startCHeader
+typedef struct context_object_struct ContextObj;
+\stopCHeader

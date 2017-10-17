@@ -8,6 +8,9 @@ lfs.mkdir('build/joylol/core')
 lfs.mkdir('install')
 lfs.mkdir('install/joylol')
 lfs.mkdir('install/joylol/core')
+lfs.mkdir('build/joylol')
+lfs.mkdir('install')
+lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
@@ -29,6 +32,23 @@ litProgs.targets{
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets{
+  coAlgs = {
+    'core/lua',
+  },
+  srcFiles = {
+    'joylol.lua',
+    'joylol/core/lua.h',
+    'joylol/core/lua-private.h',
+    'textsReadline.c',
+  },
+  coAlgLibs = {
+  },
+  buildDir = 'build',
 }
 
 local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}

@@ -31,8 +31,12 @@
 #include <readline/history.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/cFunctions.h>
+#include <joylol/stringBuffers.h>
 #include <joylol/dictionaries.h>
 #include <joylol/texts.h>
+#include <joylol/parsers.h>
+#include <joylol/contexts.h>
 #include <joylol/core/lua.h>
 #include <joylol/core/lua-private.h>
 // dictionary
@@ -67,6 +71,8 @@ tInsert(installTargets, target{
   command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
 })
 \stopLmsfile
+
+\addJoyLoLTargets{default}
 
 \compileLmsfile{default}
 
