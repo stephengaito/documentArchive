@@ -113,17 +113,6 @@ copy"](http://wiki.c2.com/?StopAndCopy) live JoyLoL objects into older
 heaps just before the newer heap is reclaimed by the Lua GC. Essentially 
 we are letting the Lua GC drive the JoyLoL GC. 
 
-%\stopJFrame
-
-%\startsyntax
-
-%\stopsyntax 
-
-%\startinitialization
-
-%\stopinitialization
-
-
 \subsection[title=Required CoAlgebraic extensions]
 
 For any given (impure) implementation of a JoyLoL interpreter, there will 
@@ -143,21 +132,23 @@ The required extensions for this implementation is:
 #define CFunctionsTag     3
 #define ContextsTag       4
 #define DictionariesTag   5
-#define LuaFunctionsTag   6
-#define NaturalsTag       7
-#define PairsTag          8
-#define ParsersTag        9
-#define StringBuffersTag  10
-#define SymbolsTag        11
-#define TemplatesTag      12
-#define TextsTag          13
-#define NumRequiredCoAlgs 14
+#define LoadersTag        6
+#define LuaFunctionsTag   7
+#define NaturalsTag       8
+#define PairsTag          9
+#define ParsersTag        10
+#define StringBuffersTag  11
+#define SymbolsTag        12
+#define TemplatesTag      13
+#define TextsTag          14
+#define NumRequiredCoAlgs 15
 
 #define JInterpsName      "JoyLoLInterps"
 #define BooleansName      "Booleans"
 #define CFunctionsName    "CFunctions"
 #define ContextsName      "Contexts"
 #define DictionariesName  "Dictionaries"
+#define LoadersName       "Loaders"
 #define LuaFunctionsName  "LuaFunctions"
 #define NaturalsName      "Naturals"
 #define PairsName         "Pairs"
@@ -209,6 +200,7 @@ RequiredCoAlgs requiredCoAlgs[] = {
   { CFunctionsName,    CFunctionsTag,    {0, 1, 0 }},
   { ContextsName,      ContextsTag,      {0, 1, 0 }},
   { DictionariesName,  DictionariesTag,  {0, 1, 0 }},
+  { LoadersName,       LoadersTag,       {0, 1, 0 }},
   { LuaFunctionsName,  LuaFunctionsTag,  {0, 1, 0 }},
   { NaturalsName,      NaturalsTag,      {0, 1, 0 }},
   { PairsName,         PairsTag,         {0, 1, 0 }},

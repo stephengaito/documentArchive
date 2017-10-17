@@ -115,15 +115,15 @@ typedef struct dictionary_struct {
   DictObj *firstSymbol;
 } Dictionary;
 
-typedef struct loader_struct Loader;
+typedef struct loader_object_struct LoaderObj;
 
 typedef struct joylol_interpreter_struct {
   lua_State    *lstate;
   size_t        numCoAlgs;
   size_t        maxNumCoAlgs;
   CoAlgVecItem *coAlgs;
-  Dictionary   dict;
-  Loader       *loader;
+  Dictionary    dict;
+  LoaderObj    *loader;
 } JoyLoLInterp;
 
 #define getCoAlgClass(jInterp, aTag)        \
@@ -153,6 +153,10 @@ typedef struct contexts_class_struct ContextsClass;
 typedef struct dictionaries_class_struct DictionariesClass;
 #define getDictionariesClass(jInterp)                \
   ((DictionariesClass*)getCoAlgClass(jInterp, DictionariesTag))
+
+typedef struct loaders_class_struct LoadersClass;
+#define getLoadersClass(jInterp)                          \
+  ((LoadersClass*)getCoAlgClass(jInterp, LoadersTag))
 
 typedef struct luaFunctions_class_struct LuaFunctionsClass;
 #define getLuaFunctionsClass(jInterp)                          \

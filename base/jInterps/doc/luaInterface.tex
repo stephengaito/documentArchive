@@ -157,6 +157,18 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
   lua_pop(lstate, 1)
 \stopCHeader
 
+\startCHeader
+#define requireLuaModuleInto(lstate, aLuaModule, result)  \
+  Boolean result = TRUE;                                  \
+  lua_getglobal(lstate, "require");                       \
+  lua_pushstring(lstate, aLuaModule);                     \
+  if (lua_pcall(lstate, 1, 1, 0)) {                       \
+    /* there was an error... */                           \
+    result = FALSE;                                       \
+  }                                                       \
+  lua_pop(lstate, 1)
+\stopCHeader
+
 \stopTestSuite
 
 \component gitVersion-c

@@ -1,0 +1,14 @@
+% A ConTeXt document [master document: loaders.tex]
+
+\section[title=Words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerLoaderWords(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerBooleanWords(JoyLoLInterp* jInterp) {
+}
+\stopCCode

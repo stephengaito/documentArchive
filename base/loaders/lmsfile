@@ -1,0 +1,73 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('build/joylol')
+lfs.mkdir('install')
+lfs.mkdir('install/joylol')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'loaders.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/loaders.h',
+    'joylol/loaders-private.h',
+    'loaders.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets{
+  coAlgs = {
+    'loaders',
+  },
+  srcFiles = {
+    'joylol/loaders.h',
+    'joylol/loaders-private.h',
+    'loaders.c',
+  },
+  coAlgLibs = {
+  },
+  buildDir = 'build',
+}
+
+require 'lms.contests'
+
+contests.targets{
+  testExecs = {
+    'allCTests',
+  },
+  mainDoc = 'loaders.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/loaders.h',
+    'joylol/loaders-private.h',
+    'loaders.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}

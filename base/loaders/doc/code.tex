@@ -1,74 +1,109 @@
-% A ConTeXt document [master document: jInterps.tex]
+% A ConTeXt document [master document: loaders.tex]
 
 \section[title=Loader functions]
 
 \startCHeader
-typedef struct loader_struct {
-  CoAlgHandle *paths;
-  CoAlgHandle *files;
-  CoAlgHandle *extensions;
-  Boolean      loadConfig;
-} JoyLoLLoader;
+typedef struct loader_object_struct {
+  CoAlgObj  super;
+  CoAlgObj *paths;
+  CoAlgObj *extensions;
+} LoaderObj;
+\stopCHeader
+
+\startCHeader
+typedef LoaderObj *(NewLoader)(
+  JoyLoLInterp *jInterp
+);
+
+#define newLoader(jInterp)          \
+  (                                 \
+    assert(getLoadersClass(jInterp) \
+      ->newLoaderFunc),             \
+    (getLoadersClass(jInterp)       \
+      ->newLoaderFunc(jInterp))     \
+  )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern void initLoader(JoyLoLInterp *jInterp);
+extern LoaderObj *newLoaderImpl(
+  JoyLoLInterp *jInterp
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void initLoader(JoyLoLInterp *jInterp) {
-  jInterp->loader.paths      = NULL;
-  jInterp->loader.files      = NULL;
-  jInterp->loader.extensions = NULL;
-  jInterp->loader.loadConfig = TRUE;
+LoaderObj *newLoaderImpl(
+  JoyLoLInterp *jInterp
+) {
+  assert(jInterp);
+  LoaderObj *loader = 
+    (LoaderObj*)newObject(jInterp, LoadersTag);
+  assert(loader);
   
-  // initStandardLoadPaths
-  char userConfigPath[1000];
-  userConfigPath[0] = 0;
-  strcat(userConfigPath, getenv("HOME"));
-  //strcat(userConfigPath, secure_getenv("HOME"));
-  strcat(userConfigPath, "/.joyLoL");
-  char userPluginPath[1000];
-  userPluginPath[0] = 0;
-  strcat(userPluginPath, userConfigPath);
-  strcat(userPluginPath, "/plugins");
-
+  loader->paths      = NULL;
+  loader->extensions = NULL;
+  
+  // init standard load paths
   // allow absolute paths as a last resort
-  pushLoadPath(jInterps, ""); 
-  pushLoadPath(jInterps, JOYLOL_SYSTEM_PLUGINS_PATH);
-  pushLoadPath(jInterps, JOYLOL_SYSTEM_CONFIG_PATH);
-  pushLoadPath(jInterps, userPluginPath);
-  pushLoadPath(jInterps, userConfigPath);
-  pushLoadPath(jInterps, ".");
+  pushLoadPath(jInterp, ""); 
+  pushLoadPath(jInterp, JOYLOL_SYSTEM_COALG_PATH);
+  pushLoadPath(jInterp, JOYLOL_SYSTEM_CONFIG_PATH);
+  pushLoadPath(jInterp, JOYLOL_USER_COALG_PATH);
+  pushLoadPath(jInterp, ".");
 
+  // init standard load extensions
   // allow absolute extensions as a last resort
-  pushLoadExtension(jInterps, "");
-  pushLoadExtension(jInterps, ".so");
-  pushLoadExtension(jInterps, ".lua");
-  pushLoadExtension(jInterps, ".joy");
+  pushLoadExtension(jInterp, "");
+  pushLoadExtension(jInterp, ".so");
+  pushLoadExtension(jInterp, ".lua");
+  pushLoadExtension(jInterp, ".joy");
+  
+  return loader;
 }
 \stopCCode
 
 \startCHeader
-void pushLoadPath(JoyLoLInterp* jInterp, const char* aLoadPath);
+typedef void (PushLoadSymbol)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aLoadSym
+);
+
+#define pushLoadPath(jInterp, aLoadPath)      \
+  (                                           \
+    assert(getLoadersClass(jInterp)           \
+      ->pushLoadPathFunc),                    \
+    (getLoadersClass(jInterp)                 \
+      ->pushLoadPathFunc(jInterp, aLoadPath)) \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern void pushLoadPathImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aLoadPath
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-void pushLoadPath(JoyLoLInterp* jInterp, const char* aLoadPath) {
+void pushLoadPathImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aLoadPath
+) {
   assert(aLoadPath);
   assert(jInterp);
-  assert(jInterp->contexts);
-  Loader* loader = jInterp->contexts->loader;
+  LoaderObj* loader = jInterp->loader;
   assert(loader);
-  loader->loadPaths =
-    newPair(jInterp, newSymbol(jInterp, aLoadPath), loader->loadPaths);
+  loader->paths =
+    newPair(jInterp, newSymbol(jInterp, aLoadPath), loader->paths);
 }
 \stopCCode
 
+\starttyping
 \startCHeader
-void pushLoadFile(JoyLoLInterp* jInterp, const char* aLoadFile);
+extern void pushLoadFile(JoyLoLInterp* jInterp, const char* aLoadFile);
 \stopCHeader
 
 \startCCode
@@ -82,46 +117,67 @@ void pushLoadFile(JoyLoLInterp* jInterp, const char* aLoadFile) {
     newPair(jInterp, newSymbol(jInterp, aLoadFile), loader->loadFiles);
 }
 \stopCCode
+\stoptyping
 
 \startCHeader
-void pushLoadExtension(JoyLoLInterp* jInterp, const char* aLoadExtension);
+#define pushLoadExtension(jInterp, aLoadExt)      \
+  (                                               \
+    assert(getLoadersClass(jInterp)               \
+      ->pushLoadExtensionFunc),                   \
+    (getLoadersClass(jInterp)                     \
+      ->pushLoadExtensionFunc(jInterp, aLoadExt)) \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern void pushLoadExtensionImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aLoadExtension
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-void pushLoadExtension(JoyLoLInterp* jInterp, const char* aLoadExtension) {
+void pushLoadExtensionImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aLoadExtension
+) {
   assert(aLoadExtension);
   assert(jInterp);
-  assert(jInterp->contexts);
-  Loader* loader = jInterp->contexts->loader;
+  LoaderObj* loader = jInterp->loader;
   assert(loader);
-  loader->loadExtensions =
-    newPair(jInterp, newSymbol(jInterp, aLoadExtension), loader->loadExtensions);
+  loader->extensions =
+    newPair(
+      jInterp, 
+      newSymbol(jInterp, aLoadExtension),
+      loader->extensions
+    );
 }
 \stopCCode
 
-\starttyping
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <unistd.h>
-#include <dlfcn.h>
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean loadAJoyLoLFile(
+  ContextObj *aCtx,
+  Symbol     *filePath
+);
+\stopCHeader
+\setCHeaderStream{public}
 
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/text.h"
-#include "joyLoL/eval.h"
-#include "joyLoL/loader.h"
-#include "joyLoL/loader_private.h"
-
-size_t loadATextFile(Context* aCtx, const char* filePath) {
+\startCCode
+Boolean loadAJoyLoLFile(
+  ContextObj *aCtx,
+  Symbol     *filePath
+) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
+  assert(aCtx->jInterp);
   DEBUG(FALSE, "loadATextFile [%s]\n", filePath);
   FILE* inputFile = fopen(filePath, "r");
   if (inputFile) {
     if(aCtx->verbose) printf("(%s)\n", filePath);
-    Text* aText = createTextFromInputFile(aCtx->coAlgebras, inputFile);
+    TextObj* aText =
+      createTextFromInputFile(aCtx->jInterp, inputFile);
     evalTextInContext(aCtx, aText);
     freeText(aText);
     fclose(inputFile);
@@ -135,86 +191,102 @@ size_t loadATextFile(Context* aCtx, const char* filePath) {
   DEBUG(FALSE, "loadATextFile [%s] FAILED\n", filePath);
   return FALSE;
 }
+\stopCCode
 
-size_t loadADSOFile(Context* aCtx, const char* fileName,
-                    const char* filePath) {
-  DEBUG(FALSE, "loadADSOFile {%s}[%s]\n", fileName, filePath);
-  void* dsoHandle = dlopen(filePath, RTLD_LAZY);
-  if (dsoHandle) {
-    if (aCtx->verbose) printf("(%s)\n", filePath);
-    char buffer[1000];
-    buffer[0] = 0;
-    strcat(buffer, fileName);
-    strcat(buffer, "_init");
-    size_t (*initFunc)(Context*) =
-      (size_t (*)(Context*)) dlsym(dsoHandle, buffer);
-    if (initFunc) {
-      size_t result = TRUE;
-      DEBUG(FALSE, "loadADSOFile calling %p with %p\n", initFunc, aCtx);
-      result = initFunc(aCtx);
-      DEBUG(FALSE, "loadADSOFile called %p with %p result = %zu\n",
-            initFunc, aCtx, result);
-      return result;
-    }
-  }
-  DEBUG(FALSE, "loadADSOFile {%s}[%s] no dsoHandle %p\n",
-        fileName, filePath, dsoHandle);
-  return FALSE;
-}
+\startCHeader
+typedef Boolean (LoadAFile)(
+  ContextObj *aCtx,
+  Symbol     *aFileToLoad
+);
 
-size_t loadAFile(Context* aCtx, const char* aFileToLoad) {
+#define loadAFile(jInterp, aFileToLoad)       \
+  (                                           \
+    assert(getLoadersClass(jInterp)           \
+      ->loadAFileFunc),                       \
+    (getLoadersClass(jInterp)                 \
+      ->loadAFileFunc(jInterp, aFileToLoad))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean loadAFileImpl(
+  ContextObj *aCtx,
+  Symbol     *aFileToLoad
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean loadAFileImpl(
+  ContextObj *aCtx,
+  Symbol     *aFileToLoad
+) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->contexts);
-  Loader* loader = aCtx->coAlgebras->contexts->loader;
+  assert(aCtx->jInterp);
+  LoaderObj* loader = aCtx->jInterp->loader;
   assert(loader);
   if (!aFileToLoad) return FALSE;
   if (!*aFileToLoad) return FALSE;
 
   if (aCtx->verbose) printf("\t%s ", aFileToLoad);
 
-  PairAtom* aLoadPathList = loader->loadPaths;
+  CoAlgObj* aLoadPathList = loader->paths;
   while(aLoadPathList) {
-    PairAtom* aLoadPath = aLoadPathList->pair.car;
+    assert(isPair(aLoadPathList));
+    CoAlgObj* aLoadPath = asCar(aLoadPathList);
     if (!isSymbol(aLoadPath)) continue;
 
-    PairAtom* aLoadExtensionList = loader->loadExtensions;
+    CoAlgObj* aLoadExtensionList = loader->extensions;
     while(aLoadExtensionList) {
-      PairAtom* aLoadExtension = aLoadExtensionList->pair.car;
+      assert(isPair(aLoadExtensionList));
+      CoAlgObj* aLoadExtension = asCar(aLoadExtensionList);
       if (!isSymbol(aLoadExtension)) continue;
 
-      char buffer[1000];
+      char buffer[8000];
       buffer[0] = 0;
       assert(isSymbol(aLoadPath));
-      strcat(buffer, aLoadPath->symbol);
+      strcat(buffer, asSymbol(aLoadPath));
       strcat(buffer, "/");
       strcat(buffer, aFileToLoad);
       assert(isSymbol(aLoadExtension));
-      strcat(buffer, aLoadExtension->symbol);
+      strcat(buffer, asSymbol(aLoadExtension));
       DEBUG(FALSE, "trying to load: [%s]\n", buffer);
 
       if (!access(buffer, R_OK)) {
-        if (strcmp(aLoadExtension->symbol, ".so") == 0) {
-          if (loadADSOFile(aCtx, aFileToLoad, buffer)) {
+        if (strcmp(asSymbol(aLoadExtension), ".joy") == 0) {
+          if (loadAJoyLoLFile(aCtx, aFileToLoad)) {
             DEBUG(FALSE, "loaded: [%s]\n", buffer);
             return TRUE;
           }
-        } else if (loadATextFile(aCtx, buffer)) {
-          DEBUG(FALSE, "loaded: [%s]\n", buffer);
-          return TRUE;
+        } else {
+          assert(aCtx);
+          lua_State *lstate = aCtx->jInterp->lstate;
+          requireLuaModuleInto(lstate, aFileToLoad, loadedOk);
+          if (loadedOk) {
+            DEBUG(FALSE, "loaded: [%s]\n", buffer);
+            return TRUE;
+          }
         }
         // keep trying other paths/extensions ...
       }
-      aLoadExtensionList = aLoadExtensionList->pair.cdr; // try the next ext
+      // try the next ext
+      aLoadExtensionList = asCdr(aLoadExtensionList);
     }
-    aLoadPathList = aLoadPathList->pair.cdr; // try the next load path
+    // try the next load path
+    aLoadPathList = asCdr(aLoadPathList);
   }
   if(aCtx->verbose) printf("FAILED\n");
   DEBUG(FALSE, "loadAFile: FAILED%s\n", "");
   return FALSE; // we could not find this file in any of the load paths
 }
+\stopCCode
 
-size_t loadFiles(Context* aCtx, PairAtom* filesToLoad) {
+\starttyping
+Boolean loadFiles(
+  ContextObj *aCtx,
+  CoAlgObj   *filesToLoad
+) {
   assert(aCtx);
   assert(aCtx->coAlgebras);
   assert(aCtx->coAlgebras->contexts);
@@ -237,6 +309,82 @@ size_t loadFiles(Context* aCtx, PairAtom* filesToLoad) {
   DEBUG(FALSE, "loadFiles < %p FAILED\n", filesToLoad);
   return FALSE; // some previous file has failed to load...
 }
-
-
 \stoptyping
+
+\startTestSuite[regiserLoaders]
+
+\startCHeader
+typedef struct loaders_class_struct {
+  CoAlgClass      super;
+  NewLoader      *newLoaderFunc;
+  PushLoadSymbol *pushLoadPathFunc;
+  PushLoadSymbol *pushLoadExtensionFunc;
+  LoadAFile      *loadAFileFunc;
+} LoadersClass;
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+Boolean registerLoaders(
+  JoyLoLInterp *jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerLoaders(
+  JoyLoLInterp *jInterp
+) {
+  assert(jInterp);
+  
+  LoadersClass* theCoAlg =
+    joyLoLCalloc(1, LoadersClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name            = LoadersName;
+  theCoAlg->super.objectSize      = sizeof(LoaderObj);
+  theCoAlg->super.registerFunc    = registerLoaders;
+  theCoAlg->super.equalityFunc    = NULL;
+  theCoAlg->super.printFunc       = NULL;
+  theCoAlg->newLoaderFunc         = newLoaderImpl;
+  theCoAlg->pushLoadPathFunc      = pushLoadPathImpl;
+  theCoAlg->pushLoadExtensionFunc = pushLoadExtensionImpl;
+  theCoAlg->loadAFileFunc         = loadAFileImpl;
+
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == LoadersTag);
+  assert(tag < jInterp->numCoAlgs);
+  assert(getLoadersClass(jInterp));
+    
+  // need to register JoyLoL words
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Loaders coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp 
+  // and run registerJInterps
+  //
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertIntTrue(LoadersTag < jInterp->numCoAlgs);
+  AssertPtrNotNull(getLoadersClass(jInterp));
+  
+  LoadersClass *loadersClass = getLoadersClass(jInterp);
+  size_t result = registerLoaders(jInterp);
+  AssertIntTrue(result);
+  AssertPtrNotNull(getLoadersClass(jInterp));
+  AssertPtrEquals(getLoadersClass(jInterp), loadersClass);
+  AssertIntEquals(
+    getLoadersClass(jInterp)->super.objectSize,
+    sizeof(LoaderObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite
