@@ -679,17 +679,8 @@ At the moment we can only (easily) test the \type{getGitVersion} function.
 \stopTestCase
 \stopTestSuite
 
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean initializeJInterps(
-  JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
-);
-\stopCHeader
-\setCHeaderStream{public}
-
 \startCCode
-Boolean initializeJInterps(
+static Boolean initializeJInterps(
   JoyLoLInterp *jInterp,
   CoAlgClass   *aCoAlgClass
 ) {
