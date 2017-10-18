@@ -331,6 +331,9 @@ static Boolean initializeLoaders(
 ) {
   assert(jInterp);
   assert(aCoAlgClass);
+  if (!jInterp->loader) {
+    jInterp->loader = newLoader(jInterp);
+  }
   registerLoaderWords(jInterp);
   return TRUE;
 }

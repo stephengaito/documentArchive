@@ -234,6 +234,10 @@ static Boolean initializeContexts(
 ) {
   assert(jInterp);
   assert(aCoAlgClass);
+  if (!jInterp->rootCtx) {
+    jInterp->rootCtx =
+      newContext(jInterp, "joylol", NULL, NULL, NULL);
+  }
   registerContextWords(jInterp);
   return TRUE;
 }
