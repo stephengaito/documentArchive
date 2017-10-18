@@ -13,6 +13,107 @@ registration and listing of new \quote{external} CoAlgebras. The instance
 part, discussed in the next section, manages the creation and removal of 
 CoAlgebra \quote{values} (more commonly know as \quote{object} instances). 
 
+Any given implementation of the overall JoyLoL \emph{system} will consist 
+of a number of CoAlgebraic extensions which are loaded into a JoyLoL 
+\quote{core}. Any given core will provide some resources for the 
+extensions to use. Before we can document the generic structure of an 
+extension, we need to provide a method to allow the JoyLoL interpreter 
+extension to obtain these resources from the core. 
+
+\startTestSuite[get Lua-state global JoyLoL-Callback LightUserData]
+
+Each JoyLoL core implementation will have a number of specific resources 
+such as C-functions which it needs to register with the JoyLoL 
+interpreter. In particular the core specific Input/Output will need to be 
+available to the JoyLoL interpreter soon after it loads in order to allow 
+it to correctly communicate with the core and hence the user. The 
+\type{getJoyLoLCallbackInto} and \type{setJoyLoLCallbackFrom} macros 
+provide this capability by registering a well known \quote{callback} 
+C-function \emph{before} the JoyLoL interpreter is loaded. 
+
+The callback C-function takes an unsigned integer as its sole argument and 
+returns a \type{void*} to the returned resource. 
+
+\startCHeader
+typedef void *(JoyLoLCallback)(size_t);
+\stopCHeader
+
+The currently well known resources are:
+
+\setCHeaderStream{public}
+\startCHeader
+#define JoyLoLCallback_StdOutMethod  1
+#define JoyLoLCallback_StdErrMethod  2
+
+typedef void (StdOutputMethod)(Symbol *aMessage);
+\stopCHeader
+
+The core implementation can then use the \type{setJoyLoLCallbackFrom} 
+macro to store the address of its specific callback C-function as a 
+LightUserData in the Lua Registry at the \type{JoyLoLCallbackKey}. The 
+JoyLoL interpreter, once it is loaded, can get the address of the callback 
+C-function using the \type{getJoyLoLCallbackInto} macro. 
+
+This means that \type{joyLoLCallbackKey} must be a unique value, but has no 
+meaningful value \emph{other than} its uniqueness. To do this we 
+transliterate the first 4 characters of the string \quote{JyLCallbackKey} 
+into hexadecimal using the standard \type{ASCII} character codes. 
+
+\startCHeader
+//                           J y L C a l l b a c k K e y
+#define joyLoLCallbackKey 0x4A794C43L
+
+#define getJoyLoLCallbackInto(lstate, aCallback)  \
+  lua_rawgetp(                                    \
+    lstate,                                       \
+    LUA_REGISTRYINDEX,                            \
+    (void *)joyLoLCallbackKey                     \
+  );                                              \
+  JoyLoLCallback* aCallback =                     \
+    (JoyLoLCallback*)lua_touserdata (lstate, -1); \
+  lua_pop(lstate, 1);                             \
+  if (!aCallback) {                               \
+    fprintf(stderr, "\nERROR:\n");                \
+    fprintf(stderr,                               \
+      "  Could not get the Lua registered\n");    \
+    fprintf(stderr,                               \
+      "  JoyLoLCallback method!\n");              \
+    fprintf(stderr,                               \
+      "  Have you required joylol.core.xxx?\n");  \
+  }
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+#define setJoyLoLCallbackFrom(lstate, aCallback)    \
+  lua_pushlightuserdata(lstate, (void *)aCallback); \
+  lua_rawsetp(                                      \
+    lstate,                                         \
+    LUA_REGISTRYINDEX,                              \
+    (void *)joyLoLCallbackKey                       \
+  )
+\stopCHeader
+\setCHeaderStream{public}
+
+\startTestCase[should get a Lua-State global JoyLoL-Callback LightUserData] 
+
+\startCTest
+  // NOTE we MUST test using ctestsCallback 
+  // OR we MUST reset the call back to ctestsCallback
+  //
+  JoyLoLCallback *origCallback = ctestsCallback;
+  setJoyLoLCallbackFrom(lstate, origCallback);
+  getJoyLoLCallbackInto(lstate, aCallback);
+  AssertPtrNotNull(aCallback);
+  AssertPtrEquals(origCallback, aCallback);
+  getJoyLoLCallbackInto(lstate, newCallback);
+  AssertPtrNotNull(newCallback);
+  AssertPtrEquals(origCallback, newCallback);  
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\section[title=CoAlgebra extensions]
 
 The ANSI-C implementation of a CoAlgebra is as a simple \type{struct} 
 which contains the following items:
@@ -119,13 +220,15 @@ typedef struct loader_object_struct LoaderObj;
 typedef struct context_object_struct ContextObj;
 
 typedef struct joylol_interpreter_struct {
-  lua_State    *lstate;
-  size_t        numCoAlgs;
-  size_t        maxNumCoAlgs;
-  CoAlgVecItem *coAlgs;
-  Dictionary    dict;
-  LoaderObj    *loader;
-  ContextObj   *rootCtx;
+  lua_State       *lstate;
+  size_t           numCoAlgs;
+  size_t           maxNumCoAlgs;
+  CoAlgVecItem    *coAlgs;
+  Dictionary       dict;
+  LoaderObj       *loader;
+  ContextObj      *rootCtx;
+  StdOutputMethod *writeStdOut;
+  StdOutputMethod *writeStdErr;
 } JoyLoLInterp;
 
 #define getCoAlgClass(jInterp, aTag)        \
@@ -213,8 +316,22 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   //
   JoyLoLInterp* jInterp = joyLoLCalloc(1, JoyLoLInterp);
   assert(jInterp);
-  
+
   jInterp->lstate = lstate;
+  
+  // before we do anything else we need to install the
+  // core's Output methods
+  getJoyLoLCallbackInto(lstate, getCoreResources);
+  assert(getCoreResources);
+  jInterp->writeStdOut =
+    getCoreResources(JoyLoLCallback_StdOutMethod);
+  jInterp->writeStdErr =
+    getCoreResources(JoyLoLCallback_StdErrMethod);
+  if (!(jInterp->writeStdOut) || !(jInterp->writeStdErr)) {
+    fprintf(stderr, "\nERROR:\n");
+    fprintf(stderr, "  Could not get the core output methods\n");
+    exit(-1);
+  }
   
   size_t maxNum =
     NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT;
@@ -283,8 +400,8 @@ transliterate the first 4 characters of the string \quote{JoyLoLInterpKey}
 into hexadecimal using the standard \type{ASCII} character codes. 
 
 \startCHeader
-//                         J o y L o L I n t e r p K e y
-#define joyLoLInterpKey 0x4A6F794CL
+//                         J y L I n t e r p K e y
+#define joyLoLInterpKey 0x4A794C49L
 
 #define getJoyLoLInterpInto(lstate, jInterp)      \
   lua_rawgetp(                                    \

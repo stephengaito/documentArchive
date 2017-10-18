@@ -171,6 +171,24 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
 
 \stopTestSuite
 
+\startCCode
+static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  
+  // begin by checking that all required CoAlg extensions 
+  // have been registered
+  //
+  for (size_t i = 1 ; i < NumRequiredCoAlgs ; i++) {
+    if (!getCoAlgClass(jInterp, i)) {
+      printf("hello world\n");
+    }
+  }
+  
+  return 0;
+}
+\stopCCode
+
 \component gitVersion-c
 
 \startCCode
@@ -188,7 +206,8 @@ static int lua_jInterps_getGitVersion (lua_State *lstate) {
 
 \startCCode
 static const struct luaL_Reg lua_jInterps [] = {
-  {"gitVersion", lua_jInterps_getGitVersion},
+  {"gitVersion",            lua_jInterps_getGitVersion},
+  {"initializeAllRequired", lua_jInterps_initializeAllRequired},
   {NULL, NULL}
 };
 \stopCCode
