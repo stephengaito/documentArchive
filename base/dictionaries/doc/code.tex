@@ -300,6 +300,18 @@ typedef struct dictionaries_class_struct {
 } DictionariesClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializeDictionaries(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerDictionaryWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerDictionaries(JoyLoLInterp *jInterp);
@@ -314,26 +326,24 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
     joyLoLCalloc(1, DictionariesClass);
   assert(theCoAlg);
   
-  theCoAlg->super.name          = "Dictionaries";
-  theCoAlg->super.objectSize    = sizeof(DictObj);
-  theCoAlg->super.registerFunc  = registerDictionaries;
-  theCoAlg->super.equalityFunc  = NULL;
-  theCoAlg->super.printFunc     = printDictionaryCoAlgObjInto;
-  theCoAlg->newDictFunc         = newDictImpl;
-  theCoAlg->createSymbolFunc    = createSymbolImpl;
-  theCoAlg->getSymbolFunc       = getSymbolImpl;
-  theCoAlg->findSymbolFunc      = findSymbolImpl;
-  theCoAlg->findLUBSymbolFunc   = findLUBSymbolImpl;
-  theCoAlg->listDefinitionsFunc = listDefinitionsImpl;
+  theCoAlg->super.name            = "Dictionaries";
+  theCoAlg->super.objectSize      = sizeof(DictObj);
+  theCoAlg->super.initializeFunc  = initializeDictionaries;
+  theCoAlg->super.equalityFunc    = NULL;
+  theCoAlg->super.printFunc       = printDictionaryCoAlgObjInto;
+  theCoAlg->newDictFunc           = newDictImpl;
+  theCoAlg->createSymbolFunc      = createSymbolImpl;
+  theCoAlg->getSymbolFunc         = getSymbolImpl;
+  theCoAlg->findSymbolFunc        = findSymbolImpl;
+  theCoAlg->findLUBSymbolFunc     = findLUBSymbolImpl;
+  theCoAlg->listDefinitionsFunc   = listDefinitionsImpl;
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == DictionariesTag);
   assert(jInterp->coAlgs[tag].sClass);
-  
-  registerDictionaryWords(jInterp);
-  
+    
   return TRUE;
 }
 \stopCCode

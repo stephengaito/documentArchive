@@ -221,6 +221,18 @@ typedef struct naturals_class_struct {
 } NaturalsClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializeNaturals(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerNaturalWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerNaturals(JoyLoLInterp* jInterp);
@@ -232,13 +244,13 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
-  NaturalsClass* theCoAlg      = joyLoLCalloc(1, NaturalsClass);
-  theCoAlg->super.name         = "Naturals";
-  theCoAlg->super.objectSize   = sizeof(NaturalObj);
-  theCoAlg->super.registerFunc = registerNaturals;
-  theCoAlg->super.equalityFunc = equalityNatCoAlgDebug;
-  theCoAlg->super.printFunc    = printNatCoAlg;
-  theCoAlg->newNaturalFunc     = newNaturalImpl;
+  NaturalsClass* theCoAlg        = joyLoLCalloc(1, NaturalsClass);
+  theCoAlg->super.name           = "Naturals";
+  theCoAlg->super.objectSize     = sizeof(NaturalObj);
+  theCoAlg->super.initializeFunc = initializeNaturals;
+  theCoAlg->super.equalityFunc   = equalityNatCoAlgDebug;
+  theCoAlg->super.printFunc      = printNatCoAlg;
+  theCoAlg->newNaturalFunc       = newNaturalImpl;
 
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
@@ -246,8 +258,6 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   // sanity check...
   assert(tag == NaturalsTag);
   assert(jInterp->coAlgs[tag].sClass);
-
-  registerNaturalWords(jInterp);
 
   return TRUE;
 }

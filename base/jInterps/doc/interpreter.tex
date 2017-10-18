@@ -684,7 +684,7 @@ static Boolean initializeJInterps(
 ) {
   assert(jInterp);
   assert(aCoAlgClass);
-  // nothing to do...
+  registerJInterpWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -721,8 +721,6 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
   assert(jInterp->coAlgs);
   assert(jInterp->coAlgs[tag].sClass);
     
-  // need to register JoyLoL words
-  
   return TRUE;
 }
 \stopCCode

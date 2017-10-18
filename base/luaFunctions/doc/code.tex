@@ -251,6 +251,18 @@ typedef struct luaFunctions_class_struct {
 } LuaFunctionsClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializeLuaFunctions(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerLuaFunctionWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerLuaFunctions(JoyLoLInterp *jInterp);
@@ -263,11 +275,11 @@ Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
   
   LuaFunctionsClass* theCoAlg =
     joyLoLCalloc(1, LuaFunctionsClass);
-  theCoAlg->super.name         = LuaFunctionsName;
-  theCoAlg->super.objectSize   = sizeof(CoAlgObj);
-  theCoAlg->super.registerFunc = registerLuaFunctions;
-  theCoAlg->super.equalityFunc = NULL;
-  theCoAlg->super.printFunc    = NULL;
+  theCoAlg->super.name           = LuaFunctionsName;
+  theCoAlg->super.objectSize     = sizeof(CoAlgObj);
+  theCoAlg->super.initializeFunc = initializeLuaFunctions;
+  theCoAlg->super.equalityFunc   = NULL;
+  theCoAlg->super.printFunc      = NULL;
   
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
@@ -275,8 +287,6 @@ Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
   // do a sanity check...
   assert(tag == LuaFunctionsTag);
   assert(jInterp->coAlgs[tag].sClass);
-  
-  registerLuaFunctionWords(jInterp);
   
   return TRUE;
 }

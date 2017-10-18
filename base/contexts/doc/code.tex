@@ -227,6 +227,18 @@ typedef struct contexts_class_struct {
 } ContextsClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializeContexts(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerContextWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerContexts(
@@ -243,7 +255,7 @@ Boolean registerContexts(
     joyLoLCalloc(1, ContextsClass);
   theCoAlg->super.name             = ContextsName;
   theCoAlg->super.objectSize       = sizeof(ContextObj);
-  theCoAlg->super.registerFunc     = registerContexts;
+  theCoAlg->super.initializeFunc   = initializeContexts;
   theCoAlg->super.equalityFunc     = equalityContextsCoAlg;
   theCoAlg->super.printFunc        = printContextsCoAlg;
   theCoAlg->newContextFunc         = newContextImpl;
@@ -292,9 +304,7 @@ Boolean registerContexts(
   // do a sanity check...
   assert(tag == ContextsTag);
   assert(jInterp->coAlgs[tag].sClass);
-  
-  registerContextWords(jInterp);
-  
+
   return TRUE;
 }
 \stopCCode

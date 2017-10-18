@@ -676,6 +676,18 @@ typedef struct parsers_class_struct {
 } ParsersClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializeParsers(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerParserWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerParsers(
@@ -690,14 +702,14 @@ Boolean registerParsers(
 ) {
   assert(jInterp);
   
-  ParsersClass* theCoAlg        = joyLoLCalloc(1, ParsersClass);
-  theCoAlg->super.name          = ParsersName;
-  theCoAlg->super.objectSize    = sizeof(CoAlgObj);
-  theCoAlg->super.registerFunc  = registerParsers;
-  theCoAlg->super.equalityFunc  = NULL;
-  theCoAlg->super.printFunc     = NULL;
-  theCoAlg->parseOneSymbolFunc  = parseOneSymbolImpl;
-  theCoAlg->parseAllSymbolsFunc = parseAllSymbolsImpl;
+  ParsersClass* theCoAlg          = joyLoLCalloc(1, ParsersClass);
+  theCoAlg->super.name            = ParsersName;
+  theCoAlg->super.objectSize      = sizeof(CoAlgObj);
+  theCoAlg->super.initializeFunc  = initializeParsers;
+  theCoAlg->super.equalityFunc    = NULL;
+  theCoAlg->super.printFunc       = NULL;
+  theCoAlg->parseOneSymbolFunc    = parseOneSymbolImpl;
+  theCoAlg->parseAllSymbolsFunc   = parseAllSymbolsImpl;
   
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
@@ -705,8 +717,6 @@ Boolean registerParsers(
   // do a sanity check...
   assert(tag == ParsersTag);
   assert(jInterp->coAlgs[tag].sClass);
-  
-  registerParserWords(jInterp);
     
   return TRUE;
 }

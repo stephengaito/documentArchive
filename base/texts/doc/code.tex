@@ -419,6 +419,18 @@ typedef struct texts_class_struct {
 } TextsClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializeTexts(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerTextWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerTexts(
@@ -437,14 +449,14 @@ Boolean registerTexts(
   TextsClass* theCoAlg = joyLoLCalloc(1, TextsClass);
   assert(theCoAlg);
   
-  theCoAlg->super.name         = TextsName;
-  theCoAlg->super.objectSize   = sizeof(TextObj);
-  theCoAlg->super.registerFunc = registerTexts;
-  theCoAlg->super.equalityFunc = equalityTextsCoAlg;
-  theCoAlg->super.printFunc    = printStrTextsCoAlg;
-  theCoAlg->nextSymbolFunc     = nextSymbolImpl;
-  theCoAlg->reportErrorFunc    = reportErrorImpl;
-  theCoAlg->freeTextFunc       = freeTextImpl;
+  theCoAlg->super.name           = TextsName;
+  theCoAlg->super.objectSize     = sizeof(TextObj);
+  theCoAlg->super.initializeFunc = initializeTexts;
+  theCoAlg->super.equalityFunc   = equalityTextsCoAlg;
+  theCoAlg->super.printFunc      = printStrTextsCoAlg;
+  theCoAlg->nextSymbolFunc       = nextSymbolImpl;
+  theCoAlg->reportErrorFunc      = reportErrorImpl;
+  theCoAlg->freeTextFunc         = freeTextImpl;
   theCoAlg->createTextFromInputFileFunc = 
     createTextFromInputFileImpl;
   theCoAlg->createTextFromStringFunc =
@@ -458,9 +470,7 @@ Boolean registerTexts(
   // do a sanity check...
   assert(tag == TextsTag);
   assert(jInterp->coAlgs[tag].sClass);
-  
-  registerTextWords(jInterp);
-  
+
   return TRUE;
 }
 \stopCCode

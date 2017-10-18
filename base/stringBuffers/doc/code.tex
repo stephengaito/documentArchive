@@ -444,6 +444,18 @@ typedef struct stringBuffers_class_struct {
 } StringBuffersClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializeStringBuffers(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerStringBufferWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerStringBuffers(JoyLoLInterp* jInterp);
@@ -457,24 +469,22 @@ Boolean registerStringBuffers(JoyLoLInterp* jInterp) {
   
   StringBuffersClass* theCoAlg  =
     joyLoLCalloc(1, StringBuffersClass);
-  theCoAlg->super.name          = "StringBuffers";
-  theCoAlg->super.objectSize    = sizeof(StringBufferObj);
-  theCoAlg->super.registerFunc  = registerStringBuffers;
-  theCoAlg->super.equalityFunc  = stringBuffersEqualDebug;
-  theCoAlg->super.printFunc     = printStringBufferCoAlg;
-  theCoAlg->newStringBufferFunc = newStringBufferImpl;
-  theCoAlg->strBufCloseFunc     = strBufCloseImpl;
-  theCoAlg->getCStringFunc      = getCStringImpl;
-  theCoAlg->strBufPrintfFunc    = strBufPrintfImpl;
-  theCoAlg->printLoLDebugFunc   = printLoLDebugImpl;
+  theCoAlg->super.name            = "StringBuffers";
+  theCoAlg->super.objectSize      = sizeof(StringBufferObj);
+  theCoAlg->super.initializeFunc  = initializeStringBuffers;
+  theCoAlg->super.equalityFunc    = stringBuffersEqualDebug;
+  theCoAlg->super.printFunc       = printStringBufferCoAlg;
+  theCoAlg->newStringBufferFunc   = newStringBufferImpl;
+  theCoAlg->strBufCloseFunc       = strBufCloseImpl;
+  theCoAlg->getCStringFunc        = getCStringImpl;
+  theCoAlg->strBufPrintfFunc      = strBufPrintfImpl;
+  theCoAlg->printLoLDebugFunc     = printLoLDebugImpl;
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   
   // sanity check...
   assert(tag == StringBuffersTag);
   assert(jInterp->coAlgs[tag].sClass);
-
-  registerStringBufferWords(jInterp);
 
   return TRUE;
 }

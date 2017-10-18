@@ -376,6 +376,18 @@ typedef struct pairs_class_struct {
 } PairsClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializePairs(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerPairWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerPairs(JoyLoLInterp *jInterp);
@@ -386,26 +398,24 @@ extern Boolean registerPairs(JoyLoLInterp *jInterp);
 Boolean registerPairs(JoyLoLInterp *jInterp) {
   assert(jInterp);
   
-  PairsClass* theCoAlg         = joyLoLCalloc(1, PairsClass);
-  theCoAlg->super.name         = strdup("Pairs");
-  theCoAlg->super.objectSize   = sizeof(PairsObj);
-  theCoAlg->super.registerFunc = registerPairs;
-  theCoAlg->super.equalityFunc = equalLoLDebugImpl;
-  theCoAlg->super.printFunc    = printPairsCoAlg;
-  theCoAlg->newPairFunc        = newPairImpl;
-  theCoAlg->carFunc            = carImpl;
-  theCoAlg->cdrFunc            = cdrImpl;
-  theCoAlg->equalLoLDebugFunc  = equalLoLDebugImpl;
-  theCoAlg->copyLoLFunc        = copyLoLImpl;
+  PairsClass* theCoAlg           = joyLoLCalloc(1, PairsClass);
+  theCoAlg->super.name           = strdup("Pairs");
+  theCoAlg->super.objectSize     = sizeof(PairsObj);
+  theCoAlg->super.initializeFunc = initializePairs;
+  theCoAlg->super.equalityFunc   = equalLoLDebugImpl;
+  theCoAlg->super.printFunc      = printPairsCoAlg;
+  theCoAlg->newPairFunc          = newPairImpl;
+  theCoAlg->carFunc              = carImpl;
+  theCoAlg->cdrFunc              = cdrImpl;
+  theCoAlg->equalLoLDebugFunc    = equalLoLDebugImpl;
+  theCoAlg->copyLoLFunc          = copyLoLImpl;
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   
   // sanity check...
   assert(tag == PairsTag);
   assert(jInterp->coAlgs[tag].sClass);
-    
-  registerPairsWords(jInterp);
-  
+
   return TRUE;
 }
 \stopCCode

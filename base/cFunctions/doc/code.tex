@@ -203,6 +203,18 @@ typedef struct cFunctions_class_struct {
 } CFunctionsClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializeCFunctions(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerCFunctionWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerCFunctions(JoyLoLInterp *jInterp);
@@ -215,12 +227,12 @@ Boolean registerCFunctions(JoyLoLInterp *jInterp) {
   
   CFunctionsClass* theCoAlg    =
     joyLoLCalloc(1, CFunctionsClass);
-  theCoAlg->super.name         = CFunctionsName;
-  theCoAlg->super.objectSize   = sizeof(CFunctionObj);
-  theCoAlg->super.registerFunc = registerCFunctions;
-  theCoAlg->super.equalityFunc = equalityFuncCoAlg;
-  theCoAlg->super.printFunc    = printFuncCoAlg;
-  theCoAlg->newCFunctionFunc   = newCFunctionImpl;
+  theCoAlg->super.name           = CFunctionsName;
+  theCoAlg->super.objectSize     = sizeof(CFunctionObj);
+  theCoAlg->super.initializeFunc = initializeCFunctions;
+  theCoAlg->super.equalityFunc   = equalityFuncCoAlg;
+  theCoAlg->super.printFunc      = printFuncCoAlg;
+  theCoAlg->newCFunctionFunc     = newCFunctionImpl;
   
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
@@ -228,9 +240,7 @@ Boolean registerCFunctions(JoyLoLInterp *jInterp) {
   // do a sanity check...
   assert(tag == CFunctionsTag);
   assert(jInterp->coAlgs[tag].sClass);
-  
-  registerCFunctionWords(jInterp);
-  
+
   return TRUE;
 }
 \stopCCode

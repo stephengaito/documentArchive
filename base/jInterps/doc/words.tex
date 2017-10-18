@@ -1,4 +1,14 @@
 % A ConTeXt document [master document: jInterps.tex]
 
-\section[title=Lua functions]
+\section[title=JoyLoL words]
 
+\setCHeaderStream{private}
+\startCHeader
+extern void registerJInterpWords(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerJInterpWords(JoyLoLInterp* jInterp) {
+}
+\stopCCode

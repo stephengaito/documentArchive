@@ -265,6 +265,18 @@ typedef struct symbols_class_struct {
 } SymbolsClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializeSymbols(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerSymbolWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerSymbols(JoyLoLInterp* jInterp);
@@ -277,13 +289,13 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   assert(jInterp->coAlgs);
   
   SymbolsClass* theCoAlg = joyLoLCalloc(1, SymbolsClass);
-  theCoAlg->super.name         = "Symbols";
-  theCoAlg->super.objectSize   = sizeof(SymbolObj);
-  theCoAlg->super.registerFunc = registerSymbols;
-  theCoAlg->super.equalityFunc = symbolsEqualDebug;
-  theCoAlg->super.printFunc    = printSymbolCoAlg;
-  theCoAlg->newSymbolFunc      = newSymbolImpl;
-  theCoAlg->symbolIsFunc       = symbolIsImpl;
+  theCoAlg->super.name           = "Symbols";
+  theCoAlg->super.objectSize     = sizeof(SymbolObj);
+  theCoAlg->super.initializeFunc = initializeSymbols;
+  theCoAlg->super.equalityFunc   = symbolsEqualDebug;
+  theCoAlg->super.printFunc      = printSymbolCoAlg;
+  theCoAlg->newSymbolFunc        = newSymbolImpl;
+  theCoAlg->symbolIsFunc         = symbolIsImpl;
 
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
@@ -291,8 +303,6 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   // sanity check...
   assert(tag == SymbolsTag);
   assert(jInterp->coAlgs[tag].sClass);
-
-  registerSymbolWords(jInterp);
 
   return TRUE;
 }

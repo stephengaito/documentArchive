@@ -50,12 +50,12 @@ static void pop2ndProcessAP(Context* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerPairsWords(JoyLoLInterp* jInterp);
+extern void registerPairWords(JoyLoLInterp* jInterp);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerPairsWords(JoyLoLInterp* jInterp) {
+void registerPairWords(JoyLoLInterp* jInterp) {
   //extendJoyLoL(jInterp, "isPair",        isPairAP);
   //extendJoyLoL(jInterp, "isAtom",        isAtomAP);
   //extendJoyLoL(jInterp, "pop",           popAP);

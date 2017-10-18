@@ -324,6 +324,18 @@ typedef struct loaders_class_struct {
 } LoadersClass;
 \stopCHeader
 
+\startCCode
+static Boolean initializeLoaders(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerLoaderWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 Boolean registerLoaders(
@@ -344,7 +356,7 @@ Boolean registerLoaders(
   
   theCoAlg->super.name            = LoadersName;
   theCoAlg->super.objectSize      = sizeof(LoaderObj);
-  theCoAlg->super.registerFunc    = registerLoaders;
+  theCoAlg->super.initializeFunc  = initializeLoaders;
   theCoAlg->super.equalityFunc    = NULL;
   theCoAlg->super.printFunc       = NULL;
   theCoAlg->newLoaderFunc         = newLoaderImpl;
@@ -359,9 +371,7 @@ Boolean registerLoaders(
   assert(tag == LoadersTag);
   assert(tag < jInterp->numCoAlgs);
   assert(getLoadersClass(jInterp));
-    
-  // need to register JoyLoL words
-  
+
   return TRUE;
 }
 \stopCCode
