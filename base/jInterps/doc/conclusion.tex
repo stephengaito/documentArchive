@@ -147,27 +147,9 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
 \addCTestInclude{<joylol/jInterps-private.h>}
 \addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
-\CTestsMethodSetup\
-\startCTest
-void ctestsWriteStdOut(Symbol *aMessage) {
-  fprintf(stdout, "%s\n", aMessage);
-}
-
-void ctestsWriteStdErr(Symbol *aMessage) {
-  fprintf(stderr, "%s\n", aMessage);
-}
-void *ctestsCallback(size_t resourceId) {
-  if (resourceId == JoyLoLCallback_StdOutMethod) {
-    return (void*)ctestsWriteStdOut;
-  } else if (resourceId == JoyLoLCallback_StdErrMethod) {
-    return (void*)ctestsWriteStdErr;
-  }
-  return NULL;
-}
-\stopCTest
+\addCTestJoyLoLCallbacks{default}
 \CTestsSetup\
 \startCTest
-  setJoyLoLCallbackFrom(lstate, ctestsCallback);
   addJoyLoLLuaPath(lstate);
   requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.symbols");

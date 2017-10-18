@@ -162,6 +162,14 @@
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 
+% from file: codeManipulation.tex after line: 400
+
+\def\addCTestJoyLoLCallbacks#1{%
+  \directlua{
+    thirddata.joylol.addCTestJoyLoLCallbacks('#1')
+  }
+}
+
 % from file: lmsfile.tex after line: 0
 
 \def\addJoyLoLTargets#1{%

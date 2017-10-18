@@ -449,6 +449,50 @@ end
 
 joylol.addPostProcessStackDescription = addPostProcessStackDescription
 
+-- from file: codeManipulation.tex after line: 400
+
+local function addCTestJoyLoLCallbacks(aCodeStream)
+  thirddata.contests  = thirddata.contests  or { }
+  local contests      = thirddata.contests
+  contests.tests      = contests.tests      or { }
+  local tests         = contests.tests
+  tests.methods       = tests.methods       or { }
+  local methods       = tests.methods
+  methods.setup       = methods.setup       or { }
+  local setup         = methods.setup
+  setup.cTests        = setup.cTests        or { }
+  local cTests        = setup.cTests
+  aCodeStream         = aCodeStream         or 'default'
+  cTests[aCodeStream] = cTests[aCodeStream] or { }
+  tInsert(cTests[aCodeStream], [=[
+void ctestsWriteStdOut(Symbol *aMessage) {
+  fprintf(stdout, "%s\n", aMessage);
+}
+
+void ctestsWriteStdErr(Symbol *aMessage) {
+  fprintf(stderr, "%s\n", aMessage);
+}
+void *ctestsCallback(size_t resourceId) {
+  if (resourceId == JoyLoLCallback_StdOutMethod) {
+    return (void*)ctestsWriteStdOut;
+  } else if (resourceId == JoyLoLCallback_StdErrMethod) {
+    return (void*)ctestsWriteStdErr;
+  }
+  return NULL;
+}
+]=])
+  tests.setup         = tests.setup         or { }
+  setup               = tests.setup
+  setup.cTests        = setup.cTests        or { }
+  cTests              = setup.cTests
+  cTests[aCodeStream] = cTests[aCodeStream] or { }
+  tInsert(cTests[aCodeStream], [=[
+setJoyLoLCallbackFrom(lstate, ctestsCallback);
+]=])
+end
+
+joylol.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
+
 -- from file: lmsfile.tex after line: 0
 
 local function addJoyLoLTargets(aCodeStream)
