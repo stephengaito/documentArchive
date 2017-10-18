@@ -186,29 +186,35 @@ the extension's current version is compared to the minimally required
 version. The registration of the extension is only accepted if these 
 versions are compatible. 
 
-\setCCodeStream{interpreter}
-\startCCode
+\setCHeaderStream{private}
+\startCHeader
 typedef struct required_coalgs_struct {
   const char*  name;
   size_t       tag;
   CoAlgVersion version;
 } RequiredCoAlgs;
 
+extern RequiredCoAlgs requiredCoAlgs[];
+\stopCHeader
+\setCHeaderStream{public}
+
+\setCCodeStream{interpreter}
+\startCCode
 RequiredCoAlgs requiredCoAlgs[] = {
-  { JInterpsName,      JInterpsTag,      {0, 1, 0 }},
-  { BooleansName,      BooleansTag,      {0, 1, 0 }},
-  { CFunctionsName,    CFunctionsTag,    {0, 1, 0 }},
-  { ContextsName,      ContextsTag,      {0, 1, 0 }},
-  { DictionariesName,  DictionariesTag,  {0, 1, 0 }},
-  { LoadersName,       LoadersTag,       {0, 1, 0 }},
-  { LuaFunctionsName,  LuaFunctionsTag,  {0, 1, 0 }},
-  { NaturalsName,      NaturalsTag,      {0, 1, 0 }},
-  { PairsName,         PairsTag,         {0, 1, 0 }},
-  { ParsersName,       ParsersTag,       {0, 1, 0 }},
-  { StringBuffersName, StringBuffersTag, {0, 1, 0 }},
-  { SymbolsName,       SymbolsTag,       {0, 1, 0 }},
-  { TemplatesName,     TemplatesTag,     {0, 1, 0 }},
-  { TextsName,         TextsTag,         {0, 1, 0 }},
+  { JInterpsName,      JInterpsTag,      {0, 1, 0 }}, //  1
+  { BooleansName,      BooleansTag,      {0, 1, 0 }}, //  2
+  { CFunctionsName,    CFunctionsTag,    {0, 1, 0 }}, //  3
+  { ContextsName,      ContextsTag,      {0, 1, 0 }}, //  4
+  { DictionariesName,  DictionariesTag,  {0, 1, 0 }}, //  5
+  { LoadersName,       LoadersTag,       {0, 1, 0 }}, //  6
+  { LuaFunctionsName,  LuaFunctionsTag,  {0, 1, 0 }}, //  7
+  { NaturalsName,      NaturalsTag,      {0, 1, 0 }}, //  8
+  { PairsName,         PairsTag,         {0, 1, 0 }}, //  9
+  { ParsersName,       ParsersTag,       {0, 1, 0 }}, // 10
+  { StringBuffersName, StringBuffersTag, {0, 1, 0 }}, // 11
+  { SymbolsName,       SymbolsTag,       {0, 1, 0 }}, // 12
+  { TemplatesName,     TemplatesTag,     {0, 1, 0 }}, // 13
+  { TextsName,         TextsTag,         {0, 1, 0 }}, // 14
   { NULL,              0,                {0, 0, 0 }}
 };
 \stopCCode

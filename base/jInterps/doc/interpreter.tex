@@ -139,8 +139,9 @@ the interpreter's dictionary of words.
 \stopitemize
 
 \startCHeader
-typedef Boolean (CoAlgRegister)(
-  JoyLoLInterp*
+typedef Boolean (CoAlgInitialize)(
+  JoyLoLInterp*,
+  CoAlgClass*
 );
 
 typedef Boolean (CoAlgEquality)(
@@ -169,13 +170,13 @@ typedef Boolean (CoAlgRelease)(
 typedef void*   CoAlgData;
 
 typedef struct coalg_class_struct {
-  Symbol         *name;
-  size_t          objectSize;
-  CoAlgRegister  *registerFunc;
-  CoAlgEquality  *equalityFunc;
-  CoAlgPrint     *printFunc;
-  CoAlgCopy      *copyFunc;
-  CoAlgRelease   *releaseFunc;
+  Symbol          *name;
+  size_t           objectSize;
+  CoAlgInitialize *initializeFunc;
+  CoAlgEquality   *equalityFunc;
+  CoAlgPrint      *printFunc;
+  CoAlgCopy       *copyFunc;
+  CoAlgRelease    *releaseFunc;
 } CoAlgClass;
 
 typedef CoAlgObj* (JInterpNewObject)(
@@ -548,18 +549,18 @@ We start by adding one single \type{CoAlgebra}.
 
 \startCTest
   JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
-  char*           coAlgName         = strdup("newCoAlgA");
-  char*           coAlgNameEnd      = coAlgName + strlen("newCoAlg");
-  CoAlgRegister*  fakeRegisterFunc  = (CoAlgRegister*)  0x100;
-  CoAlgEquality*  fakeEqualityFunc  = (CoAlgEquality*)  0x200;
-  CoAlgPrint*     fakePrintFunc     = (CoAlgPrint*)     0x300;
+  char*            coAlgName          = strdup("newCoAlgA");
+  char*            coAlgNameEnd       = coAlgName + strlen("newCoAlg");
+  CoAlgInitialize* fakeInitializeFunc = (CoAlgInitialize*) 0x100;
+  CoAlgEquality*   fakeEqualityFunc   = (CoAlgEquality*)   0x200;
+  CoAlgPrint*      fakePrintFunc      = (CoAlgPrint*)      0x300;
   
   CoAlgClass* aCoAlg   = joyLoLCalloc(1, CoAlgClass);
   AssertPtrNotNull(aCoAlg);
-  aCoAlg->name         = strdup("newCoAlgA");
-  aCoAlg->registerFunc = fakeRegisterFunc;
-  aCoAlg->equalityFunc = fakeEqualityFunc;
-  aCoAlg->printFunc    = fakePrintFunc;
+  aCoAlg->name           = strdup("newCoAlgA");
+  aCoAlg->initializeFunc = fakeInitializeFunc;
+  aCoAlg->equalityFunc   = fakeEqualityFunc;
+  aCoAlg->printFunc      = fakePrintFunc;
 
   size_t coAlgIdx = registerCoAlgClassImpl(jInterp, aCoAlg);
   AssertIntEquals(coAlgIdx, NumRequiredCoAlgs);
@@ -567,7 +568,7 @@ We start by adding one single \type{CoAlgebra}.
   CoAlgVecItem* coAlgsVec = jInterp->coAlgs;
   AssertPtrNotNull(coAlgsVec);
   AssertStrEquals(coAlgsVec[coAlgIdx].sClass->name, "newCoAlgA");
-  AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->registerFunc, fakeRegisterFunc);
+  AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->initializeFunc, fakeInitializeFunc);
   AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->equalityFunc, fakeEqualityFunc);
   AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->printFunc,    fakePrintFunc);
 \stopCTest
@@ -578,15 +579,15 @@ the existing one runs out of \quote{space}.
 \startCTest
   AssertIntTrue(JOYLOL_COALGS_INCREMENT < 26);
   for(size_t i = 1; i < 26; i++) {
-    *coAlgNameEnd        = 'A' + i;
-    fakeRegisterFunc    += 1;
-    fakeEqualityFunc    += 1;
-    fakePrintFunc       += 1;
-    aCoAlg               = joyLoLCalloc(1, CoAlgClass);
-    aCoAlg->name         = strdup(coAlgName);
-    aCoAlg->registerFunc = fakeRegisterFunc;
-    aCoAlg->equalityFunc = fakeEqualityFunc;
-    aCoAlg->printFunc    = fakePrintFunc;
+    *coAlgNameEnd          = 'A' + i;
+    fakeInitializeFunc    += 1;
+    fakeEqualityFunc      += 1;
+    fakePrintFunc         += 1;
+    aCoAlg                 = joyLoLCalloc(1, CoAlgClass);
+    aCoAlg->name           = strdup(coAlgName);
+    aCoAlg->initializeFunc = fakeInitializeFunc;
+    aCoAlg->equalityFunc   = fakeEqualityFunc;
+    aCoAlg->printFunc      = fakePrintFunc;
 
     registerCoAlgClassImpl(jInterp, aCoAlg);
 
@@ -594,7 +595,7 @@ the existing one runs out of \quote{space}.
     AssertPtrNotNull(coAlgsVec);
     size_t idx = NumRequiredCoAlgs + i;
     AssertStrEquals(coAlgsVec[idx].sClass->name, coAlgName);
-    AssertPtrEquals(coAlgsVec[idx].sClass->registerFunc, fakeRegisterFunc);
+    AssertPtrEquals(coAlgsVec[idx].sClass->initializeFunc, fakeInitializeFunc);
     AssertPtrEquals(coAlgsVec[idx].sClass->equalityFunc, fakeEqualityFunc);
     AssertPtrEquals(coAlgsVec[idx].sClass->printFunc,    fakePrintFunc);
   }
@@ -607,12 +608,12 @@ existing CoAlgebra index.
 \startCTest
   size_t oldNumCoAlgs  = jInterp->numCoAlgs;
 
-  *coAlgNameEnd        = 'A' + 5;
-  aCoAlg               = joyLoLCalloc(1, CoAlgClass);
-  aCoAlg->name         = strdup(coAlgName);
-  aCoAlg->registerFunc = (CoAlgRegister*)  0x100 + 5;
-  aCoAlg->equalityFunc = (CoAlgEquality*)  0x200 + 5;
-  aCoAlg->printFunc    = (CoAlgPrint*)     0x300 + 5;
+  *coAlgNameEnd          = 'A' + 5;
+  aCoAlg                 = joyLoLCalloc(1, CoAlgClass);
+  aCoAlg->name           = strdup(coAlgName);
+  aCoAlg->initializeFunc = (CoAlgInitialize*) 0x100 + 5;
+  aCoAlg->equalityFunc   = (CoAlgEquality*)   0x200 + 5;
+  aCoAlg->printFunc      = (CoAlgPrint*)      0x300 + 5;
   
   size_t anIndex = registerCoAlgClassImpl(jInterp, aCoAlg);
   AssertIntEquals(anIndex, 5 + NumRequiredCoAlgs);
@@ -678,11 +679,32 @@ At the moment we can only (easily) test the \type{getGitVersion} function.
 \stopTestCase
 \stopTestSuite
 
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean initializeJInterps(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean initializeJInterps(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  // nothing to do...
+  return TRUE;
+}
+\stopCCode
+
 \startTestSuite[regiserJInterps]
 
 \setCHeaderStream{private}
 \startCHeader
-Boolean registerJInterps(JoyLoLInterp *jInterp);
+extern Boolean registerJInterps(JoyLoLInterp *jInterp);
 \stopCHeader
 \setCHeaderStream{public}
 
@@ -696,7 +718,7 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
   
   theCoAlg->super.name             = JInterpsName;
   theCoAlg->super.objectSize       = sizeof(JoyLoLInterp);
-  theCoAlg->super.registerFunc     = registerJInterps;
+  theCoAlg->super.initializeFunc   = initializeJInterps;
   theCoAlg->super.equalityFunc     = NULL;
   theCoAlg->super.printFunc        = NULL;
   theCoAlg->newObjectFunc          = newObjectImpl;
@@ -739,3 +761,4 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
 \stopCTest
 \stopTestCase
 \stopTestSuite
+

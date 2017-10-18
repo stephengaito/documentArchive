@@ -176,16 +176,36 @@ static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   assert(jInterp);
   
-  // begin by checking that all required CoAlg extensions 
-  // have been registered
-  //
-  for (size_t i = 1 ; i < NumRequiredCoAlgs ; i++) {
-    if (!getCoAlgClass(jInterp, i)) {
-      printf("hello world\n");
-    }
+  // first check that core stdout and stderr are defined
+  if (!(jInterp->writeStdOut) || !(jInterp->writeStdErr)) {
+    fprintf(stderr, "\nERROR:\n");
+    fprintf(stderr, "  Core output methods are missing\n");
+    exit(-1);
   }
   
-  return 0;
+  // now check that all required CoAlg extensions 
+  // have been registered
+  //
+  RequiredCoAlgs *curCoAlg = requiredCoAlgs;
+  for ( ; curCoAlg->name ; curCoAlg++) {
+    size_t curTag = curCoAlg->tag;
+    if (!getCoAlgClass(jInterp, curTag)) {
+      fprintf(stderr, "\nERROR:\n");
+      fprintf(stderr, "  Missing a required CoAlgebraic extension\n");
+      fprintf(stderr, "  need to require joylol.%s\n\n", curCoAlg->name);
+      exit(-1);
+    }
+  }
+
+  // now call the initialization function for each 
+  // required CoAlgebraic extension
+  for( size_t i = 1; i < NumRequiredCoAlgs; i++) {
+    CoAlgClass *aCoAlg = getCoAlgClass(jInterp, i);
+    if (aCoAlg) {
+      aCoAlg->initializeFunc(jInterp, aCoAlg);
+    }
+  }
+return 0;
 }
 \stopCCode
 
