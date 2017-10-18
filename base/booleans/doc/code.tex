@@ -260,6 +260,18 @@ typedef struct booleans_class_struct {
 
 \stopCHeader
 
+\startCCode
+static Boolean initializeBooleans(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerBooleanWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerBooleans(JoyLoLInterp *jInterp);
@@ -275,23 +287,21 @@ Boolean registerBooleans(JoyLoLInterp *jInterp) {
     = joyLoLCalloc(1, BooleansClass);
   assert(theCoAlg);
   
-  theCoAlg->super.name         = BooleansName;
-  theCoAlg->super.objectSize   = sizeof(CoAlgObj);
-  theCoAlg->super.registerFunc = registerBooleans;
-  theCoAlg->super.equalityFunc = equalityBoolCoAlg;
-  theCoAlg->super.printFunc    = printBoolCoAlg;
-  theCoAlg->newBooleanFunc     = newBooleanImpl;
-  theCoAlg->isTrueFunc         = isTrueImpl;
-  theCoAlg->isFalseFunc        = isFalseImpl;
+  theCoAlg->super.name           = BooleansName;
+  theCoAlg->super.objectSize     = sizeof(CoAlgObj);
+  theCoAlg->super.initializeFunc = initializeBooleans;
+  theCoAlg->super.equalityFunc   = equalityBoolCoAlg;
+  theCoAlg->super.printFunc      = printBoolCoAlg;
+  theCoAlg->newBooleanFunc       = newBooleanImpl;
+  theCoAlg->isTrueFunc           = isTrueImpl;
+  theCoAlg->isFalseFunc          = isFalseImpl;
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == BooleansTag);
   assert(jInterp->coAlgs[tag].sClass);
-  
-  registerBooleanWords(jInterp);
-  
+   
   return TRUE;
 }
 \stopCCode

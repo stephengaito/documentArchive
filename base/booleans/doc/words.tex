@@ -39,22 +39,23 @@ static void ifteContAP(Context* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerBooleanWords(JoyLoLInterp* jInterp);
+extern void registerBooleanWords(
+  JoyLoLInterp* jInterp
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerBooleanWords(JoyLoLInterp* jInterp) {
-  //assert(coAlgebras);
-  //assert(coAlgebras->symbols);
-  //Dictionary* mainDic = coAlgebras->symbols->dictionary;
-  //assert(mainDic);
+void registerBooleanWords(
+  JoyLoLInterp* jInterp
+) {
+  assert(jInterp);
 
-  //AVLNode* true  = createSymbol(mainDic, "true");
-  //true->value    = newBoolean(coAlgebras, TRUE);
+  DictObj* true  = createSymbol(jInterp, "true");
+  true->value    = newBoolean(jInterp, TRUE);
 
-  //AVLNode* false = createSymbol(mainDic, "false");
-  //false->value   = newBoolean(coAlgebras, FALSE);
+  DictObj* false = createSymbol(jInterp, "false");
+  false->value   = newBoolean(jInterp, FALSE);
 
   //extendJoyLoL(coAlgebras, "isBoolean", isBooleanAP);
   //extendJoyLoL(coAlgebras, "ifte",      ifteAP);

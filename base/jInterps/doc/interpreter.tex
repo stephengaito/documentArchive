@@ -83,7 +83,6 @@ into hexadecimal using the standard \type{ASCII} character codes.
   }
 \stopCHeader
 
-\setCHeaderStream{private}
 \startCHeader
 #define setJoyLoLCallbackFrom(lstate, aCallback)    \
   lua_pushlightuserdata(lstate, (void *)aCallback); \
@@ -93,7 +92,6 @@ into hexadecimal using the standard \type{ASCII} character codes.
     (void *)joyLoLCallbackKey                       \
   )
 \stopCHeader
-\setCHeaderStream{public}
 
 \startTestCase[should get a Lua-State global JoyLoL-Callback LightUserData] 
 
