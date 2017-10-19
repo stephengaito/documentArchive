@@ -247,9 +247,42 @@ static const struct luaL_Reg lua_jInterps [] = {
 \stopCCode
 
 \startCCode
-static void registerJInterpsLuaInterface(lua_State *lstate) {
+static void requireAllRequiredCoAlgs(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp
+) {
   assert(lstate);
-  luaL_newlib(lstate, lua_jInterps);
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+
+  // start by creating a master table
+  lua_createtable(lstate, 0, NumRequiredCoAlgs + 5); // -3
+  
+  // now place jInterps into the master table
+  lua_pushstring(lstate, "jInterps");                // -2
+  luaL_newlib(lstate, lua_jInterps);                 // -1
+  lua_settable(lstate, -3);
+  
+  // now walk through the required coAlgs
+  // requiring each in turn and 
+  // placing it into the master table
+  RequiredCoAlgs *curCoAlg = requiredCoAlgs;
+  for ( ; curCoAlg->name ; curCoAlg++) {
+    size_t curTag = curCoAlg->tag;
+    if (!(jInterp->coAlgs[curTag].sClass)) {
+      lua_pushstring(lstate, curCoAlg->name); // -2
+      lua_getglobal(lstate, "require");
+      luaL_Buffer modName;
+      luaL_buffinit(lstate, &modName);
+      luaL_addstring(&modName, "joylol.");
+      luaL_addstring(&modName, curCoAlg->name);
+      luaL_pushresult(&modName);
+      if (lua_pcall(lstate, 1, 1, 0)) {       // -> -1
+        // deal with the error!
+      }
+      lua_settable(lstate, -3);
+    }
+  }  
 }
 \stopCCode
 
@@ -261,7 +294,7 @@ the shared library.
 int luaopen_joylol_jInterps (lua_State *lstate) {
   setJoyLoLInterpInto(lstate, jInterp);
   registerJInterps(jInterp);
-  registerJInterpsLuaInterface(lstate);
+  requireAllRequiredCoAlgs(lstate, jInterp);
   return 1;
 }
 \stopCCode
@@ -285,7 +318,13 @@ Boolean requireStaticallyLinkedJInterps(
 ) {
   lua_getglobal(lstate, "package");
   lua_getfield(lstate, -1, "loaded");
-  luaopen_joylol_jInterps(lstate);
+  
+  // fake a luaopen_joylol_jInterps 
+  // BUT without the requireAllRequiredCoAlgs
+  setJoyLoLInterpInto(lstate, jInterp);
+  registerJInterps(jInterp);
+  luaL_newlib(lstate, lua_jInterps);
+  
   lua_setfield(lstate, -2, "joylol.jInterps");
   lua_setfield(lstate, -2, "loaded");
   lua_pop(lstate, 1);
