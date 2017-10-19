@@ -7,9 +7,9 @@
 \component gitVersion-lua
 
 \startLuaCode
--- JoyLoL command line interpreter 
+-- joylol command line interpreter 
 
--- Start by adding the standard JoyLoL CoAlg locations to the Lua search 
+-- Start by adding the standard joylol CoAlg locations to the Lua search 
 -- paths 
 
 local joylolPaths = {
@@ -28,16 +28,19 @@ local joylolCPaths = {
 }
 package.cpath = table.concat(joylolCPaths, ';')
 
-require 'joylol'
+argStr = '|'..table.concat(arg, '|')..'|'
+verbose = argStr:match('|%-v|');
 
+if verbose then print('loading [joylol.core.lua]\n') end
 joylol = require 'joylol.core.lua'
+if verbose then print('loaded [joylol.core.lua]\n') end
 
 helpText = {
-  "usage: joyLoL [options] [files to load]",
+  "usage: joylol [options] [files to load]",
   "",
   "options: ",
   " -h --help        prints this help text and exits",
-  " -i --ignore      ignores default configuration file (~.joyLoL)",
+  " -i --ignore      ignores default configuration file (~.joylol)",
   " -l --load <file> loads the file <file>",
   " -p --path <path> adds <path> to the list of load paths",
   " -q --quiet       toggles verbose off",
@@ -45,14 +48,14 @@ helpText = {
   "",
   "files to load:",
   "  Any remaining options are treated as files to be loaded.",
-  "  If there are no remaining options, joyLoL enters the read,",
+  "  If there are no remaining options, joylol enters the read,",
   "  eval, print loop."
 }
 
 loadConfiguration = true
 loadFiles         = { }
   
-while(0 < arg) do
+while(0 < #arg) do
   anArg = table.remove(arg, 1)
   if anArg:match('-h') then
     print(table.concat(helpText, '\n'))
@@ -64,23 +67,25 @@ while(0 < arg) do
     table.insert(loadFiles, optArg)
   elseif anArg:match('-p') then
     optArg = table.remove(arg, 1)
-    joyLoL.pushLoadPath(optArg)
+    joylol.pushLoadPath(optArg)
   elseif anArg:match('-q') then
-    joyLoL.setVerbose(false)
+    joylol.setVerbose(false)
   elseif anArg:match('-v') then
-    joyLoL.setVerbose(true)
+    joylol.setVerbose(true)
   else
     optArg = table.remove(arg, 1)
     table.insert(loadFiles, optArg)
   end
 end
 
-if (loadConfiguration) joyLoL.loadFile("config")
-
-for i, aFile in ipairs(loadFiles) do
-  joyLoL.loadFile(aFile)
+if (loadConfiguration) then
+  joylol.loadFile("config")
 end
 
-joyLoL.runREPL();
+for i, aFile in ipairs(loadFiles) do
+  joylol.loadFile(aFile)
+end
+
+joylol.runREPL();
 
 \stopLuaCode

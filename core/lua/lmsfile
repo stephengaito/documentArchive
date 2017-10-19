@@ -31,6 +31,9 @@ litProgs.targets{
     'joylol/core/lua-private.h',
     'lua.c',
   },
+  cCodeLibs = {
+    '-lreadline',
+  },
   buildDir  = 'build',
   docDir    = 'doc',
   moduleDir = 'install',

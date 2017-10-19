@@ -171,6 +171,41 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
 
 \stopTestSuite
 
+\setCHeaderStream{public}
+\startCHeader
+// modified from: Joe Rossi's initial question
+// http://lua-users.org/lists/lua-l/2006-03/msg00335.html
+#define stackDump(lstate)                         \
+  {                                               \
+    int i = lua_gettop(lstate);                   \
+    printf("---- Stack Dump Started  ----\n");    \
+    while( i ) {                                  \
+      int aType = lua_type(lstate, i);            \
+      switch (aType) {                            \
+      case LUA_TSTRING:                           \
+        printf("%d: [%s] (string)\n",             \
+          i, lua_tostring(lstate, i));            \
+        break;                                    \
+      case LUA_TBOOLEAN:                          \
+        printf("%d: %s (boolean)\n",              \
+          i, (lua_toboolean(lstate, i) ?          \
+            "true" : "false"));                   \
+        break;                                    \
+      case LUA_TNUMBER:                           \
+        printf("%d: %g (number)\n",               \
+          i, lua_tonumber(lstate, i));            \
+        break;                                    \
+      default:                                    \
+        printf("%d: (%s)\n",                      \
+          i, lua_typename(lstate, aType));        \
+        break;                                    \
+      }                                           \
+      i--;                                        \
+    }                                             \
+    printf("---- Stack Dump Finished ----\n");    \
+  }
+\stopCHeader
+
 \startCCode
 static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
