@@ -42,10 +42,10 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
 #define buildCWDPathInto(buffer, aDir)                  \
   char *buffer = (char*)calloc(1, PATH_BUFFER_SIZE);    \
   if (!getcwd(buffer, PATH_BUFFER_SIZE)) {              \
-    fprintf(stderr, "\nERROR:\n");                      \
-    fprintf(stderr, "  Path buffer size too small\n");  \
-    fprintf(stderr, "  while building CWD path\n\n");   \
-    exit(-1);                                           \
+    /*return*/ luaL_error(lstate, "%s%s%s",             \
+      "\nERROR:\n",                                     \
+      "  Path buffer size too small\n",                 \
+      "  while building CWD path\n\n");                 \
   }                                                     \
   strncat(buffer, "/",                                  \
     PATH_BUFFER_SIZE - strlen(buffer) - 1);             \
@@ -66,10 +66,10 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
   char *buffer = (char*)calloc(1, PATH_BUFFER_SIZE);    \
   char *homeBuffer = getenv("HOME");                    \
   if (!homeBuffer) {                                    \
-    fprintf(stderr, "\nERROR:\n");                      \
-    fprintf(stderr, "  Environment variable 'HOME'\n"); \
-    fprintf(stderr, "  is empty!\n\n");                 \
-    exit(-1);                                           \
+    /*return*/ luaL_error(lstate, "%s",                 \
+      "\nERROR:\n",                                     \
+      "  Environment variable 'HOME'\n",                \
+      "  is empty!\n\n");                               \
   }                                                     \
   strncat(buffer, homeBuffer,                           \
     PATH_BUFFER_SIZE - strlen(buffer) - 1);             \
@@ -141,19 +141,19 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
 \startTestSuite[require lua modules]
 
 \startCHeader
-#define requireLuaModule(lstate, aLuaModule)              \
-  lua_getglobal(lstate, "require");                       \
-  lua_pushstring(lstate, aLuaModule);                     \
-  if (lua_pcall(lstate, 1, 1, 0)) {                       \
-    /* there was an error...                              \
-     * so return a copy of the error message              \
-     */                                                   \
-    fprintf(stderr, "Failed to load [%s]\n", aLuaModule); \
-    fprintf(stderr, "Error:\n");                          \
-    fprintf(stderr, "%s\n", lua_tostring(lstate, -1));    \
-    lua_close(lstate);                                    \
-    exit(-1);                                             \
-  }                                                       \
+#define requireLuaModule(lstate, aLuaModule)  \
+  lua_getglobal(lstate, "require");           \
+  lua_pushstring(lstate, aLuaModule);         \
+  if (lua_pcall(lstate, 1, 1, 0)) {           \
+    /* there was an error...                  \
+     * so return a copy of the error message  \
+     */                                       \
+    /*return*/ luaL_error(lstate,             \
+      "Failed to load [%s]\n%s%s\n",          \
+      aLuaModule,                             \
+      "ERROR:\n",                             \
+      lua_tostring(lstate, -1));              \
+  }                                           \
   lua_pop(lstate, 1)
 \stopCHeader
 
@@ -178,9 +178,9 @@ static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
   
   // first check that core stdout and stderr are defined
   if (!(jInterp->writeStdOut) || !(jInterp->writeStdErr)) {
-    fprintf(stderr, "\nERROR:\n");
-    fprintf(stderr, "  Core output methods are missing\n");
-    exit(-1);
+    return luaL_error(lstate, "%s%s",
+      "\nERROR:\n",
+      "  Core output methods are missing\n");
   }
   
   // now check that all required CoAlg extensions 
@@ -190,10 +190,11 @@ static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
   for ( ; curCoAlg->name ; curCoAlg++) {
     size_t curTag = curCoAlg->tag;
     if (!getCoAlgClass(jInterp, curTag)) {
-      fprintf(stderr, "\nERROR:\n");
-      fprintf(stderr, "  Missing a required CoAlgebraic extension\n");
-      fprintf(stderr, "  need to require joylol.%s\n\n", curCoAlg->name);
-      exit(-1);
+      return luaL_error(lstate, "%s%s%s%s\n\n",
+        "\nERROR:\n",
+       "  Missing a required CoAlgebraic extension\n",
+       "  need to require joylol.",
+       curCoAlg->name);
     }
   }
 
@@ -214,9 +215,9 @@ static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
     !(jInterp->loader) ||
     !(jInterp->rootCtx)
     ) {
-      fprintf(stderr, "\nERROR:\n");
-      fprintf(stderr, "  some required objects are missing\n\n");
-      exit(-1);
+      return luaL_error(lstate, "%s%s",
+        "\nERROR:\n",
+        "  some required objects are missing\n\n");
     }
   return 0;
 }

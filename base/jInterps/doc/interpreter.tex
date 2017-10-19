@@ -73,12 +73,10 @@ into hexadecimal using the standard \type{ASCII} character codes.
     (JoyLoLCallback*)lua_touserdata (lstate, -1); \
   lua_pop(lstate, 1);                             \
   if (!aCallback) {                               \
-    fprintf(stderr, "\nERROR:\n");                \
-    fprintf(stderr,                               \
-      "  Could not get the Lua registered\n");    \
-    fprintf(stderr,                               \
-      "  JoyLoLCallback method!\n");              \
-    fprintf(stderr,                               \
+    /*return*/ luaL_error(lstate, "%s%s%s%s",     \
+      "\nERROR:\n",                               \
+      "  Could not get the Lua registered\n",     \
+      "  JoyLoLCallback method!\n",               \
       "  Have you required joylol.core.xxx?\n");  \
   }
 \stopCHeader
@@ -327,9 +325,9 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   jInterp->writeStdErr =
     getCoreResources(JoyLoLCallback_StdErrMethod);
   if (!(jInterp->writeStdOut) || !(jInterp->writeStdErr)) {
-    fprintf(stderr, "\nERROR:\n");
-    fprintf(stderr, "  Could not get the core output methods\n");
-    exit(-1);
+    /*return*/ luaL_error(lstate, "%s%s",
+      "\nERROR:\n",
+      "  Could not get the core output methods\n");
   }
   
   size_t maxNum =
@@ -412,12 +410,10 @@ into hexadecimal using the standard \type{ASCII} character codes.
     (JoyLoLInterp*)lua_touserdata (lstate, -1);   \
   lua_pop(lstate, 1);                             \
   if (!jInterp) {                                 \
-    fprintf(stderr, "\nERROR:\n");                \
-    fprintf(stderr,                               \
-      "  Could not get the Lua registered\n");    \
-    fprintf(stderr,                               \
-      "  JoyLoLInterp instance!\n");              \
-    fprintf(stderr,                               \
+    /*return*/ luaL_error(lstate, "%s%s%s%s",     \
+      "\nERROR:\n",                               \
+      "  Could not get the Lua registered\n",     \
+      "  JoyLoLInterp instance!\n",               \
       "  Have you required joylol.jInterps?\n");  \
   }
 \stopCHeader
