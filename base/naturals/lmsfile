@@ -70,6 +70,7 @@ contests.targets{
   testLibDirs = {
   },
   testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
   },
   buildDir  = 'build',
   docDir    = 'doc',

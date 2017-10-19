@@ -36,11 +36,12 @@
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/stringBuffers-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
 \addCTestJoyLoLCallbacks{default}
 \CTestsSetup\
 \startCTest
   addJoyLoLLuaPath(lstate);
-  requireLuaModule(lstate, "joylol.jInterps");
+  requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.booleans");
   requireStaticallyLinkedStringBuffers(lstate);
   getJoyLoLInterpInto(lstate, jInterp);

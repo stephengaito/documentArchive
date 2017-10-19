@@ -41,11 +41,12 @@
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/naturals.h>}
 \addCTestInclude{<joylol/naturals-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
 \addCTestJoyLoLCallbacks{default}
 \CTestsSetup\
 \startCTest
   addJoyLoLLuaPath(lstate);
-  requireLuaModule(lstate, "joylol.jInterps");
+  requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.stringBuffers");
   requireLuaModule(lstate, "joylol.booleans");
   requireStaticallyLinkedNaturals(lstate);

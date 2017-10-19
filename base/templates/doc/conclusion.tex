@@ -37,11 +37,12 @@
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/templates.h>}
 \addCTestInclude{<joylol/templates-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
 \addCTestJoyLoLCallbacks{default}
 \CTestsSetup\
 \startCTest
   addJoyLoLLuaPath(lstate);
-  requireLuaModule(lstate, "joylol.jInterps");
+  requireStaticallyLinkedJInterps(lstate);
   requireStaticallyLinkedTemplates(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest

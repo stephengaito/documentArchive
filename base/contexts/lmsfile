@@ -84,6 +84,7 @@ contests.targets{
   testLibDirs = {
   },
   testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
     '-lgmp',
   },
   buildDir  = 'build',

@@ -121,7 +121,7 @@ void strBufReOpen(StringBufferObj* aStrBuf) {
   AssertIntTrue(isAtom(aStrBuf));
   AssertIntFalse(isPair(aStrBuf));
   strBufClose(jInterp, aStrBuf);
-  AssertPtrNotNull(asMemFile(aStrBuf));
+  AssertPtrNull(asMemFile(aStrBuf));
   AssertPtrNull(asBuffer(aStrBuf));
   AssertStrEquals(getCString(jInterp, aStrBuf), "");
   AssertPtrNotNull(asBuffer(aStrBuf));

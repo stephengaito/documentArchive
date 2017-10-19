@@ -272,8 +272,9 @@ shared library) is actually statically linked into the executable. In
 these cases we need the ability to mimic the standard Lua \type{require} 
 process. The following \type{requireStaticallyLinkedJInterps} does just this. 
 
+\setCHeaderStream{public}
 \startCHeader
-Boolean requireStaticallyLinkedJInterps(
+extern Boolean requireStaticallyLinkedJInterps(
   lua_State *lstate
 );
 \stopCHeader

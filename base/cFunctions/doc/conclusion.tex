@@ -37,11 +37,12 @@
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/cFunctions.h>}
 \addCTestInclude{<joylol/cFunctions-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
 \addCTestJoyLoLCallbacks{default}
 \CTestsSetup\
 \startCTest
   addJoyLoLLuaPath(lstate);
-  requireLuaModule(lstate, "joylol.jInterps");
+  requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.stringBuffers");
   requireStaticallyLinkedCFunctions(lstate);
   getJoyLoLInterpInto(lstate, jInterp);

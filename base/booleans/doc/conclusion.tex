@@ -47,11 +47,12 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/booleans-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
 \addCTestJoyLoLCallbacks{default}
 \CTestsSetup\
 \startCTest
   addJoyLoLLuaPath(lstate);
-  requireLuaModule(lstate, "joylol.jInterps");
+  requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.stringBuffers");
   requireStaticallyLinkedBooleans(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
