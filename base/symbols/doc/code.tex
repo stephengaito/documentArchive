@@ -289,7 +289,7 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   assert(jInterp->coAlgs);
   
   SymbolsClass* theCoAlg = joyLoLCalloc(1, SymbolsClass);
-  theCoAlg->super.name           = "Symbols";
+  theCoAlg->super.name           = SymbolsName;
   theCoAlg->super.objectSize     = sizeof(SymbolObj);
   theCoAlg->super.initializeFunc = initializeSymbols;
   theCoAlg->super.equalityFunc   = symbolsEqualDebug;

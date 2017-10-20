@@ -31,7 +31,7 @@ package.cpath = table.concat(joylolCPaths, ';')
 argStr = '|'..table.concat(arg, '|')..'|'
 verbose = argStr:match('|%-v|');
 
-if verbose then print('loading [joylol.core.lua]\n') end
+if verbose then print('loading [joylol.core.lua]') end
 joylol = require 'joylol.core.lua'
 if verbose then print('loaded [joylol.core.lua]\n') end
 
@@ -67,11 +67,11 @@ while(0 < #arg) do
     table.insert(loadFiles, optArg)
   elseif anArg:match('-p') then
     optArg = table.remove(arg, 1)
-    joylol.pushLoadPath(optArg)
+    joylol.core.lua.pushLoadPath(optArg)
   elseif anArg:match('-q') then
-    joylol.setVerbose(false)
+    joylol.core.lua.setVerbose(false)
   elseif anArg:match('-v') then
-    joylol.setVerbose(true)
+    joylol.core.lua.setVerbose(true)
   else
     optArg = table.remove(arg, 1)
     table.insert(loadFiles, optArg)
@@ -79,11 +79,11 @@ while(0 < #arg) do
 end
 
 if (loadConfiguration) then
-  joylol.loadFile("config")
+  joylol.core.lua.loadFile("config")
 end
 
 for i, aFile in ipairs(loadFiles) do
-  joylol.loadFile(aFile)
+  joylol.core.lua.loadFile(aFile)
 end
 
 joylol.runREPL();

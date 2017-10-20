@@ -326,7 +326,7 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
     joyLoLCalloc(1, DictionariesClass);
   assert(theCoAlg);
   
-  theCoAlg->super.name            = "Dictionaries";
+  theCoAlg->super.name            = DictionariesName;
   theCoAlg->super.objectSize      = sizeof(DictObj);
   theCoAlg->super.initializeFunc  = initializeDictionaries;
   theCoAlg->super.equalityFunc    = NULL;

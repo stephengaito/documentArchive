@@ -19,7 +19,13 @@ static int lua_core_lua_getGitVersion (lua_State *lstate) {
 static int lua_core_lua_setVerbose(lua_State *lstate) {
   Boolean verbose = 
     (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  if (verbose) {
+    // do nothing
+  }
   getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  assert(jInterp->rootCtx);
+  jInterp->verbose = verbose;
   jInterp->rootCtx->verbose = verbose;
   lua_pop(lstate, 1);
   return 0;
@@ -64,22 +70,29 @@ static void coreLuaWriteStdErr(Symbol *aMessage) {
   fprintf(stderr, "%s\n", aMessage);
 }
 
-static void *coreLuaCallback(size_t resourceId) {
+static Boolean beVerbose(lua_State *lstate) {
+  lua_getglobal(lstate, "verbose");
+  Boolean isVerbose = (Boolean)lua_toboolean(lstate, -1);
+  lua_pop(lstate, 1);
+  return isVerbose;
+}
+
+static void *coreLuaCallback(
+  lua_State *lstate,
+  size_t resourceId
+) {
   if (resourceId == JoyLoLCallback_StdOutMethod) {
     return (void*)coreLuaWriteStdOut;
   } else if (resourceId == JoyLoLCallback_StdErrMethod) {
     return (void*)coreLuaWriteStdErr;
+  } else if (resourceId == JoyLoLCallback_Verbose) {
+    return (void*)beVerbose(lstate);
   }
   return NULL;
 } 
 
 int luaopen_joylol_core_lua (lua_State *lstate) {
-  stackDump(lstate);
-  Symbol *verbose = getenv("JOYLOL_VERBOSE");
-  if (verbose) printf("loading [joylol.jInterps]\n");
-  stackDump(lstate);
   setJoyLoLCallbackFrom(lstate, coreLuaCallback);
-  stackDump(lstate);
   lua_getglobal(lstate, "require");
   lua_pushstring(lstate, "joylol.jInterps");
   if (lua_pcall(lstate, 1, 1, 0)) {
@@ -88,8 +101,6 @@ int luaopen_joylol_core_lua (lua_State *lstate) {
       lua_tostring(lstate, -1)
     );
   }
-  stackDump(lstate);
-  if (verbose) printf("loaded [joylol.jInterps]\n");
   getJoyLoLInterpInto(lstate, jInterp);
   lua_pushstring(lstate, "core");
   lua_createtable(lstate,0, 1); // joylol.core 

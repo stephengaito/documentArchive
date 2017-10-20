@@ -35,7 +35,10 @@ The callback C-function takes an unsigned integer as its sole argument and
 returns a \type{void*} to the returned resource. 
 
 \startCHeader
-typedef void *(JoyLoLCallback)(size_t);
+typedef void *(JoyLoLCallback)(
+  lua_State*,
+  size_t
+);
 \stopCHeader
 
 The currently well known resources are:
@@ -44,6 +47,7 @@ The currently well known resources are:
 \startCHeader
 #define JoyLoLCallback_StdOutMethod  1
 #define JoyLoLCallback_StdErrMethod  2
+#define JoyLoLCallback_Verbose       3
 
 typedef void (StdOutputMethod)(Symbol *aMessage);
 \stopCHeader
@@ -224,6 +228,7 @@ typedef struct joylol_interpreter_struct {
   Dictionary       dict;
   LoaderObj       *loader;
   ContextObj      *rootCtx;
+  Boolean          verbose;
   StdOutputMethod *writeStdOut;
   StdOutputMethod *writeStdErr;
 } JoyLoLInterp;
@@ -321,14 +326,16 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   getJoyLoLCallbackInto(lstate, getCoreResources);
   assert(getCoreResources);
   jInterp->writeStdOut =
-    getCoreResources(JoyLoLCallback_StdOutMethod);
+    getCoreResources(lstate, JoyLoLCallback_StdOutMethod);
   jInterp->writeStdErr =
-    getCoreResources(JoyLoLCallback_StdErrMethod);
+    getCoreResources(lstate, JoyLoLCallback_StdErrMethod);
   if (!(jInterp->writeStdOut) || !(jInterp->writeStdErr)) {
     /*return*/ luaL_error(lstate, "%s%s",
       "\nERROR:\n",
       "  Could not get the core output methods\n");
   }
+  jInterp->verbose = 
+    (Boolean)getCoreResources(lstate, JoyLoLCallback_Verbose);
   
   size_t maxNum =
     NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT;

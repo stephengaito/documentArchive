@@ -245,7 +245,7 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   assert(jInterp->coAlgs);
   
   NaturalsClass* theCoAlg        = joyLoLCalloc(1, NaturalsClass);
-  theCoAlg->super.name           = "Naturals";
+  theCoAlg->super.name           = NaturalsName;
   theCoAlg->super.objectSize     = sizeof(NaturalObj);
   theCoAlg->super.initializeFunc = initializeNaturals;
   theCoAlg->super.equalityFunc   = equalityNatCoAlgDebug;

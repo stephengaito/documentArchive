@@ -469,7 +469,7 @@ Boolean registerStringBuffers(JoyLoLInterp* jInterp) {
   
   StringBuffersClass* theCoAlg  =
     joyLoLCalloc(1, StringBuffersClass);
-  theCoAlg->super.name            = "StringBuffers";
+  theCoAlg->super.name            = StringBuffersName;
   theCoAlg->super.objectSize      = sizeof(StringBufferObj);
   theCoAlg->super.initializeFunc  = initializeStringBuffers;
   theCoAlg->super.equalityFunc    = stringBuffersEqualDebug;

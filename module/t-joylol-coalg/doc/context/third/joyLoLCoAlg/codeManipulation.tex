@@ -443,11 +443,16 @@ void ctestsWriteStdOut(Symbol *aMessage) {
 void ctestsWriteStdErr(Symbol *aMessage) {
   fprintf(stderr, "%s\n", aMessage);
 }
-void *ctestsCallback(size_t resourceId) {
+void *ctestsCallback(
+  lua_State *lstate,
+  size_t resourceId
+) {
   if (resourceId == JoyLoLCallback_StdOutMethod) {
     return (void*)ctestsWriteStdOut;
   } else if (resourceId == JoyLoLCallback_StdErrMethod) {
     return (void*)ctestsWriteStdErr;
+  } else if (resourceId == JoyLoLCallback_Verbose) {
+    return (void*)TRUE;
   }
   return NULL;
 } 

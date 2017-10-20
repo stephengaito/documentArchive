@@ -399,7 +399,7 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   assert(jInterp);
   
   PairsClass* theCoAlg           = joyLoLCalloc(1, PairsClass);
-  theCoAlg->super.name           = strdup("Pairs");
+  theCoAlg->super.name           = PairsName;
   theCoAlg->super.objectSize     = sizeof(PairsObj);
   theCoAlg->super.initializeFunc = initializePairs;
   theCoAlg->super.equalityFunc   = equalLoLDebugImpl;

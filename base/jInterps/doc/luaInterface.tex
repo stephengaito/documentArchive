@@ -175,10 +175,11 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
 \startCHeader
 // modified from: Joe Rossi's initial question
 // http://lua-users.org/lists/lua-l/2006-03/msg00335.html
-#define stackDump(lstate)                         \
+#define stackDump(lstate, message)                \
   {                                               \
     int i = lua_gettop(lstate);                   \
-    printf("---- Stack Dump Started  ----\n");    \
+    printf("%s ---- Stack Dump Started  ----\n",  \
+      message);                                   \
     while( i ) {                                  \
       int aType = lua_type(lstate, i);            \
       switch (aType) {                            \
@@ -202,18 +203,19 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
       }                                           \
       i--;                                        \
     }                                             \
-    printf("---- Stack Dump Finished ----\n");    \
+    printf("%s ---- Stack Dump Finished ----\n",  \
+      message);                                   \
   }
 \stopCHeader
 
 \startCCode
-static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
-  getJoyLoLInterpInto(lstate, jInterp);
-  assert(jInterp);
-  
+static void initializeAllRequired(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp
+) {
   // first check that core stdout and stderr are defined
   if (!(jInterp->writeStdOut) || !(jInterp->writeStdErr)) {
-    return luaL_error(lstate, "%s%s",
+    /*return*/ luaL_error(lstate, "%s%s",
       "\nERROR:\n",
       "  Core output methods are missing\n");
   }
@@ -225,7 +227,7 @@ static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
   for ( ; curCoAlg->name ; curCoAlg++) {
     size_t curTag = curCoAlg->tag;
     if (!getCoAlgClass(jInterp, curTag)) {
-      return luaL_error(lstate, "%s%s%s%s\n\n",
+      /*return*/ luaL_error(lstate, "%s%s%s%s\n\n",
         "\nERROR:\n",
        "  Missing a required CoAlgebraic extension\n",
        "  need to require joylol.",
@@ -238,7 +240,11 @@ static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
   for( size_t i = 1; i < NumRequiredCoAlgs; i++) {
     CoAlgClass *aCoAlg = getCoAlgClass(jInterp, i);
     if (aCoAlg) {
+      if (jInterp->verbose) 
+        printf("    initializing [joylol.%s]\n", aCoAlg->name);
       aCoAlg->initializeFunc(jInterp, aCoAlg);
+      if (jInterp->verbose) 
+        printf("    initialized [joylol.%s]\n", aCoAlg->name);
     }
   }
   
@@ -250,10 +256,16 @@ static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
     !(jInterp->loader) ||
     !(jInterp->rootCtx)
     ) {
-      return luaL_error(lstate, "%s%s",
+      /*return*/ luaL_error(lstate, "%s%s",
         "\nERROR:\n",
         "  some required objects are missing\n\n");
     }
+}
+
+static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  initializeAllRequired(lstate, jInterp);
   return 0;
 }
 \stopCCode
@@ -289,7 +301,7 @@ static void requireAllRequiredCoAlgs(
   assert(lstate);
   assert(jInterp);
   assert(jInterp->coAlgs);
-
+  
   // start by creating a master table
   lua_createtable(lstate, 0, NumRequiredCoAlgs + 5); // -3
   
@@ -305,6 +317,8 @@ static void requireAllRequiredCoAlgs(
   for ( ; curCoAlg->name ; curCoAlg++) {
     size_t curTag = curCoAlg->tag;
     if (!(jInterp->coAlgs[curTag].sClass)) {
+      if (jInterp->verbose)
+        printf("    loading [joylol.%s]\n", curCoAlg->name);
       lua_pushstring(lstate, curCoAlg->name); // -2
       lua_getglobal(lstate, "require");
       luaL_Buffer modName;
@@ -313,9 +327,16 @@ static void requireAllRequiredCoAlgs(
       luaL_addstring(&modName, curCoAlg->name);
       luaL_pushresult(&modName);
       if (lua_pcall(lstate, 1, 1, 0)) {       // -> -1
-        // deal with the error!
+        /* return */ luaL_error(lstate,
+          "Failed to load [%s]\n%s%s\n",
+          curCoAlg->name,
+          "ERROR:\n",
+          lua_tostring(lstate, -1)
+        );
       }
       lua_settable(lstate, -3);
+      if (jInterp->verbose)
+        printf("    loaded [joylol.%s]\n", curCoAlg->name);
     }
   }  
 }
@@ -328,8 +349,13 @@ the shared library.
 \startCCode
 int luaopen_joylol_jInterps (lua_State *lstate) {
   setJoyLoLInterpInto(lstate, jInterp);
+  if (jInterp->verbose)
+    printf("  loading [joylol.jInterps]\n");
   registerJInterps(jInterp);
   requireAllRequiredCoAlgs(lstate, jInterp);
+  initializeAllRequired(lstate, jInterp);
+  if (jInterp->verbose)
+    printf("  loaded [joylol.jInterps]\n");
   return 1;
 }
 \stopCCode

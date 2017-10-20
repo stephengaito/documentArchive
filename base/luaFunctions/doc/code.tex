@@ -128,7 +128,7 @@ Functions* createFunctionsCoAlgebra(void) {
   initACoAlgebra((CoAlgebra*)funcs);
 
   funcs->super.isA       = FUNCTION_COALG;
-  funcs->super.name      = "function";
+  funcs->super.name      = LuaFunctionsName;
   funcs->super.equality  = equalityFuncCoAlg;
   funcs->super.printSize = printSizeFuncCoAlg;
   funcs->super.printStr  = printStrFuncCoAlg;

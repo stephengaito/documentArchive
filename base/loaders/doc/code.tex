@@ -4,9 +4,10 @@
 
 \startCHeader
 typedef struct loader_object_struct {
-  CoAlgObj  super;
-  CoAlgObj *paths;
-  CoAlgObj *extensions;
+  CoAlgObj      super;
+  JoyLoLInterp *jInterp;
+  CoAlgObj     *paths;
+  CoAlgObj     *extensions;
 } LoaderObj;
 \stopCHeader
 
@@ -41,23 +42,24 @@ LoaderObj *newLoaderImpl(
     (LoaderObj*)newObject(jInterp, LoadersTag);
   assert(loader);
   
+  loader->jInterp    = jInterp;
   loader->paths      = NULL;
   loader->extensions = NULL;
   
   // init standard load paths
   // allow absolute paths as a last resort
-  pushLoadPath(jInterp, ""); 
-  pushLoadPath(jInterp, JOYLOL_SYSTEM_COALG_PATH);
-  pushLoadPath(jInterp, JOYLOL_SYSTEM_CONFIG_PATH);
-//  pushLoadPath(jInterp, JOYLOL_USER_COALG_PATH);
-  pushLoadPath(jInterp, ".");
+  pushLoadPath(loader, ""); 
+  pushLoadPath(loader, JOYLOL_SYSTEM_COALG_PATH);
+  pushLoadPath(loader, JOYLOL_SYSTEM_CONFIG_PATH);
+//  pushLoadPath(loader, JOYLOL_USER_COALG_PATH);
+  pushLoadPath(loader, ".");
 
   // init standard load extensions
   // allow absolute extensions as a last resort
-  pushLoadExtension(jInterp, "");
-  pushLoadExtension(jInterp, ".so");
-  pushLoadExtension(jInterp, ".lua");
-  pushLoadExtension(jInterp, ".joy");
+  pushLoadExtension(loader, "");
+  pushLoadExtension(loader, ".so");
+  pushLoadExtension(loader, ".lua");
+  pushLoadExtension(loader, ".joy");
   
   return loader;
 }
@@ -65,92 +67,74 @@ LoaderObj *newLoaderImpl(
 
 \startCHeader
 typedef void (PushLoadSymbol)(
-  JoyLoLInterp *jInterp,
-  Symbol       *aLoadSym
+  LoaderObj *loader,
+  Symbol    *aLoadSym
 );
 
-#define pushLoadPath(jInterp, aLoadPath)      \
+#define pushLoadPath(loader, aLoadPath)       \
   (                                           \
-    assert(getLoadersClass(jInterp)           \
+    assert(getLoadersClass(loader->jInterp)   \
       ->pushLoadPathFunc),                    \
-    (getLoadersClass(jInterp)                 \
-      ->pushLoadPathFunc(jInterp, aLoadPath)) \
+    (getLoadersClass(loader->jInterp)         \
+      ->pushLoadPathFunc(loader, aLoadPath))  \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
 extern void pushLoadPathImpl(
-  JoyLoLInterp *jInterp,
-  Symbol       *aLoadPath
+  LoaderObj *loader,
+  Symbol    *aLoadPath
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 void pushLoadPathImpl(
-  JoyLoLInterp *jInterp,
-  Symbol       *aLoadPath
+  LoaderObj *loader,
+  Symbol    *aLoadPath
 ) {
   assert(aLoadPath);
-  assert(jInterp);
-  LoaderObj* loader = jInterp->loader;
   assert(loader);
   loader->paths =
-    newPair(jInterp, newSymbol(jInterp, aLoadPath), loader->paths);
+    newPair(
+      loader->jInterp,
+      newSymbol(loader->jInterp, aLoadPath),
+      loader->paths
+    );
 }
 \stopCCode
 
-\starttyping
 \startCHeader
-extern void pushLoadFile(JoyLoLInterp* jInterp, const char* aLoadFile);
-\stopCHeader
-
-\startCCode
-void pushLoadFile(JoyLoLInterp* jInterp, const char* aLoadFile) {
-  assert(aLoadFile);
-  assert(jInterp);
-  assert(jInterp->contexts);
-  Loader* loader = jInterp->contexts->loader;
-  assert(loader);
-  loader->loadFiles =
-    newPair(jInterp, newSymbol(jInterp, aLoadFile), loader->loadFiles);
-}
-\stopCCode
-\stoptyping
-
-\startCHeader
-#define pushLoadExtension(jInterp, aLoadExt)      \
+#define pushLoadExtension(loader, aLoadExt)       \
   (                                               \
-    assert(getLoadersClass(jInterp)               \
+    assert(getLoadersClass(loader->jInterp)       \
       ->pushLoadExtensionFunc),                   \
-    (getLoadersClass(jInterp)                     \
-      ->pushLoadExtensionFunc(jInterp, aLoadExt)) \
+    (getLoadersClass(loader->jInterp)             \
+      ->pushLoadExtensionFunc(loader, aLoadExt))  \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
 extern void pushLoadExtensionImpl(
-  JoyLoLInterp *jInterp,
-  Symbol       *aLoadExtension
+  LoaderObj *loader,
+  Symbol    *aLoadExtension
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 void pushLoadExtensionImpl(
-  JoyLoLInterp *jInterp,
-  Symbol       *aLoadExtension
+  LoaderObj *loader,
+  Symbol    *aLoadExtension
 ) {
   assert(aLoadExtension);
-  assert(jInterp);
-  LoaderObj* loader = jInterp->loader;
   assert(loader);
   loader->extensions =
     newPair(
-      jInterp, 
-      newSymbol(jInterp, aLoadExtension),
+      loader->jInterp, 
+      newSymbol(loader->jInterp, aLoadExtension),
       loader->extensions
     );
 }
