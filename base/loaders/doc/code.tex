@@ -154,9 +154,10 @@ Boolean loadAJoyLoLFile(
   ContextObj *aCtx,
   Symbol     *filePath
 ) {
+  Boolean debugFlag = FALSE;
   assert(aCtx);
   assert(aCtx->jInterp);
-  DEBUG(FALSE, "loadATextFile [%s]\n", filePath);
+  DEBUG(debugFlag, "loadATextFile [%s]\n", filePath);
   FILE* inputFile = fopen(filePath, "r");
   if (inputFile) {
     if(aCtx->verbose) printf("(%s)\n", filePath);
@@ -166,13 +167,13 @@ Boolean loadAJoyLoLFile(
     freeText(aText);
     fclose(inputFile);
     if (reportException(aCtx)) {
-      DEBUG(FALSE, "loadATextFile [%s] RAISED EXCEPTION\n", filePath);
+      DEBUG(debugFlag, "loadATextFile [%s] RAISED EXCEPTION\n", filePath);
       return FALSE;
     }
-    DEBUG(FALSE, "loadATextFile [%s] OK\n", filePath);
+    DEBUG(debugFlag, "loadATextFile [%s] OK\n", filePath);
     return TRUE; // we have loaded this file so return TRUE;
   }
-  DEBUG(FALSE, "loadATextFile [%s] FAILED\n", filePath);
+  DEBUG(debugFlag, "loadATextFile [%s] FAILED\n", filePath);
   return FALSE;
 }
 \stopCCode
@@ -207,6 +208,7 @@ Boolean loadAFileImpl(
   ContextObj *aCtx,
   Symbol     *aFileToLoad
 ) {
+  Boolean debugFlag = FALSE;
   assert(aCtx);
   assert(aCtx->jInterp);
   LoaderObj* loader = aCtx->jInterp->loader;
@@ -236,12 +238,12 @@ Boolean loadAFileImpl(
       strcat(buffer, aFileToLoad);
       assert(isSymbol(aLoadExtension));
       strcat(buffer, asSymbol(aLoadExtension));
-      DEBUG(FALSE, "trying to load: [%s]\n", buffer);
+      DEBUG(debugFlag, "trying to load: [%s]\n", buffer);
 
       if (!access(buffer, R_OK)) {
         if (strcmp(asSymbol(aLoadExtension), ".joy") == 0) {
-          if (loadAJoyLoLFile(aCtx, aFileToLoad)) {
-            DEBUG(FALSE, "loaded: [%s]\n", buffer);
+          if (loadAJoyLoLFile(aCtx, buffer)) {
+            DEBUG(debugFlag, "loaded: [%s]\n", buffer);
             return TRUE;
           }
         } else {
@@ -249,7 +251,7 @@ Boolean loadAFileImpl(
           lua_State *lstate = aCtx->jInterp->lstate;
           requireLuaModuleInto(lstate, aFileToLoad, loadedOk);
           if (loadedOk) {
-            DEBUG(FALSE, "loaded: [%s]\n", buffer);
+            DEBUG(debugFlag, "loaded: [%s]\n", buffer);
             return TRUE;
           }
         }
@@ -262,7 +264,7 @@ Boolean loadAFileImpl(
     aLoadPathList = asCdr(aLoadPathList);
   }
   if(aCtx->verbose) printf("FAILED\n");
-  DEBUG(FALSE, "loadAFile: FAILED%s\n", "");
+  DEBUG(debugFlag, "loadAFile: FAILED%s\n", "");
   return FALSE; // we could not find this file in any of the load paths
 }
 \stopCCode
