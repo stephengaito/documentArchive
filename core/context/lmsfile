@@ -1,0 +1,26 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('build/joyLoL')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'joylol.tex',
+  docFiles = {
+    'overview.tex',
+    'luaInterface.tex',
+    'luaMain.tex',
+    'preamble.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    't-joylol.mkiv',
+    't-joylol.lua',
+  },
+  buildDir  = 'build',
+  docDir    = 't-joylol/doc/context/third/joyLoL',
+  moduleDir = 't-joylol/tex/context/third/joyLoL',
+}

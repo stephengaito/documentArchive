@@ -44,152 +44,42 @@
 
 \unprotect
 
+\directlua{%
+  thirddata.joylol.options =
+    thirddata.joylol.options or { }
+  thirddata.joylol.options.verbose =
+    \doifdefined{??modulet-joylol:verbose}{%
+      \??modulet-joylol:verbose
+  }{%
+      thirddata.joylol.options.verbose or false
+  }
+  thirddata.joylol.options.loadConfig =
+  \doifdefined{??modulet-joylol:loadConfig}{%
+      \??modulet-joylol:loadConfig
+  }{%
+      thirddata.joylol.options.loadConfig or true
+  }
+}
+
 \ctxloadluafile{t-joylol}
 
 % from file: overview.tex after line: 150
 
 \defineLitProgs[MinJoyLoL]
 
-% from file: codeManipulation.tex after line: 0
+% from file: luaMain.tex after line: 50
 
-\writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions}
-
-\usemodule[t-literate-progs]
-\usemodule[t-high-lisp]
-\usemodule[t-contests]
-
-% from file: codeManipulation.tex after line: 50
-
-\def\declareJoyLoLCoAlg[#1][#2]{
-  \startcomponent[#2]
-  \startchapter[#1]
-  \directlua{thirddata.joylol.newCoAlg('#2')}
+\def\loadJoyLoLFile#1{%
+  \directlua{%
+    thirddata.joylol.loadFile('#1')
+  }
 }
 
-\let\startJoyLoLCoAlg=\declareJoyLoLCoAlg
-
-\def\stopJoyLoLCoAlg{\relax}
-
-% from file: codeManipulation.tex after line: 100
-
-\def\stopJoyLoLCoAlg{
-  \directlua{thirddata.joylol.createCoAlg()}
-  \stopchapter
-  \stopcomponent
+\def\pushJoyLoLLoadPath#1{%
+  \directlua{%
+    thirddata.joylol.pushLoadPath('#1')
+  }
 }
-
-% from file: codeManipulation.tex after line: 100
-
-\unexpanded\def\srcCopyrightCCBYSA{}
-
-% from file: codeManipulation.tex after line: 150
-
-\unexpanded\def\targetCopyrightMIT{}
-
-% from file: codeManipulation.tex after line: 150
-
-\def\dependsOn[#1]{
-  \directlua{thirddata.joyLoLCoAlgs.addDependency('#1')}
-}
-
-% from file: codeManipulation.tex after line: 150
-
-\definetextbackground[JFrame]
-\setuptextbackground[JFrame][location=text, background=color, backgroundcolor=gray]
-
-% from file: codeManipulation.tex after line: 150
-
-\def\startJoyLoLWord[#1]{
-  \directlua{thirddata.joylol.newWord('#1')}
-}
-
-% from file: codeManipulation.tex after line: 200
-
-\def\stopJoyLoLWord{
-  \directlua{thirddata.joylol.endWord()}
-}
-
-% from file: codeManipulation.tex after line: 200
-
-\def\startJoyLoLStackActionIn[#1]{
-  \directlua{thirddata.joylol.newStackActionIn('#1')}
-}
-
-% from file: codeManipulation.tex after line: 200
-
-\def\stopJoyLoLStackActionIn{
-  \directlua{thirddata.joylol.endStackActionIn()}
-}
-
-% from file: codeManipulation.tex after line: 250
-
-\def\startJoyLoLStackActionOut[#1]{
-  \directlua{thirddata.joylol.newStackActionOut('#1')}
-}
-
-% from file: codeManipulation.tex after line: 250
-
-\def\stopJoyLoLStackActionOut{
-  \directlua{thirddata.joylol.endStackActionOut()}
-}
-
-% from file: codeManipulation.tex after line: 300
-
-\def\preDataStack[#1][#2]{
-  \directlua{thirddata.joylol.addPreDataStackDescription('#1', '#2')}
-}
-
-\def\postDataStack[#1]{
-  \directlua{thirddata.joylol.addPostDataStackDescription('#1')}
-}
-
-% from file: codeManipulation.tex after line: 300
-
-\def\preProcessStack[#1][#2]{
-  \directlua{thirddata.joylol.addPreProcessStackDescription('#1', '#2')}
-}
-
-\def\postProcessStack[#1]{
-  \directlua{thirddata.joylol.addPostProcessStackDescription('#1')}
-}
-
-% from file: codeManipulation.tex after line: 350
-
-\defineLitProgs
-  [JoyLoLCode]
-  [ option=lisp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
-
-\defineLitProgs
-  [MinJoyLoLCode]
-  [ option=lisp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
-
-% from file: codeManipulation.tex after line: 350
-
-\defineLitProgs
-  [CHeader]
-  [ option=cpp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
-
-% from file: codeManipulation.tex after line: 350
-
-\defineLitProgs
-  [CCode]
-  [ option=cpp, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
-
-% from file: codeManipulation.tex after line: 400
-
-\defineLitProgs
-  [LuaCode]
-  [ option=lua, numbering=line,
-    before={\noindent\startJFrame}, after=\stopJFrame
-  ]
 
 % from file: preamble.tex after line: 50
 

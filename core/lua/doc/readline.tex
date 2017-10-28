@@ -210,9 +210,9 @@ void runREPLInContext(
   aText->debugFlag = debugFlag;
   
   while(TRUE) {
-    DEBUG(debugFlag, "runREPLInContext %p reading\\n", aCtx);
+    DEBUG(debugFlag, "runREPLInContext %p reading\n", aCtx);
     CoAlgObj* aLoL = parseOneSymbol(aText);
-    DEBUG(debugFlag, "runREPLInContext %p read %p\\n", aCtx, aLoL);
+    DEBUG(debugFlag, "runREPLInContext %p read %p\n", aCtx, aLoL);
     //
     if (!aLoL) break;
     //
@@ -220,18 +220,18 @@ void runREPLInContext(
     assert(!aCtx->process);
     //
     if (aCtx->showStack) {
-      DEBUG(debugFlag, "runREPLInContext %p printing data %p\\n", aCtx, aCtx->data);
+      DEBUG(debugFlag, "runREPLInContext %p printing data %p\n", aCtx, aCtx->data);
       StringBufferObj *aStrBuf = newStringBuffer(jInterp);
       printLoL(jInterp, aStrBuf, aCtx->data);
       printf(">>%s\\n", getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
-      DEBUG(debugFlag, "runREPLInContext %p printed data %p\\n", aCtx, aCtx->data);
+      DEBUG(debugFlag, "runREPLInContext %p printed data %p\n", aCtx, aCtx->data);
     }
     //
     reportException(aCtx); // report last exception if raised
   }
   saveReadlineHistory(aText);
-  DEBUG(debugFlag, "runREPLInContext %p COMPLETED\\n", aCtx);
+  DEBUG(debugFlag, "runREPLInContext %p COMPLETED\n", aCtx);
 }
 \stopCCode
 
