@@ -1,0 +1,115 @@
+% A ConTeXt document [master document: textsReadline.tex]
+
+\section[title=Lua interface]
+
+\component gitVersion-c
+
+\startCCode
+static int lua_core_context_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  if (aKey) {
+    getGitVersionInto(gitVersionKeyValues, aKey, aValue);
+    lua_pushstring(lstate, aValue);
+  } else {
+    lua_pushstring(lstate, "no valid key provided");
+  }
+  return 1;
+}
+
+static int lua_core_context_setVerbose(lua_State *lstate) {
+  Boolean verbose = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  if (verbose) {
+    // do nothing
+  }
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  assert(jInterp->rootCtx);
+  jInterp->verbose = verbose;
+  jInterp->rootCtx->verbose = verbose;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_core_context_pushLoadPath(lua_State *lstate) {
+  Symbol *aPath = lua_tostring(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushLoadPath(jInterp->loader, aPath);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_core_context_loadFile(lua_State *lstate) {
+  Symbol *aFile = lua_tostring(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  loadAFile(jInterp->rootCtx, aFile);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_core_context_evalString(lua_state *lstate) {
+  Symbol *aString = lua_tostring(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  evalStringInContext(jInterp->rootCtx, aString);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static const struct luaL_Reg lua_core_context [] = {
+  { "gitVersion",   lua_core_context_getGitVersion },
+  { "setVerbose",   lua_core_context_setVerbose    },
+  { "pushLoadPath", lua_core_context_pushLoadPath  },
+  { "loadFile",     lua_core_context_loadFile      },
+  { "evalString",   lua_core_context_evalString    },
+  {NULL, NULL}
+};
+
+static void coreContextWriteStdOut(Symbol *aMessage) {
+  fprintf(stdout, "%s\n", aMessage);
+}
+
+static void coreContextWriteStdErr(Symbol *aMessage) {
+  fprintf(stderr, "%s\n", aMessage);
+}
+
+static Boolean beVerbose(lua_State *lstate) {
+  lua_getglobal(lstate, "verbose");
+  Boolean isVerbose = (Boolean)lua_toboolean(lstate, -1);
+  lua_pop(lstate, 1);
+  return isVerbose;
+}
+
+static void *coreContextCallback(
+  lua_State *lstate,
+  size_t resourceId
+) {
+  if (resourceId == JoyLoLCallback_StdOutMethod) {
+    return (void*)coreContextWriteStdOut;
+  } else if (resourceId == JoyLoLCallback_StdErrMethod) {
+    return (void*)coreContextWriteStdErr;
+  } else if (resourceId == JoyLoLCallback_Verbose) {
+    return (void*)beVerbose(lstate);
+  }
+  return NULL;
+} 
+
+int luaopen_joylol_core_lua (lua_State *lstate) {
+  setJoyLoLCallbackFrom(lstate, coreContextCallback);
+  lua_getglobal(lstate, "require");
+  lua_pushstring(lstate, "joylol.jInterps");
+  if (lua_pcall(lstate, 1, 1, 0)) {
+    return luaL_error(lstate,
+      "Failed to load [joylol.jInterps]\nERROR:\n%s\n",
+      lua_tostring(lstate, -1)
+    );
+  }
+  getJoyLoLInterpInto(lstate, jInterp);
+  lua_pushstring(lstate, "core");
+  lua_createtable(lstate,0, 1); // joylol.core 
+  lua_pushstring(lstate, "context");
+  luaL_newlib(lstate, lua_core_context);
+  lua_settable(lstate, -3);
+  lua_settable(lstate, -3);
+  return 1;
+}
+\stopCCode

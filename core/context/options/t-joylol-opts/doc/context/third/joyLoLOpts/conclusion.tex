@@ -1,0 +1,33 @@
+% A ConTeXt document [master document: joylol.tex]
+
+\chapter[title=Conclusion]
+
+\addDocumentDirectory%
+  {t-joylol-opts/doc/context/third/joyLoLOpts}
+
+\createMkIVCodeFile%
+  {default}%
+  {t-joylol-opts.mkiv}%
+  {A ConTeXt MkIV module}
+
+\createLuaCodeFile%
+  {default}%
+  {t-joylol-opts.lua}%
+  {-- A Lua file}
+
+\addMainDocument{joylolOpts.tex}
+\addSubDocument{overview.tex}
+\addSubDocument{luaInterface.tex}
+\addSubDocument{luaMain.tex}
+\addSubDocument{preamble.tex}
+\addSubDocument{conclusion.tex}
+\addConTeXtModuleDirectory%
+  {t-joylol-opts/tex/context/third/joyLoLOpts}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+  

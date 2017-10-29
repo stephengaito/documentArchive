@@ -1,0 +1,82 @@
+% A ConTeXt MkIV module
+
+% from file: preamble.tex after line: 0
+
+%D \module
+%D   [     file=t-joylol-opts,
+%D      version=2017.05.10,
+%D        title=\CONTEXT\ User module,
+%D     subtitle=The loading options for the JoyLoL prgramming language for \ConTeXt\,
+%D       author=Stephen Gaito,
+%D         date=\currentdate,
+%D    copyright=PerceptiSys Ltd (Stephen Gaito),
+%D        email=stephen@perceptisys.co.uk,
+%D      license=MIT License]
+
+%C Copyright (C) 2017 PerceptiSys Ltd (Stephen Gaito)
+%C
+%C Permission is hereby granted, free of charge, to any person obtaining a
+%C copy of this software and associated documentation files (the
+%C "Software"), to deal in the Software without restriction, including
+%C without limitation the rights to use, copy, modify, merge, publish,
+%C distribute, sublicense, and/or sell copies of the Software, and to
+%C permit persons to whom the Software is furnished to do so, subject to
+%C the following conditions:
+%C
+%C The above copyright notice and this permission notice shall be included
+%C in all copies or substantial portions of the Software.
+%C
+%C THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%C OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%C MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+%C IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+%C CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+%C TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+%C SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+% begin info
+%
+% title   : JoyLoL loading options
+% comment : Provides the loading options required for JoyLoL
+% status  : under development, mkiv only
+%
+% end info
+
+\unprotect
+
+\directlua{%
+  thirddata.joylol.options =
+    thirddata.joylol.options or { }
+  thirddata.joylol.options.verbose =
+    \doifdefined{??modulet-joylol:verbose}{%
+      \??modulet-joylol:verbose
+  }{%
+      thirddata.joylol.options.verbose or false
+  }
+  thirddata.joylol.options.loadConfig =
+  \doifdefined{??modulet-joylol:loadConfig}{%
+      \??modulet-joylol:loadConfig
+  }{%
+      thirddata.joylol.options.loadConfig or true
+  }
+}
+
+\ctxloadluafile{t-joylol-opts}
+
+% from file: luaMain.tex after line: 50
+
+\def\loadJoyLoLFile#1{%
+  \directlua{%
+    thirddata.joylol.loadFile('#1')
+  }
+}
+
+\def\pushJoyLoLLoadPath#1{%
+  \directlua{%
+    thirddata.joylol.pushLoadPath('#1')
+  }
+}
+
+% from file: preamble.tex after line: 50
+
+\protect \endinput

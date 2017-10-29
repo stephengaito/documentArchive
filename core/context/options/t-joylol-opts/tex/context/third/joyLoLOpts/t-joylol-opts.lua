@@ -1,16 +1,39 @@
-% A ConTeXt document [master document: joylol.tex]
+-- A Lua file
 
-\chapter[title=Lua main]
+-- from file: preamble.tex after line: 50
 
-\prependLuaCode{default}
+-- This is the lua code associated with t-joylol-opts.mkiv
 
-\component gitVersion-lua
+if not modules then modules = { } end modules ['t-joylol-opts'] = {
+    version   = 1.000,
+    comment   = "joylol loading options - lua",
+    author    = "PerceptiSys Ltd (Stephen Gaito)",
+    copyright = "PerceptiSys Ltd (Stephen Gaito)",
+    license   = "MIT License"
+}
 
-\startLuaCode
+thirddata        = thirddata        or {}
+thirddata.joylol = thirddata.joylol or {}
+
+local joylol   = thirddata.joylol
+joylol.options = joylol.options or {}
+
+local options  = joylol.options
+
+local tInsert = table.insert
+local tConcat = table.concat
+local tRemove = table.remove
+local tSort   = table.sort
+local sFmt    = string.format
+local sMatch  = string.match
+local toStr   = tostring
+
+-- from file: luaMain.tex after line: 0
+
 -- joylol interpreter embedded in ConTeXt
 
--- Start by adding the standard joylol CoAlg locations to the Lua search 
--- paths 
+-- Start by adding the standard joylol CoAlg locations to the Lua search
+-- paths
 
 local joylolPaths = {
   os.getenv('HOME')..'/.joylol/?.lua',
@@ -32,11 +55,11 @@ package.cpath = table.concat(joylolCPaths, ';')
 -- verbose = argStr:match('|%-v|');
 
 -- if verbose then print('loading [joylol.core.context]') end
-thirddata.joylol = require 'joylol.core.context'
+-- thirddata.joylol = require 'joylol.core.context'
 -- if verbose then print('loaded [joylol.core.context]\n') end
 
 loadConfiguration = true
-  
+ 
 while(0 < #arg) do
   anArg = table.remove(arg, 1)
   if anArg:match('-h') then
@@ -55,23 +78,5 @@ while(0 < #arg) do
 end
 
 if (loadConfiguration) then
-  joylol.core.lua.loadFile("config")
+--  joylol.core.lua.loadFile("config")
 end
-
-\stopLuaCode
-
-\startMkIVCode
-\def\loadJoyLoLFile#1{%
-  \directlua{%
-    thirddata.joylol.loadFile('#1')
-  }
-}
-
-\def\pushJoyLoLLoadPath#1{%
-  \directlua{%
-    thirddata.joylol.pushLoadPath('#1')
-  }
-}
-
-
-\stopMkIVCode
