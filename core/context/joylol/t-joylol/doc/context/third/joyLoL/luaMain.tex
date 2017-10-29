@@ -13,65 +13,35 @@
 -- paths 
 
 local joylolPaths = {
-  os.getenv('HOME')..'/.joylol/?.lua',
-  '/usr/local/lib/joylol/?.lua',
-  '/usr/lib/joylol/?.lua',
+  options.userPath..'/?.lua',
+  options.localPath..'/?.lua',
+  options.systemPath..'/?.lua',
   package.path
 }
 package.path = table.concat(joylolPaths, ';')
 
 local joylolCPaths = {
-  os.getenv('HOME')..'/.joylol/?.so',
-  '/usr/local/lib/joylol/?.so',
-  '/usr/lib/joylol/?.so',
+  options.userPath..'/?.so',
+  options.localPath..'/?.so',
+  options.systemPath..'/?.so',
   package.path
 }
 package.cpath = table.concat(joylolCPaths, ';')
 
--- argStr = '|'..table.concat(arg, '|')..'|'
--- verbose = argStr:match('|%-v|');
-
--- if verbose then print('loading [joylol.core.context]') end
+if options.verbose then print('loading [joylol.core.context]') end
 -- thirddata.joylol = require 'joylol.core.context'
--- if verbose then print('loaded [joylol.core.context]\n') end
+joylol.core   = joylol.core or {}
+local core    = joylol.core
+core.context  = core.context or {}
+local context = core.context
+if options.verbose then print('loaded [joylol.core.context]\n') end
 
-loadConfiguration = true
-  
-while(0 < #arg) do
-  anArg = table.remove(arg, 1)
-  if anArg:match('-h') then
-    print(table.concat(helpText, '\n'))
-    os.exit(0);
-  elseif anArg:match('-i') then
-    loadConfiguration = false
-  elseif anArg:match('-q') then
-    joylol.core.lua.setVerbose(false)
-  elseif anArg:match('-v') then
-    joylol.core.lua.setVerbose(true)
-  else
-    optArg = table.remove(arg, 1)
-    table.insert(loadFiles, optArg)
-  end
-end
+local joylol = thirddata.joylol
 
-if (loadConfiguration) then
---  joylol.core.lua.loadFile("config")
+-- joylol.core.context.setVerbose(options.verbose)
+
+if (options.configFile) then
+--  joylol.core.context.loadFile(options.configFile)
 end
 
 \stopLuaCode
-
-\startMkIVCode
-\def\loadJoyLoLFile#1{%
-  \directlua{%
-    thirddata.joylol.loadFile('#1')
-  }
-}
-
-\def\pushJoyLoLLoadPath#1{%
-  \directlua{%
-    thirddata.joylol.pushLoadPath('#1')
-  }
-}
-
-
-\stopMkIVCode

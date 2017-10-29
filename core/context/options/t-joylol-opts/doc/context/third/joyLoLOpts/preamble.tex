@@ -46,23 +46,6 @@
 
 \unprotect
 
-\directlua{%
-  thirddata.joylol.options =
-    thirddata.joylol.options or { }
-  thirddata.joylol.options.verbose = 
-    \doifdefined{??modulet-joylol:verbose}{%
-      \??modulet-joylol:verbose
-  }{%
-      thirddata.joylol.options.verbose or false
-  }
-  thirddata.joylol.options.loadConfig =
-  \doifdefined{??modulet-joylol:loadConfig}{%
-      \??modulet-joylol:loadConfig
-  }{%
-      thirddata.joylol.options.loadConfig or true
-  }
-}
-
 \ctxloadluafile{t-joylol-opts}
 \stopMkIVCode
 

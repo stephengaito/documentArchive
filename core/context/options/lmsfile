@@ -10,8 +10,6 @@ litProgs.targets{
   mainDoc  = 'joylolOpts.tex',
   docFiles = {
     'overview.tex',
-    'luaInterface.tex',
-    'luaMain.tex',
     'preamble.tex',
     'conclusion.tex',
   },

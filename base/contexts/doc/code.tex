@@ -224,6 +224,8 @@ typedef struct contexts_class_struct {
     *evalTextInContextFunc;
   EvalArrayOfStringsInContext
     *evalArrayOfStringsInContextFunc;
+  EvalStringInContext
+    *evalStringInContextFunc;
 } ContextsClass;
 \stopCHeader
 
@@ -301,7 +303,8 @@ Boolean registerContexts(
   theCoAlg->evalTextInContextFunc  = evalTextInContextImpl;
   theCoAlg->evalArrayOfStringsInContextFunc =
     evalArrayOfStringsInContextImpl;
-  
+  theCoAlg->evalStringInContextFunc =
+    evalStringInContextImpl;
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
 

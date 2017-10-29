@@ -44,36 +44,48 @@
 
 \unprotect
 
-\directlua{%
-  thirddata.joylol.options =
-    thirddata.joylol.options or { }
-  thirddata.joylol.options.verbose =
-    \doifdefined{??modulet-joylol:verbose}{%
-      \??modulet-joylol:verbose
-  }{%
-      thirddata.joylol.options.verbose or false
-  }
-  thirddata.joylol.options.loadConfig =
-  \doifdefined{??modulet-joylol:loadConfig}{%
-      \??modulet-joylol:loadConfig
-  }{%
-      thirddata.joylol.options.loadConfig or true
-  }
-}
-
 \ctxloadluafile{t-joylol-opts}
 
-% from file: luaMain.tex after line: 50
+% from file: overview.tex after line: 0
 
-\def\loadJoyLoLFile#1{%
-  \directlua{%
-    thirddata.joylol.loadFile('#1')
+\def\joyLoLVerbose{
+  \directlua{
+    thirddata.joylol.options.verbose = true
   }
 }
 
-\def\pushJoyLoLLoadPath#1{%
-  \directlua{%
-    thirddata.joylol.pushLoadPath('#1')
+\def\joyLoLQuiet{
+  \directlua{
+    thirddata.joylol.options.verbose = false
+  }
+}
+
+\def\joyLoLNoConfiguration{
+  \directlua{
+    thirddata.joylol.options.configFile = nil
+  }
+}
+
+\def\joyLoLConfigFile#1{
+  \directlua{
+    thirddata.joylol.options.configFile = '#1'
+  }
+}
+
+\def\joyLoLUserPath#1{
+  \directlua{
+    thirddata.joylol.options.userPath = '#1'
+  }
+}
+
+\def\joyLoLLocalPath#1{
+  \directlua{
+    thirddata.joylol.options.localPath = '#1'
+  }
+}
+\def\joyLoLSystemPath#1{
+  \directlua{
+    thirddata.joylol.options.systemPath = '#1'
   }
 }
 

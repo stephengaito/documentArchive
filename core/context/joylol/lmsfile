@@ -3,7 +3,14 @@
 lfs = require 'lfs'
 
 lfs.mkdir('build')
-lfs.mkdir('build/joyLoL')
+lfs.mkdir('build/joylol')
+lfs.mkdir('build/joylol/core')
+lfs.mkdir('build/core')
+lfs.mkdir('t-joylol/tex/context/third/joyLoL/joylol')
+lfs.mkdir('t-joylol/tex/context/third/joyLoL/joylol/core')
+lfs.mkdir('build/joylol')
+lfs.mkdir('install')
+lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
@@ -19,8 +26,29 @@ litProgs.targets{
   srcFiles = {
     't-joylol.mkiv',
     't-joylol.lua',
+    'joylol/core/context.h',
+    'joylol/core/context-private.h',
+    'lua.c',
   },
   buildDir  = 'build',
   docDir    = 't-joylol/doc/context/third/joyLoL',
   moduleDir = 't-joylol/tex/context/third/joyLoL',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets{
+  coAlgs = {
+    'core/context',
+  },
+  srcFiles = {
+    't-joylol.mkiv',
+    't-joylol.lua',
+    'joylol/core/context.h',
+    'joylol/core/context-private.h',
+    'lua.c',
+  },
+  coAlgLibs = {
+  },
+  buildDir = 'build',
 }

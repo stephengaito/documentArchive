@@ -44,41 +44,47 @@
 
 \unprotect
 
-\directlua{%
-  thirddata.joylol.options =
-    thirddata.joylol.options or { }
-  thirddata.joylol.options.verbose =
-    \doifdefined{??modulet-joylol:verbose}{%
-      \??modulet-joylol:verbose
-  }{%
-      thirddata.joylol.options.verbose or false
-  }
-  thirddata.joylol.options.loadConfig =
-  \doifdefined{??modulet-joylol:loadConfig}{%
-      \??modulet-joylol:loadConfig
-  }{%
-      thirddata.joylol.options.loadConfig or true
-  }
-}
-
 \ctxloadluafile{t-joylol}
 
-% from file: overview.tex after line: 150
+% from file: luaInterface.tex after line: 0
 
-\defineLitProgs[MinJoyLoL]
-
-% from file: luaMain.tex after line: 50
-
-\def\loadJoyLoLFile#1{%
-  \directlua{%
-    thirddata.joylol.loadFile('#1')
+\def\joyLoLQuiet{
+  \directlua{
+    thirddata.joylol.core.context.setVerbose(false)
   }
 }
+
+\def\joyLoLVerbose{
+  \directlua{
+    thirddata.joylol.core.context.setVerbose(true)
+  }
+}
+
+% from file: luaInterface.tex after line: 50
 
 \def\pushJoyLoLLoadPath#1{%
   \directlua{%
-    thirddata.joylol.pushLoadPath('#1')
+    thirddata.joylol.core.context.pushLoadPath('#1')
   }
+}
+
+% from file: luaInterface.tex after line: 50
+
+\def\loadJoyLoLFile#1{%
+  \directlua{%
+    thirddata.joylol.core.context.loadFile('#1')
+  }
+}
+
+% from file: luaInterface.tex after line: 50
+
+\definetyping[JoyLoLCode]
+%\setuptyping[JoyLoLCode][option=lisp]
+
+\let\oldStopJoyLoLCode=\stopJoyLoLCode
+\def\stopJoyLoLCode{%
+  \oldStopJoyLoLCode%
+  \directlua{thirddata.joylol.core.context.evalBuffer('_typing_')}
 }
 
 % from file: preamble.tex after line: 50

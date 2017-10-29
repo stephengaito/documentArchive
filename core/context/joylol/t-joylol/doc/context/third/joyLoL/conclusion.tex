@@ -15,7 +15,49 @@
   {t-joylol.lua}%
   {-- A Lua file}
 
-\ensureDirectoryExists{build/joyLoL}
+\CHeaderIncludeGuard{public}{JOYLOL_CORE_CONTEXT}
+\createCHeaderFile%
+  {public}
+  {joylol/core/context.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_CORE_CONTEXT_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/core/context-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/cFunctions.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/dictionaries.h>
+#include <joylol/texts.h>
+#include <joylol/parsers.h>
+#include <joylol/contexts.h>
+#include <joylol/loaders.h>
+//#include <joylol/core/context.h>
+//#include <joylol/core/context-private.h>
+// dictionary
+// printer
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {lua.c}%
+  {}
+
+\ensureDirectoryExists{build/joylol}
+\ensureDirectoryExists{build/joylol/core}
+\ensureDirectoryExists{build/core}
 
 \addMainDocument{joylol.tex}
 \addSubDocument{overview.tex}
@@ -25,7 +67,13 @@
 \addSubDocument{conclusion.tex}
 \addConTeXtModuleDirectory%
   {t-joylol/tex/context/third/joyLoL}
+\ensureDirectoryExists%
+  {t-joylol/tex/context/third/joyLoL/joylol}
+\ensureDirectoryExists%
+  {t-joylol/tex/context/third/joyLoL/joylol/core}
 
+\addJoyLoLTargets{default}
+  
 \compileLmsfile{default}
 
 \createLmsfileFile%

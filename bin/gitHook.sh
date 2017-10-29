@@ -41,6 +41,12 @@ local gitVersion = {
 
 # Now distribute these files to appropriate locations
 #
+cp $gitVLua module/t-joylol-coalg/doc/context/third/joyLoLCoAlg
+cp $gitVC   module/t-joylol-coalg/doc/context/third/joyLoLCoAlg
+cp $gitVLua core/context/joylol/t-joylol/doc/context/third/joyLoL
+cp $gitVC   core/context/joylol/t-joylol/doc/context/third/joyLoL
+cp $gitVLua core/context/options/t-joylol-opts/doc/context/third/joyLoLOpts
+cp $gitVC   core/context/options/t-joylol-opts/doc/context/third/joyLoLOpts
 cp $gitVLua core/lua/doc
 cp $gitVC   core/lua/doc
 cp $gitVC   base/booleans/doc

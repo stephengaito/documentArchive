@@ -267,7 +267,6 @@ void evalTextInContextImpl(
 }
 \stopCCode
 
-
 \startCHeader
 typedef void (EvalArrayOfStringsInContext)(
   ContextObj *aCtx,
@@ -298,7 +297,8 @@ void evalArrayOfStringsInContextImpl(
   ContextObj *aCtx,
   Symbol     *someStrings[]
 ) {
-  DEBUG(FALSE, "evalStringInContext > %p %p\\n", aCtx, someStrings);
+  DEBUG(FALSE, "evalArrayOfStringsInContext > %p %p\\n",
+    aCtx, someStrings);
   assert(aCtx);
   TextObj* stringText =
     createTextFromArrayOfStrings(
@@ -307,12 +307,38 @@ void evalArrayOfStringsInContextImpl(
     );
   evalTextInContext(aCtx, stringText);
   freeText(stringText);
-  DEBUG(FALSE, "evalStringInContext < %p %p\\n", aCtx, someStrings);
+  DEBUG(FALSE, "evalArrayOfStringsInContext < %p %p\\n",
+    aCtx, someStrings);
 }
 \stopCCode
 
+\startCHeader
+typedef void (EvalStringInContext)(
+  ContextObj *aCtx,
+  Symbol     *aString
+);
+
+#define evalStringInContext(aCtx, aString)      \
+  (                                             \
+    assert(aCtx),                               \
+    assert(getContextsClass(aCtx->jInterp)      \
+      ->evalStringInContextFunc),               \
+    (getContextsClass(aCtx->jInterp)            \
+      ->evalStringInContextFunc(aCtx, aString)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void evalStringInContextImpl(
+  ContextObj *aCtx,
+  Symbol     *aString
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-void evalStringInContext(
+void evalStringInContextImpl(
   ContextObj *aCtx,
   Symbol     *aString
 ) {

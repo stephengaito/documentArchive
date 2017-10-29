@@ -4,3 +4,61 @@
 
 We document the options required \emph{before} loading JoyLoL. 
 
+\startLuaCode
+-- joylol loader options
+
+options.verbose    = false
+options.configFile = 'config'
+options.userPath   = os.getenv('HOME')..'/.joylol'
+options.localPath  = '/usr/local/lib/joylol'
+options.systemPath = '/usr/lib/joylol'
+\stopLuaCode
+
+\component gitVersion-lua
+
+\startLuaCode
+options.gitVersion = gitVersion
+\stopLuaCode
+
+\startMkIVCode
+\def\joyLoLVerbose{
+  \directlua{
+    thirddata.joylol.options.verbose = true
+  }
+}
+
+\def\joyLoLQuiet{
+  \directlua{
+    thirddata.joylol.options.verbose = false
+  }
+}
+
+\def\joyLoLNoConfiguration{
+  \directlua{
+    thirddata.joylol.options.configFile = nil
+  }
+}
+
+\def\joyLoLConfigFile#1{
+  \directlua{
+    thirddata.joylol.options.configFile = '#1'
+  }
+}
+
+\def\joyLoLUserPath#1{
+  \directlua{
+    thirddata.joylol.options.userPath = '#1'
+  }
+}
+
+\def\joyLoLLocalPath#1{
+  \directlua{
+    thirddata.joylol.options.localPath = '#1'
+  }
+}
+\def\joyLoLSystemPath#1{
+  \directlua{
+    thirddata.joylol.options.systemPath = '#1'
+  }
+}
+\stopMkIVCode

@@ -12,10 +12,22 @@ if not modules then modules = { } end modules ['t-joylol'] = {
     license   = "MIT License"
 }
 
-thirddata        = thirddata        or {}
-thirddata.joylol = thirddata.joylol or {}
+thirddata          = thirddata        or {}
+thirddata.joylol   = thirddata.joylol or {}
+local joylol       = thirddata.joylol
+joylol.options     = joylol.options or {}
+local options      = joylol.options
 
-local joylol   = thirddata.joylol
+options.verbose    =
+  options.verbose    or false
+options.configFile =
+  options.configFile or 'config'
+options.userPath   =
+  options.userPath   or os.getenv('HOME')..'/.joylol'
+options.localPath  =
+  options.localPath  or '/usr/local/lib/joylol'
+options.systemPath =
+  options.systemPath or '/usr/lib/joylol'
 
 local tInsert = table.insert
 local tConcat = table.concat
@@ -45,6 +57,17 @@ local toStr   = tostring
 --  joyLoL = require 'joyLoLMinLua/joyLoL'
 -- end
 
+-- from file: gitVersion-lua.tex after line: 0
+
+local gitVersion = {
+  authorName      = "Stephen Gaito",
+  commitDate      = "2017-10-29",
+  commitShortHash = "6fc8f93",
+  commitLongHash  = "6fc8f935f92a10720bb560b981fcdd003c27571a",
+  subject         = "begun refactoring t-joylol in to joylol and options",
+  notes           = ""
+}
+
 -- from file: luaMain.tex after line: 0
 
 -- joylol interpreter embedded in ConTeXt
@@ -53,47 +76,43 @@ local toStr   = tostring
 -- paths
 
 local joylolPaths = {
-  os.getenv('HOME')..'/.joylol/?.lua',
-  '/usr/local/lib/joylol/?.lua',
-  '/usr/lib/joylol/?.lua',
+  options.userPath..'/?.lua',
+  options.localPath..'/?.lua',
+  options.systemPath..'/?.lua',
   package.path
 }
 package.path = table.concat(joylolPaths, ';')
 
 local joylolCPaths = {
-  os.getenv('HOME')..'/.joylol/?.so',
-  '/usr/local/lib/joylol/?.so',
-  '/usr/lib/joylol/?.so',
+  options.userPath..'/?.so',
+  options.localPath..'/?.so',
+  options.systemPath..'/?.so',
   package.path
 }
 package.cpath = table.concat(joylolCPaths, ';')
 
--- argStr = '|'..table.concat(arg, '|')..'|'
--- verbose = argStr:match('|%-v|');
-
--- if verbose then print('loading [joylol.core.context]') end
+if options.verbose then print('loading [joylol.core.context]') end
 -- thirddata.joylol = require 'joylol.core.context'
--- if verbose then print('loaded [joylol.core.context]\n') end
+joylol.core   = joylol.core or {}
+local core    = joylol.core
+core.context  = core.context or {}
+local context = core.context
+if options.verbose then print('loaded [joylol.core.context]\n') end
 
-loadConfiguration = true
- 
-while(0 < #arg) do
-  anArg = table.remove(arg, 1)
-  if anArg:match('-h') then
-    print(table.concat(helpText, '\n'))
-    os.exit(0);
-  elseif anArg:match('-i') then
-    loadConfiguration = false
-  elseif anArg:match('-q') then
-    joylol.core.lua.setVerbose(false)
-  elseif anArg:match('-v') then
-    joylol.core.lua.setVerbose(true)
-  else
-    optArg = table.remove(arg, 1)
-    table.insert(loadFiles, optArg)
-  end
+local joylol = thirddata.joylol
+
+-- joylol.core.context.setVerbose(options.verbose)
+
+if (options.configFile) then
+--  joylol.core.context.loadFile(options.configFile)
 end
 
-if (loadConfiguration) then
---  joylol.core.lua.loadFile("config")
+-- from file: luaInterface.tex after line: 50
+
+local function evalBuffer(bufferName)
+  local bufferContents =
+    buffers.getcontent(bufferName):gsub("\13", "\n")
+  joylol.core.context.evalString(bufferContents)
 end
+
+joylol.core.context.evalBuffer = evalBuffer

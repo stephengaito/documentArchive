@@ -28,55 +28,27 @@ local sFmt    = string.format
 local sMatch  = string.match
 local toStr   = tostring
 
--- from file: luaMain.tex after line: 0
+-- from file: overview.tex after line: 0
 
--- joylol interpreter embedded in ConTeXt
+-- joylol loader options
 
--- Start by adding the standard joylol CoAlg locations to the Lua search
--- paths
+options.verbose    = false
+options.configFile = 'config'
+options.userPath   = os.getenv('HOME')..'/.joylol'
+options.localPath  = '/usr/local/lib/joylol'
+options.systemPath = '/usr/lib/joylol'
 
-local joylolPaths = {
-  os.getenv('HOME')..'/.joylol/?.lua',
-  '/usr/local/lib/joylol/?.lua',
-  '/usr/lib/joylol/?.lua',
-  package.path
+-- from file: gitVersion-lua.tex after line: 0
+
+local gitVersion = {
+  authorName      = "Stephen Gaito",
+  commitDate      = "2017-10-29",
+  commitShortHash = "6fc8f93",
+  commitLongHash  = "6fc8f935f92a10720bb560b981fcdd003c27571a",
+  subject         = "begun refactoring t-joylol in to joylol and options",
+  notes           = ""
 }
-package.path = table.concat(joylolPaths, ';')
 
-local joylolCPaths = {
-  os.getenv('HOME')..'/.joylol/?.so',
-  '/usr/local/lib/joylol/?.so',
-  '/usr/lib/joylol/?.so',
-  package.path
-}
-package.cpath = table.concat(joylolCPaths, ';')
+-- from file: overview.tex after line: 0
 
--- argStr = '|'..table.concat(arg, '|')..'|'
--- verbose = argStr:match('|%-v|');
-
--- if verbose then print('loading [joylol.core.context]') end
--- thirddata.joylol = require 'joylol.core.context'
--- if verbose then print('loaded [joylol.core.context]\n') end
-
-loadConfiguration = true
- 
-while(0 < #arg) do
-  anArg = table.remove(arg, 1)
-  if anArg:match('-h') then
-    print(table.concat(helpText, '\n'))
-    os.exit(0);
-  elseif anArg:match('-i') then
-    loadConfiguration = false
-  elseif anArg:match('-q') then
-    joylol.core.lua.setVerbose(false)
-  elseif anArg:match('-v') then
-    joylol.core.lua.setVerbose(true)
-  else
-    optArg = table.remove(arg, 1)
-    table.insert(loadFiles, optArg)
-  end
-end
-
-if (loadConfiguration) then
---  joylol.core.lua.loadFile("config")
-end
+options.gitVersion = gitVersion

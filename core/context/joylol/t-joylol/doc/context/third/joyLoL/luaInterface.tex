@@ -15,7 +15,23 @@ static int lua_core_context_getGitVersion (lua_State *lstate) {
   }
   return 1;
 }
+\stopCCode
 
+\startMkIVCode
+\def\joyLoLQuiet{
+  \directlua{
+    thirddata.joylol.core.context.setVerbose(false)
+  }
+}
+
+\def\joyLoLVerbose{
+  \directlua{
+    thirddata.joylol.core.context.setVerbose(true)
+  }
+}
+\stopMkIVCode
+
+\startCCode
 static int lua_core_context_setVerbose(lua_State *lstate) {
   Boolean verbose = 
     (lua_toboolean(lstate, 1) ? TRUE : FALSE);
@@ -30,7 +46,17 @@ static int lua_core_context_setVerbose(lua_State *lstate) {
   lua_pop(lstate, 1);
   return 0;
 }
+\stopCCode
 
+\startMkIVCode
+\def\pushJoyLoLLoadPath#1{%
+  \directlua{%
+    thirddata.joylol.core.context.pushLoadPath('#1')
+  }
+}
+\stopMkIVCode
+
+\startCCode
 static int lua_core_context_pushLoadPath(lua_State *lstate) {
   Symbol *aPath = lua_tostring(lstate, 1);
   getJoyLoLInterpInto(lstate, jInterp);
@@ -38,7 +64,17 @@ static int lua_core_context_pushLoadPath(lua_State *lstate) {
   lua_pop(lstate, 1);
   return 0;
 }
+\stopCCode
 
+\startMkIVCode
+\def\loadJoyLoLFile#1{%
+  \directlua{%
+    thirddata.joylol.core.context.loadFile('#1')
+  }
+}
+\stopMkIVCode
+
+\startCCode
 static int lua_core_context_loadFile(lua_State *lstate) {
   Symbol *aFile = lua_tostring(lstate, 1);
   getJoyLoLInterpInto(lstate, jInterp);
@@ -46,15 +82,40 @@ static int lua_core_context_loadFile(lua_State *lstate) {
   lua_pop(lstate, 1);
   return 0;
 }
+\stopCCode
 
-static int lua_core_context_evalString(lua_state *lstate) {
+\startMkIVCode
+\definetyping[JoyLoLCode]
+%\setuptyping[JoyLoLCode][option=lisp]
+
+\let\oldStopJoyLoLCode=\stopJoyLoLCode
+\def\stopJoyLoLCode{%
+  \oldStopJoyLoLCode%
+  \directlua{thirddata.joylol.core.context.evalBuffer('_typing_')}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function evalBuffer(bufferName) 
+  local bufferContents =
+    buffers.getcontent(bufferName):gsub("\13", "\n")
+  joylol.core.context.evalString(bufferContents)
+end
+
+joylol.core.context.evalBuffer = evalBuffer
+\stopLuaCode
+
+\startCCode
+static int lua_core_context_evalString(lua_State *lstate) {
   Symbol *aString = lua_tostring(lstate, 1);
   getJoyLoLInterpInto(lstate, jInterp);
   evalStringInContext(jInterp->rootCtx, aString);
   lua_pop(lstate, 1);
   return 0;
 }
+\stopCCode
 
+\startCCode
 static const struct luaL_Reg lua_core_context [] = {
   { "gitVersion",   lua_core_context_getGitVersion },
   { "setVerbose",   lua_core_context_setVerbose    },
@@ -63,19 +124,56 @@ static const struct luaL_Reg lua_core_context [] = {
   { "evalString",   lua_core_context_evalString    },
   {NULL, NULL}
 };
+\stopCCode
 
-static void coreContextWriteStdOut(Symbol *aMessage) {
-  fprintf(stdout, "%s\n", aMessage);
+\startCCode
+static void coreContextWriteStdOut(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
+  assert(jInterp);
+  lua_State *lstate = jInterp->lstate;
+  assert(lstate);
+  
+  lua_getglobal(lstate, "tex");
+  lua_getfield(lstate, -1, "print");
+  lua_pushstring(lstate, aMessage);
+  if (lua_pcall(lstate, 1, 1, 0)) {
+    /*return*/ luaL_error(lstate,
+      "Failed of coreContextWriteStdOut\nERROR:\n%s\n",
+      lua_tostring(lstate, -1)
+    );
+  }
+  lua_pop(lstate, 1);
 }
 
-static void coreContextWriteStdErr(Symbol *aMessage) {
-  fprintf(stderr, "%s\n", aMessage);
+static void coreContextWriteStdErr(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
+  assert(jInterp);
+  lua_State *lstate = jInterp->lstate;
+  assert(lstate);
+  
+  lua_getglobal(lstate, "texio");
+  lua_getfield(lstate, -1, "write_nl");
+  lua_pushstring(lstate, aMessage);
+  if (lua_pcall(lstate, 1, 1, 0)) {
+    /*return*/ luaL_error(lstate,
+      "Failed of coreContextWriteStdErr\nERROR:\n%s\n",
+      lua_tostring(lstate, -1)
+    );
+  }
+  lua_pop(lstate, 1);
 }
 
 static Boolean beVerbose(lua_State *lstate) {
-  lua_getglobal(lstate, "verbose");
+  lua_getglobal(lstate, "thirddata");
+  lua_getfield(lstate, -1, "joylol");
+  lua_getfield(lstate, -1, "options");
+  lua_getfield(lstate, -1, "verbose");
   Boolean isVerbose = (Boolean)lua_toboolean(lstate, -1);
-  lua_pop(lstate, 1);
+  lua_pop(lstate, 4);
   return isVerbose;
 }
 
@@ -91,8 +189,10 @@ static void *coreContextCallback(
     return (void*)beVerbose(lstate);
   }
   return NULL;
-} 
+}
+\stopCCode
 
+\startCCode
 int luaopen_joylol_core_lua (lua_State *lstate) {
   setJoyLoLCallbackFrom(lstate, coreContextCallback);
   lua_getglobal(lstate, "require");

@@ -1,51 +1,27 @@
 % A ConTeXt document
 
+\usemodule[t-disimp]
 \usemodule[t-literate-progs]
 \usemodule[t-contests]
 \usemodule[t-joylol]
+\usemodule[t-joylol-coalg]
 
-\setupinteraction[
-  state=start,
-  color=green,
-  stype=bold
-]
-\placebookmarks[chapter, section, subsection][chapter, section]
-\setupinteractionscreen[option=bookmark]
+\startJoyLoLCoAlg[title=The core JoyLoL embedded in ConTeXt][core/context]
 
-\setuppapersize[A4]
+\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
+src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
+(Stephen Gaito)}, year=2017] 
 
-\setupindenting[medium,yes]
-
-% do not indent after itemize
-\setupitemgroup[itemize][indentnext=no]
-
-% indent the paragraphs after all sectioning heads 
-\setupheads[indentnext=yes] 
-
-% indent paragraphs after formulas if there is a blank space in between
-\setupformulas[indentnext=auto] 
-
-\usebtxdataset[joylolBib.lua]
-\usebtxdefinitions[apa]
-\setupbtxlist[apa][
-  alternative=paragraph,
-  width=fit,
-  distance=.5em,
-  margin=3em % hanging list
-]
-
-\startproduct
-\startdocument[title=JoyLoL  \ConTeXt\ module]
+\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
 
 \component overview
 
-\component luaInterface
-
 \component luaMain
+
+\component luaInterface
 
 \component preamble
 
 \component conclusion
 
-\stopdocument
-\stopproduct
+\stopJoyLoLCoAlg

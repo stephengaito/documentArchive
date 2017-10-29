@@ -46,23 +46,6 @@
 
 \unprotect
 
-\directlua{%
-  thirddata.joylol.options =
-    thirddata.joylol.options or { }
-  thirddata.joylol.options.verbose = 
-    \doifdefined{??modulet-joylol:verbose}{%
-      \??modulet-joylol:verbose
-  }{%
-      thirddata.joylol.options.verbose or false
-  }
-  thirddata.joylol.options.loadConfig =
-  \doifdefined{??modulet-joylol:loadConfig}{%
-      \??modulet-joylol:loadConfig
-  }{%
-      thirddata.joylol.options.loadConfig or true
-  }
-}
-
 \ctxloadluafile{t-joylol}
 \stopMkIVCode
 
@@ -82,10 +65,22 @@ if not modules then modules = { } end modules ['t-joylol'] = {
     license   = "MIT License"
 }
 
-thirddata        = thirddata        or {}
-thirddata.joylol = thirddata.joylol or {}
+thirddata          = thirddata        or {}
+thirddata.joylol   = thirddata.joylol or {}
+local joylol       = thirddata.joylol
+joylol.options     = joylol.options or {}
+local options      = joylol.options
 
-local joylol   = thirddata.joylol
+options.verbose    =
+  options.verbose    or false
+options.configFile =
+  options.configFile or 'config'
+options.userPath   =
+  options.userPath   or os.getenv('HOME')..'/.joylol'
+options.localPath  =
+  options.localPath  or '/usr/local/lib/joylol'
+options.systemPath =
+  options.systemPath or '/usr/lib/joylol'
 
 local tInsert = table.insert
 local tConcat = table.concat
