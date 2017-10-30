@@ -1,0 +1,20 @@
+% A ConTeXt document [master document: coreTextadept.tex]
+
+\section[title=Textadept installation for JoyLoL language]
+
+\setLuaCodeStream{install}
+
+\startLuaCode
+-- Ensure files whose extensions are either 
+-- 'joy' or 'joylol' are interpreted as JoyLoL files.
+textadept.file_types.extensions['joy']    = 'joylol'
+textadept.file_types.extensions['joylol'] = 'joylol'
+
+-- Ensure files whose first lines contain the word
+-- 'JoyLoL' are interpreted as JoyLoL files.
+textadept.file_types.patterns['[Jj][Oo][Yy][Ll][Oo][Ll]'] = 'joylol'
+
+-- Tell Textadept how to compile/run JoyLoL files.
+textadept.run.compile_commands.joylol = 'joylol "%f"'
+textadept.run.run_commands.joylol     = 'joylol "%f"'
+\stopLuaCode

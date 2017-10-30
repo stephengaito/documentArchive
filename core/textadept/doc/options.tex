@@ -1,0 +1,66 @@
+% A ConTeXt document [master document: coreTextadept.tex]
+
+\section[title=JoyLoL load options]
+
+\setLuaCodeStream{options}
+
+\startLuaCode
+
+local jOpts = { }
+
+joylol         = joylol         or { }
+joylol.options = joylol.options or { }
+
+local options  = joylol.options
+
+\stopLuaCode
+
+\component gitVersion-lua
+
+\startLuaCode
+options.gitVersion = gitVersion
+\stopLuaCode
+
+\startLuaCode
+-- joylol loader options
+
+options.verbose    = false
+
+function jOpts.beVerbose()
+  options.verbose = true
+end
+
+function jOpts.beQuiet()
+  options.verbose = false
+end
+
+options.configFile = 'config'
+
+function jOpts.setConfigFile(aConfigFile)
+  options.configFile = aConfigFile
+end
+
+function jOpts.noConfiguration()
+  options.configFile = nil
+end
+
+options.userPath   = os.getenv('HOME')..'/.joylol'
+
+function jOpts.setUserPath(aUserPath)
+  options.userPath = aUserPath
+end
+
+options.localPath  = '/usr/local/lib/joylol'
+
+function jOpts.setLocalPath(aLocalPath)
+  options.localPath = aLocalPath
+end
+
+options.systemPath = '/usr/lib/joylol'
+
+function jOpts.setSystemPath(aSystemPath)
+  options.systemPath = aSystemPath
+end
+
+return jOpts
+\stopLuaCode

@@ -73,6 +73,10 @@ cp $gitVTex core/lua/doc
 cp $gitVLua core/lua/doc
 cp $gitVC   core/lua/doc
 
+cp $gitVTex core/textadept/doc
+cp $gitVLua core/textadept/doc
+cp $gitVC   core/textadept/doc
+
 cp $gitVTex base/booleans/doc
 cp $gitVC   base/booleans/doc
 cp $gitVTex base/cFunctions/doc

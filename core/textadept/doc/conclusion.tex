@@ -1,0 +1,154 @@
+% A ConTeXt document [master document: coreTextadept.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\createLuaCodeFile%
+  {lexer}%
+  {joylol.lua}%
+  {-- A Lua file (Textadept lexer)}
+
+\createLuaCodeFile%
+  {install}%
+  {installJoyLoLLanguage.lua}%
+  {-- A Lua file (Textadept installation of JoyLoL language)}
+
+\createLuaCodeFile%
+  {options}%
+  {options.lua}%
+  {-- A Lua file (Textadept JoyLoL load options)}
+  
+\createLuaCodeFile%
+  {init}%
+  {init.lua}%
+  {-- A Lua file (Textadept JoyLoL language initialization)}
+  
+\createLuaCodeFile%
+  {repl}%
+  {repl.lua}%
+  {-- A Lua file (Textadept REPL for JoyLoL)}
+  
+\CHeaderIncludeGuard{public}{JOYLOL_CORE_TEXTADEPT}
+\createCHeaderFile%
+  {public}
+  {joylol/core/textadept.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_CORE_TEXTADEPT_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/core/textadept-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/cFunctions.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/dictionaries.h>
+#include <joylol/texts.h>
+#include <joylol/parsers.h>
+#include <joylol/contexts.h>
+#include <joylol/loaders.h>
+#include <joylol/core/textadept.h>
+#include <joylol/core/textadept-private.h>
+// dictionary
+// printer
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {textadept.c}%
+  {}
+
+\ensureDirectoryExists{build/joylol}
+\ensureDirectoryExists{build/joylol/core}
+\ensureDirectoryExists{build/core}
+
+\ensureDirectoryExists{install}
+\ensureDirectoryExists{install/joylol}
+\ensureDirectoryExists{install/joylol/core}
+\ensureDirectoryExists{install/core}
+  
+\addMainDocument{coreTextadept.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{lexer.tex}
+\addSubDocument{options.tex}
+\addSubDocument{install.tex}
+\addSubDocument{init.tex}
+\addSubDocument{repl.tex}
+\addSubDocument{luaInterface.tex}
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{install}
+
+\startLmsfile
+local joylolTarget =
+  makePath{getEnv('HOME'), '.textadept', 'lexers', 'joylol.lua'}
+local joylolDep    = makePath{'build', 'joylol.lua'}
+tInsert(installTargets, target{
+  target       = joylolTarget,
+  dependencies = { joylolDep },
+  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
+})
+
+local joylolModuleDir =
+  makePath{getEnv('HOME'), '.textadept', 'modules', 'joylol'}
+tInsert(installTargets, target{
+  target       = joylolModuleDir,
+  dependencies = { },
+  command      = tConcat({'install --directory', joylolModuleDir }, ' ')
+})
+
+local installTarget =
+  makePath{ joylolModuleDir, 'installJoyLoLLangauge.lua'}
+local installDep    = makePath{'build', 'installJoyLoLLanguage.lua'}
+tInsert(installTargets, target{
+  target       = installTarget,
+  dependencies = { installDep },
+  command      = tConcat({'install -T', installDep, installTarget }, ' ')
+})
+
+local initTarget =
+  makePath{ joylolModuleDir, 'init.lua'}
+local initDep    = makePath{'build', 'init.lua'}
+tInsert(installTargets, target{
+  target       = initTarget,
+  dependencies = { initDep },
+  command      = tConcat({'install -T', initDep, initTarget }, ' ')
+})
+
+local optsTarget =
+  makePath{ joylolModuleDir, 'options.lua'}
+local optsDep    = makePath{'build', 'options.lua'}
+tInsert(installTargets, target{
+  target       = optsTarget,
+  dependencies = { optsDep },
+  command      = tConcat({'install -T', optsDep, optsTarget }, ' ')
+})
+
+local replTarget =
+  makePath{ joylolModuleDir, 'repl.lua'}
+local replDep    = makePath{'build', 'repl.lua'}
+tInsert(installTargets, target{
+  target       = replTarget,
+  dependencies = { replDep },
+  command      = tConcat({'install -T', replDep, replTarget }, ' ')
+})
+\stopLmsfile
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
