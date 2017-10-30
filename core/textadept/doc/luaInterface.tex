@@ -65,29 +65,67 @@ static const struct luaL_Reg lua_core_textadept [] = {
   {NULL, NULL}
 };
 
-static void coreLuaWriteStdOut(Symbol *aMessage) {
-  fprintf(stdout, "%s\n", aMessage);
+static void coreTextadeptWriteStdOut(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
+  assert(jInterp);
+  lua_State *lstate = jInterp->lstate;
+  assert(lstate);
+
+  lua_getglobal(lstate, "buffer");
+  lua_getfield(lstate, -1, "append_text");
+  lua_getglobal(lstate, "buffer");
+  lua_pushstring(lstate, aMessage);
+  if (lua_pcall(lstate, 2, 1, 0)) {
+    /*return*/ luaL_error(lstate,
+      "Failed to append message [%s] to current buffer\nERROR:\n%s\n",
+      aMessage,
+      lua_tostring(lstate, -1)
+    );
+  }
+  lua_pop(lstate, 1);
 }
 
-static void coreLuaWriteStdErr(Symbol *aMessage) {
-  fprintf(stderr, "%s\n", aMessage);
+static void coreTextadeptWriteStdErr(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
+  assert(jInterp);
+  lua_State *lstate = jInterp->lstate;
+  assert(lstate);
+
+  lua_getglobal(lstate, "ui");
+  lua_getfield(lstate, -1, "print");
+  lua_pushstring(lstate, aMessage);
+  if (lua_pcall(lstate, 1, 1, 0)) {
+    /*return*/ luaL_error(lstate,
+      "Failed to append message [%s] to Message Buffer\nERROR:\n%s\n",
+      aMessage,
+      lua_tostring(lstate, -1)
+    );
+  }
+  lua_pop(lstate, 1);
 }
 
 static Boolean beVerbose(lua_State *lstate) {
-  lua_getglobal(lstate, "verbose");
+  lua_getglobal(lstate, "joylol");
+  lua_getfield(lstate, -1, "options");
+  lua_getfield(lstate, -1, "verbose");
   Boolean isVerbose = (Boolean)lua_toboolean(lstate, -1);
-  lua_pop(lstate, 1);
+  lua_pop(lstate, 3);
   return isVerbose;
 }
 
-static void *coreLuaCallback(
+
+static void *coreTextadeptCallback(
   lua_State *lstate,
   size_t resourceId
 ) {
   if (resourceId == JoyLoLCallback_StdOutMethod) {
-    return (void*)coreLuaWriteStdOut;
+    return (void*)coreTextadeptWriteStdOut;
   } else if (resourceId == JoyLoLCallback_StdErrMethod) {
-    return (void*)coreLuaWriteStdErr;
+    return (void*)coreTextadeptWriteStdErr;
   } else if (resourceId == JoyLoLCallback_Verbose) {
     return (void*)beVerbose(lstate);
   }
@@ -95,7 +133,7 @@ static void *coreLuaCallback(
 } 
 
 int luaopen_joylol_core_textadept (lua_State *lstate) {
-  setJoyLoLCallbackFrom(lstate, coreLuaCallback);
+  setJoyLoLCallbackFrom(lstate, coreTextadeptCallback);
   lua_getglobal(lstate, "require");
   lua_pushstring(lstate, "joylol.jInterps");
   if (lua_pcall(lstate, 1, 1, 0)) {
@@ -107,7 +145,7 @@ int luaopen_joylol_core_textadept (lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   lua_pushstring(lstate, "core");
   lua_createtable(lstate,0, 1); // joylol.core 
-  lua_pushstring(lstate, "lua");
+  lua_pushstring(lstate, "textadept");
   luaL_newlib(lstate, lua_core_textadept);
   lua_settable(lstate, -3);
   lua_settable(lstate, -3);

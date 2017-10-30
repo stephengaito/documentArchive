@@ -45,18 +45,16 @@ local joylolCPaths = {
 package.cpath = table.concat(joylolCPaths, ';')
 
 if options.verbose then print('loading [joylol.core.textadept]') end
---  joylol = require 'joylol.core.textadept'
+joylol = require 'joylol.core.textadept'
 if options.verbose then print('loaded [joylol.core.textadept]\n') end
 
 joylol.options = options
 
--- joylol.core.textadept.setVerbose(options.verbose)
+joylol.core.textadept.setVerbose(options.verbose)
 
 if (options.configFile) then
---  joylol.core.textadept.loadFile(options.configFile)
+  joylol.core.textadept.loadFile(options.configFile)
 end
-
-local M = { }
 
 local function initJoyLoL(lexerName)
   if lexerName == 'joylol' then
@@ -78,5 +76,5 @@ end
 
 events.connect(events.LEXER_LOADED, initJoyLoL)
 
-return M
+return { }
 \stopLuaCode
