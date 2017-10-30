@@ -193,7 +193,7 @@ static void *coreContextCallback(
 \stopCCode
 
 \startCCode
-int luaopen_joylol_core_lua (lua_State *lstate) {
+int luaopen_joylol_core_context (lua_State *lstate) {
   setJoyLoLCallbackFrom(lstate, coreContextCallback);
   lua_getglobal(lstate, "require");
   lua_pushstring(lstate, "joylol.jInterps");

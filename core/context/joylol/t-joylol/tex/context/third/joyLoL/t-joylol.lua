@@ -61,10 +61,10 @@ local toStr   = tostring
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-10-29",
-  commitShortHash = "6fc8f93",
-  commitLongHash  = "6fc8f935f92a10720bb560b981fcdd003c27571a",
-  subject         = "begun refactoring t-joylol in to joylol and options",
+  commitDate      = "2017-10-30",
+  commitShortHash = "5bdbddb",
+  commitLongHash  = "5bdbddb2741c8d0516aad7a69f18edb654019ef5",
+  subject         = "added gitVersion-tex.tex",
   notes           = ""
 }
 
@@ -92,19 +92,15 @@ local joylolCPaths = {
 package.cpath = table.concat(joylolCPaths, ';')
 
 if options.verbose then print('loading [joylol.core.context]') end
--- thirddata.joylol = require 'joylol.core.context'
-joylol.core   = joylol.core or {}
-local core    = joylol.core
-core.context  = core.context or {}
-local context = core.context
+  thirddata.joylol = require 'joylol.core.context'
 if options.verbose then print('loaded [joylol.core.context]\n') end
 
 local joylol = thirddata.joylol
 
--- joylol.core.context.setVerbose(options.verbose)
+joylol.core.context.setVerbose(options.verbose)
 
 if (options.configFile) then
---  joylol.core.context.loadFile(options.configFile)
+  joylol.core.context.loadFile(options.configFile)
 end
 
 -- from file: luaInterface.tex after line: 50

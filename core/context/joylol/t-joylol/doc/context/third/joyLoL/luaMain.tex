@@ -29,19 +29,15 @@ local joylolCPaths = {
 package.cpath = table.concat(joylolCPaths, ';')
 
 if options.verbose then print('loading [joylol.core.context]') end
--- thirddata.joylol = require 'joylol.core.context'
-joylol.core   = joylol.core or {}
-local core    = joylol.core
-core.context  = core.context or {}
-local context = core.context
+  thirddata.joylol = require 'joylol.core.context'
 if options.verbose then print('loaded [joylol.core.context]\n') end
 
 local joylol = thirddata.joylol
 
--- joylol.core.context.setVerbose(options.verbose)
+joylol.core.context.setVerbose(options.verbose)
 
 if (options.configFile) then
---  joylol.core.context.loadFile(options.configFile)
+  joylol.core.context.loadFile(options.configFile)
 end
 
 \stopLuaCode
