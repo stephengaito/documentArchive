@@ -43,9 +43,9 @@ options.systemPath = '/usr/lib/joylol'
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-10-29",
-  commitShortHash = "6fc8f93",
-  commitLongHash  = "6fc8f935f92a10720bb560b981fcdd003c27571a",
-  subject         = "begun refactoring t-joylol in to joylol and options",
+  commitShortHash = "c2dbd2e",
+  commitLongHash  = "c2dbd2e7996a482f39ca95ee50b6f42f0933e749",
+  subject         = "continued work on core/context",
   notes           = ""
 }
 
