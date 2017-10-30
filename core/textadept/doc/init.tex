@@ -56,25 +56,22 @@ if (options.configFile) then
   joylol.core.textadept.loadFile(options.configFile)
 end
 
-local function initJoyLoL(lexerName)
-  if lexerName == 'joylol' then
-    -- Initialization for the JoyLoL module
+-- Initialization for the JoyLoL language
 
-    -- add in luatex specific key codes
-    keys['joylol'] = keys.context or {}
-    -- keys.joylol.cg = require('context/ctags').goto_symbol    -- Ctrl-g
-    --keys.joylol[not OSX and (GUI and 'cR' or 'cmr') or 'mR'] = require('common/messageBuffer').clearRunCompile
-    keys.joylol['cR'] = require('common/messageBuffer').clearRunCompile
-    
-        -- add the mapping from the context lexer to context
-    textadept.run.compile_commands['joylol'] = 'joylol %f'
+-- add in luatex specific key codes
+keys['joylol'] = keys.context or {}
+-- keys.joylol.cg = require('context/ctags').goto_symbol    -- Ctrl-g
+--keys.joylol[not OSX and (GUI and 'cR' or 'cmr') or 'mR'] = require('common/messageBuffer').clearRunCompile
+keys.joylol['cR'] = require('common/messageBuffer').clearRunCompile
+
+-- tell textadept how to compile/run joylol files
+textadept.run.compile_commands.joylol = 'joylol "%f"'
+textadept.run.run_commands.joylol     = 'joylol "%f"'
    
-    -- add comment string for context
-    textadept.editing.comment_string['joylol'] = ';'
-  end
-end
+-- add comment string for context
+textadept.editing.comment_string.joylol = ';'
 
-events.connect(events.LEXER_LOADED, initJoyLoL)
+require 'joylol.repl'
 
 return { }
 \stopLuaCode
