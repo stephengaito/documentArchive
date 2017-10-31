@@ -55,7 +55,8 @@ static void saveReadlineHistory(TextObj* aText) {
 \startCCode
 static void nextLineFromReadline(TextObj* aText) {
   assert(aText);
-  DEBUG(aText->debugFlag, "->nextLineFromReadline %s\n", "");
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "->nextLineFromReadline %s\n", "");
   if (!aText) return; // there is nothing we can do!
 
   if (aText->completed) {
@@ -108,11 +109,12 @@ static char* dictionaryWalker(const char* text, int state) {
   if (!currentReadLineText) return NULL;
   if (!state) {
 
+    assert(currentReadLineText);
     assert(currentReadLineText->jInterp);
 
     currentReadLineText->curNode =
       findLUBSymbol(currentReadLineText->jInterp, text);
-    DEBUG(currentReadLineText->debugFlag,
+    DEBUG(currentReadLineText->jInterp,
           "dictionaryWalker-start %p\n",
           currentReadLineText->curNode);
   }
@@ -121,7 +123,7 @@ static char* dictionaryWalker(const char* text, int state) {
   if (!curNode) return NULL;
 
   if (strncmp(curNode->symbol, text, strlen(text)) == 0) {
-    DEBUG(currentReadLineText->debugFlag,
+    DEBUG(currentReadLineText->jInterp,
           "dictionaryWalker %p {%s}[%s]\n",
           curNode, text, curNode->symbol);
     currentReadLineText->curNode = curNode->next;
@@ -139,17 +141,16 @@ static char** dictionaryCompletion(const char* text, int start, int end) {
 
 \startCCode
 static TextObj* createTextFromReadline(JoyLoLInterp *jInterp) {
-  Boolean debugFlag = TRUE;
   
   assert(jInterp);
-  DEBUG(debugFlag, "createTextFromReadline %p\n", jInterp);
+  DEBUG(jInterp, "createTextFromReadline %p\n", jInterp);
   
   TextObj* aText = (TextObj*)newObject(jInterp, TextsTag);
   assert(aText);
   //
   // readline specific initializations
   //
-  DEBUG(debugFlag, "starting readline initialization %s\n", "");
+  DEBUG(jInterp, "starting readline initialization %s\n", "");
   using_history();
   read_history(".joyLoL-history");
   rl_readline_name = "joyLoL";
@@ -192,7 +193,6 @@ extern void runREPLInContext(
 void runREPLInContext(
   ContextObj* aCtx
 ) {
-  Boolean debugFlag = TRUE;
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
@@ -206,13 +206,11 @@ void runREPLInContext(
   aCtx->showStack = TRUE;
   TextObj* aText = createTextFromReadline(jInterp);
   assert(aText);
-
-  aText->debugFlag = debugFlag;
   
   while(TRUE) {
-    DEBUG(debugFlag, "runREPLInContext %p reading\n", aCtx);
+    DEBUG(jInterp, "runREPLInContext %p reading\n", aCtx);
     CoAlgObj* aLoL = parseOneSymbol(aText);
-    DEBUG(debugFlag, "runREPLInContext %p read %p\n", aCtx, aLoL);
+    DEBUG(jInterp, "runREPLInContext %p read %p\n", aCtx, aLoL);
     //
     if (!aLoL) break;
     //
@@ -220,18 +218,18 @@ void runREPLInContext(
     assert(!aCtx->process);
     //
     if (aCtx->showStack) {
-      DEBUG(debugFlag, "runREPLInContext %p printing data %p\n", aCtx, aCtx->data);
+      DEBUG(jInterp, "runREPLInContext %p printing data %p\n", aCtx, aCtx->data);
       StringBufferObj *aStrBuf = newStringBuffer(jInterp);
       printLoL(jInterp, aStrBuf, aCtx->data);
       printf(">>%s\\n", getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
-      DEBUG(debugFlag, "runREPLInContext %p printed data %p\n", aCtx, aCtx->data);
+      DEBUG(jInterp, "runREPLInContext %p printed data %p\n", aCtx, aCtx->data);
     }
     //
     reportException(aCtx); // report last exception if raised
   }
   saveReadlineHistory(aText);
-  DEBUG(debugFlag, "runREPLInContext %p COMPLETED\n", aCtx);
+  DEBUG(jInterp, "runREPLInContext %p COMPLETED\n", aCtx);
 }
 \stopCCode
 
