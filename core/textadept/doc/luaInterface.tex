@@ -123,11 +123,16 @@ static void *coreTextadeptCallback(
   size_t resourceId
 ) {
   if (resourceId == JoyLoLCallback_StdOutMethod) {
-    return (void*)coreTextadeptWriteStdOut;
+    StdOutputMethod *coreWriteStdOut =
+      coreTextadeptWriteStdOut;
+    return (void*)coreWriteStdOut;
   } else if (resourceId == JoyLoLCallback_StdErrMethod) {
-    return (void*)coreTextadeptWriteStdErr;
+    StdOutputMethod *coreWriteStdErr =
+      coreTextadeptWriteStdErr;
+    return (void*)coreWriteStdErr;
   } else if (resourceId == JoyLoLCallback_Verbose) {
-    return (void*)beVerbose(lstate);
+    Boolean isVerbose = beVerbose(lstate);
+    return (void*)isVerbose;
   }
   return NULL;
 } 

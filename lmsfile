@@ -1,0 +1,33 @@
+-- A Lua Make System file
+
+cmd = 'lms'
+if 0 < #arg then
+  arguments = table.concat(arg, ' ')
+  cmd = 'lms '..arguments
+end
+
+print('command run in each subDir = ['..cmd..']')
+
+lfs = require 'lfs'
+
+subDirs = {
+  'module',
+  'base',
+  'core'
+}
+
+curDir = lfs.currentdir()
+os.execute('reset')
+for i, subDir in ipairs(subDirs) do
+  print('\n========================================================')
+  print('working in ['..subDir..']')
+  print('running    ['..cmd..']')
+  lfs.chdir(subDir)
+  if not os.execute(cmd) then
+    print('FAILED to run: ['..cmd..']')
+    os.exit(-1)
+  end
+  lfs.chdir(curDir)
+end
+
+os.exit(0)

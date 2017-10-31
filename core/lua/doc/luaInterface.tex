@@ -62,11 +62,17 @@ static const struct luaL_Reg lua_core_lua [] = {
   {NULL, NULL}
 };
 
-static void coreLuaWriteStdOut(Symbol *aMessage) {
+static void coreLuaWriteStdOut(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
   fprintf(stdout, "%s\n", aMessage);
 }
 
-static void coreLuaWriteStdErr(Symbol *aMessage) {
+static void coreLuaWriteStdErr(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
   fprintf(stderr, "%s\n", aMessage);
 }
 
@@ -82,11 +88,16 @@ static void *coreLuaCallback(
   size_t resourceId
 ) {
   if (resourceId == JoyLoLCallback_StdOutMethod) {
-    return (void*)coreLuaWriteStdOut;
+    StdOutputMethod *coreWriteStdOut =
+      coreLuaWriteStdOut;
+    return (void*)coreWriteStdOut;
   } else if (resourceId == JoyLoLCallback_StdErrMethod) {
-    return (void*)coreLuaWriteStdErr;
+    StdOutputMethod *coreWriteStdErr =
+      coreLuaWriteStdErr;
+    return (void*)coreWriteStdErr;
   } else if (resourceId == JoyLoLCallback_Verbose) {
-    return (void*)beVerbose(lstate);
+    Boolean isVerbose = beVerbose(lstate);
+    return (void*)isVerbose;
   }
   return NULL;
 } 

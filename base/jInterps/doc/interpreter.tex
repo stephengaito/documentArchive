@@ -49,7 +49,10 @@ The currently well known resources are:
 #define JoyLoLCallback_StdErrMethod  2
 #define JoyLoLCallback_Verbose       3
 
-typedef void (StdOutputMethod)(Symbol *aMessage);
+typedef void (StdOutputMethod)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+);
 \stopCHeader
 
 The core implementation can then use the \type{setJoyLoLCallbackFrom} 
