@@ -17,7 +17,8 @@ static void traceAction(
   if (command) {
     printLoL(jInterp, aStrBuf, command);
   }
-  printf("%s\\n", getCString(jInterp, aStrBuf));
+  strBufPrintf(jInterp, aStrBuf, "\n");
+  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
   strBufClose(jInterp, aStrBuf);
 }
 \stopCCode
@@ -67,7 +68,13 @@ void evalCommandInContextImpl(
   pushCtxProcess(aCtx, command);
   //
   while(aCtx->process) {
-    if (aCtx->tracingOn) printf("\\n ctx: %s\\n", aCtx->name);
+    if (aCtx->tracingOn) {
+      StringBufferObj *aStrBuf = 
+        newStringBuffer(jInterp);
+      strBufPrintf(jInterp, aStrBuf, "\\n ctx: %s\\n", aCtx->name);
+      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
+      strBufClose(jInterp, aStrBuf);
+    }
     //
     // pop the next command off the process stack
     //
@@ -183,7 +190,7 @@ void evalCommandInContextImpl(
       strBufPrintf(jInterp, aStrBuf, "p>>");
       printLoL(jInterp, aStrBuf, aCtx->process);
       strBufPrintf(jInterp, aStrBuf, "\\n");
-      printf("%s", getCString(jInterp, aStrBuf));
+      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
       DEBUG(FALSE, "evalCommandInContext <- tracing%s\\n", "");
     }
@@ -254,13 +261,33 @@ void evalTextInContextImpl(
   ContextObj *aCtx,
   TextObj    *aText
 ) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+
   DEBUG(FALSE, "evalTextInContext > %p %p\\n", aCtx, aText);
   while(TRUE) {
     CoAlgObj* aLoL = parseOneSymbol(aText);
-//    if (aCtx->showStack) printf("<%s\\n", printLoL(aLoL));
+/**/    if (aCtx->showStack) {
+      StringBufferObj *aStrBuf =
+        newStringBuffer(jInterp);
+      strBufPrintf(jInterp, aStrBuf, "<");
+      printLoL(jInterp, aStrBuf, aLoL);
+      strBufPrintf(jInterp, aStrBuf, "\n");
+      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
+      strBufClose(jInterp, aStrBuf);
+    } /**/
     if (!aLoL) break;
     evalCommandInContext(aCtx, aLoL);
-//    if (aCtx->showStack) printf(">%s\\n", printLoL(aCtx->data));
+/**/    if (aCtx->showStack) {
+      StringBufferObj *aStrBuf =
+        newStringBuffer(jInterp);
+      strBufPrintf(jInterp, aStrBuf, ">");
+      printLoL(jInterp, aStrBuf, aCtx->data);
+      strBufPrintf(jInterp, aStrBuf, "\n");
+      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
+      strBufClose(jInterp, aStrBuf);
+    } /**/
     if (aCtx->exceptionRaised) break;
   }
   DEBUG(FALSE, "evalTextInContext < %p %p\\n", aCtx, aText);

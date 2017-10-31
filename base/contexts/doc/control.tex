@@ -153,9 +153,10 @@ Boolean reportExceptionImpl(
   assert(jInterp);
   StringBufferObj *aStrBuf = 
     newStringBuffer(jInterp);
+  strBufPrintf(jInterp, aStrBuf, "\nUNHANDLED EXCEPTION:\n");
   printLoL(jInterp, aStrBuf, aCtx->data);
-  printf("\nUNHANDLED EXCEPTION: %s\n",
-    getCString(jInterp, aStrBuf));
+  strBufPrintf(jInterp, aStrBuf, "\n");
+  jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
   strBufClose(jInterp, aStrBuf);
   aCtx->exceptionRaised = FALSE;
   return TRUE;

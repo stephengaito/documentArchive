@@ -303,15 +303,17 @@ typedef CoAlgObj *(PopCtx)(
       ->popCtxDataFunc(aCtx))               \
   )
 
-#define popCtxDataInto(aCtx, aVar)                          \
-assert(aCtx);                                               \
-CoAlgObj* aVar = popCtxData(aCtx);                          \
-if (aCtx->tracingOn) {                                      \
-  JoyLoLInterp *jInterp = aCtx->jInterp;                    \
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);      \
-  printLoL(jInterp, aStrBuf, aVar);                         \
-  printf("%s = %s\n", #aVar, getCString(jInterp, aStrBuf)); \
-  strBufClose(jInterp, aStrBuf);                            \
+#define popCtxDataInto(aCtx, aVar)                              \
+assert(aCtx);                                                   \
+CoAlgObj* aVar = popCtxData(aCtx);                              \
+if (aCtx->tracingOn) {                                          \
+  JoyLoLInterp *jInterp = aCtx->jInterp;                        \
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
+  strBufPrintf(jInterp, aStrBuf, "%s = ", #aVar);               \
+  printLoL(jInterp, aStrBuf, aVar);                             \
+  strBufPrintf(jInterp, aStrBuf, "\n");                         \
+  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));  \
+  strBufClose(jInterp, aStrBuf);                                \
 }
 \stopCHeader
 
@@ -569,15 +571,17 @@ void prependListCtxProcessImpl(
       ->popCtxProcessFunc(aCtx))               \
   )
 
-#define popCtxProcessInto(aCtx, aVar)                       \
-assert(aCtx);                                               \
-CoAlgObj* aVar = popCtxProcess(aCtx);                       \
-if (aCtx->tracingOn) {                                      \
-  JoyLoLInterp *jInterp = aCtx->jInterp;                    \
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);      \
-  printLoL(jInterp, aStrBuf, aVar);                         \
-  printf("%s = %s\n", #aVar, getCString(jInterp, aStrBuf)); \
-  strBufClose(jInterp, aStrBuf);                            \
+#define popCtxProcessInto(aCtx, aVar)                           \
+assert(aCtx);                                                   \
+CoAlgObj* aVar = popCtxProcess(aCtx);                           \
+if (aCtx->tracingOn) {                                          \
+  JoyLoLInterp *jInterp = aCtx->jInterp;                        \
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
+  strBufPrintf(jInterp, aStrBuf, "%s = ", #aVar);               \
+  printLoL(jInterp, aStrBuf, aVar);                             \
+  strBufPrintf(jInterp, aStrBuf, "\n");                         \
+  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));  \
+  strBufClose(jInterp, aStrBuf);                                \
 }
 \stopCHeader
 
