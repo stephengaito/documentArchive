@@ -88,7 +88,7 @@ DictObj *newDictImpl(
   
   assert(aSym);
   
-  DEBUG(FALSE, "newAVLNode [%s]\n", aSym);
+  DEBUG(jInterp, "newAVLNode [%s]\n", aSym);
   CoAlgObj* newNode   = newObject(jInterp, DictionariesTag);
   dictAsSymbol(newNode)   = strdup(aSym);
   dictAsPreObs(newNode)   = NULL;

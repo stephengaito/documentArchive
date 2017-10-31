@@ -703,7 +703,7 @@ Boolean defineContext(
   Symbol* definedName,
   ContextObj* newCtx
 ) {
-  DEBUG(FALSE, "defineContext %p [%s] %p\n",
+  DEBUG(jInterp, "defineContext %p [%s] %p\n",
         jInterp, definedName, newCtx);
   assert(jInterp);
   DictObj* aSym =

@@ -116,20 +116,20 @@ CoAlgObj* newNaturalImpl(
 
 \setCHeaderStream{private}
 \startCHeader
-Boolean equalityNatCoAlgDebug(
-  CoAlgObj* lolA,
-  CoAlgObj* lolB,
-  Boolean debugFlag
+Boolean equalityNatCoAlg(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 );
-
-#define equalityNatCoAlg(lolA, lolB) \
-  equalityNatCoAlgDebug(lolA, lolB, FALSE)
 \stopCHeader
 
 \startCCode
-Boolean equalityNatCoAlgDebug(CoAlgObj* lolA, CoAlgObj* lolB,
-                              size_t debugFlag) {
-  DEBUG(debugFlag, "natCoAlg-equal a:%p b:%p\n", lolA, lolB);
+Boolean equalityNatCoAlg(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
+) {
+  DEBUG(jInterp, "natCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
@@ -144,10 +144,10 @@ Boolean equalityNatCoAlgDebug(CoAlgObj* lolA, CoAlgObj* lolB,
 \startTestCase[should return true if naturals are equal]
 
 \startCTest
-  AssertIntTrue(equalityNatCoAlg(NULL, NULL));
+  AssertIntTrue(equalityNatCoAlg(jInterp, NULL, NULL));
   CoAlgObj *natA = newNatural(jInterp, "12345");
   CoAlgObj *natB = newNatural(jInterp, "12345");
-  AssertIntTrue(equalityNatCoAlg(natA, natB));
+  AssertIntTrue(equalityNatCoAlg(jInterp, natA, natB));
 \stopCTest
 \stopTestCase
 
@@ -156,9 +156,9 @@ Boolean equalityNatCoAlgDebug(CoAlgObj* lolA, CoAlgObj* lolB,
 \startCTest
   CoAlgObj *natA = newNatural(jInterp, "12346");
   CoAlgObj *natB = newNatural(jInterp, "12345");
-  AssertIntFalse(equalityNatCoAlg(NULL, natB));
-  AssertIntFalse(equalityNatCoAlg(natA, NULL));
-  AssertIntFalse(equalityNatCoAlg(natA, natB));
+  AssertIntFalse(equalityNatCoAlg(jInterp, NULL, natB));
+  AssertIntFalse(equalityNatCoAlg(jInterp, natA, NULL));
+  AssertIntFalse(equalityNatCoAlg(jInterp, natA, natB));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -248,7 +248,7 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   theCoAlg->super.name           = NaturalsName;
   theCoAlg->super.objectSize     = sizeof(NaturalObj);
   theCoAlg->super.initializeFunc = initializeNaturals;
-  theCoAlg->super.equalityFunc   = equalityNatCoAlgDebug;
+  theCoAlg->super.equalityFunc   = equalityNatCoAlg;
   theCoAlg->super.printFunc      = printNatCoAlg;
   theCoAlg->newNaturalFunc       = newNaturalImpl;
 

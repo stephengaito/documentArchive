@@ -258,23 +258,20 @@ Boolean strBufPrintfImpl(
 
 \setCHeaderStream{private}
 \startCHeader
-Boolean stringBuffersEqualDebug(
+Boolean stringBuffersEqual(
+  JoyLoLInterp *jInterp,
   CoAlgObj     *lolA,
-  CoAlgObj     *lolB,
-  Boolean       debugFlag
+  CoAlgObj     *lolB
 );
-
-#define stringBuffersEqual(lolA, lolB) \
-  stringBuffersEqualDebug(lolA, lolB, FALSE)
 \stopCHeader
 
 \startCCode
-Boolean stringBuffersEqualDebug(
+Boolean stringBuffersEqual(
+  JoyLoLInterp *jInterp,
   CoAlgObj     *lolA,
-  CoAlgObj     *lolB,
-  Boolean       debugFlag
+  CoAlgObj     *lolB
 ) {
-  DEBUG(debugFlag, "stringBuffersEqual a:%p b:%p\n", lolA, lolB);
+  DEBUG(jInterp, "stringBuffersEqual a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA || !lolB) return FALSE;
   if (asType(lolA) != asType(lolB)) return FALSE;
@@ -290,13 +287,13 @@ Boolean stringBuffersEqualDebug(
 \startTestCase[should return true if stringBuffers are equal]
 
 \startCTest
-  AssertIntTrue(stringBuffersEqual(NULL, NULL));
+  AssertIntTrue(stringBuffersEqual(jInterp, NULL, NULL));
   StringBufferObj *strBufA = newStringBuffer(jInterp);
   strBufPrintf(jInterp, strBufA, "test");
   StringBufferObj *strBufB = newStringBuffer(jInterp);
   strBufPrintf(jInterp, strBufB, "test");
   AssertIntTrue(stringBuffersEqual(
-    (CoAlgObj*)strBufA, (CoAlgObj*)strBufB));
+    jInterp, (CoAlgObj*)strBufA, (CoAlgObj*)strBufB));
 \stopCTest
 \stopTestCase
 
@@ -307,12 +304,12 @@ Boolean stringBuffersEqualDebug(
   strBufPrintf(jInterp, strBufA, "testA");
   StringBufferObj *strBufB = newStringBuffer(jInterp);
   strBufPrintf(jInterp, strBufB, "testB");
-  AssertIntFalse(stringBuffersEqualDebug(
-    NULL, (CoAlgObj*)strBufB, FALSE));
-  AssertIntFalse(stringBuffersEqualDebug(
-    (CoAlgObj*)strBufA, NULL, FALSE));
-  AssertIntFalse(stringBuffersEqualDebug(
-    (CoAlgObj*)strBufA, (CoAlgObj*)strBufB, FALSE));
+  AssertIntFalse(stringBuffersEqual(
+    jInterp, NULL, (CoAlgObj*)strBufB));
+  AssertIntFalse(stringBuffersEqual(
+    jInterp, (CoAlgObj*)strBufA, NULL));
+  AssertIntFalse(stringBuffersEqual(
+    jInterp, (CoAlgObj*)strBufA, (CoAlgObj*)strBufB));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -359,45 +356,38 @@ Boolean printStringBufferCoAlg(
 \stopCCode
 
 \startCHeader
-typedef void (PrintLoLDebug)(
+typedef void (PrintLoL)(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL,
-  Boolean          debugFlag
+  CoAlgObj        *aLoL
 );
 
-#define printLoLDebug(jInterp, aStrBuf, aLoL, debugFlag)      \ 
-  (                                                           \
-    assert(getStringBuffersClass(jInterp)                     \
-      ->printLoLDebugFunc),                                   \
-    (getStringBuffersClass(jInterp)                           \
-      ->printLoLDebugFunc(jInterp, aStrBuf, aLoL, debugFlag)) \
+#define printLoL(jInterp, aStrBuf, aLoL)       \ 
+  (                                            \
+    assert(getStringBuffersClass(jInterp)      \
+      ->printLoLFunc),                         \
+    (getStringBuffersClass(jInterp)            \
+      ->printLoLFunc(jInterp, aStrBuf, aLoL))  \
   )
-
-#define printLoL(jInterp, aStrBuf, aLoL)       \
-  printLoLDebug( jInterp, aStrBuf, aLoL, FALSE)
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-void printLoLDebugImpl(
+void printLoLImpl(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL, 
-  Boolean          debugFlag
+  CoAlgObj        *aLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void printLoLDebugImpl(
+void printLoLImpl(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL, 
-  Boolean          debugFlag
+  CoAlgObj        *aLoL
 ) {
-  //  debugFlag = TRUE;
-  DEBUG(debugFlag, "printLoL %p %p\n", aStrBuf, aLoL);
+  DEBUG(jInterp, "printLoL %p %p\n", aStrBuf, aLoL);
 
   if (aLoL) {
     assert(asType(aLoL));
@@ -440,7 +430,7 @@ typedef struct stringBuffers_class_struct {
   StrBufClose     *strBufCloseFunc;
   GetCString      *getCStringFunc;
   StrBufPrintf    *strBufPrintfFunc;
-  PrintLoLDebug   *printLoLDebugFunc;
+  PrintLoL        *printLoLFunc;
 } StringBuffersClass;
 \stopCHeader
 
@@ -472,13 +462,13 @@ Boolean registerStringBuffers(JoyLoLInterp* jInterp) {
   theCoAlg->super.name            = StringBuffersName;
   theCoAlg->super.objectSize      = sizeof(StringBufferObj);
   theCoAlg->super.initializeFunc  = initializeStringBuffers;
-  theCoAlg->super.equalityFunc    = stringBuffersEqualDebug;
+  theCoAlg->super.equalityFunc    = stringBuffersEqual;
   theCoAlg->super.printFunc       = printStringBufferCoAlg;
   theCoAlg->newStringBufferFunc   = newStringBufferImpl;
   theCoAlg->strBufCloseFunc       = strBufCloseImpl;
   theCoAlg->getCStringFunc        = getCStringImpl;
   theCoAlg->strBufPrintfFunc      = strBufPrintfImpl;
-  theCoAlg->printLoLDebugFunc     = printLoLDebugImpl;
+  theCoAlg->printLoLFunc          = printLoLImpl;
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
   

@@ -130,12 +130,12 @@ DictObj* findLUBSymbolRecurse(
   assert(jInterp);
   if (!anAVLNode) return jInterp->dict.firstSymbol;
 
-  DEBUG(FALSE, "findLUBSymbol %p {%s}[%s] %p %p\n",
+  DEBUG(jInterp, "findLUBSymbol %p {%s}[%s] %p %p\n",
         anAVLNode, anAVLNode->symbol, aSymbol,
         anAVLNode->left, anAVLNode->right);
 
   int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
-  DEBUG(FALSE, "findLUBSymbol cmp: %d\n", aStrCmp);
+  DEBUG(jInterp, "findLUBSymbol cmp: %d\n", aStrCmp);
   if (aStrCmp < 0) {
     // aSymbol < anAVLNode->symbol
     // the current anAVLNode->symbol is an upper bound

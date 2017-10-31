@@ -21,25 +21,24 @@ DictObj* insertSymbolRecurse(
   Symbol* aSymbol
 ) {
   if (!anAVLNode) return newDict(jInterp, aSymbol);
-  Boolean debugFlag = FALSE;
 
   assert(jInterp);
   StringBufferObj *aStrBuf = 
-    (debugFlag ? newStringBuffer(jInterp) : NULL);
+    (jInterp->debug ? newStringBuffer(jInterp) : NULL);
 
-  DEBUG(debugFlag, "\ninsertSymbol %p <%s>[%s] %ld:%zu\n",
+  DEBUG(jInterp, "\ninsertSymbol %p <%s>[%s] %ld:%zu\n",
         anAVLNode, anAVLNode->symbol, aSymbol,
         anAVLNode->balance, anAVLNode->height);
 
-  DEBUG(debugFlag, "insertSymbol strncmp %d\n",
+  DEBUG(jInterp, "insertSymbol strncmp %d\n",
         strcmp(aSymbol, anAVLNode->symbol));
 
   int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
   if (aStrCmp < 0) {
     // aSymbol < anAVLNode->symbol // insert in LEFT subtree
-    if (debugFlag) {
+    if (jInterp->debug) {
       printDicInto(jInterp, aStrBuf, anAVLNode);
-      DEBUG(debugFlag, ">-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+      DEBUG(jInterp, ">-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
             anAVLNode, aSymbol, anAVLNode->balance,
             anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
             getCString(jInterp, aStrBuf));
@@ -63,9 +62,9 @@ DictObj* insertSymbolRecurse(
     }
     anAVLNode->left = leftResult;
     reCalculateAVLNodeHeightBalance(anAVLNode);
-    if (debugFlag) {
+    if (jInterp->debug) {
       printDicInto(jInterp, aStrBuf, anAVLNode);
-      DEBUG(debugFlag, "<-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+      DEBUG(jInterp, "<-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
           anAVLNode, aSymbol, anAVLNode->balance,
           anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
           getCString(jInterp, aStrBuf));
@@ -82,9 +81,9 @@ DictObj* insertSymbolRecurse(
     }
   } else if (0 < aStrCmp) {
     // aSymbol > anAVLNode->symbol // insert in RIGHT subtree
-    if (debugFlag) {
+    if (jInterp->debug) {
       printDicInto(jInterp, aStrBuf, anAVLNode);
-      DEBUG(debugFlag, ">-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+      DEBUG(jInterp, ">-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
           anAVLNode, aSymbol, anAVLNode->balance,
           anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
           getCString(jInterp, aStrBuf));
@@ -105,9 +104,9 @@ DictObj* insertSymbolRecurse(
     }
     anAVLNode->right = rightResult;
     reCalculateAVLNodeHeightBalance(anAVLNode);
-    if (debugFlag) {
+    if (jInterp->debug) {
       printDicInto(jInterp, aStrBuf, anAVLNode);
-      DEBUG(FALSE, "<-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+      DEBUG(jInterp, "<-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
           anAVLNode, aSymbol, anAVLNode->balance,
           anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
           getCString(jInterp, aStrBuf));
@@ -124,7 +123,7 @@ DictObj* insertSymbolRecurse(
     }
   } else {
     // aSymbol == anAVLNode->symbol // nothing to do...
-    DEBUG(debugFlag,"symols equal <%s>[%s]\n",
+    DEBUG(jInterp,"symols equal <%s>[%s]\n",
           anAVLNode->symbol, aSymbol);
   }
 
@@ -187,7 +186,7 @@ DictObj* insertSymbol(
 
 \startTestCase[should insert Symbol Not In Dictionary]
 \startCTest
-  DEBUG(FALSE, "\n%s insert many symbols %s", "---------", "---------");
+  DEBUG(jInterp, "\n%s insert many symbols %s", "---------", "---------");
 
   AssertPtrNotNull(jInterp);
   // ensure the global dictionary is empty
@@ -287,14 +286,14 @@ DictObj* insertSymbol(
   AssertPtrNotNull(aNode);
   AssertStrEquals(aNode->symbol, "23");
 
-  checkAVLNode(jInterp, aNewDic, FALSE);
+  checkAVLNode(jInterp, aNewDic);
 \stopCTest
 \stopTestCase
 
 
 \startTestCase[should insert Symbol LL]
 \startCTest
-  DEBUG(FALSE, "\n%s should invoke an LL %s\n", "---------", "---------");
+  DEBUG(jInterp, "\n%s should invoke an LL %s\n", "---------", "---------");
 
   AssertPtrNotNull(jInterp);
   // ensure the global dictionary is empty
@@ -328,7 +327,7 @@ DictObj* insertSymbol(
 
 \startTestCase[should insert Symbol RR]
 \startCTest
-  DEBUG(FALSE, "\n%s should invoke an RR %s\n", "---------", "---------");
+  DEBUG(jInterp, "\n%s should invoke an RR %s\n", "---------", "---------");
 
   AssertPtrNotNull(jInterp);
   // ensure the global dictionary is empty
@@ -369,7 +368,7 @@ DictObj* insertSymbol(
 
 \startTestCase[should insert Symbol LR]
 \startCTest
-  DEBUG(FALSE, "\n%s should invoke an LR %s\n", "---------", "---------");
+  DEBUG(jInterp, "\n%s should invoke an LR %s\n", "---------", "---------");
 
   AssertPtrNotNull(jInterp);
   // ensure the global dictionary is empty
@@ -404,7 +403,7 @@ DictObj* insertSymbol(
 
 \startTestCase[should insert Symbol RL]
 \startCTest
-  DEBUG(FALSE, "\n%s should invoke an RL %s\n", "---------", "---------");
+  DEBUG(jInterp, "\n%s should invoke an RL %s\n", "---------", "---------");
 
   AssertPtrNotNull(jInterp);
   // ensure the global dictionary is empty
@@ -455,7 +454,7 @@ DictObj* insertSymbol(
     sprintf(itoa, "%d", rand() % 100);
     avlDic = insertSymbolRecurse(jInterp, avlDic, itoa);
   }
-  checkAVLNode(jInterp, avlDic, FALSE);
+  checkAVLNode(jInterp, avlDic);
 
 //  StringBufferObj* aStrBuf = newStringBuffer(jInterp);
 //  printDictInto(aStrBuf, avlDic);
@@ -482,7 +481,7 @@ DictObj* insertSymbol(
     sprintf(itoa, "%d", i);
     avlDic = insertSymbolRecurse(jInterp, avlDic, itoa);
   }
-  checkAVLNode(jInterp, avlDic, FALSE);
+  checkAVLNode(jInterp, avlDic);
 
 //  StringBufferObj* aStrBuf = newStringBuffer(jInterp);
 //  printDictInto(aStrBuf, avlDic);

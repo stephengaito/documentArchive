@@ -16,12 +16,12 @@ DictObj* rotateLeft(
   JoyLoLInterp *jInterp,
   DictObj      *anAVLNode
 ) {
-  Boolean debugFlag = FALSE;
+  assert(jInterp);
   StringBufferObj *aStrBuf =
-    (debugFlag? newStringBuffer(jInterp) : NULL);
-  if (debugFlag) {
+    (jInterp->debug ? newStringBuffer(jInterp) : NULL);
+  if (jInterp->debug) {
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(debugFlag, ">-rotateLeft %p %ld:%zu=%zu %s\n",
+    DEBUG(jInterp, ">-rotateLeft %p %ld:%zu=%zu %s\n",
           anAVLNode, anAVLNode->balance, anAVLNode->height,
           deepCalculateAVLNodeHeight(anAVLNode),
           getCString(jInterp, aStrBuf));
@@ -36,15 +36,15 @@ DictObj* rotateLeft(
   reCalculateAVLNodeHeightBalance(anAVLNode);
   reCalculateAVLNodeHeightBalance(newRoot);
 
-  if (debugFlag) {
+  if (jInterp->debug) {
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(debugFlag, "<o-rotateLeft %p %ld:%zu=%zu %s\n",
+    DEBUG(jInterp, "<o-rotateLeft %p %ld:%zu=%zu %s\n",
           anAVLNode, anAVLNode->balance, anAVLNode->height,
           deepCalculateAVLNodeHeight(anAVLNode),
           getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
     printDicInto(jInterp, aStrBuf, newRoot);
-    DEBUG(debugFlag, "<n-rotateLeft %p %ld:%zu=%zu %s\n",
+    DEBUG(jInterp, "<n-rotateLeft %p %ld:%zu=%zu %s\n",
           newRoot, newRoot->balance, newRoot->height,
           deepCalculateAVLNodeHeight(newRoot),
           getCString(jInterp, aStrBuf));
@@ -68,12 +68,12 @@ DictObj* rotateRight(
   JoyLoLInterp *jInterp,
   DictObj      *anAVLNode
 ) {
-  Boolean debugFlag = FALSE;
+  assert(jInterp);
   StringBufferObj *aStrBuf =
-    (debugFlag? newStringBuffer(jInterp) : NULL);
-  if (debugFlag) {
+    (jInterp->debug ? newStringBuffer(jInterp) : NULL);
+  if (jInterp->debug) {
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(debugFlag, ">-rotateRight %p %ld:%zu=%zu %s\n",
+    DEBUG(jInterp, ">-rotateRight %p %ld:%zu=%zu %s\n",
           anAVLNode, anAVLNode->balance, anAVLNode->height,
           deepCalculateAVLNodeHeight(anAVLNode),
           getCString(jInterp, aStrBuf));
@@ -88,15 +88,15 @@ DictObj* rotateRight(
   reCalculateAVLNodeHeightBalance(anAVLNode);
   reCalculateAVLNodeHeightBalance(newRoot);
 
-  if (debugFlag) {
+  if (jInterp->debug) {
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(debugFlag, "<o-rotateRight %p %ld:%zu=%zu %s\n",
+    DEBUG(jInterp, "<o-rotateRight %p %ld:%zu=%zu %s\n",
           anAVLNode, anAVLNode->balance, anAVLNode->height,
           deepCalculateAVLNodeHeight(anAVLNode),
           getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
     printDicInto(jInterp, aStrBuf, newRoot);
-    DEBUG(FALSE, "<n-rotateRight %p %ld:%zu=%zu %s\n",
+    DEBUG(jInterp, "<n-rotateRight %p %ld:%zu=%zu %s\n",
           newRoot, newRoot->balance, newRoot->height,
           deepCalculateAVLNodeHeight(newRoot),
           getCString(jInterp, aStrBuf));
@@ -120,11 +120,11 @@ DictObj* rotateLeftLeft(
   JoyLoLInterp *jInterp,
   DictObj      *anAVLNode
 ) {
-  Boolean debugFlag = FALSE;
-  if (debugFlag) {
+  assert(jInterp);
+  if (jInterp->debug) {
     StringBufferObj *aStrBuf = newStringBuffer(jInterp);
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(debugFlag, "LL %p %s\n",
+    DEBUG(jInterp, "LL %p %s\n",
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
@@ -144,19 +144,19 @@ DictObj* rotateLeftRight(
   JoyLoLInterp *jInterp,
   DictObj      *anAVLNode
 ) {
-  Boolean debugFlag = FALSE;
+  assert(jInterp);
   StringBufferObj *aStrBuf =
-    (debugFlag ? newStringBuffer(jInterp) : NULL);
-  if (debugFlag) {
+    (jInterp->debug ? newStringBuffer(jInterp) : NULL);
+  if (jInterp->debug) {
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(debugFlag, "0-LR %p %s\n",
+    DEBUG(jInterp, "0-LR %p %s\n",
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
   anAVLNode->left = rotateLeft(jInterp, anAVLNode->left);
-  if (debugFlag) {
+  if (jInterp->debug) {
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(debugFlag, "1-LR %p %s\n",
+    DEBUG(jInterp, "1-LR %p %s\n",
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
@@ -176,19 +176,19 @@ DictObj* rotateRightLeft(
   JoyLoLInterp *jInterp,
   DictObj      *anAVLNode
 ) {
-  Boolean debugFlag = FALSE;
+  assert(jInterp);
   StringBufferObj *aStrBuf =
-    (debugFlag ? newStringBuffer(jInterp) : NULL);
-  if (debugFlag) {
+    (jInterp->debug ? newStringBuffer(jInterp) : NULL);
+  if (jInterp->debug) {
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(debugFlag, "0-RL %p %s\n",
+    DEBUG(jInterp, "0-RL %p %s\n",
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
   anAVLNode->right = rotateRight(jInterp, anAVLNode->right);
-  if (debugFlag) {
+  if (jInterp->debug) {
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(FALSE, "1-RL %p %s\n",
+    DEBUG(jInterp, "1-RL %p %s\n",
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
@@ -208,11 +208,11 @@ DictObj* rotateRightRight(
   JoyLoLInterp *jInterp,
   DictObj      *anAVLNode
 ) {
-  Boolean debugFlag = FALSE;
-  if (debugFlag) {
+  assert(jInterp);
+  if (jInterp->debug) {
     StringBufferObj *aStrBuf = newStringBuffer(jInterp);
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(FALSE, "RR %p %s\n",
+    DEBUG(jInterp, "RR %p %s\n",
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }

@@ -24,7 +24,6 @@ typedef struct text_object_struct {
   Symbol*       lastChar;
   NextLineFunc* nextLine;
   JoyLoLInterp* jInterp;
-  Boolean       debugFlag;
   //
   // array of strings specific fields
   //
@@ -155,7 +154,7 @@ void nextSymbolImpl(
   assert(aText);
   assert(aText->jInterp);
 
-  DEBUG(aText->debugFlag,
+  DEBUG(aText->jInterp,
     "->nextSymbol [%s]{%s}\n", aText->curLine, aText->curChar);
   aText->sym = NULL;
 
@@ -164,7 +163,7 @@ void nextSymbolImpl(
     aText->nextLine(aText);
   }
   if (!aText->curLine) {
-    DEBUG(aText->debugFlag, "<-nextSymbol End of Text %s\n","");
+    DEBUG(aText->jInterp, "<-nextSymbol End of Text %s\n","");
     return; // we have exhausted this text
   }
 
@@ -272,7 +271,7 @@ void nextSymbolImpl(
   char* aSymbol = strndup(symStart, symEnd - symStart); // TODO this thrashes memory ;-(
   if (matchingQuote && symEnd < lastChar) symEnd++; // skip ending quote
   aText->curChar = symEnd;
-  DEBUG(aText->debugFlag, "--nextSymbol == [%s]\n", aSymbol);
+  DEBUG(aText->jInterp, "--nextSymbol == [%s]\n", aSymbol);
 
   // check to see if this is the exit or quit symbol ...
   // ... and if so rest the nextLine function
@@ -281,19 +280,19 @@ void nextSymbolImpl(
   }
 
   if (parsingNatural) {
-    DEBUG(aText->debugFlag, "--nextSymbol == %s (natural)\n", aSymbol);
+    DEBUG(aText->jInterp, "--nextSymbol == %s (natural)\n", aSymbol);
     // we have parsed a natural... so create a new natural
     //
     aText->sym = newNatural(aText->jInterp, aSymbol);
     //
-    DEBUG(aText->debugFlag, "<-nextSymbol %s (natural)\n", aSymbol);
+    DEBUG(aText->jInterp, "<-nextSymbol %s (natural)\n", aSymbol);
   } else {
     // we have parsed a symbol... so create a new symbol
     //
     DictObj* aSym = createSymbol(aText->jInterp, aSymbol);
     aText->sym = newSymbol(aText->jInterp, aSym->symbol);
     //
-    DEBUG(aText->debugFlag, "<-nextSymbol [%s] (symbol)\n",
+    DEBUG(aText->jInterp, "<-nextSymbol [%s] (symbol)\n",
       ((SymbolObj*)(aText->sym))->sym);
   }
   free(aSymbol);
@@ -351,15 +350,22 @@ void reportErrorImpl(
 
 \setCHeaderStream{private}
 \startCHeader
-extern Boolean equalityTextsCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
-                                  size_t debugFlag);
+extern Boolean equalityTextsCoAlg(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-Boolean equalityTextsCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
-                           size_t debugFlag) {
-  DEBUG(debugFlag, "textsCoAlg-equal a:%p b:%p\n", lolA, lolB);
+Boolean equalityTextsCoAlg(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
+) {
+  assert(jInterp);
+  DEBUG(jInterp, "textsCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
@@ -406,7 +412,7 @@ Boolean printStrTextsCoAlg(
   TextObj* aNewText = createTextFromString(jInterp, "a string");
   AssertPtrNotNull(aNewText);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoLDebug(jInterp, aStrBuf, (CoAlgObj*)aNewText, FALSE);
+  printLoL(jInterp, aStrBuf, (CoAlgObj*)aNewText);
   AssertStrEquals(getCString(jInterp, aStrBuf), "--texts-- ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest

@@ -40,7 +40,9 @@ extern void nextLineFromString(TextObj* aText);
 
 \startCCode
 void nextLineFromString(TextObj* aText) {
-  DEBUG(FALSE, "->nextLineFromString [%s]{%p:%p}\n",
+  assert(aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "->nextLineFromString [%s]{%p:%p}\n",
     aText->curLine, aText->curChar, aText->lastChar);
   if (!aText) return;  // there is nothing we can do!
   if (!aText->curLine) return; // there is nothing we can do!
@@ -100,7 +102,6 @@ TextObj* createTextFromStringImpl(
   aText->jInterp   = jInterp;
   aText->completed = FALSE;
   aText->sym       = NULL;
-  aText->debugFlag = FALSE;
   //
   aText->inputFile = NULL;
   //
@@ -233,7 +234,9 @@ extern void nextLineFromArray(TextObj* aText);
 
 \startCCode
 void nextLineFromArray(TextObj* aText) {
-  DEBUG(FALSE, "->nextLineFromArray %s\n", "");
+  assert(aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "->nextLineFromArray %s\n", "");
   if (!aText) return;  // there is nothing we can do!
   if (!aText->textLines) return; // there is nothing we can do!
 
@@ -307,7 +310,6 @@ TextObj* createTextFromArrayOfStringsImpl(
   aText->curLine    = NULL;
   aText->curChar    = NULL;
   aText->lastChar   = NULL;
-  aText->debugFlag  = FALSE;
   //
   aText->inputFile  = NULL;
   //

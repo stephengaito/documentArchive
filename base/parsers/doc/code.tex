@@ -197,7 +197,8 @@ CoAlgObj* parseList(
   char closingChar
 ) {
   assert(aText);
-  DEBUG(aText->debugFlag,
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp,
     "parseList %p '%c'\n", aText, closingChar);
 
   CoAlgObj* firstPair = NULL;
@@ -206,7 +207,7 @@ CoAlgObj* parseList(
   while (!aText->completed) {
 
     nextSymbol(aText);
-    DEBUG(aText->debugFlag,
+    DEBUG(aText->jInterp,
       "parseList ns: %p\n", aText->sym);
     if (!aText->sym) {
       reportUnmatchedClosingSymbol(aText, closingChar);
@@ -274,7 +275,8 @@ CoAlgObj* parseOneSymbolImpl(
   TextObj* aText
 ) {
   assert(aText);
-  DEBUG(aText->debugFlag, "parseOneSymbol %p\n", aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "parseOneSymbol %p\n", aText);
   nextSymbol(aText);
   if (!aText->sym) return NULL;
 
@@ -476,7 +478,7 @@ CoAlgObj* parseOneSymbolImpl(
   AssertIntTrue(isNatural(aLoL));
   AssertIntEquals( mpz_cmp_si(asNatural(aLoL), 1234567890), 0);
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
-  printLoLDebug(jInterp, aStrBuf, aLoL, FALSE);
+  printLoL(jInterp, aStrBuf, aLoL);
   AssertStrEquals(getCString(jInterp, aStrBuf), "1234567890 ");
   strBufClose(jInterp, aStrBuf);
 
@@ -518,7 +520,9 @@ extern CoAlgObj* parseAllSymbolsImpl(
 CoAlgObj* parseAllSymbolsImpl(
   TextObj* aText
 ) {
-  DEBUG(FALSE, "parseAllSymbols %p]\n", aText);
+  assert(aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "parseAllSymbols %p]\n", aText);
   return parseList(aText, 0);
 }
 \stopCCode
@@ -539,7 +543,7 @@ paths} in our parsing code.
 
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoLDebug(jInterp, aStrBuf, aLoL, FALSE);
+  printLoL(jInterp, aStrBuf, aLoL);
   AssertStrEquals(getCString(jInterp, aStrBuf),
     "this ; is ; a test with some semi-colons and ; again ; 123 ; 456 ; 789 12 ; 34 and ; one ; more ; time ");
   strBufClose(jInterp, aStrBuf);
@@ -563,7 +567,7 @@ paths} in our parsing code.
 
   CoAlgObj* lolCopy = copyLoL(jInterp, aLoL);
   AssertPtrNotEquals(aLoL, lolCopy);
-  AssertIntTrue(equalLoLDebug(jInterp, aLoL, lolCopy, FALSE));
+  AssertIntTrue(equalLoL(jInterp, aLoL, lolCopy));
 \stopCTest
 \stopTestCase
 
@@ -604,7 +608,7 @@ paths} in our parsing code.
   
   CoAlgObj* lolCopy = copyLoL(jInterp, aLoL);
   AssertPtrNotEquals(aLoL, lolCopy);
-  AssertIntTrue(equalLoLDebug(jInterp, aLoL, lolCopy, FALSE));
+  AssertIntTrue(equalLoL(jInterp, aLoL, lolCopy));
 \stopCTest
 \stopTestCase
 

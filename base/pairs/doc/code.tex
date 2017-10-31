@@ -216,60 +216,57 @@ CoAlgObj* copyLoLImpl(
 \startTestSuite[equalLoL]
 
 \startCHeader
-typedef Boolean (EqualLoLDebug)(
-  CoAlgObj* lolA,
-  CoAlgObj* lolB,
-  Boolean debugFlag
+typedef Boolean (EqualLoL)(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 );
 
-#define equalLoLDebug(jInterp, lolA, lolB, debugFlag) \
-  (                                                   \
-    assert(getPairsClass(jInterp)                     \
-      ->equalLoLDebugFunc),                           \
-    (getPairsClass(jInterp)                           \
-      ->equalLoLDebugFunc(lolA, lolB, debugFlag))     \
+#define equalLoL(jInterp, lolA, lolB)       \
+  (                                         \
+    assert(getPairsClass(jInterp)           \
+      ->equalLoLFunc),                      \
+    (getPairsClass(jInterp)                 \
+      ->equalLoLFunc(jInterp, lolA, lolB))  \
   )
 
-#define equalLoL(jInterp, lolA, lolB)       \
-  equalLoLDebug(jInterp, lolA, lolB, FALSE)
-
-#define lolEqual(areEqual, lolA, lolB)	    \
-  if (areEqual && (lolA)) {			            \
-    assert(asType(lolA));  			            \
-    areEqual = (asType(lolA)->equalityFunc)	\
-      ((lolA), (lolB), debugFlag);          \
+#define lolEqual(jInterp, areEqual, lolA, lolB) \
+  if (areEqual && (lolA)) {			                \
+    assert(asType(lolA));  			                \
+    areEqual = (asType(lolA)->equalityFunc)	    \
+      (jInterp, (lolA), (lolB));                \
   }
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-Boolean equalLoLDebugImpl(
-  CoAlgObj* lolA,
-  CoAlgObj* lolB,
-  Boolean debugFlag
+Boolean equalLoLImpl(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-Boolean equalLoLDebugImpl(
-  CoAlgObj* lolA,
-  CoAlgObj* lolB,
-  Boolean debugFlag
+Boolean equalLoLImpl(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 ) {
-  DEBUG(debugFlag, "equalLoL %p %p\n", lolA, lolB);
+  DEBUG(jInterp, "equalLoL %p %p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA || !lolB) return FALSE;
   if (asType(lolA) != asType(lolB)) return FALSE;
   if (asType(lolA) && 
      (asTag(lolA) != PairsTag)) {
-    return (asType(lolA)->equalityFunc)(lolA, lolB, debugFlag);
+    return (asType(lolA)->equalityFunc)(jInterp, lolA, lolB);
   }
   
-  if (!equalLoLDebugImpl(asCar(lolA), asCar(lolB), debugFlag)) {
+  if (!equalLoLImpl(jInterp, asCar(lolA), asCar(lolB))) {
     return FALSE;
   }
-  return equalLoLDebugImpl(asCdr(lolA), asCdr(lolB), debugFlag);
+  return equalLoLImpl(jInterp, asCdr(lolA), asCdr(lolB));
 }
 \stopCCode
 
@@ -280,7 +277,7 @@ Boolean equalLoLDebugImpl(
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
   AssertPtrNotNull(getPairsClass(jInterp));
-  AssertPtrNotNull(getPairsClass(jInterp)->equalLoLDebugFunc);
+  AssertPtrNotNull(getPairsClass(jInterp)->equalLoLFunc);
   AssertIntTrue(equalLoL(jInterp, NULL, NULL));
   AssertIntTrue(equalLoL(jInterp, pairA, pairB));
   // need to test with NON-Pairs
@@ -356,7 +353,7 @@ Boolean printPairsCoAlg(
                                newPair(jInterp, NULL, NULL));
   AssertPtrNotNull(aNewPair);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoLDebug(jInterp, aStrBuf, aNewPair, FALSE);
+  printLoL(jInterp, aStrBuf, aNewPair);
   AssertStrEquals(getCString(jInterp, aStrBuf), "( ( ) ) ( ) ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
@@ -367,12 +364,12 @@ Boolean printPairsCoAlg(
 
 \startCHeader
 typedef struct pairs_class_struct {
-  CoAlgClass     super;
-  NewPair       *newPairFunc;
-  CarCdr        *carFunc;
-  CarCdr        *cdrFunc;
-  EqualLoLDebug *equalLoLDebugFunc;
-  CopyLoL       *copyLoLFunc;
+  CoAlgClass  super;
+  NewPair    *newPairFunc;
+  CarCdr     *carFunc;
+  CarCdr     *cdrFunc;
+  EqualLoL   *equalLoLFunc;
+  CopyLoL    *copyLoLFunc;
 } PairsClass;
 \stopCHeader
 
@@ -402,12 +399,12 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = PairsName;
   theCoAlg->super.objectSize     = sizeof(PairsObj);
   theCoAlg->super.initializeFunc = initializePairs;
-  theCoAlg->super.equalityFunc   = equalLoLDebugImpl;
+  theCoAlg->super.equalityFunc   = equalLoLImpl;
   theCoAlg->super.printFunc      = printPairsCoAlg;
   theCoAlg->newPairFunc          = newPairImpl;
   theCoAlg->carFunc              = carImpl;
   theCoAlg->cdrFunc              = cdrImpl;
-  theCoAlg->equalLoLDebugFunc    = equalLoLDebugImpl;
+  theCoAlg->equalLoLFunc         = equalLoLImpl;
   theCoAlg->copyLoLFunc          = copyLoLImpl;
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);

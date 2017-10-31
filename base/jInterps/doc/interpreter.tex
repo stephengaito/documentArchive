@@ -148,9 +148,9 @@ typedef Boolean (CoAlgInitialize)(
 );
 
 typedef Boolean (CoAlgEquality)(
-  CoAlgObj*,
-  CoAlgObj*,
-  Boolean
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 );
 
 typedef struct string_buffer_object_struct StringBufferObj;

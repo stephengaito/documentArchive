@@ -173,21 +173,25 @@ static void loadPathAP(ContextObj* aCtx) {
 }
 
 static void loadFileAP(ContextObj* aCtx) {
-  DEBUG(FALSE, "loadFileAP > %p\n", aCtx);
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  DEBUG(aCtx->jInterp, "loadFileAP > %p\n", aCtx);
   assert(aCtx);
   popCtxDataInto(aCtx, top);
   int oldVerboseFlag = aCtx->verbose;
   aCtx->verbose = aCtx->showStack;
   loadFiles(aCtx, top);
   aCtx->verbose = oldVerboseFlag;
-  DEBUG(FALSE, "loadFileAP < %p\n", aCtx);
+  DEBUG(aCtx->jInterp, "loadFileAP < %p\n", aCtx);
 }
 
 static void lispLoadFileAP(ContextObj* aCtx) {
-  DEBUG(FALSE, "listLoadFileAP > %p\n", aCtx);
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  DEBUG(aCtx->jInterp, "listLoadFileAP > %p\n", aCtx);
   pushSymbolCtxProcess(aCtx, "lispInterpret");
   loadFileAP(aCtx);
-  DEBUG(FALSE, "listLoadFileAP < %p\n", aCtx);
+  DEBUG(aCtx->jInterp, "listLoadFileAP < %p\n", aCtx);
 }
 \stoptyping
 

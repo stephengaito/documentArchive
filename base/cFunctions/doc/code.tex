@@ -100,20 +100,20 @@ CFunctionObj *newCFunctionImpl(
 \setCHeaderStream{private}
 \startCHeader
 Boolean equalityFuncCoAlg(
-  CoAlgObj* lolA,
-  CoAlgObj* lolB,
-  Boolean debugFlag
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 Boolean equalityFuncCoAlg(
-  CoAlgObj* lolA,
-  CoAlgObj* lolB,
-  Boolean debugFlag
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 ) {
-  DEBUG(debugFlag, "funcCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  DEBUG(jInterp, "funcCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
@@ -167,7 +167,7 @@ Boolean printFuncCoAlg(
   CoAlgObj* aNewFunc =
     (CoAlgObj*)newCFunction(jInterp, testCFunction);
   AssertPtrNotNull(aNewFunc);
-  printLoLDebug(jInterp, aStrBuf, aNewFunc, FALSE);
+  printLoL(jInterp, aStrBuf, aNewFunc);
   AssertStrEquals(getCString(jInterp, aStrBuf), buffer);
   strBufClose(jInterp, aStrBuf);
 \stopCTest

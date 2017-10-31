@@ -19,12 +19,14 @@ static void interpretAP(Context* aCtx) {
 }
 
 static void forAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
   popCtxProcessInto(aCtx, nextCommand);
   if (symbolIs(nextCommand, "forDone")) {
     // this for loop is done
-    DEBUG(FALSE, "forAP DONE%s\n", "");
+    DEBUG(aCtx->jInterp, "forAP DONE%s\n", "");
   } else {
-    DEBUG(FALSE, "forAP continue%s\n", "");
+    DEBUG(aCtx->jInterp, "forAP continue%s\n", "");
     pushSymbolCtxProcess(aCtx, "for");
     prependListCtxProcess(aCtx, nextCommand);
   }
@@ -43,12 +45,14 @@ static void lispInterpretAP(Context* aCtx) {
 }
 
 static void lispForAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
   popCtxProcessInto(aCtx, nextCommand);
   if (symbolIs(nextCommand, "forDone")) {
     // this lisp for loop is done
-    DEBUG(FALSE, "lispForAP DONE%s\n", "");
+    DEBUG(aCtx->jInterp, "lispForAP DONE%s\n", "");
   } else {
-    DEBUG(FALSE, "lispForAP continue%s\n", "");
+    DEBUG(aCtx->jInterp, "lispForAP continue%s\n", "");
     PairAtom* operationName = car(nextCommand);
     PairAtom* operationBody = cdr(nextCommand);
     pushSymbolCtxProcess(aCtx, "lispFor");

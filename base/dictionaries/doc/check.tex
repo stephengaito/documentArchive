@@ -91,23 +91,23 @@ size_t deepCalculateAVLNodeHeight(DictObj* anAVLNode) {
 \startCHeader
 extern Boolean checkAVLNode(
   JoyLoLInterp *jInterp,
-  DictObj      *anAVLNode,
-  Boolean       debugFlag
+  DictObj      *anAVLNode
 );
 \stopCHeader
 
 \startCCode
 Boolean checkAVLNode(
   JoyLoLInterp *jInterp,
-  DictObj      *anAVLNode, 
-  Boolean       debugFlag
+  DictObj      *anAVLNode
 ) {
+  assert(jInterp);
+  
   if (!anAVLNode) return TRUE;
-  if (debugFlag) {
+  if (jInterp->debug) {
     StringBufferObj *aStrBuf = 
       newStringBuffer(jInterp);
     printDicInto(jInterp, aStrBuf, anAVLNode);
-    DEBUG(debugFlag, "checkAVLNode %p %ld:%zu=%zu %s\n",
+    DEBUG(jInterp, "checkAVLNode %p %ld:%zu=%zu %s\n",
           anAVLNode, anAVLNode->balance, anAVLNode->height,
           deepCalculateAVLNodeHeight(anAVLNode),
           getCString(jInterp, aStrBuf));
@@ -115,19 +115,19 @@ Boolean checkAVLNode(
   }
 
   if (anAVLNode->left) {
-      DEBUG(debugFlag, "car>-checkAVLNode %p\n", anAVLNode);
-      checkAVLNode(jInterp, anAVLNode->left, debugFlag);
+      DEBUG(jInterp, "car>-checkAVLNode %p\n", anAVLNode);
+      checkAVLNode(jInterp, anAVLNode->left);
       assert(0 < strcmp(anAVLNode->symbol,
                       anAVLNode->left->symbol));
-    DEBUG(debugFlag, "car<-checkAVLNode %p\n", anAVLNode);
+    DEBUG(jInterp, "car<-checkAVLNode %p\n", anAVLNode);
   }
 
   if (anAVLNode->right) {
-    DEBUG(debugFlag, "cdr>-checkAVLNode %p\n", anAVLNode);
-    checkAVLNode(jInterp, anAVLNode->right, debugFlag);
+    DEBUG(jInterp, "cdr>-checkAVLNode %p\n", anAVLNode);
+    checkAVLNode(jInterp, anAVLNode->right);
     assert(strcmp(anAVLNode->symbol,
                   anAVLNode->right->symbol) < 0);
-    DEBUG(debugFlag, "cdr<-checkAVLNode %p\n", anAVLNode);
+    DEBUG(jInterp, "cdr<-checkAVLNode %p\n", anAVLNode);
   }
 
   assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));

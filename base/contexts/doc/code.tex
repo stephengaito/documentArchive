@@ -76,7 +76,7 @@ ContextObj* newContextImpl(
   CoAlgObj     *dataLoL,
   CoAlgObj     *processLoL
 ) {
-  DEBUG(FALSE, "createContext %p [%s] %p %p %p\n",
+  DEBUG(jInterp, "createContext %p [%s] %p %p %p\n",
     jInterp, name, parent, dataLoL, processLoL);
   assert(jInterp);
 
@@ -113,20 +113,20 @@ ContextObj* newContextImpl(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean equalityContextsCoAlg(
-  CoAlgObj* lolA,
-  CoAlgObj* lolB,
-  Boolean debugFlag
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 Boolean equalityContextsCoAlg(
-  CoAlgObj* lolA,
-  CoAlgObj* lolB,
-  Boolean debugFlag
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 ) {
-  DEBUG(debugFlag, "contextCoAlg->equal a:%p b:%p\n",
+  DEBUG(jInterp, "contextCoAlg->equal a:%p b:%p\n",
     lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
@@ -135,11 +135,11 @@ Boolean equalityContextsCoAlg(
   if (!asType(lolA)) return FALSE;
   if (asTag(lolA) != ContextsTag) return FALSE;
   size_t areEqual = TRUE;
-  lolEqual(areEqual, asData(lolA),      asData(lolB));
-  lolEqual(areEqual, asCommand(lolA),   asCommand(lolB));
-  lolEqual(areEqual, asProcess(lolA),   asProcess(lolB));
-  lolEqual(areEqual, asMessages(lolA),  asMessages(lolB));
-  lolEqual(areEqual, asListeners(lolA), asListeners(lolB));
+  lolEqual(jInterp, areEqual, asData(lolA),      asData(lolB));
+  lolEqual(jInterp, areEqual, asCommand(lolA),   asCommand(lolB));
+  lolEqual(jInterp, areEqual, asProcess(lolA),   asProcess(lolB));
+  lolEqual(jInterp, areEqual, asMessages(lolA),  asMessages(lolB));
+  lolEqual(jInterp, areEqual, asListeners(lolA), asListeners(lolB));
   return areEqual;
 }
 \stopCCode

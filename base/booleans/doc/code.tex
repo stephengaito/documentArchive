@@ -84,13 +84,13 @@ CoAlgObj* newBooleanImpl(
 
   CoAlgObj* aLoL = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aLoL);
-  printLoLDebug(jInterp, aStrBuf, aLoL, FALSE);
+  printLoL(jInterp, aStrBuf, aLoL);
   AssertStrEquals(getCString(jInterp, aStrBuf), "true ");
   strBufClose(jInterp, aStrBuf);
 
   aLoL = newBoolean(jInterp, FALSE);
   AssertPtrNotNull(aLoL);
-  printLoLDebug(jInterp, aStrBuf, aLoL, FALSE);
+  printLoL(jInterp, aStrBuf, aLoL);
   AssertStrEquals(getCString(jInterp, aStrBuf), "false ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
@@ -177,15 +177,21 @@ Boolean isFalseImpl(CoAlgObj* aLoL) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern Boolean equalityBoolCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
-                                 size_t debugFlag);
+extern Boolean equalityBoolCoAlg(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-Boolean equalityBoolCoAlg(CoAlgObj* lolA, CoAlgObj* lolB,
-                          size_t debugFlag) {
-  DEBUG(debugFlag, "boolCoAlg-equal a:%p b:%p\n", lolA, lolB);
+Boolean equalityBoolCoAlg(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
+) {
+  DEBUG(jInterp, "boolCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA && lolB)  return FALSE;
   if (lolA  && !lolB) return FALSE;
@@ -235,13 +241,13 @@ Boolean printBoolCoAlg(
   
   CoAlgObj* aNewBoolean = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aNewBoolean);
-  printLoLDebug(jInterp, aStrBuf, aNewBoolean, FALSE);
+  printLoL(jInterp, aStrBuf, aNewBoolean);
   AssertStrEquals(getCString(jInterp, aStrBuf), "true ");
   strBufClose(jInterp, aStrBuf);
   
   aNewBoolean = newBoolean(jInterp, FALSE);
   AssertPtrNotNull(aNewBoolean);  
-  printLoLDebug(jInterp, aStrBuf, aNewBoolean, FALSE);
+  printLoL(jInterp, aStrBuf, aNewBoolean);
   AssertStrEquals(getCString(jInterp, aStrBuf), "false ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest

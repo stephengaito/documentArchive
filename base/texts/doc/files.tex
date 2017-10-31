@@ -12,7 +12,9 @@ extern void nextLineFromFile(TextObj* aText);
 
 \startCCode
 void nextLineFromFile(TextObj* aText) {
-  DEBUG(FALSE, "->nextLineFromFile %s\n", "");
+  assert(aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "->nextLineFromFile %s\n", "");
   if (!aText) return; // there is nothing we can do!
   if (!aText->inputFile) return; // there is nothing we can do!
 
@@ -26,14 +28,14 @@ void nextLineFromFile(TextObj* aText) {
   char *linePtr    = NULL;
   size_t n         = 0;
   if (!getline(&linePtr, &n, aText->inputFile) && n < 1) {
-    DEBUG(FALSE, "<-nextLineFromFile %s\n", "getline returned 0");
+    DEBUG(aText->jInterp, "<-nextLineFromFile %s\n", "getline returned 0");
     aText->completed = TRUE;
     return;
   }
 
   if (feof(aText->inputFile)) {
     // we have already reached the end of the text;
-    DEBUG(FALSE, "<-nextLineFromFile %s\n", "feof returned file end");
+    DEBUG(aText->jInterp, "<-nextLineFromFile %s\n", "feof returned file end");
     aText->completed = TRUE;
     aText->curLine   = NULL;
     aText->curChar   = NULL;
@@ -45,7 +47,7 @@ void nextLineFromFile(TextObj* aText) {
 
   aText->curChar    = aText->curLine;
   aText->lastChar   = aText->curChar + strlen(aText->curLine);
-  DEBUG(FALSE, "<-nextLineFromFile [%s]\n", aText->curLine);
+  DEBUG(aText->jInterp, "<-nextLineFromFile [%s]\n", aText->curLine);
 }
 \stopCCode
 
@@ -97,7 +99,6 @@ TextObj* createTextFromInputFileImpl(
   aText->curLine    = NULL;
   aText->curChar    = NULL;
   aText->lastChar   = NULL;
-  aText->debugFlag  = FALSE;
   //
   aText->textLines  = NULL;
   aText->curLineNum = 0;

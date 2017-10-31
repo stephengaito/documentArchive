@@ -159,24 +159,21 @@ Boolean symbolIsImpl(
 
 \setCHeaderStream{private}
 \startCHeader
-Boolean symbolsEqualDebug(
-  CoAlgObj* lolA,
-  CoAlgObj* lolB,
-  Boolean debugFlag
+Boolean symbolsEqual(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 );
-
-#define symbolsEqual(lolA, lolB) \
-  symbolsEqualDebug(lolA, lolB, FALSE)
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-Boolean symbolsEqualDebug(
-  CoAlgObj* lolA,
-  CoAlgObj* lolB,
-  Boolean debugFlag
+Boolean symbolsEqual(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
 ) {
-  DEBUG(debugFlag, "symbolsEqual a:%p b:%p\n", lolA, lolB);
+  DEBUG(jInterp, "symbolsEqual a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
   if (!lolA || !lolB) return FALSE;
   if (asType(lolA) != asType(lolB)) return FALSE;
@@ -190,10 +187,10 @@ Boolean symbolsEqualDebug(
 \startTestCase[should return true if symbols are equal]
 
 \startCTest
-  AssertIntTrue(symbolsEqual(NULL, NULL));
+  AssertIntTrue(symbolsEqual(jInterp, NULL, NULL));
   CoAlgObj *symA = newSymbol(jInterp, "the same text");
   CoAlgObj *symB = newSymbol(jInterp, "the same text");
-  AssertIntTrue(symbolsEqual(symA, symB));
+  AssertIntTrue(symbolsEqual(jInterp, symA, symB));
 \stopCTest
 \stopTestCase
 
@@ -202,9 +199,9 @@ Boolean symbolsEqualDebug(
 \startCTest
   CoAlgObj *symA = newSymbol(jInterp, "text A");
   CoAlgObj *symB = newSymbol(jInterp, "text B");
-  AssertIntFalse(symbolsEqual(NULL, symB));
-  AssertIntFalse(symbolsEqual(symA, NULL));
-  AssertIntFalse(symbolsEqual(symA, symB));
+  AssertIntFalse(symbolsEqual(jInterp, NULL, symB));
+  AssertIntFalse(symbolsEqual(jInterp, symA, NULL));
+  AssertIntFalse(symbolsEqual(jInterp, symA, symB));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -247,7 +244,7 @@ Boolean printSymbolCoAlg(
   
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
   
-  printLoLDebug(jInterp, aStrBuf, aNewSymbol, FALSE);
+  printLoL(jInterp, aStrBuf, aNewSymbol);
   AssertStrEquals(getCString(jInterp, aStrBuf),
     "test string ");
   strBufClose(jInterp, aStrBuf);
@@ -292,7 +289,7 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   theCoAlg->super.name           = SymbolsName;
   theCoAlg->super.objectSize     = sizeof(SymbolObj);
   theCoAlg->super.initializeFunc = initializeSymbols;
-  theCoAlg->super.equalityFunc   = symbolsEqualDebug;
+  theCoAlg->super.equalityFunc   = symbolsEqual;
   theCoAlg->super.printFunc      = printSymbolCoAlg;
   theCoAlg->newSymbolFunc        = newSymbolImpl;
   theCoAlg->symbolIsFunc         = symbolIsImpl;
