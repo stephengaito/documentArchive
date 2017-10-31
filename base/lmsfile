@@ -77,6 +77,7 @@ os.execute('reset')
 for i, subDir in ipairs(reqCoAlgs) do
   print('\n========================================================')
   print('working in ['..subDir..']')
+  print('running    ['..cmd..']')
   lfs.chdir(subDir)
   if not os.execute(cmd) then
     print('FAILED to run: ['..cmd..']')

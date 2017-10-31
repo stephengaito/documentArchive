@@ -42,10 +42,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-10-29",
-  commitShortHash = "c2dbd2e",
-  commitLongHash  = "c2dbd2e7996a482f39ca95ee50b6f42f0933e749",
-  subject         = "continued work on core/context",
+  commitDate      = "2017-10-30",
+  commitShortHash = "c808f42",
+  commitLongHash  = "c808f42787279fc2804df6292cc9178d95bd96e6",
+  subject         = "completed core/textadept joyLoLREPL",
   notes           = ""
 }
 
