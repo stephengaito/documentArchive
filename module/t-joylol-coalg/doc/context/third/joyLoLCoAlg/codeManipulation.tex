@@ -25,6 +25,9 @@ with the \type{t-joylol} module.
 \usemodule[t-literate-progs]
 \usemodule[t-high-lisp]
 \usemodule[t-contests]
+\usemodule[t-joylol]
+
+\ctxloadluafile{t-joylol-coalg}
 \stopMkIVCode
 
 \startTestSuite[JoyLoLCoAlg environment]
@@ -79,7 +82,7 @@ local function newCoAlg(coAlgName)
   texio.write_nl('newCoAlg: ['..coAlgName..']')
   theCoAlg               = {}
   theCoAlg.name          = coAlgName
-  theCoAlg.ctx           = joyLoL.newContext()
+  theCoAlg.ctx           = nil --joylol.newContext()
   theCoAlg.hasJoyLoLCode = false;
   theCoAlg.hasLuaCode    = false;
   theCoAlg.hasCHeader    = false;

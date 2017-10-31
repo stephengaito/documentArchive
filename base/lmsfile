@@ -1,12 +1,12 @@
 -- A Lua Make System file
 
+if clearScreen then os.execute('reset') end
+
 cmd = 'lms'
 if 0 < #arg then
   arguments = table.concat(arg, ' ')
-  cmd = 'lms '..arguments
+  cmd = 'lms -c '..arguments
 end
-
-print('command run in each subDir = ['..cmd..']')
 
 lfs = require 'lfs'
 
@@ -73,7 +73,6 @@ end
 -- running the lms command on each one
 
 curDir = lfs.currentdir()
-os.execute('reset')
 for i, subDir in ipairs(reqCoAlgs) do
   print('\n========================================================')
   print('working in ['..subDir..']')

@@ -62,9 +62,9 @@ local toStr   = tostring
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-10-31",
-  commitShortHash = "2260a83",
-  commitLongHash  = "2260a83b6c44cdff0d13a828863f926cae45792b",
-  subject         = "removed redundant core/cTests ; added lmsfile to core to build all cores ; improved reporting in base/lmsfile",
+  commitShortHash = "3948af4",
+  commitLongHash  = "3948af4cceb8cb24b1a9aed4d252546d1f1449d8",
+  subject         = "added lmsfile for whole project; improved callback interface type checking",
   notes           = ""
 }
 

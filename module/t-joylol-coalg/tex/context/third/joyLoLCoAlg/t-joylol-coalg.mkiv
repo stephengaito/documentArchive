@@ -44,8 +44,6 @@
 
 \unprotect
 
-\ctxloadluafile{t-joylol-coalg}
-
 % from file: codeManipulation.tex after line: 0
 
 \writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions}
@@ -53,10 +51,9 @@
 \usemodule[t-literate-progs]
 \usemodule[t-high-lisp]
 \usemodule[t-contests]
+\usemodule[t-joylol]
 
-% from file: overview.tex after line: 150
-
-\defineLitProgs[MinJoyLoL]
+\ctxloadluafile{t-joylol-coalg}
 
 % from file: codeManipulation.tex after line: 50
 

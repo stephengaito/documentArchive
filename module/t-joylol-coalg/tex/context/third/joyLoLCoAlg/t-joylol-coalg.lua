@@ -46,22 +46,25 @@ local toStr   = tostring
 --  "How to check if a module exists in Lua?"
 -- see: http://stackoverflow.com/a/22686090
 
-local hasJoyLoL,joyLoL = pcall(require, "joyLoL/joyLoL")
-if not hasJoyLoL then
-  interfaces.writestatus("joyLoL",
-    "Could NOT load joyLoL... loading mininal Lua version instead.")
-  joyLoL = require 'joyLoLMinLua/joyLoL'
-end
+--local hasJoyLoL,joylol = pcall(require, "joylol/joylol")
+--if not hasJoyLoL then
+--  interfaces.writestatus("joyLoL",
+--    "Could NOT load joyLoL... loading mininal Lua version instead.")
+--  joylol = require 'joylolMinLua/joylol'
+--end
 
---coAlgs.joyLoL = joyLoL
+--coAlgs.joylol = joylol
 
-local pushData, pushProcess = joyLoL.pushData, joyLoL.pushProcess
-local pushProcessQuoted = joyLoL.pushProcessQuoted
-local popData, popProcess   = joyLoL.popData, joyLoL.popProcess
-local newList, newDictionary = joyLoL.newList, joyLoL.newDictionary
-local jEval = joyLoL.eval
+local pushData, pushProcess = joylol.pushData, joylol.pushProcess
+local pushProcessQuoted = joylol.pushProcessQuoted
+local popData, popProcess   = joylol.popData, joylol.popProcess
+local newList, newDictionary = joylol.newList, joylol.newDictionary
+local jEval = joylol.eval
 
-interfaces.writestatus("joyLoL", joyLoL.version())
+interfaces.writestatus(
+  "joyLoL",
+  joylol.core.context.gitVersion('commitDate')
+)
 
 -----------------------------------------------------------------------------
 -- NOTE the following uses raw JoyLoL code to collect the coAlgebra's
@@ -314,7 +317,7 @@ function coAlgs.addLuaCode(bufferName)
   jEval(aCtx)
 end
 
-coAlgs.joyLoL = joyLoL
+coAlgs.joylol = joylol
 
 interfaces.writestatus('joyLoLCoAlg', "loaded JoyLoL CoAlgs")
 
@@ -333,7 +336,7 @@ local function newCoAlg(coAlgName)
   texio.write_nl('newCoAlg: ['..coAlgName..']')
   theCoAlg               = {}
   theCoAlg.name          = coAlgName
-  theCoAlg.ctx           = joyLoL.newContext()
+  theCoAlg.ctx           = nil --joylol.newContext()
   theCoAlg.hasJoyLoLCode = false;
   theCoAlg.hasLuaCode    = false;
   theCoAlg.hasCHeader    = false;
@@ -390,7 +393,7 @@ end
 
 joylol.newWord = newWord
 
--- from file: codeManipulation.tex after line: 200
+-- from file: codeManipulation.tex after line: 250
 
 local function endWord()
 end

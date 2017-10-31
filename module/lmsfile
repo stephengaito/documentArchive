@@ -21,7 +21,6 @@ litProgs.targets{
     't-joylol-coalg.mkiv',
     't-joylol-coalg.lua',
     't-joylol-coalg-templates.lua',
-    'joyLoLMinLua/joyLoL.lua',
     'joyLoLMinLua/prettyPrint.lua',
   },
   buildDir  = 'build',
