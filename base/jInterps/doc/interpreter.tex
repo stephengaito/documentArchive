@@ -232,6 +232,7 @@ typedef struct joylol_interpreter_struct {
   LoaderObj       *loader;
   ContextObj      *rootCtx;
   Boolean          verbose;
+  Boolean          debug;
   StdOutputMethod *writeStdOut;
   StdOutputMethod *writeStdErr;
 } JoyLoLInterp;
@@ -357,6 +358,9 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   jInterp->dict.firstSymbol = NULL;
   jInterp->loader           = NULL;
   jInterp->rootCtx          = NULL;
+  
+  jInterp->verbose = FALSE;
+  jInterp->debug   = FALSE;
   
   return jInterp;
 }

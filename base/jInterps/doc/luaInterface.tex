@@ -213,6 +213,9 @@ static void initializeAllRequired(
   lua_State    *lstate,
   JoyLoLInterp *jInterp
 ) {
+  assert(lstate);
+  assert(jInterp);
+  
   // first check that core stdout and stderr are defined
   if (!(jInterp->writeStdOut) || !(jInterp->writeStdErr)) {
     /*return*/ luaL_error(lstate, "%s%s",
@@ -240,11 +243,23 @@ static void initializeAllRequired(
   for( size_t i = 1; i < NumRequiredCoAlgs; i++) {
     CoAlgClass *aCoAlg = getCoAlgClass(jInterp, i);
     if (aCoAlg) {
-      if (jInterp->verbose) 
-        printf("    initializing [joylol.%s]\n", aCoAlg->name);
+      if (jInterp->verbose) {
+        char output[1000];
+        memset(output, 0, 1000);
+        snprintf(output, 999, 
+          "    initializing [joylol.%s]\n",
+          aCoAlg->name);
+        jInterp->writeStdOut(jInterp, output);
+      }
       aCoAlg->initializeFunc(jInterp, aCoAlg);
-      if (jInterp->verbose) 
-        printf("    initialized [joylol.%s]\n", aCoAlg->name);
+      if (jInterp->verbose) {
+        char output[1000];
+        memset(output, 0, 1000);
+        snprintf(output, 999, 
+          "    initialized [joylol.%s]\n",
+          aCoAlg->name);
+        jInterp->writeStdOut(jInterp, output);
+      }
     }
   }
   
@@ -317,8 +332,14 @@ static void requireAllRequiredCoAlgs(
   for ( ; curCoAlg->name ; curCoAlg++) {
     size_t curTag = curCoAlg->tag;
     if (!(jInterp->coAlgs[curTag].sClass)) {
-      if (jInterp->verbose)
-        printf("    loading [joylol.%s]\n", curCoAlg->name);
+      if (jInterp->verbose) {
+        char output[1000];
+        memset(output, 0, 1000);
+        snprintf(output, 999, 
+          "    loading [joylol.%s]\n",
+          curCoAlg->name);
+        jInterp->writeStdOut(jInterp, output);
+      }
       lua_pushstring(lstate, curCoAlg->name); // -2
       lua_getglobal(lstate, "require");
       luaL_Buffer modName;
@@ -335,8 +356,14 @@ static void requireAllRequiredCoAlgs(
         );
       }
       lua_settable(lstate, -3);
-      if (jInterp->verbose)
-        printf("    loaded [joylol.%s]\n", curCoAlg->name);
+      if (jInterp->verbose) {
+        char output[1000];
+        memset(output, 0, 1000);
+        snprintf(output, 999,
+          "    loaded [joylol.%s]\n",
+          curCoAlg->name);
+        jInterp->writeStdOut(jInterp, output);
+      }
     }
   }  
 }
@@ -349,13 +376,19 @@ the shared library.
 \startCCode
 int luaopen_joylol_jInterps (lua_State *lstate) {
   setJoyLoLInterpInto(lstate, jInterp);
-  if (jInterp->verbose)
-    printf("  loading [joylol.jInterps]\n");
+  if (jInterp->verbose) {
+    jInterp->writeStdOut(jInterp,
+      "  loading [joylol.jInterps]\n"
+    );
+  }
   registerJInterps(jInterp);
   requireAllRequiredCoAlgs(lstate, jInterp);
   initializeAllRequired(lstate, jInterp);
-  if (jInterp->verbose)
-    printf("  loaded [joylol.jInterps]\n");
+  if (jInterp->verbose) {
+    jInterp->writeStdOut(jInterp,
+      "  loaded [joylol.jInterps]\n"
+    );
+  }
   return 1;
 }
 \stopCCode

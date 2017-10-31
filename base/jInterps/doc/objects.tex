@@ -148,7 +148,7 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
 
   size_t objectSize = jInterp->coAlgs[aTag].sClass->objectSize;
 
-  DEBUG(FALSE, "addObjectBlock > %p %u %zu %zu\n", 
+  DEBUG(jInterp, "addObjectBlock > %p %u %zu %zu\n", 
     jInterp, aTag, objectSize, (size_t)OBJECT_BLOCK_SIZE);
   assert(jInterp);
   
@@ -172,7 +172,7 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
   } else {
     jInterp->coAlgs[aTag].oMem.rootObjectBlock = aNewObjectBlock;
   }
-  DEBUG(FALSE, "addObjectBlock = %p %p\n", 
+  DEBUG(jInterp, "addObjectBlock = %p %p\n", 
     jInterp, aNewObjectBlock);
 
   // make sure this object block has some CoAlgObjs
@@ -191,7 +191,7 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
   *(void**)nextObject =
     (void*)jInterp->coAlgs[aTag].oMem.freeObjects;
   jInterp->coAlgs[aTag].oMem.freeObjects = aNewObjectBlock->block;
-  DEBUG(FALSE, "addObjectBlock < %p %p %p\n",
+  DEBUG(jInterp, "addObjectBlock < %p %p %p\n",
     jInterp, aNewObjectBlock, aNewObjectBlock->block);
 }
 \stopCCode
@@ -288,7 +288,7 @@ extern void collectGarbage(JoyLoLInterp* jInterp, TagType aTag);
 
 \startCCode
 void collectGarbage(JoyLoLInterp* jInterp, TagType aTag) {
-  DEBUG(FALSE, "collectGarbage %p\n", jInterp);
+  DEBUG(jInterp, "collectGarbage %p\n", jInterp);
   //
   // add a garbage collection mark-sweep here
   //

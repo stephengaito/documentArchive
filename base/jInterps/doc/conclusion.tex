@@ -62,10 +62,24 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
 
 #ifndef NDEBUG
 #include <stdio.h>
-#define DEBUG(debugFlag, format, ... ) \
-  if (debugFlag) { printf( format, __VA_ARGS__ ); fflush(stdout); }
+#define setDebugging(jInterp, aBool)  \
+  assert(jInterp);                    \
+  jInterp->debug = aBool
+#define getDebuggingInto(jInterp, aVar) \
+  assert(jInterp);                      \
+  Boolean aVar = jInterp->debug
+#define DEBUG(jInterp, format, ... )              \
+  assert(jInterp);                                \
+  if (jInterp->debug) {                           \
+    char output[1000];                            \
+    memset(output, 0, 1000);                     \
+    snprintf(output, 999, format, __VA_ARGS__ ); \
+    jInterp->writeStdOut(jInterp, output);        \
+  }
 #else
-#define DEBUG(...)
+#define startDebugging(jInterp)
+#define stopDebuggging(jInterp)
+#define DEBUG(jInterp, format, ...)
 #endif
 \stopCHeader
 
