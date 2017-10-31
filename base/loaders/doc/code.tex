@@ -154,26 +154,32 @@ Boolean loadAJoyLoLFile(
   ContextObj *aCtx,
   Symbol     *filePath
 ) {
-  Boolean debugFlag = FALSE;
   assert(aCtx);
-  assert(aCtx->jInterp);
-  DEBUG(debugFlag, "loadATextFile [%s]\n", filePath);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  DEBUG(jInterp, "loadATextFile [%s]\n", filePath);
   FILE* inputFile = fopen(filePath, "r");
   if (inputFile) {
-    if(aCtx->verbose) printf("(%s)\n", filePath);
+    if(aCtx->verbose) {
+      StringBufferObj *aStrBuf = 
+        newStringBuffer(jInterp);      
+      strBufPrintf(jInterp, aStrBuf, "(%s)\n", filePath);
+      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
+      strBufClose(jInterp, aStrBuf);
+    }
     TextObj* aText =
-      createTextFromInputFile(aCtx->jInterp, inputFile);
+      createTextFromInputFile(jInterp, inputFile);
     evalTextInContext(aCtx, aText);
     freeText(aText);
     fclose(inputFile);
     if (reportException(aCtx)) {
-      DEBUG(debugFlag, "loadATextFile [%s] RAISED EXCEPTION\n", filePath);
+      DEBUG(jInterp, "loadATextFile [%s] RAISED EXCEPTION\n", filePath);
       return FALSE;
     }
-    DEBUG(debugFlag, "loadATextFile [%s] OK\n", filePath);
+    DEBUG(jInterp, "loadATextFile [%s] OK\n", filePath);
     return TRUE; // we have loaded this file so return TRUE;
   }
-  DEBUG(debugFlag, "loadATextFile [%s] FAILED\n", filePath);
+  DEBUG(jInterp, "loadATextFile [%s] FAILED\n", filePath);
   return FALSE;
 }
 \stopCCode
@@ -208,15 +214,21 @@ Boolean loadAFileImpl(
   ContextObj *aCtx,
   Symbol     *aFileToLoad
 ) {
-  Boolean debugFlag = FALSE;
   assert(aCtx);
-  assert(aCtx->jInterp);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   LoaderObj* loader = aCtx->jInterp->loader;
   assert(loader);
   if (!aFileToLoad) return FALSE;
   if (!*aFileToLoad) return FALSE;
 
-  if (aCtx->verbose) printf("\t%s ", aFileToLoad);
+  if (aCtx->verbose) {
+    StringBufferObj *aStrBuf = 
+      newStringBuffer(jInterp);
+    strBufPrintf(jInterp, aStrBuf, "\t%s ", aFileToLoad);
+    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
+    strBufClose(jInterp, aStrBuf);
+  }
 
   CoAlgObj* aLoadPathList = loader->paths;
   while(aLoadPathList) {
@@ -238,12 +250,12 @@ Boolean loadAFileImpl(
       strcat(buffer, aFileToLoad);
       assert(isSymbol(aLoadExtension));
       strcat(buffer, asSymbol(aLoadExtension));
-      DEBUG(debugFlag, "trying to load: [%s]\n", buffer);
+      DEBUG(jInterp, "trying to load: [%s]\n", buffer);
 
       if (!access(buffer, R_OK)) {
         if (strcmp(asSymbol(aLoadExtension), ".joy") == 0) {
           if (loadAJoyLoLFile(aCtx, buffer)) {
-            DEBUG(debugFlag, "loaded: [%s]\n", buffer);
+            DEBUG(jInterp, "loaded: [%s]\n", buffer);
             return TRUE;
           }
         } else {
@@ -251,7 +263,7 @@ Boolean loadAFileImpl(
           lua_State *lstate = aCtx->jInterp->lstate;
           requireLuaModuleInto(lstate, aFileToLoad, loadedOk);
           if (loadedOk) {
-            DEBUG(debugFlag, "loaded: [%s]\n", buffer);
+            DEBUG(jInterp, "loaded: [%s]\n", buffer);
             return TRUE;
           }
         }
@@ -263,8 +275,10 @@ Boolean loadAFileImpl(
     // try the next load path
     aLoadPathList = asCdr(aLoadPathList);
   }
-  if(aCtx->verbose) printf("FAILED\n");
-  DEBUG(debugFlag, "loadAFile: FAILED%s\n", "");
+  if(aCtx->verbose) {
+    jInterp->writeStdOut(jInterp, "FAILED\n");
+  }
+  DEBUG(jInterp, "loadAFile: FAILED%s\n", "");
   return FALSE; // we could not find this file in any of the load paths
 }
 \stopCCode
@@ -275,13 +289,13 @@ Boolean loadFiles(
   CoAlgObj   *filesToLoad
 ) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->contexts);
-  Loader* loader = aCtx->coAlgebras->contexts->loader;
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  Loader* loader = jInterp->loader;
   assert(loader);
   if (!filesToLoad) return TRUE; // nothing to do...
 
-  DEBUG(FALSE, "loadFiles > %s:%p\n", filesToLoad->coAlg->name, filesToLoad);
+  DEBUG(jInterp, "loadFiles > %s:%p\n", filesToLoad->coAlg->name, filesToLoad);
 
   if (isSymbol(filesToLoad)) { // try to load this file
     return loadAFile(aCtx, filesToLoad->symbol);
@@ -293,7 +307,7 @@ Boolean loadFiles(
     // if all previous files have been loaded... load this one as well
     return loadFiles(aCtx, filesToLoad->pair.car);
   }
-  DEBUG(FALSE, "loadFiles < %p FAILED\n", filesToLoad);
+  DEBUG(jInterp, "loadFiles < %p FAILED\n", filesToLoad);
   return FALSE; // some previous file has failed to load...
 }
 \stoptyping
