@@ -330,14 +330,22 @@ void reportErrorImpl(
   TextObj *aText,
   Symbol  *message
 ) {
-  fprintf(stderr, "\n\n%s\n", message);
+  assert(aText);
+  JoyLoLInterp *jInterp = aText->jInterp;
+  assert(jInterp);
+  StringBufferObj *aStrBuf = 
+    newStringBuffer(jInterp);
+  strBufPrintf(jInterp, aStrBuf, "\n\n%s\n", message);
   if (aText->curLine) {
-    fprintf(stderr, "while parsing\n");
-    fprintf(stderr, "\t[%s]\n", aText->curLine);
-    fprintf(stderr, "at character %zu\n\n", aText->curChar - aText->curLine);
+    strBufPrintf(jInterp, aStrBuf, "while parsing\n");
+    strBufPrintf(jInterp, aStrBuf, "\t[%s]\n", aText->curLine);
+    strBufPrintf(jInterp, aStrBuf,
+      "at character %zu\n\n", aText->curChar - aText->curLine);
   } else {
-    fprintf(stderr, "at end of text\n\n");
+    strBufPrintf(jInterp, aStrBuf, "at end of text\n\n");
   }
+  jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+  strBufClose(jInterp, aStrBuf);
 }
 \stopCCode
 
