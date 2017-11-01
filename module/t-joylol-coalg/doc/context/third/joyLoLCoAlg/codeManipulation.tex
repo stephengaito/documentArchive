@@ -439,12 +439,18 @@ local function addCTestJoyLoLCallbacks(aCodeStream)
   aCodeStream         = aCodeStream         or 'default'
   cTests[aCodeStream] = cTests[aCodeStream] or { }
   tInsert(cTests[aCodeStream], [=[
-void ctestsWriteStdOut(Symbol *aMessage) {
-  fprintf(stdout, "%s\n", aMessage);
+void ctestsWriteStdOut(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
+  fprintf(stdout, "%s", aMessage);
 }
 
-void ctestsWriteStdErr(Symbol *aMessage) {
-  fprintf(stderr, "%s\n", aMessage);
+void ctestsWriteStdErr(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
+  fprintf(stderr, "%s", aMessage);
 }
 void *ctestsCallback(
   lua_State *lstate,
@@ -455,7 +461,9 @@ void *ctestsCallback(
   } else if (resourceId == JoyLoLCallback_StdErrMethod) {
     return (void*)ctestsWriteStdErr;
   } else if (resourceId == JoyLoLCallback_Verbose) {
-    return (void*)TRUE;
+    return (void*)FALSE;
+  } else if (resourceId == JoyLoLCallback_Debug) {
+    return (void*)FALSE;
   }
   return NULL;
 } 

@@ -48,6 +48,7 @@ The currently well known resources are:
 #define JoyLoLCallback_StdOutMethod  1
 #define JoyLoLCallback_StdErrMethod  2
 #define JoyLoLCallback_Verbose       3
+#define JoyLoLCallback_Debug         4
 
 typedef void (StdOutputMethod)(
   JoyLoLInterp *jInterp,
@@ -340,7 +341,12 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   }
   jInterp->verbose = 
     (Boolean)getCoreResources(lstate, JoyLoLCallback_Verbose);
-  
+    
+  jInterp->debug = 
+    (Boolean)getCoreResources(lstate, JoyLoLCallback_Debug);
+
+  DEBUG(jInterp, "Creating jInterp %p\n", jInterp);
+    
   size_t maxNum =
     NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT;
   jInterp->numCoAlgs    = NumRequiredCoAlgs;
@@ -358,10 +364,7 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   jInterp->dict.firstSymbol = NULL;
   jInterp->loader           = NULL;
   jInterp->rootCtx          = NULL;
-  
-  jInterp->verbose = FALSE;
-  jInterp->debug   = FALSE;
-  
+    
   return jInterp;
 }
 \stopCCode

@@ -44,9 +44,9 @@ options.systemPath = '/usr/lib/joylol'
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-01",
-  commitShortHash = "057efa1",
-  commitLongHash  = "057efa1179fab1a3beb1cdce93e1e6f38f04c836",
-  subject         = "renamed core/lua/joylol.tex to core/lua/coreLua.tex",
+  commitShortHash = "82e28b8",
+  commitLongHash  = "82e28b89a0686329e73c524efdb63b429805bcd5",
+  subject         = "renamed core/context joylol.tex and joylolOpts.tex to coreContext.tex and coreContextOptions.tex",
   notes           = ""
 }
 

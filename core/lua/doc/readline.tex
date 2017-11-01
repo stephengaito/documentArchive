@@ -220,8 +220,10 @@ void runREPLInContext(
     if (aCtx->showStack) {
       DEBUG(jInterp, "runREPLInContext %p printing data %p\n", aCtx, aCtx->data);
       StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+      strBufPrintf(jInterp, aStrBuf, ">>");
       printLoL(jInterp, aStrBuf, aCtx->data);
-      printf(">>%s\\n", getCString(jInterp, aStrBuf));
+      strBufPrintf(jInterp, aStrBuf, "\n");
+      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
       DEBUG(jInterp, "runREPLInContext %p printed data %p\n", aCtx, aCtx->data);
     }
@@ -229,6 +231,7 @@ void runREPLInContext(
     reportException(aCtx); // report last exception if raised
   }
   saveReadlineHistory(aText);
+  jInterp->writeStdOut(jInterp, "\n");
   DEBUG(jInterp, "runREPLInContext %p COMPLETED\n", aCtx);
 }
 \stopCCode

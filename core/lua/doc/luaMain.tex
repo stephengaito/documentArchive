@@ -28,12 +28,19 @@ local joylolCPaths = {
 }
 package.cpath = table.concat(joylolCPaths, ';')
 
+joylol = { }
+joylol.options = { }
+local options = joylol.options
+
 argStr = '|'..table.concat(arg, '|')..'|'
-verbose = argStr:match('|%-v|');
+joylol.options.verbose = argStr:match('|%-v|');
+joylol.options.debug   = argStr:match('|%-d|');
 
 if verbose then print('loading [joylol.core.lua]') end
 joylol = require 'joylol.core.lua'
 if verbose then print('loaded [joylol.core.lua]\n') end
+
+joylol.options = options
 
 helpText = {
   "usage: joylol [options] [files to load]",
