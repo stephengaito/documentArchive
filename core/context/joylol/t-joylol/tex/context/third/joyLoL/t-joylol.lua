@@ -98,7 +98,7 @@ if options.verbose then print('loaded [joylol.core.context]\n') end
 local joylol = thirddata.joylol
 
 joylol.core.context.setVerbose(options.verbose)
-joylol.core.context.setDebugging(options.debug)
+--joylol.core.context.setDebugging(options.debug)
 
 if (options.configFile) then
   joylol.core.context.loadFile(options.configFile)
