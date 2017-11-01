@@ -9,38 +9,22 @@
 \startLuaCode
 -- joylol command line interpreter 
 
--- Start by adding the standard joylol CoAlg locations to
--- the Lua search paths 
-
-local joylolPaths = {
-  os.getenv('HOME')..'/.joylol/?.lua',
-  '/usr/local/lib/joylol/?.lua',
-  '/usr/lib/joylol/?.lua',
-  package.path
-}
-package.path = table.concat(joylolPaths, ';')
-
-local joylolCPaths = {
-  os.getenv('HOME')..'/.joylol/?.so',
-  '/usr/local/lib/joylol/?.so',
-  '/usr/lib/joylol/?.so',
-  package.path
-}
-package.cpath = table.concat(joylolCPaths, ';')
+-- Start by dealing with the options
 
 joylol = { }
 joylol.options = { }
 local options = joylol.options
 
-argStr = '|'..table.concat(arg, '|')..'|'
-joylol.options.verbose = argStr:match('|%-v|');
-joylol.options.debug   = argStr:match('|%-d|');
-
-if verbose then print('loading [joylol.core.lua]') end
-joylol = require 'joylol.core.lua'
-if verbose then print('loaded [joylol.core.lua]\n') end
-
-joylol.options = options
+-- default options
+options.verbose    = false
+options.debug      = false
+options.quiet      = false
+options.loadFiles  = { }
+options.loadPaths  = { }  
+options.configFile = 'config'
+options.userPath   = os.getenv('HOME')..'/.joylol'
+options.localPath  = '/usr/local/lib/joylol'
+options.systemPath = '/usr/lib/joylol'
 
 helpText = {
   "usage: joylol [options] [files to load]",
@@ -53,6 +37,9 @@ helpText = {
   " -q --quiet       toggles verbose off",
   " -v --verbose     toggles verbose on",
   " -d --debug       turns on internal debugging",
+  " -u --userPath    sets the user load path",
+  " -L --localPath   sets the local load path",
+  " -s --systemPath  sets the system load path",
   "",
   "files to load:",
   "  Any remaining options are treated as files to be loaded.",
@@ -60,42 +47,89 @@ helpText = {
   "  eval, print loop."
 }
 
-loadConfiguration = true
-loadFiles         = { }
-  
 while(0 < #arg) do
   anArg = table.remove(arg, 1)
-  if anArg:match('-h') then
+  if anArg:match('-h') or anArg:match('--help') then
     print(table.concat(helpText, '\n'))
     os.exit(0);
-  elseif anArg:match('-i') then
-    loadConfiguration = false
-  elseif anArg:match('-l') then
+  elseif anArg:match('-c') or anArg:match('--config') then
     optArg = table.remove(arg, 1)
-    table.insert(loadFiles, optArg)
-  elseif anArg:match('-p') then
+    options.configFile = optArg
+  elseif anArg:match('-i') or anArg:match('--ignore') then
+    options.configFile = nil
+  elseif anArg:match('-u') or anArg:match('--user') then
     optArg = table.remove(arg, 1)
-    joylol.core.lua.pushLoadPath(optArg)
-  elseif anArg:match('-q') then
-    joylol.core.lua.setVerbose(false)
-    joylol.core.lua.setDebugging(false)
-  elseif anArg:match('-v') then
-    joylol.core.lua.setVerbose(true)
-  elseif anArg:match('-d') then
-    joylol.core.lua.setDebugging(true)
+    options.userPath = optArg
+  elseif anArg:match('-L') or anArg:match('--local') then
+    optArg = table.remove(arg, 1)
+    options.localPath = optArg
+  elseif anArg:match('-s') or anArg:match('--system') then
+    optArg = table.remove(arg, 1)
+    options.systemPath = optArg
+  elseif anArg:match('-l') or anArg:match('--load') then
+    optArg = table.remove(arg, 1)
+    table.insert(options.loadFiles, optArg)
+  elseif anArg:match('-p') or anArg:match('--path') then
+    optArg = table.remove(arg, 1)
+    table.insert(options.loadPaths, optArg)
+  elseif anArg:match('-q') or anArg:match('--quiet') then
+    options.verbose = false
+    options.debug   = false
+    options.quiet   = true
+  elseif anArg:match('-v') or anArg:match('--verbose') then
+    options.verbose = true
+  elseif anArg:match('-d') or anArg:match('--debug') then
+    options.debug = true
   else
     optArg = table.remove(arg, 1)
-    table.insert(loadFiles, optArg)
+    table.insert(options.loadFiles, optArg)
   end
 end
 
-if (loadConfiguration) then
-  joylol.core.lua.loadFile("config")
+-- Now add the standard joylol CoAlg locations to
+-- the Lua search paths 
+
+local joylolPaths = {
+  options.userPath..'/?.lua',
+  options.localPath..'/?.lua',
+  options.systemPath..'/?.lua',
+  package.path
+}
+package.path = table.concat(joylolPaths, ';')
+
+local joylolCPaths = {
+  options.userPath..'/?.so',
+  options.localPath..'/?.so',
+  options.systemPath..'/?.so',
+  package.path
+}
+package.cpath = table.concat(joylolCPaths, ';')
+
+-- Now load joylol
+
+if verbose then print('loading [joylol.core.lua]') end
+joylol = require 'joylol.core.lua'
+if verbose then print('loaded [joylol.core.lua]\n') end
+
+-- replace the options
+
+joylol.options = options
+
+--  deal with loadPaths, configFile, and loadFiles
+
+for i, aPath in ipairs(options.loadPaths) do
+  joylol.core.lua.pushLoadPath(aPath)
 end
 
-for i, aFile in ipairs(loadFiles) do
+if (options.configFile) then
+  joylol.core.lua.loadFile(options.configFile)
+end
+
+for i, aFile in ipairs(options.loadFiles) do
   joylol.core.lua.loadFile(aFile)
 end
+
+-- Finally run the REPL
 
 joylol.core.lua.runREPL();
 

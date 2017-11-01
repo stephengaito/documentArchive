@@ -41,24 +41,32 @@ LoaderObj *newLoaderImpl(
   LoaderObj *loader = 
     (LoaderObj*)newObject(jInterp, LoadersTag);
   assert(loader);
-  
   loader->jInterp    = jInterp;
   loader->paths      = NULL;
   loader->extensions = NULL;
+
+  // get the lua state associated with this jInterp
+  lua_State *lstate = jInterp->lstate;
+  assert(lstate);
+
+  // get the method to get the core resources (XXXpaths)
+  getJoyLoLCallbackInto(lstate, getCoreResources);
+  assert(getCoreResources);
   
   // init standard load paths
   // allow absolute paths as a last resort
   pushLoadPath(loader, ""); 
-  pushLoadPath(loader, JOYLOL_SYSTEM_COALG_PATH);
-  pushLoadPath(loader, JOYLOL_SYSTEM_CONFIG_PATH);
-//  pushLoadPath(loader, JOYLOL_USER_COALG_PATH);
+  pushLoadPath(loader, 
+    getCoreResources(lstate, JoyLoLCallback_SystemPath));
+  pushLoadPath(loader, 
+    getCoreResources(lstate, JoyLoLCallback_LocalPath));
+  pushLoadPath(loader, 
+    getCoreResources(lstate, JoyLoLCallback_UserPath));
   pushLoadPath(loader, ".");
 
   // init standard load extensions
   // allow absolute extensions as a last resort
   pushLoadExtension(loader, "");
-  pushLoadExtension(loader, ".so");
-  pushLoadExtension(loader, ".lua");
   pushLoadExtension(loader, ".joy");
   
   return loader;

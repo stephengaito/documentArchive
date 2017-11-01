@@ -116,22 +116,28 @@ static void coreTextadeptWriteStdErr(
   lua_pop(lstate, 1);
 }
 
-static Boolean beVerbose(lua_State *lstate) {
+static Boolean getBooleanOption(
+  lua_State *lstate, 
+  Symbol    *optionName
+) {
   lua_getglobal(lstate, "joylol");
   lua_getfield(lstate, -1, "options");
-  lua_getfield(lstate, -1, "verbose");
-  Boolean isVerbose = (Boolean)lua_toboolean(lstate, -1);
+  lua_getfield(lstate, -1, optionName);
+  Boolean aBool = (Boolean)lua_toboolean(lstate, -1);
   lua_pop(lstate, 3);
-  return isVerbose;
+  return aBool;
 }
 
-static Boolean shouldDebug(lua_State *lstate) {
+static Symbol *getSymbolOption(
+  lua_State *lstate,
+  Symbol    *optionName
+) {
   lua_getglobal(lstate, "joylol");
   lua_getfield(lstate, -1, "options");
-  lua_getfield(lstate, -1, "debug");
-  Boolean debugFlag = (Boolean)lua_toboolean(lstate, -1);
+  lua_getfield(lstate, -1, optionName);
+  Symbol *aSymbol = (Symbol*)lua_tostring(lstate, -1);
   lua_pop(lstate, 3);
-  return debugFlag;
+  return aSymbol;
 }
 
 static void *coreTextadeptCallback(
@@ -147,11 +153,26 @@ static void *coreTextadeptCallback(
       coreTextadeptWriteStdErr;
     return (void*)coreWriteStdErr;
   } else if (resourceId == JoyLoLCallback_Verbose) {
-    Boolean isVerbose = beVerbose(lstate);
-    return (void*)isVerbose;
+    Boolean verbose = getBooleanOption(lstate, "verbose");
+    return (void*)verbose;
   } else if (resourceId == JoyLoLCallback_Debug) {
-    Boolean debugFlag = shouldDebug(lstate);
-    return (void*)debugFlag;
+    Boolean debug = getBooleanOption(lstate, "debug");
+    return (void*)debug;
+  } else if (resourceId == JoyLoLCallback_Quiet) {
+    Boolean quiet = getBooleanOption(lstate, "quiet");
+    return (void*)quiet;
+  } else if (resourceId == JoyLoLCallback_ConfigFile) {
+    Symbol *configFile = getSymbolOption(lstate, "configFile");
+    return (void*)configFile;
+  } else if (resourceId == JoyLoLCallback_UserPath) {
+    Symbol *userPath = getSymbolOption(lstate, "userPath");
+    return (void*)userPath;
+  } else if (resourceId == JoyLoLCallback_LocalPath) {
+    Symbol *localPath = getSymbolOption(lstate, "localPath");
+    return (void*)localPath;
+  } else if (resourceId == JoyLoLCallback_SystemPath) {
+    Symbol *systemPath = getSymbolOption(lstate, "systemPath");
+    return (void*)systemPath;
   }
   return NULL;
 } 

@@ -61,7 +61,7 @@ void evalCommandInContextImpl(
   //
   if (!command) return;
   //
-  DEBUG(jInterp, "evalCommandInContext > %p %p\\n", aCtx, command);
+  DEBUG(jInterp, "evalCommandInContext > %p %p\n", aCtx, command);
   //
   // push this command onto the top of the process stack
   //
@@ -71,7 +71,7 @@ void evalCommandInContextImpl(
     if (aCtx->tracingOn) {
       StringBufferObj *aStrBuf = 
         newStringBuffer(jInterp);
-      strBufPrintf(jInterp, aStrBuf, "\\n ctx: %s\\n", aCtx->name);
+      strBufPrintf(jInterp, aStrBuf, "\n ctx: %s\n", aCtx->name);
       jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
     }
@@ -93,7 +93,7 @@ void evalCommandInContextImpl(
       //
       // if the command is a context... switch to this context
       //
-      DEBUG(jInterp, "evalCommandInContext -> switching origCtx: %s\\n",
+      DEBUG(jInterp, "evalCommandInContext -> switching origCtx: %s\n",
             aCtx->name);
       if (aCtx->tracingOn)
         traceAction(jInterp, "switching", command, NULL);
@@ -104,7 +104,7 @@ void evalCommandInContextImpl(
       pushCtxData(switchCtx, oldCtxTop);
       switchCtx->tracingOn = aCtx->tracingOn;
       aCtx = switchCtx;
-      DEBUG(jInterp, "evalCommandInContext <- switching newCtx: %s\\n",
+      DEBUG(jInterp, "evalCommandInContext <- switching newCtx: %s\n",
             aCtx->name);
       //
     } else if (!isSymbol(command)) {
@@ -156,7 +156,7 @@ void evalCommandInContextImpl(
         //
         // if the association is a context... switch to this contex
         //
-        DEBUG(jInterp, "evalCommandInContext -> switching origCtx: %s\\n",
+        DEBUG(jInterp, "evalCommandInContext -> switching origCtx: %s\n",
               aCtx->name);
         if (aCtx->tracingOn)
           traceAction(jInterp, "switching", command, NULL);
@@ -167,7 +167,7 @@ void evalCommandInContextImpl(
         pushCtxData(switchCtx, oldCtxTop);
         switchCtx->tracingOn = aCtx->tracingOn;
         aCtx = switchCtx;
-        DEBUG(jInterp, "evalCommandInContext <- switching newCtx: %s\\n",
+        DEBUG(jInterp, "evalCommandInContext <- switching newCtx: %s\n",
               aCtx->name);
         //
       } else {
@@ -182,20 +182,20 @@ void evalCommandInContextImpl(
       }
     }
     if (aCtx->tracingOn) {
-      DEBUG(jInterp, "evalCommandInContext -> tracing%s\\n", "");
+      DEBUG(jInterp, "evalCommandInContext -> tracing%s\n", "");
       StringBufferObj *aStrBuf = newStringBuffer(jInterp);
       strBufPrintf(jInterp, aStrBuf, "d>>");
       printLoL(jInterp, aStrBuf, aCtx->data);
-      strBufPrintf(jInterp, aStrBuf, "\\n");
+      strBufPrintf(jInterp, aStrBuf, "\n");
       strBufPrintf(jInterp, aStrBuf, "p>>");
       printLoL(jInterp, aStrBuf, aCtx->process);
-      strBufPrintf(jInterp, aStrBuf, "\\n");
+      strBufPrintf(jInterp, aStrBuf, "\n");
       jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
-      DEBUG(jInterp, "evalCommandInContext <- tracing%s\\n", "");
+      DEBUG(jInterp, "evalCommandInContext <- tracing%s\n", "");
     }
   } // aCtx->process is empty
-  DEBUG(jInterp, "evalCommandInContext < %p %p\\n", aCtx, command);
+  DEBUG(jInterp, "evalCommandInContext < %p %p\n", aCtx, command);
 }
 \stopCCode
 
@@ -265,7 +265,7 @@ void evalTextInContextImpl(
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
 
-  DEBUG(jInterp, "evalTextInContext > %p %p\\n", aCtx, aText);
+  DEBUG(jInterp, "evalTextInContext > %p %p\n", aCtx, aText);
   while(TRUE) {
     CoAlgObj* aLoL = parseOneSymbol(aText);
 /**/    if (aCtx->showStack) {
@@ -290,7 +290,7 @@ void evalTextInContextImpl(
     } /**/
     if (aCtx->exceptionRaised) break;
   }
-  DEBUG(jInterp, "evalTextInContext < %p %p\\n", aCtx, aText);
+  DEBUG(jInterp, "evalTextInContext < %p %p\n", aCtx, aText);
 }
 \stopCCode
 
@@ -326,7 +326,7 @@ void evalArrayOfStringsInContextImpl(
 ) {
   assert(aCtx);
   assert(aCtx->jInterp);
-  DEBUG(aCtx->jInterp, "evalArrayOfStringsInContext > %p %p\\n",
+  DEBUG(aCtx->jInterp, "evalArrayOfStringsInContext > %p %p\n",
     aCtx, someStrings);
   assert(aCtx);
   TextObj* stringText =
@@ -336,7 +336,7 @@ void evalArrayOfStringsInContextImpl(
     );
   evalTextInContext(aCtx, stringText);
   freeText(stringText);
-  DEBUG(aCtx->jInterp, "evalArrayOfStringsInContext < %p %p\\n",
+  DEBUG(aCtx->jInterp, "evalArrayOfStringsInContext < %p %p\n",
     aCtx, someStrings);
 }
 \stopCCode
@@ -373,7 +373,7 @@ void evalStringInContextImpl(
 ) {
   assert(aCtx);
   assert(aCtx->jInterp);
-  DEBUG(aCtx->jInterp, "evalStringInContext > %p [%s]\\n", aCtx, aString);
+  DEBUG(aCtx->jInterp, "evalStringInContext > %p [%s]\n", aCtx, aString);
   assert(aCtx);
   TextObj* stringText =
     createTextFromString(
@@ -382,6 +382,6 @@ void evalStringInContextImpl(
     );
   evalTextInContext(aCtx, stringText);
   freeText(stringText);
-  DEBUG(aCtx->jInterp, "evalStringInContext < %p [%s]\\n", aCtx, aString);
+  DEBUG(aCtx->jInterp, "evalStringInContext < %p [%s]\n", aCtx, aString);
 }
 \stopCCode
