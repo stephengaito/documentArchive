@@ -112,10 +112,17 @@ local popData, popProcess   = joylol.popData, joylol.popProcess
 local newList, newDictionary = joylol.newList, joylol.newDictionary
 local jEval = joylol.eval
 
-interfaces.writestatus(
-  "joyLoL",
-  joylol.core.context.gitVersion('commitDate')
-)
+if joylol.core then
+  interfaces.writestatus(
+    "joyLoL",
+    joylol.core.context.gitVersion('commitDate')
+  )
+else
+  interfaces.writestatus(
+    "joyLoL",
+    "partially loaded"
+  )
+end
 
 -----------------------------------------------------------------------------
 -- NOTE the following uses raw JoyLoL code to collect the coAlgebra's 
