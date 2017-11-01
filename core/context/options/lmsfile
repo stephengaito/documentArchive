@@ -7,7 +7,7 @@ lfs.mkdir('build')
 require 'lms.litProgs'
 
 litProgs.targets{
-  mainDoc  = 'joylolOpts.tex',
+  mainDoc  = 'coreContextOptions.tex',
   docFiles = {
     'overview.tex',
     'preamble.tex',

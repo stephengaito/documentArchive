@@ -44,9 +44,9 @@ options.systemPath = '/usr/lib/joylol'
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-01",
-  commitShortHash = "c5cc010",
-  commitLongHash  = "c5cc010c01536c6893bb1bd2fb4f619d4afebad4",
-  subject         = "added debugging option to core/textadept",
+  commitShortHash = "057efa1",
+  commitLongHash  = "057efa1179fab1a3beb1cdce93e1e6f38f04c836",
+  subject         = "renamed core/lua/joylol.tex to core/lua/coreLua.tex",
   notes           = ""
 }
 

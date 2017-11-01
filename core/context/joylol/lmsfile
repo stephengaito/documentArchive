@@ -15,7 +15,7 @@ lfs.mkdir('install/joylol')
 require 'lms.litProgs'
 
 litProgs.targets{
-  mainDoc  = 'joylol.tex',
+  mainDoc  = 'coreContext.tex',
   docFiles = {
     'overview.tex',
     'luaInterface.tex',
