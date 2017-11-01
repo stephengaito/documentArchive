@@ -16,6 +16,8 @@ local options      = joylol.options
 
 options.verbose    =
   options.verbose    or false
+options.debug      =
+  options.debug      or false
 options.configFile =
   options.configFile or 'config'
 options.userPath   =
@@ -51,6 +53,7 @@ if options.verbose then print('loaded [joylol.core.textadept]\n') end
 joylol.options = options
 
 joylol.core.textadept.setVerbose(options.verbose)
+joylol.core.textadept.setDebugging(options.debug)
 
 if (options.configFile) then
   joylol.core.textadept.loadFile(options.configFile)

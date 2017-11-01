@@ -24,7 +24,7 @@ options.gitVersion = gitVersion
 \startLuaCode
 -- joylol loader options
 
-options.verbose    = false
+options.verbose = false
 
 function jOpts.beVerbose()
   options.verbose = true
@@ -32,6 +32,12 @@ end
 
 function jOpts.beQuiet()
   options.verbose = false
+end
+
+options.debug = false
+
+function jOpts.debug()
+  options.deubg = true
 end
 
 options.configFile = 'config'
@@ -44,13 +50,13 @@ function jOpts.noConfiguration()
   options.configFile = nil
 end
 
-options.userPath   = os.getenv('HOME')..'/.joylol'
+options.userPath = os.getenv('HOME')..'/.joylol'
 
 function jOpts.setUserPath(aUserPath)
   options.userPath = aUserPath
 end
 
-options.localPath  = '/usr/local/lib/joylol'
+options.localPath = '/usr/local/lib/joylol'
 
 function jOpts.setLocalPath(aLocalPath)
   options.localPath = aLocalPath
