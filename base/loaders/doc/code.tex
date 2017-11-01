@@ -165,7 +165,7 @@ Boolean loadAJoyLoLFile(
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
-  DEBUG(jInterp, "loadATextFile [%s]\n", filePath);
+  DEBUG(jInterp, "loadAJoyLoLFile [%s]\n", filePath);
   FILE* inputFile = fopen(filePath, "r");
   if (inputFile) {
     if(aCtx->verbose) {
@@ -181,13 +181,13 @@ Boolean loadAJoyLoLFile(
     freeText(aText);
     fclose(inputFile);
     if (reportException(aCtx)) {
-      DEBUG(jInterp, "loadATextFile [%s] RAISED EXCEPTION\n", filePath);
+      DEBUG(jInterp, "loadAJoyLoLFile [%s] RAISED EXCEPTION\n", filePath);
       return FALSE;
     }
-    DEBUG(jInterp, "loadATextFile [%s] OK\n", filePath);
+    DEBUG(jInterp, "loadAJoyLoLFile [%s] OK\n", filePath);
     return TRUE; // we have loaded this file so return TRUE;
   }
-  DEBUG(jInterp, "loadATextFile [%s] FAILED\n", filePath);
+  DEBUG(jInterp, "loadAJoyLoLFile [%s] FAILED\n", filePath);
   return FALSE;
 }
 \stopCCode

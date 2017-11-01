@@ -338,10 +338,17 @@ CoAlgObj* newObjectImpl(
   TagType aTag
 ) {
   assert(jInterp);
+  DEBUG(jInterp, "newObjectImpl %p %zu\n", jInterp, (size_t)aTag);
+  
   assert(jInterp->coAlgs);
   assert(aTag < jInterp->numCoAlgs);
   assert(jInterp->coAlgs[aTag].sClass);
-  
+
+  DEBUG(jInterp, "newObjectImpl freeObjects %p objectBlock %p\n",
+    jInterp->coAlgs[aTag].oMem.freeObjects,
+    jInterp->coAlgs[aTag].oMem.rootObjectBlock
+  ); 
+
   // ensure there are some free objects
   if ( ! jInterp->coAlgs[aTag].oMem.freeObjects ) 
     collectGarbage(jInterp, aTag);
