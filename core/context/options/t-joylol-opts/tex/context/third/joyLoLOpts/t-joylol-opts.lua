@@ -33,6 +33,7 @@ local toStr   = tostring
 -- joylol loader options
 
 options.verbose    = false
+options.debug      = false
 options.configFile = 'config'
 options.userPath   = os.getenv('HOME')..'/.joylol'
 options.localPath  = '/usr/local/lib/joylol'
@@ -42,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-10-31",
-  commitShortHash = "05d254d",
-  commitLongHash  = "05d254d55140f53eb8c9ab21d2a2eeb9d453a5a2",
-  subject         = "refactored DEBUG in core",
+  commitDate      = "2017-11-01",
+  commitShortHash = "c5cc010",
+  commitLongHash  = "c5cc010c01536c6893bb1bd2fb4f619d4afebad4",
+  subject         = "added debugging option to core/textadept",
   notes           = ""
 }
 

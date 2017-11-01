@@ -57,9 +57,15 @@
 \def\joyLoLQuiet{
   \directlua{
     thirddata.joylol.options.verbose = false
+    thirddata.joylol.options.debug   = false
   }
 }
 
+\def\joyLoLDebug{
+  \directlua{
+    thirddata.joylol.options.debug = true
+  }
+}
 \def\joyLoLNoConfiguration{
   \directlua{
     thirddata.joylol.options.configFile = nil

@@ -8,6 +8,7 @@ We document the options required \emph{before} loading JoyLoL.
 -- joylol loader options
 
 options.verbose    = false
+options.debug      = false
 options.configFile = 'config'
 options.userPath   = os.getenv('HOME')..'/.joylol'
 options.localPath  = '/usr/local/lib/joylol'
@@ -30,9 +31,15 @@ options.gitVersion = gitVersion
 \def\joyLoLQuiet{
   \directlua{
     thirddata.joylol.options.verbose = false
+    thirddata.joylol.options.debug   = false
   }
 }
 
+\def\joyLoLDebug{
+  \directlua{
+    thirddata.joylol.options.debug = true
+  }
+}
 \def\joyLoLNoConfiguration{
   \directlua{
     thirddata.joylol.options.configFile = nil
