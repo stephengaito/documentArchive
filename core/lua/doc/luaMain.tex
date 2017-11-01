@@ -9,8 +9,8 @@
 \startLuaCode
 -- joylol command line interpreter 
 
--- Start by adding the standard joylol CoAlg locations to the Lua search 
--- paths 
+-- Start by adding the standard joylol CoAlg locations to
+-- the Lua search paths 
 
 local joylolPaths = {
   os.getenv('HOME')..'/.joylol/?.lua',
@@ -45,6 +45,7 @@ helpText = {
   " -p --path <path> adds <path> to the list of load paths",
   " -q --quiet       toggles verbose off",
   " -v --verbose     toggles verbose on",
+  " -d --debug       turns on internal debugging",
   "",
   "files to load:",
   "  Any remaining options are treated as files to be loaded.",
@@ -70,8 +71,11 @@ while(0 < #arg) do
     joylol.core.lua.pushLoadPath(optArg)
   elseif anArg:match('-q') then
     joylol.core.lua.setVerbose(false)
+    joylol.core.lua.setDebugging(false)
   elseif anArg:match('-v') then
     joylol.core.lua.setVerbose(true)
+  elseif anArg:match('-d') then
+    joylol.core.lua.setDebugging(true)
   else
     optArg = table.remove(arg, 1)
     table.insert(loadFiles, optArg)
