@@ -197,12 +197,17 @@ void runREPLInContext(
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   
-  if (aCtx->verbose) {
-    printf("Welcome to JoyLoL v0.1 ( %s ; %s )\n",
-      "hash", //getMainVersionShortHash(),
-      "date" //getMainVersionShortDate()
+//  if (aCtx->verbose) {
+    getGitVersionInto(gitVersionKeyValues, "commitShortHash", commitHash);
+    getGitVersionInto(gitVersionKeyValues, "commitDate",      commitDate);
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+    strBufPrintf(jInterp, aStrBuf, "Welcome to JoyLoL v0.1 ( %s ; %s )\n",
+      commitHash,
+      commitDate
     );
-  }
+    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
+    strBufClose(jInterp, aStrBuf);
+//  }
   aCtx->showStack = TRUE;
   TextObj* aText = createTextFromReadline(jInterp);
   assert(aText);
