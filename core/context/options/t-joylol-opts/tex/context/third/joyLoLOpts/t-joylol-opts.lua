@@ -44,9 +44,9 @@ options.systemPath = '/usr/lib/joylol'
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-01",
-  commitShortHash = "3de422a",
-  commitLongHash  = "3de422a0d240285f0dc7d002e02dcf901c63f8dc",
-  subject         = "made core/lua welcome message permanent and added gitVersion details",
+  commitShortHash = "1a8a5eb",
+  commitLongHash  = "1a8a5eb5377a176440f7ab00f29957a80e066b8c",
+  subject         = "improved debug chatter to find/correct problem with freeing texts",
   notes           = ""
 }
 

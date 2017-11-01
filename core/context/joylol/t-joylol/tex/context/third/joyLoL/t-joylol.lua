@@ -62,9 +62,9 @@ local toStr   = tostring
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-01",
-  commitShortHash = "3de422a",
-  commitLongHash  = "3de422a0d240285f0dc7d002e02dcf901c63f8dc",
-  subject         = "made core/lua welcome message permanent and added gitVersion details",
+  commitShortHash = "1a8a5eb",
+  commitLongHash  = "1a8a5eb5377a176440f7ab00f29957a80e066b8c",
+  subject         = "improved debug chatter to find/correct problem with freeing texts",
   notes           = ""
 }
 
@@ -92,16 +92,16 @@ local joylolCPaths = {
 package.cpath = table.concat(joylolCPaths, ';')
 
 if options.verbose then print('loading [joylol.core.context]') end
-  thirddata.joylol = require 'joylol.core.context'
+--  thirddata.joylol = require 'joylol.core.context'
 if options.verbose then print('loaded [joylol.core.context]\n') end
 
 local joylol = thirddata.joylol
 
-joylol.core.context.setVerbose(options.verbose)
-joylol.core.context.setDebugging(options.debug)
+--joylol.core.context.setVerbose(options.verbose)
+--joylol.core.context.setDebugging(options.debug)
 
 if (options.configFile) then
-  joylol.core.context.loadFile(options.configFile)
+--  joylol.core.context.loadFile(options.configFile)
 end
 
 -- from file: luaInterface.tex after line: 50
@@ -109,7 +109,7 @@ end
 local function evalBuffer(bufferName)
   local bufferContents =
     buffers.getcontent(bufferName):gsub("\13", "\n")
-  joylol.core.context.evalString(bufferContents)
+--  joylol.core.context.evalString(bufferContents)
 end
 
-joylol.core.context.evalBuffer = evalBuffer
+--joylol.core.context.evalBuffer = evalBuffer

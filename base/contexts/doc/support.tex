@@ -97,12 +97,12 @@ static void definitionsAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\starttyping
+\startCCode
 static void showLoadExtensionsAP(ContextObj* aCtx) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->contexts);
-  Loader* loader = aCtx->coAlgebras->contexts->loader;
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  LoaderObj* loader = jInterp->loader;
   assert(loader);
   CoAlgObj* extensionList = loader->loadExtensions;
   while(extensionList) {
@@ -117,12 +117,14 @@ static void showLoadExtensionsAP(ContextObj* aCtx) {
     extensionList = extensionList->pair.cdr;
   }
 }
+\stopCCode
 
+\startCCode
 static void showLoadPathsAP(ContextObj* aCtx) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->contexts);
-  Loader* loader = aCtx->coAlgebras->contexts->loader;
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  LoaderObj* loader = jInterp->loader;
   assert(loader);
   CoAlgObj* pathList = loader->loadPaths;
   while(pathList) {
@@ -137,12 +139,14 @@ static void showLoadPathsAP(ContextObj* aCtx) {
     pathList = pathList->pair.cdr;
   }
 }
+\stopCCode
 
+\starttyping
 static void showLoadFilesAP(ContextObj* aCtx) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
-  assert(aCtx->coAlgebras->contexts);
-  Loader* loader = aCtx->coAlgebras->contexts->loader;
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  LoaderObj* loader = jInterp->loader;
   assert(loader);
   CoAlgObj* fileList = loader->loadFiles;
   while(fileList) {
@@ -157,21 +161,27 @@ static void showLoadFilesAP(ContextObj* aCtx) {
     fileList = fileList->pair.cdr;
   }
 }
+\stoptyping
 
+\startCCode
 static void loadExtensionAP(ContextObj* aCtx) {
   assert(aCtx);
   popCtxDataInto(aCtx, top);
   if (!isSymbol(top)) return;
-  pushLoadExtension(aCtx->coAlgebras, top->symbol);
+  pushLoadExtension(aCtx->jInterp, top->symbol);
 }
+\stopCCode
 
+\startCCode
 static void loadPathAP(ContextObj* aCtx) {
   assert(aCtx);
   popCtxDataInto(aCtx, top);
   if (!isSymbol(top)) return;
-  pushLoadPath(aCtx->coAlgebras, top->symbol);
+  pushLoadPath(aCtx->jInterp, top->symbol);
 }
+\stopCCode
 
+\startCCode
 static void loadFileAP(ContextObj* aCtx) {
   assert(aCtx);
   assert(aCtx->jInterp);
@@ -184,7 +194,9 @@ static void loadFileAP(ContextObj* aCtx) {
   aCtx->verbose = oldVerboseFlag;
   DEBUG(aCtx->jInterp, "loadFileAP < %p\n", aCtx);
 }
+\stopCCode
 
+\startCCode
 static void lispLoadFileAP(ContextObj* aCtx) {
   assert(aCtx);
   assert(aCtx->jInterp);
@@ -193,7 +205,7 @@ static void lispLoadFileAP(ContextObj* aCtx) {
   loadFileAP(aCtx);
   DEBUG(aCtx->jInterp, "listLoadFileAP < %p\n", aCtx);
 }
-\stoptyping
+\stopCCode
 
 \startCCode
 static void commentAP(ContextObj* aCtx) {

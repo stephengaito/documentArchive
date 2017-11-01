@@ -17,10 +17,11 @@ reqCoAlgs = {
   'symbols',
   'pairs',
   'naturals',
-  'booleans',
   'dictionaries',
+  'booleans',
   'texts',
-  'parsers'
+  'parsers',
+  'loaders'
 }
 
 -- ensure the .joylol directories exist
