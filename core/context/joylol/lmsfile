@@ -6,8 +6,8 @@ lfs.mkdir('build')
 lfs.mkdir('build/joylol')
 lfs.mkdir('build/joylol/core')
 lfs.mkdir('build/core')
-lfs.mkdir('t-joylol/tex/context/third/joyLoL/joylol')
-lfs.mkdir('t-joylol/tex/context/third/joyLoL/joylol/core')
+lfs.mkdir('/home/stg/.joylol/joylol/core')
+lfs.mkdir('/home/stg/.joylol/include/joylol/core')
 lfs.mkdir('build/joylol')
 lfs.mkdir('install')
 lfs.mkdir('install/joylol')
@@ -20,11 +20,13 @@ litProgs.targets{
     'overview.tex',
     'luaInterface.tex',
     'luaMain.tex',
+    'minJoyLoL.tex',
     'preamble.tex',
     'conclusion.tex',
   },
   srcFiles = {
     't-joylol.mkiv',
+    't-joylol-minimal.lua',
     't-joylol.lua',
     'joylol/core/context.h',
     'joylol/core/context-private.h',
@@ -43,6 +45,7 @@ joylol.targets{
   },
   srcFiles = {
     't-joylol.mkiv',
+    't-joylol-minimal.lua',
     't-joylol.lua',
     'joylol/core/context.h',
     'joylol/core/context-private.h',

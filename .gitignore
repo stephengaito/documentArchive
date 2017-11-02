@@ -11,3 +11,4 @@ gitVersion-tex.tex
 *.log
 *.tuc
 *.pdf
+*-history

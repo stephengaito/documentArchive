@@ -44,9 +44,9 @@ options.systemPath = '/usr/lib/joylol'
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-02",
-  commitShortHash = "60b6f97",
-  commitLongHash  = "60b6f9759930d182b8ef60316aefe936e0841583",
-  subject         = "added context/control JoyLoL words",
+  commitShortHash = "a0e837e",
+  commitLongHash  = "a0e837e5746a4d4e9bb4822a514586b72c030031",
+  subject         = "added boolean JoyLoL words",
   notes           = ""
 }
 

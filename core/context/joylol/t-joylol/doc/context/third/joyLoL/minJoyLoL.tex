@@ -1,0 +1,23 @@
+% A ConTeXt document [master document: coreContext.tex]
+
+\chapter[title=Minimal JoyLoL]
+
+\setLuaCodeStream{minJoyLoL}
+\startLuaCode
+
+texio.write_nl("HELLO FROM MINIMAL JOYLOY!")
+
+thirddata.minJoylol = thirddata.minJoylol or { }
+local minJoylol     = thirddata.minJoylol
+
+minJoylol.core = { }
+
+minJoylol.core.context = { }
+
+function minJoylol.core.context.setVerbose(aBool) end
+function minJoylol.core.context.setDebugging(aBool) end
+function minJoylol.core.context.loadFile(aBool) end
+function minJoylol.core.context.gitVersion(aBool) end
+
+\stopLuaCode
+\setLuaCodeStream{default}

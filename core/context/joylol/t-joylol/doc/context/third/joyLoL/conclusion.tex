@@ -11,6 +11,11 @@
   {A ConTeXt MkIV module}
 
 \createLuaCodeFile%
+  {minJoyLoL}%
+  {t-joylol-minimal.lua}%
+  {-- A Lua file}
+
+\createLuaCodeFile%
   {default}%
   {t-joylol.lua}%
   {-- A Lua file}
@@ -63,14 +68,15 @@
 \addSubDocument{overview.tex}
 \addSubDocument{luaInterface.tex}
 \addSubDocument{luaMain.tex}
+\addSubDocument{minJoyLoL.tex}
 \addSubDocument{preamble.tex}
 \addSubDocument{conclusion.tex}
 \addConTeXtModuleDirectory%
   {t-joylol/tex/context/third/joyLoL}
 \ensureDirectoryExists%
-  {t-joylol/tex/context/third/joyLoL/joylol}
+  {<HOME>/.joylol/joylol/core}
 \ensureDirectoryExists%
-  {t-joylol/tex/context/third/joyLoL/joylol/core}
+  {<HOME>/.joylol/include/joylol/core}
 
 \addJoyLoLTargets{default}
   

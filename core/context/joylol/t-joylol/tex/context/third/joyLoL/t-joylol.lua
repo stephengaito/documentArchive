@@ -20,6 +20,10 @@ local options      = joylol.options
 
 options.verbose    =
   options.verbose    or false
+options.debug      =
+  options.debug      or false
+options.quiet      =
+  options.quiet      or false
 options.configFile =
   options.configFile or 'config'
 options.userPath   =
@@ -37,34 +41,14 @@ local sFmt    = string.format
 local sMatch  = string.match
 local toStr   = tostring
 
--- **Problem**: we can not assume that a user *has* a compiled and working
--- C based JoyLoL. This is the "Bootstrapping (Compiler)" problem (see
--- Wikipedia). We solve this problem by writing a minimal joyLoL
--- interpreter in Lua.
-
--- SO we first check to see if the joyLoL (C shared libraries) exists and
--- can be required, if it can not be loaded, we load the joyLoLMinLua
--- version instead.
-
--- The following conditional require is adapted from: shuva's answer to
---  "How to check if a module exists in Lua?"
--- see: http://stackoverflow.com/a/22686090
-
--- local hasJoyLoL,joyLoL = pcall(require, "joyLoL/joyLoL")
--- if not hasJoyLoL then
--- interfaces.writestatus("joyLoL",
---     "Could NOT load joyLoL... loading mininal Lua version instead.")
---  joyLoL = require 'joyLoLMinLua/joyLoL'
--- end
-
 -- from file: gitVersion-lua.tex after line: 0
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-02",
-  commitShortHash = "60b6f97",
-  commitLongHash  = "60b6f9759930d182b8ef60316aefe936e0841583",
-  subject         = "added context/control JoyLoL words",
+  commitShortHash = "a0e837e",
+  commitLongHash  = "a0e837e5746a4d4e9bb4822a514586b72c030031",
+  subject         = "added boolean JoyLoL words",
   notes           = ""
 }
 
@@ -92,7 +76,33 @@ local joylolCPaths = {
 package.cpath = table.concat(joylolCPaths, ';')
 
 if options.verbose then print('loading [joylol.core.context]') end
-  thirddata.joylol = require 'joylol.core.context'
+
+-- **Problem**: we can not assume that a user *has*
+-- a compiled and working C based JoyLoL. This is
+-- the "Bootstrapping (Compiler)" problem (see
+-- Wikipedia). We solve this problem by writing a
+-- minimal joyLoL interpreter in Lua.
+
+-- SO we first check to see if the joyLoL (C shared
+-- libraries) exists and can be required, if it can
+-- not be loaded, we load the joyLoLMinLua version
+-- instead.
+
+-- The following conditional require is adapted
+-- from: shuva's answer to
+--   "How to check if a module exists in Lua?"
+-- see: http://stackoverflow.com/a/22686090
+ 
+local hasJoylol, loadedJoylol =
+  pcall(require, 'joylol.core.context')
+if not hasJoylol then
+  interfaces.writestatus("joyLoL",
+    "Could NOT load joyLoL... loading mininal Lua version instead.")
+  lua.registercode('t-joylol-minimal')
+  loadedJoylol = thirddata.minJoylol
+end
+thirddata.joylol = loadedJoylol
+
 if options.verbose then print('loaded [joylol.core.context]\n') end
 
 local joylol = thirddata.joylol
