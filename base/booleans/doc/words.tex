@@ -2,19 +2,23 @@
 
 \section[title=Words]
 
-\starttyping
 \startCCode
-static void isBooleanAP(Context* aCtx) {
+static void isBooleanAP(ContextObj* aCtx) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top);
-  PairAtom* result = NULL;
-  if (isBoolean(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
-  else                result = newBoolean(aCtx->coAlgebras, FALSE);
+  CoAlgObj* result = NULL;
+  if (isBoolean(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
   pushCtxData(aCtx, result);
 }
+\stopCCode
 
-static void ifteAP(Context* aCtx) {
+\startCCode
+static void ifteAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, topElse);
   popCtxDataInto(aCtx, topThen);
   popCtxDataInto(aCtx, topIf);
@@ -23,19 +27,23 @@ static void ifteAP(Context* aCtx) {
   pushSymbolCtxProcess(aCtx, "ifteCont");
   prependListCtxProcess(aCtx, topIf); // execute the if condition
 }
+\stopCCode
 
-static void ifteContAP(Context* aCtx) {
+\startCCode
+static void ifteContAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, topIf);
   popCtxProcessInto(aCtx, topThen);
   popCtxProcessInto(aCtx, topElse);
-  if (isTrue(topIf)) {
+  if (isTrue(jInterp, topIf)) {
     prependListCtxProcess(aCtx, topThen);
   } else {
     prependListCtxProcess(aCtx, topElse);
   }
 }
 \stopCCode
-\stoptyping
 
 \setCHeaderStream{private}
 \startCHeader
@@ -57,8 +65,8 @@ void registerBooleanWords(
   DictObj* false = createSymbol(jInterp, "false");
   false->value   = newBoolean(jInterp, FALSE);
 
-  //extendJoyLoL(coAlgebras, "isBoolean", isBooleanAP);
-  //extendJoyLoL(coAlgebras, "ifte",      ifteAP);
-  //extendJoyLoL(coAlgebras, "ifteCont",  ifteContAP);
+  extendJoyLoL(jInterp, "isBoolean", isBooleanAP);
+  extendJoyLoL(jInterp, "ifte",      ifteAP);
+  extendJoyLoL(jInterp, "ifteCont",  ifteContAP);
 }
 \stopCCode

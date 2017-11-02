@@ -43,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-11-01",
-  commitShortHash = "d9464a3",
-  commitLongHash  = "d9464a31cdd53fb4e312850abef5d8f9dd59a906",
-  subject         = "begun adding context/support ;; unfotunately we now have loaders<->contexts dependency cycle",
+  commitDate      = "2017-11-02",
+  commitShortHash = "60b6f97",
+  commitLongHash  = "60b6f9759930d182b8ef60316aefe936e0841583",
+  subject         = "added context/control JoyLoL words",
   notes           = ""
 }
 
