@@ -139,7 +139,11 @@ static void loadExtensionAP(ContextObj* aCtx) {
   LoaderObj *loader = jInterp->loader;
   assert(loader);
   popCtxDataInto(aCtx, top);
-  if (!isSymbol(top)) return;
+  if (!isSymbol(top)) {
+    raiseException(aCtx,
+      "loadExtension requires a symbol as top");
+    return;
+  }
   pushLoadExtension(loader, asSymbol(top));
 }
 \stopCCode
@@ -152,7 +156,11 @@ static void loadPathAP(ContextObj* aCtx) {
   LoaderObj *loader = jInterp->loader;
   assert(loader);
   popCtxDataInto(aCtx, top);
-  if (!isSymbol(top)) return;
+  if (!isSymbol(top)) {
+    raiseException(aCtx,
+      "loadPath requires a symbol as top");
+    return;
+  }
   pushLoadPath(loader, asSymbol(top));
 }
 \stopCCode
@@ -164,7 +172,11 @@ static void loadFileAP(ContextObj* aCtx) {
   DEBUG(aCtx->jInterp, "loadFileAP > %p\n", aCtx);
   assert(aCtx);
   popCtxDataInto(aCtx, top);
-  if (!isSymbol(top)) return;
+  if (!isSymbol(top)) {
+    raiseException(aCtx,
+      "loadFile requires a symbol as top");
+    return;
+  }
   
   int oldVerboseFlag = aCtx->verbose;
   aCtx->verbose = aCtx->showStack;

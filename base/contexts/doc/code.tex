@@ -76,7 +76,7 @@ ContextObj* newContextImpl(
   CoAlgObj     *dataLoL,
   CoAlgObj     *processLoL
 ) {
-  DEBUG(jInterp, "createContext %p [%s] %p %p %p\n",
+  DEBUG(jInterp, "newContext %p [%s] %p %p %p\n",
     jInterp, name, parent, dataLoL, processLoL);
   assert(jInterp);
 
@@ -215,6 +215,8 @@ typedef struct contexts_class_struct {
   PopCtx         *popCtxProcessFunc;
   ExtendJoyLoL   *extendJoyLoLFunc;
   DefineJoyLoL   *defineJoyLoLFunc;
+  DefineContext  *defineContextFunc;
+  RaiseException *raiseExceptionFunc;
   ReportException
     *reportExceptionFunc;
   EvalCommandInContext
@@ -294,7 +296,9 @@ Boolean registerContexts(
   
   theCoAlg->extendJoyLoLFunc       = extendJoyLoLImpl;
   theCoAlg->defineJoyLoLFunc       = defineJoyLoLImpl;
-  
+  theCoAlg->defineContextFunc      = defineContextImpl;
+
+  theCoAlg->raiseExceptionFunc     = raiseExceptionImpl;
   theCoAlg->reportExceptionFunc    = reportExceptionImpl;
   
   theCoAlg->evalCommandInContextFunc =

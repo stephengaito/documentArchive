@@ -688,29 +688,45 @@ Boolean defineJoyLoLImpl(
 }
 \stopCCode
 
-\starttyping
 \startCHeader
-extern Boolean defineContext(
-  JoyLoLInterp* jInterp,
-  Symbol* definedName,
-  ContextObj* newCtx
+typedef Boolean (DefineContext)(
+  JoyLoLInterp *jInterp,
+  Symbol       *definedName,
+  ContextObj   *newCtx
 );
+
+#define defineContext(jInterp, definedName, newCtx)       \
+  (                                                       \
+    assert(getContextsClass(jInterp)                      \
+      ->defineContextFunc),                               \
+    (getContextsClass(jInterp)                            \
+      ->defineContextFunc(jInterp, definedName, newCtx))  \
+  )
 \stopCHeader
 
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean defineContextImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *definedName,
+  ContextObj   *newCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
 \startCCode
-Boolean defineContext(
-  JoyLoLInterp* jInterp,
-  Symbol* definedName,
-  ContextObj* newCtx
+Boolean defineContextImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *definedName,
+  ContextObj   *newCtx
 ) {
   DEBUG(jInterp, "defineContext %p [%s] %p\n",
         jInterp, definedName, newCtx);
   assert(jInterp);
   DictObj* aSym =
     createSymbol(jInterp, definedName);
-  aSym->value   = newContext(jInterp, newCtx);
+  aSym->value   = (CoAlgObj*)newCtx;
 
   return TRUE;
 }
 \stopCCode
-\stoptyping
