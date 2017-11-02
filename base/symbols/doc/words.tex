@@ -2,28 +2,36 @@
 
 \section[title=Words]
 
-\starttyping
-static void isSymbolAP(Context* aCtx) {
+\startCCode
+static void isSymbolAP(ContextObj* aCtx) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top);
-  PairAtom* result = NULL;
-  if (isSymbol(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
-  else               result = newBoolean(aCtx->coAlgebras, FALSE);
+  CoAlgObj* result = NULL;
+  if (isSymbol(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
   pushCtxData(aCtx, result);
 }
+\stopCCode
 
-static void equalSymbolAP(Context* aCtx) {
+\startCCode
+static void equalSymbolAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
   size_t result = FALSE;
   if (isSymbol(top1) && isSymbol(top2)) {
-    if (strcmp(top1->symbol, top2->symbol) == 0) result = TRUE;
+    if (strcmp(asSymbol(top1), asSymbol(top2)) == 0) result = TRUE;
   }
-  DEBUG(FALSE, "equalSymbol: %zu\n", result);
-  pushCtxData(aCtx, newBoolean(aCtx->coAlgebras, result));
+  DEBUG(jInterp, "equalSymbol: %zu\n", result);
+  pushCtxData(aCtx, newBoolean(jInterp, result));
 }
-\stoptyping
+\stopCCode
 
 \setCHeaderStream{private}
 \startCHeader
@@ -33,7 +41,7 @@ extern void registerSymbolWords(JoyLoLInterp* jInterp);
 
 \startCCode
 void registerSymbolWords(JoyLoLInterp* jInterp) {
-  //extendJoyLoL(coAlgs, "isSymbol", isSymbolAP);
-  //extendJoyLoL(coAlgs, "=Sym",     equalSymbolAP);
+  extendJoyLoL(jInterp, "isSymbol", isSymbolAP);
+  extendJoyLoL(jInterp, "=Sym",     equalSymbolAP);
 }
 \stopCCode

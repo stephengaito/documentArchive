@@ -2,49 +2,63 @@
 
 \section[title=JoyLoL words]
 
-\starttyping
 \startCCode
-static void isPairAP(Context* aCtx) {
+static void isPairAP(ContextObj* aCtx) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top);
-  CoAlgHandle* result = NULL;
-  if (isPair(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
-  else             result = newBoolean(aCtx->coAlgebras, FALSE);
+  CoAlgObj* result = NULL;
+  if (isPair(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
   pushCtxData(aCtx, result);
 }
+\stopCCode
 
-static void isAtomAP(Context* aCtx) {
+\startCCode
+static void isAtomAP(ContextObj* aCtx) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top);
-  CoAlgHandle* result = NULL;
-  if (isAtom(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
-  else             result = newBoolean(aCtx->coAlgebras, FALSE);
+  CoAlgObj* result = NULL;
+  if (isAtom(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
   pushCtxData(aCtx, result);
 }
+\stopCCode
 
-static void popAP(Context* aCtx) {
+\startCCode
+static void popAP(ContextObj* aCtx) {
   popCtxData(aCtx);
 }
+\stopCCode
 
-static void popProcessAP(Context* aCtx) {
+\startCCode
+static void popProcessAP(ContextObj* aCtx) {
   popCtxProcess(aCtx);
 }
+\stopCCode
 
-static void pop2ndAP(Context* aCtx) {
+\startCCode
+static void pop2ndAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxData(aCtx);
   pushCtxData(aCtx, top);
 }
+\stopCCode
 
-static void pop2ndProcessAP(Context* aCtx) {
+\startCCode
+static void pop2ndProcessAP(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   popCtxProcess(aCtx);
   pushCtxProcess(aCtx, top);
 }
 \stopCCode
-\stoptyping
 
 \startTestSuite[initPairsCoAlgebra]
 
@@ -56,12 +70,12 @@ extern void registerPairWords(JoyLoLInterp* jInterp);
 
 \startCCode
 void registerPairWords(JoyLoLInterp* jInterp) {
-  //extendJoyLoL(jInterp, "isPair",        isPairAP);
-  //extendJoyLoL(jInterp, "isAtom",        isAtomAP);
-  //extendJoyLoL(jInterp, "pop",           popAP);
-  //extendJoyLoL(jInterp, "popProcess",    popProcessAP);
-  //extendJoyLoL(jInterp, "pop2nd",        pop2ndAP);
-  //extendJoyLoL(jInterp, "pop2ndProcess", pop2ndProcessAP);
+  extendJoyLoL(jInterp, "isPair",        isPairAP);
+  extendJoyLoL(jInterp, "isAtom",        isAtomAP);
+  extendJoyLoL(jInterp, "pop",           popAP);
+  extendJoyLoL(jInterp, "popProcess",    popProcessAP);
+  extendJoyLoL(jInterp, "pop2nd",        pop2ndAP);
+  extendJoyLoL(jInterp, "pop2ndProcess", pop2ndProcessAP);
 }
 \stopCCode
 

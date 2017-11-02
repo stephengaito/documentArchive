@@ -46,9 +46,9 @@ local toStr   = tostring
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-02",
-  commitShortHash = "a0e837e",
-  commitLongHash  = "a0e837e5746a4d4e9bb4822a514586b72c030031",
-  subject         = "added boolean JoyLoL words",
+  commitShortHash = "92bb184",
+  commitLongHash  = "92bb184745920dd45e0235690b7a1ea81b4b252c",
+  subject         = "added a minimal joylol to help solve the bootstrapping problem",
   notes           = ""
 }
 

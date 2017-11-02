@@ -2,8 +2,6 @@
 
 -- from file: minJoyLoL.tex after line: 0
 
-texio.write_nl("HELLO FROM MINIMAL JOYLOY!")
-
 thirddata.minJoylol = thirddata.minJoylol or { }
 local minJoylol     = thirddata.minJoylol
 

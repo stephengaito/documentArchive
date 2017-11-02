@@ -2,84 +2,131 @@
 
 \section[title=Words]
 
-\starttyping
-static void addAP(Context* aCtx) {
+\startCCode
+static void addAP(ContextObj* aCtx) {
   assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) return;
-  PairAtom* sum = newNatural(aCtx->coAlgebras, NULL);
-  mpz_add(sum->natural, top1->natural, top2->natural);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseException(aCtx,
+      "addition requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  CoAlgObj* sum = newNatural(jInterp, NULL);
+  mpz_add(asNatural(sum), asNatural(top1), asNatural(top2));
   pushCtxData(aCtx, sum);
 }
+\stopCCode
 
-static void subtractAP(Context* aCtx) {
+\startCCode
+static void subtractAP(ContextObj* aCtx) {
   assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) return;
-  PairAtom* difference = newNatural(aCtx->coAlgebras, NULL);
-  if (top2->natural < top1->natural) {
-    mpz_sub(difference->natural, top1->natural, top2->natural);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseException(aCtx,
+      "subtraction requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  CoAlgObj* difference = newNatural(jInterp, NULL);
+  if (asNatural(top2) < asNatural(top1)) {
+    mpz_sub(asNatural(difference), asNatural(top1), asNatural(top2));
   }
   pushCtxData(aCtx, difference);
 }
+\stopCCode
 
-static void subtractReverseAP(Context* aCtx) {
+\startCCode
+static void subtractReverseAP(ContextObj* aCtx) {
   assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) return;
-  PairAtom* difference = newNatural(aCtx->coAlgebras, NULL);
-  if (top1->natural < top2->natural) {
-    mpz_sub(difference->natural, top2->natural, top1->natural);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseException(aCtx,
+      "(reverse) subtraction requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  CoAlgObj* difference = newNatural(jInterp, NULL);
+  if (asNatural(top1) < asNatural(top2)) {
+    mpz_sub(asNatural(difference), asNatural(top2), asNatural(top1));
   }
   pushCtxData(aCtx, difference);
 }
+\stopCCode
 
-static void multiplyAP(Context* aCtx) {
+\startCCode
+static void multiplyAP(ContextObj* aCtx) {
   assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) return;
-  PairAtom* product = newNatural(aCtx->coAlgebras, NULL);
-  mpz_mul(product->natural, top1->natural, top2->natural);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseException(aCtx,
+      "multiplication requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  CoAlgObj* product = newNatural(jInterp, NULL);
+  mpz_mul(asNatural(product), asNatural(top1), asNatural(top2));
   pushCtxData(aCtx, product);
 }
+\stopCCode
 
-static void equalNatAP(Context* aCtx) {
+\startCCode
+static void equalNatAP(ContextObj* aCtx) {
   assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
-  size_t result = FALSE;
+  Boolean result = FALSE;
   if (isNatural(top1) &&
       isNatural(top2) &&
-      (mpz_cmp(top1->natural, top2->natural) == 0)) result = TRUE;
-  DEBUG(FALSE, "equalNat: %zu\n", result);
-  pushCtxData(aCtx, newBoolean(aCtx->coAlgebras, result));
+      (mpz_cmp(asNatural(top1), asNatural(top2)) == 0)) result = TRUE;
+  DEBUG(jInterp, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, newBoolean(jInterp, result));
 }
+\stopCCode
 
+\startCCode
 static  mpz_t zero;
 
-static void isZeroAP(Context* aCtx) {
+static void isZeroAP(ContextObj* aCtx) {
   assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top);
   size_t result = FALSE;
   if (isNatural(top) &&
-      (mpz_cmp(top->natural, zero) == 0)) result = TRUE;
-  pushCtxData(aCtx, newBoolean(aCtx->coAlgebras, result));
+      (mpz_cmp(asNatural(top), zero) == 0)) result = TRUE;
+  pushCtxData(aCtx, newBoolean(jInterp, result));
 }
+\stopCCode
 
-static void isNaturalAP(Context* aCtx) {
+\startCCode
+static void isNaturalAP(ContextObj* aCtx) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top);
-  PairAtom* result = NULL;
-  if (isNatural(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
-  else                result = newBoolean(aCtx->coAlgebras, FALSE);
+  CoAlgObj* result = NULL;
+  if (isNatural(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
   pushCtxData(aCtx, result);
 }
-\stoptyping
+\stopCCode
 
 \setCHeaderStream{private}
 \startCHeader
@@ -89,13 +136,13 @@ extern void registerNaturalWords(JoyLoLInterp* jInterp);
 
 \startCCode
 void registerNaturalWords(JoyLoLInterp* jInterp) {
-  //mpz_init(zero);
-  //extendJoyLoL(coAlgs, "isNatural", isNaturalAP);
-  //extendJoyLoL(coAlgs, "+",         addAP);
-  //extendJoyLoL(coAlgs, "-",         subtractAP);
-  //extendJoyLoL(coAlgs, "-rev",      subtractReverseAP);
-  //extendJoyLoL(coAlgs, "*",         multiplyAP);
-  //extendJoyLoL(coAlgs, "=nat",      equalNatAP);
-  //extendJoyLoL(coAlgs, "isZero",    isZeroAP);
+  mpz_init(zero);
+  extendJoyLoL(jInterp, "isNatural", isNaturalAP);
+  extendJoyLoL(jInterp, "+",         addAP);
+  extendJoyLoL(jInterp, "-",         subtractAP);
+  extendJoyLoL(jInterp, "-rev",      subtractReverseAP);
+  extendJoyLoL(jInterp, "*",         multiplyAP);
+  extendJoyLoL(jInterp, "=nat",      equalNatAP);
+  extendJoyLoL(jInterp, "isZero",    isZeroAP);
 }
 \stopCCode

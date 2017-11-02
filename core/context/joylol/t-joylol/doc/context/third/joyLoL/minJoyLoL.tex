@@ -4,9 +4,6 @@
 
 \setLuaCodeStream{minJoyLoL}
 \startLuaCode
-
-texio.write_nl("HELLO FROM MINIMAL JOYLOY!")
-
 thirddata.minJoylol = thirddata.minJoylol or { }
 local minJoylol     = thirddata.minJoylol
 
@@ -18,6 +15,5 @@ function minJoylol.core.context.setVerbose(aBool) end
 function minJoylol.core.context.setDebugging(aBool) end
 function minJoylol.core.context.loadFile(aBool) end
 function minJoylol.core.context.gitVersion(aBool) end
-
 \stopLuaCode
 \setLuaCodeStream{default}

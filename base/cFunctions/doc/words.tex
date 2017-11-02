@@ -2,17 +2,20 @@
 
 \section[title=JoyLoL words]
 
-\starttyping
-static void isFunctionAP(Context* aCtx) {
+\startCCode
+static void isCFunctionAP(ContextObj* aCtx) {
   assert(aCtx);
-  assert(aCtx->coAlgebras);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
   popCtxDataInto(aCtx, top);
-  PairAtom* result = NULL;
-  if (isFunction(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
-  else                 result = newBoolean(aCtx->coAlgebras, FALSE);
+  CoAlgObj* result = NULL;
+  if (isCFunction(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
   pushCtxData(aCtx, result);
 }
-\stoptyping
+\stopCCode
 
 \setCHeaderStream{private}
 \startCHeader
@@ -23,6 +26,6 @@ extern void registerCFunctionWords(JoyLoLInterp* jInterp);
 \startCCode
 void registerCFunctionWords(JoyLoLInterp* jInterp) {
   assert(jInterp);
-  //extendJoyLoL(jInterp, "isFunction", isFunctionAP);
+  extendJoyLoL(jInterp, "isCFunction", isCFunctionAP);
 }
 \stopCCode
