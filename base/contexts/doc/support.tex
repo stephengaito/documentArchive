@@ -104,18 +104,13 @@ static void showLoadExtensionsAP(ContextObj* aCtx) {
   assert(jInterp);
   LoaderObj* loader = jInterp->loader;
   assert(loader);
-  CoAlgObj* extensionList = loader->loadExtensions;
-  while(extensionList) {
-    CoAlgObj* anExtension = extensionList->pair.car;
-    if (isSymbol(anExtension)) {
-      StringBufferObj *aStrBuf =
-        newStringBuffer(jInterp);
-      strBufPrintf(jInterp, aStrBuf, "%s\n", anExtension->symbol);
-      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-      strBufClose(jInterp, aStrBuf);
-    }
-    extensionList = extensionList->pair.cdr;
-  }
+  StringBufferObj *aStrBuf =
+    newStringBuffer(jInterp);
+  listLoadExtensions(loader, aStrBuf);
+  jInterp->writeStdOut(jInterp,
+    getCString(jInterp, aStrBuf)
+  );
+  strBufClose(jInterp, aStrBuf);
 }
 \stopCCode
 
@@ -126,58 +121,39 @@ static void showLoadPathsAP(ContextObj* aCtx) {
   assert(jInterp);
   LoaderObj* loader = jInterp->loader;
   assert(loader);
-  CoAlgObj* pathList = loader->loadPaths;
-  while(pathList) {
-    CoAlgObj* aPath = pathList->pair.car;
-    if (isSymbol(aPath)) {
-      StringBufferObj *aStrBuf =
-        newStringBuffer(jInterp);
-      strBufPrintf(jInterp, aStrBuf, "%s\n", aPath->symbol);
-      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-      strBufClose(jInterp, aStrBuf);
-    }
-    pathList = pathList->pair.cdr;
-  }
+  StringBufferObj *aStrBuf =
+    newStringBuffer(jInterp);
+  listLoadPaths(loader, aStrBuf);
+  jInterp->writeStdOut(jInterp,
+    getCString(jInterp, aStrBuf)
+  );
+  strBufClose(jInterp, aStrBuf);  
 }
 \stopCCode
-
-\starttyping
-static void showLoadFilesAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  LoaderObj* loader = jInterp->loader;
-  assert(loader);
-  CoAlgObj* fileList = loader->loadFiles;
-  while(fileList) {
-    CoAlgObj* aFile = fileList->pair.car;
-    if (isSymbol(aFile)) {
-      StringBufferObj *aStrBuf =
-        newStringBuffer(jInterp);
-      strBufPrintf(jInterp, aStrBuf, "%s\n", aFile->symbol);
-      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-      strBufClose(jInterp, aStrBuf);
-    }
-    fileList = fileList->pair.cdr;
-  }
-}
-\stoptyping
 
 \startCCode
 static void loadExtensionAP(ContextObj* aCtx) {
   assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  LoaderObj *loader = jInterp->loader;
+  assert(loader);
   popCtxDataInto(aCtx, top);
   if (!isSymbol(top)) return;
-  pushLoadExtension(aCtx->jInterp, top->symbol);
+  pushLoadExtension(loader, asSymbol(top));
 }
 \stopCCode
 
 \startCCode
 static void loadPathAP(ContextObj* aCtx) {
   assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  LoaderObj *loader = jInterp->loader;
+  assert(loader);
   popCtxDataInto(aCtx, top);
   if (!isSymbol(top)) return;
-  pushLoadPath(aCtx->jInterp, top->symbol);
+  pushLoadPath(loader, asSymbol(top));
 }
 \stopCCode
 
@@ -188,9 +164,11 @@ static void loadFileAP(ContextObj* aCtx) {
   DEBUG(aCtx->jInterp, "loadFileAP > %p\n", aCtx);
   assert(aCtx);
   popCtxDataInto(aCtx, top);
+  if (!isSymbol(top)) return;
+  
   int oldVerboseFlag = aCtx->verbose;
   aCtx->verbose = aCtx->showStack;
-  loadFiles(aCtx, top);
+  loadAFile(aCtx, asSymbol(top));
   aCtx->verbose = oldVerboseFlag;
   DEBUG(aCtx->jInterp, "loadFileAP < %p\n", aCtx);
 }
@@ -223,15 +201,14 @@ extern void initContextsAPSupport(JoyLoLInterp *jInterp);
 void initContextsAPSupport(JoyLoLInterp *jInterp) {
   extendJoyLoL(jInterp, "isContext",           isContextAP);
   extendJoyLoL(jInterp, "definitions",         definitionsAP);
-//  extendJoyLoL(jInterp, "loadExtension",       loadExtensionAP);
-//  extendJoyLoL(jInterp, "loadPath",            loadPathAP);
-//  extendJoyLoL(jInterp, "load",                loadFileAP);
-//  extendJoyLoL(jInterp, "lispLoad",            lispLoadFileAP);
+  extendJoyLoL(jInterp, "loadExtension",       loadExtensionAP);
+  extendJoyLoL(jInterp, "loadPath",            loadPathAP);
+  extendJoyLoL(jInterp, "load",                loadFileAP);
+  extendJoyLoL(jInterp, "lispLoad",            lispLoadFileAP);
   extendJoyLoL(jInterp, "comment",             commentAP);
   extendJoyLoL(jInterp, "---",                 commentAP);
-//  extendJoyLoL(jInterp, "showLoadExtensions",  showLoadExtensionsAP);
-//  extendJoyLoL(jInterp, "showLoadPaths",       showLoadPathsAP);
-//  extendJoyLoL(jInterp, "showLoadFiles",       showLoadFilesAP);
+  extendJoyLoL(jInterp, "showLoadExtensions",  showLoadExtensionsAP);
+  extendJoyLoL(jInterp, "showLoadPaths",       showLoadPathsAP);
   extendJoyLoL(jInterp, "showStack",           showStackAP);
   extendJoyLoL(jInterp, "showStackOn",         showStackOnAP);
   extendJoyLoL(jInterp, "showStackOff",        showStackOffAP);

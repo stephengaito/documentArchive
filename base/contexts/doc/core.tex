@@ -83,7 +83,7 @@ typedef void (PushSymbolCtx)(
     assert(aCtx),                             \
     assert(getContextsClass(aCtx->jInterp)    \
       ->pushSymbolCtxDataFunc),               \
-    (getContextsClass(aCtx-jInterp)           \
+    (getContextsClass(aCtx->jInterp)          \
       ->pushSymbolCtxDataFunc(aCtx, aSymbol)) \
   )
 \stopCHeader
@@ -375,7 +375,7 @@ void pushCtxProcessImpl(
     assert(aCtx),                                \
     assert(getContextsClass(aCtx->jInterp)       \
       ->pushSymbolCtxProcessFunc),               \
-    (getContextsClass(aCtx-jInterp)              \
+    (getContextsClass(aCtx->jInterp)             \
       ->pushSymbolCtxProcessFunc(aCtx, aSymbol)) \
   )
 \stopCHeader

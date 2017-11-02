@@ -114,6 +114,52 @@ void pushLoadPathImpl(
 \stopCCode
 
 \startCHeader
+typedef void (ListLoader)(
+  LoaderObj       *loader,
+  StringBufferObj *aStrBuf
+);
+
+#define listLoadPaths(loader, aStrBuf)      \
+  (                                         \
+    assert(getLoadersClass(loader->jInterp) \
+      ->listLoadPathsFunc),                 \
+    (getLoadersClass(loader->jInterp)       \
+      ->listLoadPathsFunc(loader, aStrBuf)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void listLoadPathsImpl(
+  LoaderObj       *loader,
+  StringBufferObj *aStrBuf
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void listLoadPathsImpl(
+  LoaderObj       *loader,
+  StringBufferObj *aStrBuf
+) {
+  assert(loader);
+  JoyLoLInterp *jInterp = loader->jInterp;
+  assert(jInterp);
+  assert(aStrBuf);
+  CoAlgObj* pathList = loader->paths;
+  while(pathList && isPair(pathList)) {
+    CoAlgObj* aPath = asCar(pathList);
+    if (isSymbol(aPath)) {
+      strBufPrintf(jInterp, aStrBuf,
+        "%s\n", asSymbol(aPath)
+      );
+    }
+    pathList = asCdr(pathList);
+  }  
+}
+\stopCCode
+
+\startCHeader
 #define pushLoadExtension(loader, aLoadExt)       \
   (                                               \
     assert(getLoadersClass(loader->jInterp)       \
@@ -145,6 +191,47 @@ void pushLoadExtensionImpl(
       newSymbol(loader->jInterp, aLoadExtension),
       loader->extensions
     );
+}
+\stopCCode
+
+\startCHeader
+#define listLoadExtensions(loader, aStrBuf)      \
+  (                                              \
+    assert(getLoadersClass(loader->jInterp)      \
+      ->listLoadExtensionsFunc),                 \
+    (getLoadersClass(loader->jInterp)            \
+      ->listLoadExtensionsFunc(loader, aStrBuf)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void listLoadExtensionsImpl(
+  LoaderObj       *loader,
+  StringBufferObj *aStrBuf
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void listLoadExtensionsImpl(
+  LoaderObj       *loader,
+  StringBufferObj *aStrBuf
+) {
+  assert(loader);
+  JoyLoLInterp *jInterp = loader->jInterp;
+  assert(jInterp);
+  assert(aStrBuf);
+  CoAlgObj* extensionList = loader->extensions;
+  while(extensionList && isPair(extensionList)) {
+    CoAlgObj* anExtension = asCar(extensionList);
+    if (isSymbol(anExtension)) {
+      strBufPrintf(jInterp, aStrBuf,
+        "%s\n", asSymbol(anExtension)
+      );
+    }
+    extensionList = asCdr(extensionList);
+  }
 }
 \stopCCode
 
@@ -327,7 +414,9 @@ typedef struct loaders_class_struct {
   CoAlgClass      super;
   NewLoader      *newLoaderFunc;
   PushLoadSymbol *pushLoadPathFunc;
+  ListLoader     *listLoadPathsFunc;
   PushLoadSymbol *pushLoadExtensionFunc;
+  ListLoader     *listLoadExtensionsFunc;
   LoadAFile      *loadAFileFunc;
 } LoadersClass;
 \stopCHeader
@@ -365,15 +454,17 @@ Boolean registerLoaders(
     joyLoLCalloc(1, LoadersClass);
   assert(theCoAlg);
   
-  theCoAlg->super.name            = LoadersName;
-  theCoAlg->super.objectSize      = sizeof(LoaderObj);
-  theCoAlg->super.initializeFunc  = initializeLoaders;
-  theCoAlg->super.equalityFunc    = NULL;
-  theCoAlg->super.printFunc       = NULL;
-  theCoAlg->newLoaderFunc         = newLoaderImpl;
-  theCoAlg->pushLoadPathFunc      = pushLoadPathImpl;
-  theCoAlg->pushLoadExtensionFunc = pushLoadExtensionImpl;
-  theCoAlg->loadAFileFunc         = loadAFileImpl;
+  theCoAlg->super.name             = LoadersName;
+  theCoAlg->super.objectSize       = sizeof(LoaderObj);
+  theCoAlg->super.initializeFunc   = initializeLoaders;
+  theCoAlg->super.equalityFunc     = NULL;
+  theCoAlg->super.printFunc        = NULL;
+  theCoAlg->newLoaderFunc          = newLoaderImpl;
+  theCoAlg->pushLoadPathFunc       = pushLoadPathImpl;
+  theCoAlg->listLoadPathsFunc      = listLoadPathsImpl;
+  theCoAlg->pushLoadExtensionFunc  = pushLoadExtensionImpl;
+  theCoAlg->listLoadExtensionsFunc = listLoadExtensionsImpl;
+  theCoAlg->loadAFileFunc          = loadAFileImpl;
 
   size_t tag =
     registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);

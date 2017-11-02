@@ -44,9 +44,9 @@ options.systemPath = '/usr/lib/joylol'
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-01",
-  commitShortHash = "1a8a5eb",
-  commitLongHash  = "1a8a5eb5377a176440f7ab00f29957a80e066b8c",
-  subject         = "improved debug chatter to find/correct problem with freeing texts",
+  commitShortHash = "d9464a3",
+  commitLongHash  = "d9464a31cdd53fb4e312850abef5d8f9dd59a906",
+  subject         = "begun adding context/support ;; unfotunately we now have loaders<->contexts dependency cycle",
   notes           = ""
 }
 
