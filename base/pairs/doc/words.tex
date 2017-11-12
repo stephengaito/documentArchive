@@ -60,6 +60,14 @@ static void pop2ndProcessAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\startCCode
+static void dupAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, copyLoL(aCtx->jInterp, top));
+}
+\stopCCode
+
 \startTestSuite[initPairsCoAlgebra]
 
 \setCHeaderStream{private}
@@ -76,6 +84,7 @@ void registerPairWords(JoyLoLInterp* jInterp) {
   extendJoyLoL(jInterp, "popProcess",    popProcessAP);
   extendJoyLoL(jInterp, "pop2nd",        pop2ndAP);
   extendJoyLoL(jInterp, "pop2ndProcess", pop2ndProcessAP);
+  extendJoyLoL(jInterp, "dup",           dupAP);
 }
 \stopCCode
 

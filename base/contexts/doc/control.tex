@@ -244,14 +244,14 @@ Boolean reportExceptionImpl(
 \startCCode
 static void defineAP(ContextObj* aCtx) {
   assert(aCtx);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  if (!isSymbol(top1)) {
+  popCtxDataInto(aCtx, name);
+  popCtxDataInto(aCtx, definition);
+  if (!isSymbol(name)) {
     raiseException(aCtx,
-      "define requires a symbol as top");
+      "define requires a symbol as name");
     return;
   }
-  defineJoyLoL(aCtx->jInterp, asSymbol(top1), top2);
+  defineJoyLoL(aCtx->jInterp, asSymbol(name), definition);
 }
 \stopCCode
 

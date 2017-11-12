@@ -44,9 +44,9 @@ options.systemPath = '/usr/lib/joylol'
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-02",
-  commitShortHash = "92bb184",
-  commitLongHash  = "92bb184745920dd45e0235690b7a1ea81b4b252c",
-  subject         = "added a minimal joylol to help solve the bootstrapping problem",
+  commitShortHash = "8fc68d1",
+  commitLongHash  = "8fc68d1bafbaa579d1d91ffd2cce92f92fbc7d6b",
+  subject         = "completed adding all existing joylol words",
   notes           = ""
 }
 
