@@ -674,7 +674,7 @@ in our parsing code.
 
 \startCHeader
 typedef struct parsers_class_struct {
-  CoAlgClass       super;
+  JClass       super;
   ParseOneSymbol  *parseOneSymbolFunc;
   ParseAllSymbols *parseAllSymbolsFunc;
 } ParsersClass;
@@ -683,10 +683,10 @@ typedef struct parsers_class_struct {
 \startCCode
 static Boolean initializeParsers(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerParserWords(jInterp);
   return TRUE;
 }
@@ -716,7 +716,7 @@ Boolean registerParsers(
   theCoAlg->parseAllSymbolsFunc   = parseAllSymbolsImpl;
   
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == ParsersTag);

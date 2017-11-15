@@ -423,7 +423,7 @@ Boolean printStrTextsCoAlg(
 
 \startCHeader
 typedef struct texts_class_struct {
-  CoAlgClass                    super;
+  JClass                    super;
   NextSymbol                   *nextSymbolFunc;
   ReportError                  *reportErrorFunc;
   FreeText                     *freeTextFunc;
@@ -436,10 +436,10 @@ typedef struct texts_class_struct {
 \startCCode
 static Boolean initializeTexts(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerTextWords(jInterp);
   return TRUE;
 }
@@ -479,7 +479,7 @@ Boolean registerTexts(
     createTextFromArrayOfStringsImpl;
 
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == TextsTag);

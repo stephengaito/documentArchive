@@ -411,7 +411,7 @@ Boolean loadFiles(
 
 \startCHeader
 typedef struct loaders_class_struct {
-  CoAlgClass      super;
+  JClass      super;
   NewLoader      *newLoaderFunc;
   PushLoadSymbol *pushLoadPathFunc;
   ListLoader     *listLoadPathsFunc;
@@ -424,10 +424,10 @@ typedef struct loaders_class_struct {
 \startCCode
 static Boolean initializeLoaders(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   if (!jInterp->loader) {
     jInterp->loader = newLoader(jInterp);
   }
@@ -467,7 +467,7 @@ Boolean registerLoaders(
   theCoAlg->loadAFileFunc          = loadAFileImpl;
 
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == LoadersTag);

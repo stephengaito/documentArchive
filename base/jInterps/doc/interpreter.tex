@@ -148,60 +148,60 @@ the interpreter's dictionary of words.
 \stopitemize
 
 \startCHeader
-typedef Boolean (CoAlgInitialize)(
+typedef Boolean (JClassInitialize)(
   JoyLoLInterp*,
-  CoAlgClass*
+  JClass*
 );
 
-typedef Boolean (CoAlgEquality)(
+typedef Boolean (JObjEquality)(
   JoyLoLInterp *jInterp,
   JObj     *lolA,
   JObj     *lolB
 );
 
 typedef struct string_buffer_object_struct StringBufferObj;
-typedef Boolean (CoAlgPrint)(
+typedef Boolean (JObjPrint)(
   JoyLoLInterp*,
   StringBufferObj*,
   JObj*
 );
 
-typedef JObj* (CoAlgCopy)(
+typedef JObj* (JObjCopy)(
   JoyLoLInterp*,
   JObj*
 );
 
-typedef Boolean (CoAlgRelease)(
+typedef Boolean (JObjRelease)(
   JoyLoLInterp*,
   JObj*
 );
 
 typedef void*   CoAlgData;
 
-typedef struct coalg_class_struct {
-  Symbol          *name;
-  size_t           objectSize;
-  CoAlgInitialize *initializeFunc;
-  CoAlgEquality   *equalityFunc;
-  CoAlgPrint      *printFunc;
-  CoAlgCopy       *copyFunc;
-  CoAlgRelease    *releaseFunc;
-} CoAlgClass;
+typedef struct joylol_class_struct {
+  Symbol           *name;
+  size_t            objectSize;
+  JClassInitialize *initializeFunc;
+  JObjEquality     *equalityFunc;
+  JObjPrint        *printFunc;
+  JObjCopy         *copyFunc;
+  JObjRelease      *releaseFunc;
+} JClass;
 
 typedef JObj* (JInterpNewObject)(
   JoyLoLInterp *jInterp,
   TagType       aTag
 );
 
-typedef size_t (JInterpRegisterCoAlgClass)(
+typedef size_t (JInterpRegisterJClass)(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *theCoAlgClass
+  JClass   *theJClass
 );
 
 typedef struct joylolinterp_class_struct {
-  CoAlgClass                 super;
+  JClass                 super;
   JInterpNewObject          *newObjectFunc;
-  JInterpRegisterCoAlgClass *registerCoAlgClassFunc;
+  JInterpRegisterJClass *registerJClassFunc;
 } JoyLoLInterpClass;
 \stopCHeader
 
@@ -214,7 +214,7 @@ as possible.
 
 \startCHeader
 typedef struct coalg_vecItem_struct {
-  CoAlgClass   *sClass; // static part
+  JClass   *sClass; // static part
   void         *dClass; // dynamic part
   ObjectMemory oMem;
 } CoAlgVecItem;
@@ -243,7 +243,7 @@ typedef struct joylol_interpreter_struct {
   StdOutputMethod *writeStdErr;
 } JoyLoLInterp;
 
-#define getCoAlgClass(jInterp, aTag)        \
+#define getJClass(jInterp, aTag)        \
   (                                         \
     assert(jInterp),                        \
     assert(aTag),                           \
@@ -253,63 +253,63 @@ typedef struct joylol_interpreter_struct {
   )
 
 #define getJInterpClass(jInterp)                            \
-  ((JoyLoLInterpClass*)getCoAlgClass(jInterp, JInterpsTag))
+  ((JoyLoLInterpClass*)getJClass(jInterp, JInterpsTag))
 
 typedef struct booleans_class_struct BooleansClass;
 #define getBooleansClass(jInterp)                           \
-  ((BooleansClass*)getCoAlgClass(jInterp, BooleansTag))
+  ((BooleansClass*)getJClass(jInterp, BooleansTag))
 
 typedef struct cFunctions_class_struct CFunctionsClass;
 #define getCFunctionsClass(jInterp)                         \
-  ((CFunctionsClass*)getCoAlgClass(jInterp, CFunctionsTag))
+  ((CFunctionsClass*)getJClass(jInterp, CFunctionsTag))
 
 typedef struct coAlgebras_class_struct CoAlgebrasClass;
 #define getCoAlgebrasClass(jInterp)                         \
-  ((CoAlgebrasClass*)getCoAlgClass(jInterp, CoAlgebrasTag))
+  ((CoAlgebrasClass*)getJClass(jInterp, CoAlgebrasTag))
 
 typedef struct contexts_class_struct ContextsClass;
 #define getContextsClass(jInterp)                           \
-  ((ContextsClass*)getCoAlgClass(jInterp, ContextsTag))
+  ((ContextsClass*)getJClass(jInterp, ContextsTag))
 
 typedef struct dictionaries_class_struct DictionariesClass;
 #define getDictionariesClass(jInterp)                \
-  ((DictionariesClass*)getCoAlgClass(jInterp, DictionariesTag))
+  ((DictionariesClass*)getJClass(jInterp, DictionariesTag))
 
 typedef struct loaders_class_struct LoadersClass;
 #define getLoadersClass(jInterp)                          \
-  ((LoadersClass*)getCoAlgClass(jInterp, LoadersTag))
+  ((LoadersClass*)getJClass(jInterp, LoadersTag))
 
 typedef struct luaFunctions_class_struct LuaFunctionsClass;
 #define getLuaFunctionsClass(jInterp)                          \
-  ((LuaFunctionsClass*)getCoAlgClass(jInterp, LuaFunctionsTag))
+  ((LuaFunctionsClass*)getJClass(jInterp, LuaFunctionsTag))
 
 typedef struct naturals_class_struct NaturalsClass;
 #define getNaturalsClass(jInterp)                           \
-  ((NaturalsClass*)getCoAlgClass(jInterp, NaturalsTag))
+  ((NaturalsClass*)getJClass(jInterp, NaturalsTag))
 
 typedef struct pairs_class_struct PairsClass;
 #define getPairsClass(jInterp)                              \
-  ((PairsClass*)getCoAlgClass(jInterp, PairsTag))
+  ((PairsClass*)getJClass(jInterp, PairsTag))
 
 typedef struct parsers_class_struct ParsersClass;
 #define getParsersClass(jInterp)                            \
-  ((ParsersClass*)getCoAlgClass(jInterp, ParsersTag))
+  ((ParsersClass*)getJClass(jInterp, ParsersTag))
 
 typedef struct stringBuffers_class_struct StringBuffersClass;
 #define getStringBuffersClass(jInterp)                      \
-  ((StringBuffersClass*)getCoAlgClass(jInterp, StringBuffersTag))
+  ((StringBuffersClass*)getJClass(jInterp, StringBuffersTag))
 
 typedef struct symbols_class_struct SymbolsClass;
 #define getSymbolsClass(jInterp)                            \
-  ((SymbolsClass*)getCoAlgClass(jInterp, SymbolsTag))
+  ((SymbolsClass*)getJClass(jInterp, SymbolsTag))
   
 typedef struct templates_class_struct TemplatesClass;
 #define getTemplatesClass(jInterp)                          \
-  ((TemplatesClass*)getCoAlgClass(jInterp, TemplatesTag))
+  ((TemplatesClass*)getJClass(jInterp, TemplatesTag))
 
 typedef struct texts_class_struct TextsClass;
 #define getTextsClass(jInterp)                              \
-  ((TextsClass*)getCoAlgClass(jInterp, TextsTag))
+  ((TextsClass*)getJClass(jInterp, TextsTag))
 \stopCHeader
 
 \startTestSuite[newJoyLoLInterp]
@@ -478,26 +478,26 @@ into hexadecimal using the standard \type{ASCII} character codes.
 \startTestSuite[registerCoAlgebra]
 
 \startCHeader
-#define registerCoAlgClass(jInterp, aTag)                              \
+#define registerJClass(jInterp, aTag)                              \
   (                                                                    \
-    assert(getJInterpClass(jInterp)->registerCoAlgClassFunc),          \
-    (getJInterpClass(jInterp)->registerCoAlgClassFunc)(jInterp, aTag)  \
+    assert(getJInterpClass(jInterp)->registerJClassFunc),          \
+    (getJInterpClass(jInterp)->registerJClassFunc)(jInterp, aTag)  \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-size_t registerCoAlgClassImpl(
+size_t registerJClassImpl(
   JoyLoLInterp *jInterp,
-  CoAlgClass *theCoAlg
+  JClass *theCoAlg
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-size_t registerCoAlgClassImpl(
+size_t registerJClassImpl(
   JoyLoLInterp *jInterp,
-  CoAlgClass *theCoAlg
+  JClass *theCoAlg
 ) {
   assert(jInterp);
   assert(jInterp->coAlgs);
@@ -569,20 +569,20 @@ We start by adding one single \type{CoAlgebra}.
 
 \startCTest
   JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
-  char*            coAlgName          = strdup("newCoAlgA");
-  char*            coAlgNameEnd       = coAlgName + strlen("newCoAlg");
-  CoAlgInitialize* fakeInitializeFunc = (CoAlgInitialize*) 0x100;
-  CoAlgEquality*   fakeEqualityFunc   = (CoAlgEquality*)   0x200;
-  CoAlgPrint*      fakePrintFunc      = (CoAlgPrint*)      0x300;
+  char*             coAlgName          = strdup("newCoAlgA");
+  char*             coAlgNameEnd       = coAlgName + strlen("newCoAlg");
+  JClassInitialize* fakeInitializeFunc = (JClassInitialize*) 0x100;
+  JObjEquality*    fakeEqualityFunc    = (JObjEquality*)   0x200;
+  JObjPrint*       fakePrintFunc       = (JObjPrint*)      0x300;
   
-  CoAlgClass* aCoAlg   = joyLoLCalloc(1, CoAlgClass);
+  JClass* aCoAlg   = joyLoLCalloc(1, JClass);
   AssertPtrNotNull(aCoAlg);
   aCoAlg->name           = strdup("newCoAlgA");
   aCoAlg->initializeFunc = fakeInitializeFunc;
   aCoAlg->equalityFunc   = fakeEqualityFunc;
   aCoAlg->printFunc      = fakePrintFunc;
 
-  size_t coAlgIdx = registerCoAlgClassImpl(jInterp, aCoAlg);
+  size_t coAlgIdx = registerJClassImpl(jInterp, aCoAlg);
   AssertIntEquals(coAlgIdx, NumRequiredCoAlgs);
 
   CoAlgVecItem* coAlgsVec = jInterp->coAlgs;
@@ -603,13 +603,13 @@ the existing one runs out of \quote{space}.
     fakeInitializeFunc    += 1;
     fakeEqualityFunc      += 1;
     fakePrintFunc         += 1;
-    aCoAlg                 = joyLoLCalloc(1, CoAlgClass);
+    aCoAlg                 = joyLoLCalloc(1, JClass);
     aCoAlg->name           = strdup(coAlgName);
     aCoAlg->initializeFunc = fakeInitializeFunc;
     aCoAlg->equalityFunc   = fakeEqualityFunc;
     aCoAlg->printFunc      = fakePrintFunc;
 
-    registerCoAlgClassImpl(jInterp, aCoAlg);
+    registerJClassImpl(jInterp, aCoAlg);
 
     CoAlgVecItem* coAlgsVec = jInterp->coAlgs;
     AssertPtrNotNull(coAlgsVec);
@@ -629,13 +629,13 @@ existing CoAlgebra index.
   size_t oldNumCoAlgs  = jInterp->numCoAlgs;
 
   *coAlgNameEnd          = 'A' + 5;
-  aCoAlg                 = joyLoLCalloc(1, CoAlgClass);
+  aCoAlg                 = joyLoLCalloc(1, JClass);
   aCoAlg->name           = strdup(coAlgName);
-  aCoAlg->initializeFunc = (CoAlgInitialize*) 0x100 + 5;
-  aCoAlg->equalityFunc   = (CoAlgEquality*)   0x200 + 5;
-  aCoAlg->printFunc      = (CoAlgPrint*)      0x300 + 5;
+  aCoAlg->initializeFunc = (JClassInitialize*) 0x100 + 5;
+  aCoAlg->equalityFunc   = (JObjEquality*)     0x200 + 5;
+  aCoAlg->printFunc      = (JObjPrint*)        0x300 + 5;
   
-  size_t anIndex = registerCoAlgClassImpl(jInterp, aCoAlg);
+  size_t anIndex = registerJClassImpl(jInterp, aCoAlg);
   AssertIntEquals(anIndex, 5 + NumRequiredCoAlgs);
   AssertIntEquals(oldNumCoAlgs, jInterp->numCoAlgs);
 \stopCTest
@@ -702,10 +702,10 @@ At the moment we can only (easily) test the \type{getGitVersion} function.
 \startCCode
 static Boolean initializeJInterps(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerJInterpWords(jInterp);
   return TRUE;
 }
@@ -733,9 +733,9 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
   theCoAlg->super.equalityFunc     = NULL;
   theCoAlg->super.printFunc        = NULL;
   theCoAlg->newObjectFunc          = newObjectImpl;
-  theCoAlg->registerCoAlgClassFunc = registerCoAlgClassImpl;
+  theCoAlg->registerJClassFunc = registerJClassImpl;
   size_t tag =
-    registerCoAlgClassImpl(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClassImpl(jInterp, (JClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == JInterpsTag);

@@ -188,7 +188,7 @@ void Test_checkFunctionsSymbols(CuTest* tc) {
 
 \startCHeader
 typedef struct coAlgebras_class_struct {
-  CoAlgClass    super;
+  JClass    super;
   NewCoAlgebra *newCoAlgebraFunc;
 } CoAlgebrasClass;
 \stopCHeader
@@ -196,10 +196,10 @@ typedef struct coAlgebras_class_struct {
 \startCCode
 static Boolean initializeCoAlgebras(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerCoAlgebraWords(jInterp);
   return TRUE;
 }
@@ -225,7 +225,7 @@ Boolean registerCoAlgebras(JoyLoLInterp *jInterp) {
   theCoAlg->newCoAlgebraFunc     = newCoAlgebraImpl;
   
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
 
   // do a sanity check...
   assert(tag == CoAlgebrasTag);

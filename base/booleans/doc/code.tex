@@ -258,7 +258,7 @@ Boolean printBoolCoAlg(
 
 \startCHeader
 typedef struct booleans_class_struct {
-  CoAlgClass       super;
+  JClass       super;
   NewBoolean      *newBooleanFunc;
   AssertBoolValue *isTrueFunc;
   AssertBoolValue *isFalseFunc;
@@ -269,10 +269,10 @@ typedef struct booleans_class_struct {
 \startCCode
 static Boolean initializeBooleans(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerBooleanWords(jInterp);
   return TRUE;
 }
@@ -302,7 +302,7 @@ Boolean registerBooleans(JoyLoLInterp *jInterp) {
   theCoAlg->isTrueFunc           = isTrueImpl;
   theCoAlg->isFalseFunc          = isFalseImpl;
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == BooleansTag);

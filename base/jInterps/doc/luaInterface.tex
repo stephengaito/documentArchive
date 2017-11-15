@@ -229,7 +229,7 @@ static void initializeAllRequired(
   RequiredCoAlgs *curCoAlg = requiredCoAlgs;
   for ( ; curCoAlg->name ; curCoAlg++) {
     size_t curTag = curCoAlg->tag;
-    if (!getCoAlgClass(jInterp, curTag)) {
+    if (!getJClass(jInterp, curTag)) {
       /*return*/ luaL_error(lstate, "%s%s%s%s\n\n",
         "\nERROR:\n",
        "  Missing a required CoAlgebraic extension\n",
@@ -241,7 +241,7 @@ static void initializeAllRequired(
   // now call the initialization function for each 
   // required CoAlgebraic extension
   for( size_t i = 1; i < NumRequiredCoAlgs; i++) {
-    CoAlgClass *aCoAlg = getCoAlgClass(jInterp, i);
+    JClass *aCoAlg = getJClass(jInterp, i);
     if (aCoAlg) {
       if (jInterp->verbose) {
         char output[1000];

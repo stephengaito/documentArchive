@@ -10,17 +10,17 @@
 
 \startCHeader
 typedef struct templates_class_struct {
-  CoAlgClass super;
+  JClass super;
 } TemplatesClass;
 \stopCHeader
 
 \startCCode
 static Boolean initializeTemplates(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerTemplateWords(jInterp);
   return TRUE;
 }
@@ -45,7 +45,7 @@ Boolean registerTemplates(JoyLoLInterp *jInterp) {
   theCoAlg->super.printFunc      = NULL;
   
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
 
   // do a sanity check...
   assert(tag == TemplatesTag);

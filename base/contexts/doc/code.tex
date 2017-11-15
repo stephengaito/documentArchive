@@ -189,7 +189,7 @@ Boolean printContextsCoAlg(
 
 \startCHeader
 typedef struct contexts_class_struct {
-  CoAlgClass      super;
+  JClass      super;
   NewContext     *newContextFunc;
   PushCtx        *pushCtxDataFunc; 
   PushNullCtx    *pushNullCtxDataFunc;
@@ -234,10 +234,10 @@ typedef struct contexts_class_struct {
 \startCCode
 static Boolean initializeContexts(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   if (!jInterp->rootCtx) {
     jInterp->rootCtx =
       newContext(jInterp, "joylol", NULL, NULL, NULL);
@@ -310,7 +310,7 @@ Boolean registerContexts(
   theCoAlg->evalStringInContextFunc =
     evalStringInContextImpl;
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
 
   // do a sanity check...
   assert(tag == ContextsTag);

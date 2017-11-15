@@ -187,7 +187,7 @@ JObj* copyLoLImpl(
   AssertPtrNotNull(aPair1);
   AssertPtrNotNull(asType(aPair1));
   AssertPtrEquals(asType(aPair1),
-    (CoAlgClass*)getPairsClass(jInterp));
+    (JClass*)getPairsClass(jInterp));
 
   AssertPtrNotNull(asCar(aPair1));
   AssertPtrNotEquals(asCar(aPair1), pairA);
@@ -364,7 +364,7 @@ Boolean printPairsCoAlg(
 
 \startCHeader
 typedef struct pairs_class_struct {
-  CoAlgClass  super;
+  JClass  super;
   NewPair    *newPairFunc;
   CarCdr     *carFunc;
   CarCdr     *cdrFunc;
@@ -376,10 +376,10 @@ typedef struct pairs_class_struct {
 \startCCode
 static Boolean initializePairs(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerPairWords(jInterp);
   return TRUE;
 }
@@ -407,7 +407,7 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   theCoAlg->equalLoLFunc         = equalLoLImpl;
   theCoAlg->copyLoLFunc          = copyLoLImpl;
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
   
   // sanity check...
   assert(tag == PairsTag);

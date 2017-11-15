@@ -256,7 +256,7 @@ Boolean printSymbolCoAlg(
 
 \startCHeader
 typedef struct symbols_class_struct {
-  CoAlgClass  super;
+  JClass  super;
   NewSymbol  *newSymbolFunc;
   SymbolIs   *symbolIsFunc;
 } SymbolsClass;
@@ -265,10 +265,10 @@ typedef struct symbols_class_struct {
 \startCCode
 static Boolean initializeSymbols(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerSymbolWords(jInterp);
   return TRUE;
 }
@@ -295,7 +295,7 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   theCoAlg->symbolIsFunc         = symbolIsImpl;
 
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
   
   // sanity check...
   assert(tag == SymbolsTag);

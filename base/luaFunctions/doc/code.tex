@@ -247,17 +247,17 @@ void Test_checkFunctionsSymbols(CuTest* tc) {
 
 \startCHeader
 typedef struct luaFunctions_class_struct {
-  CoAlgClass super;
+  JClass super;
 } LuaFunctionsClass;
 \stopCHeader
 
 \startCCode
 static Boolean initializeLuaFunctions(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerLuaFunctionWords(jInterp);
   return TRUE;
 }
@@ -282,7 +282,7 @@ Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
   theCoAlg->super.printFunc      = NULL;
   
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
 
   // do a sanity check...
   assert(tag == LuaFunctionsTag);

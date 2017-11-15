@@ -198,7 +198,7 @@ void Test_checkFunctionsSymbols(CuTest* tc) {
 
 \startCHeader
 typedef struct cFunctions_class_struct {
-  CoAlgClass    super;
+  JClass    super;
   NewCFunction *newCFunctionFunc;
 } CFunctionsClass;
 \stopCHeader
@@ -206,10 +206,10 @@ typedef struct cFunctions_class_struct {
 \startCCode
 static Boolean initializeCFunctions(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerCFunctionWords(jInterp);
   return TRUE;
 }
@@ -235,7 +235,7 @@ Boolean registerCFunctions(JoyLoLInterp *jInterp) {
   theCoAlg->newCFunctionFunc     = newCFunctionImpl;
   
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
 
   // do a sanity check...
   assert(tag == CFunctionsTag);

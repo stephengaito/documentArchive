@@ -425,7 +425,7 @@ void printLoLImpl(
 
 \startCHeader
 typedef struct stringBuffers_class_struct {
-  CoAlgClass       super;
+  JClass       super;
   NewStringBuffer *newStringBufferFunc;
   StrBufClose     *strBufCloseFunc;
   GetCString      *getCStringFunc;
@@ -437,10 +437,10 @@ typedef struct stringBuffers_class_struct {
 \startCCode
 static Boolean initializeStringBuffers(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerStringBufferWords(jInterp);
   return TRUE;
 }
@@ -470,7 +470,7 @@ Boolean registerStringBuffers(JoyLoLInterp* jInterp) {
   theCoAlg->strBufPrintfFunc      = strBufPrintfImpl;
   theCoAlg->printLoLFunc          = printLoLImpl;
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
   
   // sanity check...
   assert(tag == StringBuffersTag);

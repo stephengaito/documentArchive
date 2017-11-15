@@ -78,7 +78,7 @@ We can now define the \emph{base} \type{JObj} as:
 
 \startCHeader
 typedef struct joylol_object_struct {
-  CoAlgClass *type;
+  JClass *type;
   TagType     tag;
   FlagsType   flags; // an arbitrary collection of bits
 } JObj;

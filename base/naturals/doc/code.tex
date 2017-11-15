@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: symbols.tex]
+% A ConTeXt document [master document: naturals.tex]
 
 \section[title=Code]
 \setCHeaderStream{public}
@@ -215,7 +215,7 @@ Boolean printNatCoAlg(
 
 \startCHeader
 typedef struct naturals_class_struct {
-  CoAlgClass super;
+  JClass super;
   NewNatural *newNaturalFunc;
 } NaturalsClass;
 \stopCHeader
@@ -223,10 +223,10 @@ typedef struct naturals_class_struct {
 \startCCode
 static Boolean initializeNaturals(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerNaturalWords(jInterp);
   return TRUE;
 }
@@ -252,7 +252,7 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   theCoAlg->newNaturalFunc       = newNaturalImpl;
 
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
   
   // sanity check...
   assert(tag == NaturalsTag);

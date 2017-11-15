@@ -290,7 +290,7 @@ Boolean printDicInto(
 
 \startCHeader
 typedef struct dictionaries_class_struct {
-  CoAlgClass super;
+  JClass super;
   NewDict         *newDictFunc;
   CreateSymbol    *createSymbolFunc;
   GetSymbol       *getSymbolFunc;
@@ -303,10 +303,10 @@ typedef struct dictionaries_class_struct {
 \startCCode
 static Boolean initializeDictionaries(
   JoyLoLInterp *jInterp,
-  CoAlgClass   *aCoAlgClass
+  JClass   *aJClass
 ) {
   assert(jInterp);
-  assert(aCoAlgClass);
+  assert(aJClass);
   registerDictionaryWords(jInterp);
   return TRUE;
 }
@@ -338,7 +338,7 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   theCoAlg->findLUBSymbolFunc     = findLUBSymbolImpl;
   theCoAlg->listDefinitionsFunc   = listDefinitionsImpl;
   size_t tag =
-    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+    registerJClass(jInterp, (JClass*)theCoAlg);
   
   // do a sanity check...
   assert(tag == DictionariesTag);
