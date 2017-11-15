@@ -10,7 +10,7 @@ lfs.mkdir('install/joylol')
 require 'lms.litProgs'
 
 litProgs.targets{
-  mainDoc  = 'coAlgs.tex',
+  mainDoc  = 'coAlgebras.tex',
   docFiles = {
     'overview.tex',
     'code.tex',
@@ -19,9 +19,9 @@ litProgs.targets{
     'conclusion.tex',
   },
   srcFiles = {
-    'joylol/coAlgs.h',
-    'joylol/coAlgs-private.h',
-    'coAlgs.c',
+    'joylol/coAlgebras.h',
+    'joylol/coAlgebras-private.h',
+    'coAlgebras.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',
@@ -32,12 +32,12 @@ require 'lms.joyLoL'
 
 joylol.targets{
   coAlgs = {
-    'cFunctions',
+    'coAlgebras',
   },
   srcFiles = {
-    'joylol/coAlgs.h',
-    'joylol/coAlgs-private.h',
-    'coAlgs.c',
+    'joylol/coAlgebras.h',
+    'joylol/coAlgebras-private.h',
+    'coAlgebras.c',
   },
   coAlgLibs = {
     'jInterps',
@@ -51,7 +51,7 @@ contests.targets{
   testExecs = {
     'allCTests',
   },
-  mainDoc = 'coAlgs.tex',
+  mainDoc = 'coAlgebras.tex',
   docFiles = {
     'overview.tex',
     'code.tex',
@@ -60,9 +60,9 @@ contests.targets{
     'conclusion.tex',
   },
   srcFiles = {
-    'joylol/coAlgs.h',
-    'joylol/coAlgs-private.h',
-    'coAlgs.c',
+    'joylol/coAlgebras.h',
+    'joylol/coAlgebras-private.h',
+    'coAlgebras.c',
   },
   testLibDirs = {
   },

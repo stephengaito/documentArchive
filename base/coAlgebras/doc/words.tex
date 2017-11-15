@@ -3,13 +3,13 @@
 \section[title=JoyLoL words]
 
 \startCCode
-static void isCoAlgAP(ContextObj* aCtx) {
+static void isCoAlgebraAP(ContextObj* aCtx) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   popCtxDataInto(aCtx, top);
   CoAlgObj* result = NULL;
-  if (isCoAlg(top))
+  if (isCoAlgebra(top))
     result = newBoolean(jInterp, TRUE);
   else
     result = newBoolean(jInterp, FALSE);
@@ -19,13 +19,13 @@ static void isCoAlgAP(ContextObj* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerCoAlgWords(JoyLoLInterp* jInterp);
+extern void registerCoAlgebraWords(JoyLoLInterp* jInterp);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerCoAlgWords(JoyLoLInterp* jInterp) {
+void registerCoAlgebraWords(JoyLoLInterp* jInterp) {
   assert(jInterp);
-  extendJoyLoL(jInterp, "isCoAlg", isCoAlgAP);
+  extendJoyLoL(jInterp, "isCoAlgebra", isCoAlgebraAP);
 }
 \stopCCode

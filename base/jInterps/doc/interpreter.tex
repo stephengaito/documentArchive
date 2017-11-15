@@ -263,6 +263,10 @@ typedef struct cFunctions_class_struct CFunctionsClass;
 #define getCFunctionsClass(jInterp)                         \
   ((CFunctionsClass*)getCoAlgClass(jInterp, CFunctionsTag))
 
+typedef struct coAlgebras_class_struct CoAlgebrasClass;
+#define getCoAlgebrasClass(jInterp)                         \
+  ((CoAlgebrasClass*)getCoAlgClass(jInterp, CoAlgebrasTag))
+
 typedef struct contexts_class_struct ContextsClass;
 #define getContextsClass(jInterp)                           \
   ((ContextsClass*)getCoAlgClass(jInterp, ContextsTag))

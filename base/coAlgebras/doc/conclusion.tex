@@ -4,16 +4,16 @@
 
 \addDocumentDirectory{doc}
 
-\CHeaderIncludeGuard{public}{JOYLOL_COALG_COALGS}
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_COALGEBRAS}
 \createCHeaderFile%
   {public}
-  {joylol/coAlgs.h}
+  {joylol/coAlgebras.h}
   {}
 
-\CHeaderIncludeGuard{private}{JOYLOL_COALG_COALGS_PRIVATE}
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_COALGEBRAS_PRIVATE}
 \createCHeaderFile%
   {private}
-  {joylol/coAlgs-private.h}
+  {joylol/coAlgebras-private.h}
   {}
 
 \prependCCode{default}
@@ -23,25 +23,32 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
-#include <joylol/coAlgs.h>
-#include <joylol/coAlgs-private.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/booleans.h>
+#include <joylol/cFunctions.h>
+#include <joylol/texts.h>
+#include <joylol/contexts.h>
+#include <joylol/coAlgebras.h>
+#include <joylol/coAlgebras-private.h>
 \stopCCode
 
 \createCCodeFile%
   {default}%
-  {coAlgs.c}%
+  {coAlgebras.c}%
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
-\addCTestInclude{<joylol/coAlgs.h>}
-\addCTestInclude{<joylol/coAlgs-private.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/coAlgebras.h>}
+\addCTestInclude{<joylol/coAlgebras-private.h>}
 \addCTestLib{<HOME>/.joylol/joylol/jInterps}
 \addCTestJoyLoLCallbacks{default}
 \CTestsSetup\
 \startCTest
   addJoyLoLLuaPath(lstate);
   requireStaticallyLinkedJInterps(lstate);
-  requireStaticallyLinkedCoAlgs(lstate);
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireStaticallyLinkedCoAlgebras(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
 
@@ -50,7 +57,7 @@
   {allCTests.c}%
   {}
 
-\addMainDocument{coAlgs.tex}
+\addMainDocument{coAlgebras.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
 \addSubDocument{lua.tex}

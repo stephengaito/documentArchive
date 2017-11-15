@@ -5,7 +5,7 @@
 \component gitVersion-c
 
 \startCCode
-static int lua_coAlgs_getGitVersion (lua_State *lstate) {
+static int lua_coAlgebras_getGitVersion (lua_State *lstate) {
   const char* aKey   = lua_tostring(lstate, 1);
   if (aKey) {
     getGitVersionInto(gitVersionKeyValues, aKey, aValue);
@@ -16,15 +16,15 @@ static int lua_coAlgs_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static const struct luaL_Reg lua_coAlgs [] = {
-  {"gitVersion", lua_coAlgs_getGitVersion},
+static const struct luaL_Reg lua_coAlgebras [] = {
+  {"gitVersion", lua_coAlgebras_getGitVersion},
   {NULL, NULL}
 };
 
-int luaopen_joylol_coAlgs (lua_State *lstate) {
+int luaopen_joylol_coAlgebras (lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
-  registerCoAlgs(jInterp);
-  luaL_newlib(lstate, lua_coAlgs);
+  registerCoAlgebras(jInterp);
+  luaL_newlib(lstate, lua_coAlgebras);
   return 1;
 }
 \stopCCode
@@ -33,23 +33,23 @@ In some instances, such as the typical \type{CTest} program
 \type{allCTests}, this Lua module (which can be \type{require}d as a 
 shared library) is actually statically linked into the executable. In 
 these cases we need the ability to mimic the standard Lua \type{require} 
-process. The following \type{requireStaticallyLinkedCoAlgs} does just 
+process. The following \type{requireStaticallyLinkedCoAlgebras} does just 
 this. 
 
 \startCHeader
-Boolean requireStaticallyLinkedCoAlgs(
+extern Boolean requireStaticallyLinkedCoAlgebras(
   lua_State *lstate
 );
 \stopCHeader
 
 \startCCode
-Boolean requireStaticallyLinkedCoAlgs(
+Boolean requireStaticallyLinkedCoAlgebras(
   lua_State *lstate
 ) {
   lua_getglobal(lstate, "package");
   lua_getfield(lstate, -1, "loaded");
-  luaopen_joylol_coAlgs(lstate);
-  lua_setfield(lstate, -2, "joylol.coAlgs");
+  luaopen_joylol_coAlgebras(lstate);
+  lua_setfield(lstate, -2, "joylol.coAlgebras");
   lua_setfield(lstate, -2, "loaded");
   lua_pop(lstate, 1);
   return TRUE;

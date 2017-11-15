@@ -130,33 +130,35 @@ The required extensions for this implementation is:
 #define JInterpsTag        1
 #define BooleansTag        2
 #define CFunctionsTag      3
-#define ContextsTag        4
-#define DictionariesTag    5
-#define LoadersTag         6
-#define LuaFunctionsTag    7
-#define NaturalsTag        8
-#define PairsTag           9
-#define ParsersTag        10
-#define StringBuffersTag  11
-#define SymbolsTag        12
-#define TemplatesTag      13
-#define TextsTag          14
-#define NumRequiredCoAlgs 15
+#define CoAlgebrasTag      4
+#define ContextsTag        5
+#define DictionariesTag    6
+#define LoadersTag         7
+#define LuaFunctionsTag    8
+#define NaturalsTag        9
+#define PairsTag          10
+#define ParsersTag        11
+#define StringBuffersTag  12
+#define SymbolsTag        13
+#define TemplatesTag      14
+#define TextsTag          15
+#define NumRequiredCoAlgs 16
 
-#define JInterpsName      "jInterps"
-#define BooleansName      "booleans"
-#define CFunctionsName    "cFunctions"
-#define ContextsName      "contexts"
-#define DictionariesName  "dictionaries"
-#define LoadersName       "loaders"
-#define LuaFunctionsName  "luaFunctions"
-#define NaturalsName      "naturals"
-#define PairsName         "pairs"
-#define ParsersName       "parsers"
-#define StringBuffersName "stringBuffers"
-#define SymbolsName       "symbols"
-#define TemplatesName     "templates"
-#define TextsName         "texts"
+#define JInterpsName      "jInterps"      /*  1 */
+#define BooleansName      "booleans"      /*  2 */
+#define CFunctionsName    "cFunctions"    /*  3 */
+#define CoAlgebrasName    "coAlgebras"    /*  4 */
+#define ContextsName      "contexts"      /*  5 */
+#define DictionariesName  "dictionaries"  /*  6 */
+#define LoadersName       "loaders"       /*  7 */
+#define LuaFunctionsName  "luaFunctions"  /*  8 */
+#define NaturalsName      "naturals"      /*  9 */
+#define PairsName         "pairs"         /* 10 */
+#define ParsersName       "parsers"       /* 11 */
+#define StringBuffersName "stringBuffers" /* 12 */
+#define SymbolsName       "symbols"       /* 13 */
+#define TemplatesName     "templates"     /* 14 */
+#define TextsName         "texts"         /* 15 */
 \stopCHeader
 
 Since each CoAlgebraic extension can be developed separately, we need to 
@@ -204,17 +206,18 @@ RequiredCoAlgs requiredCoAlgs[] = {
   { JInterpsName,      JInterpsTag,      {0, 1, 0 }}, //  1
   { BooleansName,      BooleansTag,      {0, 1, 0 }}, //  2
   { CFunctionsName,    CFunctionsTag,    {0, 1, 0 }}, //  3
-  { ContextsName,      ContextsTag,      {0, 1, 0 }}, //  4
-  { DictionariesName,  DictionariesTag,  {0, 1, 0 }}, //  5
-  { LoadersName,       LoadersTag,       {0, 1, 0 }}, //  6
-  { LuaFunctionsName,  LuaFunctionsTag,  {0, 1, 0 }}, //  7
-  { NaturalsName,      NaturalsTag,      {0, 1, 0 }}, //  8
-  { PairsName,         PairsTag,         {0, 1, 0 }}, //  9
-  { ParsersName,       ParsersTag,       {0, 1, 0 }}, // 10
-  { StringBuffersName, StringBuffersTag, {0, 1, 0 }}, // 11
-  { SymbolsName,       SymbolsTag,       {0, 1, 0 }}, // 12
-  { TemplatesName,     TemplatesTag,     {0, 1, 0 }}, // 13
-  { TextsName,         TextsTag,         {0, 1, 0 }}, // 14
+  { CoAlgebrasName,    CoAlgebrasTag,    {0, 1, 0 }}, //  4
+  { ContextsName,      ContextsTag,      {0, 1, 0 }}, //  5
+  { DictionariesName,  DictionariesTag,  {0, 1, 0 }}, //  6
+  { LoadersName,       LoadersTag,       {0, 1, 0 }}, //  7
+  { LuaFunctionsName,  LuaFunctionsTag,  {0, 1, 0 }}, //  8
+  { NaturalsName,      NaturalsTag,      {0, 1, 0 }}, //  9
+  { PairsName,         PairsTag,         {0, 1, 0 }}, // 10
+  { ParsersName,       ParsersTag,       {0, 1, 0 }}, // 11
+  { StringBuffersName, StringBuffersTag, {0, 1, 0 }}, // 12
+  { SymbolsName,       SymbolsTag,       {0, 1, 0 }}, // 13
+  { TemplatesName,     TemplatesTag,     {0, 1, 0 }}, // 14
+  { TextsName,         TextsTag,         {0, 1, 0 }}, // 15
   { NULL,              0,                {0, 0, 0 }}
 };
 \stopCCode
@@ -227,17 +230,18 @@ local joylol = { }
 joylol.jInterps      = require 'joylol.jInterps'       --  1
 joylol.booleans      = require 'joylol.booleans'       --  2
 joylol.cFunctions    = require 'joylol.cFunctions'     --  3
-joylol.contexts      = require 'joylol.contexts'       --  4
-joylol.dictionaries  = require 'joylol.dictionaries'   --  5
-joylol.loaders       = require 'joylol.loaders'        --  6
-joylol.luaFunctions  = require 'joylol.luaFunctions'   --  7
-joylol.naturals      = require 'joylol.naturals'       --  8
-joylol.pairs         = require 'joylol.pairs'          --  9
-joylol.parsers       = require 'joylol.parsers'        -- 10
-joylol.stringBuffers = require 'joylol.stringBuffers'  -- 11
-joylol.symbols       = require 'joylol.symbols'        -- 12
-joylol.templates     = require 'joylol.templates'      -- 13
-joylol.texts         = require 'joylol.texts'          -- 14
+joylol.coAlgebras    = require 'joylol.coAlgebras'     --  4
+joylol.contexts      = require 'joylol.contexts'       --  5
+joylol.dictionaries  = require 'joylol.dictionaries'   --  6
+joylol.loaders       = require 'joylol.loaders'        --  7
+joylol.luaFunctions  = require 'joylol.luaFunctions'   --  8
+joylol.naturals      = require 'joylol.naturals'       --  9
+joylol.pairs         = require 'joylol.pairs'          -- 10
+joylol.parsers       = require 'joylol.parsers'        -- 11
+joylol.stringBuffers = require 'joylol.stringBuffers'  -- 12
+joylol.symbols       = require 'joylol.symbols'        -- 13
+joylol.templates     = require 'joylol.templates'      -- 14
+joylol.texts         = require 'joylol.texts'          -- 15
 
 -- load all required CoAlgebraic extensions -- initialization phase
 
