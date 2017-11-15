@@ -1,0 +1,70 @@
+% A ConTeXt document [master document: coAlgs.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_COALGS}
+\createCHeaderFile%
+  {public}
+  {joylol/coAlgs.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_COALGS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/coAlgs-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/coAlgs.h>
+#include <joylol/coAlgs-private.h>
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {coAlgs.c}%
+  {}
+
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/coAlgs.h>}
+\addCTestInclude{<joylol/coAlgs-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedCoAlgs(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
+\stopCTest
+
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{coAlgs.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{install}
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

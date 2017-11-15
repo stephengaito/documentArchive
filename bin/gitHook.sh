@@ -81,6 +81,8 @@ cp $gitVTex base/booleans/doc
 cp $gitVC   base/booleans/doc
 cp $gitVTex base/cFunctions/doc
 cp $gitVC   base/cFunctions/doc
+cp $gitVTex base/coAlgs/doc
+cp $gitVC   base/coAlgs/doc
 cp $gitVTex base/contexts/doc
 cp $gitVC   base/contexts/doc
 cp $gitVTex base/dictionaries/doc

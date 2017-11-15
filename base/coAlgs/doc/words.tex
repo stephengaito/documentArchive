@@ -1,0 +1,31 @@
+% A ConTeXt document [master document: coAlgs.tex]
+
+\section[title=JoyLoL words]
+
+\startCCode
+static void isCoAlgAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  CoAlgObj* result = NULL;
+  if (isCoAlg(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerCoAlgWords(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerCoAlgWords(JoyLoLInterp* jInterp) {
+  assert(jInterp);
+  extendJoyLoL(jInterp, "isCoAlg", isCoAlgAP);
+}
+\stopCCode

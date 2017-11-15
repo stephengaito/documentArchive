@@ -1,0 +1,263 @@
+% A ConTeXt document [master document: coAlgs.tex]
+
+\section[title=Code]
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+%\dependsOn[boolean]
+\setCHeaderStream{public}
+
+\startCHeader
+typedef struct context_object_struct ContextObj;
+typedef void (CoAlg)(ContextObj*);
+
+typedef struct coAlg_object_struct {
+  CoAlgObj   super;
+  // ??
+} CoAlgObj;
+
+//#define asCFunc(aLoL) (((CFunctionObj*)(aLoL))->func)
+\stopCHeader
+
+\startTestSuite[newCoAlg]
+
+\startCHeader
+typedef CoAlgObj *(NewCoAlg)(
+  JoyLoLInterp *jInterp//,
+  //CFunction    *aFunc
+);
+
+#define newCoAlg(jInterp/*, aFunc*/)      \
+  (                                       \
+    assert(getCoAlgsClass(jInterp)    \
+      ->newCoAlgFunc),                \
+    (getCoAlgsClass(jInterp)          \
+      ->newCoAlgFunc(jInterp/*, aFunc*/)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgObj *newCoAlgImpl(
+  JoyLoLInterp *jInterp//,
+  //CFunction *aFunc
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+CFunctionObj *newCoAlgImpl(
+  JoyLoLInterp *jInterp//,
+  //CFunction *aFunc
+) {
+  assert(jInterp);
+  CoAlgObj* aNewCoAlg =
+    (CoAlgObj*)newObject(jInterp, CoAlgsTag);
+  assert(aNewCoAlg);
+  //aNewFunc->func  = aFunc;
+  return aNewCoAlg;
+}
+\stopCCode
+
+\startTestCase[should create a new CoAlg]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  CFunctionObj *aNewFunc =
+    newCFunction(jInterp, testCFunction);
+  AssertPtrNotNull(aNewFunc);
+  AssertPtrNotEquals((void*)aNewFunc, (void*)testCFunction);
+  AssertPtrNotNull(aNewFunc->super.type);
+  AssertIntEquals(aNewFunc->super.tag, CFunctionsTag);
+  AssertPtrEquals(aNewFunc->func, testCFunction);
+  AssertIntTrue(isCFunction((CoAlgObj*)aNewFunc));
+  AssertIntTrue(isAtom((CoAlgObj*)aNewFunc));
+  AssertIntFalse(isPair((CoAlgObj*)aNewFunc));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startCHeader
+#define isCFunction(aLoL)               \
+  (                                     \
+    (                                   \
+      (aLoL) &&                         \
+      asType(aLoL) &&                   \
+      (asTag(aLoL) == CFunctionsTag) && \
+       asCFunc(aLoL)                    \
+    ) ?                                 \
+      TRUE :                            \
+      FALSE                             \
+  )
+
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+Boolean equalityFuncCoAlg(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityFuncCoAlg(
+  JoyLoLInterp *jInterp,
+  CoAlgObj     *lolA,
+  CoAlgObj     *lolB
+) {
+  DEBUG(jInterp, "funcCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA) != CFunctionsTag) return FALSE;
+  if (asCFunc(lolA) != asCFunc(lolB)) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[print CFunction]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printFuncCoAlg(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printFuncCoAlg(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  CoAlgObj        *aLoL
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == CFunctionsTag);
+
+  char ptoa[100];
+  sprintf(ptoa, "<%p> ", asCFunc(aLoL));
+  strBufPrintf(jInterp, aStrBuf, ptoa);
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print CFuncion]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  char buffer[100];
+  buffer[0] = 0;
+  sprintf((char*)&buffer, "<%p> ", testCFunction);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+  
+  CoAlgObj* aNewFunc =
+    (CoAlgObj*)newCFunction(jInterp, testCFunction);
+  AssertPtrNotNull(aNewFunc);
+  printLoL(jInterp, aStrBuf, aNewFunc);
+  AssertStrEquals(getCString(jInterp, aStrBuf), buffer);
+  strBufClose(jInterp, aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\starttyping
+// suiteName: - Functions CoAlgebra tests -
+
+void Test_checkFunctionsSymbols(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+
+  Symbols* symbols = coAlgs->symbols;
+  CuAssertPtrNotNull(tc, symbols);
+  Dictionary* mainDic = symbols->dictionary;
+  CuAssertPtrNotNull(tc, mainDic);
+
+  AVLNode* aNode = findSymbol(mainDic, "isFunction");
+  CuAssertPtrNotNull(tc, aNode);
+  CuAssertStrEquals(tc, aNode->symbol, "isFunction");
+  CuAssertPtrNotNull(tc, aNode->value);
+  CuAssertTrue(tc, isFunction(aNode->value));
+}
+\stoptyping
+
+\startTestSuite[registerCFunctions]
+
+\startCHeader
+typedef struct cFunctions_class_struct {
+  CoAlgClass    super;
+  NewCFunction *newCFunctionFunc;
+} CFunctionsClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializeCFunctions(
+  JoyLoLInterp *jInterp,
+  CoAlgClass   *aCoAlgClass
+) {
+  assert(jInterp);
+  assert(aCoAlgClass);
+  registerCFunctionWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerCFunctions(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerCFunctions(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  
+  CFunctionsClass* theCoAlg    =
+    joyLoLCalloc(1, CFunctionsClass);
+  theCoAlg->super.name           = CFunctionsName;
+  theCoAlg->super.objectSize     = sizeof(CFunctionObj);
+  theCoAlg->super.initializeFunc = initializeCFunctions;
+  theCoAlg->super.equalityFunc   = equalityFuncCoAlg;
+  theCoAlg->super.printFunc      = printFuncCoAlg;
+  theCoAlg->newCFunctionFunc     = newCFunctionImpl;
+  
+  size_t tag =
+    registerCoAlgClass(jInterp, (CoAlgClass*)theCoAlg);
+
+  // do a sanity check...
+  assert(tag == CFunctionsTag);
+  assert(jInterp->coAlgs[tag].sClass);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register cFunctions]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerCFunctions
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getCFunctionsClass(jInterp));
+  CFunctionsClass *coAlg =
+    getCFunctionsClass(jInterp);
+  AssertIntTrue(registerCFunctions(jInterp));
+  AssertPtrNotNull(getCFunctionsClass(jInterp));
+  AssertPtrEquals(getCFunctionsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getCFunctionsClass(jInterp)->super.objectSize,
+    sizeof(CFunctionObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite
