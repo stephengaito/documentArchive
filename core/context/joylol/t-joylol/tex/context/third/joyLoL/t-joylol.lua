@@ -46,9 +46,9 @@ local toStr   = tostring
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-15",
-  commitShortHash = "aefe223",
-  commitLongHash  = "aefe223e111be0fd0c1af34f6f5ebb1a19673855",
-  subject         = "begun addition of CoAlgs coalgebra",
+  commitShortHash = "6e91902",
+  commitLongHash  = "6e919027044e0615f85a37068a06684eead5a91b",
+  subject         = "completed first phase of addition of coAlgebras",
   notes           = ""
 }
 

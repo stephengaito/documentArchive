@@ -52,8 +52,8 @@ static void lispInterpretAP(ContextObj* aCtx) {
       "listInterpret expected a pair as top");
     return;
   }
-  CoAlgObj* operationName = asCar(top);
-  CoAlgObj* operationBody = asCdr(top);
+  JObj* operationName = asCar(top);
+  JObj* operationBody = asCdr(top);
   pushCtxProcess(aCtx, operationName);
   pushCtxProcess(aCtx, operationBody);
 }
@@ -75,8 +75,8 @@ static void lispForAP(ContextObj* aCtx) {
         "listFor (continue) expected a pair as nextCommand");
       return;
     }
-    CoAlgObj* operationName = asCar(nextCommand);
-    CoAlgObj* operationBody = asCdr(nextCommand);
+    JObj* operationName = asCar(nextCommand);
+    JObj* operationBody = asCdr(nextCommand);
     pushSymbolCtxProcess(aCtx, "lispFor");
     pushCtxProcess(aCtx, operationName);
     pushCtxProcess(aCtx, operationBody);
@@ -149,7 +149,7 @@ static void findFirstTryHandlerAP(ContextObj* aCtx) {
         NULL
       );
       pushSymbolCtxProcess(aCtx->parent, "raise");
-      pushCtxProcess(aCtx, (CoAlgObj*)parentCtx);
+      pushCtxProcess(aCtx, (JObj*)parentCtx);
     }
   }
 }
@@ -297,7 +297,7 @@ static void newContextAP(ContextObj* aCtx) {
     contextProcess
   );
   assert(newCtx);
-  pushCtxData(aCtx, (CoAlgObj*)newCtx);
+  pushCtxData(aCtx, (JObj*)newCtx);
 }
 \stopCCode
 

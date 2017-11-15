@@ -18,7 +18,7 @@
 static void isContextAP(ContextObj* aCtx) {
   assert(aCtx);
   popCtxDataInto(aCtx, top);
-  CoAlgObj* result = NULL;
+  JObj* result = NULL;
   if (isContext(top)) result = newBoolean(aCtx->jInterp, TRUE);
   else                result = newBoolean(aCtx->jInterp, FALSE);
   pushCtxData(aCtx, result);

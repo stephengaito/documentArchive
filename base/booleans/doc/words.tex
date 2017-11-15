@@ -8,7 +8,7 @@ static void isBooleanAP(ContextObj* aCtx) {
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   popCtxDataInto(aCtx, top);
-  CoAlgObj* result = NULL;
+  JObj* result = NULL;
   if (isBoolean(top))
     result = newBoolean(jInterp, TRUE);
   else

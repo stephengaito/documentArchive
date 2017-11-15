@@ -12,7 +12,7 @@ typedef struct context_object_struct ContextObj;
 typedef void (CFunction)(ContextObj*);
 
 typedef struct cFunction_object_struct {
-  CoAlgObj   super;
+  JObj   super;
   CFunction *func;
 } CFunctionObj;
 
@@ -75,9 +75,9 @@ CFunctionObj *newCFunctionImpl(
   AssertPtrNotNull(aNewFunc->super.type);
   AssertIntEquals(aNewFunc->super.tag, CFunctionsTag);
   AssertPtrEquals(aNewFunc->func, testCFunction);
-  AssertIntTrue(isCFunction((CoAlgObj*)aNewFunc));
-  AssertIntTrue(isAtom((CoAlgObj*)aNewFunc));
-  AssertIntFalse(isPair((CoAlgObj*)aNewFunc));
+  AssertIntTrue(isCFunction((JObj*)aNewFunc));
+  AssertIntTrue(isAtom((JObj*)aNewFunc));
+  AssertIntFalse(isPair((JObj*)aNewFunc));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -101,8 +101,8 @@ CFunctionObj *newCFunctionImpl(
 \startCHeader
 Boolean equalityFuncCoAlg(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -110,8 +110,8 @@ Boolean equalityFuncCoAlg(
 \startCCode
 Boolean equalityFuncCoAlg(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 ) {
   DEBUG(jInterp, "funcCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -132,7 +132,7 @@ Boolean equalityFuncCoAlg(
 extern Boolean printFuncCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -141,7 +141,7 @@ extern Boolean printFuncCoAlg(
 Boolean printFuncCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == CFunctionsTag);
@@ -164,8 +164,8 @@ Boolean printFuncCoAlg(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  CoAlgObj* aNewFunc =
-    (CoAlgObj*)newCFunction(jInterp, testCFunction);
+  JObj* aNewFunc =
+    (JObj*)newCFunction(jInterp, testCFunction);
   AssertPtrNotNull(aNewFunc);
   printLoL(jInterp, aStrBuf, aNewFunc);
   AssertStrEquals(getCString(jInterp, aStrBuf), buffer);

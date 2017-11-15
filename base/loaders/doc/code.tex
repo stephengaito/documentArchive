@@ -4,10 +4,10 @@
 
 \startCHeader
 typedef struct loader_object_struct {
-  CoAlgObj      super;
+  JObj      super;
   JoyLoLInterp *jInterp;
-  CoAlgObj     *paths;
-  CoAlgObj     *extensions;
+  JObj     *paths;
+  JObj     *extensions;
 } LoaderObj;
 \stopCHeader
 
@@ -146,9 +146,9 @@ void listLoadPathsImpl(
   JoyLoLInterp *jInterp = loader->jInterp;
   assert(jInterp);
   assert(aStrBuf);
-  CoAlgObj* pathList = loader->paths;
+  JObj* pathList = loader->paths;
   while(pathList && isPair(pathList)) {
-    CoAlgObj* aPath = asCar(pathList);
+    JObj* aPath = asCar(pathList);
     if (isSymbol(aPath)) {
       strBufPrintf(jInterp, aStrBuf,
         "%s\n", asSymbol(aPath)
@@ -222,9 +222,9 @@ void listLoadExtensionsImpl(
   JoyLoLInterp *jInterp = loader->jInterp;
   assert(jInterp);
   assert(aStrBuf);
-  CoAlgObj* extensionList = loader->extensions;
+  JObj* extensionList = loader->extensions;
   while(extensionList && isPair(extensionList)) {
-    CoAlgObj* anExtension = asCar(extensionList);
+    JObj* anExtension = asCar(extensionList);
     if (isSymbol(anExtension)) {
       strBufPrintf(jInterp, aStrBuf,
         "%s\n", asSymbol(anExtension)
@@ -325,16 +325,16 @@ Boolean loadAFileImpl(
     strBufClose(jInterp, aStrBuf);
   }
 
-  CoAlgObj* aLoadPathList = loader->paths;
+  JObj* aLoadPathList = loader->paths;
   while(aLoadPathList) {
     assert(isPair(aLoadPathList));
-    CoAlgObj* aLoadPath = asCar(aLoadPathList);
+    JObj* aLoadPath = asCar(aLoadPathList);
     if (!isSymbol(aLoadPath)) continue;
 
-    CoAlgObj* aLoadExtensionList = loader->extensions;
+    JObj* aLoadExtensionList = loader->extensions;
     while(aLoadExtensionList) {
       assert(isPair(aLoadExtensionList));
-      CoAlgObj* aLoadExtension = asCar(aLoadExtensionList);
+      JObj* aLoadExtension = asCar(aLoadExtensionList);
       if (!isSymbol(aLoadExtension)) continue;
 
       char buffer[8000];
@@ -381,7 +381,7 @@ Boolean loadAFileImpl(
 \starttyping
 Boolean loadFiles(
   ContextObj *aCtx,
-  CoAlgObj   *filesToLoad
+  JObj   *filesToLoad
 ) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;

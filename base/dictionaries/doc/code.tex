@@ -11,11 +11,11 @@
 typedef struct dictionaries_object_struct DictObj;
 
 typedef struct dictionaries_object_struct {
-  CoAlgObj  super;
+  JObj  super;
   Symbol*   symbol;
-  CoAlgObj* preObs;
-  CoAlgObj* value;
-  CoAlgObj* postObs;
+  JObj* preObs;
+  JObj* value;
+  JObj* postObs;
   DictObj*  left;
   DictObj*  right;
   DictObj*  previous;
@@ -89,7 +89,7 @@ DictObj *newDictImpl(
   assert(aSym);
   
   DEBUG(jInterp, "newAVLNode [%s]\n", aSym);
-  CoAlgObj* newNode   = newObject(jInterp, DictionariesTag);
+  JObj* newNode   = newObject(jInterp, DictionariesTag);
   dictAsSymbol(newNode)   = strdup(aSym);
   dictAsPreObs(newNode)   = NULL;
   dictAsValue(newNode)    = NULL;
@@ -171,7 +171,7 @@ DictObj* createSymbolImpl(
 \stopTestSuite
 
 \startCHeader
-typedef CoAlgObj *(GetSymbol)(
+typedef JObj *(GetSymbol)(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol
 );
@@ -187,7 +187,7 @@ typedef CoAlgObj *(GetSymbol)(
 
 \setCHeaderStream{private}
 \startCHeader
-extern CoAlgObj* getSymbolImpl(
+extern JObj* getSymbolImpl(
   JoyLoLInterp* jInterp,
   Symbol* aSymbol
 );
@@ -195,7 +195,7 @@ extern CoAlgObj* getSymbolImpl(
 \setCHeaderStream{public}
 
 \startCCode
-CoAlgObj* getSymbolImpl(
+JObj* getSymbolImpl(
   JoyLoLInterp* jInterp,
   Symbol* aSymbol
 ) {
@@ -247,10 +247,10 @@ void listDefinitionsImpl(
 
 \setCHeaderStream{private}
 \startCHeader
-extern Boolean printDicionaryCoAlgObjInto(
+extern Boolean printDicionaryJObjInto(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *anAVLNode
+  JObj        *anAVLNode
 );
 extern Boolean printDicInto(
   JoyLoLInterp    *jInterp,
@@ -261,10 +261,10 @@ extern Boolean printDicInto(
 \setCHeaderStream{public}
 
 \startCCode
-Boolean printDictionaryCoAlgObjInto(
+Boolean printDictionaryJObjInto(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *anAVLNode
+  JObj        *anAVLNode
 ) {
   if (!anAVLNode) return FALSE;
   if (asTag(anAVLNode) != DictionariesTag) return FALSE;
@@ -330,7 +330,7 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   theCoAlg->super.objectSize      = sizeof(DictObj);
   theCoAlg->super.initializeFunc  = initializeDictionaries;
   theCoAlg->super.equalityFunc    = NULL;
-  theCoAlg->super.printFunc       = printDictionaryCoAlgObjInto;
+  theCoAlg->super.printFunc       = printDictionaryJObjInto;
   theCoAlg->newDictFunc           = newDictImpl;
   theCoAlg->createSymbolFunc      = createSymbolImpl;
   theCoAlg->getSymbolFunc         = getSymbolImpl;

@@ -8,7 +8,7 @@ static void isSymbolAP(ContextObj* aCtx) {
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   popCtxDataInto(aCtx, top);
-  CoAlgObj* result = NULL;
+  JObj* result = NULL;
   if (isSymbol(top))
     result = newBoolean(jInterp, TRUE);
   else

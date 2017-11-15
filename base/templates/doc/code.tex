@@ -39,7 +39,7 @@ Boolean registerTemplates(JoyLoLInterp *jInterp) {
   TemplatesClass* theCoAlg =
     joyLoLCalloc(1, TemplatesClass);
   theCoAlg->super.name           = TemplatesName;
-  theCoAlg->super.objectSize     = sizeof(CoAlgObj);
+  theCoAlg->super.objectSize     = sizeof(JObj);
   theCoAlg->super.initializeFunc = initializeTemplates;
   theCoAlg->super.equalityFunc   = NULL;
   theCoAlg->super.printFunc      = NULL;
@@ -71,7 +71,7 @@ Boolean registerTemplates(JoyLoLInterp *jInterp) {
   AssertPtrEquals(getTemplatesClass(jInterp), coAlg);
   AssertIntEquals(
     getTemplatesClass(jInterp)->super.objectSize,
-    sizeof(CoAlgObj)
+    sizeof(JObj)
   )
 \stopCTest
 \stopTestCase

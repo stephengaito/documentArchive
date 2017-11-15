@@ -155,25 +155,25 @@ typedef Boolean (CoAlgInitialize)(
 
 typedef Boolean (CoAlgEquality)(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 );
 
 typedef struct string_buffer_object_struct StringBufferObj;
 typedef Boolean (CoAlgPrint)(
   JoyLoLInterp*,
   StringBufferObj*,
-  CoAlgObj*
+  JObj*
 );
 
-typedef CoAlgObj* (CoAlgCopy)(
+typedef JObj* (CoAlgCopy)(
   JoyLoLInterp*,
-  CoAlgObj*
+  JObj*
 );
 
 typedef Boolean (CoAlgRelease)(
   JoyLoLInterp*,
-  CoAlgObj*
+  JObj*
 );
 
 typedef void*   CoAlgData;
@@ -188,7 +188,7 @@ typedef struct coalg_class_struct {
   CoAlgRelease    *releaseFunc;
 } CoAlgClass;
 
-typedef CoAlgObj* (JInterpNewObject)(
+typedef JObj* (JInterpNewObject)(
   JoyLoLInterp *jInterp,
   TagType       aTag
 );

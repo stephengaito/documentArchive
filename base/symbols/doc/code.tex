@@ -8,7 +8,7 @@
 
 \startCHeader
 typedef struct symbol_object_struct {
-  CoAlgObj super;
+  JObj super;
   Symbol *sym;
 } SymbolObj;
 
@@ -22,7 +22,7 @@ typedef struct symbol_object_struct {
 \startTestSuite[newSymbol]
 
 \startCHeader
-typedef CoAlgObj *(NewSymbol)(
+typedef JObj *(NewSymbol)(
   JoyLoLInterp*,
   Symbol*
 );
@@ -38,7 +38,7 @@ typedef CoAlgObj *(NewSymbol)(
 
 \setCHeaderStream{private}
 \startCHeader
-extern CoAlgObj *newSymbolImpl(
+extern JObj *newSymbolImpl(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol
 );
@@ -46,14 +46,14 @@ extern CoAlgObj *newSymbolImpl(
 \setCHeaderStream{public}
 
 \startCCode
-CoAlgObj* newSymbolImpl(
+JObj* newSymbolImpl(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol
 ) {
   assert(aSymbol);
   assert(jInterp);
   
-  CoAlgObj* result = newObject(jInterp, SymbolsTag);
+  JObj* result = newObject(jInterp, SymbolsTag);
   assert(result);
   asSymbol(result) = strdup(aSymbol);
   return result;
@@ -67,7 +67,7 @@ CoAlgObj* newSymbolImpl(
   AssertPtrNotNull(jInterp->coAlgs);
 
   const char* testStr = "test string";
-  CoAlgObj* aNewSymbol = newSymbol(jInterp, testStr);
+  JObj* aNewSymbol = newSymbol(jInterp, testStr);
   AssertPtrNotNull(aNewSymbol);
   AssertPtrNotNull(asType(aNewSymbol));
   AssertIntEquals(asTag(aNewSymbol), SymbolsTag);
@@ -98,7 +98,7 @@ CoAlgObj* newSymbolImpl(
 
 \startCHeader
 typedef Boolean (SymbolIs)(
-  CoAlgObj *aLoL,
+  JObj *aLoL,
   Symbol   *aSymbol
 );
 
@@ -114,7 +114,7 @@ typedef Boolean (SymbolIs)(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean symbolIsImpl(
-  CoAlgObj *aLoL, 
+  JObj *aLoL, 
   Symbol *aSymbol
 );
 \stopCHeader
@@ -122,7 +122,7 @@ extern Boolean symbolIsImpl(
 
 \startCCode
 Boolean symbolIsImpl(
-  CoAlgObj *aLoL,
+  JObj *aLoL,
   Symbol *aSymbol
 ) {
   if (isSymbol(aLoL) &&
@@ -136,7 +136,7 @@ Boolean symbolIsImpl(
 \startTestCase[should return true if a symbol]
 
 \startCTest
-  CoAlgObj *aSym = newSymbol(jInterp, "this is a test");
+  JObj *aSym = newSymbol(jInterp, "this is a test");
   AssertIntTrue(isSymbol(aSym));
   AssertIntTrue(symbolIs(jInterp, aSym, "this is a test"));
 \stopCTest
@@ -146,10 +146,10 @@ Boolean symbolIsImpl(
 \startCTest
   AssertIntFalse(isSymbol(NULL));
   AssertIntFalse(symbolIs(jInterp, NULL, "this is NOT a test"));
-  CoAlgObj *aObj = newObject(jInterp, BooleansTag);
+  JObj *aObj = newObject(jInterp, BooleansTag);
   AssertIntFalse(isSymbol(aObj));
   AssertIntFalse(symbolIs(jInterp, aObj, "this is NOT a test"));
-  CoAlgObj *aSym = newSymbol(jInterp, "this is a test");
+  JObj *aSym = newSymbol(jInterp, "this is a test");
   AssertIntFalse(symbolIs(jInterp, aSym, "this is NOT a test"));
 \stopCTest
 \stopTestCase
@@ -161,8 +161,8 @@ Boolean symbolIsImpl(
 \startCHeader
 Boolean symbolsEqual(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -170,8 +170,8 @@ Boolean symbolsEqual(
 \startCCode
 Boolean symbolsEqual(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 ) {
   DEBUG(jInterp, "symbolsEqual a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -188,8 +188,8 @@ Boolean symbolsEqual(
 
 \startCTest
   AssertIntTrue(symbolsEqual(jInterp, NULL, NULL));
-  CoAlgObj *symA = newSymbol(jInterp, "the same text");
-  CoAlgObj *symB = newSymbol(jInterp, "the same text");
+  JObj *symA = newSymbol(jInterp, "the same text");
+  JObj *symB = newSymbol(jInterp, "the same text");
   AssertIntTrue(symbolsEqual(jInterp, symA, symB));
 \stopCTest
 \stopTestCase
@@ -197,8 +197,8 @@ Boolean symbolsEqual(
 \startTestCase[should return false if symbols are not equal]
 
 \startCTest
-  CoAlgObj *symA = newSymbol(jInterp, "text A");
-  CoAlgObj *symB = newSymbol(jInterp, "text B");
+  JObj *symA = newSymbol(jInterp, "text A");
+  JObj *symB = newSymbol(jInterp, "text B");
   AssertIntFalse(symbolsEqual(jInterp, NULL, symB));
   AssertIntFalse(symbolsEqual(jInterp, symA, NULL));
   AssertIntFalse(symbolsEqual(jInterp, symA, symB));
@@ -214,7 +214,7 @@ Boolean symbolsEqual(
 extern size_t printSymbolCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrObj,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -223,7 +223,7 @@ extern size_t printSymbolCoAlg(
 Boolean printSymbolCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == SymbolsTag);
@@ -239,7 +239,7 @@ Boolean printSymbolCoAlg(
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
 
-  CoAlgObj* aNewSymbol = newSymbol(jInterp, "test string");
+  JObj* aNewSymbol = newSymbol(jInterp, "test string");
   AssertPtrNotNull(aNewSymbol);
   
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);

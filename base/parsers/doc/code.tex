@@ -184,7 +184,7 @@ void reportUnmatchedClosingSymbol(
 
 \setCHeaderStream{private}
 \startCHeader
-extern CoAlgObj* parseList(
+extern JObj* parseList(
   TextObj* aText,
   char closingChar
 );
@@ -192,7 +192,7 @@ extern CoAlgObj* parseList(
 \setCHeaderStream{public}
 
 \startCCode
-CoAlgObj* parseList(
+JObj* parseList(
   TextObj* aText,
   char closingChar
 ) {
@@ -201,8 +201,8 @@ CoAlgObj* parseList(
   DEBUG(aText->jInterp,
     "parseList %p '%c'\n", aText, closingChar);
 
-  CoAlgObj* firstPair = NULL;
-  CoAlgObj* lastPair  = NULL;
+  JObj* firstPair = NULL;
+  JObj* lastPair  = NULL;
 
   while (!aText->completed) {
 
@@ -224,7 +224,7 @@ CoAlgObj* parseList(
       return firstPair;
     }
     assert(aText->jInterp);
-    CoAlgObj* aNewPair = newPair(aText->jInterp, NULL, NULL);
+    JObj* aNewPair = newPair(aText->jInterp, NULL, NULL);
 
     // check to see if this is an opening list symbol
     if (isSymbol(aText->sym)) {
@@ -248,7 +248,7 @@ CoAlgObj* parseList(
 \startTestSuite[parse one symbol]
 
 \startCHeader
-typedef CoAlgObj *(ParseOneSymbol)(
+typedef JObj *(ParseOneSymbol)(
   TextObj *aText
 );
 
@@ -264,14 +264,14 @@ typedef CoAlgObj *(ParseOneSymbol)(
 
 \setCHeaderStream{private}
 \startCHeader
-extern CoAlgObj* parseOneSymbolImpl(
+extern JObj* parseOneSymbolImpl(
   TextObj* aText
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-CoAlgObj* parseOneSymbolImpl(
+JObj* parseOneSymbolImpl(
   TextObj* aText
 ) {
   assert(aText);
@@ -300,7 +300,7 @@ CoAlgObj* parseOneSymbolImpl(
     createTextFromArrayOfStrings(jInterp, simpleList);
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseOneSymbol(aText);
+  JObj* aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
   AssertPtrNotNull(asType(aLoL));
   AssertIntEquals(asTag(aLoL), SymbolsTag);
@@ -345,7 +345,7 @@ CoAlgObj* parseOneSymbolImpl(
 
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseOneSymbol(aText);
+  JObj* aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
   AssertPtrNotNull(asType(aLoL));
   AssertIntEquals(asTag(aLoL), SymbolsTag);
@@ -406,7 +406,7 @@ CoAlgObj* parseOneSymbolImpl(
   TextObj* aText = createTextFromArrayOfStrings(jInterp, moreComplexList);
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseOneSymbol(aText);
+  JObj* aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
   AssertPtrNotNull(asType(aLoL));
   AssertIntEquals(asTag(aLoL), SymbolsTag);
@@ -440,7 +440,7 @@ CoAlgObj* parseOneSymbolImpl(
   Text* aText = createTextFromString(coAlgs, " true false ");
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseOneSymbol(aText);
+  JObj* aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
   AssertIntTrue(isAtom(aLoL));
   AssertIntTrue(isSymbol(aLoL));
@@ -472,7 +472,7 @@ CoAlgObj* parseOneSymbolImpl(
     createTextFromString(jInterp, " 1234567890 not1234567890 ");
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseOneSymbol(aText);
+  JObj* aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
   AssertIntTrue(isAtom(aLoL));
   AssertIntTrue(isNatural(aLoL));
@@ -494,7 +494,7 @@ CoAlgObj* parseOneSymbolImpl(
 \startTestSuite[parse all symbols]
 
 \startCHeader
-typedef CoAlgObj *(ParseAllSymbols)(
+typedef JObj *(ParseAllSymbols)(
   TextObj *aText
 );
 
@@ -510,14 +510,14 @@ typedef CoAlgObj *(ParseAllSymbols)(
 
 \setCHeaderStream{private}
 \startCHeader
-extern CoAlgObj* parseAllSymbolsImpl(
+extern JObj* parseAllSymbolsImpl(
   TextObj* aText
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-CoAlgObj* parseAllSymbolsImpl(
+JObj* parseAllSymbolsImpl(
   TextObj* aText
 ) {
   assert(aText);
@@ -539,7 +539,7 @@ paths} in our parsing code.
 
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseAllSymbols(aText);
+  JObj* aLoL = parseAllSymbols(aText);
 
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
@@ -558,14 +558,14 @@ paths} in our parsing code.
     createTextFromArrayOfStrings(jInterp, simpleList);
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseAllSymbols(aText);
+  JObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   printLoL(jInterp, aStrBuf, aLoL);
   AssertStrEquals(getCString(jInterp, aStrBuf), "this is a simple list ");
   strBufClose(jInterp, aStrBuf);
 
-  CoAlgObj* lolCopy = copyLoL(jInterp, aLoL);
+  JObj* lolCopy = copyLoL(jInterp, aLoL);
   AssertPtrNotEquals(aLoL, lolCopy);
   AssertIntTrue(equalLoL(jInterp, aLoL, lolCopy));
 \stopCTest
@@ -579,7 +579,7 @@ paths} in our parsing code.
     createTextFromString(jInterp, moreComplexList[0]);
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseAllSymbols(aText);
+  JObj* aLoL = parseAllSymbols(aText);
 
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
@@ -598,7 +598,7 @@ paths} in our parsing code.
     createTextFromArrayOfStrings(jInterp, moreComplexList);
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseAllSymbols(aText);
+  JObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   printLoL(jInterp, aStrBuf, aLoL);
@@ -606,7 +606,7 @@ paths} in our parsing code.
     "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ");
   strBufClose(jInterp, aStrBuf);
   
-  CoAlgObj* lolCopy = copyLoL(jInterp, aLoL);
+  JObj* lolCopy = copyLoL(jInterp, aLoL);
   AssertPtrNotEquals(aLoL, lolCopy);
   AssertIntTrue(equalLoL(jInterp, aLoL, lolCopy));
 \stopCTest
@@ -620,7 +620,7 @@ paths} in our parsing code.
     createTextFromArrayOfStrings(jInterp, differentList);
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseAllSymbols(aText);
+  JObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   printLoL(jInterp, aStrBuf, aLoL);
@@ -641,7 +641,7 @@ in our parsing code.
   Text* aText = createTextFromArrayOfStrings(coAlgs, incorrectMarkerList);
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseAllSymbols(aText);
+  JObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   printLoL(jInterp, aStrBuf, aLoL);
@@ -659,7 +659,7 @@ in our parsing code.
   Text* aText = createTextFromArrayOfStrings(coAlgs, unmatchedMarkerList);
   AssertPtrNotNull(aText);
 
-  CoAlgObj* aLoL = parseAllSymbols(aText);
+  JObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   printLoL(jInterp, aStrBuf, aLoL);
@@ -708,7 +708,7 @@ Boolean registerParsers(
   
   ParsersClass* theCoAlg          = joyLoLCalloc(1, ParsersClass);
   theCoAlg->super.name            = ParsersName;
-  theCoAlg->super.objectSize      = sizeof(CoAlgObj);
+  theCoAlg->super.objectSize      = sizeof(JObj);
   theCoAlg->super.initializeFunc  = initializeParsers;
   theCoAlg->super.equalityFunc    = NULL;
   theCoAlg->super.printFunc       = NULL;
@@ -741,7 +741,7 @@ Boolean registerParsers(
   AssertPtrEquals(getParsersClass(jInterp), coAlg);
   AssertIntEquals(
     getParsersClass(jInterp)->super.objectSize,
-    sizeof(CoAlgObj)
+    sizeof(JObj)
   )
 \stopCTest
 \stopTestCase

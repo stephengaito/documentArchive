@@ -11,7 +11,7 @@
 typedef mpz_t Natural;
 
 typedef struct natural_object_struct {
-  CoAlgObj super;
+  JObj super;
   Natural  natural;
 } NaturalObj;
 
@@ -21,7 +21,7 @@ typedef struct natural_object_struct {
 \startTestSuite[newNatural]
 
 \startCHeader
-typedef CoAlgObj *(NewNatural)(
+typedef JObj *(NewNatural)(
   JoyLoLInterp *jInterp,
   Symbol       *aNatural
 );
@@ -37,7 +37,7 @@ typedef CoAlgObj *(NewNatural)(
 
 \setCHeaderStream{private}
 \startCHeader
-extern CoAlgObj* newNaturalImpl(
+extern JObj* newNaturalImpl(
   JoyLoLInterp *jInterp,
   Symbol       *aNatural
 );
@@ -45,14 +45,14 @@ extern CoAlgObj* newNaturalImpl(
 \setCHeaderStream{public}
 
 \startCCode
-CoAlgObj* newNaturalImpl(
+JObj* newNaturalImpl(
   JoyLoLInterp *jInterp,
   Symbol       *aNatural
 ) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
-  CoAlgObj* result = newObject(jInterp, NaturalsTag);
+  JObj* result = newObject(jInterp, NaturalsTag);
   assert(result);
   if (aNatural) {
     long success = mpz_set_str(asNatural(result), aNatural, 0);
@@ -69,7 +69,7 @@ CoAlgObj* newNaturalImpl(
   AssertPtrNotNull(jInterp->coAlgs);
 
   const char* testNum = "12345";
-  CoAlgObj* aNewNat = newNatural(jInterp, testNum);
+  JObj* aNewNat = newNatural(jInterp, testNum);
   AssertPtrNotNull(aNewNat);
   AssertPtrNotNull(asType(aNewNat));
   AssertIntEquals(asTag(aNewNat), NaturalsTag);
@@ -97,7 +97,7 @@ CoAlgObj* newNaturalImpl(
 \startTestCase[should return true if a natural]
 
 \startCTest
-  CoAlgObj *aNat = newNatural(jInterp, "12345");
+  JObj *aNat = newNatural(jInterp, "12345");
   AssertIntTrue(isNatural(aNat));
 \stopCTest
 \stopTestCase
@@ -105,7 +105,7 @@ CoAlgObj* newNaturalImpl(
 \startTestCase[should return false if not a symbol]
 \startCTest
   AssertIntFalse(isNatural(NULL));
-  CoAlgObj *aObj = newObject(jInterp, BooleansTag);
+  JObj *aObj = newObject(jInterp, BooleansTag);
   AssertIntFalse(isNatural(aObj));
 \stopCTest
 \stopTestCase
@@ -117,16 +117,16 @@ CoAlgObj* newNaturalImpl(
 \startCHeader
 Boolean equalityNatCoAlg(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 );
 \stopCHeader
 
 \startCCode
 Boolean equalityNatCoAlg(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 ) {
   DEBUG(jInterp, "natCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -144,8 +144,8 @@ Boolean equalityNatCoAlg(
 
 \startCTest
   AssertIntTrue(equalityNatCoAlg(jInterp, NULL, NULL));
-  CoAlgObj *natA = newNatural(jInterp, "12345");
-  CoAlgObj *natB = newNatural(jInterp, "12345");
+  JObj *natA = newNatural(jInterp, "12345");
+  JObj *natB = newNatural(jInterp, "12345");
   AssertIntTrue(equalityNatCoAlg(jInterp, natA, natB));
 \stopCTest
 \stopTestCase
@@ -153,8 +153,8 @@ Boolean equalityNatCoAlg(
 \startTestCase[should return false if symbols are not equal]
 
 \startCTest
-  CoAlgObj *natA = newNatural(jInterp, "12346");
-  CoAlgObj *natB = newNatural(jInterp, "12345");
+  JObj *natA = newNatural(jInterp, "12346");
+  JObj *natB = newNatural(jInterp, "12345");
   AssertIntFalse(equalityNatCoAlg(jInterp, NULL, natB));
   AssertIntFalse(equalityNatCoAlg(jInterp, natA, NULL));
   AssertIntFalse(equalityNatCoAlg(jInterp, natA, natB));
@@ -170,7 +170,7 @@ Boolean equalityNatCoAlg(
 extern Boolean printNatCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -179,7 +179,7 @@ extern Boolean printNatCoAlg(
 Boolean printNatCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == NaturalsTag);
@@ -201,7 +201,7 @@ Boolean printNatCoAlg(
   AssertPtrNotNull(jInterp->coAlgs[NaturalsTag].sClass);
 
   const char* testNum = "12345 ";
-  CoAlgObj* aNewNat = newNatural(jInterp, testNum);
+  JObj* aNewNat = newNatural(jInterp, testNum);
   AssertPtrNotNull(aNewNat);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   printNatCoAlg(jInterp, aStrBuf, aNewNat);

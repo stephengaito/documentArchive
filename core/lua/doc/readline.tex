@@ -214,7 +214,7 @@ void runREPLInContext(
   
   while(TRUE) {
     DEBUG(jInterp, "runREPLInContext %p reading\n", aCtx);
-    CoAlgObj* aLoL = parseOneSymbol(aText);
+    JObj* aLoL = parseOneSymbol(aText);
     DEBUG(jInterp, "runREPLInContext %p read %p\n", aCtx, aLoL);
     //
     if (!aLoL) break;

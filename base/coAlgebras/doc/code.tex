@@ -11,7 +11,7 @@
 typedef struct coAlgebra_object_struct CoAlgebraObj;
 
 typedef struct coAlgebra_object_struct {
-  CoAlgObj   super;
+  JObj   super;
   // ??
 } CoAlgebraObj;
 
@@ -66,9 +66,9 @@ CoAlgebraObj *newCoAlgebraImpl(
   AssertPtrNotNull(aNewCoAlgebra);
   AssertPtrNotNull(aNewCoAlgebra->super.type);
   AssertIntEquals(aNewCoAlgebra->super.tag, CoAlgebrasTag);
-  AssertIntTrue(isCoAlgebra((CoAlgObj*)aNewCoAlgebra));
-  AssertIntTrue(isAtom((CoAlgObj*)aNewCoAlgebra));
-  AssertIntFalse(isPair((CoAlgObj*)aNewCoAlgebra));
+  AssertIntTrue(isCoAlgebra((JObj*)aNewCoAlgebra));
+  AssertIntTrue(isAtom((JObj*)aNewCoAlgebra));
+  AssertIntFalse(isPair((JObj*)aNewCoAlgebra));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -91,8 +91,8 @@ CoAlgebraObj *newCoAlgebraImpl(
 \startCHeader
 extern Boolean equalityCoAlgebraCoAlg(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -100,8 +100,8 @@ extern Boolean equalityCoAlgebraCoAlg(
 \startCCode
 Boolean equalityCoAlgebraCoAlg(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 ) {
   DEBUG(jInterp, "coAlgebraCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -121,7 +121,7 @@ Boolean equalityCoAlgebraCoAlg(
 extern Boolean printCoAlgebarCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -130,7 +130,7 @@ extern Boolean printCoAlgebarCoAlg(
 Boolean printCoAlgebraCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == CoAlgebrasTag);
@@ -152,7 +152,7 @@ Boolean printCoAlgebraCoAlg(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  CoAlgObj* aNewCoAlgebra = (CoAlgObj*)newCoAlgebra(jInterp);
+  JObj* aNewCoAlgebra = (JObj*)newCoAlgebra(jInterp);
   AssertPtrNotNull(aNewCoAlgebra);
   
   sprintf((char*)&buffer, "<CoAlgebra:%p> ", aNewCoAlgebra);

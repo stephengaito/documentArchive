@@ -276,7 +276,7 @@ Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
   LuaFunctionsClass* theCoAlg =
     joyLoLCalloc(1, LuaFunctionsClass);
   theCoAlg->super.name           = LuaFunctionsName;
-  theCoAlg->super.objectSize     = sizeof(CoAlgObj);
+  theCoAlg->super.objectSize     = sizeof(JObj);
   theCoAlg->super.initializeFunc = initializeLuaFunctions;
   theCoAlg->super.equalityFunc   = NULL;
   theCoAlg->super.printFunc      = NULL;
@@ -308,7 +308,7 @@ Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
   AssertPtrEquals(getLuaFunctionsClass(jInterp), coAlg);
   AssertIntEquals(
     getLuaFunctionsClass(jInterp)->super.objectSize,
-    sizeof(CoAlgObj)
+    sizeof(JObj)
   )
 \stopCTest
 \stopTestCase

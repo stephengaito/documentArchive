@@ -31,9 +31,9 @@ implement lists. The implementation of lists is reserved for the
 
 This \type{CoAlgs} CoAlgebraic extension provides the infrastructure with 
 which to both organize the currently loaded collection of CoAlgebras, as 
-well as provide \type{CoAlgObj}s which represent individual instances 
+well as provide \type{JObj}s which represent individual instances 
 of any loaded CoAlgebra. Of particular importance is that these 
-\type{CoAlgObj}s are automatically garbage collected. 
+\type{JObj}s are automatically garbage collected. 
 
 The CoAlgebras \quote{extension} provides the basis upon which the whole 
 of the JoyLoL implementation is built. It provides a first class 
@@ -63,11 +63,11 @@ extension.
 typedef struct coalg_class_struct CoAlgClass;
 \stopCHeader
 
-\item A \type{CoAlgObj} represents a relatively opaque object to one of 
+\item A \type{JObj} represents a relatively opaque object to one of 
 many possible \emph{instances} of a CoAlgebra. 
 
 \startCHeader
-typedef struct coalgebra_object_struct CoAlgObj;
+typedef struct joylol_object_struct JObj;
 \stopCHeader 
 \stopitemize
 
@@ -120,7 +120,7 @@ be a collection of CoAlgebraic extensions \emph{required} for the
 interpreter to function. By listing this collection of required 
 extensions, we can give each one a unique and well known integer 
 identifier, which can be used in the running code to quickly verify the 
-class type of a given \type{CoAlgObj}. 
+class type of a given \type{JObj}. 
 
 The required extensions for this implementation is:
 

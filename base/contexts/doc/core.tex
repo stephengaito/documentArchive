@@ -6,7 +6,7 @@
 \startCHeader
 typedef void (PushCtx)(
   ContextObj *aCtx,
-  CoAlgObj   *lolToPush
+  JObj   *lolToPush
 );
 
 #define pushCtxData(aCtx, lolToPush)        \
@@ -23,7 +23,7 @@ typedef void (PushCtx)(
 \startCHeader
 extern void pushCtxDataImpl(
   ContextObj* aCtx,
-  CoAlgObj* lolToPush
+  JObj* lolToPush
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -31,7 +31,7 @@ extern void pushCtxDataImpl(
 \startCCode
 void pushCtxDataImpl(
   ContextObj* aCtx,
-  CoAlgObj* lolToPush
+  JObj* lolToPush
 ) {
   if (!aCtx) return;
   assert(aCtx->jInterp);
@@ -106,7 +106,7 @@ void pushSymbolCtxDataImpl(
   if (!aSymbol) return;
   assert(aCtx->jInterp);
 
-  CoAlgObj* aSymbolPA =
+  JObj* aSymbolPA =
     getSymbol(aCtx->jInterp, aSymbol);
   if (!aSymbolPA) return;
   aCtx->data = newPair(aCtx->jInterp, aSymbolPA, aCtx->data);
@@ -226,7 +226,7 @@ void pushParsedTextCtxDataImpl(
   if (!aCtx) return;
   if (!aText) return;
   assert(aCtx->jInterp);
-  CoAlgObj* aLoL = parseAllSymbols(aText);
+  JObj* aLoL = parseAllSymbols(aText);
   if (!aLoL) return;
   aCtx->data = newPair(aCtx->jInterp, aLoL, aCtx->data);
 }
@@ -235,7 +235,7 @@ void pushParsedTextCtxDataImpl(
 \startCHeader
 typedef void (PrependListCtx)(
   ContextObj *aCtx,
-  CoAlgObj   *lolToPrepend
+  JObj   *lolToPrepend
 );
 
 #define prependListCtxData(aCtx, lolToPrepend)      \
@@ -252,7 +252,7 @@ typedef void (PrependListCtx)(
 \startCHeader
 extern void prependListCtxDataImpl(
   ContextObj* aCtx,
-  CoAlgObj* lolToPrepend
+  JObj* lolToPrepend
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -260,7 +260,7 @@ extern void prependListCtxDataImpl(
 \startCCode
 void prependListCtxDataImpl(
   ContextObj* aCtx,
-  CoAlgObj* lolToPrepend
+  JObj* lolToPrepend
 ) {
   if (!aCtx) return;
   if (!lolToPrepend) return;
@@ -272,7 +272,7 @@ void prependListCtxDataImpl(
   }
 
   // find end of lolToPrepend
-  CoAlgObj* lolList = lolToPrepend;
+  JObj* lolList = lolToPrepend;
   while(asCdr(lolList) && isPair(asCdr(lolList))) {
     lolList = asCdr(lolList);
   }
@@ -290,7 +290,7 @@ void prependListCtxDataImpl(
 \stopCCode
 
 \startCHeader
-typedef CoAlgObj *(PopCtx)(
+typedef JObj *(PopCtx)(
   ContextObj *aCtx
 );
 
@@ -305,7 +305,7 @@ typedef CoAlgObj *(PopCtx)(
 
 #define popCtxDataInto(aCtx, aVar)                              \
 assert(aCtx);                                                   \
-CoAlgObj* aVar = popCtxData(aCtx);                              \
+JObj* aVar = popCtxData(aCtx);                              \
 if (aCtx->tracingOn) {                                          \
   JoyLoLInterp *jInterp = aCtx->jInterp;                        \
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
@@ -319,20 +319,20 @@ if (aCtx->tracingOn) {                                          \
 
 \setCHeaderStream{private}
 \startCHeader
-extern CoAlgObj* popCtxDataImpl(
+extern JObj* popCtxDataImpl(
   ContextObj* aCtx
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-CoAlgObj* popCtxDataImpl(
+JObj* popCtxDataImpl(
   ContextObj* aCtx
 ) {
   if (!aCtx) return NULL;
   if (!aCtx->data) return NULL;
 
-  CoAlgObj* poppedLoL = asCar(aCtx->data);
+  JObj* poppedLoL = asCar(aCtx->data);
   aCtx->data          = asCdr(aCtx->data);
   return poppedLoL;
 }
@@ -353,7 +353,7 @@ CoAlgObj* popCtxDataImpl(
 \startCHeader
 extern void pushCtxProcessImpl(
   ContextObj* aCtx,
-  CoAlgObj* lolToPush
+  JObj* lolToPush
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -361,7 +361,7 @@ extern void pushCtxProcessImpl(
 \startCCode
 void pushCtxProcessImpl(
   ContextObj* aCtx,
-  CoAlgObj* lolToPush
+  JObj* lolToPush
 ) {
   if (!aCtx) return;
   assert(aCtx->jInterp);
@@ -398,7 +398,7 @@ void pushSymbolCtxProcessImpl(
   if (!aSymbol) return;
   assert(aCtx->jInterp);
 
-  CoAlgObj* aSymbolPA =
+  JObj* aSymbolPA =
     getSymbol(aCtx->jInterp, aSymbol);
   if (!aSymbolPA) return;
   aCtx->process = newPair(aCtx->jInterp, aSymbolPA, aCtx->process);
@@ -503,7 +503,7 @@ void pushParsedTextCtxProcessImpl(
   if (!aCtx) return;
   if (!aText) return;
   assert(aCtx->jInterp);
-  CoAlgObj* aLoL = parseAllSymbols(aText);
+  JObj* aLoL = parseAllSymbols(aText);
   if (!aLoL) return;
   aCtx->process = newPair(aCtx->jInterp, aLoL, aCtx->process);
 }
@@ -524,7 +524,7 @@ void pushParsedTextCtxProcessImpl(
 \startCHeader
 extern void prependListCtxProcessImpl(
   ContextObj* aCtx,
-  CoAlgObj* lolToPrepend
+  JObj* lolToPrepend
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -532,7 +532,7 @@ extern void prependListCtxProcessImpl(
 \startCCode
 void prependListCtxProcessImpl(
   ContextObj* aCtx,
-  CoAlgObj* lolToPrepend
+  JObj* lolToPrepend
 ) {
   if (!aCtx) return;
   if (!lolToPrepend) return;
@@ -544,7 +544,7 @@ void prependListCtxProcessImpl(
   }
 
   // find end of lolToPrepend
-  CoAlgObj* lolList = lolToPrepend;
+  JObj* lolList = lolToPrepend;
   while(asCdr(lolList) && isPair(asCdr(lolList))) {
     lolList = asCdr(lolList);
   }
@@ -573,7 +573,7 @@ void prependListCtxProcessImpl(
 
 #define popCtxProcessInto(aCtx, aVar)                           \
 assert(aCtx);                                                   \
-CoAlgObj* aVar = popCtxProcess(aCtx);                           \
+JObj* aVar = popCtxProcess(aCtx);                           \
 if (aCtx->tracingOn) {                                          \
   JoyLoLInterp *jInterp = aCtx->jInterp;                        \
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
@@ -587,19 +587,19 @@ if (aCtx->tracingOn) {                                          \
 
 \setCHeaderStream{private}
 \startCHeader
-extern CoAlgObj* popCtxProcessImpl(
+extern JObj* popCtxProcessImpl(
   ContextObj* aCtx
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-CoAlgObj* popCtxProcessImpl(
+JObj* popCtxProcessImpl(
   ContextObj* aCtx
 ) {
   if (!aCtx->process) return NULL;
 
-  CoAlgObj* poppedLoL = asCar(aCtx->process);
+  JObj* poppedLoL = asCar(aCtx->process);
   aCtx->process       = asCdr(aCtx->process);
   return poppedLoL;
 }
@@ -641,7 +641,7 @@ Boolean extendJoyLoLImpl(
   DictObj* aSym =
     createSymbol(jInterp, definedName);
   aSym->value =
-    (CoAlgObj*)newCFunction(jInterp, aFunc);
+    (JObj*)newCFunction(jInterp, aFunc);
 
   return TRUE;
 }
@@ -651,7 +651,7 @@ Boolean extendJoyLoLImpl(
 typedef Boolean (DefineJoyLoL)(
   JoyLoLInterp *jInterp,
   Symbol       *definedName,
-  CoAlgObj     *aLoL
+  JObj     *aLoL
 );
 
 #define defineJoyLoL(jInterp, definedName, aLoL)      \
@@ -668,7 +668,7 @@ typedef Boolean (DefineJoyLoL)(
 extern Boolean defineJoyLoLImpl(
   JoyLoLInterp *jInterp,
   Symbol       *definedName,
-  CoAlgObj     *aLoL
+  JObj     *aLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -677,7 +677,7 @@ extern Boolean defineJoyLoLImpl(
 Boolean defineJoyLoLImpl(
   JoyLoLInterp *jInterp,
   Symbol       *definedName,
-  CoAlgObj     *aLoL
+  JObj     *aLoL
 ) {
   assert(jInterp);
   DictObj* aSym =
@@ -725,7 +725,7 @@ Boolean defineContextImpl(
   assert(jInterp);
   DictObj* aSym =
     createSymbol(jInterp, definedName);
-  aSym->value   = (CoAlgObj*)newCtx;
+  aSym->value   = (JObj*)newCtx;
 
   return TRUE;
 }

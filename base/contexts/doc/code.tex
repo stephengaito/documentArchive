@@ -17,15 +17,15 @@
 \startCHeader
 typedef struct context_object_struct ContextObj;
 typedef struct context_object_struct {
-  CoAlgObj      super;
+  JObj      super;
   JoyLoLInterp *jInterp;
   Symbol       *name;
   ContextObj   *parent;
-  CoAlgObj     *data;
-  CoAlgObj     *command;
-  CoAlgObj     *process;
-  CoAlgObj     *messages;
-  CoAlgObj     *listeners;
+  JObj     *data;
+  JObj     *command;
+  JObj     *process;
+  JObj     *messages;
+  JObj     *listeners;
   Boolean       exceptionRaised;
   Boolean       showSpecifications;
   Boolean       showStack;
@@ -41,8 +41,8 @@ typedef ContextObj *(NewContext)(
   JoyLoLInterp *jInterp,
   Symbol       *name,
   ContextObj   *parent,
-  CoAlgObj     *dataLoL,
-  CoAlgObj     *processLoL
+  JObj     *dataLoL,
+  JObj     *processLoL
 );
 
 #define newContext(jInterp, name, parent,     \
@@ -62,8 +62,8 @@ extern ContextObj* newContextImpl(
   JoyLoLInterp *jInterp,
   Symbol       *name,
   ContextObj   *parent,
-  CoAlgObj     *dataLoL,
-  CoAlgObj     *processLoL
+  JObj     *dataLoL,
+  JObj     *processLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -73,8 +73,8 @@ ContextObj* newContextImpl(
   JoyLoLInterp *jInterp,
   Symbol       *name,
   ContextObj   *parent,
-  CoAlgObj     *dataLoL,
-  CoAlgObj     *processLoL
+  JObj     *dataLoL,
+  JObj     *processLoL
 ) {
   DEBUG(jInterp, "newContext %p [%s] %p %p %p\n",
     jInterp, name, parent, dataLoL, processLoL);
@@ -114,8 +114,8 @@ ContextObj* newContextImpl(
 \startCHeader
 extern Boolean equalityContextsCoAlg(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -123,8 +123,8 @@ extern Boolean equalityContextsCoAlg(
 \startCCode
 Boolean equalityContextsCoAlg(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 ) {
   DEBUG(jInterp, "contextCoAlg->equal a:%p b:%p\n",
     lolA, lolB);
@@ -149,7 +149,7 @@ Boolean equalityContextsCoAlg(
 extern Boolean printContextsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -158,7 +158,7 @@ extern Boolean printContextsCoAlg(
 Boolean printContextsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 ) {
   assert(jInterp);
   assert(aLoL);
@@ -358,7 +358,7 @@ void ignoreTest_defineFactorial(CuTest* tc) {
   Text* factorialText = createTextFromArrayOfStrings(coAlgs, factorialStrs);
   AssertPtrNotNull(factorialText);
 
-  CoAlgObj* factorialLoL = parseAllSymbols(factorialText);
+  JObj* factorialLoL = parseAllSymbols(factorialText);
   AssertPtrNotNull(factorialLoL);
 
   defineJoyLoL(anInterp->coAlgebras, "factorial", factorialLoL);

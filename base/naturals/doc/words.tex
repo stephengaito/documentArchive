@@ -15,7 +15,7 @@ static void addAP(ContextObj* aCtx) {
     );
     return;
   }
-  CoAlgObj* sum = newNatural(jInterp, NULL);
+  JObj* sum = newNatural(jInterp, NULL);
   mpz_add(asNatural(sum), asNatural(top1), asNatural(top2));
   pushCtxData(aCtx, sum);
 }
@@ -34,7 +34,7 @@ static void subtractAP(ContextObj* aCtx) {
     );
     return;
   }
-  CoAlgObj* difference = newNatural(jInterp, NULL);
+  JObj* difference = newNatural(jInterp, NULL);
   if (asNatural(top2) < asNatural(top1)) {
     mpz_sub(asNatural(difference), asNatural(top1), asNatural(top2));
   }
@@ -55,7 +55,7 @@ static void subtractReverseAP(ContextObj* aCtx) {
     );
     return;
   }
-  CoAlgObj* difference = newNatural(jInterp, NULL);
+  JObj* difference = newNatural(jInterp, NULL);
   if (asNatural(top1) < asNatural(top2)) {
     mpz_sub(asNatural(difference), asNatural(top2), asNatural(top1));
   }
@@ -76,7 +76,7 @@ static void multiplyAP(ContextObj* aCtx) {
     );
     return;
   }
-  CoAlgObj* product = newNatural(jInterp, NULL);
+  JObj* product = newNatural(jInterp, NULL);
   mpz_mul(asNatural(product), asNatural(top1), asNatural(top2));
   pushCtxData(aCtx, product);
 }
@@ -119,7 +119,7 @@ static void isNaturalAP(ContextObj* aCtx) {
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   popCtxDataInto(aCtx, top);
-  CoAlgObj* result = NULL;
+  JObj* result = NULL;
   if (isNatural(top))
     result = newBoolean(jInterp, TRUE);
   else

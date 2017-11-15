@@ -1,18 +1,18 @@
 % A ConTeXt document [master document: jInterps.tex]
 
-\section[title=CoAlgObjs]
+\section[title=JObjs]
 \setCHeaderStream{public}
 \setCCodeStream{objects}
 
 Since the implementation of any particular CoAlgebraic extension will of 
 necessity make use of instance specific data stored in a 
-\type{CoAlgObj}ect, we \emph{begin} by providing the implementation of 
-\type{CoAlgObj}. Together with any extension specific part, all of our 
-\type{CoAlgObj}s have the same three part base structure. 
+\type{JObj}ect, we \emph{begin} by providing the implementation of 
+\type{JObj}. Together with any extension specific part, all of our 
+\type{JObj}s have the same three part base structure. 
 
 \subsection[title=Type part] The first (type) part is a \type{CoAlgebra*} 
 pointer to the data structure which represents the CoAlgebra for which the 
-\type{CoAlgObj} is an instance. This CoAlgebra pointer ensures that the 
+\type{JObj} is an instance. This CoAlgebra pointer ensures that the 
 implementation code knows what the given instance, is an instance 
 \emph{for}, as well as what it can \emph{do}. 
 
@@ -74,24 +74,24 @@ typedef uint16_t FlagsType;
 #endif
 \stopCHeader
 
-We can now define the \emph{base} \type{CoAlgObj} as:
+We can now define the \emph{base} \type{JObj} as:
 
 \startCHeader
-typedef struct coalgebra_object_struct {
+typedef struct joylol_object_struct {
   CoAlgClass *type;
   TagType     tag;
   FlagsType   flags; // an arbitrary collection of bits
-} CoAlgObj;
+} JObj;
 
-#define asType(aLoL)  (((CoAlgObj*)(aLoL))->type)
-#define asTag(aLoL)   (((CoAlgObj*)(aLoL))->tag)
-#define asFlags(aLoL) (((CoAlgObj*)(aLoL))->flags)
+#define asType(aLoL)  (((JObj*)(aLoL))->type)
+#define asTag(aLoL)   (((JObj*)(aLoL))->tag)
+#define asFlags(aLoL) (((JObj*)(aLoL))->flags)
 \stopCHeader
 
 \section[title=isAtom isPair]
 
 A common requirement is to determine whether or not a given 
-\type{CoAlgObj} is an \quote{atom} or a \quote{pair}. Quite simply we 
+\type{JObj} is an \quote{atom} or a \quote{pair}. Quite simply we 
 define anything that is not an instance of \type{Pairs} an \quote{atom}.
 
 \startCHeader
@@ -107,7 +107,7 @@ define anything that is not an instance of \type{Pairs} an \quote{atom}.
 Since a JoyLoL interpreter is essentially a list processor, any JoyLoL 
 program will create (and orphan) a very large number of list \type{Pairs} 
 over the course of a computation. This means that we need to make the 
-allocation and eventual garbage collection of orphaned \type{CoAlgObjs} 
+allocation and eventual garbage collection of orphaned \type{JObjs} 
 as efficient as possible.
 
 We do this by defining a \type{ObjectMemory} as a pair of pointers. The 
@@ -118,7 +118,7 @@ points to a linked list of \type{ObjectBlock}s.
 typedef struct object_block_struct ObjectBlock;
 
 typedef struct object_memory_struct {
-  CoAlgObj*    freeObjects;
+  JObj*    freeObjects;
   ObjectBlock* rootObjectBlock;
 } ObjectMemory;
 
@@ -175,13 +175,13 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
   DEBUG(jInterp, "addObjectBlock = %p %p\n", 
     jInterp, aNewObjectBlock);
 
-  // make sure this object block has some CoAlgObjs
+  // make sure this object block has some JObjs
   aNewObjectBlock->block = 
     calloc(OBJECT_BLOCK_SIZE, objectSize);
   assert( aNewObjectBlock->block );
   assert( IS_MEM_ALIGNED(aNewObjectBlock->block) );
   
-  // add these new CoAlgObjs to the free list
+  // add these new JObjs to the free list
   void* nextObject = aNewObjectBlock->block;
   for (size_t i = 1 ; i < OBJECT_BLOCK_SIZE ; i++) {
     assert( IS_MEM_ALIGNED(nextObject) );
@@ -309,7 +309,7 @@ void collectGarbage(JoyLoLInterp* jInterp, TagType aTag) {
 
 \startTestSuite[newObject]
 
-To allocate a new \type{CoAlgObj} the first free object is taken from 
+To allocate a new \type{JObj} the first free object is taken from 
 the linked list of free objects. If there are no remaining free objects, 
 then we first attempt to collect any garbage and then if this fails to get 
 any new free objects, a new \type{ObjectBlock} is allocated together with 
@@ -325,7 +325,7 @@ its collection of free objects.
 
 \setCHeaderStream{private}
 \startCHeader
-extern CoAlgObj* newObjectImpl(
+extern JObj* newObjectImpl(
   JoyLoLInterp* jInterp,
   TagType aTag
 );
@@ -333,7 +333,7 @@ extern CoAlgObj* newObjectImpl(
 \setCHeaderStream{public}
 
 \startCCode
-CoAlgObj* newObjectImpl(
+JObj* newObjectImpl(
   JoyLoLInterp* jInterp,
   TagType aTag
 ) {
@@ -357,8 +357,8 @@ CoAlgObj* newObjectImpl(
 
   assert(jInterp->coAlgs[aTag].oMem.freeObjects);
 
-  CoAlgObj* aNewObject   = jInterp->coAlgs[aTag].oMem.freeObjects;
-  jInterp->coAlgs[aTag].oMem.freeObjects = (CoAlgObj*)(aNewObject->type);
+  JObj* aNewObject   = jInterp->coAlgs[aTag].oMem.freeObjects;
+  jInterp->coAlgs[aTag].oMem.freeObjects = (JObj*)(aNewObject->type);
 
   asType(aNewObject)  = jInterp->coAlgs[aTag].sClass;
   asTag(aNewObject)   = aTag;
@@ -368,7 +368,7 @@ CoAlgObj* newObjectImpl(
 }
 \stopCCode
 
-\startTestCase[Allocate one new CoAlgObj]
+\startTestCase[Allocate one new JObj]
 \startCTest
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
@@ -383,7 +383,7 @@ CoAlgObj* newObjectImpl(
   // get one new object to ensure our lazily
   // initialized object memory structures 
   // are initialized...
-  CoAlgObj* aNewObject = newObject(jInterp, aTag);
+  JObj* aNewObject = newObject(jInterp, aTag);
   
   AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
   AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
@@ -398,10 +398,10 @@ CoAlgObj* newObjectImpl(
   // now get one more object to ensure
   // we can properly deal with object blocks/memory
   
-  CoAlgObj* oldFreeObjects =
+  JObj* oldFreeObjects =
     jInterp->coAlgs[aTag].oMem.freeObjects;
-  CoAlgObj* newfreeObjects = 
-    (CoAlgObj*)jInterp->coAlgs[aTag].oMem.freeObjects->type;
+  JObj* newfreeObjects = 
+    (JObj*)jInterp->coAlgs[aTag].oMem.freeObjects->type;
 
   aNewObject = newObject(jInterp, JInterpsTag);
 
@@ -415,12 +415,12 @@ CoAlgObj* newObjectImpl(
 \stopCTest
 \stopTestCase
 
-\startTestCase[Allocate lots of new CoAlgObjs]
+\startTestCase[Allocate lots of new JObjs]
 
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  CoAlgObj* aNewObject = NULL;
+  JObj* aNewObject = NULL;
   for ( size_t i = 0; i < 3*OBJECT_BLOCK_SIZE; i++ ) {
     aNewObject = newObject(jInterp, JInterpsTag);
   }

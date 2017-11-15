@@ -13,12 +13,12 @@ struct text_object_struct;
 typedef void (NextLineFunc)(struct text_object_struct*);
 
 typedef struct text_object_struct {
-  CoAlgObj super;
+  JObj super;
   //
   // fields used by all backing types
   //
   size_t        completed;
-  CoAlgObj*     sym;
+  JObj*     sym;
   Symbol*       curLine;
   Symbol*       curChar;
   Symbol*       lastChar;
@@ -352,8 +352,8 @@ void reportErrorImpl(
 \startCHeader
 extern Boolean equalityTextsCoAlg(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -361,8 +361,8 @@ extern Boolean equalityTextsCoAlg(
 \startCCode
 Boolean equalityTextsCoAlg(
   JoyLoLInterp *jInterp,
-  CoAlgObj     *lolA,
-  CoAlgObj     *lolB
+  JObj     *lolA,
+  JObj     *lolB
 ) {
   assert(jInterp);
   DEBUG(jInterp, "textsCoAlg-equal a:%p b:%p\n", lolA, lolB);
@@ -384,7 +384,7 @@ Boolean equalityTextsCoAlg(
 extern Boolean printStrTextsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -393,7 +393,7 @@ extern Boolean printStrTextsCoAlg(
 Boolean printStrTextsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  CoAlgObj        *aLoL
+  JObj        *aLoL
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == TextsTag);
@@ -412,7 +412,7 @@ Boolean printStrTextsCoAlg(
   TextObj* aNewText = createTextFromString(jInterp, "a string");
   AssertPtrNotNull(aNewText);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, (CoAlgObj*)aNewText);
+  printLoL(jInterp, aStrBuf, (JObj*)aNewText);
   AssertStrEquals(getCString(jInterp, aStrBuf), "--texts-- ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest

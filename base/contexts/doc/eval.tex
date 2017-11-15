@@ -6,8 +6,8 @@
 static void traceAction(
   JoyLoLInterp *jInterp,
   Symbol       *action,
-  CoAlgObj     *aLoL,
-  CoAlgObj     *command
+  JObj     *aLoL,
+  JObj     *command
 ) {
   assert(jInterp);
   StringBufferObj *aStrBuf =
@@ -26,7 +26,7 @@ static void traceAction(
 \startCHeader
 typedef void (EvalCommandInContext)(
   ContextObj *aCtx,
-  CoAlgObj   *command
+  JObj   *command
 );
 
 #define evalCommandInContext(aCtx, aCommand)      \
@@ -43,7 +43,7 @@ typedef void (EvalCommandInContext)(
 \startCHeader
 void evalCommandInContextImpl(
   ContextObj *aCtx,
-  CoAlgObj   *command
+  JObj   *command
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -51,7 +51,7 @@ void evalCommandInContextImpl(
 \startCCode
 void evalCommandInContextImpl(
   ContextObj *aCtx,
-  CoAlgObj   *command
+  JObj   *command
 ) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
@@ -267,7 +267,7 @@ void evalTextInContextImpl(
 
   DEBUG(jInterp, "evalTextInContext > %p %p\n", aCtx, aText);
   while(TRUE) {
-    CoAlgObj* aLoL = parseOneSymbol(aText);
+    JObj* aLoL = parseOneSymbol(aText);
 /**/    if (aCtx->showStack) {
       StringBufferObj *aStrBuf =
         newStringBuffer(jInterp);

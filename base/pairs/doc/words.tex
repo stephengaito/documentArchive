@@ -8,7 +8,7 @@ static void isPairAP(ContextObj* aCtx) {
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   popCtxDataInto(aCtx, top);
-  CoAlgObj* result = NULL;
+  JObj* result = NULL;
   if (isPair(top))
     result = newBoolean(jInterp, TRUE);
   else
@@ -23,7 +23,7 @@ static void isAtomAP(ContextObj* aCtx) {
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   popCtxDataInto(aCtx, top);
-  CoAlgObj* result = NULL;
+  JObj* result = NULL;
   if (isAtom(top))
     result = newBoolean(jInterp, TRUE);
   else
