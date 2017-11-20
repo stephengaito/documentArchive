@@ -21,6 +21,35 @@ static void addAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\stoptyping
+
+\startWord[add]
+
+\preDataStack
+  (
+    top1 : natural
+    top2 : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  (
+    top1 + top2 : natural ??
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
 \startCCode
 static void subtractAP(ContextObj* aCtx) {
   assert(aCtx);
@@ -41,6 +70,40 @@ static void subtractAP(ContextObj* aCtx) {
   pushCtxData(aCtx, difference);
 }
 \stopCCode
+
+\starttyping
+
+\startWord[subtract]
+
+\preDataStack
+  (
+    top1 : natural
+    top2 : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  (top2 < top1) ->(
+    top1 - top2 : natural ??
+    dataStack
+  )
+  OR
+  (else) -> (
+    0 : natural
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
 
 \startCCode
 static void subtractReverseAP(ContextObj* aCtx) {
@@ -63,6 +126,35 @@ static void subtractReverseAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\starttyping
+
+\startWord[subtractReverse]
+
+\preDataStack
+  (
+    top1 : natural
+    top2 : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  ( top1 < top2 ) -> (
+    top2 - top1 : natural ?
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
 \startCCode
 static void multiplyAP(ContextObj* aCtx) {
   assert(aCtx);
@@ -82,6 +174,35 @@ static void multiplyAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\starttyping
+
+\startWord[mulitply]
+
+\preDataStack
+  (
+    top1 : natural
+    top2 : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  (
+    top1 * top2 : natural ?
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
 \startCCode
 static void equalNatAP(ContextObj* aCtx) {
   assert(aCtx);
@@ -98,6 +219,35 @@ static void equalNatAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\starttyping
+
+\startWord[equal]
+
+\preDataStack
+  (
+    top1 : natural
+    top2 : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreConditions
+
+\postDataStack
+  (
+    top1 == top2 : boolean
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostConditions
+
+\stopWord
+
+\stoptyping
+
 \startCCode
 static  mpz_t zero;
 
@@ -113,6 +263,34 @@ static void isZeroAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\starttyping
+
+\startWord[isZero]
+
+\preDataStack
+  (
+    top : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreConditions
+
+\postDataStack
+  (
+    top == 0 : Boolean
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostConditions
+
+\stopWord
+
+\stoptyping
+
 \startCCode
 static void isNaturalAP(ContextObj* aCtx) {
   assert(aCtx);
@@ -127,6 +305,34 @@ static void isNaturalAP(ContextObj* aCtx) {
   pushCtxData(aCtx, result);
 }
 \stopCCode
+
+\startTyping
+
+\startWord[isNatural]
+
+\preDataStack
+  (
+    top : aType
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreConditions
+
+\postDataStack
+  ( 
+    (top isNatural) : Boolean ????
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostConditions
+
+\stopWord
+
+\stopTyping
 
 \setCHeaderStream{private}
 \startCHeader

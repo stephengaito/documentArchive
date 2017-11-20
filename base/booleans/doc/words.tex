@@ -17,6 +17,40 @@ static void isBooleanAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\starttyping
+
+\startWord[isBoolean]
+
+\preDataStack
+  (
+    top : aType
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\stopPreStack
+
+\postDataStack
+  ( (top isBoolean) ->
+    TRUE : Boolean
+    dataStack
+  )
+  (else) ->
+    FALSE: Boolean
+    dataStack
+  )
+\postProcessStack
+  (
+    processStack
+  )
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
 \startCCode
 static void ifteAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, topElse);
@@ -28,6 +62,44 @@ static void ifteAP(ContextObj* aCtx) {
   prependListCtxProcess(aCtx, topIf); // execute the if condition
 }
 \stopCCode
+
+\starttyping
+
+\startWord[ifte]
+
+\preDataStack
+  (
+    topElse : list
+    topThen : list
+    topIf   : list
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preConditions
+  (topIf isFinite)
+\stopPreStack
+
+\postDataStack
+  (
+    dataStack
+  )
+\postProcessStack
+  (
+    topIf (prepended)
+    'ifteCont' : Symbol
+    topThen    : list
+    topElse    : list
+    processStack
+  )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
 
 \startCCode
 static void ifteContAP(ContextObj* aCtx) {
@@ -44,6 +116,47 @@ static void ifteContAP(ContextObj* aCtx) {
   }
 }
 \stopCCode
+
+\starttyping
+
+\startWord[ifteCont]
+
+\preDataStack
+  (
+    topIf : Boolean
+    dataStack
+  )
+\preProcessStack
+  (
+    topThen : list
+    topElse : list
+    processStack
+  )
+\preConditions
+  (topThen isFinite)
+  (topElse isFinite)
+\stopPreStack
+
+\postDataStack
+  (
+    dataStack
+  )
+\postProcessStack
+  (topIf isTrue) -> (
+    topThen (prepended)
+    processStack
+  )
+  OR
+  (else) -> (
+    topElse (prepended)
+    processStack
+  )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
 
 \setCHeaderStream{private}
 \startCHeader

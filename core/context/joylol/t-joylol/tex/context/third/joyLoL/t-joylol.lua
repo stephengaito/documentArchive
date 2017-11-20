@@ -46,9 +46,9 @@ local toStr   = tostring
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-15",
-  commitShortHash = "b9ec10c",
-  commitLongHash  = "b9ec10c249c213905ae0af1dcf7ce873c47dac0b",
-  subject         = "renamed CoAlgObj to JObj to begin splitting off CoAlgebra objects",
+  commitShortHash = "8d6d3cf",
+  commitLongHash  = "8d6d3cf9092e4d9bb261539f8d8047ca0682e4ac",
+  subject         = "renamed CoAlgClass to JClass",
   notes           = ""
 }
 

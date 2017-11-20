@@ -12,7 +12,33 @@ static void failAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\subsection[title=Compinators]
+\starttyping
+
+\startWord[fail]
+
+\preDataStack
+  (
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  ( )
+\postProcessStack
+  ( )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
+\subsection[title=Combinators]
 
 \startCCode
 static void interpretAP(ContextObj* aCtx) {
@@ -20,6 +46,39 @@ static void interpretAP(ContextObj* aCtx) {
   prependListCtxProcess(aCtx, top);
 }
 \stopCCode
+
+\starttyping
+
+\startWord[interpret]
+
+\preDataStack
+  (
+    top : list
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preConditions
+  (top isFinite)
+\stopPreStack
+
+\postDataStack
+  (
+    dataStack
+  )
+\postProcessStack
+  (
+    top (prepended)
+    processStack
+  )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
 
 \startCCode
 static void forAP(ContextObj* aCtx) {
@@ -38,10 +97,71 @@ static void forAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\starttyping
+
+\startWord[for]
+\preDataStack
+  (
+    dataStack
+  )
+\preProcessStack
+  (
+    nextCommand : aType
+    processStack
+  )
+\preConditions
+  (nextCommand isFinite)  >> if nextCommand == 'forDone' ok
+                             if nextCommand isList then nextCommand isFinite
+                             else ok <<
+\stopPreStack
+
+\postDataStack
+  (
+    dataStack
+  )
+\postProcessStack
+  (nextCommand 'forDone' =symbol) -> (
+    processStack
+  )
+  OR
+  (else) -> (
+    nextCommand (prepended)
+    'for' : Symbol
+    processStack
+  )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
 \startCCode
 static void forDoneAP(ContextObj* aCtx) {
   // ignore
 }
+\stopCCode
+
+\starttyping
+
+\startWord[forDone]
+
+\preDataStack
+  ( dataStack )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  ( dataStack )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostStack
+
+\stopWord
+
 \stopCCode
 
 \startCCode
@@ -58,6 +178,40 @@ static void lispInterpretAP(ContextObj* aCtx) {
   pushCtxProcess(aCtx, operationBody);
 }
 \stopCCode
+
+\starttyping
+
+\startWord[lispInterpret]
+
+\preDataStack
+  (
+    (
+      operationName : list
+      operationBody
+    )
+    dataStack 
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  ( dataStack )
+\postProcessStack
+  (
+    operationBody : list <<< PREPEND?
+    operationName : aType
+    processStack
+  )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
 
 \startCCode
 static void lispForAP(ContextObj* aCtx) {
