@@ -1,0 +1,85 @@
+% A ConTeXt document [master document: joylolCoAlg.tex] 
+
+\chapter[title=Rules]
+
+\startTestSuite[startRule]
+
+% depends upon the 
+%   \buff_pickup{name}{startsequence}{stopsequence}{before}{after}{undent}
+% macro defined in buff-ini.mkiv
+% where:
+%  name          is the name of the buffer to be extracted
+%                  from the following text
+%  startsequence is the *macro* which starts the text
+%  stopsequence  is the *macro* (used as a literal) which
+%                  stops the text
+%  before        is the *macro* to be executed *before* text
+%                  is extracted
+%  after         is the *macro* to be executed *after* the 
+%                  text has been extracted
+%  undent        is .... ??
+
+\starttyping
+
+\startRule[rule-1]
+\preDataStack
+\preProcessStack
+\preConditions
+\postDataStack
+\postProcessStack
+\postConditions
+\stopRule
+
+\stoptyping
+
+\startMkIVCode
+\let\stopRule\relax
+
+\def\stopRuleDone{
+  \directlua{thirddata.joyLoLCoAlgs.stopRule()}
+}
+
+\def\startRule[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.startRule('#1')}
+  \buff_pickup{_rules_buffer_}%
+    {startRule}{stopRule}%
+    {\relax}{\stopRuleDone}\plusone%
+}
+\stopMkIVCode
+
+\startLuaCode
+local function startRule(ruleName)
+  texio.write_nl("starting rule: ["..ruleName.."]")
+end
+
+coAlgs.startRule = startRule
+
+local function stopRule()
+  local rulesBody = buffers.getcontent('_rules_buffer_'):gsub("\13", "\n")
+  texio.write_nl('---------rules-buffer-------------')
+  texio.write_nl(rulesBody)
+  texio.write_nl('---------rules-buffer-------------')
+end
+
+coAlgs.stopRule = stopRule
+\stopLuaCode
+
+\startTestCase[stopRule should manipulate buffers]
+\startConTest
+  \startRule[testRule]
+    \preDataStack
+      some preDataStack content
+    \preProcessStack
+      some preProcessStack content
+    \preConditions
+      some preConditions content
+    \postDataStack
+      some postDataStack content
+    \postProcessStack
+      some postProcessStack content
+    \postConditions  
+      some postConditions content
+  \stopRule
+\stopConTest
+\stopTestCase
+\stopTestSuite

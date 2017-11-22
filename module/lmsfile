@@ -13,6 +13,7 @@ litProgs.targets{
   docFiles = {
     'overview.tex',
     'codeManipulation.tex',
+    'rules.tex',
     'lmsfile.tex',
     'preamble.tex',
     'conclusion.tex',

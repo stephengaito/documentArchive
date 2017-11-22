@@ -516,6 +516,23 @@ end
 
 joylol.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
 
+-- from file: rules.tex after line: 50
+
+local function startRule(ruleName)
+  texio.write_nl("starting rule: ["..ruleName.."]")
+end
+
+coAlgs.startRule = startRule
+
+local function stopRule()
+  local rulesBody = buffers.getcontent('_rules_buffer_'):gsub("\13", "\n")
+  texio.write_nl('---------rules-buffer-------------')
+  texio.write_nl(rulesBody)
+  texio.write_nl('---------rules-buffer-------------')
+end
+
+coAlgs.stopRule = stopRule
+
 -- from file: lmsfile.tex after line: 0
 
 local function addJoyLoLTargets(aCodeStream)

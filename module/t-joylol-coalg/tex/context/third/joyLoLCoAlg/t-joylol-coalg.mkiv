@@ -167,6 +167,21 @@
   }
 }
 
+% from file: rules.tex after line: 0
+
+\let\stopRule\relax
+
+\def\stopRuleDone{
+  \directlua{thirddata.joyLoLCoAlgs.stopRule()}
+}
+
+\def\startRule[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.startRule('#1')}
+  \buff_pickup{_rules_buffer_}%
+    {startRule}{stopRule}%
+    {\relax}{\stopRuleDone}\plusone%
+}
+
 % from file: lmsfile.tex after line: 0
 
 \def\addJoyLoLTargets#1{%
