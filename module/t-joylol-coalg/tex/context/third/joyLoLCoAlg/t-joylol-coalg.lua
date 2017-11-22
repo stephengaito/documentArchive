@@ -532,7 +532,7 @@ local function stopRule()
   local curSection = 'ignore'
   for aLine in rulesBody:gmatch("[^\r\n]+") do
     local aMatch = aLine:match("^%s*\\(%a+)%s*$")
-    if aMatch then
+    if aMatch then -- need to check that this *is* a section header!
       rules[curSection] = lines
       lines             = { }
       curSection        = aMatch
