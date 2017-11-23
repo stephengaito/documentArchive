@@ -525,24 +525,9 @@ end
 coAlgs.startRule = startRule
 
 local function stopRule()
-  local pp = require 'pl.pretty'
-  local rulesBody  = buffers.getcontent('_rules_buffer_'):gsub("\13", "\n")
-  local rules      = { }
-  local lines      = { }
-  local curSection = 'ignore'
-  for aLine in rulesBody:gmatch("[^\r\n]+") do
-    local aMatch = aLine:match("^%s*\\(%a+)%s*$")
-    if aMatch then -- need to check that this *is* a section header!
-      rules[curSection] = lines
-      lines             = { }
-      curSection        = aMatch
-    else
-      tInsert(lines, aLine)
-    end
-  end
-  rules[curSection] = lines
+  local rulesBody = buffers.getcontent('_rules_buffer_'):gsub("\13", "\n")
   texio.write_nl('---------rules-buffer-------------')
-  texio.write_nl(pp.write(rules))
+  texio.write_nl(rulesBody)
   texio.write_nl('---------rules-buffer-------------')
 end
 

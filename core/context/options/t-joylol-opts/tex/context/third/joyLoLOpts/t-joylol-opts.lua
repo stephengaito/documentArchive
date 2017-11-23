@@ -43,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-11-15",
-  commitShortHash = "8d6d3cf",
-  commitLongHash  = "8d6d3cf9092e4d9bb261539f8d8047ca0682e4ac",
-  subject         = "renamed CoAlgClass to JClass",
+  commitDate      = "2017-11-22",
+  commitShortHash = "6e32ac3",
+  commitLongHash  = "6e32ac3fefc81cb2dc7abcab399f8fd3eb6ef389",
+  subject         = "added comment for future work",
   notes           = ""
 }
 
