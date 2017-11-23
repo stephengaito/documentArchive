@@ -524,17 +524,17 @@ end
 
 coAlgs.startRule = startRule
 
+local sectionHeaders = tConcat({
+  'preDataStack',
+  'preProcessStack',
+  'preConditions',
+  'postDataStack',
+  'postProcessStack',
+  'postConditions'
+}, '|'):lower()
+
 local function stopRule()
   local pp = require 'pl.pretty'
-  local sectionHeaders = tConcat({
-    'preDataStack',
-    'preProcessStack',
-    'preConditions',
-    'postDataStack',
-    'postProcessStack',
-    'postConditions'
-  }, '|'):lower()
-  texio.write_nl(pp.write(sectionHeaders))
   local rulesBody  = buffers.getcontent('_rules_buffer_'):gsub("\13", "\n")
   local rules      = { }
   local lines      = { }

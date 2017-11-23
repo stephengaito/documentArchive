@@ -2,6 +2,33 @@
 
 \section[title=Words]
 
+%\startWord[isBoolean]
+
+\startRule[isBoolean]
+\preDataStack
+  (
+    top : aType
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\postDataStack
+  ( (top isBoolean) ->
+    TRUE : Boolean
+    dataStack
+  )
+  (else) ->
+    FALSE: Boolean
+    dataStack
+  )
+\postProcessStack
+  (
+    processStack
+  )
+\stopRule
+
 \startCCode
 static void isBooleanAP(ContextObj* aCtx) {
   assert(aCtx);
@@ -17,39 +44,7 @@ static void isBooleanAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\starttyping
-
-\startWord[isBoolean]
-
-\preDataStack
-  (
-    top : aType
-    dataStack
-  )
-\preProcessStack
-  (
-    processStack
-  )
-\stopPreStack
-
-\postDataStack
-  ( (top isBoolean) ->
-    TRUE : Boolean
-    dataStack
-  )
-  (else) ->
-    FALSE: Boolean
-    dataStack
-  )
-\postProcessStack
-  (
-    processStack
-  )
-\stopPostStack
-
-\stopWord
-
-\stoptyping
+%\stopWord
 
 \startCCode
 static void ifteAP(ContextObj* aCtx) {
@@ -63,10 +58,7 @@ static void ifteAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\starttyping
-
-\startWord[ifte]
-
+\startRule[ifte]
 \preDataStack
   (
     topElse : list
@@ -80,8 +72,6 @@ static void ifteAP(ContextObj* aCtx) {
   )
 \preConditions
   (topIf isFinite)
-\stopPreStack
-
 \postDataStack
   (
     dataStack
@@ -95,11 +85,7 @@ static void ifteAP(ContextObj* aCtx) {
     processStack
   )
 \postConditions
-\stopPostStack
-
-\stopWord
-
-\stoptyping
+\stopRule
 
 \startCCode
 static void ifteContAP(ContextObj* aCtx) {
@@ -117,10 +103,7 @@ static void ifteContAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\starttyping
-
-\startWord[ifteCont]
-
+\startRule[ifteCont]
 \preDataStack
   (
     topIf : Boolean
@@ -135,8 +118,6 @@ static void ifteContAP(ContextObj* aCtx) {
 \preConditions
   (topThen isFinite)
   (topElse isFinite)
-\stopPreStack
-
 \postDataStack
   (
     dataStack
@@ -152,11 +133,7 @@ static void ifteContAP(ContextObj* aCtx) {
     processStack
   )
 \postConditions
-\stopPostStack
-
-\stopWord
-
-\stoptyping
+\stopRule
 
 \setCHeaderStream{private}
 \startCHeader
