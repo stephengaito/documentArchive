@@ -525,11 +525,38 @@ end
 coAlgs.startRule = startRule
 
 local function stopRule()
-  local rulesBody = buffers.getcontent('_rules_buffer_'):gsub("\13", "\n")
+  local pp = require 'pl.pretty'
+  local sectionHeaders = tConcat({
+    'preDataStack',
+    'preProcessStack',
+    'preConditions',
+    'postDataStack',
+    'postProcessStack',
+    'postConditions'
+  }, '|'):lower()
+  texio.write_nl(pp.write(sectionHeaders))
+  local rulesBody  = buffers.getcontent('_rules_buffer_'):gsub("\13", "\n")
+  local rules      = { }
+  local lines      = { }
+  local curSection = 'ignore'
+  for aLine in rulesBody:gmatch("[^\r\n]+") do
+    local aMatch = aLine:match("^%s*\\(%a+)%s*$")
+    if aMatch and
+      sectionHeaders:find(aMatch:lower(), 1, true)
+    then
+      rules[curSection] = lines
+      lines             = { }
+      curSection        = aMatch
+    else
+      tInsert(lines, aLine)
+    end
+  end
+  rules[curSection] = lines
   texio.write_nl('---------rules-buffer-------------')
-  texio.write_nl(rulesBody)
+  texio.write_nl(pp.write(rules))
   texio.write_nl('---------rules-buffer-------------')
 end
+
 
 coAlgs.stopRule = stopRule
 
