@@ -2,25 +2,248 @@
 
 \section[title=Words]
 
-%\startWord[isBoolean]
-
-\startRule[isBoolean]
+The f
+\startJoyLoLWord[true]
+\startRule[true]
 \preDataStack
   (
-    top : aType
+    dataStack
+  )
+\postDataStack
+  (
+    TRUE
+    dataStack
+  )
+\stopRule
+\stopJoyLoLWord
+
+\startJoyLoLWord[false]
+\startRule[false]
+\preDataStack
+  (
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+\stopJoyLoLWord
+
+\startJoyLoLWord[isTrue]
+\startRule[isTrue-true]
+\preDataStack
+  (
+    true
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[isTrue-else]
+\preDataStack
+  (
+    (top)
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+\stopJoyLoLWord
+
+\startJoyLoLWord[ifFalse]
+
+\startRule[ifFalse-false]
+\preDataStack
+  (
+    false
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[ifFalse-else]
+\preDataStack
+  (
+    (top)
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+\stopJoyLoLWord
+
+\startJoyLoLWord[not]
+\startRule[not-true]
+\preDataStack
+  (
+    false
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[not-false]
+\preDataStack
+  (
+    true
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+\stopJoyLoLWord
+
+\startJoyLoLWord[or]
+\startRule[or-true1]
+\preDataStack
+  (
+    true
+    (top2)
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[or-true2]
+\preDataStack
+  (
+    false
+    true
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[or-false]
+\preDataStack
+  (
+    false
+    false
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+\stopJoyLoLWord
+
+\startJoyLoLWord[and]
+\startRule[and-true]
+\preDataStack
+  (
+    true
+    true
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[and-false1]
+\preDataStack
+  (
+    false
+    (top2)
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+
+\startRule[and-false2]
+\preDataStack
+  (
+    true
+    false
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+\stopJoyLoLWord
+
+\startJoyLoLWord[isBoolean]
+
+\startRule[isBoolean-true]
+\preDataStack
+  (
+    (top aType)
     dataStack
   )
 \preProcessStack
   (
     processStack
   )
+\preCondition
+  dup isTrue or isFalse  << WRONG!
 \postDataStack
-  ( (top isBoolean) ->
-    TRUE : Boolean
+  (
+    (TRUE Boolean)
     dataStack
   )
-  (else) ->
-    FALSE: Boolean
+\postProcessStack
+  (
+    processStack
+  )
+\stopRule
+
+\startRule[isBoolean-false]
+\preDataStack
+  (
+    (top aType)
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preCondition
+  (top isBoolean not)
+\postDataStack
+  (
+    (FALSE Boolean)
     dataStack
   )
 \postProcessStack
@@ -44,7 +267,15 @@ static void isBooleanAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-%\stopWord
+\stopJoyLoLWord
+
+\startJoyLoLWord[or]
+
+\stopJoyLoLWord
+
+\startJoyLoLWord[and]
+
+\stopJoyLoLWord
 
 \startCCode
 static void ifteAP(ContextObj* aCtx) {
