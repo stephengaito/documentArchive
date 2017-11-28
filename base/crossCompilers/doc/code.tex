@@ -1,0 +1,247 @@
+% A ConTeXt document [master document: crossCompiler.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\component gitVersion-c
+
+\startTestSuite[newCrossCompiler]
+
+\startCHeader
+typedef JObj* (NewCrossCompiler)(
+  JoyLoLInterp*,
+  Symbol*
+);
+
+#define newCrossCompiler(jInterp, aName)      \
+  (                                           \
+    assert(getCrossCompilersClass(jInterp)    \
+      ->newCrossCompilerFunc),                \
+    (getCrossCompilersClass(jInterp)          \
+      ->newCrossCompilerFunc(jInterp, aName)) \
+  )
+
+//#define asCrossCompiler(aLoL) (((aLoL)->flags) & BOOLEAN_FLAG_MASK)
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* newCrossCompilerImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aCompilerType
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* newCrossCompilerImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aCompilerName
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  JObj* result = newObject(jInterp, CrossCompilersTag);
+  assert(result);
+  
+  result->type  = jInterp->coAlgs[CrossCompilersTag].sClass;
+ 
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new crossCompiler]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  JObj* aNewCrossCompiler = newCrossCompiler(jInterp, "ansiC");
+  AssertPtrNotNull(aNewCrossCompiler);
+  AssertPtrNotNull(asType(aNewCrossCompiler));
+  AssertIntEquals(asTag(aNewCrossCompiler), CrossCompilersTag);
+  AssertIntTrue(isAtom(aNewCrossCompiler));
+  AssertIntTrue(isCrossCompiler(aNewCrossCompiler));
+  AssertIntFalse(isPair(aNewCrossCompiler));
+\stopCTest
+\stopTestCase
+
+\startTestCase[print CrossCompiler]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+
+  JObj* aLoL = newCrossCompiler(jInterp, "ansiC");
+  AssertPtrNotNull(aLoL);
+  printLoL(jInterp, aStrBuf, aLoL);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "crossCompiler ");
+  strBufClose(jInterp, aStrBuf);
+\stopCTest
+\stopTestCase
+
+\stopTestSuite
+
+\startTestSuite[isCrossCompiler]
+
+\startCHeader
+#define isCrossCompiler(aLoL)             \
+  (                                 \
+    (                               \
+      (aLoL) &&                     \
+      asType(aLoL) &&               \
+      (asTag(aLoL) == CrossCompilersTag)  \
+    ) ?                             \
+      TRUE :                        \
+      FALSE                         \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityCrossCompilerCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj     *lolA,
+  JObj     *lolB
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityCrossCompilerCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj     *lolA,
+  JObj     *lolB
+) {
+  DEBUG(jInterp, "crossCompilerCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != CrossCompilersTag) return FALSE;
+  if (lolA != lolB) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing crossCompilers]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printCrossCompilerCoAlg(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  JObj        *aLoL
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printCrossCompilerCoAlg(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  JObj        *aLoL
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == CrossCompilersTag);
+
+  strBufPrintf(jInterp, aStrBuf, "crossCompiler ");
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print crossCompilers]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[CrossCompilersTag].sClass);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+  
+  JObj* aNewCrossCompiler = newCrossCompiler(jInterp, "ansiC");
+  AssertPtrNotNull(aNewCrossCompiler);
+  printLoL(jInterp, aStrBuf, aNewCrossCompiler);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "crossCompiler ");
+  strBufClose(jInterp, aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerCrossCompilers]
+
+\startCHeader
+typedef struct crossCompilers_class_struct {
+  JClass       super;
+  NewCrossCompiler      *newCrossCompilerFunc;
+} CrossCompilersClass;
+
+\stopCHeader
+
+\startCCode
+static Boolean initializeCrossCompilers(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  registerCrossCompilerWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerCrossCompilers(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerCrossCompilers(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  CrossCompilersClass* theCoAlg
+    = joyLoLCalloc(1, CrossCompilersClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name           = CrossCompilersName;
+  theCoAlg->super.objectSize     = sizeof(JObj);
+  theCoAlg->super.initializeFunc = initializeCrossCompilers;
+  theCoAlg->super.equalityFunc   = equalityCrossCompilerCoAlg;
+  theCoAlg->super.printFunc      = printCrossCompilerCoAlg;
+  theCoAlg->newCrossCompilerFunc = newCrossCompilerImpl;
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == CrossCompilersTag);
+  assert(jInterp->coAlgs[tag].sClass);
+   
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the CrossCompilers coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerCrossCompilers
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getCrossCompilersClass(jInterp));
+  CrossCompilersClass *coAlg = getCrossCompilersClass(jInterp);
+  registerCrossCompilers(jInterp);
+  AssertPtrNotNull(getCrossCompilersClass(jInterp));
+  AssertPtrEquals(getCrossCompilersClass(jInterp), coAlg);
+  AssertIntEquals(
+    getCrossCompilersClass(jInterp)->super.objectSize,
+    sizeof(JObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

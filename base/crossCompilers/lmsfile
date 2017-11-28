@@ -1,0 +1,75 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('build/joylol')
+lfs.mkdir('install')
+lfs.mkdir('install/joylol')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'crossCompilers.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/crossCompilers.h',
+    'joylol/crossCompilers-private.h',
+    'crossCompilers.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets{
+  coAlgs = {
+    'crossCompiler',
+  },
+  srcFiles = {
+    'joylol/crossCompilers.h',
+    'joylol/crossCompilers-private.h',
+    'crossCompilers.c',
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+  buildDir = 'build',
+}
+
+require 'lms.contests'
+
+contests.targets{
+  testExecs = {
+    'allCTests',
+  },
+  mainDoc = 'crossCompilers.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/crossCompilers.h',
+    'joylol/crossCompilers-private.h',
+    'crossCompilers.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}

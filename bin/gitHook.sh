@@ -85,6 +85,8 @@ cp $gitVTex base/coAlgebras/doc
 cp $gitVC   base/coAlgebras/doc
 cp $gitVTex base/contexts/doc
 cp $gitVC   base/contexts/doc
+cp $gitVTex base/crossCompilers/doc
+cp $gitVC   base/crossCompilers/doc
 cp $gitVTex base/dictionaries/doc
 cp $gitVC   base/dictionaries/doc
 cp $gitVTex base/jInterps/doc

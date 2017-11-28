@@ -271,16 +271,20 @@ typedef struct contexts_class_struct ContextsClass;
 #define getContextsClass(jInterp)                           \
   ((ContextsClass*)getJClass(jInterp, ContextsTag))
 
+typedef struct crossCompilers_class_struct CrossCompilersClass;
+#define getCrossCompilersClass(jInterp)                     \
+  ((CrossCompilersClass*)getJClass(jInterp, CrossCompilersTag))
+
 typedef struct dictionaries_class_struct DictionariesClass;
-#define getDictionariesClass(jInterp)                \
+#define getDictionariesClass(jInterp)                       \
   ((DictionariesClass*)getJClass(jInterp, DictionariesTag))
 
 typedef struct loaders_class_struct LoadersClass;
-#define getLoadersClass(jInterp)                          \
+#define getLoadersClass(jInterp)                            \
   ((LoadersClass*)getJClass(jInterp, LoadersTag))
 
 typedef struct luaFunctions_class_struct LuaFunctionsClass;
-#define getLuaFunctionsClass(jInterp)                          \
+#define getLuaFunctionsClass(jInterp)                       \
   ((LuaFunctionsClass*)getJClass(jInterp, LuaFunctionsTag))
 
 typedef struct naturals_class_struct NaturalsClass;
