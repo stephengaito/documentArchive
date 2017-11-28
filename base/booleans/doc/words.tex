@@ -2,7 +2,6 @@
 
 \section[title=Words]
 
-The f
 \startJoyLoLWord[true]
 \startRule[true]
 \preDataStack
@@ -15,6 +14,13 @@ The f
     dataStack
   )
 \stopRule
+
+\startImplementation[ansiC]
+  (
+    (pushData true)
+  )
+\stopImplementation
+
 \stopJoyLoLWord
 
 \startJoyLoLWord[false]
@@ -29,6 +35,13 @@ The f
     dataStack
   )
 \stopRule
+
+\startImplementation[ansiC]
+  (
+    (pushData false)
+  )
+\stopImplementation
+
 \stopJoyLoLWord
 
 \startJoyLoLWord[isTrue]
@@ -57,6 +70,17 @@ The f
     dataStack
   )
 \stopRule
+
+\startImplementation[ansiC]
+  (
+    (popData aBool)
+    (doIfte aBool
+      (pushData true)
+      (pushData false)
+    )
+  )
+\stopImplementation
+
 \stopJoyLoLWord
 
 \startJoyLoLWord[ifFalse]
@@ -86,6 +110,17 @@ The f
     dataStack
   )
 \stopRule
+
+\startImplementation[ansiC]
+  (
+    (popData aBool)
+    (doIfte aBool
+      (pushData false)
+      (pushData true)
+    )
+  )
+\stopImplementation
+
 \stopJoyLoLWord
 
 \startJoyLoLWord[not]
@@ -114,6 +149,16 @@ The f
     dataStack
   )
 \stopRule
+
+\startImplementation[ansiC]
+  (
+    (popData aBool)
+    (doIfte aBool
+      (pushData false)
+      (pushData true)
+    )
+  )
+\stopImplementation
 \stopJoyLoLWord
 
 \startJoyLoLWord[or]
@@ -158,9 +203,25 @@ The f
     dataStack
   )
 \stopRule
+
+\startImplementation[ansiC]
+  (
+    (popData aBool1)
+    (popData aBool2)
+    (doIfte aBool1
+      (pushData true)
+      (doIfte aBool2
+        (pushData true)
+        (pushData false)
+      )
+    )
+  )
+\stopImplementation
+
 \stopJoyLoLWord
 
 \startJoyLoLWord[and]
+
 \startRule[and-true]
 \preDataStack
   (
@@ -202,6 +263,21 @@ The f
     dataStack
   )
 \stopRule
+
+\startImplementation[ansiC]
+  (
+    (popData aBool1)
+    (popData aBool2)
+    (doIfte aBool1
+      (doIfte aBool2
+        (pushData true)
+        (pushData false)
+      )
+      (pushData false)
+    )
+  )
+\stopImplementation
+
 \stopJoyLoLWord
 
 \startJoyLoLWord[isBoolean]
@@ -269,13 +345,7 @@ static void isBooleanAP(ContextObj* aCtx) {
 
 \stopJoyLoLWord
 
-\startJoyLoLWord[or]
-
-\stopJoyLoLWord
-
-\startJoyLoLWord[and]
-
-\stopJoyLoLWord
+\startJoyLoLWord[ifte]
 
 \startCCode
 static void ifteAP(ContextObj* aCtx) {
@@ -288,6 +358,18 @@ static void ifteAP(ContextObj* aCtx) {
   prependListCtxProcess(aCtx, topIf); // execute the if condition
 }
 \stopCCode
+
+\startImplementation[ansiC]
+  (
+    (popData topElse)
+    (popData topThen)
+    (popData topIf)
+    (pushProcess topElse)
+    (pushProcess topThen)
+    (pushSymbolProcess ifteCont)
+    (prependProcess topIf)
+  )
+\stopImplementation
 
 \startRule[ifte]
 \preDataStack
@@ -318,6 +400,10 @@ static void ifteAP(ContextObj* aCtx) {
 \postConditions
 \stopRule
 
+\stopJoyLoLWord
+
+\startJoyLoLWord[ifteCont]
+
 \startCCode
 static void ifteContAP(ContextObj* aCtx) {
   assert(aCtx);
@@ -334,7 +420,19 @@ static void ifteContAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\startRule[ifteCont]
+\startImplementation[ansiC]
+  (
+    (popData topIf)
+    (popProcess topThen)
+    (popProcess topElse)
+    (doIfte topIf 
+      (prependProcess topThen)
+      (prependProcess topElse)
+    )
+  )
+\stopImplementation
+
+\startRule[ifteCont-true]
 \preDataStack
   (
     topIf : Boolean
@@ -348,23 +446,45 @@ static void ifteContAP(ContextObj* aCtx) {
   )
 \preConditions
   (topThen isFinite)
+\postDataStack
+  (
+    dataStack
+  )
+\postProcessStack
+  (
+    topThen (prepended)
+    processStack
+  )
+\postConditions
+\stopRule
+
+\startRule[ifteCont-false]
+\preDataStack
+  (
+    topIf : Boolean
+    dataStack
+  )
+\preProcessStack
+  (
+    topThen : list
+    topElse : list
+    processStack
+  )
+\preConditions
   (topElse isFinite)
 \postDataStack
   (
     dataStack
   )
 \postProcessStack
-  (topIf isTrue) -> (
-    topThen (prepended)
-    processStack
-  )
-  OR
-  (else) -> (
+  (
     topElse (prepended)
     processStack
   )
 \postConditions
 \stopRule
+
+\stopJoyLoLWord
 
 \setCHeaderStream{private}
 \startCHeader

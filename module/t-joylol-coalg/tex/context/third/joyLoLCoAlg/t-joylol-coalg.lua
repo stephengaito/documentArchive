@@ -516,7 +516,7 @@ end
 
 joylol.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
 
--- from file: rules.tex after line: 50
+-- from file: rules.tex after line: 0
 
 local function startRule(ruleName)
   texio.write_nl("starting rule: ["..ruleName.."]")
@@ -559,6 +559,25 @@ end
 
 
 coAlgs.stopRule = stopRule
+
+-- from file: rules.tex after line: 100
+
+local function startImplementation(implementationType)
+end
+
+coAlgs.startImplementation = startImplementation
+
+local function stopImplementation()
+  local implBody  = buffers.getcontent('_implementation_buffer_'):gsub("\13", "\n")
+  tex.sprint("\\starttyping")
+  tex.print(implBody)
+  tex.sprint("\\stoptyping")
+  texio.write_nl('---------impl-buffer-------------')
+  texio.write_nl(implBody)
+  texio.write_nl('---------impl-buffer-------------')
+end
+
+coAlgs.stopImplementation = stopImplementation
 
 -- from file: lmsfile.tex after line: 0
 

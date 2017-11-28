@@ -2,7 +2,7 @@
 
 \chapter[title=Rules]
 
-\startTestSuite[startRule]
+\startTestSuite[rule environment]
 
 % depends upon the 
 %   \buff_pickup{name}{startsequence}{stopsequence}{before}{after}{undent}
@@ -18,19 +18,6 @@
 %  after         is the *macro* to be executed *after* the 
 %                  text has been extracted
 %  undent        is .... ??
-
-\starttyping
-
-\startRule[rule-1]
-\preDataStack
-\preProcessStack
-\preConditions
-\postDataStack
-\postProcessStack
-\postConditions
-\stopRule
-
-\stoptyping
 
 \startMkIVCode
 \let\stopRule\relax
@@ -91,7 +78,7 @@ end
 coAlgs.stopRule = stopRule
 \stopLuaCode
 
-\startTestCase[stopRule should manipulate buffers]
+\startTestCase[should manipulate buffers]
 \startConTest
   \startRule[testRule]
     \preDataStack
@@ -109,4 +96,42 @@ coAlgs.stopRule = stopRule
   \stopRule
 \stopConTest
 \stopTestCase
+\stopTestSuite
+
+\startTestSuite[implementation environment]
+
+\startMkIVCode
+\let\stopImplementation\relax
+
+\def\stopImplementationDone{
+  \directlua{thirddata.joyLoLCoAlgs.stopImplementation()}
+}
+
+\def\startImplementation[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.startImplementation('#1')}
+  \buff_pickup{_implementation_buffer_}%
+    {startImplementation}{stopImplementation}%
+    {\relax}{\stopImplementationDone}\plusone%
+}
+\stopMkIVCode
+
+\startLuaCode
+local function startImplementation(implementationType)
+end
+
+coAlgs.startImplementation = startImplementation
+
+local function stopImplementation()
+  local implBody  = buffers.getcontent('_implementation_buffer_'):gsub("\13", "\n")
+  tex.sprint("\\starttyping")
+  tex.print(implBody)
+  tex.sprint("\\stoptyping")
+  texio.write_nl('---------impl-buffer-------------')
+  texio.write_nl(implBody)
+  texio.write_nl('---------impl-buffer-------------')
+end
+
+coAlgs.stopImplementation = stopImplementation
+\stopLuaCode
+
 \stopTestSuite

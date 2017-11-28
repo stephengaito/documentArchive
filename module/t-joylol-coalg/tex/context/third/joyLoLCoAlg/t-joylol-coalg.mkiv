@@ -182,6 +182,21 @@
     {\relax}{\stopRuleDone}\plusone%
 }
 
+% from file: rules.tex after line: 100
+
+\let\stopImplementation\relax
+
+\def\stopImplementationDone{
+  \directlua{thirddata.joyLoLCoAlgs.stopImplementation()}
+}
+
+\def\startImplementation[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.startImplementation('#1')}
+  \buff_pickup{_implementation_buffer_}%
+    {startImplementation}{stopImplementation}%
+    {\relax}{\stopImplementationDone}\plusone%
+}
+
 % from file: lmsfile.tex after line: 0
 
 \def\addJoyLoLTargets#1{%
