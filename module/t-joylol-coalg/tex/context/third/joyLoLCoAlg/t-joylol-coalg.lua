@@ -409,26 +409,40 @@ joylol.endWord = endWord
 
 -- from file: codeManipulation.tex after line: 250
 
+local function newFragment(aFragment)
+end
+
+joylol.newFragment = newFragment
+
+-- from file: codeManipulation.tex after line: 250
+
+local function endFragment()
+end
+
+joylol.endFragment = endFragment
+
+-- from file: codeManipulation.tex after line: 300
+
 local function newStackActionIn(aWord)
 end
 
 joylol.newStackActionIn = newStackActionIn
 
--- from file: codeManipulation.tex after line: 250
+-- from file: codeManipulation.tex after line: 300
 
 local function endStackActionIn()
 end
 
 joylol.endStackActionIn = endStackActionIn
 
--- from file: codeManipulation.tex after line: 300
+-- from file: codeManipulation.tex after line: 350
 
 local function newStackActionOut(aWord)
 end
 
 joylol.newStackActionOut = newStackActionOut
 
--- from file: codeManipulation.tex after line: 300
+-- from file: codeManipulation.tex after line: 350
 
 local function endStackActionOut()
 end
@@ -447,7 +461,7 @@ end
 
 joylol.addPostDataStackDescription = addPostDataStackDescription
 
--- from file: codeManipulation.tex after line: 350
+-- from file: codeManipulation.tex after line: 400
 
 local function addPreProcessStackDescription(arg1, arg2)
 end
@@ -459,7 +473,7 @@ end
 
 joylol.addPostProcessStackDescription = addPostProcessStackDescription
 
--- from file: codeManipulation.tex after line: 400
+-- from file: codeManipulation.tex after line: 450
 
 local function addCTestJoyLoLCallbacks(aCodeStream)
   thirddata.contests  = thirddata.contests  or { }
@@ -525,6 +539,8 @@ end
 coAlgs.startRule = startRule
 
 local sectionHeaders = tConcat({
+  'arguments',
+  'returns',
   'preDataStack',
   'preProcessStack',
   'preConditions',
@@ -578,6 +594,25 @@ local function stopImplementation()
 end
 
 coAlgs.stopImplementation = stopImplementation
+
+-- from file: rules.tex after line: 150
+
+local function startFragment(fragmentType)
+end
+
+coAlgs.startFragment = startFragment
+
+local function stopFragment()
+  local fragmentBody  = buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
+  tex.sprint("\\starttyping")
+  tex.print(fragmentBody)
+  tex.sprint("\\stoptyping")
+  texio.write_nl('---------fragment-buffer-------------')
+  texio.write_nl(fragmentBody)
+  texio.write_nl('---------fragment-buffer-------------')
+end
+
+coAlgs.stopFragment = stopFragment
 
 -- from file: lmsfile.tex after line: 0
 

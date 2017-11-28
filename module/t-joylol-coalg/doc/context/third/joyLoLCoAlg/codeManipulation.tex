@@ -255,6 +255,40 @@ end
 joylol.endWord = endWord
 \stopLuaCode
 
+\section{JoyLoL implementation fragment}
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\def\startJoyLoLFragment[#1]{
+  \directlua{thirddata.joylol.newFragment('#1')}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function newFragment(aFragment)
+end
+
+joylol.newFragment = newFragment
+\stopLuaCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\def\stopJoyLoLFragment{
+  \directlua{thirddata.joylol.endFragment()}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function endFragment()
+end
+
+joylol.endFragment = endFragment
+\stopLuaCode
+
 \section{JoyLoL stack action: In }
 
 A JoyLoL stack action (either in or out) contains one or more sections of 

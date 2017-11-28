@@ -103,11 +103,23 @@
 
 % from file: codeManipulation.tex after line: 250
 
+\def\startJoyLoLFragment[#1]{
+  \directlua{thirddata.joylol.newFragment('#1')}
+}
+
+% from file: codeManipulation.tex after line: 250
+
+\def\stopJoyLoLFragment{
+  \directlua{thirddata.joylol.endFragment()}
+}
+
+% from file: codeManipulation.tex after line: 300
+
 \def\startJoyLoLStackActionIn[#1]{
   \directlua{thirddata.joylol.newStackActionIn('#1')}
 }
 
-% from file: codeManipulation.tex after line: 250
+% from file: codeManipulation.tex after line: 300
 
 \def\stopJoyLoLStackActionIn{
   \directlua{thirddata.joylol.endStackActionIn()}
@@ -119,13 +131,13 @@
   \directlua{thirddata.joylol.newStackActionOut('#1')}
 }
 
-% from file: codeManipulation.tex after line: 300
+% from file: codeManipulation.tex after line: 350
 
 \def\stopJoyLoLStackActionOut{
   \directlua{thirddata.joylol.endStackActionOut()}
 }
 
-% from file: codeManipulation.tex after line: 300
+% from file: codeManipulation.tex after line: 350
 
 \def\preDataStack[#1][#2]{
   \directlua{thirddata.joylol.addPreDataStackDescription('#1', '#2')}
@@ -135,7 +147,7 @@
   \directlua{thirddata.joylol.addPostDataStackDescription('#1')}
 }
 
-% from file: codeManipulation.tex after line: 350
+% from file: codeManipulation.tex after line: 400
 
 \def\preProcessStack[#1][#2]{
   \directlua{thirddata.joylol.addPreProcessStackDescription('#1', '#2')}
@@ -159,7 +171,7 @@
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 
-% from file: codeManipulation.tex after line: 400
+% from file: codeManipulation.tex after line: 450
 
 \def\addCTestJoyLoLCallbacks#1{%
   \directlua{
@@ -195,6 +207,21 @@
   \buff_pickup{_implementation_buffer_}%
     {startImplementation}{stopImplementation}%
     {\relax}{\stopImplementationDone}\plusone%
+}
+
+% from file: rules.tex after line: 100
+
+\let\stopFragment\relax
+
+\def\stopFragmentDone{
+  \directlua{thirddata.joyLoLCoAlgs.stopFragment()}
+}
+
+\def\startFragment[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.startFragment('#1')}
+  \buff_pickup{_fragment_buffer_}%
+    {startFragment}{stopFragment}%
+    {\relax}{\stopFragmentDone}\plusone%
 }
 
 % from file: lmsfile.tex after line: 0

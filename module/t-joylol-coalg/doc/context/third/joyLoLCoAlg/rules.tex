@@ -42,6 +42,8 @@ end
 coAlgs.startRule = startRule
 
 local sectionHeaders = tConcat({
+  'arguments',
+  'returns',
   'preDataStack',
   'preProcessStack',
   'preConditions',
@@ -81,6 +83,10 @@ coAlgs.stopRule = stopRule
 \startTestCase[should manipulate buffers]
 \startConTest
   \startRule[testRule]
+    \arguments
+      some argument content
+    \returns
+      some returns content
     \preDataStack
       some preDataStack content
     \preProcessStack
@@ -132,6 +138,44 @@ local function stopImplementation()
 end
 
 coAlgs.stopImplementation = stopImplementation
+\stopLuaCode
+
+\stopTestSuite
+
+\startTestSuite[fragment environment]
+
+\startMkIVCode
+\let\stopFragment\relax
+
+\def\stopFragmentDone{
+  \directlua{thirddata.joyLoLCoAlgs.stopFragment()}
+}
+
+\def\startFragment[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.startFragment('#1')}
+  \buff_pickup{_fragment_buffer_}%
+    {startFragment}{stopFragment}%
+    {\relax}{\stopFragmentDone}\plusone%
+}
+\stopMkIVCode
+
+\startLuaCode
+local function startFragment(fragmentType)
+end
+
+coAlgs.startFragment = startFragment
+
+local function stopFragment()
+  local fragmentBody  = buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
+  tex.sprint("\\starttyping")
+  tex.print(fragmentBody)
+  tex.sprint("\\stoptyping")
+  texio.write_nl('---------fragment-buffer-------------')
+  texio.write_nl(fragmentBody)
+  texio.write_nl('---------fragment-buffer-------------')
+end
+
+coAlgs.stopFragment = stopFragment
 \stopLuaCode
 
 \stopTestSuite

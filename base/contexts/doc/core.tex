@@ -3,6 +3,35 @@
 \section[title=Context core code]
 \setCHeaderStream{public}
 
+\startJoyLoLFragment[pushData]
+
+\startRule[pushData]
+\arguments
+  (
+    aCtx
+    lolToPush
+  )
+\preDataStack
+  (
+    dataStack
+  )
+\postDataStack
+  (
+    (something)
+    dataStack
+  )
+\returns
+  (
+  )
+\stopRule
+
+\startFragment[ansiC]
+  assert(aCtx);
+  aCtx->data = newPair(aCtx->jInterp, lolToPush, aCtx->data);
+\stopFragment
+
+\stopJoyLoLFragment
+
 \startCHeader
 typedef void (PushCtx)(
   ContextObj *aCtx,
