@@ -279,6 +279,10 @@ typedef struct dictionaries_class_struct DictionariesClass;
 #define getDictionariesClass(jInterp)                       \
   ((DictionariesClass*)getJClass(jInterp, DictionariesTag))
 
+typedef struct fragments_class_struct FragmentsClass;
+#define getFragmentsClass(jInterp)                          \
+  ((FragmentsClass*)getJClass(jInterp, FragmentsTag))
+
 typedef struct loaders_class_struct LoadersClass;
 #define getLoadersClass(jInterp)                            \
   ((LoadersClass*)getJClass(jInterp, LoadersTag))

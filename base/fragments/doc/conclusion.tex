@@ -1,0 +1,85 @@
+% A ConTeXt document [master document: fragments.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_FRAGMENTS}
+\createCHeaderFile%
+  {public}
+  {joylol/fragments.h}
+  {}
+
+\setCHeaderStream{private}
+\startCHeader
+extern size_t joylol_register_fragments(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_FRAGMENTS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/fragments-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/dictionaries.h>
+#include <joylol/texts.h>
+#include <joylol/cFunctions.h>
+#include <joylol/contexts.h>
+#include <joylol/fragments.h>
+#include <joylol/fragments-private.h>
+// dictionary
+// printer
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {fragments.c}%
+  {}
+
+  
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/fragments.h>}
+\addCTestInclude{<joylol/fragments-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireStaticallyLinkedFragments(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
+\stopCTest
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{fragments.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{install}
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
