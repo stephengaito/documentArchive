@@ -32,7 +32,7 @@ require 'lms.joyLoL'
 
 joylol.targets{
   coAlgs = {
-    'crossCompiler',
+    'crossCompilers',
   },
   srcFiles = {
     'joylol/crossCompilers.h',

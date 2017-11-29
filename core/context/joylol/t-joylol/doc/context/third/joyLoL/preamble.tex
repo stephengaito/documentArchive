@@ -65,11 +65,16 @@ if not modules then modules = { } end modules ['t-joylol'] = {
     license   = "MIT License"
 }
 
+
+local function setDefs(varVal, selector, defVal)
+  if not defVal then defVal = { } end
+  varVal[selector] = varVal[selector] or defVal
+  return varVal[selector]
+end
+
 thirddata          = thirddata        or {}
-thirddata.joylol   = thirddata.joylol or {}
-local joylol       = thirddata.joylol
-joylol.options     = joylol.options or {}
-local options      = joylol.options
+local joylol       = setDefs(thirddata, 'joylol')
+local options      = setDefs(joylol, 'options')
 
 options.verbose    =
   options.verbose    or false

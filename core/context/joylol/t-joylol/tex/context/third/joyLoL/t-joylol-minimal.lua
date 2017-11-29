@@ -2,8 +2,7 @@
 
 -- from file: minJoyLoL.tex after line: 0
 
-thirddata.minJoylol = thirddata.minJoylol or { }
-local minJoylol     = thirddata.minJoylol
+local minJoylol     = setDefs(thirddata, 'minJoylol')
 
 minJoylol.core = { }
 

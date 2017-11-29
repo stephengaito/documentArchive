@@ -12,11 +12,16 @@ if not modules then modules = { } end modules ['t-joylol'] = {
     license   = "MIT License"
 }
 
+
+local function setDefs(varVal, selector, defVal)
+  if not defVal then defVal = { } end
+  varVal[selector] = varVal[selector] or defVal
+  return varVal[selector]
+end
+
 thirddata          = thirddata        or {}
-thirddata.joylol   = thirddata.joylol or {}
-local joylol       = thirddata.joylol
-joylol.options     = joylol.options or {}
-local options      = joylol.options
+local joylol       = setDefs(thirddata, 'joylol')
+local options      = setDefs(joylol, 'options')
 
 options.verbose    =
   options.verbose    or false
@@ -45,10 +50,10 @@ local toStr   = tostring
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-11-28",
-  commitShortHash = "fe921cd",
-  commitLongHash  = "fe921cdda8f95ed19cab2bc33de4827fa5df6283",
-  subject         = "added initial crossCompilers coAlg",
+  commitDate      = "2017-11-29",
+  commitShortHash = "4f779b5",
+  commitLongHash  = "4f779b5ef1065a3be26992e35c8ddc1617b701b4",
+  subject         = "begun work on code fragments",
   notes           = ""
 }
 

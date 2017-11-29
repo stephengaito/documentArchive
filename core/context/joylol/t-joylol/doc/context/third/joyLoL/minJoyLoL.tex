@@ -4,8 +4,7 @@
 
 \setLuaCodeStream{minJoyLoL}
 \startLuaCode
-thirddata.minJoylol = thirddata.minJoylol or { }
-local minJoylol     = thirddata.minJoylol
+local minJoylol     = setDefs(thirddata, 'minJoylol')
 
 minJoylol.core = { }
 

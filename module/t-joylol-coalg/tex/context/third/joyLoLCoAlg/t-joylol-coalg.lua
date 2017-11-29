@@ -22,8 +22,8 @@ coAlgs.theCoAlg  = {}
 local theCoAlg   = coAlgs.theCoAlg
 
 local litProgs   = thirddata.literateProgs or {}
-litProgs.build   = litProgs.build or {}
-local build      = litProgs.build
+local setDefs    = litProgs.setDefs
+local build      = setDefs(litProgs, 'build')
 
 local tInsert = table.insert
 local tConcat = table.concat
@@ -331,9 +331,7 @@ interfaces.writestatus('joyLoLCoAlg', "loaded JoyLoL CoAlgs")
 -- from file: codeManipulation.tex after line: 50
 
 --local function newCoAlg(coAlgName)
---  theCoAlg[coAlgName] =
---    theCoAlg[coAlgName] or {}
---  local lCoAlg        = theCoAlg[coAlgName]
+--  local lCoAlg        = setDefs(theCoAlg, coAlgName)
 --  lCoAlg.name         = coAlgName
 --  lCoAlg.words        = lCoAlg.words or {}
 --  lCoAlg.words.global = {}
@@ -400,7 +398,7 @@ end
 
 joylol.newWord = newWord
 
--- from file: codeManipulation.tex after line: 250
+-- from file: codeManipulation.tex after line: 200
 
 local function endWord()
 end
@@ -476,16 +474,11 @@ joylol.addPostProcessStackDescription = addPostProcessStackDescription
 -- from file: codeManipulation.tex after line: 450
 
 local function addCTestJoyLoLCallbacks(aCodeStream)
-  thirddata.contests  = thirddata.contests  or { }
-  local contests      = thirddata.contests
-  contests.tests      = contests.tests      or { }
-  local tests         = contests.tests
-  tests.methods       = tests.methods       or { }
-  local methods       = tests.methods
-  methods.setup       = methods.setup       or { }
-  local setup         = methods.setup
-  setup.cTests        = setup.cTests        or { }
-  local cTests        = setup.cTests
+  local contests      = setDefs(thirddata, 'contests')
+  local tests         = setDefs(contests, 'tests')
+  local methods       = setDefs(tests, 'methods')
+  local setup         = setDefs(methods, 'setup')
+  local cTests        = setDefs(setup, 'cTests')
   aCodeStream         = aCodeStream         or 'default'
   cTests[aCodeStream] = cTests[aCodeStream] or { }
   tInsert(cTests[aCodeStream], [=[
@@ -518,10 +511,8 @@ void *ctestsCallback(
   return NULL;
 }
 ]=])
-  tests.setup         = tests.setup         or { }
-  setup               = tests.setup
-  setup.cTests        = setup.cTests        or { }
-  cTests              = setup.cTests
+  setup               = setDefs(tests, 'setup')
+  cTests              = setDefs(setup, 'cTests')
   cTests[aCodeStream] = cTests[aCodeStream] or { }
   tInsert(cTests[aCodeStream], [=[
 setJoyLoLCallbackFrom(lstate, ctestsCallback);
