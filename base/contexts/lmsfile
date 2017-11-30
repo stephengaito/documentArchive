@@ -53,7 +53,7 @@ joylol.targets{
     'pairs',
     'texts',
     'parsers',
-    'dictionaries',
+    'dictNodes',
   },
   buildDir = 'build',
 }

@@ -219,11 +219,11 @@ typedef struct coalg_vecItem_struct {
   ObjectMemory oMem;
 } CoAlgVecItem;
 
-typedef struct dictionaries_object_struct DictObj;
+typedef struct dictNode_object_struct DictNodeObj;
 
 typedef struct dictionary_struct {
-  DictObj *root;
-  DictObj *firstSymbol;
+  DictNodeObj *root;
+  DictNodeObj *firstSymbol;
 } Dictionary;
 
 typedef struct loader_object_struct LoaderObj;
@@ -275,9 +275,9 @@ typedef struct crossCompilers_class_struct CrossCompilersClass;
 #define getCrossCompilersClass(jInterp)                     \
   ((CrossCompilersClass*)getJClass(jInterp, CrossCompilersTag))
 
-typedef struct dictionaries_class_struct DictionariesClass;
-#define getDictionariesClass(jInterp)                       \
-  ((DictionariesClass*)getJClass(jInterp, DictionariesTag))
+typedef struct dictNodes_class_struct DictNodesClass;
+#define getDictNodesClass(jInterp)                       \
+  ((DictNodesClass*)getJClass(jInterp, DictNodesTag))
 
 typedef struct fragments_class_struct FragmentsClass;
 #define getFragmentsClass(jInterp)                          \

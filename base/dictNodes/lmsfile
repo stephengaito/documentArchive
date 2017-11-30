@@ -10,7 +10,7 @@ lfs.mkdir('install/joylol')
 require 'lms.litProgs'
 
 litProgs.targets{
-  mainDoc  = 'dictionaries.tex',
+  mainDoc  = 'dictNodes.tex',
   docFiles = {
     'overview.tex',
     'code.tex',
@@ -23,9 +23,9 @@ litProgs.targets{
     'conclusion.tex',
   },
   srcFiles = {
-    'joylol/dictionaries.h',
-    'joylol/dictionaries-private.h',
-    'dictionaries.c',
+    'joylol/dictNodes.h',
+    'joylol/dictNodes-private.h',
+    'dictNodes.c',
   },
   buildDir  = 'build',
   docDir    = 'doc',
@@ -36,12 +36,12 @@ require 'lms.joyLoL'
 
 joylol.targets{
   coAlgs = {
-    'dictionaries',
+    'dictNodes',
   },
   srcFiles = {
-    'joylol/dictionaries.h',
-    'joylol/dictionaries-private.h',
-    'dictionaries.c',
+    'joylol/dictNodes.h',
+    'joylol/dictNodes-private.h',
+    'dictNodes.c',
   },
   coAlgLibs = {
     'jInterps',
@@ -57,7 +57,7 @@ contests.targets{
   testExecs = {
     'allCTests',
   },
-  mainDoc = 'dictionaries.tex',
+  mainDoc = 'dictNodes.tex',
   docFiles = {
     'overview.tex',
     'code.tex',
@@ -70,9 +70,9 @@ contests.targets{
     'conclusion.tex',
   },
   srcFiles = {
-    'joylol/dictionaries.h',
-    'joylol/dictionaries-private.h',
-    'dictionaries.c',
+    'joylol/dictNodes.h',
+    'joylol/dictNodes-private.h',
+    'dictNodes.c',
   },
   testLibDirs = {
   },

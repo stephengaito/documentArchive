@@ -31,7 +31,7 @@
 #include <joylol/pairs.h>
 #include <joylol/texts.h>
 #include <joylol/parsers.h>
-#include <joylol/dictionaries.h>
+#include <joylol/dictNodes.h>
 #include <joylol/loaders.h>
 #include <joylol/contexts.h>
 #include <joylol/contexts-private.h>
@@ -51,7 +51,7 @@
 \addCTestInclude{<joylol/pairs.h>}
 \addCTestInclude{<joylol/texts.h>}
 \addCTestInclude{<joylol/parsers.h>}
-\addCTestInclude{<joylol/dictionaries.h>}
+\addCTestInclude{<joylol/dictNodes.h>}
 \addCTestInclude{<joylol/contexts.h>}
 \addCTestInclude{<joylol/contexts-private.h>}
 \addCTestLib{<HOME>/.joylol/joylol/jInterps}
@@ -69,7 +69,7 @@
   requireLuaModule(lstate, "joylol.pairs");
   requireLuaModule(lstate, "joylol.texts");
   requireLuaModule(lstate, "joylol.parsers");
-  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.dictNodes");
   requireStaticallyLinkedContexts(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest

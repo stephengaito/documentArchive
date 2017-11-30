@@ -28,7 +28,7 @@
 #include <joylol/symbols.h>
 #include <joylol/naturals.h>
 #include <joylol/pairs.h>
-#include <joylol/dictionaries.h>
+#include <joylol/dictNodes.h>
 #include <joylol/texts.h>
 #include <joylol/parsers.h>
 #include <joylol/parsers-private.h>
@@ -48,7 +48,7 @@
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/naturals.h>}
 \addCTestInclude{<joylol/pairs.h>}
-\addCTestInclude{<joylol/dictionaries.h>}
+\addCTestInclude{<joylol/dictNodes.h>}
 \addCTestInclude{<joylol/texts.h>}
 \addCTestInclude{<joylol/parsers.h>}
 \addCTestInclude{<joylol/parsers-private.h>}
@@ -64,7 +64,7 @@
   requireLuaModule(lstate, "joylol.stringBuffers");
   requireLuaModule(lstate, "joylol.naturals");
   requireLuaModule(lstate, "joylol.pairs");
-  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.dictNodes");
   requireLuaModule(lstate, "joylol.texts");
   requireStaticallyLinkedParsers(lstate);
   getJoyLoLInterpInto(lstate, jInterp);

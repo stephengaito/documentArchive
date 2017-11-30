@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: dictionaries.tex]
+% A ConTeXt document [master document: dictNodes.tex]
 
 \section[title=Find]
 
@@ -6,18 +6,18 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictObj* findSymbolRecurse(
+extern DictNodeObj* findSymbolRecurse(
   JoyLoLInterp* jInterp,
-  DictObj* anAVLNode,
+  DictNodeObj* anAVLNode,
   Symbol* aSymbol
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-DictObj* findSymbolRecurse(
+DictNodeObj* findSymbolRecurse(
   JoyLoLInterp* jInterp,
-  DictObj* anAVLNode,
+  DictNodeObj* anAVLNode,
   Symbol* aSymbol
 ) {
   if (!anAVLNode) return NULL;
@@ -37,23 +37,23 @@ DictObj* findSymbolRecurse(
 \stopCCode
 
 \startCHeader
-typedef DictObj *(FindSymbol)(
+typedef DictNodeObj *(FindSymbol)(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol
 );
 
 #define findSymbol(jInterp, aSymbol)      \
   (                                       \
-    assert(getDictionariesClass(jInterp)  \
+    assert(getDictNodesClass(jInterp)  \
       ->findSymbolFunc),                  \
-    (getDictionariesClass(jInterp)        \
+    (getDictNodesClass(jInterp)        \
       ->findSymbolFunc(jInterp, aSymbol)) \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictObj* findSymbolImpl(
+extern DictNodeObj* findSymbolImpl(
   JoyLoLInterp* jInterp,
   Symbol* aSymbol
 );
@@ -61,7 +61,7 @@ extern DictObj* findSymbolImpl(
 \setCHeaderStream{public}
 
 \startCCode
-DictObj* findSymbolImpl(
+DictNodeObj* findSymbolImpl(
   JoyLoLInterp* jInterp,
   Symbol* aSymbol
 ) {
@@ -89,9 +89,9 @@ DictObj* findSymbolImpl(
   jInterp->dict.root        = NULL;
   jInterp->dict.firstSymbol = NULL;
 
-  DictObj* aNode = newDict(jInterp, "aNodeSymbol");
+  DictNodeObj* aNode = newDict(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aNode);
-  DictObj* foundAPair = findSymbolRecurse(jInterp, aNode, "aNodeSymbol");
+  DictNodeObj* foundAPair = findSymbolRecurse(jInterp, aNode, "aNodeSymbol");
   AssertPtrNotNull(foundAPair);
   AssertStrEquals(foundAPair->symbol, "aNodeSymbol");
 \stopCTest
@@ -104,7 +104,7 @@ DictObj* findSymbolImpl(
   jInterp->dict.root        = NULL;
   jInterp->dict.firstSymbol = NULL;
 
-  DictObj* aSimpleDic = newDict(jInterp, "aNodeSymbol");
+  DictNodeObj* aSimpleDic = newDict(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aSimpleDic);
   AssertPtrNull(findSymbolRecurse(jInterp, aSimpleDic, "aSymbol"));
 \stopCTest
@@ -113,18 +113,18 @@ DictObj* findSymbolImpl(
 
 \setCHeaderStream{private}
 \startCHeader
-DictObj* findLUBSymbolRecurse(
+DictNodeObj* findLUBSymbolRecurse(
   JoyLoLInterp *jInterp,
-  DictObj      *anAVLNode,
+  DictNodeObj      *anAVLNode,
   Symbol       *aSymbol
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-DictObj* findLUBSymbolRecurse(
+DictNodeObj* findLUBSymbolRecurse(
   JoyLoLInterp *jInterp,
-  DictObj      *anAVLNode,
+  DictNodeObj      *anAVLNode,
   Symbol       *aSymbol
 ) {
   assert(jInterp);
@@ -141,7 +141,7 @@ DictObj* findLUBSymbolRecurse(
     // the current anAVLNode->symbol is an upper bound
     // search the LEFT subtree for a smaller upper bound
     if (anAVLNode->left) {
-      DictObj* aNode = findLUBSymbolRecurse(jInterp, anAVLNode->left, aSymbol);
+      DictNodeObj* aNode = findLUBSymbolRecurse(jInterp, anAVLNode->left, aSymbol);
       if (!aNode) {
         // there is nothing in the LEFT subtree which is an upper bound
         // so return this node.
@@ -175,23 +175,23 @@ DictObj* findLUBSymbolRecurse(
 \stopCCode
 
 \startCHeader
-typedef DictObj *(FindLUBSymbol)(
+typedef DictNodeObj *(FindLUBSymbol)(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol
 );
 
 #define findLUBSymbol(jInterp, aSymbol)       \
   (                                           \
-    assert(getDictionariesClass(jInterp)      \
+    assert(getDictNodesClass(jInterp)      \
       ->findLUBSymbolFunc),                   \
-    (getDictionariesClass(jInterp)            \
+    (getDictNodesClass(jInterp)            \
       ->findLUBSymbolFunc(jInterp, aSymbol))  \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictObj* findLUBSymbolImpl(
+extern DictNodeObj* findLUBSymbolImpl(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol
 );
@@ -199,7 +199,7 @@ extern DictObj* findLUBSymbolImpl(
 \setCHeaderStream{public}
 
 \startCCode
-DictObj* findLUBSymbolImpl(
+DictNodeObj* findLUBSymbolImpl(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol
 ) {

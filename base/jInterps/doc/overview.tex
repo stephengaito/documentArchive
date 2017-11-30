@@ -133,7 +133,7 @@ The required extensions for this implementation is:
 #define CoAlgebrasTag      4
 #define ContextsTag        5
 #define CrossCompilersTag  6
-#define DictionariesTag    7
+#define DictNodesTag       7
 #define FragmentsTag       8
 #define LoadersTag         9
 #define LuaFunctionsTag   10
@@ -152,7 +152,7 @@ The required extensions for this implementation is:
 #define CoAlgebrasName     "coAlgebras"     /*  4 */
 #define ContextsName       "contexts"       /*  5 */
 #define CrossCompilersName "crossCompilers" /*  6 */
-#define DictionariesName   "dictionaries"   /*  7 */
+#define DictNodesName      "dictNodes"      /*  7 */
 #define FragmentsName      "fragments"      /*  8 */
 #define LoadersName        "loaders"        /*  9 */
 #define LuaFunctionsName   "luaFunctions"   /* 10 */
@@ -213,7 +213,7 @@ RequiredCoAlgs requiredCoAlgs[] = {
   { CoAlgebrasName,     CoAlgebrasTag,     {0, 1, 0 }}, //  4
   { ContextsName,       ContextsTag,       {0, 1, 0 }}, //  5
   { CrossCompilersName, CrossCompilersTag, {0, 1, 0 }}, //  6
-  { DictionariesName,   DictionariesTag,   {0, 1, 0 }}, //  7
+  { DictNodesName,      DictNodesTag,      {0, 1, 0 }}, //  7
   { FragmentsName,      FragmentsTag,      {0, 1, 0 }}, //  8
   { LoadersName,        LoadersTag,        {0, 1, 0 }}, //  9
   { LuaFunctionsName,   LuaFunctionsTag,   {0, 1, 0 }}, // 10
@@ -239,7 +239,7 @@ joylol.cFunctions     = require 'joylol.cFunctions'     --  3
 joylol.coAlgebras     = require 'joylol.coAlgebras'     --  4
 joylol.contexts       = require 'joylol.contexts'       --  5
 joylol.crossCompilers = require 'joylol.crossCompilers' --  6
-joylol.dictionaries   = require 'joylol.dictionaries'   --  7
+joylol.dictNodes      = require 'joylol.dictNodes'      --  7
 joylol.fragments      = require 'joylol.fragments'      --  8
 joylol.loaders        = require 'joylol.loaders'        --  9
 joylol.luaFunctions   = require 'joylol.luaFunctions'   -- 10

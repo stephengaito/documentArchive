@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: dictionaries.tex]
+% A ConTeXt document [master document: dictNodes.tex]
 
 \section[title=Check]
 \setCHeaderStream{private}
@@ -6,11 +6,11 @@
 \startTestSuite[reCalculateAVLNodeHeight]
 
 \startCHeader
-extern void reCalculateAVLNodeHeightBalance(DictObj* anAVLNode);
+extern void reCalculateAVLNodeHeightBalance(DictNodeObj* anAVLNode);
 \stopCHeader
 
 \startCCode
-void reCalculateAVLNodeHeightBalance(DictObj* anAVLNode) {
+void reCalculateAVLNodeHeightBalance(DictNodeObj* anAVLNode) {
   if (!anAVLNode) return;
 
   if (!anAVLNode->left && !anAVLNode->right) {
@@ -39,7 +39,7 @@ void reCalculateAVLNodeHeightBalance(DictObj* anAVLNode) {
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  DictObj* aNode = newDict(jInterp, "20");
+  DictNodeObj* aNode = newDict(jInterp, "20");
   AssertPtrNotNull(aNode);
   printDicInto(jInterp, aStrBuf, aNode);
   AssertStrEquals(getCString(jInterp, aStrBuf),
@@ -73,11 +73,11 @@ void reCalculateAVLNodeHeightBalance(DictObj* anAVLNode) {
 \stopTestSuite
 
 \startCHeader
-extern size_t deepCalculateAVLNodeHeight(DictObj* anAVLNode);
+extern size_t deepCalculateAVLNodeHeight(DictNodeObj* anAVLNode);
 \stopCHeader
 
 \startCCode
-size_t deepCalculateAVLNodeHeight(DictObj* anAVLNode) {
+size_t deepCalculateAVLNodeHeight(DictNodeObj* anAVLNode) {
   if (!anAVLNode) return 0;
 
   size_t leftHeight = 1 + deepCalculateAVLNodeHeight(anAVLNode->left);
@@ -91,14 +91,14 @@ size_t deepCalculateAVLNodeHeight(DictObj* anAVLNode) {
 \startCHeader
 extern Boolean checkAVLNode(
   JoyLoLInterp *jInterp,
-  DictObj      *anAVLNode
+  DictNodeObj  *anAVLNode
 );
 \stopCHeader
 
 \startCCode
 Boolean checkAVLNode(
   JoyLoLInterp *jInterp,
-  DictObj      *anAVLNode
+  DictNodeObj  *anAVLNode
 ) {
   assert(jInterp);
   

@@ -118,7 +118,7 @@ static char* dictionaryWalker(const char* text, int state) {
           "dictionaryWalker-start %p\n",
           currentReadLineText->curNode);
   }
-  DictObj* curNode = currentReadLineText->curNode;
+  DictNodeObj* curNode = currentReadLineText->curNode;
 
   if (!curNode) return NULL;
 

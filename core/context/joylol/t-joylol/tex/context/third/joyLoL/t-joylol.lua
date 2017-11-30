@@ -50,10 +50,10 @@ local toStr   = tostring
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-11-29",
-  commitShortHash = "8b08385",
-  commitLongHash  = "8b083856c922802a18c354110125271313195ead",
-  subject         = "integrated fragments into gitHook",
+  commitDate      = "2017-11-30",
+  commitShortHash = "bef6a55",
+  commitLongHash  = "bef6a55e2ac1ca27e542c74fe2c232eb470d3fa1",
+  subject         = "corrected missing setDefs in minLua",
   notes           = ""
 }
 

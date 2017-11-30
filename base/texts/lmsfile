@@ -43,7 +43,7 @@ joylol.targets{
   },
   coAlgLibs = {
     'jInterps',
-    'dictionaries',
+    'dictNodes',
     'symbols',
   },
   buildDir = 'build',

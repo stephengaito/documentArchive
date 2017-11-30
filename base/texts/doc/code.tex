@@ -3,7 +3,7 @@
 \section[title=Code]
 
 \dependsOn[jInterps]
-\dependsOn[dictionaries]
+\dependsOn[dictNodes]
 \dependsOn[symbols]
 
 \setCHeaderStream{public}
@@ -39,7 +39,7 @@ typedef struct text_object_struct {
   Symbol*  newPrompt;
   Symbol*  continuePrompt;
   Symbol*  curPrompt;
-  DictObj* curNode;
+  DictNodeObj* curNode;
   Symbol*  curCompletionText;
   size_t   curCompletionLen;
 } TextObj;
@@ -289,7 +289,7 @@ void nextSymbolImpl(
   } else {
     // we have parsed a symbol... so create a new symbol
     //
-    DictObj* aSym = createSymbol(aText->jInterp, aSymbol);
+    DictNodeObj* aSym = createSymbol(aText->jInterp, aSymbol);
     aText->sym = newSymbol(aText->jInterp, aSym->symbol);
     //
     DEBUG(aText->jInterp, "<-nextSymbol [%s] (symbol)\n",

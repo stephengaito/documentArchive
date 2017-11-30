@@ -17,7 +17,7 @@ reqCoAlgs = {
   'symbols',
   'pairs',
   'naturals',
-  'dictionaries',
+  'dictNodes',
   'booleans',
   'texts',
   'parsers',

@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: dictionaries.tex]
+% A ConTeXt document [master document: dictNodes.tex]
 
 \section[title=Code]
 \setCHeaderStream{public}
@@ -8,57 +8,57 @@
 \dependsOn[stringBuffers]
 
 \startCHeader
-typedef struct dictionaries_object_struct DictObj;
+typedef struct dictNode_object_struct DictNodeObj;
 
-typedef struct dictionaries_object_struct {
+typedef struct dictNode_object_struct {
   JObj  super;
   Symbol*   symbol;
   JObj* preObs;
   JObj* value;
   JObj* postObs;
-  DictObj*  left;
-  DictObj*  right;
-  DictObj*  previous;
-  DictObj*  next;
+  DictNodeObj*  left;
+  DictNodeObj*  right;
+  DictNodeObj*  previous;
+  DictNodeObj*  next;
   size_t    height;
   long      balance;
-} DictObj;
+} DictNodeObj;
 \stopCHeader
 
 \startTestSuite[newDict]
 
 \startCHeader
-typedef DictObj *(NewDict)(
+typedef DictNodeObj *(NewDict)(
   JoyLoLInterp *jInterp,
   Symbol       *aSym
 );
 
 #define newDict(jInterp, aSym)            \
   (                                       \
-    assert(getDictionariesClass(jInterp)  \
+    assert(getDictNodesClass(jInterp)  \
       ->newDictFunc),                     \
-    (getDictionariesClass(jInterp)        \
+    (getDictNodesClass(jInterp)        \
       ->newDictFunc(jInterp, aSym))       \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictObj *newDictImpl(
+extern DictNodeObj *newDictImpl(
   JoyLoLInterp *jInterp,
   Symbol *aSym
 );
 
-#define dictAsSymbol(aNode)   ((DictObj*)(aNode))->symbol
-#define dictAsPreObs(aNode)   ((DictObj*)(aNode))->preObs
-#define dictAsValue(aNode)    ((DictObj*)(aNode))->value
-#define dictAsPostObs(aNode)  ((DictObj*)(aNode))->postObs
-#define dictAsLeft(aNode)     ((DictObj*)(aNode))->left
-#define dictAsRight(aNode)    ((DictObj*)(aNode))->right
-#define dictAsPrevious(aNode) ((DictObj*)(aNode))->previous
-#define dictAsNext(aNode)     ((DictObj*)(aNode))->next
-#define dictAsHeight(aNode)   ((DictObj*)(aNode))->height
-#define dictAsBalance(aNode)  ((DictObj*)(aNode))->balance
+#define dictAsSymbol(aNode)   ((DictNodeObj*)(aNode))->symbol
+#define dictAsPreObs(aNode)   ((DictNodeObj*)(aNode))->preObs
+#define dictAsValue(aNode)    ((DictNodeObj*)(aNode))->value
+#define dictAsPostObs(aNode)  ((DictNodeObj*)(aNode))->postObs
+#define dictAsLeft(aNode)     ((DictNodeObj*)(aNode))->left
+#define dictAsRight(aNode)    ((DictNodeObj*)(aNode))->right
+#define dictAsPrevious(aNode) ((DictNodeObj*)(aNode))->previous
+#define dictAsNext(aNode)     ((DictNodeObj*)(aNode))->next
+#define dictAsHeight(aNode)   ((DictNodeObj*)(aNode))->height
+#define dictAsBalance(aNode)  ((DictNodeObj*)(aNode))->balance
 \stopCHeader
 \setCHeaderStream{public}
 
@@ -77,19 +77,19 @@ extern DictObj *newDictImpl(
 // ANY AVLTree node can be the root of a new dictionary.
 //
 
-DictObj *newDictImpl(
+DictNodeObj *newDictImpl(
   JoyLoLInterp *jInterp,
   Symbol *aSym
 ) {
   assert(jInterp);
   assert(jInterp->coAlgs);
-  assert(DictionariesTag < jInterp->numCoAlgs);
-  assert(jInterp->coAlgs[DictionariesTag].sClass);
+  assert(DictNodesTag < jInterp->numCoAlgs);
+  assert(jInterp->coAlgs[DictNodesTag].sClass);
   
   assert(aSym);
   
   DEBUG(jInterp, "newAVLNode [%s]\n", aSym);
-  JObj* newNode   = newObject(jInterp, DictionariesTag);
+  JObj* newNode   = newObject(jInterp, DictNodesTag);
   dictAsSymbol(newNode)   = strdup(aSym);
   dictAsPreObs(newNode)   = NULL;
   dictAsValue(newNode)    = NULL;
@@ -100,7 +100,7 @@ DictObj *newDictImpl(
   dictAsNext(newNode)     = NULL;
   dictAsHeight(newNode)   = 1;
   dictAsBalance(newNode)  = 0;
-  return (DictObj*)newNode;
+  return (DictNodeObj*)newNode;
 }
 \stopCCode
 
@@ -108,12 +108,12 @@ DictObj *newDictImpl(
 
 \startCTest
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
+  AssertPtrNotNull(jInterp->coAlgs[DictNodesTag].sClass);
 
-  DictObj* aNode = newDict(jInterp, "aNodeSymbol");
+  DictNodeObj* aNode = newDict(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aNode);
   AssertPtrNotNull(asType(aNode));
-  AssertIntEquals(asTag(aNode), DictionariesTag)
+  AssertIntEquals(asTag(aNode), DictNodesTag)
   AssertPtrNotNull(dictAsSymbol(aNode));
   AssertStrEquals(dictAsSymbol(aNode), "aNodeSymbol");
   AssertPtrNull(dictAsValue(aNode));
@@ -130,23 +130,23 @@ DictObj *newDictImpl(
 \startTestSuite[createSymbol]
 
 \startCHeader
-typedef DictObj *(CreateSymbol)(
+typedef DictNodeObj *(CreateSymbol)(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol
 );
 
 #define createSymbol(jInterp, aSymbol)      \
   (                                         \
-    assert(getDictionariesClass(jInterp)    \
+    assert(getDictNodesClass(jInterp)    \
       ->createSymbolFunc),                  \
-    (getDictionariesClass(jInterp)          \
+    (getDictNodesClass(jInterp)          \
       ->createSymbolFunc(jInterp, aSymbol)) \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictObj* createSymbolImpl(
+extern DictNodeObj* createSymbolImpl(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol
 );
@@ -154,13 +154,13 @@ extern DictObj* createSymbolImpl(
 \setCHeaderStream{public}
 
 \startCCode
-DictObj* createSymbolImpl(
+DictNodeObj* createSymbolImpl(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol
 ) {
   assert(jInterp);
   if (!aSymbol) return NULL;
-  DictObj* aSym = findSymbol(jInterp, aSymbol);
+  DictNodeObj* aSym = findSymbol(jInterp, aSymbol);
   if (!aSym) {
     jInterp->dict.root = insertSymbol(jInterp, aSymbol);
     aSym = findSymbol(jInterp, aSymbol);
@@ -178,9 +178,9 @@ typedef JObj *(GetSymbol)(
 
 #define getSymbol(jInterp, aSymbol)       \
   (                                       \
-    assert(getDictionariesClass(jInterp)  \
+    assert(getDictNodesClass(jInterp)  \
       ->getSymbolFunc),                   \
-    (getDictionariesClass(jInterp)        \
+    (getDictNodesClass(jInterp)        \
       ->getSymbolFunc(jInterp, aSymbol))  \
   )
 \stopCHeader
@@ -199,7 +199,7 @@ JObj* getSymbolImpl(
   JoyLoLInterp* jInterp,
   Symbol* aSymbol
 ) {
-  DictObj* aSym = createSymbol(jInterp, aSymbol);
+  DictNodeObj* aSym = createSymbol(jInterp, aSymbol);
   return newSymbol(jInterp, aSym->symbol);
 }
 \stopCCode
@@ -212,9 +212,9 @@ typedef void (ListDefinitions)(
 
 #define listDefinitions(jInterp, aStrBuf)       \
   (                                             \
-    assert(getDictionariesClass(jInterp)        \
+    assert(getDictNodesClass(jInterp)        \
       ->listDefinitionsFunc),                   \
-    (getDictionariesClass(jInterp)              \
+    (getDictNodesClass(jInterp)              \
       ->listDefinitionsFunc(jInterp, aStrBuf))  \
   )
 \stopCHeader
@@ -233,7 +233,7 @@ void listDefinitionsImpl(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf
 ) {
-  DictObj* curNode = jInterp->dict.firstSymbol;
+  DictNodeObj* curNode = jInterp->dict.firstSymbol;
   while(curNode) {
     if (curNode->value) {
       strBufPrintf(jInterp, aStrBuf,"%s == ", curNode->symbol);
@@ -255,7 +255,7 @@ extern Boolean printDicionaryJObjInto(
 extern Boolean printDicInto(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  DictObj         *anAVLNode
+  DictNodeObj         *anAVLNode
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -267,14 +267,14 @@ Boolean printDictionaryJObjInto(
   JObj        *anAVLNode
 ) {
   if (!anAVLNode) return FALSE;
-  if (asTag(anAVLNode) != DictionariesTag) return FALSE;
-  return printDicInto(jInterp, aStrBuf, (DictObj*)anAVLNode);
+  if (asTag(anAVLNode) != DictNodesTag) return FALSE;
+  return printDicInto(jInterp, aStrBuf, (DictNodeObj*)anAVLNode);
 }
 
 Boolean printDicInto(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  DictObj         *anAVLNode
+  DictNodeObj         *anAVLNode
 ) {
   if (!anAVLNode) return TRUE;
   strBufPrintf(jInterp, aStrBuf, "[%s] l:( ", anAVLNode->symbol);
@@ -286,10 +286,10 @@ Boolean printDicInto(
 }
 \stopCCode
 
-\startTestSuite[registerDictionaries]
+\startTestSuite[registerDictNodes]
 
 \startCHeader
-typedef struct dictionaries_class_struct {
+typedef struct dictNodes_class_struct {
   JClass super;
   NewDict         *newDictFunc;
   CreateSymbol    *createSymbolFunc;
@@ -297,38 +297,38 @@ typedef struct dictionaries_class_struct {
   FindSymbol      *findSymbolFunc;
   FindLUBSymbol   *findLUBSymbolFunc;
   ListDefinitions *listDefinitionsFunc;
-} DictionariesClass;
+} DictNodesClass;
 \stopCHeader
 
 \startCCode
-static Boolean initializeDictionaries(
+static Boolean initializeDictNodes(
   JoyLoLInterp *jInterp,
   JClass   *aJClass
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerDictionaryWords(jInterp);
+  registerDictNodeWords(jInterp);
   return TRUE;
 }
 \stopCCode
 
 \setCHeaderStream{private}
 \startCHeader
-extern Boolean registerDictionaries(JoyLoLInterp *jInterp);
+extern Boolean registerDictNodes(JoyLoLInterp *jInterp);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-Boolean registerDictionaries(JoyLoLInterp *jInterp) {
+Boolean registerDictNodes(JoyLoLInterp *jInterp) {
   assert(jInterp);
   
-  DictionariesClass* theCoAlg =
-    joyLoLCalloc(1, DictionariesClass);
+  DictNodesClass* theCoAlg =
+    joyLoLCalloc(1, DictNodesClass);
   assert(theCoAlg);
   
-  theCoAlg->super.name            = DictionariesName;
-  theCoAlg->super.objectSize      = sizeof(DictObj);
-  theCoAlg->super.initializeFunc  = initializeDictionaries;
+  theCoAlg->super.name            = DictNodesName;
+  theCoAlg->super.objectSize      = sizeof(DictNodeObj);
+  theCoAlg->super.initializeFunc  = initializeDictNodes;
   theCoAlg->super.equalityFunc    = NULL;
   theCoAlg->super.printFunc       = printDictionaryJObjInto;
   theCoAlg->newDictFunc           = newDictImpl;
@@ -341,28 +341,28 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
     registerJClass(jInterp, (JClass*)theCoAlg);
   
   // do a sanity check...
-  assert(tag == DictionariesTag);
+  assert(tag == DictNodesTag);
   assert(jInterp->coAlgs[tag].sClass);
     
   return TRUE;
 }
 \stopCCode
 
-\startTestCase[should register the Dictionaries coAlg]
+\startTestCase[should register the DictNodes coAlg]
 
 \startCTest
   // CTestsSetup has already created a jInterp
-  // and run regiserDictionaries
+  // and run regiserDictNodes
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(getDictionariesClass(jInterp));
-  DictionariesClass *coAlg =
-    getDictionariesClass(jInterp);
-  AssertIntTrue(registerDictionaries(jInterp));
-  AssertPtrNotNull(getDictionariesClass(jInterp));
-  AssertPtrEquals(getDictionariesClass(jInterp), coAlg);
+  AssertPtrNotNull(getDictNodesClass(jInterp));
+  DictNodesClass *coAlg =
+    getDictNodesClass(jInterp);
+  AssertIntTrue(registerDictNodes(jInterp));
+  AssertPtrNotNull(getDictNodesClass(jInterp));
+  AssertPtrEquals(getDictNodesClass(jInterp), coAlg);
   AssertIntEquals(
-    getDictionariesClass(jInterp)->super.objectSize, 
-    sizeof(DictObj)
+    getDictNodesClass(jInterp)->super.objectSize, 
+    sizeof(DictNodeObj)
   );
 \stopCTest
 \stopTestCase

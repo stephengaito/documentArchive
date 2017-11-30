@@ -500,10 +500,10 @@ void registerBooleanWords(
 ) {
   assert(jInterp);
 
-  DictObj* true  = createSymbol(jInterp, "true");
+  DictNodeObj* true  = createSymbol(jInterp, "true");
   true->value    = newBoolean(jInterp, TRUE);
 
-  DictObj* false = createSymbol(jInterp, "false");
+  DictNodeObj* false = createSymbol(jInterp, "false");
   false->value   = newBoolean(jInterp, FALSE);
 
   extendJoyLoL(jInterp, "isBoolean", isBooleanAP);

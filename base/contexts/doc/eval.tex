@@ -121,7 +121,7 @@ void evalCommandInContextImpl(
       // if the command is a symbol ...
       //  ... look up the symbol's association in the dictionary
       //
-      DictObj* assoc = findSymbol(jInterp, asSymbol(command));
+      DictNodeObj* assoc = findSymbol(jInterp, asSymbol(command));
       assert(assoc);
       //
       if (!assoc->value) {

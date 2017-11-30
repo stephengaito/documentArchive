@@ -1,19 +1,19 @@
-% A ConTeXt document [master document: dictionaries.tex]
+% A ConTeXt document [master document: dictNodes.tex]
 
 \section[title=Conclusions]
 
 \addDocumentDirectory{doc}
 
-\CHeaderIncludeGuard{public}{JOYLOL_COALG_DICTIONARIES}
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_DICTNODES}
 \createCHeaderFile%
   {public}
-  {joylol/dictionaries.h}
+  {joylol/dictNodes.h}
   {}
 
-\CHeaderIncludeGuard{private}{JOYLOL_COALG_DICTIONARIES_PRIVATE}
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_DICTNODES_PRIVATE}
 \createCHeaderFile%
   {private}
-  {joylol/dictionaries-private.h}
+  {joylol/dictNodes-private.h}
   {}
 
 \prependCCode{default}
@@ -25,23 +25,23 @@
 #include <joylol/jInterps.h>
 #include <joylol/stringBuffers.h>
 #include <joylol/symbols.h>
-#include <joylol/dictionaries.h>
-#include <joylol/dictionaries-private.h>
+#include <joylol/dictNodes.h>
+#include <joylol/dictNodes-private.h>
 // dictionary
 // printer
 \stopCCode
 
 \createCCodeFile%
   {default}%
-  {dictionaries.c}%
+  {dictNodes.c}%
   {}
 
 \addCTestInclude{<time.h>}
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/symbols.h>}
-\addCTestInclude{<joylol/dictionaries.h>}
-\addCTestInclude{<joylol/dictionaries-private.h>}
+\addCTestInclude{<joylol/dictNodes.h>}
+\addCTestInclude{<joylol/dictNodes-private.h>}
 \addCTestLib{<HOME>/.joylol/joylol/jInterps}
 \addCTestJoyLoLCallbacks{default}
 \CTestsSetup\
@@ -50,7 +50,7 @@
   requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.stringBuffers");
   requireLuaModule(lstate, "joylol.symbols");
-  requireStaticallyLinkedDictionaries(lstate);
+  requireStaticallyLinkedDictNodes(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
 \createCTestFile%
@@ -58,7 +58,7 @@
   {allCTests.c}%
   {}
 
-\addMainDocument{dictionaries.tex}
+\addMainDocument{dictNodes.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{code.tex}
 \addSubDocument{find.tex}

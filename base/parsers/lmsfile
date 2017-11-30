@@ -48,7 +48,7 @@ joylol.targets{
     'symbols',
     'naturals',
     'pairs',
-    'dictionaries',
+    'dictNodes',
     'texts',
   },
   buildDir = 'build',
