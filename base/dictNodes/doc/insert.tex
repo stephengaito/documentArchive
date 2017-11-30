@@ -4,9 +4,26 @@
 
 \startTestSuite[insertSymbol]
 
+\setCHeaderStream{public}
+\startCHeader
+typedef DictNodeObj *(InsertSymbolRecurse)(
+  JoyLoLInterp *jInterp,
+  DictNodeObj  *anAVLNode,
+  Symbol       *aSymbol
+);
+
+#define insertSymbolRecurse(jInterp, anAVLNode, aSymbol)      \
+  (                                                           \
+    assert(getDictNodesClass(jInterp)                         \
+      ->insertSymbolRecurseFunc),                             \
+    (getDictNodesClass(jInterp)                               \
+      ->insertSymbolRecurseFunc(jInterp, anAVLNode, aSymbol)) \
+  )
+\stopCHeader
+
 \setCHeaderStream{private}
 \startCHeader
-extern DictNodeObj* insertSymbolRecurse(
+extern DictNodeObj* insertSymbolRecurseImpl(
   JoyLoLInterp* jInterp,
   DictNodeObj* anAVLNode,
   Symbol* aSymbol
@@ -15,12 +32,12 @@ extern DictNodeObj* insertSymbolRecurse(
 \setCHeaderStream{public}
 
 \startCCode
-DictNodeObj* insertSymbolRecurse(
+DictNodeObj* insertSymbolRecurseImpl(
   JoyLoLInterp* jInterp,
   DictNodeObj* anAVLNode,
   Symbol* aSymbol
 ) {
-  if (!anAVLNode) return newDict(jInterp, aSymbol);
+  if (!anAVLNode) return newDictNode(jInterp, aSymbol);
 
   assert(jInterp);
   StringBufferObj *aStrBuf = 
@@ -51,7 +68,7 @@ DictNodeObj* insertSymbolRecurse(
       // we have inserted a new node ...
       // ... insert this new node into the doubly linked list
       //
-      DictNodeObj* oldPrevious               = anAVLNode->previous;
+      DictNodeObj* oldPrevious           = anAVLNode->previous;
       assert(jInterp->dict.firstSymbol);
       if (oldPrevious) oldPrevious->next = leftResult;
       else jInterp->dict.firstSymbol     = leftResult;
@@ -95,7 +112,7 @@ DictNodeObj* insertSymbolRecurse(
       // we have inserted a new node ...
       // ... insert this new node into the doubly linked list
       //
-      DictNodeObj* oldNext               = anAVLNode->next;
+      DictNodeObj* oldNext           = anAVLNode->next;
       if (oldNext) oldNext->previous = rightResult;
       rightResult->previous          = anAVLNode;
       rightResult->next              = oldNext;
@@ -132,35 +149,6 @@ DictNodeObj* insertSymbolRecurse(
 }
 \stopCCode
 
-\setCHeaderStream{private}
-\startCHeader
-extern DictNodeObj* insertSymbol(
-  JoyLoLInterp* jInterp,
-  Symbol* aSymbol
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-DictNodeObj* insertSymbol(
-  JoyLoLInterp* jInterp,
-  Symbol* aSymbol
-) {
-  assert(aSymbol);
-  assert(jInterp);
-
-  // lazy initialization
-  if (!jInterp->dict.root) {
-    DictNodeObj* firstNode = newDict(jInterp, aSymbol);
-    jInterp->dict.root        = firstNode;
-    jInterp->dict.firstSymbol = firstNode;
-    return firstNode;
-  }
-
-  return insertSymbolRecurse(jInterp, jInterp->dict.root, aSymbol);
-}
-\stopCCode
-
 \startTestCase[should insert Symbol In Dictionary]
 \startCTest
   AssertPtrNotNull(jInterp);
@@ -168,7 +156,7 @@ DictNodeObj* insertSymbol(
   jInterp->dict.root        = NULL;
   jInterp->dict.firstSymbol = NULL;
   
-  DictNodeObj* aSimpleDic = newDict(jInterp, "aNodeSymbol");
+  DictNodeObj* aSimpleDic = newDictNode(jInterp, "aNodeSymbol");
   DictNodeObj* aNewDic = insertSymbolRecurse(jInterp, aSimpleDic, "aNodeSymbol");
   AssertPtrNotNull(aNewDic);
   AssertPtrEquals(aSimpleDic, aNewDic);
@@ -196,7 +184,7 @@ DictNodeObj* insertSymbol(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  DictNodeObj* aSimpleDic = newDict(jInterp, "20");
+  DictNodeObj* aSimpleDic   = newDictNode(jInterp, "20");
   jInterp->dict.root        = aSimpleDic;
   jInterp->dict.firstSymbol = aSimpleDic;
 
@@ -303,7 +291,7 @@ DictNodeObj* insertSymbol(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  DictNodeObj* aSimpleDic = newDict(jInterp,"20");
+  DictNodeObj* aSimpleDic   = newDictNode(jInterp,"20");
   jInterp->dict.root        = aSimpleDic;
   jInterp->dict.firstSymbol = aSimpleDic;
 
@@ -337,7 +325,7 @@ DictNodeObj* insertSymbol(
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  DictNodeObj* aSimpleDic = newDict(jInterp,"20");
+  DictNodeObj* aSimpleDic   = newDictNode(jInterp,"20");
   jInterp->dict.root        = aSimpleDic;
   jInterp->dict.firstSymbol = aSimpleDic;
 
@@ -378,7 +366,7 @@ DictNodeObj* insertSymbol(
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  DictNodeObj* aSimpleDic = newDict(jInterp,"20");
+  DictNodeObj* aSimpleDic   = newDictNode(jInterp,"20");
   jInterp->dict.root        = aSimpleDic;
   jInterp->dict.firstSymbol = aSimpleDic;
 
@@ -413,7 +401,7 @@ DictNodeObj* insertSymbol(
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  DictNodeObj* aSimpleDic = newDict(jInterp,"20");
+  DictNodeObj* aSimpleDic   = newDictNode(jInterp,"20");
   jInterp->dict.root        = aSimpleDic;
   jInterp->dict.firstSymbol = aSimpleDic;
 
@@ -445,7 +433,7 @@ DictNodeObj* insertSymbol(
   jInterp->dict.root        = NULL;
   jInterp->dict.firstSymbol = NULL;
 
-  DictNodeObj* avlDic = newDict(jInterp,"0");
+  DictNodeObj* avlDic       = newDictNode(jInterp,"0");
   jInterp->dict.root        = avlDic;
   jInterp->dict.firstSymbol = avlDic;
 
@@ -472,7 +460,7 @@ DictNodeObj* insertSymbol(
   jInterp->dict.root        = NULL;
   jInterp->dict.firstSymbol = NULL;
 
-  DictNodeObj* avlDic = newDict(jInterp,"10");
+  DictNodeObj* avlDic       = newDictNode(jInterp,"10");
   jInterp->dict.root        = avlDic;
   jInterp->dict.firstSymbol = avlDic;
 

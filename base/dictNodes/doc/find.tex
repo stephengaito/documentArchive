@@ -2,23 +2,40 @@
 
 \section[title=Find]
 
-\startTestSuite[findSymbol]
+\startTestSuite[findSymbolRecurse]
+
+\setCHeaderStream{public}
+\startCHeader
+typedef DictNodeObj *(FindSymbolRecurse)(
+  JoyLoLInterp *jInterp,
+  DictNodeObj  *anAVLNode,
+  Symbol       *aSymbol
+);
+
+#define findSymbolRecurse(jInterp, anAVLNode, aSymbol)      \
+  (                                                         \
+    assert(getDictNodesClass(jInterp)                       \
+      ->findSymbolRecurseFunc),                             \
+    (getDictNodesClass(jInterp)                             \
+      ->findSymbolRecurseFunc(jInterp, anAVLNode, aSymbol)) \
+  )
+\stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictNodeObj* findSymbolRecurse(
-  JoyLoLInterp* jInterp,
-  DictNodeObj* anAVLNode,
-  Symbol* aSymbol
+extern DictNodeObj* findSymbolRecurseImpl(
+  JoyLoLInterp *jInterp,
+  DictNodeObj  *anAVLNode,
+  Symbol       *aSymbol
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-DictNodeObj* findSymbolRecurse(
-  JoyLoLInterp* jInterp,
-  DictNodeObj* anAVLNode,
-  Symbol* aSymbol
+DictNodeObj* findSymbolRecurseImpl(
+  JoyLoLInterp *jInterp,
+  DictNodeObj  *anAVLNode,
+  Symbol       *aSymbol
 ) {
   if (!anAVLNode) return NULL;
   int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
@@ -33,41 +50,6 @@ DictNodeObj* findSymbolRecurse(
     return anAVLNode;
   }
   return NULL;
-}
-\stopCCode
-
-\startCHeader
-typedef DictNodeObj *(FindSymbol)(
-  JoyLoLInterp *jInterp,
-  Symbol       *aSymbol
-);
-
-#define findSymbol(jInterp, aSymbol)      \
-  (                                       \
-    assert(getDictNodesClass(jInterp)  \
-      ->findSymbolFunc),                  \
-    (getDictNodesClass(jInterp)        \
-      ->findSymbolFunc(jInterp, aSymbol)) \
-  )
-\stopCHeader
-
-\setCHeaderStream{private}
-\startCHeader
-extern DictNodeObj* findSymbolImpl(
-  JoyLoLInterp* jInterp,
-  Symbol* aSymbol
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-DictNodeObj* findSymbolImpl(
-  JoyLoLInterp* jInterp,
-  Symbol* aSymbol
-) {
-  if (!aSymbol) return NULL;
-  assert(jInterp);
-  return findSymbolRecurse(jInterp, jInterp->dict.root, aSymbol);
 }
 \stopCCode
 
@@ -89,7 +71,7 @@ DictNodeObj* findSymbolImpl(
   jInterp->dict.root        = NULL;
   jInterp->dict.firstSymbol = NULL;
 
-  DictNodeObj* aNode = newDict(jInterp, "aNodeSymbol");
+  DictNodeObj* aNode = newDictNode(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aNode);
   DictNodeObj* foundAPair = findSymbolRecurse(jInterp, aNode, "aNodeSymbol");
   AssertPtrNotNull(foundAPair);
@@ -104,27 +86,45 @@ DictNodeObj* findSymbolImpl(
   jInterp->dict.root        = NULL;
   jInterp->dict.firstSymbol = NULL;
 
-  DictNodeObj* aSimpleDic = newDict(jInterp, "aNodeSymbol");
+  DictNodeObj* aSimpleDic = newDictNode(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aSimpleDic);
   AssertPtrNull(findSymbolRecurse(jInterp, aSimpleDic, "aSymbol"));
 \stopCTest
 \stopTestCase
 \stopTestSuite
 
+\startTestSuite[findLUBSymbolRecurse]
+
+\startCHeader
+typedef DictNodeObj *(FindLUBSymbolRecurse)(
+  JoyLoLInterp *jInterp,
+  DictNodeObj  *anAVLNode,
+  Symbol       *aSymbol
+);
+
+#define findLUBSymbolRecurse(jInterp, anAVLNode, aSymbol)       \
+  (                                                             \
+    assert(getDictNodesClass(jInterp)                           \
+      ->findLUBSymbolRecurseFunc),                              \
+    (getDictNodesClass(jInterp)                                 \
+      ->findLUBSymbolRecurseFunc(jInterp, anAVLNode, aSymbol))  \
+  )
+\stopCHeader
+
 \setCHeaderStream{private}
 \startCHeader
-DictNodeObj* findLUBSymbolRecurse(
+DictNodeObj* findLUBSymbolRecurseImpl(
   JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode,
+  DictNodeObj  *anAVLNode,
   Symbol       *aSymbol
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-DictNodeObj* findLUBSymbolRecurse(
+DictNodeObj* findLUBSymbolRecurseImpl(
   JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode,
+  DictNodeObj  *anAVLNode,
   Symbol       *aSymbol
 ) {
   assert(jInterp);
@@ -173,38 +173,4 @@ DictNodeObj* findLUBSymbolRecurse(
   return jInterp->dict.firstSymbol;
 }
 \stopCCode
-
-\startCHeader
-typedef DictNodeObj *(FindLUBSymbol)(
-  JoyLoLInterp *jInterp,
-  Symbol       *aSymbol
-);
-
-#define findLUBSymbol(jInterp, aSymbol)       \
-  (                                           \
-    assert(getDictNodesClass(jInterp)      \
-      ->findLUBSymbolFunc),                   \
-    (getDictNodesClass(jInterp)            \
-      ->findLUBSymbolFunc(jInterp, aSymbol))  \
-  )
-\stopCHeader
-
-\setCHeaderStream{private}
-\startCHeader
-extern DictNodeObj* findLUBSymbolImpl(
-  JoyLoLInterp *jInterp,
-  Symbol       *aSymbol
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-DictNodeObj* findLUBSymbolImpl(
-  JoyLoLInterp *jInterp,
-  Symbol       *aSymbol
-) {
-  assert(jInterp);
-  if (!aSymbol) return jInterp->dict.firstSymbol;
-  return findLUBSymbolRecurse(jInterp, jInterp->dict.root, aSymbol);
-}
-\stopCCode
+\stopTestSuite

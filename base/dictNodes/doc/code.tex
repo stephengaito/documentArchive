@@ -28,25 +28,25 @@ typedef struct dictNode_object_struct {
 \startTestSuite[newDict]
 
 \startCHeader
-typedef DictNodeObj *(NewDict)(
+typedef DictNodeObj *(NewDictNode)(
   JoyLoLInterp *jInterp,
   Symbol       *aSym
 );
 
-#define newDict(jInterp, aSym)            \
-  (                                       \
-    assert(getDictNodesClass(jInterp)  \
-      ->newDictFunc),                     \
-    (getDictNodesClass(jInterp)        \
-      ->newDictFunc(jInterp, aSym))       \
+#define newDictNode(jInterp, aSym)      \
+  (                                     \
+    assert(getDictNodesClass(jInterp)   \
+      ->newDictNodeFunc),               \
+    (getDictNodesClass(jInterp)         \
+      ->newDictNodeFunc(jInterp, aSym)) \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictNodeObj *newDictImpl(
+extern DictNodeObj *newDictNodeImpl(
   JoyLoLInterp *jInterp,
-  Symbol *aSym
+  Symbol       *aSym
 );
 
 #define dictAsSymbol(aNode)   ((DictNodeObj*)(aNode))->symbol
@@ -77,9 +77,9 @@ extern DictNodeObj *newDictImpl(
 // ANY AVLTree node can be the root of a new dictionary.
 //
 
-DictNodeObj *newDictImpl(
+DictNodeObj *newDictNodeImpl(
   JoyLoLInterp *jInterp,
-  Symbol *aSym
+  Symbol       *aSym
 ) {
   assert(jInterp);
   assert(jInterp->coAlgs);
@@ -88,7 +88,7 @@ DictNodeObj *newDictImpl(
   
   assert(aSym);
   
-  DEBUG(jInterp, "newAVLNode [%s]\n", aSym);
+  DEBUG(jInterp, "newDictNode [%s]\n", aSym);
   JObj* newNode   = newObject(jInterp, DictNodesTag);
   dictAsSymbol(newNode)   = strdup(aSym);
   dictAsPreObs(newNode)   = NULL;
@@ -104,13 +104,13 @@ DictNodeObj *newDictImpl(
 }
 \stopCCode
 
-\startTestCase[should add a new dict object (AVL node)]
+\startTestCase[should add a new dictNode object (AVL node)]
 
 \startCTest
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[DictNodesTag].sClass);
 
-  DictNodeObj* aNode = newDict(jInterp, "aNodeSymbol");
+  DictNodeObj* aNode = newDictNode(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aNode);
   AssertPtrNotNull(asType(aNode));
   AssertIntEquals(asTag(aNode), DictNodesTag)
@@ -126,124 +126,6 @@ DictNodeObj *newDictImpl(
 \stopCTest
 \stopTestCase
 \stopTestSuite
-
-\startTestSuite[createSymbol]
-
-\startCHeader
-typedef DictNodeObj *(CreateSymbol)(
-  JoyLoLInterp *jInterp,
-  Symbol       *aSymbol
-);
-
-#define createSymbol(jInterp, aSymbol)      \
-  (                                         \
-    assert(getDictNodesClass(jInterp)    \
-      ->createSymbolFunc),                  \
-    (getDictNodesClass(jInterp)          \
-      ->createSymbolFunc(jInterp, aSymbol)) \
-  )
-\stopCHeader
-
-\setCHeaderStream{private}
-\startCHeader
-extern DictNodeObj* createSymbolImpl(
-  JoyLoLInterp *jInterp,
-  Symbol       *aSymbol
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-DictNodeObj* createSymbolImpl(
-  JoyLoLInterp *jInterp,
-  Symbol       *aSymbol
-) {
-  assert(jInterp);
-  if (!aSymbol) return NULL;
-  DictNodeObj* aSym = findSymbol(jInterp, aSymbol);
-  if (!aSym) {
-    jInterp->dict.root = insertSymbol(jInterp, aSymbol);
-    aSym = findSymbol(jInterp, aSymbol);
-  }
-  return aSym;
-}
-\stopCCode
-\stopTestSuite
-
-\startCHeader
-typedef JObj *(GetSymbol)(
-  JoyLoLInterp *jInterp,
-  Symbol       *aSymbol
-);
-
-#define getSymbol(jInterp, aSymbol)       \
-  (                                       \
-    assert(getDictNodesClass(jInterp)  \
-      ->getSymbolFunc),                   \
-    (getDictNodesClass(jInterp)        \
-      ->getSymbolFunc(jInterp, aSymbol))  \
-  )
-\stopCHeader
-
-\setCHeaderStream{private}
-\startCHeader
-extern JObj* getSymbolImpl(
-  JoyLoLInterp* jInterp,
-  Symbol* aSymbol
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-JObj* getSymbolImpl(
-  JoyLoLInterp* jInterp,
-  Symbol* aSymbol
-) {
-  DictNodeObj* aSym = createSymbol(jInterp, aSymbol);
-  return newSymbol(jInterp, aSym->symbol);
-}
-\stopCCode
-
-\startCHeader
-typedef void (ListDefinitions)(
-  JoyLoLInterp    *jInterp,
-  StringBufferObj *aStrBuf
-);
-
-#define listDefinitions(jInterp, aStrBuf)       \
-  (                                             \
-    assert(getDictNodesClass(jInterp)        \
-      ->listDefinitionsFunc),                   \
-    (getDictNodesClass(jInterp)              \
-      ->listDefinitionsFunc(jInterp, aStrBuf))  \
-  )
-\stopCHeader
-
-\setCHeaderStream{private}
-\startCHeader
-extern void listDefinitionsImpl(
-  JoyLoLInterp    *jInterp,
-  StringBufferObj *aStrBuf
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-void listDefinitionsImpl(
-  JoyLoLInterp    *jInterp,
-  StringBufferObj *aStrBuf
-) {
-  DictNodeObj* curNode = jInterp->dict.firstSymbol;
-  while(curNode) {
-    if (curNode->value) {
-      strBufPrintf(jInterp, aStrBuf,"%s == ", curNode->symbol);
-      printLoL(jInterp, aStrBuf, curNode->value);
-      strBufPrintf(jInterp, aStrBuf,"\n");
-    }
-    curNode = curNode->next;
-  }
-}
-\stopCCode
 
 \setCHeaderStream{private}
 \startCHeader
@@ -291,12 +173,10 @@ Boolean printDicInto(
 \startCHeader
 typedef struct dictNodes_class_struct {
   JClass super;
-  NewDict         *newDictFunc;
-  CreateSymbol    *createSymbolFunc;
-  GetSymbol       *getSymbolFunc;
-  FindSymbol      *findSymbolFunc;
-  FindLUBSymbol   *findLUBSymbolFunc;
-  ListDefinitions *listDefinitionsFunc;
+  NewDictNode          *newDictNodeFunc;
+  FindSymbolRecurse    *findSymbolRecurseFunc;
+  InsertSymbolRecurse  *insertSymbolRecurseFunc;
+  FindLUBSymbolRecurse *findLUBSymbolRecurseFunc;
 } DictNodesClass;
 \stopCHeader
 
@@ -331,12 +211,13 @@ Boolean registerDictNodes(JoyLoLInterp *jInterp) {
   theCoAlg->super.initializeFunc  = initializeDictNodes;
   theCoAlg->super.equalityFunc    = NULL;
   theCoAlg->super.printFunc       = printDictionaryJObjInto;
-  theCoAlg->newDictFunc           = newDictImpl;
-  theCoAlg->createSymbolFunc      = createSymbolImpl;
-  theCoAlg->getSymbolFunc         = getSymbolImpl;
-  theCoAlg->findSymbolFunc        = findSymbolImpl;
-  theCoAlg->findLUBSymbolFunc     = findLUBSymbolImpl;
-  theCoAlg->listDefinitionsFunc   = listDefinitionsImpl;
+  theCoAlg->newDictNodeFunc       = newDictNodeImpl;
+  theCoAlg->findSymbolRecurseFunc = findSymbolRecurseImpl;
+  theCoAlg->insertSymbolRecurseFunc =
+    insertSymbolRecurseImpl;
+  theCoAlg->findLUBSymbolRecurseFunc =
+    findLUBSymbolRecurseImpl;
+
   size_t tag =
     registerJClass(jInterp, (JClass*)theCoAlg);
   
