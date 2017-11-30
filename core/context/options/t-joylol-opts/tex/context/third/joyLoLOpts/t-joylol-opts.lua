@@ -44,9 +44,9 @@ options.systemPath = '/usr/lib/joylol'
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-29",
-  commitShortHash = "4f779b5",
-  commitLongHash  = "4f779b5ef1065a3be26992e35c8ddc1617b701b4",
-  subject         = "begun work on code fragments",
+  commitShortHash = "8b08385",
+  commitLongHash  = "8b083856c922802a18c354110125271313195ead",
+  subject         = "integrated fragments into gitHook",
   notes           = ""
 }
 

@@ -2,6 +2,12 @@
 
 -- from file: minJoyLoL.tex after line: 0
 
+local function setDefs(varVal, selector, defVal)
+  if not defVal then defVal = { } end
+  varVal[selector] = varVal[selector] or defVal
+  return varVal[selector]
+end
+
 local minJoylol     = setDefs(thirddata, 'minJoylol')
 
 minJoylol.core = { }
