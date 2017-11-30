@@ -51,9 +51,9 @@ local toStr   = tostring
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-30",
-  commitShortHash = "bef6a55",
-  commitLongHash  = "bef6a55e2ac1ca27e542c74fe2c232eb470d3fa1",
-  subject         = "corrected missing setDefs in minLua",
+  commitShortHash = "9be7e9b",
+  commitLongHash  = "9be7e9b1a6bbc5f4cc1257b2f9db56a1038a00bc",
+  subject         = "refactored dictionaries into dictNodes",
   notes           = ""
 }
 

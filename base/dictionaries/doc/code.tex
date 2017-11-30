@@ -1,0 +1,247 @@
+% A ConTeXt document [master document: dictionaries.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\component gitVersion-c
+
+\startTestSuite[newDictionary]
+
+\startCHeader
+typedef JObj* (NewDictionary)(
+  JoyLoLInterp*,
+  Symbol*
+);
+
+#define newDictionary(jInterp, aName)      \
+  (                                           \
+    assert(getDictionariesClass(jInterp)    \
+      ->newDictionaryFunc),                \
+    (getDictionariesClass(jInterp)          \
+      ->newDictionaryFunc(jInterp, aName)) \
+  )
+
+//#define asDictionary(aLoL) (((aLoL)->flags) & BOOLEAN_FLAG_MASK)
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* newDictionaryImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aCompilerType
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* newDictionaryImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aCompilerName
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  JObj* result = newObject(jInterp, DictionariesTag);
+  assert(result);
+  
+  result->type  = jInterp->coAlgs[DictionariesTag].sClass;
+ 
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new Dictionary]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  JObj* aNewDictionary = newDictionary(jInterp, "ansiC");
+  AssertPtrNotNull(aNewDictionary);
+  AssertPtrNotNull(asType(aNewDictionary));
+  AssertIntEquals(asTag(aNewDictionary), DictionariesTag);
+  AssertIntTrue(isAtom(aNewDictionary));
+  AssertIntTrue(isDictionary(aNewDictionary));
+  AssertIntFalse(isPair(aNewDictionary));
+\stopCTest
+\stopTestCase
+
+\startTestCase[print Dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+
+  JObj* aLoL = newDictionary(jInterp, "ansiC");
+  AssertPtrNotNull(aLoL);
+  printLoL(jInterp, aStrBuf, aLoL);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "dictionary ");
+  strBufClose(jInterp, aStrBuf);
+\stopCTest
+\stopTestCase
+
+\stopTestSuite
+
+\startTestSuite[isDictionary]
+
+\startCHeader
+#define isDictionary(aLoL)             \
+  (                                 \
+    (                               \
+      (aLoL) &&                     \
+      asType(aLoL) &&               \
+      (asTag(aLoL) == DictionariesTag)  \
+    ) ?                             \
+      TRUE :                        \
+      FALSE                         \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityDictionaryCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj     *lolA,
+  JObj     *lolB
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityDictionaryCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj     *lolA,
+  JObj     *lolB
+) {
+  DEBUG(jInterp, "dictionaryCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != DictionariesTag) return FALSE;
+  if (lolA != lolB) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing dictionaries]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printDictionaryCoAlg(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  JObj        *aLoL
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printDictionaryCoAlg(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  JObj        *aLoL
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == DictionariesTag);
+
+  strBufPrintf(jInterp, aStrBuf, "dictionary ");
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print dictionaries]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+  
+  JObj* aNewDictionary = newDictionary(jInterp, "ansiC");
+  AssertPtrNotNull(aNewDictionary);
+  printLoL(jInterp, aStrBuf, aNewDictionary);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "dictionary ");
+  strBufClose(jInterp, aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerDictionaries]
+
+\startCHeader
+typedef struct dictionaries_class_struct {
+  JClass       super;
+  NewDictionary      *newDictionaryFunc;
+} DictionariesClass;
+
+\stopCHeader
+
+\startCCode
+static Boolean initializeDictionaries(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  registerDictionaryWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerDictionaries(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerDictionaries(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  DictionariesClass* theCoAlg
+    = joyLoLCalloc(1, DictionariesClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name           = DictionariesName;
+  theCoAlg->super.objectSize     = sizeof(JObj);
+  theCoAlg->super.initializeFunc = initializeDictionaries;
+  theCoAlg->super.equalityFunc   = equalityDictionaryCoAlg;
+  theCoAlg->super.printFunc      = printDictionaryCoAlg;
+  theCoAlg->newDictionaryFunc = newDictionaryImpl;
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == DictionariesTag);
+  assert(jInterp->coAlgs[tag].sClass);
+   
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Dictionaries coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerDictionaries
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getDictionariesClass(jInterp));
+  DictionariesClass *coAlg = getDictionariesClass(jInterp);
+  registerDictionaries(jInterp);
+  AssertPtrNotNull(getDictionariesClass(jInterp));
+  AssertPtrEquals(getDictionariesClass(jInterp), coAlg);
+  AssertIntEquals(
+    getDictionariesClass(jInterp)->super.objectSize,
+    sizeof(JObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

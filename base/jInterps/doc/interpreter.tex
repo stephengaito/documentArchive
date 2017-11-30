@@ -276,8 +276,12 @@ typedef struct crossCompilers_class_struct CrossCompilersClass;
   ((CrossCompilersClass*)getJClass(jInterp, CrossCompilersTag))
 
 typedef struct dictNodes_class_struct DictNodesClass;
-#define getDictNodesClass(jInterp)                       \
+#define getDictNodesClass(jInterp)                          \
   ((DictNodesClass*)getJClass(jInterp, DictNodesTag))
+
+typedef struct dictionaries_class_struct DictionariesClass;
+#define getDictionariesClass(jInterp)                       \
+  ((DictionariesClass*)getJClass(jInterp, DictionariesTag))
 
 typedef struct fragments_class_struct FragmentsClass;
 #define getFragmentsClass(jInterp)                          \

@@ -1,0 +1,75 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('build/joylol')
+lfs.mkdir('install')
+lfs.mkdir('install/joylol')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'dictionaries.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/dictionaries.h',
+    'joylol/dictionaries-private.h',
+    'dictionaries.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets{
+  coAlgs = {
+    'dictionaries',
+  },
+  srcFiles = {
+    'joylol/dictionaries.h',
+    'joylol/dictionaries-private.h',
+    'dictionaries.c',
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+  buildDir = 'build',
+}
+
+require 'lms.contests'
+
+contests.targets{
+  testExecs = {
+    'allCTests',
+  },
+  mainDoc = 'dictionaries.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/dictionaries.h',
+    'joylol/dictionaries-private.h',
+    'dictionaries.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}

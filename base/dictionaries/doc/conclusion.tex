@@ -1,0 +1,85 @@
+% A ConTeXt document [master document: dictionaries.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_DICTIONARIES}
+\createCHeaderFile%
+  {public}
+  {joylol/dictionaries.h}
+  {}
+
+\setCHeaderStream{private}
+\startCHeader
+extern size_t joylol_register_dictionaries(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_DICTIONARIES_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/dictionaries-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/dictNodes.h>
+#include <joylol/texts.h>
+#include <joylol/cFunctions.h>
+#include <joylol/contexts.h>
+#include <joylol/dictionaries.h>
+#include <joylol/dictionaries-private.h>
+// dictionary
+// printer
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {dictionaries.c}%
+  {}
+
+  
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
+\addCTestInclude{<joylol/dictionaries-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireStaticallyLinkedDictionaries(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
+\stopCTest
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{dictionaries.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{install}
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

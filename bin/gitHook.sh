@@ -89,6 +89,8 @@ cp $gitVTex base/crossCompilers/doc
 cp $gitVC   base/crossCompilers/doc
 cp $gitVTex base/dictNodes/doc
 cp $gitVC   base/dictNodes/doc
+cp $gitVTex base/dictionaries/doc
+cp $gitVC   base/dictionaries/doc
 cp $gitVTex base/fragments/doc
 cp $gitVC   base/fragments/doc
 cp $gitVTex base/jInterps/doc
