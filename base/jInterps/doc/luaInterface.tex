@@ -266,8 +266,7 @@ static void initializeAllRequired(
   // finally check that all important interpreter 
   // objects have been assigned
   if (
-    !(jInterp->dict.root) || 
-    !(jInterp->dict.firstSymbol) ||
+    !(jInterp->dict) || 
     !(jInterp->loader) ||
     !(jInterp->rootCtx)
     ) {

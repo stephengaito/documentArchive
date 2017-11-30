@@ -7,44 +7,45 @@
 \setCHeaderStream{public}
 \startCHeader
 typedef DictNodeObj *(FindSymbolRecurse)(
-  JoyLoLInterp *jInterp,
-  DictNodeObj  *anAVLNode,
-  Symbol       *aSymbol
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
 );
 
-#define findSymbolRecurse(jInterp, anAVLNode, aSymbol)      \
-  (                                                         \
-    assert(getDictNodesClass(jInterp)                       \
-      ->findSymbolRecurseFunc),                             \
-    (getDictNodesClass(jInterp)                             \
-      ->findSymbolRecurseFunc(jInterp, anAVLNode, aSymbol)) \
+#define findSymbolRecurse(aDict, anAVLNode, aSymbol)      \
+  (                                                       \
+    assert(aDict),                                        \
+    assert(getDictNodesClass(aDict->jInterp)              \
+      ->findSymbolRecurseFunc),                           \
+    (getDictNodesClass(aDict->jInterp)                    \
+      ->findSymbolRecurseFunc(aDict, anAVLNode, aSymbol)) \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
 extern DictNodeObj* findSymbolRecurseImpl(
-  JoyLoLInterp *jInterp,
-  DictNodeObj  *anAVLNode,
-  Symbol       *aSymbol
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 DictNodeObj* findSymbolRecurseImpl(
-  JoyLoLInterp *jInterp,
-  DictNodeObj  *anAVLNode,
-  Symbol       *aSymbol
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
 ) {
   if (!anAVLNode) return NULL;
   int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
   if (aStrCmp < 0) {
     // aSymbol < anAVLNode->symbol // search the LEFT subtree
-    return findSymbolRecurse(jInterp, anAVLNode->left, aSymbol);
+    return findSymbolRecurse(aDict, anAVLNode->left, aSymbol);
   } else if (0 < aStrCmp) {
     // aSymbol > anAVLNode->symbol // search the RIGHT subtree
-    return findSymbolRecurse(jInterp, anAVLNode->right, aSymbol);
+    return findSymbolRecurse(aDict, anAVLNode->right, aSymbol);
   } else {
     // aSymbol == anAVLNode->symbol // return this association pair
     return anAVLNode;
@@ -56,24 +57,20 @@ DictNodeObj* findSymbolRecurseImpl(
 \startTestCase[should find Symbol In Empty Dictionary]
 \startCTest
   AssertPtrNotNull(jInterp);
-  // ensure the global dictionary is empty
-  jInterp->dict.root        = NULL;
-  jInterp->dict.firstSymbol = NULL;
+  DictObj *aDict = newDictionary(jInterp);
   
-  AssertPtrNull(findSymbolRecurse(jInterp, NULL, "aSymbol"));
+  AssertPtrNull(findSymbolRecurse(aDict, NULL, "aSymbol"));
 \stopCTest
 \stopTestCase
 
 \startTestCase[should find Symbol In Non Empty Dictionary]
 \startCTest
   AssertPtrNotNull(jInterp);
-  // ensure the global dictionary is empty
-  jInterp->dict.root        = NULL;
-  jInterp->dict.firstSymbol = NULL;
+  DictObj *aDict = newDictionary(jInterp);
 
-  DictNodeObj* aNode = newDictNode(jInterp, "aNodeSymbol");
+  DictNodeObj* aNode = newDictNode(aDict, "aNodeSymbol");
   AssertPtrNotNull(aNode);
-  DictNodeObj* foundAPair = findSymbolRecurse(jInterp, aNode, "aNodeSymbol");
+  DictNodeObj* foundAPair = findSymbolRecurse(aDict, aNode, "aNodeSymbol");
   AssertPtrNotNull(foundAPair);
   AssertStrEquals(foundAPair->symbol, "aNodeSymbol");
 \stopCTest
@@ -82,13 +79,11 @@ DictNodeObj* findSymbolRecurseImpl(
 \startTestCase[should find Symbol Not In Dictionary]
 \startCTest
   AssertPtrNotNull(jInterp);
-  // ensure the global dictionary is empty
-  jInterp->dict.root        = NULL;
-  jInterp->dict.firstSymbol = NULL;
+  DictObj *aDict = newDictionary(jInterp);
 
-  DictNodeObj* aSimpleDic = newDictNode(jInterp, "aNodeSymbol");
+  DictNodeObj* aSimpleDic = newDictNode(aDict, "aNodeSymbol");
   AssertPtrNotNull(aSimpleDic);
-  AssertPtrNull(findSymbolRecurse(jInterp, aSimpleDic, "aSymbol"));
+  AssertPtrNull(findSymbolRecurse(aDict, aSimpleDic, "aSymbol"));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -97,38 +92,39 @@ DictNodeObj* findSymbolRecurseImpl(
 
 \startCHeader
 typedef DictNodeObj *(FindLUBSymbolRecurse)(
-  JoyLoLInterp *jInterp,
-  DictNodeObj  *anAVLNode,
-  Symbol       *aSymbol
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
 );
 
-#define findLUBSymbolRecurse(jInterp, anAVLNode, aSymbol)       \
-  (                                                             \
-    assert(getDictNodesClass(jInterp)                           \
-      ->findLUBSymbolRecurseFunc),                              \
-    (getDictNodesClass(jInterp)                                 \
-      ->findLUBSymbolRecurseFunc(jInterp, anAVLNode, aSymbol))  \
+#define findLUBSymbolRecurse(aDict, anAVLNode, aSymbol)       \
+  (                                                           \
+    assert(aDict),                                            \
+    assert(getDictNodesClass(aDict->jInterp)                  \
+      ->findLUBSymbolRecurseFunc),                            \
+    (getDictNodesClass(aDict->jInterp)                        \
+      ->findLUBSymbolRecurseFunc(aDict, anAVLNode, aSymbol))  \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
 DictNodeObj* findLUBSymbolRecurseImpl(
-  JoyLoLInterp *jInterp,
-  DictNodeObj  *anAVLNode,
-  Symbol       *aSymbol
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 DictNodeObj* findLUBSymbolRecurseImpl(
-  JoyLoLInterp *jInterp,
-  DictNodeObj  *anAVLNode,
-  Symbol       *aSymbol
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
 ) {
-  assert(jInterp);
-  if (!anAVLNode) return jInterp->dict.firstSymbol;
+  assert(aDict);
+  if (!anAVLNode) return aDict->firstSymbol;
 
   DEBUG(jInterp, "findLUBSymbol %p {%s}[%s] %p %p\n",
         anAVLNode, anAVLNode->symbol, aSymbol,
@@ -141,7 +137,7 @@ DictNodeObj* findLUBSymbolRecurseImpl(
     // the current anAVLNode->symbol is an upper bound
     // search the LEFT subtree for a smaller upper bound
     if (anAVLNode->left) {
-      DictNodeObj* aNode = findLUBSymbolRecurse(jInterp, anAVLNode->left, aSymbol);
+      DictNodeObj* aNode = findLUBSymbolRecurse(aDict, anAVLNode->left, aSymbol);
       if (!aNode) {
         // there is nothing in the LEFT subtree which is an upper bound
         // so return this node.
@@ -158,7 +154,7 @@ DictNodeObj* findLUBSymbolRecurseImpl(
     // the current anAVLNode->symbol is a lower bound
     // search the RIGHT subtree for any upper bounds
     if (anAVLNode->right) {
-      return findLUBSymbolRecurse(jInterp, anAVLNode->right, aSymbol);
+      return findLUBSymbolRecurse(aDict, anAVLNode->right, aSymbol);
     }
     // there is nothing greater than this node so return NULL to signal failure
     return NULL;
@@ -170,7 +166,7 @@ DictNodeObj* findLUBSymbolRecurseImpl(
     return anAVLNode;
     //
   }
-  return jInterp->dict.firstSymbol;
+  return aDict->firstSymbol;
 }
 \stopCCode
 \stopTestSuite

@@ -221,20 +221,16 @@ typedef struct coalg_vecItem_struct {
 
 typedef struct dictNode_object_struct DictNodeObj;
 
-typedef struct dictionary_struct {
-  DictNodeObj *root;
-  DictNodeObj *firstSymbol;
-} Dictionary;
-
 typedef struct loader_object_struct LoaderObj;
 typedef struct context_object_struct ContextObj;
+typedef struct dicionary_object_struct DictObj;
 
 typedef struct joylol_interpreter_struct {
   lua_State       *lstate;
   size_t           numCoAlgs;
   size_t           maxNumCoAlgs;
   CoAlgVecItem    *coAlgs;
-  Dictionary       dict;
+  DictObj         *dict;
   LoaderObj       *loader;
   ContextObj      *rootCtx;
   Boolean          verbose;
@@ -381,10 +377,9 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
     jInterp->coAlgs[i].oMem.rootObjectBlock = NULL; 
   }
   
-  jInterp->dict.root        = NULL;
-  jInterp->dict.firstSymbol = NULL;
-  jInterp->loader           = NULL;
-  jInterp->rootCtx          = NULL;
+  jInterp->dict    = NULL;
+  jInterp->loader  = NULL;
+  jInterp->rootCtx = NULL;
     
   return jInterp;
 }
@@ -409,8 +404,7 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
     AssertPtrNull(jInterp->coAlgs[i].oMem.rootObjectBlock);
   }
   
-  AssertPtrNull(jInterp->dict.root);
-  AssertPtrNull(jInterp->dict.firstSymbol);
+  AssertPtrNull(jInterp->dict);
   AssertPtrNull(jInterp->loader);
 \stopCTest
 \stopTestCase
