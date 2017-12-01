@@ -96,8 +96,6 @@ Things you can do with a memory block:
 
 \stopitemize
 
-%\startJFrame
-
 The lists extension is the core JoyLoL extension. It provides the core 
 lists of lists structures. It \emph{only} provides the most basic JoyLoL 
 expressions. It has no ability to preform any computation other than to 
@@ -197,19 +195,19 @@ versions are compatible.
 
 \setCHeaderStream{private}
 \startCHeader
-typedef struct required_coalgs_struct {
+typedef struct required_objects_struct {
   const char*  name;
   size_t       tag;
   CoAlgVersion version;
-} RequiredCoAlgs;
+} RequiredObjects;
 
-extern RequiredCoAlgs requiredCoAlgs[];
+extern RequiredObjects requiredCoAlgs[];
 \stopCHeader
 \setCHeaderStream{public}
 
 \setCCodeStream{interpreter}
 \startCCode
-RequiredCoAlgs requiredCoAlgs[] = {
+RequiredObjects requiredCoAlgs[] = {
   { JInterpsName,       JInterpsTag,       {0, 1, 0 }}, //  1
   { DictionariesName,   DictionariesTag,   {0, 1, 0 }}, //  2
   { BooleansName,       BooleansTag,       {0, 1, 0 }}, //  3
@@ -261,6 +259,54 @@ joylol.texts          = require 'joylol.texts'          -- 18
 joylol.jInterps.initializeAllRequired()
 
 \stopLuaCode
+
+\section[title=Required cross compilers]
+
+One of the key objectives of the JoyLoL interpreter is to ensure as much 
+as possible of its own code and the code of any of its extensions is 
+proven correct. While it is theoretically impossible to ever prove any 
+implementation of reality to be 100\percent correct, we can ensure that 
+those code fragements which can only be tests as opposed to proven 
+correct, is as small as possible.
+
+It is the \type{CrossCompiler} CoAlgebra which manages the process of 
+proving \emph{implemented} JoyLoL words are proven correct. The 
+\type{CrossCompiler} coalgebras do this by first verifying and then 
+assembling JoyLoL words from adequately tests code fragments in a 
+particular programming language. There is one \type{CrossCompiler} for 
+each programming language as embedded in a computer system. 
+
+For the current JoyLoL implementation, the required \type{CrossCompilers} are:
+
+\setCHeaderStream{public}
+\startCHeader
+#define Unused_CC                 0
+#define AnsiC_CC                  1
+#define AnsiC_Lua_CC              2
+#define PureLua_CC                3
+#define NumRequiredCrossCompilers 4
+
+#define AnsiC_Name     "ansiC"     /*  1 */
+#define AnsiC_Lua_Name "ansiC-Lua" /*  2 */
+#define PureLua_Name   "pureLua"   /*  3 */
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern RequiredObjects requiredCompilers[];
+\stopCHeader
+\setCHeaderStream{public}
+
+\setCCodeStream{interpreter}
+\startCCode
+RequiredObjects requiredCompilers[] = {
+  { AnsiC_Name,       AnsiC_CC,     {0, 1, 0 }}, //  1
+  { AnsiC_Lua_Name,   AnsiC_Lua_CC, {0, 1, 0 }}, //  2
+  { PureLua_Name,     PureLua_CC,   {0, 1, 0 }}, //  3
+  { NULL,             0,            {0, 0, 0 }}
+};
+\stopCCode
+\section[title=Semi-standard typedefs]
 
 Finally we provide a number of semi-standard typdefs to provide a semantic 
 meaning to various typical variable uses. 

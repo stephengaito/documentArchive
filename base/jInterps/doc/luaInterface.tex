@@ -223,7 +223,7 @@ static void checkAllRequired(
   // now check that all required CoAlg extensions 
   // have been registered
   //
-  RequiredCoAlgs *curCoAlg = requiredCoAlgs;
+  RequiredObjects *curCoAlg = requiredCoAlgs;
   for ( ; curCoAlg->name ; curCoAlg++) {
     size_t curTag = curCoAlg->tag;
     if (!getJClass(jInterp, curTag)) {
@@ -307,7 +307,7 @@ static void requireAllRequiredCoAlgs(
   // now walk through the required coAlgs
   // requiring each in turn and 
   // placing it into the master table
-  RequiredCoAlgs *curCoAlg = requiredCoAlgs;
+  RequiredObjects *curCoAlg = requiredCoAlgs;
   for ( ; curCoAlg->name ; curCoAlg++) {
     size_t curTag = curCoAlg->tag;
     if (!(jInterp->coAlgs[curTag].sClass)) {

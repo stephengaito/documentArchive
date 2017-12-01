@@ -220,9 +220,9 @@ as possible.
 
 \startCHeader
 typedef struct coalg_vecItem_struct {
-  JClass   *sClass; // static part
+  JClass       *sClass; // static part
   void         *dClass; // dynamic part
-  ObjectMemory oMem;
+  ObjectMemory  oMem;
 } CoAlgVecItem;
 
 typedef struct dictNode_object_struct DictNodeObj;
@@ -230,19 +230,23 @@ typedef struct dictNode_object_struct DictNodeObj;
 typedef struct loader_object_struct LoaderObj;
 typedef struct context_object_struct ContextObj;
 typedef struct dictionary_object_struct DictObj;
+typedef struct crossCompiler_object_struct CrossCompilerObj;
 
 typedef struct joylol_interpreter_struct {
-  lua_State       *lstate;
-  size_t           numCoAlgs;
-  size_t           maxNumCoAlgs;
-  CoAlgVecItem    *coAlgs;
-  DictObj         *dict;
-  LoaderObj       *loader;
-  ContextObj      *rootCtx;
-  Boolean          verbose;
-  Boolean          debug;
-  StdOutputMethod *writeStdOut;
-  StdOutputMethod *writeStdErr;
+  lua_State        *lstate;
+  size_t            numCoAlgs;
+  size_t            maxNumCoAlgs;
+  CoAlgVecItem     *coAlgs;
+  DictObj          *dict;
+  LoaderObj        *loader;
+  ContextObj       *rootCtx;
+  size_t            numCompilers;
+  size_t            maxNumCompilers;
+  CrossCompilerObj **compilers;
+  Boolean           verbose;
+  Boolean           debug;
+  StdOutputMethod  *writeStdOut;
+  StdOutputMethod  *writeStdErr;
 } JoyLoLInterp;
 
 #define getJClass(jInterp, aTag)        \
@@ -381,6 +385,16 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
     jInterp->coAlgs[i].dClass               = NULL;
     jInterp->coAlgs[i].oMem.freeObjects     = NULL;
     jInterp->coAlgs[i].oMem.rootObjectBlock = NULL; 
+  }
+
+  maxNum =
+    NumRequiredCrossCompilers + JOYLOL_COMPILERS_INCREMENT;
+  jInterp->numCompilers    = NumRequiredCrossCompilers;
+  jInterp->maxNumCompilers = maxNum;
+  jInterp->compilers       = joyLoLCalloc(maxNum, CrossCompilerObj*);
+
+  for (size_t i = 0; i < jInterp->maxNumCompilers; i++) {
+    jInterp->compilers[i] = NULL;
   }
   
   jInterp->dict    = NULL;
@@ -651,6 +665,159 @@ existing CoAlgebra index.
   AssertIntEquals(anIndex, 5 + NumRequiredCoAlgs);
   AssertIntEquals(oldNumCoAlgs, jInterp->numCoAlgs);
 \stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerCrossCompiler]
+
+\startCHeader
+#define registerCrossCompiler(jInterp, aTag)      \
+  (                                               \
+    assert(getJInterpClass(jInterp)               \
+      ->registerCrossCompilerFunc),               \
+    (getJInterpClass(jInterp)                     \
+      ->registerCrossCompilerFunc)(jInterp, aTag) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+size_t registerCrossCompilerImpl(
+  JoyLoLInterp     *jInterp,
+  CrossCompilerObj *aCompiler
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+size_t registerCrossCompilerImpl(
+  JoyLoLInterp     *jInterp,
+  CrossCompilerObj *aCompiler
+) {
+  assert(jInterp);
+  assert(jInterp->compilers);
+  assert(aCompiler);
+  
+  for(size_t i = 0; i < jInterp->numCompilers; i++ ) {
+    if (jInterp->compilers[i]) {
+      if (strcmp(aCompiler->type,
+        jInterp->compilers[i]->type) == 0) {
+    
+        // a compiler with this name has already been registered. 
+        // so return its index...
+        return i;
+      }
+    }
+  }
+
+  // now check to see if this is a required coAlg
+  for (size_t i = 0; requiredCompilers[i].name; i++) {
+    if (strcmp(aCompiler->type, requiredCompilers[i].name) == 0) {
+      size_t tag = requiredCompilers[i].tag;
+      if (!(jInterp->compilers[tag])) {
+        jInterp->compilers[tag] = aCompiler;
+      }
+      return tag;
+    }
+  }
+
+  // we follow a policy of lazy management of the jInterp
+  // if jInterp->compilers is too small we expand it
+  if (jInterp->maxNumCompilers <= jInterp->numCompilers) {
+    // we need to expand the existing compilers structure...
+    //  
+    size_t oldNumCompilers          = jInterp->numCompilers;
+    size_t oldMaxNumCompilers       = jInterp->maxNumCompilers;
+    CrossCompilerObj** oldCompilers = jInterp->compilers;
+    
+    size_t newMaxNumCompilers =
+      oldMaxNumCompilers + JOYLOL_COMPILERS_INCREMENT;
+
+    jInterp->compilers =
+      joyLoLCalloc(newMaxNumCompilers, CrossCompilerObj*);
+    assert(jInterp->compilers);
+    
+    if (oldCompilers) {
+      memcpy(jInterp->compilers,
+        oldCompilers,
+        sizeof(CrossCompilerObj)*oldNumCompilers);
+      free(oldCompilers);
+    }
+    
+    jInterp->numCompilers    = oldNumCompilers;
+    jInterp->maxNumCompilers = newMaxNumCompilers;
+  }
+  
+  size_t newCompiler = jInterp->numCompilers;
+  
+  jInterp->compilers[newCompiler] = aCompiler;
+  
+  jInterp->numCompilers++;
+  
+  return newCompiler;
+}
+\stopCCode
+
+\startTestCase[should add lots of Compilers to a JoyLoLInterp]
+
+We start by adding one single \type{Compiler}. 
+
+\startCTest
+  JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
+  char*             compilerType       = strdup("newCompiler");
+  char*             compilerTypeEnd    = compilerType + strlen("newCompiler");
+  
+  CrossCompilerObj* aCompiler = joyLoLCalloc(1, CrossCompilerObj);
+  AssertPtrNotNull(aCompiler);
+  aCompiler->type               = strdup("newCompilerA");
+
+  size_t compilerIdx = registerCrossCompilerImpl(jInterp, aCompiler);
+  AssertIntEquals(compilerIdx, NumRequiredCrossCompilers);
+
+  CrossCompilerObj** compilers = jInterp->compilers;
+  AssertPtrNotNull(compilers);
+  AssertStrEquals(compilers[compilerIdx]->type, "newCompilerA");
+\stopCTest
+
+Now we want to test the expansion of an existing CoAlgebras structure when 
+the existing one runs out of \quote{space}.
+
+\startCTest
+  AssertIntTrue(JOYLOL_COALGS_INCREMENT < 26);
+  for(size_t i = 1; i < 26; i++) {
+    *compilerTypeEnd = 'A' + i;
+    aCompiler        = joyLoLCalloc(1, CrossCompilerObj);
+    aCompiler->type  = strdup(compilerType);
+
+    registerCrossCompilerImpl(jInterp, aCompiler);
+
+    CrossCompilerObj** compilers = jInterp->compilers;
+    AssertPtrNotNull(compilers);
+    size_t idx = NumRequiredCrossCompilers + i;
+    AssertStrEquals(compilers[idx]->type, compilerType);
+  }
+\stopCTest
+
+Now we want to test the addition of CoAlgebra with an existing name does 
+not change the number of registered CoAlgebras but simple returns the 
+existing CoAlgebra index. 
+
+\starttyping
+\startCTest
+  size_t oldNumCoAlgs  = jInterp->numCoAlgs;
+
+  *coAlgNameEnd          = 'A' + 5;
+  aCoAlg                 = joyLoLCalloc(1, JClass);
+  aCoAlg->name           = strdup(coAlgName);
+  aCoAlg->initializeFunc = (JClassInitialize*) 0x100 + 5;
+  aCoAlg->equalityFunc   = (JObjEquality*)     0x200 + 5;
+  aCoAlg->printFunc      = (JObjPrint*)        0x300 + 5;
+  
+  size_t anIndex = registerJClassImpl(jInterp, aCoAlg);
+  AssertIntEquals(anIndex, 5 + NumRequiredCoAlgs);
+  AssertIntEquals(oldNumCoAlgs, jInterp->numCoAlgs);
+\stopCTest
+\stoptyping
 \stopTestCase
 \stopTestSuite
 

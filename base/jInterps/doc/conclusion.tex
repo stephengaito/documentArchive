@@ -37,6 +37,10 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
 #ifndef JOYLOL_COALGS_INCREMENT
 #define JOYLOL_COALGS_INCREMENT 10
 #endif
+
+#ifndef JOYLOL_COMPILERS_INCREMENT
+#define JOYLOL_COMPILERS_INCREMENT 10
+#endif
  
 #ifndef NULL
 #define NULL (void*)0
@@ -117,6 +121,7 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include "joylol/crossCompilers.h"
 #include "joylol/jInterps-private.h"
 \stopCCode
 
@@ -161,6 +166,7 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
 \addCTestInclude{<joylol/jInterps-private.h>}
 \addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/crossCompilers.h>}
 \addCTestJoyLoLCallbacks{default}
 \CTestsSetup\
 \startCTest
@@ -168,6 +174,7 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
   requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.symbols");
   requireLuaModule(lstate, "joylol.stringBuffers");
+  
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest
 \createCTestFile%

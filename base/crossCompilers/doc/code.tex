@@ -8,20 +8,30 @@
 
 \component gitVersion-c
 
+\startCHeader
+typedef struct crossCompiler_object_struct {
+  JObj     super;
+  Symbol  *type;
+  DictObj *dict;
+} CrossCompilerObj;
+
+#define asCFunc(aLoL) (((CFunctionObj*)(aLoL))->func)
+\stopCHeader
+
 \startTestSuite[newCrossCompiler]
 
 \startCHeader
-typedef JObj* (NewCrossCompiler)(
-  JoyLoLInterp*,
-  Symbol*
+typedef CrossCompilerObj* (NewCrossCompiler)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aType
 );
 
-#define newCrossCompiler(jInterp, aName)      \
+#define newCrossCompiler(jInterp, aType)      \
   (                                           \
     assert(getCrossCompilersClass(jInterp)    \
       ->newCrossCompilerFunc),                \
     (getCrossCompilersClass(jInterp)          \
-      ->newCrossCompilerFunc(jInterp, aName)) \
+      ->newCrossCompilerFunc(jInterp, aType)) \
   )
 
 //#define asCrossCompiler(aLoL) (((aLoL)->flags) & BOOLEAN_FLAG_MASK)
@@ -29,25 +39,29 @@ typedef JObj* (NewCrossCompiler)(
 
 \setCHeaderStream{private}
 \startCHeader
-extern JObj* newCrossCompilerImpl(
+extern CrossCompilerObj* newCrossCompilerImpl(
   JoyLoLInterp *jInterp,
-  Symbol       *aCompilerType
+  Symbol       *aType
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-JObj* newCrossCompilerImpl(
+CrossCompilerObj* newCrossCompilerImpl(
   JoyLoLInterp *jInterp,
-  Symbol       *aCompilerName
+  Symbol       *aType
 ) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
-  JObj* result = newObject(jInterp, CrossCompilersTag);
+  CrossCompilerObj* result =
+    (CrossCompilerObj*)newObject(jInterp, CrossCompilersTag);
   assert(result);
   
-  result->type  = jInterp->coAlgs[CrossCompilersTag].sClass;
+  result->type = strdup(aType);
+  result->dict         = newDictionary(jInterp);
+  
+  result->super.type   = jInterp->coAlgs[CrossCompilersTag].sClass;
  
   return result;
 }
@@ -58,13 +72,16 @@ JObj* newCrossCompilerImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  JObj* aNewCrossCompiler = newCrossCompiler(jInterp, "ansiC");
+  CrossCompilerObj* aNewCrossCompiler =
+    newCrossCompiler(jInterp, "ansiC");
   AssertPtrNotNull(aNewCrossCompiler);
   AssertPtrNotNull(asType(aNewCrossCompiler));
   AssertIntEquals(asTag(aNewCrossCompiler), CrossCompilersTag);
   AssertIntTrue(isAtom(aNewCrossCompiler));
   AssertIntTrue(isCrossCompiler(aNewCrossCompiler));
   AssertIntFalse(isPair(aNewCrossCompiler));
+  AssertPtrNotNull(aNewCrossCompiler->dict);
+  AssertIntTrue(isDictionary(aNewCrossCompiler->dict));
 \stopCTest
 \stopTestCase
 
@@ -75,9 +92,10 @@ JObj* newCrossCompilerImpl(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
 
-  JObj* aLoL = newCrossCompiler(jInterp, "ansiC");
+  CrossCompilerObj* aLoL =
+    newCrossCompiler(jInterp, "ansiC");
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoL(jInterp, aStrBuf, (JObj*)aLoL);
   AssertStrEquals(getCString(jInterp, aStrBuf), "crossCompiler ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
@@ -89,14 +107,14 @@ JObj* newCrossCompilerImpl(
 
 \startCHeader
 #define isCrossCompiler(aLoL)             \
-  (                                 \
-    (                               \
-      (aLoL) &&                     \
-      asType(aLoL) &&               \
+  (                                       \
+    (                                     \
+      (aLoL) &&                           \
+      asType(aLoL) &&                     \
       (asTag(aLoL) == CrossCompilersTag)  \
-    ) ?                             \
-      TRUE :                        \
-      FALSE                         \
+    ) ?                                   \
+      TRUE :                              \
+      FALSE                               \
   )
 \stopCHeader
 
@@ -163,9 +181,10 @@ Boolean printCrossCompilerCoAlg(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  JObj* aNewCrossCompiler = newCrossCompiler(jInterp, "ansiC");
+  CrossCompilerObj* aNewCrossCompiler =
+    newCrossCompiler(jInterp, "ansiC");
   AssertPtrNotNull(aNewCrossCompiler);
-  printLoL(jInterp, aStrBuf, aNewCrossCompiler);
+  printLoL(jInterp, aStrBuf, (JObj*)aNewCrossCompiler);
   AssertStrEquals(getCString(jInterp, aStrBuf), "crossCompiler ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
@@ -210,7 +229,7 @@ Boolean registerCrossCompilers(JoyLoLInterp *jInterp) {
   assert(theCoAlg);
   
   theCoAlg->super.name           = CrossCompilersName;
-  theCoAlg->super.objectSize     = sizeof(JObj);
+  theCoAlg->super.objectSize     = sizeof(CrossCompilerObj);
   theCoAlg->super.initializeFunc = initializeCrossCompilers;
   theCoAlg->super.equalityFunc   = equalityCrossCompilerCoAlg;
   theCoAlg->super.printFunc      = printCrossCompilerCoAlg;
@@ -240,7 +259,7 @@ Boolean registerCrossCompilers(JoyLoLInterp *jInterp) {
   AssertPtrEquals(getCrossCompilersClass(jInterp), coAlg);
   AssertIntEquals(
     getCrossCompilersClass(jInterp)->super.objectSize,
-    sizeof(JObj)
+    sizeof(CrossCompilerObj)
   )
 \stopCTest
 \stopTestCase
