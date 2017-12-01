@@ -136,7 +136,7 @@ void pushSymbolCtxDataImpl(
   assert(aCtx->jInterp);
 
   JObj* aSymbolPA =
-    getSymbol(aCtx->jInterp, aSymbol);
+    getSymbol(aCtx->jInterp->dict, aSymbol);
   if (!aSymbolPA) return;
   aCtx->data = newPair(aCtx->jInterp, aSymbolPA, aCtx->data);
 }
@@ -428,7 +428,7 @@ void pushSymbolCtxProcessImpl(
   assert(aCtx->jInterp);
 
   JObj* aSymbolPA =
-    getSymbol(aCtx->jInterp, aSymbol);
+    getSymbol(aCtx->jInterp->dict, aSymbol);
   if (!aSymbolPA) return;
   aCtx->process = newPair(aCtx->jInterp, aSymbolPA, aCtx->process);
 }
@@ -668,7 +668,7 @@ Boolean extendJoyLoLImpl(
 ) {
   assert(jInterp);
   DictNodeObj* aSym =
-    createSymbol(jInterp, definedName);
+    createSymbol(jInterp->dict, definedName);
   aSym->value =
     (JObj*)newCFunction(jInterp, aFunc);
 
@@ -710,7 +710,7 @@ Boolean defineJoyLoLImpl(
 ) {
   assert(jInterp);
   DictNodeObj* aSym =
-    createSymbol(jInterp, definedName);
+    createSymbol(jInterp->dict, definedName);
   aSym->value = copyLoL(jInterp, aLoL);
 
   return TRUE;
@@ -753,7 +753,7 @@ Boolean defineContextImpl(
         jInterp, definedName, newCtx);
   assert(jInterp);
   DictNodeObj* aSym =
-    createSymbol(jInterp, definedName);
+    createSymbol(jInterp->dict, definedName);
   aSym->value   = (JObj*)newCtx;
 
   return TRUE;

@@ -198,10 +198,16 @@ typedef size_t (JInterpRegisterJClass)(
   JClass   *theJClass
 );
 
+typedef void (JInterpInitializeAllLoaded)(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp
+);
+
 typedef struct joylolinterp_class_struct {
-  JClass                 super;
-  JInterpNewObject          *newObjectFunc;
-  JInterpRegisterJClass *registerJClassFunc;
+  JClass                      super;
+  JInterpNewObject           *newObjectFunc;
+  JInterpRegisterJClass      *registerJClassFunc;
+  JInterpInitializeAllLoaded *initializeAllLoadedFunc;
 } JoyLoLInterpClass;
 \stopCHeader
 
@@ -223,7 +229,7 @@ typedef struct dictNode_object_struct DictNodeObj;
 
 typedef struct loader_object_struct LoaderObj;
 typedef struct context_object_struct ContextObj;
-typedef struct dicionary_object_struct DictObj;
+typedef struct dictionary_object_struct DictObj;
 
 typedef struct joylol_interpreter_struct {
   lua_State       *lstate;
@@ -648,6 +654,67 @@ existing CoAlgebra index.
 \stopTestCase
 \stopTestSuite
 
+\startTestSuite[initializeAllLoaded]
+
+\setCHeaderStream{public}
+\startCHeader
+#define initializeAllLoaded(lstate, jInterp)      \
+  (                                               \
+    assert(getJInterpClass(jInterp)               \
+      ->initializeAllLoadedFunc),                 \
+    (getJInterpClass(jInterp)                     \
+      ->initializeAllLoadedFunc(lstate, jInterp)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void initializeAllLoadedImpl(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void initializeAllLoadedImpl(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp
+) {
+  assert(lstate);
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  // now call the initialization function for each 
+  // loaded CoAlgebraic extension
+  for( size_t i = 1; i < NumRequiredCoAlgs; i++) {
+    if (jInterp->coAlgs[i].sClass) {
+      JClass *aCoAlg = getJClass(jInterp, i);
+      if (jInterp->verbose) {
+        char output[1000];
+        memset(output, 0, 1000);
+        snprintf(output, 999, 
+          "    initializing [joylol.%s]\n",
+          aCoAlg->name);
+        jInterp->writeStdOut(jInterp, output);
+      }
+      assert(aCoAlg->initializeFunc);
+      aCoAlg->initializeFunc(jInterp, aCoAlg);
+      if (jInterp->verbose) {
+        char output[1000];
+        memset(output, 0, 1000);
+        snprintf(output, 999, 
+          "    initialized [joylol.%s]\n",
+          aCoAlg->name);
+        jInterp->writeStdOut(jInterp, output);
+      }
+    }
+  }
+}
+\stopCCode
+
+\stopTestSuite
+
 \startTestSuite[getGitVersion]
 
 We need a generic way of obtaining the git version of a given CoAlgebra. 
@@ -739,8 +806,11 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
   theCoAlg->super.equalityFunc     = NULL;
   theCoAlg->super.printFunc        = NULL;
   theCoAlg->newObjectFunc          = newObjectImpl;
-  theCoAlg->registerJClassFunc = registerJClassImpl;
-  size_t tag =
+  theCoAlg->registerJClassFunc     = registerJClassImpl;
+  theCoAlg->initializeAllLoadedFunc =
+    initializeAllLoadedImpl;
+    
+  size_t tag =     
     registerJClassImpl(jInterp, (JClass*)theCoAlg);
   
   // do a sanity check...

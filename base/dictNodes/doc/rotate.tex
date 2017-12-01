@@ -6,17 +6,20 @@
 
 \startCHeader
 extern DictNodeObj* rotateLeft(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 );
 \stopCHeader
 
 \startCCode
 DictNodeObj* rotateLeft(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 ) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
   assert(jInterp);
+  
   StringBufferObj *aStrBuf =
     (jInterp->debug ? newStringBuffer(jInterp) : NULL);
   if (jInterp->debug) {
@@ -58,17 +61,20 @@ DictNodeObj* rotateLeft(
 
 \startCHeader
 extern DictNodeObj* rotateRight(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 );
 \stopCHeader
 
 \startCCode
 DictNodeObj* rotateRight(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 ) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
   assert(jInterp);
+  
   StringBufferObj *aStrBuf =
     (jInterp->debug ? newStringBuffer(jInterp) : NULL);
   if (jInterp->debug) {
@@ -110,17 +116,20 @@ DictNodeObj* rotateRight(
 
 \startCHeader
 extern DictNodeObj* rotateLeftLeft(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 );
 \stopCHeader
 
 \startCCode
 DictNodeObj* rotateLeftLeft(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 ) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
   assert(jInterp);
+  
   if (jInterp->debug) {
     StringBufferObj *aStrBuf = newStringBuffer(jInterp);
     printDicInto(jInterp, aStrBuf, anAVLNode);
@@ -128,23 +137,26 @@ DictNodeObj* rotateLeftLeft(
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
-  return rotateRight(jInterp, anAVLNode);
+  return rotateRight(aDict, anAVLNode);
 }
 \stopCCode
 
 \startCHeader
 extern DictNodeObj* rotateLeftRight(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 );
 \stopCHeader
 
 \startCCode
 DictNodeObj* rotateLeftRight(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 ) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
   assert(jInterp);
+  
   StringBufferObj *aStrBuf =
     (jInterp->debug ? newStringBuffer(jInterp) : NULL);
   if (jInterp->debug) {
@@ -153,30 +165,33 @@ DictNodeObj* rotateLeftRight(
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
-  anAVLNode->left = rotateLeft(jInterp, anAVLNode->left);
+  anAVLNode->left = rotateLeft(aDict, anAVLNode->left);
   if (jInterp->debug) {
     printDicInto(jInterp, aStrBuf, anAVLNode);
     DEBUG(jInterp, "1-LR %p %s\n",
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
-  return rotateRight(jInterp, anAVLNode);
+  return rotateRight(aDict, anAVLNode);
 }
 \stopCCode
 
 \startCHeader
 extern DictNodeObj* rotateRightLeft(
-  JoyLoLInterp *jInterp,
-  DictNodeObj* anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 );
 \stopCHeader
 
 \startCCode
 DictNodeObj* rotateRightLeft(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 ) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
   assert(jInterp);
+  
   StringBufferObj *aStrBuf =
     (jInterp->debug ? newStringBuffer(jInterp) : NULL);
   if (jInterp->debug) {
@@ -185,30 +200,33 @@ DictNodeObj* rotateRightLeft(
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
-  anAVLNode->right = rotateRight(jInterp, anAVLNode->right);
+  anAVLNode->right = rotateRight(aDict, anAVLNode->right);
   if (jInterp->debug) {
     printDicInto(jInterp, aStrBuf, anAVLNode);
     DEBUG(jInterp, "1-RL %p %s\n",
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
-  return rotateLeft(jInterp, anAVLNode);
+  return rotateLeft(aDict, anAVLNode);
 }
 \stopCCode
 
 \startCHeader
 extern DictNodeObj* rotateRightRight(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 );
 \stopCHeader
 
 \startCCode
 DictNodeObj* rotateRightRight(
-  JoyLoLInterp *jInterp,
-  DictNodeObj      *anAVLNode
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
 ) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
   assert(jInterp);
+  
   if (jInterp->debug) {
     StringBufferObj *aStrBuf = newStringBuffer(jInterp);
     printDicInto(jInterp, aStrBuf, anAVLNode);
@@ -216,7 +234,7 @@ DictNodeObj* rotateRightRight(
       anAVLNode, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
-  return rotateLeft(jInterp, anAVLNode);
+  return rotateLeft(aDict, anAVLNode);
 }
 \stopCCode
 

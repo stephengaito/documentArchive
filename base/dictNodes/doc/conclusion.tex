@@ -25,6 +25,7 @@
 #include <joylol/jInterps.h>
 #include <joylol/stringBuffers.h>
 #include <joylol/symbols.h>
+#include <joylol/dictionaries.h>
 #include <joylol/dictNodes.h>
 #include <joylol/dictNodes-private.h>
 // dictionary
@@ -40,6 +41,7 @@
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/dictNodes.h>}
 \addCTestInclude{<joylol/dictNodes-private.h>}
 \addCTestLib{<HOME>/.joylol/joylol/jInterps}
@@ -50,6 +52,7 @@
   requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.stringBuffers");
   requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.dictionaries");
   requireStaticallyLinkedDictNodes(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
 \stopCTest

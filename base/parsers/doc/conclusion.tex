@@ -66,9 +66,12 @@
   requireLuaModule(lstate, "joylol.pairs");
   requireLuaModule(lstate, "joylol.dictNodes");
   requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.cFunctions");
+  requireLuaModule(lstate, "joylol.contexts");
   requireLuaModule(lstate, "joylol.texts");
   requireStaticallyLinkedParsers(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

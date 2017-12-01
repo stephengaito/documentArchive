@@ -51,9 +51,9 @@ local toStr   = tostring
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-11-30",
-  commitShortHash = "d7d5071",
-  commitLongHash  = "d7d5071bb0fb2d603dbad42458be31a57cdb7b2f",
-  subject         = "recreated a minimal initial dictionaries coAlg",
+  commitShortHash = "9a9403a",
+  commitLongHash  = "9a9403a51e6e91239c1b841ec9b01ef0ebccf0f3",
+  subject         = "completed work for the day",
   notes           = ""
 }
 
@@ -98,14 +98,14 @@ if options.verbose then print('loading [joylol.core.context]') end
 --   "How to check if a module exists in Lua?"
 -- see: http://stackoverflow.com/a/22686090
  
-local hasJoylol, loadedJoylol =
-  pcall(require, 'joylol.core.context')
-if not hasJoylol then
-  interfaces.writestatus("joyLoL",
-    "Could NOT load joyLoL... loading mininal Lua version instead.")
+--local hasJoylol, loadedJoylol =
+--  pcall(require, 'joylol.core.context')
+--if not hasJoylol then
+--  interfaces.writestatus("joyLoL",
+--    "Could NOT load joyLoL... loading mininal Lua version instead.")
   lua.registercode('t-joylol-minimal')
   loadedJoylol = thirddata.minJoylol
-end
+--end
 thirddata.joylol = loadedJoylol
 
 if options.verbose then print('loaded [joylol.core.context]\n') end

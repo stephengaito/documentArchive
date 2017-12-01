@@ -91,7 +91,7 @@ static void definitionsAP(ContextObj* aCtx) {
   JoyLoLInterp *jInterp = aCtx->jInterp;
   StringBufferObj *aStrBuf = 
     newStringBuffer(jInterp);
-  listDefinitions(jInterp, aStrBuf);
+  listDefinitions(jInterp->dict, aStrBuf);
   jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
   strBufClose(jInterp, aStrBuf);
 }

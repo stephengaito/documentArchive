@@ -122,19 +122,20 @@ extensions, we can give each one a unique and well known integer
 identifier, which can be used in the running code to quickly verify the 
 class type of a given \type{JObj}. 
 
-The required extensions for this implementation is:
+Listed in the order in which they must be initialized, the required 
+extensions for this implementation are: 
 
 \setCHeaderStream{public}
 \startCHeader
 #define UnusedTag          0
 #define JInterpsTag        1
-#define BooleansTag        2
-#define CFunctionsTag      3
-#define CoAlgebrasTag      4
-#define ContextsTag        5
-#define CrossCompilersTag  6
-#define DictNodesTag       7
-#define DictionariesTag    8
+#define DictionariesTag    2
+#define BooleansTag        3
+#define CFunctionsTag      4
+#define CoAlgebrasTag      5
+#define ContextsTag        6
+#define CrossCompilersTag  7
+#define DictNodesTag       8
 #define FragmentsTag       9
 #define LoadersTag        10
 #define LuaFunctionsTag   11
@@ -148,13 +149,13 @@ The required extensions for this implementation is:
 #define NumRequiredCoAlgs 19
 
 #define JInterpsName       "jInterps"       /*  1 */
-#define BooleansName       "booleans"       /*  2 */
-#define CFunctionsName     "cFunctions"     /*  3 */
-#define CoAlgebrasName     "coAlgebras"     /*  4 */
-#define ContextsName       "contexts"       /*  5 */
-#define CrossCompilersName "crossCompilers" /*  6 */
-#define DictNodesName      "dictNodes"      /*  7 */
-#define DictionariesName   "dictionaries"   /*  8 */
+#define DictionariesName   "dictionaries"   /*  2 */
+#define BooleansName       "booleans"       /*  3 */
+#define CFunctionsName     "cFunctions"     /*  4 */
+#define CoAlgebrasName     "coAlgebras"     /*  5 */
+#define ContextsName       "contexts"       /*  6 */
+#define CrossCompilersName "crossCompilers" /*  7 */
+#define DictNodesName      "dictNodes"      /*  8 */
 #define FragmentsName      "fragments"      /*  9 */
 #define LoadersName        "loaders"        /* 10 */
 #define LuaFunctionsName   "luaFunctions"   /* 11 */
@@ -210,13 +211,13 @@ extern RequiredCoAlgs requiredCoAlgs[];
 \startCCode
 RequiredCoAlgs requiredCoAlgs[] = {
   { JInterpsName,       JInterpsTag,       {0, 1, 0 }}, //  1
-  { BooleansName,       BooleansTag,       {0, 1, 0 }}, //  2
-  { CFunctionsName,     CFunctionsTag,     {0, 1, 0 }}, //  3
-  { CoAlgebrasName,     CoAlgebrasTag,     {0, 1, 0 }}, //  4
-  { ContextsName,       ContextsTag,       {0, 1, 0 }}, //  5
-  { CrossCompilersName, CrossCompilersTag, {0, 1, 0 }}, //  6
-  { DictNodesName,      DictNodesTag,      {0, 1, 0 }}, //  7
-  { DictionariesName,   DictionariesTag,   {0, 1, 0 }}, //  8
+  { DictionariesName,   DictionariesTag,   {0, 1, 0 }}, //  2
+  { BooleansName,       BooleansTag,       {0, 1, 0 }}, //  3
+  { CFunctionsName,     CFunctionsTag,     {0, 1, 0 }}, //  4
+  { CoAlgebrasName,     CoAlgebrasTag,     {0, 1, 0 }}, //  5
+  { ContextsName,       ContextsTag,       {0, 1, 0 }}, //  6
+  { CrossCompilersName, CrossCompilersTag, {0, 1, 0 }}, //  7
+  { DictNodesName,      DictNodesTag,      {0, 1, 0 }}, //  8
   { FragmentsName,      FragmentsTag,      {0, 1, 0 }}, //  9
   { LoadersName,        LoadersTag,        {0, 1, 0 }}, // 10
   { LuaFunctionsName,   LuaFunctionsTag,   {0, 1, 0 }}, // 11
@@ -237,13 +238,13 @@ local joylol = { }
 -- load all required CoAlgebraic extensions -- creation phase
 
 joylol.jInterps       = require 'joylol.jInterps'       --  1
-joylol.booleans       = require 'joylol.booleans'       --  2
-joylol.cFunctions     = require 'joylol.cFunctions'     --  3
-joylol.coAlgebras     = require 'joylol.coAlgebras'     --  4
-joylol.contexts       = require 'joylol.contexts'       --  5
-joylol.crossCompilers = require 'joylol.crossCompilers' --  6
-joylol.dictNodes      = require 'joylol.dictNodes'      --  7
-joylol.dicionaries    = require 'joylol.dictionaries'   --  8
+joylol.dicionaries    = require 'joylol.dictionaries'   --  2
+joylol.booleans       = require 'joylol.booleans'       --  3
+joylol.cFunctions     = require 'joylol.cFunctions'     --  4
+joylol.coAlgebras     = require 'joylol.coAlgebras'     --  5
+joylol.contexts       = require 'joylol.contexts'       --  6
+joylol.crossCompilers = require 'joylol.crossCompilers' --  7
+joylol.dictNodes      = require 'joylol.dictNodes'      --  8
 joylol.fragments      = require 'joylol.fragments'      --  9
 joylol.loaders        = require 'joylol.loaders'        -- 10
 joylol.luaFunctions   = require 'joylol.luaFunctions'   -- 11

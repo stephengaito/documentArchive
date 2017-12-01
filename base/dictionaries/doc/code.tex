@@ -22,7 +22,7 @@ typedef struct dictionary_object_struct {
 \startTestSuite[newDictionary]
 
 \startCHeader
-typedef JObj* (NewDictionary)(
+typedef DictObj* (NewDictionary)(
   JoyLoLInterp*
 );
 
@@ -39,27 +39,27 @@ typedef JObj* (NewDictionary)(
 
 \setCHeaderStream{private}
 \startCHeader
-extern JObj* newDictionaryImpl(
+extern DictObj* newDictionaryImpl(
   JoyLoLInterp *jInterp
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-JObj* newDictionaryImpl(
+DictObj* newDictionaryImpl(
   JoyLoLInterp *jInterp
 ) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
-  DictionaryObj* result =
-    (DictionaryObj*)newObject(jInterp, DictionariesTag);
+  DictObj* result =
+    (DictObj*)newObject(jInterp, DictionariesTag);
   result->jInterp     = jInterp;
   result->root        = NULL;
   result->firstSymbol = NULL;
   assert(result);
   
-  result->type  = jInterp->coAlgs[DictionariesTag].sClass;
+  result->super.type  = jInterp->coAlgs[DictionariesTag].sClass;
  
   return result;
 }
@@ -199,7 +199,7 @@ extern DictNodeObj* findLUBSymbolImpl(
 
 \startCCode
 DictNodeObj* findLUBSymbolImpl(
-  DictObj *jInterp,
+  DictObj *aDict,
   Symbol  *aSymbol
 ) {
   assert(aDict);
@@ -267,7 +267,7 @@ typedef JObj *(GetSymbol)(
     assert(getDictionariesClass(aDict->jInterp) \
       ->getSymbolFunc),                         \
     (getDictionariesClass(aDict->jInterp)       \
-      ->getSymbolFunc(jInterp, aSymbol))        \
+      ->getSymbolFunc(aDict, aSymbol))          \
   )
 \stopCHeader
 
@@ -306,7 +306,7 @@ typedef void (ListDefinitions)(
     assert(getDictionariesClass(aDict->jInterp) \
       ->listDefinitionsFunc),                   \
     (getDictionariesClass(aDict->jInterp)       \
-      ->listDefinitionsFunc(jInterp, aStrBuf))  \
+      ->listDefinitionsFunc(aDict, aStrBuf))    \
   )
 \stopCHeader
 
@@ -336,8 +336,6 @@ void listDefinitionsImpl(
   }
 }
 \stopCCode
-\stopTestSuite
-
 
 \startTestCase[print Dictionary]
 \startCTest
@@ -346,18 +344,16 @@ void listDefinitionsImpl(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
 
-  JObj* aLoL = newDictionary(jInterp);
+  DictObj* aLoL = newDictionary(jInterp);
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoL(jInterp, aStrBuf, (JObj*)aLoL);
   AssertStrEquals(getCString(jInterp, aStrBuf), "dictionary ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
-
 \stopTestSuite
 
 \startTestSuite[isDictionary]
-
 \startCHeader
 #define isDictionary(aLoL)              \
   (                                     \
@@ -370,6 +366,7 @@ void listDefinitionsImpl(
       FALSE                             \
   )
 \stopCHeader
+\stopTestSuite
 
 \setCHeaderStream{private}
 \startCHeader
@@ -434,9 +431,9 @@ Boolean printDictionaryCoAlg(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  JObj* aNewDictionary = newDictionary(jInterp);
+  DictObj* aNewDictionary = newDictionary(jInterp);
   AssertPtrNotNull(aNewDictionary);
-  printLoL(jInterp, aStrBuf, aNewDictionary);
+  printLoL(jInterp, aStrBuf, (JObj*)aNewDictionary);
   AssertStrEquals(getCString(jInterp, aStrBuf), "dictionary ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
@@ -466,6 +463,7 @@ static Boolean initializeDictionaries(
 ) {
   assert(jInterp);
   assert(aJClass);
+  jInterp->dict = newDictionary(jInterp);
   registerDictionaryWords(jInterp);
   return TRUE;
 }

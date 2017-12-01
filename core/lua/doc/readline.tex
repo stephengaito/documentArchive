@@ -113,7 +113,7 @@ static char* dictionaryWalker(const char* text, int state) {
     assert(currentReadLineText->jInterp);
 
     currentReadLineText->curNode =
-      findLUBSymbol(currentReadLineText->jInterp, text);
+      findLUBSymbol(currentReadLineText->jInterp->dict, text);
     DEBUG(currentReadLineText->jInterp,
           "dictionaryWalker-start %p\n",
           currentReadLineText->curNode);

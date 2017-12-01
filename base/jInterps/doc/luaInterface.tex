@@ -209,13 +209,10 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
 \stopCHeader
 
 \startCCode
-static void initializeAllRequired(
+static void checkAllRequired(
   lua_State    *lstate,
   JoyLoLInterp *jInterp
 ) {
-  assert(lstate);
-  assert(jInterp);
-  
   // first check that core stdout and stderr are defined
   if (!(jInterp->writeStdOut) || !(jInterp->writeStdErr)) {
     /*return*/ luaL_error(lstate, "%s%s",
@@ -237,31 +234,6 @@ static void initializeAllRequired(
        curCoAlg->name);
     }
   }
-
-  // now call the initialization function for each 
-  // required CoAlgebraic extension
-  for( size_t i = 1; i < NumRequiredCoAlgs; i++) {
-    JClass *aCoAlg = getJClass(jInterp, i);
-    if (aCoAlg) {
-      if (jInterp->verbose) {
-        char output[1000];
-        memset(output, 0, 1000);
-        snprintf(output, 999, 
-          "    initializing [joylol.%s]\n",
-          aCoAlg->name);
-        jInterp->writeStdOut(jInterp, output);
-      }
-      aCoAlg->initializeFunc(jInterp, aCoAlg);
-      if (jInterp->verbose) {
-        char output[1000];
-        memset(output, 0, 1000);
-        snprintf(output, 999, 
-          "    initialized [joylol.%s]\n",
-          aCoAlg->name);
-        jInterp->writeStdOut(jInterp, output);
-      }
-    }
-  }
   
   // finally check that all important interpreter 
   // objects have been assigned
@@ -269,17 +241,24 @@ static void initializeAllRequired(
     !(jInterp->dict) || 
     !(jInterp->loader) ||
     !(jInterp->rootCtx)
-    ) {
+  ) {
       /*return*/ luaL_error(lstate, "%s%s",
         "\nERROR:\n",
         "  some required objects are missing\n\n");
-    }
+  }
 }
 
-static int lua_jInterps_initializeAllRequired(lua_State *lstate) {
+static int lua_jInterps_checkAllRequired(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   assert(jInterp);
-  initializeAllRequired(lstate, jInterp);
+  checkAllRequired(lstate, jInterp);
+  return 0;
+}
+
+static int lua_jInterps_initializeAllLoaded(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  initializeAllLoadedImpl(lstate, jInterp);
   return 0;
 }
 \stopCCode
@@ -301,8 +280,9 @@ static int lua_jInterps_getGitVersion (lua_State *lstate) {
 
 \startCCode
 static const struct luaL_Reg lua_jInterps [] = {
-  {"gitVersion",            lua_jInterps_getGitVersion},
-  {"initializeAllRequired", lua_jInterps_initializeAllRequired},
+  {"gitVersion",          lua_jInterps_getGitVersion},
+  {"initializeAllLoaded", lua_jInterps_initializeAllLoaded},
+  {"checkAllRequired",    lua_jInterps_checkAllRequired},
   {NULL, NULL}
 };
 \stopCCode
@@ -382,7 +362,8 @@ int luaopen_joylol_jInterps (lua_State *lstate) {
   }
   registerJInterps(jInterp);
   requireAllRequiredCoAlgs(lstate, jInterp);
-  initializeAllRequired(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  checkAllRequired(lstate, jInterp);
   if (jInterp->verbose) {
     jInterp->writeStdOut(jInterp,
       "  loaded [joylol.jInterps]\n"
@@ -414,6 +395,8 @@ Boolean requireStaticallyLinkedJInterps(
   
   // fake a luaopen_joylol_jInterps 
   // BUT without the requireAllRequiredCoAlgs
+  // AND without the checkAllRequired
+  // AND without the initializeAllLoaded
   setJoyLoLInterpInto(lstate, jInterp);
   registerJInterps(jInterp);
   luaL_newlib(lstate, lua_jInterps);

@@ -68,7 +68,7 @@ DictNodeObj* findSymbolRecurseImpl(
   AssertPtrNotNull(jInterp);
   DictObj *aDict = newDictionary(jInterp);
 
-  DictNodeObj* aNode = newDictNode(aDict, "aNodeSymbol");
+  DictNodeObj* aNode = newDictNode(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aNode);
   DictNodeObj* foundAPair = findSymbolRecurse(aDict, aNode, "aNodeSymbol");
   AssertPtrNotNull(foundAPair);
@@ -81,7 +81,7 @@ DictNodeObj* findSymbolRecurseImpl(
   AssertPtrNotNull(jInterp);
   DictObj *aDict = newDictionary(jInterp);
 
-  DictNodeObj* aSimpleDic = newDictNode(aDict, "aNodeSymbol");
+  DictNodeObj* aSimpleDic = newDictNode(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aSimpleDic);
   AssertPtrNull(findSymbolRecurse(aDict, aSimpleDic, "aSymbol"));
 \stopCTest
@@ -126,12 +126,13 @@ DictNodeObj* findLUBSymbolRecurseImpl(
   assert(aDict);
   if (!anAVLNode) return aDict->firstSymbol;
 
-  DEBUG(jInterp, "findLUBSymbol %p {%s}[%s] %p %p\n",
+  DEBUG(aDict->jInterp,
+        "findLUBSymbol %p {%s}[%s] %p %p\n",
         anAVLNode, anAVLNode->symbol, aSymbol,
         anAVLNode->left, anAVLNode->right);
 
   int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
-  DEBUG(jInterp, "findLUBSymbol cmp: %d\n", aStrCmp);
+  DEBUG(aDict->jInterp, "findLUBSymbol cmp: %d\n", aStrCmp);
   if (aStrCmp < 0) {
     // aSymbol < anAVLNode->symbol
     // the current anAVLNode->symbol is an upper bound

@@ -46,14 +46,14 @@ if options.verbose then print('loading [joylol.core.context]') end
 --   "How to check if a module exists in Lua?"
 -- see: http://stackoverflow.com/a/22686090
   
-local hasJoylol, loadedJoylol = 
-  pcall(require, 'joylol.core.context')
-if not hasJoylol then
-  interfaces.writestatus("joyLoL", 
-    "Could NOT load joyLoL... loading mininal Lua version instead.")
+--local hasJoylol, loadedJoylol = 
+--  pcall(require, 'joylol.core.context')
+--if not hasJoylol then
+--  interfaces.writestatus("joyLoL", 
+--    "Could NOT load joyLoL... loading mininal Lua version instead.")
   lua.registercode('t-joylol-minimal')
   loadedJoylol = thirddata.minJoylol
-end
+--end
 thirddata.joylol = loadedJoylol
 
 if options.verbose then print('loaded [joylol.core.context]\n') end

@@ -56,6 +56,9 @@ void evalCommandInContextImpl(
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
+  DictObj *theDict = jInterp->dict;
+  assert(theDict);
+  
   //
   // if there is no command... there is nothing to do
   //
@@ -121,7 +124,7 @@ void evalCommandInContextImpl(
       // if the command is a symbol ...
       //  ... look up the symbol's association in the dictionary
       //
-      DictNodeObj* assoc = findSymbol(jInterp, asSymbol(command));
+      DictNodeObj* assoc = findSymbol(theDict, asSymbol(command));
       assert(assoc);
       //
       if (!assoc->value) {

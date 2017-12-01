@@ -289,7 +289,7 @@ void nextSymbolImpl(
   } else {
     // we have parsed a symbol... so create a new symbol
     //
-    DictNodeObj* aSym = createSymbol(aText->jInterp, aSymbol);
+    DictNodeObj* aSym = createSymbol(aText->jInterp->dict, aSymbol);
     aText->sym = newSymbol(aText->jInterp, aSym->symbol);
     //
     DEBUG(aText->jInterp, "<-nextSymbol [%s] (symbol)\n",
