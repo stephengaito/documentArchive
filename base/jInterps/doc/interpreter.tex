@@ -740,7 +740,7 @@ size_t registerCrossCompilerImpl(
     if (oldCompilers) {
       memcpy(jInterp->compilers,
         oldCompilers,
-        sizeof(CrossCompilerObj)*oldNumCompilers);
+        sizeof(CrossCompilerObj*)*oldNumCompilers);
       free(oldCompilers);
     }
     
@@ -764,7 +764,7 @@ We start by adding one single \type{Compiler}.
 
 \startCTest
   JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
-  char*             compilerType       = strdup("newCompiler");
+  char*             compilerType       = strdup("newCompilerA");
   char*             compilerTypeEnd    = compilerType + strlen("newCompiler");
   
   CrossCompilerObj* aCompiler = joyLoLCalloc(1, CrossCompilerObj);
@@ -802,22 +802,17 @@ Now we want to test the addition of CoAlgebra with an existing name does
 not change the number of registered CoAlgebras but simple returns the 
 existing CoAlgebra index. 
 
-\starttyping
 \startCTest
-  size_t oldNumCoAlgs  = jInterp->numCoAlgs;
+  size_t oldNumCompilers = jInterp->numCompilers;
 
-  *coAlgNameEnd          = 'A' + 5;
-  aCoAlg                 = joyLoLCalloc(1, JClass);
-  aCoAlg->name           = strdup(coAlgName);
-  aCoAlg->initializeFunc = (JClassInitialize*) 0x100 + 5;
-  aCoAlg->equalityFunc   = (JObjEquality*)     0x200 + 5;
-  aCoAlg->printFunc      = (JObjPrint*)        0x300 + 5;
+  *compilerTypeEnd       = 'A' + 5;
+  aCompiler              = joyLoLCalloc(1, CrossCompilerObj);
+  aCompiler->type        = strdup(compilerType);
   
-  size_t anIndex = registerJClassImpl(jInterp, aCoAlg);
-  AssertIntEquals(anIndex, 5 + NumRequiredCoAlgs);
-  AssertIntEquals(oldNumCoAlgs, jInterp->numCoAlgs);
+  size_t anIndex = registerCrossCompilerImpl(jInterp, aCompiler);
+  AssertIntEquals(anIndex, 5 + NumRequiredCrossCompilers);
+  AssertIntEquals(oldNumCompilers, jInterp->numCompilers);
 \stopCTest
-\stoptyping
 \stopTestCase
 \stopTestSuite
 
