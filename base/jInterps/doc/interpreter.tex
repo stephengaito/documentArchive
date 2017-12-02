@@ -181,6 +181,8 @@ typedef void*   CoAlgData;
 typedef struct joylol_class_struct {
   Symbol           *name;
   size_t            objectSize;
+  JObj             *freeObjects;
+  ObjectBlock      *rootObjectBlock;
   JClassInitialize *initializeFunc;
   JObjEquality     *equalityFunc;
   JObjPrint        *printFunc;
