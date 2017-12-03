@@ -50,10 +50,10 @@ local toStr   = tostring
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-12-01",
-  commitShortHash = "4946bfb",
-  commitLongHash  = "4946bfbdb85fb6e7f3e1233540ea5c5a69f6c5a7",
-  subject         = "initial work on adding dictionaries to crossCompilers and crossCOmpilers to jInterp",
+  commitDate      = "2017-12-02",
+  commitShortHash = "6a233f5",
+  commitLongHash  = "6a233f59fa9cdf055aacc5596fb50f5d69ee72bb",
+  subject         = "started refactoring into new class system",
   notes           = ""
 }
 
