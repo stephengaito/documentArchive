@@ -43,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-12-02",
-  commitShortHash = "6a233f5",
-  commitLongHash  = "6a233f59fa9cdf055aacc5596fb50f5d69ee72bb",
-  subject         = "started refactoring into new class system",
+  commitDate      = "2017-12-03",
+  commitShortHash = "119ba0f",
+  commitLongHash  = "119ba0fc1e398a22a09bb31aa959fe844d4d4c82",
+  subject         = "continued shift to new class structure",
   notes           = ""
 }
 

@@ -224,7 +224,6 @@ as possible.
 \startCHeader
 typedef struct coalg_vecItem_struct {
   JClass       *sClass; // static part
-  void         *dClass; // dynamic part
   ObjectMemory  oMem;
 } CoAlgVecItem;
 
@@ -385,7 +384,6 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   
   for (size_t i = 0; i < jInterp->maxNumCoAlgs; i++) {
     jInterp->coAlgs[i].sClass               = NULL;
-    jInterp->coAlgs[i].dClass               = NULL;
     jInterp->coAlgs[i].oMem.freeObjects     = NULL;
     jInterp->coAlgs[i].oMem.rootObjectBlock = NULL; 
   }
@@ -422,7 +420,6 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   
   for (size_t i = 0; i < jInterp->maxNumCoAlgs; i++) {
     AssertPtrNull(jInterp->coAlgs[i].sClass);
-    AssertPtrNull(jInterp->coAlgs[i].dClass);
     AssertPtrNull(jInterp->coAlgs[i].oMem.freeObjects);
     AssertPtrNull(jInterp->coAlgs[i].oMem.rootObjectBlock);
   }

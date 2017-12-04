@@ -521,7 +521,7 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   AssertPtrEquals(getDictionariesClass(jInterp), coAlg);
   AssertIntEquals(
     getDictionariesClass(jInterp)->super.objectSize,
-    sizeof(JObj)
+    sizeof(DictObj)
   )
 \stopCTest
 \stopTestCase
