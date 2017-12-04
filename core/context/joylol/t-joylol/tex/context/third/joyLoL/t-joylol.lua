@@ -50,10 +50,10 @@ local toStr   = tostring
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-12-03",
-  commitShortHash = "119ba0f",
-  commitLongHash  = "119ba0fc1e398a22a09bb31aa959fe844d4d4c82",
-  subject         = "continued shift to new class structure",
+  commitDate      = "2017-12-04",
+  commitShortHash = "761fef7",
+  commitLongHash  = "761fef7005382395a03cce2510355ea4cff5ad2b",
+  subject         = "corrected error in Dictionaries; removed dClass",
   notes           = ""
 }
 

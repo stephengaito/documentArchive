@@ -474,7 +474,7 @@ Boolean registerStringBuffers(JoyLoLInterp* jInterp) {
   
   // sanity check...
   assert(tag == StringBuffersTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
 
   return TRUE;
 }

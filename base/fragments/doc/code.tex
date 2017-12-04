@@ -47,7 +47,7 @@ JObj* newFragmentImpl(
   JObj* result = newObject(jInterp, FragmentsTag);
   assert(result);
   
-  result->type  = jInterp->coAlgs[FragmentsTag].sClass;
+  result->type  = jInterp->coAlgs[FragmentsTag];
  
   return result;
 }
@@ -158,7 +158,7 @@ Boolean printFragmentCoAlg(
 
 \startCTest
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs[FragmentsTag].sClass);
+  AssertPtrNotNull(jInterp->coAlgs[FragmentsTag]);
 
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
@@ -220,7 +220,7 @@ Boolean registerFragments(JoyLoLInterp *jInterp) {
   
   // do a sanity check...
   assert(tag == FragmentsTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
    
   return TRUE;
 }

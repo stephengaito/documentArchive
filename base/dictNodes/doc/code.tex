@@ -84,7 +84,7 @@ DictNodeObj *newDictNodeImpl(
   assert(jInterp);
   assert(jInterp->coAlgs);
   assert(DictNodesTag < jInterp->numCoAlgs);
-  assert(jInterp->coAlgs[DictNodesTag].sClass);
+  assert(jInterp->coAlgs[DictNodesTag]);
   
   assert(aSym);
   
@@ -108,7 +108,7 @@ DictNodeObj *newDictNodeImpl(
 
 \startCTest
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs[DictNodesTag].sClass);
+  AssertPtrNotNull(jInterp->coAlgs[DictNodesTag]);
 
   DictNodeObj* aNode = newDictNode(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aNode);
@@ -223,7 +223,7 @@ Boolean registerDictNodes(JoyLoLInterp *jInterp) {
   
   // do a sanity check...
   assert(tag == DictNodesTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
     
   return TRUE;
 }

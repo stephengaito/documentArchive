@@ -286,7 +286,7 @@ Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
 
   // do a sanity check...
   assert(tag == LuaFunctionsTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
   
   return TRUE;
 }

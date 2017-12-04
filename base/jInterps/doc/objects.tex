@@ -117,10 +117,10 @@ points to a linked list of \type{ObjectBlock}s.
 \startCHeader
 typedef struct object_block_struct ObjectBlock;
 
-typedef struct object_memory_struct {
-  JObj*    freeObjects;
-  ObjectBlock* rootObjectBlock;
-} ObjectMemory;
+//typedef struct object_memory_struct {
+//  JObj*    freeObjects;
+//  ObjectBlock* rootObjectBlock;
+//} ObjectMemory;
 
 typedef struct object_block_struct {
   size_t       objectSize;
@@ -135,22 +135,19 @@ typedef struct object_block_struct {
 \startCHeader
 #define OBJECT_BLOCK_SIZE 1024
 
-extern void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag);
+extern void addObjectBlock(JClass *theClass);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
-  assert(jInterp);
-  assert(jInterp->coAlgs);
-  assert(aTag < jInterp->numCoAlgs);
-  assert(jInterp->coAlgs[aTag].sClass);
+void addObjectBlock(JClass* theClass) {
+  assert(theClass);
+  assert(theClass->jInterp);
+  
+  size_t objectSize = theClass->objectSize;
 
-  size_t objectSize = jInterp->coAlgs[aTag].sClass->objectSize;
-
-  DEBUG(jInterp, "addObjectBlock > %p %u %zu %zu\n", 
-    jInterp, aTag, objectSize, (size_t)OBJECT_BLOCK_SIZE);
-  assert(jInterp);
+  DEBUG(theClass->jInterp, "addObjectBlock > %p [%s] %zu %zu\n", 
+    theClass, theClass->name, objectSize, (size_t)OBJECT_BLOCK_SIZE);
   
   // obtain a new object block
   ObjectBlock* aNewObjectBlock = 
@@ -162,18 +159,18 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
   
   // integrate this new object block into the linked list of
   // object blocks
-  if ( jInterp->coAlgs[aTag].oMem.rootObjectBlock ) {
-    ObjectBlock *lastObjectBlock = jInterp->coAlgs[aTag].oMem.rootObjectBlock;
+  if ( theClass->rootObjectBlock ) {
+    ObjectBlock *lastObjectBlock = theClass->rootObjectBlock;
     while ( lastObjectBlock->nextBlock ) {
       lastObjectBlock = lastObjectBlock->nextBlock;
     }
     assert(lastObjectBlock->nextBlock == NULL);
     lastObjectBlock->nextBlock = aNewObjectBlock;
   } else {
-    jInterp->coAlgs[aTag].oMem.rootObjectBlock = aNewObjectBlock;
+    theClass->rootObjectBlock = aNewObjectBlock;
   }
-  DEBUG(jInterp, "addObjectBlock = %p %p\n", 
-    jInterp, aNewObjectBlock);
+  DEBUG(theClass->jInterp, "addObjectBlock = %p %p\n", 
+    theClass, aNewObjectBlock);
 
   // make sure this object block has some JObjs
   aNewObjectBlock->block = 
@@ -189,10 +186,10 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
     nextObject += objectSize;
   }
   *(void**)nextObject =
-    (void*)jInterp->coAlgs[aTag].oMem.freeObjects;
-  jInterp->coAlgs[aTag].oMem.freeObjects = aNewObjectBlock->block;
-  DEBUG(jInterp, "addObjectBlock < %p %p %p\n",
-    jInterp, aNewObjectBlock, aNewObjectBlock->block);
+    (void*)theClass->freeObjects;
+  theClass->freeObjects = aNewObjectBlock->block;
+  DEBUG(theClass->jInterp, "addObjectBlock < %p %p %p\n",
+    theClass, aNewObjectBlock, aNewObjectBlock->block);
 }
 \stopCCode
 
@@ -201,22 +198,23 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
   // create the first list block and make sure it is 
   // properly integrated into linked list of list blocks
 
-  TagType aTag = JInterpsTag;
-    
   AssertPtrNotNull(jInterp);
-  AssertPtrNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
-  AssertPtrNull(jInterp->coAlgs[aTag].oMem.freeObjects);
+  JClass *theClass = jInterp->coAlgs[JInterpsTag];
+  AssertPtrNotNull(theClass);
+  
+  AssertPtrNull(theClass->rootObjectBlock);
+  AssertPtrNull(theClass->freeObjects);
 
-  addObjectBlock(jInterp, aTag);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->block);
-  AssertPtrNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
+  addObjectBlock(theClass);
+  AssertPtrNotNull(theClass->rootObjectBlock);
+  AssertPtrNotNull(theClass->rootObjectBlock->block);
+  AssertPtrNull(theClass->rootObjectBlock->nextBlock);
+  AssertPtrNotNull(theClass->freeObjects);
 
   // check to make sure freeObjects list is correctly linked
-  void* nextObject  = jInterp->coAlgs[aTag].oMem.rootObjectBlock->block;
-  size_t objectSize = jInterp->coAlgs[aTag].oMem.rootObjectBlock->objectSize;
-  AssertIntEquals(objectSize, jInterp->coAlgs[aTag].sClass->objectSize);
+  void* nextObject  = theClass->rootObjectBlock->block;
+  size_t objectSize = theClass->rootObjectBlock->objectSize;
+  AssertIntEquals(objectSize, theClass->objectSize);
   
   for ( size_t i = 1 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
     AssertIntTrue(IS_MEM_ALIGNED(nextObject));
@@ -225,19 +223,19 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
     AssertPtrEquals( asType(nextObject), nextObject + objectSize);
   }
   AssertPtrNull(*((void**)nextObject));
-  AssertPtrEquals(jInterp->coAlgs[aTag].oMem.freeObjects,
-    jInterp->coAlgs[aTag].oMem.rootObjectBlock->block);
+  AssertPtrEquals(theClass->freeObjects,
+    theClass->rootObjectBlock->block);
 
   // add another object block
-  void* oldFreeObjects = jInterp->coAlgs[aTag].oMem.freeObjects;
-  addObjectBlock(jInterp, JInterpsTag);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->block);
-  AssertPtrNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->nextBlock);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
+  void* oldFreeObjects = theClass->freeObjects;
+  addObjectBlock(theClass);
+  AssertPtrNotNull(theClass->rootObjectBlock->nextBlock);
+  AssertPtrNotNull(theClass->rootObjectBlock->nextBlock->block);
+  AssertPtrNull(theClass->rootObjectBlock->nextBlock->nextBlock);
+  AssertPtrNotNull(theClass->freeObjects);
 
   // check to make sure freeObjects list is correctly linked
-  nextObject = jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->block;
+  nextObject = theClass->rootObjectBlock->nextBlock->block;
 
   for (size_t i = 1 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
     AssertIntTrue(IS_MEM_ALIGNED(nextObject));
@@ -246,8 +244,8 @@ void addObjectBlock(JoyLoLInterp* jInterp, TagType aTag) {
     AssertPtrEquals(asType(nextObject), nextObject + objectSize);
   }
   AssertPtrEquals(asType(nextObject), oldFreeObjects);
-  AssertPtrEquals(jInterp->coAlgs[aTag].oMem.freeObjects,
-    jInterp->coAlgs[aTag].oMem.rootObjectBlock->nextBlock->block);
+  AssertPtrEquals(theClass->freeObjects,
+    theClass->rootObjectBlock->nextBlock->block);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -282,13 +280,15 @@ needed.
 
 \setCHeaderStream{private}
 \startCHeader
-extern void collectGarbage(JoyLoLInterp* jInterp, TagType aTag);
+extern void collectGarbage(JClass *theClass);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void collectGarbage(JoyLoLInterp* jInterp, TagType aTag) {
-  DEBUG(jInterp, "collectGarbage %p\n", jInterp);
+void collectGarbage(JClass *theClass) {
+  assert(theClass);
+  
+  DEBUG(theClass->jInterp, "collectGarbage %p\n", theClass);
   //
   // add a garbage collection mark-sweep here
   //
@@ -303,7 +303,6 @@ void collectGarbage(JoyLoLInterp* jInterp, TagType aTag) {
   // this means we can have an incremental mark/trace cycle
   // which can be run in small increments in each call to eval.
   //
-  assert(jInterp);
 }
 \stopCCode
 
@@ -342,25 +341,26 @@ JObj* newObjectImpl(
   
   assert(jInterp->coAlgs);
   assert(aTag < jInterp->numCoAlgs);
-  assert(jInterp->coAlgs[aTag].sClass);
+  JClass *theClass = jInterp->coAlgs[aTag];
+  assert(theClass);
 
   DEBUG(jInterp, "newObjectImpl freeObjects %p objectBlock %p\n",
-    jInterp->coAlgs[aTag].oMem.freeObjects,
-    jInterp->coAlgs[aTag].oMem.rootObjectBlock
+    theClass->freeObjects,
+    theClass->rootObjectBlock
   ); 
 
   // ensure there are some free objects
-  if ( ! jInterp->coAlgs[aTag].oMem.freeObjects ) 
-    collectGarbage(jInterp, aTag);
-  if ( ! jInterp->coAlgs[aTag].oMem.freeObjects )
-    addObjectBlock(jInterp, aTag);
+  if ( ! theClass->freeObjects ) 
+    collectGarbage(theClass);
+  if ( ! theClass->freeObjects )
+    addObjectBlock(theClass);
 
-  assert(jInterp->coAlgs[aTag].oMem.freeObjects);
+  assert(theClass->freeObjects);
 
-  JObj* aNewObject   = jInterp->coAlgs[aTag].oMem.freeObjects;
-  jInterp->coAlgs[aTag].oMem.freeObjects = (JObj*)(aNewObject->type);
+  JObj* aNewObject   = theClass->freeObjects;
+  theClass->freeObjects = (JObj*)(aNewObject->type);
 
-  asType(aNewObject)  = jInterp->coAlgs[aTag].sClass;
+  asType(aNewObject)  = jInterp->coAlgs[aTag];
   asTag(aNewObject)   = aTag;
   asFlags(aNewObject) = 0;
 
@@ -372,46 +372,47 @@ JObj* newObjectImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs);
-
   TagType aTag = JInterpsTag;
+  JClass *theClass = jInterp->coAlgs[aTag];
+  AssertPtrNotNull(theClass);
   
   // a block has already been assigned from the last test
   // so we simply throw it away...
-  jInterp->coAlgs[aTag].oMem.freeObjects = NULL;
-  jInterp->coAlgs[aTag].oMem.rootObjectBlock = NULL;
+  theClass->freeObjects = NULL;
+  theClass->rootObjectBlock = NULL;
 
   // get one new object to ensure our lazily
   // initialized object memory structures 
   // are initialized...
   JObj* aNewObject = newObject(jInterp, aTag);
   
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.freeObjects);
-  AssertPtrNotNull(jInterp->coAlgs[aTag].oMem.rootObjectBlock);
+  AssertPtrNotNull(theClass->freeObjects);
+  AssertPtrNotNull(theClass->rootObjectBlock);
   AssertPtrNotNull(aNewObject);
   AssertPtrNotNull(asType(aNewObject));
-  AssertPtrEquals(asType(aNewObject), jInterp->coAlgs[aTag].sClass);
+  AssertPtrEquals(asType(aNewObject), theClass);
   AssertIntEquals(asTag(aNewObject), aTag);
   AssertIntZero(asFlags(aNewObject));
   AssertPtrEquals(aNewObject,
-    jInterp->coAlgs[aTag].oMem.rootObjectBlock->block);
+    theClass->rootObjectBlock->block);
 
   // now get one more object to ensure
   // we can properly deal with object blocks/memory
   
   JObj* oldFreeObjects =
-    jInterp->coAlgs[aTag].oMem.freeObjects;
+    theClass->freeObjects;
   JObj* newfreeObjects = 
-    (JObj*)jInterp->coAlgs[aTag].oMem.freeObjects->type;
+    (JObj*)theClass->freeObjects->type;
 
   aNewObject = newObject(jInterp, JInterpsTag);
 
   AssertPtrNotNull(aNewObject);
   AssertPtrNotNull(asType(aNewObject));
-  AssertPtrEquals(asType(aNewObject), jInterp->coAlgs[JInterpsTag].sClass);
+  AssertPtrEquals(asType(aNewObject), jInterp->coAlgs[JInterpsTag]);
   AssertIntEquals(asTag(aNewObject), JInterpsTag);
   AssertIntZero(asFlags(aNewObject));
   AssertPtrEquals(oldFreeObjects, aNewObject);
-  AssertPtrEquals(newfreeObjects, jInterp->coAlgs[aTag].oMem.freeObjects);
+  AssertPtrEquals(newfreeObjects, theClass->freeObjects);
 \stopCTest
 \stopTestCase
 
@@ -426,7 +427,7 @@ JObj* newObjectImpl(
   }
   AssertPtrNotNull(aNewObject);
   AssertPtrNotNull(asType(aNewObject));
-  AssertPtrEquals(asType(aNewObject), jInterp->coAlgs[JInterpsTag].sClass);
+  AssertPtrEquals(asType(aNewObject), jInterp->coAlgs[JInterpsTag]);
   AssertIntEquals(asTag(aNewObject), JInterpsTag);
   AssertIntZero(asFlags(aNewObject));
 \stopCTest

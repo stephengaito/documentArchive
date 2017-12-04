@@ -49,7 +49,7 @@ JObj* newBooleanImpl(
   JObj* result = newObject(jInterp, BooleansTag);
   assert(result);
   
-  result->type  = jInterp->coAlgs[BooleansTag].sClass;
+  result->type  = jInterp->coAlgs[BooleansTag];
   if (aBoolean) {
     result->flags |= BOOLEAN_FLAG_MASK;
   } else {
@@ -234,7 +234,7 @@ Boolean printBoolCoAlg(
 
 \startCTest
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs[BooleansTag].sClass);
+  AssertPtrNotNull(jInterp->coAlgs[BooleansTag]);
 
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
@@ -306,7 +306,7 @@ Boolean registerBooleans(JoyLoLInterp *jInterp) {
   
   // do a sanity check...
   assert(tag == BooleansTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
    
   return TRUE;
 }

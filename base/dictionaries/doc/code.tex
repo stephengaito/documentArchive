@@ -59,7 +59,7 @@ DictObj* newDictionaryImpl(
   result->firstSymbol = NULL;
   assert(result);
   
-  result->super.type  = jInterp->coAlgs[DictionariesTag].sClass;
+  result->super.type  = jInterp->coAlgs[DictionariesTag];
  
   return result;
 }
@@ -426,7 +426,7 @@ Boolean printDictionaryCoAlg(
 
 \startCTest
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag].sClass);
+  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag]);
 
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
@@ -501,7 +501,7 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   
   // do a sanity check...
   assert(tag == DictionariesTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
    
   return TRUE;
 }

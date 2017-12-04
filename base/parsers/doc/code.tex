@@ -720,7 +720,7 @@ Boolean registerParsers(
   
   // do a sanity check...
   assert(tag == ParsersTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
     
   return TRUE;
 }

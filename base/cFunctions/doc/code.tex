@@ -239,7 +239,7 @@ Boolean registerCFunctions(JoyLoLInterp *jInterp) {
 
   // do a sanity check...
   assert(tag == CFunctionsTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
 
   return TRUE;
 }

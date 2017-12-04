@@ -61,7 +61,7 @@ CrossCompilerObj* newCrossCompilerImpl(
   result->type = strdup(aType);
   result->dict         = newDictionary(jInterp);
   
-  result->super.type   = jInterp->coAlgs[CrossCompilersTag].sClass;
+  result->super.type   = jInterp->coAlgs[CrossCompilersTag];
  
   return result;
 }
@@ -176,7 +176,7 @@ Boolean printCrossCompilerCoAlg(
 
 \startCTest
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs[CrossCompilersTag].sClass);
+  AssertPtrNotNull(jInterp->coAlgs[CrossCompilersTag]);
 
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
@@ -239,7 +239,7 @@ Boolean registerCrossCompilers(JoyLoLInterp *jInterp) {
   
   // do a sanity check...
   assert(tag == CrossCompilersTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
    
   return TRUE;
 }

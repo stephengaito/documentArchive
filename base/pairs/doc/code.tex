@@ -70,7 +70,7 @@ JObj* newPairImpl(
   JObj *lolA = newPair(jInterp, NULL, NULL);
   JObj *lolB = newPair(jInterp, NULL, NULL);
   JObj *lol  = newPair(jInterp, lolA, lolB);
-  AssertPtrEquals(asType(lol), jInterp->coAlgs[PairsTag].sClass);
+  AssertPtrEquals(asType(lol), jInterp->coAlgs[PairsTag]);
   AssertIntEquals(asTag(lol), PairsTag);
   AssertIntZero(asFlags(lol));
   AssertPtrEquals(asCar(lol), lolA);
@@ -411,7 +411,7 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   
   // sanity check...
   assert(tag == PairsTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
 
   return TRUE;
 }

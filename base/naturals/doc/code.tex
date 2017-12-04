@@ -198,7 +198,7 @@ Boolean printNatCoAlg(
 
 \startCTest
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs[NaturalsTag].sClass);
+  AssertPtrNotNull(jInterp->coAlgs[NaturalsTag]);
 
   const char* testNum = "12345 ";
   JObj* aNewNat = newNatural(jInterp, testNum);
@@ -256,7 +256,7 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   
   // sanity check...
   assert(tag == NaturalsTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
 
   return TRUE;
 }

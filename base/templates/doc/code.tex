@@ -49,7 +49,7 @@ Boolean registerTemplates(JoyLoLInterp *jInterp) {
 
   // do a sanity check...
   assert(tag == TemplatesTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
   
   return TRUE;
 }

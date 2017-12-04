@@ -237,7 +237,7 @@ Boolean printSymbolCoAlg(
 
 \startCTest
   AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag].sClass);
+  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag]);
 
   JObj* aNewSymbol = newSymbol(jInterp, "test string");
   AssertPtrNotNull(aNewSymbol);
@@ -299,7 +299,7 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   
   // sanity check...
   assert(tag == SymbolsTag);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
 
   return TRUE;
 }

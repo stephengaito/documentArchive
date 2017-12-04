@@ -180,6 +180,7 @@ typedef void*   CoAlgData;
 
 typedef struct joylol_class_struct {
   Symbol           *name;
+  JoyLoLInterp     *jInterp;
   size_t            objectSize;
   size_t            numObjectsPerBlock;
   JObj             *freeObjects;
@@ -222,11 +223,6 @@ repeatedly, so should probably be accessible with as few memory accesses
 as possible. 
 
 \startCHeader
-typedef struct coalg_vecItem_struct {
-  JClass       *sClass; // static part
-  ObjectMemory  oMem;
-} CoAlgVecItem;
-
 typedef struct dictNode_object_struct DictNodeObj;
 
 typedef struct loader_object_struct LoaderObj;
@@ -238,7 +234,7 @@ typedef struct joylol_interpreter_struct {
   lua_State        *lstate;
   size_t            numCoAlgs;
   size_t            maxNumCoAlgs;
-  CoAlgVecItem     *coAlgs;
+  JClass          **coAlgs;
   DictObj          *dict;
   LoaderObj        *loader;
   ContextObj       *rootCtx;
@@ -251,13 +247,13 @@ typedef struct joylol_interpreter_struct {
   StdOutputMethod  *writeStdErr;
 } JoyLoLInterp;
 
-#define getJClass(jInterp, aTag)        \
-  (                                         \
-    assert(jInterp),                        \
-    assert(aTag),                           \
-    assert((jInterp)->coAlgs),              \
-    assert((jInterp)->coAlgs[aTag].sClass), \
-    ((jInterp)->coAlgs[aTag].sClass)        \
+#define getJClass(jInterp, aTag)     \
+  (                                  \
+    assert(jInterp),                 \
+    assert(aTag),                    \
+    assert((jInterp)->coAlgs),       \
+    assert((jInterp)->coAlgs[aTag]), \
+    ((jInterp)->coAlgs[aTag])        \
   )
 
 #define getJInterpClass(jInterp)                            \
@@ -380,28 +376,40 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
     NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT;
   jInterp->numCoAlgs    = NumRequiredCoAlgs;
   jInterp->maxNumCoAlgs = maxNum;
-  jInterp->coAlgs    = joyLoLCalloc(maxNum, CoAlgVecItem);
+  jInterp->coAlgs       = joyLoLCalloc(maxNum, JClass*);
+  
+  DEBUG(jInterp, "Created coAlgs vector %p %zu %zu\n",
+    jInterp->coAlgs, jInterp->numCoAlgs, jInterp->maxNumCoAlgs);
   
   for (size_t i = 0; i < jInterp->maxNumCoAlgs; i++) {
-    jInterp->coAlgs[i].sClass               = NULL;
-    jInterp->coAlgs[i].oMem.freeObjects     = NULL;
-    jInterp->coAlgs[i].oMem.rootObjectBlock = NULL; 
+    jInterp->coAlgs[i] = NULL;
   }
 
+  DEBUG(jInterp, "Initialized coAlgs %p\n", jInterp);
+  
   maxNum =
     NumRequiredCrossCompilers + JOYLOL_COMPILERS_INCREMENT;
   jInterp->numCompilers    = NumRequiredCrossCompilers;
   jInterp->maxNumCompilers = maxNum;
   jInterp->compilers       = joyLoLCalloc(maxNum, CrossCompilerObj*);
 
+  DEBUG(jInterp, "Created crossCompilers vector %p %zu %zu\n",
+    jInterp->compilers, 
+    jInterp->numCompilers,
+    jInterp->maxNumCompilers);
+
   for (size_t i = 0; i < jInterp->maxNumCompilers; i++) {
     jInterp->compilers[i] = NULL;
   }
-  
+
+  DEBUG(jInterp, "Initialized compilers %p\n", jInterp);
+
   jInterp->dict    = NULL;
   jInterp->loader  = NULL;
   jInterp->rootCtx = NULL;
     
+  DEBUG(jInterp, "Initialized jInterp %p\n", jInterp);
+
   return jInterp;
 }
 \stopCCode
@@ -419,9 +427,7 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   AssertPtrNotNull(jInterp->coAlgs);
   
   for (size_t i = 0; i < jInterp->maxNumCoAlgs; i++) {
-    AssertPtrNull(jInterp->coAlgs[i].sClass);
-    AssertPtrNull(jInterp->coAlgs[i].oMem.freeObjects);
-    AssertPtrNull(jInterp->coAlgs[i].oMem.rootObjectBlock);
+    AssertPtrNull(jInterp->coAlgs[i]);
   }
   
   AssertPtrNull(jInterp->dict);
@@ -529,10 +535,12 @@ size_t registerJClassImpl(
   assert(jInterp->coAlgs);
   assert(theCoAlg);
   
+  theCoAlg->jInterp = jInterp;
+  
   for(size_t i = 0; i < jInterp->numCoAlgs; i++ ) {
-    if (jInterp->coAlgs[i].sClass) {
+    if (jInterp->coAlgs[i]) {
       if (strcmp(theCoAlg->name,
-        jInterp->coAlgs[i].sClass->name) == 0) {
+        jInterp->coAlgs[i]->name) == 0) {
     
         // a coAlgebra with this name has already been registered. 
         // so return its index...
@@ -545,8 +553,8 @@ size_t registerJClassImpl(
   for (size_t i = 0; requiredCoAlgs[i].name; i++) {
     if (strcmp(theCoAlg->name, requiredCoAlgs[i].name) == 0) {
       size_t tag = requiredCoAlgs[i].tag;
-      if (!(jInterp->coAlgs[tag].sClass)) {
-        jInterp->coAlgs[tag].sClass = theCoAlg;
+      if (!(jInterp->coAlgs[tag])) {
+        jInterp->coAlgs[tag] = theCoAlg;
       }
       return tag;
     }
@@ -559,19 +567,19 @@ size_t registerJClassImpl(
     //  
     size_t oldnumCoAlgs     = jInterp->numCoAlgs;
     size_t oldmaxNumCoAlgs  = jInterp->maxNumCoAlgs;
-    CoAlgVecItem *oldcoAlgs = jInterp->coAlgs;
+    JClass **oldcoAlgs = jInterp->coAlgs;
     
     size_t newMaxNumCoAlgs =
       oldmaxNumCoAlgs + JOYLOL_COALGS_INCREMENT;
 
     jInterp->coAlgs =
-      joyLoLCalloc(newMaxNumCoAlgs, CoAlgVecItem);
+      joyLoLCalloc(newMaxNumCoAlgs, JClass*);
     assert(jInterp->coAlgs);
     
     if (oldcoAlgs) {
       memcpy(jInterp->coAlgs,
         oldcoAlgs,
-        sizeof(CoAlgVecItem)*oldnumCoAlgs);
+        sizeof(JClass*)*oldnumCoAlgs);
       free(oldcoAlgs);
     }
     
@@ -581,7 +589,7 @@ size_t registerJClassImpl(
   
   size_t newCoAlg = jInterp->numCoAlgs;
   
-  jInterp->coAlgs[newCoAlg].sClass      = theCoAlg;
+  jInterp->coAlgs[newCoAlg] = theCoAlg;
   
   jInterp->numCoAlgs++;
   
@@ -611,12 +619,12 @@ We start by adding one single \type{CoAlgebra}.
   size_t coAlgIdx = registerJClassImpl(jInterp, aCoAlg);
   AssertIntEquals(coAlgIdx, NumRequiredCoAlgs);
 
-  CoAlgVecItem* coAlgsVec = jInterp->coAlgs;
+  JClass** coAlgsVec = jInterp->coAlgs;
   AssertPtrNotNull(coAlgsVec);
-  AssertStrEquals(coAlgsVec[coAlgIdx].sClass->name, "newCoAlgA");
-  AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->initializeFunc, fakeInitializeFunc);
-  AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->equalityFunc, fakeEqualityFunc);
-  AssertPtrEquals(coAlgsVec[coAlgIdx].sClass->printFunc,    fakePrintFunc);
+  AssertStrEquals(coAlgsVec[coAlgIdx]->name, "newCoAlgA");
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->initializeFunc, fakeInitializeFunc);
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->equalityFunc, fakeEqualityFunc);
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->printFunc,    fakePrintFunc);
 \stopCTest
 
 Now we want to test the expansion of an existing CoAlgebras structure when 
@@ -637,13 +645,13 @@ the existing one runs out of \quote{space}.
 
     registerJClassImpl(jInterp, aCoAlg);
 
-    CoAlgVecItem* coAlgsVec = jInterp->coAlgs;
+    JClass** coAlgsVec = jInterp->coAlgs;
     AssertPtrNotNull(coAlgsVec);
     size_t idx = NumRequiredCoAlgs + i;
-    AssertStrEquals(coAlgsVec[idx].sClass->name, coAlgName);
-    AssertPtrEquals(coAlgsVec[idx].sClass->initializeFunc, fakeInitializeFunc);
-    AssertPtrEquals(coAlgsVec[idx].sClass->equalityFunc, fakeEqualityFunc);
-    AssertPtrEquals(coAlgsVec[idx].sClass->printFunc,    fakePrintFunc);
+    AssertStrEquals(coAlgsVec[idx]->name, coAlgName);
+    AssertPtrEquals(coAlgsVec[idx]->initializeFunc, fakeInitializeFunc);
+    AssertPtrEquals(coAlgsVec[idx]->equalityFunc, fakeEqualityFunc);
+    AssertPtrEquals(coAlgsVec[idx]->printFunc,    fakePrintFunc);
   }
 \stopCTest
 
@@ -850,7 +858,7 @@ void initializeAllLoadedImpl(
   // now call the initialization function for each 
   // loaded CoAlgebraic extension
   for( size_t i = 1; i < NumRequiredCoAlgs; i++) {
-    if (jInterp->coAlgs[i].sClass) {
+    if (jInterp->coAlgs[i]) {
       JClass *aCoAlg = getJClass(jInterp, i);
       if (jInterp->verbose) {
         char output[1000];
@@ -979,7 +987,7 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
   assert(tag == JInterpsTag);
   assert(tag < jInterp->numCoAlgs);
   assert(jInterp->coAlgs);
-  assert(jInterp->coAlgs[tag].sClass);
+  assert(jInterp->coAlgs[tag]);
     
   return TRUE;
 }
