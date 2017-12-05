@@ -397,11 +397,8 @@ Boolean requireStaticallyLinkedJInterps(
   // BUT without the requireAllRequiredCoAlgs
   // AND without the checkAllRequired
   // AND without the initializeAllLoaded
-  printf("setting joylol interp into jInterp\n");
   setJoyLoLInterpInto(lstate, jInterp);
-  printf("registering jinterps\n");
   registerJInterps(jInterp);
-  printf("creating new jInterps lib\n");
   luaL_newlib(lstate, lua_jInterps);
   
   lua_setfield(lstate, -2, "joylol.jInterps");
