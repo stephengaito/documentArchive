@@ -161,18 +161,30 @@ coAlgs.stopImplementation = stopImplementation
 
 \startLuaCode
 local function startFragment(fragmentType)
+  theCoAlg.curFragment      = { }
+  theCoAlg.curFragment.type = fragmentType
 end
 
 coAlgs.startFragment = startFragment
 
 local function stopFragment()
+  local curFragment   = setDefs(theCoAlg, 'curFragment')
+  local fragementType = setDefs(curFragment, 'type', 'ansic')
   local fragmentBody  = buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
+  local curWord       = setDefs(theCoAlg, 'curWord')
+  local wordName      = curWord.name
+  if wordName then
+    joylol.crossCompilers.addFragment(wordName, fragmentType, fragmentBody)
+  else
+    texio.write_nl('ERROR: fragment found outside of a coAlgebraic word!')
+    texio.write_nl('       ignoring fragment')
+    texio.write_nl('---------fragment-buffer-------------')
+    texio.write_nl(fragmentBody)
+    texio.write_nl('---------fragment-buffer-------------')
+  end
   tex.sprint("\\starttyping")
   tex.print(fragmentBody)
   tex.sprint("\\stoptyping")
-  texio.write_nl('---------fragment-buffer-------------')
-  texio.write_nl(fragmentBody)
-  texio.write_nl('---------fragment-buffer-------------')
 end
 
 coAlgs.stopFragment = stopFragment
