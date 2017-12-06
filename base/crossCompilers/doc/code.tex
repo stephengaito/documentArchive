@@ -103,6 +103,77 @@ CrossCompilerObj* newCrossCompilerImpl(
 
 \stopTestSuite
 
+\startTestSuite[addFragment]
+
+\startCHeader
+typedef void (AddFragment)(
+  JoyLoLInterp *jInterp,
+  Symbol       *ccType,
+  Symbol       *fragmentBody
+);
+
+#define addFragment(jInterp, ccType, wordName, fragmentBody)      \
+  (                                                               \
+    assert(getCrossCompilersClass(jInterp)                        \
+      ->addFragmentFunc),                                         \
+    (getCrossCompilersClass(jInterp)                              \
+      ->addFragmentFunc(jInterp, ccType, wordName, fragmentBody)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void addFragmentImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *ccType,
+  Symbol       *wordName,
+  Symbol       *fragmentBody
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void addFragmentImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *ccType,
+  Symbol       *wordName,
+  Symbol       *fragmentBody
+) {
+  assert(jInterp);
+  assert(jInterp->compilers);
+
+  CrossCompilerObj *theCC = NULL;
+  if (strcmp(ccType, AnsicName) == 0) {
+    theCC = jInterp->compilers[AnsicCC];
+  } else if (strcmp(ccType, AnsicLuaName) == 0) {
+    theCC = jInterp->compilers[AnsicLuaCC];
+  } else if (strcmp(ccType, PureLuaName) == 0) {
+    theCC = jInterp->compilers[PureLuaCC];
+  }
+  if (theCC) {
+    DictObj *ccDict = theCC->dict;
+    assert(ccDict);
+    DictNodeObj *entry    = insertSymbol(ccDict, wordName);
+    FragmentObj *fragment =
+      newFragment(jInterp, wordName, fragmentBody);
+    entry->value = (JObj*)fragment;
+  } else {
+    // raise error -- NEEDS Context!
+    
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+    strBufPrintf(jInterp, aStrBuf, 
+      "ERROR could not find the [%s] cross compiler.\n", ccType);
+    strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", fragmentBody);
+    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
+    strBufClose(jInterp, aStrBuf);
+  }
+}
+\stopCCode
+
+
+\stopTestSuite
+
 \startTestSuite[isCrossCompiler]
 
 \startCHeader

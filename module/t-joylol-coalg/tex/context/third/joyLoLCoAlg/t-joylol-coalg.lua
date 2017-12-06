@@ -589,18 +589,22 @@ coAlgs.stopImplementation = stopImplementation
 -- from file: rules.tex after line: 150
 
 local function startFragment(fragmentType)
+  theCoAlg.curFragment      = { }
+  theCoAlg.curFragment.type = fragmentType
 end
 
 coAlgs.startFragment = startFragment
 
 local function stopFragment()
+  local curFragment   = setDefs(theCoAlg, 'curFragment')
+  local fragementType = setDefs(curFragment, 'type', 'ansic')
   local fragmentBody  = buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
+
+  joylol.crossCompilers.addFragment(fragmentType, fragmentBody)
+
   tex.sprint("\\starttyping")
   tex.print(fragmentBody)
   tex.sprint("\\stoptyping")
-  texio.write_nl('---------fragment-buffer-------------')
-  texio.write_nl(fragmentBody)
-  texio.write_nl('---------fragment-buffer-------------')
 end
 
 coAlgs.stopFragment = stopFragment

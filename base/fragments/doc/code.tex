@@ -8,20 +8,29 @@
 
 \component gitVersion-c
 
+\startCHeader
+typedef struct fragment_object_struct {
+  JObj    super;
+  Symbol *name;
+  Symbol *body;
+} FragmentObj;
+\stopCHeader
+
 \startTestSuite[newFragment]
 
 \startCHeader
-typedef JObj* (NewFragment)(
-  JoyLoLInterp*,
-  Symbol*
+typedef FragmentObj* (NewFragment)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aName,
+  Symbol       *aBody
 );
 
-#define newFragment(jInterp, aName)      \
-  (                                           \
-    assert(getFragmentsClass(jInterp)    \
-      ->newFragmentFunc),                \
-    (getFragmentsClass(jInterp)          \
-      ->newFragmentFunc(jInterp, aName)) \
+#define newFragment(jInterp, aName, aBody)      \
+  (                                             \
+    assert(getFragmentsClass(jInterp)           \
+      ->newFragmentFunc),                       \
+    (getFragmentsClass(jInterp)                 \
+      ->newFragmentFunc(jInterp, aName, aBody)) \
   )
 
 //#define asFragment(aLoL) (((aLoL)->flags) & BOOLEAN_FLAG_MASK)
@@ -29,25 +38,30 @@ typedef JObj* (NewFragment)(
 
 \setCHeaderStream{private}
 \startCHeader
-extern JObj* newFragmentImpl(
+extern FragmentObj* newFragmentImpl(
   JoyLoLInterp *jInterp,
-  Symbol       *aCompilerType
+  Symbol       *aName,
+  Symbol       *aBody
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-JObj* newFragmentImpl(
+FragmentObj* newFragmentImpl(
   JoyLoLInterp *jInterp,
-  Symbol       *aCompilerName
+  Symbol       *aName,
+  Symbol       *aBody
 ) {
   assert(jInterp);
   assert(jInterp->coAlgs);
   
-  JObj* result = newObject(jInterp, FragmentsTag);
+  FragmentObj *result =
+    (FragmentObj*)newObject(jInterp, FragmentsTag);
   assert(result);
   
-  result->type  = jInterp->coAlgs[FragmentsTag];
+  result->super.type  = jInterp->coAlgs[FragmentsTag];
+  result->name        = strdup(aName);
+  result->body        = strdup(aBody);
  
   return result;
 }
@@ -58,7 +72,8 @@ JObj* newFragmentImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  JObj* aNewFragment = newFragment(jInterp, "ansiC");
+  FragmentObj* aNewFragment =
+    newFragment(jInterp, "ansiC", "a fragment body");
   AssertPtrNotNull(aNewFragment);
   AssertPtrNotNull(asType(aNewFragment));
   AssertIntEquals(asTag(aNewFragment), FragmentsTag);
@@ -75,14 +90,14 @@ JObj* newFragmentImpl(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
 
-  JObj* aLoL = newFragment(jInterp, "ansiC");
+  FragmentObj* aLoL =
+    newFragment(jInterp, "ansiC", "a fragment body");
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoL(jInterp, aStrBuf, (JObj*)aLoL);
   AssertStrEquals(getCString(jInterp, aStrBuf), "fragment ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
-
 \stopTestSuite
 
 \startTestSuite[isFragment]
@@ -163,9 +178,10 @@ Boolean printFragmentCoAlg(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  JObj* aNewFragment = newFragment(jInterp, "ansiC");
+  FragmentObj* aNewFragment =
+    newFragment(jInterp, "ansiC", "a fragment body");
   AssertPtrNotNull(aNewFragment);
-  printLoL(jInterp, aStrBuf, aNewFragment);
+  printLoL(jInterp, aStrBuf, (JObj*)aNewFragment);
   AssertStrEquals(getCString(jInterp, aStrBuf), "fragment ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest

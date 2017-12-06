@@ -14,6 +14,9 @@ litProgs.targets{
   docFiles = {
     'overview.tex',
     'code.tex',
+    'ansic.tex',
+    'ansicLua.tex',
+    'pureLua.tex',
     'lua.tex',
     'words.tex',
     'conclusion.tex',
@@ -55,6 +58,9 @@ contests.targets{
   docFiles = {
     'overview.tex',
     'code.tex',
+    'ansic.tex',
+    'ansicLua.tex',
+    'pureLua.tex',
     'lua.tex',
     'words.tex',
     'conclusion.tex',

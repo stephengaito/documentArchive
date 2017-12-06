@@ -18,3 +18,8 @@ function minJoylol.core.context.setVerbose(aBool) end
 function minJoylol.core.context.setDebugging(aBool) end
 function minJoylol.core.context.loadFile(aBool) end
 function minJoylol.core.context.gitVersion(aBool) end
+
+local crossCompilers = setDefs(minJoylol, 'crossCompilers')
+
+function crossCompilers.addFragment(ccType, fragmentBody)
+end

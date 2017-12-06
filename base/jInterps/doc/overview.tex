@@ -280,15 +280,15 @@ For the current JoyLoL implementation, the required \type{CrossCompilers} are:
 
 \setCHeaderStream{public}
 \startCHeader
-#define Unused_CC                 0
-#define AnsiC_CC                  1
-#define AnsiC_Lua_CC              2
-#define PureLua_CC                3
+#define UnusedCC                 0
+#define AnsicCC                  1
+#define AnsicLuaCC               2
+#define PureLuaCC                3
 #define NumRequiredCrossCompilers 4
 
-#define AnsiC_Name     "ansiC"     /*  1 */
-#define AnsiC_Lua_Name "ansiC-Lua" /*  2 */
-#define PureLua_Name   "pureLua"   /*  3 */
+#define AnsicName     "ansic"     /*  1 */
+#define AnsicLuaName  "ansicLua"  /*  2 */
+#define PureLuaName   "pureLua"   /*  3 */
 \stopCHeader
 
 \setCHeaderStream{private}
@@ -300,10 +300,10 @@ extern RequiredObjects requiredCompilers[];
 \setCCodeStream{interpreter}
 \startCCode
 RequiredObjects requiredCompilers[] = {
-  { AnsiC_Name,       AnsiC_CC,     {0, 1, 0 }}, //  1
-  { AnsiC_Lua_Name,   AnsiC_Lua_CC, {0, 1, 0 }}, //  2
-  { PureLua_Name,     PureLua_CC,   {0, 1, 0 }}, //  3
-  { NULL,             0,            {0, 0, 0 }}
+  { AnsicName,       AnsicCC,     {0, 1, 0 }}, //  1
+  { AnsicLuaName,    AnsicLuaCC,  {0, 1, 0 }}, //  2
+  { PureLuaName,     PureLuaCC,   {0, 1, 0 }}, //  3
+  { NULL,             0,          {0, 0, 0 }}
 };
 \stopCCode
 \section[title=Semi-standard typedefs]
