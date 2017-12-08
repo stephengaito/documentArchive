@@ -203,15 +203,22 @@ typedef size_t (JInterpRegisterJClass)(
   JClass   *theJClass
 );
 
+typedef struct crossCompiler_object_struct CrossCompilerObj;
+typedef size_t (JInterpRegisterCrossCompiler)(
+  JoyLoLInterp     *jInterp,
+  CrossCompilerObj *aCompiler
+);
+
 typedef void (JInterpInitializeAllLoaded)(
   lua_State    *lstate,
   JoyLoLInterp *jInterp
 );
 
 typedef struct joylolinterp_class_struct {
-  JClass                      super;
-  JInterpNewObject           *newObjectFunc;
-  JInterpRegisterJClass      *registerJClassFunc;
+  JClass                        super;
+  JInterpNewObject             *newObjectFunc;
+  JInterpRegisterJClass        *registerJClassFunc;
+  JInterpRegisterCrossCompiler *registerCrossCompilerFunc;
   JInterpInitializeAllLoaded *initializeAllLoadedFunc;
 } JoyLoLInterpClass;
 \stopCHeader
@@ -982,6 +989,8 @@ Boolean registerJInterps(JoyLoLInterp *jInterp) {
   theCoAlg->super.printFunc        = NULL;
   theCoAlg->newObjectFunc          = newObjectImpl;
   theCoAlg->registerJClassFunc     = registerJClassImpl;
+  theCoAlg->registerCrossCompilerFunc =
+    registerCrossCompilerImpl;
   theCoAlg->initializeAllLoadedFunc =
     initializeAllLoadedImpl;
     

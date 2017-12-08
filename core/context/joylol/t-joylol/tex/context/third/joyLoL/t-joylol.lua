@@ -98,9 +98,9 @@ end
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-12-08",
-  commitShortHash = "2d64f2a",
-  commitLongHash  = "2d64f2a1ef83e9ef86ad02e0d8972fee69d01749",
-  subject         = "added option reporting to core context t-joylol",
+  commitShortHash = "5d5ce75",
+  commitLongHash  = "5d5ce751351133dd7732be8839ec6ac18f8c1a65",
+  subject         = "added addFragment as lua method",
   notes           = ""
 }
 

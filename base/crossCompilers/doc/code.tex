@@ -290,6 +290,17 @@ static Boolean initializeCrossCompilers(
   assert(jInterp);
   assert(aJClass);
   registerCrossCompilerWords(jInterp);
+
+  CrossCompilerObj *ansic =
+    newCrossCompilerImpl(jInterp, AnsicName);
+  registerCrossCompiler(jInterp, ansic);
+  CrossCompilerObj *ansicLua =
+    newCrossCompilerImpl(jInterp, AnsicLuaName);
+  registerCrossCompiler(jInterp, ansicLua);
+  CrossCompilerObj *pureLua =
+    newCrossCompilerImpl(jInterp, PureLuaName);
+  registerCrossCompiler(jInterp, pureLua);
+
   return TRUE;
 }
 \stopCCode
