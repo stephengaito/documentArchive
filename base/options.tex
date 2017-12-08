@@ -1,0 +1,31 @@
+% A ConTeXt document (options environment)
+
+% This document captures any global options for the JoyLoL project
+
+\usemodule[t-joylol-opts]
+
+\startenvironment options
+
+% Assert only ONE of the following macros
+
+% use the following macro to load the 
+% MINIMAL Lua based version of JoyLoL
+\joyLoLLoadLua
+% we use this when rebuilding a potentially 
+% broken ANSI-C based version of JoyLoL
+
+% use the following macro to try to load the
+% MAXIMAL ANSI-C based version of JoyLoL
+%\joyLoLLoadAnsic
+% we use this when (re)building a more or
+% less correctly working ANSI-C based version
+% of JoyLoL....
+
+% if neither of the above macros are asserted
+% the current standard default is to attempt 
+% to load the ANSI-C based version of JoyLoL
+% and if this fails to load the minimal Lua
+% based version of JoyLoL
+
+\stopenvironment
+

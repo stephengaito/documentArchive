@@ -16,15 +16,16 @@ joylol.options = { }
 local options = joylol.options
 
 -- default options
-options.verbose    = false
-options.debug      = false
-options.quiet      = false
-options.loadFiles  = { }
-options.loadPaths  = { }  
-options.configFile = 'config'
-options.userPath   = os.getenv('HOME')..'/.joylol'
-options.localPath  = '/usr/local/lib/joylol'
-options.systemPath = '/usr/lib/joylol'
+options.verbose       = false
+options.debug         = false
+options.quiet         = false
+options.loadFiles     = { }
+options.loadPaths     = { }  
+options.configFile    = 'config'
+options.userPath      = os.getenv('HOME')..'/.joylol'
+options.localPath     = '/usr/local/lib/joylol'
+options.systemPath    = '/usr/lib/joylol'
+options.minimalJoylol = false
 
 helpText = {
   "usage: joylol [options] [files to load]",
@@ -40,6 +41,8 @@ helpText = {
   " -u --userPath    sets the user load path",
   " -L --localPath   sets the local load path",
   " -s --systemPath  sets the system load path",
+  " -j --minJoylol   only load the Lua based minimal JoyLoL",
+  " -J --maxJoylol   attempt to load the C based maximal JoyLol",
   "",
   "files to load:",
   "  Any remaining options are treated as files to be loaded.",
@@ -80,6 +83,10 @@ while(0 < #arg) do
     options.verbose = true
   elseif anArg:match('-d') or anArg:match('--debug') then
     options.debug = true
+  elseif anArg:match('-j') or anArg:match('--minJoylol') then
+    options.minimalJoylol = true
+  elseif anArg:match('-J') or anArg:match('--maxJoylol') then
+    options.minimalJoylol = false
   else
     optArg = table.remove(arg, 1)
     table.insert(options.loadFiles, optArg)

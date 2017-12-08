@@ -222,6 +222,9 @@ static void *coreContextCallback(
   } else if (resourceId == JoyLoLCallback_SystemPath) {
     Symbol *systemPath = getSymbolOption(lstate, "systemPath");
     return (void*)systemPath;
+  } else if (resourceId == JoyLoLCallback_MinimalJoylol) {
+    Boolean minimalJoylol = getBooleanOption(lstate, "minimalJoylol");
+    return (void*)minimalJoylol;
   }
   return NULL;
 }

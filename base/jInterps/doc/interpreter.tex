@@ -45,15 +45,16 @@ The currently well known resources are:
 
 \setCHeaderStream{public}
 \startCHeader
-#define JoyLoLCallback_StdOutMethod  1
-#define JoyLoLCallback_StdErrMethod  2
-#define JoyLoLCallback_Verbose       3
-#define JoyLoLCallback_Debug         4
-#define JoyLoLCallback_Quiet         5
-#define JoyLoLCallback_ConfigFile    6
-#define JoyLoLCallback_UserPath      7
-#define JoyLoLCallback_LocalPath     8
-#define JoyLoLCallback_SystemPath    9
+#define JoyLoLCallback_StdOutMethod   1
+#define JoyLoLCallback_StdErrMethod   2
+#define JoyLoLCallback_Verbose        3
+#define JoyLoLCallback_Debug          4
+#define JoyLoLCallback_Quiet          5
+#define JoyLoLCallback_ConfigFile     6
+#define JoyLoLCallback_UserPath       7
+#define JoyLoLCallback_LocalPath      8
+#define JoyLoLCallback_SystemPath     9
+#define JoyLoLCallback_MinimalJoylol 10
 
 typedef void (StdOutputMethod)(
   JoyLoLInterp *jInterp,
@@ -243,6 +244,7 @@ typedef struct joylol_interpreter_struct {
   CrossCompilerObj **compilers;
   Boolean           verbose;
   Boolean           debug;
+  Boolean           minimalJoylol;
   StdOutputMethod  *writeStdOut;
   StdOutputMethod  *writeStdErr;
 } JoyLoLInterp;
@@ -369,6 +371,9 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
     
   jInterp->debug = 
     (Boolean)getCoreResources(lstate, JoyLoLCallback_Debug);
+    
+  jInterp->minimalJoylol =
+    (Boolean)getCoreResources(lstate, JoyLoLCallback_MinimalJoylol);
 
   DEBUG(jInterp, "Creating jInterp %p\n", jInterp);
     

@@ -68,4 +68,14 @@ options.gitVersion = gitVersion
     thirddata.joylol.options.systemPath = '#1'
   }
 }
+\def\joyLoLLoadAnsic{
+  \directlua{
+    thirddata.joylol.options.minimalJoylol = false
+  }
+}
+\def\joyLoLLoadLua{
+  \directlua{
+    thirddata.joylol.options.minimalJoylol = true
+  }
+}
 \stopMkIVCode

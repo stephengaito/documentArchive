@@ -43,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-12-05",
-  commitShortHash = "7f29a84",
-  commitLongHash  = "7f29a843b28b46fc64383948e004717a024549ca",
-  subject         = "restarted work on crossCompilers and fragments",
+  commitDate      = "2017-12-06",
+  commitShortHash = "a457af5",
+  commitLongHash  = "a457af5f9e6c383e6d0fb05503a55137f3118b44",
+  subject         = "completed first pass at crossCompilers and fragments",
   notes           = ""
 }
 
