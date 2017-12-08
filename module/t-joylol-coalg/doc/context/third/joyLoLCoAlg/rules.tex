@@ -168,11 +168,16 @@ end
 coAlgs.startFragment = startFragment
 
 local function stopFragment()
-  local curFragment   = setDefs(theCoAlg, 'curFragment')
-  local fragementType = setDefs(curFragment, 'type', 'ansic')
-  local fragmentBody  = buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
+  local curFragment  = setDefs(theCoAlg, 'curFragment')
+  local fragmentType = setDefs(curFragment, 'type', 'ansic')
+  local wordName     = 'something'
+  local fragmentBody = buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
 
-  joylol.crossCompilers.addFragment(fragmentType, fragmentBody)
+  joylol.crossCompilers.addFragment(
+    fragmentType,
+    wordName,
+    fragmentBody
+  )
 
   tex.sprint("\\starttyping")
   tex.print(fragmentBody)

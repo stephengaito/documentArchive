@@ -98,9 +98,9 @@ end
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-12-08",
-  commitShortHash = "1d0183d",
-  commitLongHash  = "1d0183dfd13e45e3569f9c725fa34846a4dfce39",
-  subject         = "implemented additional option to control the loading of the ANSI-C or Minimal Lua versions of JoyLoL into ConTeXt",
+  commitShortHash = "2d64f2a",
+  commitLongHash  = "2d64f2a1ef83e9ef86ad02e0d8972fee69d01749",
+  subject         = "added option reporting to core context t-joylol",
   notes           = ""
 }
 

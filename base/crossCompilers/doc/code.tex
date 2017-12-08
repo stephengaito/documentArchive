@@ -165,9 +165,19 @@ void addFragmentImpl(
       "ERROR could not find the [%s] cross compiler.\n", ccType);
     strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
     strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", fragmentBody);
-    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
+    jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
+}
+
+static int lua_crossCompilers_addFragment(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  Symbol *ccType       = luaL_checkstring(lstate, 1);
+  Symbol *wordName     = luaL_checkstring(lstate, 2);
+  Symbol *fragmentBody = luaL_checkstring(lstate, 3);
+  addFragmentImpl(jInterp, ccType, wordName, fragmentBody);
+  lua_pop(lstate, 3);
+  return 0;
 }
 \stopCCode
 
