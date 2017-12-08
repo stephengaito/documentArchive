@@ -12,7 +12,6 @@ if not modules then modules = { } end modules ['t-joylol'] = {
     license   = "MIT License"
 }
 
-
 local function setDefs(varVal, selector, defVal)
   if not defVal then defVal = { } end
   varVal[selector] = varVal[selector] or defVal
@@ -47,15 +46,61 @@ local tSort   = table.sort
 local sFmt    = string.format
 local sMatch  = string.match
 local toStr   = tostring
+ 
+local function compareKeyValues(a, b)
+  return (a[1] < b[1])
+end
+
+local function prettyPrint(anObj, indent)
+  local result = ""
+  indent = indent or ""
+  if type(anObj) == 'nil' then
+    result = 'nil'
+  elseif type(anObj) == 'boolean' then
+    if anObj then result = 'true' else result = 'false' end
+  elseif type(anObj) == 'number' then
+    result = toStr(anObj)
+  elseif type(anObj) == 'string' then
+    result = '"'..anObj..'"'
+  elseif type(anObj) == 'function' then
+    result = toStr(anObj)
+  elseif type(anObj) == 'userdata' then
+    result = toStr(anObj)
+  elseif type(anObj) == 'thread' then
+    result = toStr(anObj)
+  elseif type(anObj) == 'table' then
+    local origIndent = indent
+    indent = indent..'  '
+    result = '{\n'
+    for i, aValue in ipairs(anObj) do
+      result = result..indent..prettyPrint(aValue, indent)..',\n'
+    end
+    local theKeyValues = { }
+    for aKey, aValue in pairs(anObj) do
+      if type(aKey) ~= 'number' or aKey < 1 or #anObj < aKey then
+        tInsert(theKeyValues,
+          { prettyPrint(aKey), aKey, prettyPrint(aValue, indent) })
+      end
+    end
+    tSort(theKeyValues, compareKeyValues)
+    for i, aKeyValue in ipairs(theKeyValues) do
+      result = result..indent..'['..aKeyValue[1]..'] = '..aKeyValue[3]..',\n'
+    end
+    result = result..origIndent..'}'
+  else
+    result = 'UNKNOWN TYPE: ['..toStr(anObj)..']'
+  end
+  return result
+end
 
 -- from file: gitVersion-lua.tex after line: 0
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-12-06",
-  commitShortHash = "a457af5",
-  commitLongHash  = "a457af5f9e6c383e6d0fb05503a55137f3118b44",
-  subject         = "completed first pass at crossCompilers and fragments",
+  commitDate      = "2017-12-08",
+  commitShortHash = "1d0183d",
+  commitLongHash  = "1d0183dfd13e45e3569f9c725fa34846a4dfce39",
+  subject         = "implemented additional option to control the loading of the ANSI-C or Minimal Lua versions of JoyLoL into ConTeXt",
   notes           = ""
 }
 
@@ -66,8 +111,9 @@ local gitVersion = {
 -- Start by adding the standard joylol CoAlg locations to the Lua search
 -- paths
 
-local pp = require 'pl.pretty'
-texio.write_nl(pp.write(options))
+texio.write_nl("----------JoyLoL options-----------")
+texio.write_nl(prettyPrint(options))
+texio.write_nl("-----------------------------------")
 
 local joylolPaths = {
   options.userPath..'/?.lua',

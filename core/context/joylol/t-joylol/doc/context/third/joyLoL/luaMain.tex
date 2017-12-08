@@ -12,8 +12,9 @@
 -- Start by adding the standard joylol CoAlg locations to the Lua search 
 -- paths 
 
-local pp = require 'pl.pretty'
-texio.write_nl(pp.write(options))
+texio.write_nl("----------JoyLoL options-----------")
+texio.write_nl(prettyPrint(options))
+texio.write_nl("-----------------------------------")
 
 local joylolPaths = {
   options.userPath..'/?.lua',

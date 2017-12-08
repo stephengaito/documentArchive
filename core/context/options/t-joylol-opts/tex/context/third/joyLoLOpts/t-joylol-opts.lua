@@ -43,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-12-06",
-  commitShortHash = "a457af5",
-  commitLongHash  = "a457af5f9e6c383e6d0fb05503a55137f3118b44",
-  subject         = "completed first pass at crossCompilers and fragments",
+  commitDate      = "2017-12-08",
+  commitShortHash = "1d0183d",
+  commitLongHash  = "1d0183dfd13e45e3569f9c725fa34846a4dfce39",
+  subject         = "implemented additional option to control the loading of the ANSI-C or Minimal Lua versions of JoyLoL into ConTeXt",
   notes           = ""
 }
 
