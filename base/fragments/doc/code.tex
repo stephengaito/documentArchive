@@ -59,7 +59,7 @@ FragmentObj* newFragmentImpl(
     (FragmentObj*)newObject(jInterp, FragmentsTag);
   assert(result);
   
-  result->super.type  = jInterp->coAlgs[FragmentsTag];
+//  result->super.type  = jInterp->coAlgs[FragmentsTag];
   result->name        = strdup(aName);
   result->body        = strdup(aBody);
  
@@ -226,7 +226,7 @@ Boolean registerFragments(JoyLoLInterp *jInterp) {
   assert(theCoAlg);
   
   theCoAlg->super.name           = FragmentsName;
-  theCoAlg->super.objectSize     = sizeof(JObj);
+  theCoAlg->super.objectSize     = sizeof(FragmentObj);
   theCoAlg->super.initializeFunc = initializeFragments;
   theCoAlg->super.equalityFunc   = equalityFragmentCoAlg;
   theCoAlg->super.printFunc      = printFragmentCoAlg;
@@ -256,7 +256,7 @@ Boolean registerFragments(JoyLoLInterp *jInterp) {
   AssertPtrEquals(getFragmentsClass(jInterp), coAlg);
   AssertIntEquals(
     getFragmentsClass(jInterp)->super.objectSize,
-    sizeof(JObj)
+    sizeof(FragmentObj)
   )
 \stopCTest
 \stopTestCase

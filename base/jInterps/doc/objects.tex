@@ -78,14 +78,23 @@ We can now define the \emph{base} \type{JObj} as:
 
 \startCHeader
 typedef struct joylol_object_struct {
-  JClass *type;
-  TagType     tag;
-  FlagsType   flags; // an arbitrary collection of bits
+  JClass    *type;
+  TagType    tag;
+  FlagsType  flags; // an arbitrary collection of bits
 } JObj;
 
 #define asType(aLoL)  (((JObj*)(aLoL))->type)
 #define asTag(aLoL)   (((JObj*)(aLoL))->tag)
 #define asFlags(aLoL) (((JObj*)(aLoL))->flags)
+
+#define checkObj(jInterp, theObj, theTag) \
+  (                                       \
+    assert(jInterp),                      \
+    assert(theObj),                       \
+    assert(theTag),                       \
+    assert((((JObj*)(theObj))->type) ==   \
+      ((jInterp)->coAlgs[theTag]))        \
+  )
 \stopCHeader
 
 \section[title=isAtom isPair]

@@ -15,8 +15,9 @@ static int lua_crossCompilers_getGitVersion (lua_State *lstate) {
 }
 
 static const struct luaL_Reg lua_crossCompilers [] = {
-  {"gitVersion",  lua_crossCompilers_getGitVersion},
-  {"addFragment", lua_crossCompilers_addFragment},
+  {"gitVersion",        lua_crossCompilers_getGitVersion},
+  {"addImplementation", lua_crossCompilers_addImplementation},
+  {"addFragment",       lua_crossCompilers_addFragment},
   {NULL, NULL}
 };
 

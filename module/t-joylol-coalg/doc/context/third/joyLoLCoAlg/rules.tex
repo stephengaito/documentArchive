@@ -53,7 +53,6 @@ local sectionHeaders = tConcat({
 }, '|'):lower()
 
 local function stopRule()
-  local pp = require 'pl.pretty'
   local rulesBody  = buffers.getcontent('_rules_buffer_'):gsub("\13", "\n")
   local rules      = { }
   local lines      = { }
@@ -71,6 +70,8 @@ local function stopRule()
     end
   end
   rules[curSection] = lines
+
+  local pp = require 'pl.pretty'
   texio.write_nl('---------rules-buffer-------------')
   texio.write_nl(pp.write(rules))
   texio.write_nl('---------rules-buffer-------------')
@@ -123,18 +124,32 @@ coAlgs.stopRule = stopRule
 
 \startLuaCode
 local function startImplementation(implementationType)
+  theCoAlg.curImpl      = { }
+  theCoAlg.curImpl.type = implType
 end
 
 coAlgs.startImplementation = startImplementation
 
 local function stopImplementation()
-  local implBody  = buffers.getcontent('_implementation_buffer_'):gsub("\13", "\n")
+  local curImpl  = setDefs(theCoAlg, 'curImpl')
+  local implType = setDefs(curImpl, 'type', 'ansic')
+  local wordName = 'something'
+  local implBody = buffers.getcontent('_implementation_buffer_'):gsub("\13", "\n")
+
+  local pp = require 'pl.pretty'
+  texio.write_nl('---------impl-buffer-------------')
+  texio.write_nl(pp.write(implBody))
+  texio.write_nl('---------impl-buffer-------------')
+
+  joylol.crossCompilers.addImplementation(
+    implType,
+    wordName,
+    implBody
+  )
+
   tex.sprint("\\starttyping")
   tex.print(implBody)
   tex.sprint("\\stoptyping")
-  texio.write_nl('---------impl-buffer-------------')
-  texio.write_nl(implBody)
-  texio.write_nl('---------impl-buffer-------------')
 end
 
 coAlgs.stopImplementation = stopImplementation
@@ -172,6 +187,11 @@ local function stopFragment()
   local fragmentType = setDefs(curFragment, 'type', 'ansic')
   local wordName     = 'something'
   local fragmentBody = buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
+
+  local pp = require 'pl.pretty'
+  texio.write_nl('---------fragment-buffer-------------')
+  texio.write_nl(pp.write(implBody))
+  texio.write_nl('---------fragment-buffer-------------')
 
   joylol.crossCompilers.addFragment(
     fragmentType,

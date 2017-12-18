@@ -21,5 +21,8 @@ function minJoylol.core.context.gitVersion(aBool) end
 
 local crossCompilers = setDefs(minJoylol, 'crossCompilers')
 
+function crossCompilers.addImplementation(ccType, implBody)
+end
+
 function crossCompilers.addFragment(ccType, fragmentBody)
 end

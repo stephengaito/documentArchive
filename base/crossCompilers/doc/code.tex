@@ -103,12 +103,116 @@ CrossCompilerObj* newCrossCompilerImpl(
 
 \stopTestSuite
 
+\startTestSuite[addImplementation]
+
+\startCHeader
+typedef void (AddImplementation)(
+  JoyLoLInterp *jInterp,
+  Symbol       *ccType,
+  Symbol       *wordName,
+  Symbol       *implBody
+);
+
+#define addImplementation(jInterp, ccType, wordName, implBody)      \
+  (                                                                 \
+    assert(getCrossCompilersClass(jInterp)                          \
+      ->addImplementationFunc),                                     \
+    (getCrossCompilersClass(jInterp)                                \
+      ->addImplementationFunc(jInterp, ccType, wordName, implBody)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void addImplementationImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *ccType,
+  Symbol       *wordName,
+  Symbol       *implBody
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void addImplementationImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *ccType,
+  Symbol       *wordName,
+  Symbol       *implBody
+) {
+  assert(jInterp);
+  
+//  if (jInterp->debug) {
+  if (TRUE) {
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+    strBufPrintf(jInterp, aStrBuf, 
+      "DEBUG addImplementation crossCompiler: [%s]\n", ccType);
+    strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", implBody);
+    jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+    strBufClose(jInterp, aStrBuf);
+  }
+  
+  assert(jInterp->compilers);
+
+  CrossCompilerObj *theCC = NULL;
+  if (strcmp(ccType, AnsicName) == 0) {
+    theCC = jInterp->compilers[AnsicCC];
+  } else if (strcmp(ccType, AnsicLuaName) == 0) {
+    theCC = jInterp->compilers[AnsicLuaCC];
+  } else if (strcmp(ccType, PureLuaName) == 0) {
+    theCC = jInterp->compilers[PureLuaCC];
+  }
+  
+  if (theCC) {
+    jInterp->writeStdErr(jInterp, "addImplementation found theCC\n");
+    checkObj(jInterp, theCC, CrossCompilersTag);
+    DictObj *ccDict = theCC->dict;
+    checkObj(jInterp, ccDict, DictionariesTag);
+    
+    DictNodeObj *entry    = insertSymbol(ccDict, wordName);
+    checkObj(jInterp, entry, DictNodesTag);
+    jInterp->writeStdErr(jInterp, "addImplementation inserted symbol\n");
+//    ImplementationObj *implementation =
+//      newImplementation(jInterp, wordName, implBody);
+    FragmentObj *implementation =
+      newFragment(jInterp, wordName, implBody);
+    jInterp->writeStdErr(jInterp, "addImplementation created fragment\n");
+    checkObj(jInterp, implementation, FragmentsTag);
+    entry->value = (JObj*)implementation;
+  } else {
+    // raise error -- NEEDS Context!
+    
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+    strBufPrintf(jInterp, aStrBuf, 
+      "ERROR(impl) could not find the [%s] cross compiler.\n", ccType);
+    strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", implBody);
+    jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+    strBufClose(jInterp, aStrBuf);
+  }
+  jInterp->writeStdErr(jInterp, "addImplementation DONE\n");
+}
+
+static int lua_crossCompilers_addImplementation(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  Symbol *ccType   = luaL_checkstring(lstate, 1);
+  Symbol *wordName = luaL_checkstring(lstate, 2);
+  Symbol *implBody = luaL_checkstring(lstate, 3);
+  addImplementationImpl(jInterp, ccType, wordName, implBody);
+  lua_pop(lstate, 3);
+  return 0;
+}
+\stopCCode
+\stopTestSuite
+
 \startTestSuite[addFragment]
 
 \startCHeader
 typedef void (AddFragment)(
   JoyLoLInterp *jInterp,
   Symbol       *ccType,
+  Symbol       *wordName,
   Symbol       *fragmentBody
 );
 
@@ -140,6 +244,17 @@ void addFragmentImpl(
   Symbol       *fragmentBody
 ) {
   assert(jInterp);
+
+//  if (jInterp->debug) {
+  if (TRUE) {
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+    strBufPrintf(jInterp, aStrBuf, 
+      "DEBUG addFragment crossCompiler: [%s]\n", ccType);
+    strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", fragmentBody);
+    jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+    strBufClose(jInterp, aStrBuf);
+  }
   assert(jInterp->compilers);
 
   CrossCompilerObj *theCC = NULL;
@@ -151,8 +266,10 @@ void addFragmentImpl(
     theCC = jInterp->compilers[PureLuaCC];
   }
   if (theCC) {
+    checkObj(jInterp, theCC, CrossCompilersTag);
     DictObj *ccDict = theCC->dict;
-    assert(ccDict);
+    checkObj(jInterp, ccDict, DictionariesTag);
+    
     DictNodeObj *entry    = insertSymbol(ccDict, wordName);
     FragmentObj *fragment =
       newFragment(jInterp, wordName, fragmentBody);
@@ -276,8 +393,10 @@ Boolean printCrossCompilerCoAlg(
 
 \startCHeader
 typedef struct crossCompilers_class_struct {
-  JClass       super;
-  NewCrossCompiler      *newCrossCompilerFunc;
+  JClass            super;
+  NewCrossCompiler  *newCrossCompilerFunc;
+  AddImplementation *addImplementationFunc;
+  AddFragment       *addFragmentFunc;
 } CrossCompilersClass;
 
 \stopCHeader
@@ -320,12 +439,15 @@ Boolean registerCrossCompilers(JoyLoLInterp *jInterp) {
     = joyLoLCalloc(1, CrossCompilersClass);
   assert(theCoAlg);
   
-  theCoAlg->super.name           = CrossCompilersName;
-  theCoAlg->super.objectSize     = sizeof(CrossCompilerObj);
-  theCoAlg->super.initializeFunc = initializeCrossCompilers;
-  theCoAlg->super.equalityFunc   = equalityCrossCompilerCoAlg;
-  theCoAlg->super.printFunc      = printCrossCompilerCoAlg;
-  theCoAlg->newCrossCompilerFunc = newCrossCompilerImpl;
+  theCoAlg->super.name            = CrossCompilersName;
+  theCoAlg->super.objectSize      = sizeof(CrossCompilerObj);
+  theCoAlg->super.initializeFunc  = initializeCrossCompilers;
+  theCoAlg->super.equalityFunc    = equalityCrossCompilerCoAlg;
+  theCoAlg->super.printFunc       = printCrossCompilerCoAlg;
+  theCoAlg->newCrossCompilerFunc  = newCrossCompilerImpl;
+  theCoAlg->addImplementationFunc = addImplementationImpl;
+  theCoAlg->addFragmentFunc       = addFragmentImpl;
+
   size_t tag =
     registerJClass(jInterp, (JClass*)theCoAlg);
   
