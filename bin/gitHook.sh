@@ -93,6 +93,8 @@ cp $gitVTex base/dictionaries/doc
 cp $gitVC   base/dictionaries/doc
 cp $gitVTex base/fragments/doc
 cp $gitVC   base/fragments/doc
+cp $gitVTex base/implementations/doc
+cp $gitVC   base/implementations/doc
 cp $gitVTex base/jInterps/doc
 cp $gitVC   base/jInterps/doc
 cp $gitVTex base/loaders/doc

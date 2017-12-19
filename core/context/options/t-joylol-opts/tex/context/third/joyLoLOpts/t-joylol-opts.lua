@@ -43,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-12-08",
-  commitShortHash = "a1ce963",
-  commitLongHash  = "a1ce963215a31011237a35c332751d2045d4bf46",
-  subject         = "initialization of crossCompilers ansic ansicLua and pureLua",
+  commitDate      = "2017-12-18",
+  commitShortHash = "37863db",
+  commitLongHash  = "37863db2f14bc170e6bcd91c782af0c191fdf12a",
+  subject         = "added addImplementation and fixed newFragement",
   notes           = ""
 }
 

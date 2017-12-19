@@ -300,6 +300,10 @@ typedef struct fragments_class_struct FragmentsClass;
 #define getFragmentsClass(jInterp)                          \
   ((FragmentsClass*)getJClass(jInterp, FragmentsTag))
 
+typedef struct implementations_class_struct ImplementationsClass;
+#define getImplementationsClass(jInterp)                          \
+  ((ImplementationsClass*)getJClass(jInterp, ImplementationsTag))
+
 typedef struct loaders_class_struct LoadersClass;
 #define getLoadersClass(jInterp)                            \
   ((LoadersClass*)getJClass(jInterp, LoadersTag))

@@ -1,0 +1,20 @@
+% A ConTeXt document [master document: implementations.tex]
+
+\section[title=Words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerImplementationWords(
+  JoyLoLInterp* jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerImplementationWords(
+  JoyLoLInterp* jInterp
+) {
+  assert(jInterp);
+
+}
+\stopCCode
