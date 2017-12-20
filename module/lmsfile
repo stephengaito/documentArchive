@@ -14,6 +14,8 @@ litProgs.targets{
     'overview.tex',
     'codeManipulation.tex',
     'rules.tex',
+    'fragments.tex',
+    'words.tex',
     'lmsfile.tex',
     'preamble.tex',
     'conclusion.tex',

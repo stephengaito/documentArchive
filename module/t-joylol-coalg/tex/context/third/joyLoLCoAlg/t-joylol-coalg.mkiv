@@ -91,53 +91,29 @@
 
 % from file: codeManipulation.tex after line: 200
 
-\def\startJoyLoLWord[#1]{
-  \directlua{thirddata.joylol.newWord('#1')}
-}
-
-% from file: codeManipulation.tex after line: 200
-
-\def\stopJoyLoLWord{
-  \directlua{thirddata.joylol.endWord()}
-}
-
-% from file: codeManipulation.tex after line: 250
-
-\def\startJoyLoLFragment[#1]{
-  \directlua{thirddata.joylol.newFragment('#1')}
-}
-
-% from file: codeManipulation.tex after line: 250
-
-\def\stopJoyLoLFragment{
-  \directlua{thirddata.joylol.endFragment()}
-}
-
-% from file: codeManipulation.tex after line: 300
-
 \def\startJoyLoLStackActionIn[#1]{
   \directlua{thirddata.joylol.newStackActionIn('#1')}
 }
 
-% from file: codeManipulation.tex after line: 300
+% from file: codeManipulation.tex after line: 200
 
 \def\stopJoyLoLStackActionIn{
   \directlua{thirddata.joylol.endStackActionIn()}
 }
 
-% from file: codeManipulation.tex after line: 300
+% from file: codeManipulation.tex after line: 250
 
 \def\startJoyLoLStackActionOut[#1]{
   \directlua{thirddata.joylol.newStackActionOut('#1')}
 }
 
-% from file: codeManipulation.tex after line: 350
+% from file: codeManipulation.tex after line: 250
 
 \def\stopJoyLoLStackActionOut{
   \directlua{thirddata.joylol.endStackActionOut()}
 }
 
-% from file: codeManipulation.tex after line: 350
+% from file: codeManipulation.tex after line: 300
 
 \def\preDataStack[#1][#2]{
   \directlua{thirddata.joylol.addPreDataStackDescription('#1', '#2')}
@@ -147,7 +123,7 @@
   \directlua{thirddata.joylol.addPostDataStackDescription('#1')}
 }
 
-% from file: codeManipulation.tex after line: 400
+% from file: codeManipulation.tex after line: 300
 
 \def\preProcessStack[#1][#2]{
   \directlua{thirddata.joylol.addPreProcessStackDescription('#1', '#2')}
@@ -157,7 +133,7 @@
   \directlua{thirddata.joylol.addPostProcessStackDescription('#1')}
 }
 
-% from file: codeManipulation.tex after line: 400
+% from file: codeManipulation.tex after line: 350
 
 \defineLitProgs
   [JoyLoLCode]
@@ -171,7 +147,7 @@
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 
-% from file: codeManipulation.tex after line: 450
+% from file: codeManipulation.tex after line: 350
 
 \def\addCTestJoyLoLCallbacks#1{%
   \directlua{
@@ -194,22 +170,19 @@
     {\relax}{\stopRuleDone}\plusone%
 }
 
-% from file: rules.tex after line: 100
+% from file: fragments.tex after line: 0
 
-\let\stopImplementation\relax
-
-\def\stopImplementationDone{
-  \directlua{thirddata.joyLoLCoAlgs.stopImplementation()}
+\def\startJoyLoLFragment[#1]{
+  \directlua{thirddata.joylol.newFragment('#1')}
 }
 
-\def\startImplementation[#1]{
-  \directlua{thirddata.joyLoLCoAlgs.startImplementation('#1')}
-  \buff_pickup{_implementation_buffer_}%
-    {startImplementation}{stopImplementation}%
-    {\relax}{\stopImplementationDone}\plusone%
+% from file: fragments.tex after line: 0
+
+\def\stopJoyLoLFragment{
+  \directlua{thirddata.joylol.endFragment()}
 }
 
-% from file: rules.tex after line: 150
+% from file: fragments.tex after line: 0
 
 \let\stopFragment\relax
 
@@ -222,6 +195,33 @@
   \buff_pickup{_fragment_buffer_}%
     {startFragment}{stopFragment}%
     {\relax}{\stopFragmentDone}\plusone%
+}
+
+% from file: words.tex after line: 0
+
+\def\startJoyLoLWord[#1]{
+  \directlua{thirddata.joylol.newWord('#1')}
+}
+
+% from file: words.tex after line: 0
+
+\def\stopJoyLoLWord{
+  \directlua{thirddata.joylol.endWord()}
+}
+
+% from file: words.tex after line: 0
+
+\let\stopImplementation\relax
+
+\def\stopImplementationDone{
+  \directlua{thirddata.joyLoLCoAlgs.stopImplementation()}
+}
+
+\def\startImplementation[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.startImplementation('#1')}
+  \buff_pickup{_implementation_buffer_}%
+    {startImplementation}{stopImplementation}%
+    {\relax}{\stopImplementationDone}\plusone%
 }
 
 % from file: lmsfile.tex after line: 0

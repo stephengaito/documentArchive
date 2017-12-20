@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: joylolCoAlg.tex] 
+% A ConTeXt document [master document: joylolCoAlg.tex]
 
 \chapter[title=Code Manipulation] 
 
@@ -213,78 +213,6 @@ local function addDependency(dependencyName)
 end
 
 coAlgs.addDependency = addDependency
-\stopLuaCode
-
-\section{JoyLoL word environment}
-
-A JoyLoL word contains one or more sections of code, either JoyLoL, 
-ANSI-C or Lua, together with a collection of descriptors of the JoyLoL 
-\{pre, post\} \{data, process\} stacks. 
-
-\subsection{Examples}
-
-\subsection{Implementation: start}
-
-\startMkIVCode
-\def\startJoyLoLWord[#1]{
-  \directlua{thirddata.joylol.newWord('#1')}
-}
-\stopMkIVCode
-
-\startLuaCode
-local function newWord(aWord)
-end
-
-joylol.newWord = newWord
-\stopLuaCode
-
-\subsection{Implementation: stop}
-
-\startMkIVCode
-\def\stopJoyLoLWord{
-  \directlua{thirddata.joylol.endWord()}
-}
-\stopMkIVCode
-
-\startLuaCode
-local function endWord()
-end
-
-joylol.endWord = endWord
-\stopLuaCode
-
-\section{JoyLoL implementation fragment}
-
-\subsection{Examples}
-
-\subsection{Implementation: start}
-
-\startMkIVCode
-\def\startJoyLoLFragment[#1]{
-  \directlua{thirddata.joylol.newFragment('#1')}
-}
-\stopMkIVCode
-
-\startLuaCode
-local function newFragment(aFragment)
-end
-
-joylol.newFragment = newFragment
-\stopLuaCode
-
-\subsection{Implementation: stop}
-
-\startMkIVCode
-\def\stopJoyLoLFragment{
-  \directlua{thirddata.joylol.endFragment()}
-}
-\stopMkIVCode
-
-\startLuaCode
-local function endFragment()
-end
-
-joylol.endFragment = endFragment
 \stopLuaCode
 
 \section{JoyLoL stack action: In }

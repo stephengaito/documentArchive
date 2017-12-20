@@ -98,9 +98,9 @@ end
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-12-19",
-  commitShortHash = "4cd42e3",
-  commitLongHash  = "4cd42e383c018fcb2508440283a91088d2c52a58",
-  subject         = "added implementations based upon fragments",
+  commitShortHash = "4e15f7c",
+  commitLongHash  = "4e15f7c605741407ce71b70d3141c1fee8635f28",
+  subject         = "integrated new implementation into crossCompilers",
   notes           = ""
 }
 

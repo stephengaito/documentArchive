@@ -393,61 +393,33 @@ coAlgs.addDependency = addDependency
 
 -- from file: codeManipulation.tex after line: 200
 
-local function newWord(aWord)
-end
-
-joylol.newWord = newWord
-
--- from file: codeManipulation.tex after line: 200
-
-local function endWord()
-end
-
-joylol.endWord = endWord
-
--- from file: codeManipulation.tex after line: 250
-
-local function newFragment(aFragment)
-end
-
-joylol.newFragment = newFragment
-
--- from file: codeManipulation.tex after line: 250
-
-local function endFragment()
-end
-
-joylol.endFragment = endFragment
-
--- from file: codeManipulation.tex after line: 300
-
 local function newStackActionIn(aWord)
 end
 
 joylol.newStackActionIn = newStackActionIn
 
--- from file: codeManipulation.tex after line: 300
+-- from file: codeManipulation.tex after line: 250
 
 local function endStackActionIn()
 end
 
 joylol.endStackActionIn = endStackActionIn
 
--- from file: codeManipulation.tex after line: 350
+-- from file: codeManipulation.tex after line: 250
 
 local function newStackActionOut(aWord)
 end
 
 joylol.newStackActionOut = newStackActionOut
 
--- from file: codeManipulation.tex after line: 350
+-- from file: codeManipulation.tex after line: 250
 
 local function endStackActionOut()
 end
 
 joylol.endStackActionOut = endStackActionOut
 
--- from file: codeManipulation.tex after line: 350
+-- from file: codeManipulation.tex after line: 300
 
 local function addPreDataStackDescription(arg1, arg2)
 end
@@ -459,7 +431,7 @@ end
 
 joylol.addPostDataStackDescription = addPostDataStackDescription
 
--- from file: codeManipulation.tex after line: 400
+-- from file: codeManipulation.tex after line: 300
 
 local function addPreProcessStackDescription(arg1, arg2)
 end
@@ -471,7 +443,7 @@ end
 
 joylol.addPostProcessStackDescription = addPostProcessStackDescription
 
--- from file: codeManipulation.tex after line: 450
+-- from file: codeManipulation.tex after line: 350
 
 local function addCTestJoyLoLCallbacks(aCodeStream)
   local contests      = setDefs(thirddata, 'contests')
@@ -568,40 +540,21 @@ end
 
 coAlgs.stopRule = stopRule
 
--- from file: rules.tex after line: 100
+-- from file: fragments.tex after line: 0
 
-local function startImplementation(implementationType)
-  theCoAlg.curImpl      = { }
-  theCoAlg.curImpl.type = implType
+local function newFragment(aFragment)
 end
 
-coAlgs.startImplementation = startImplementation
+joylol.newFragment = newFragment
 
-local function stopImplementation()
-  local curImpl  = setDefs(theCoAlg, 'curImpl')
-  local implType = setDefs(curImpl, 'type', 'ansic')
-  local wordName = 'something'
-  local implBody = buffers.getcontent('_implementation_buffer_'):gsub("\13", "\n")
+-- from file: fragments.tex after line: 0
 
-  local pp = require 'pl.pretty'
-  texio.write_nl('---------impl-buffer-------------')
-  texio.write_nl(pp.write(implBody))
-  texio.write_nl('---------impl-buffer-------------')
-
-  joylol.crossCompilers.addImplementation(
-    implType,
-    wordName,
-    implBody
-  )
-
-  tex.sprint("\\starttyping")
-  tex.print(implBody)
-  tex.sprint("\\stoptyping")
+local function endFragment()
 end
 
-coAlgs.stopImplementation = stopImplementation
+joylol.endFragment = endFragment
 
--- from file: rules.tex after line: 150
+-- from file: fragments.tex after line: 50
 
 local function startFragment(fragmentType)
   theCoAlg.curFragment      = { }
@@ -633,6 +586,53 @@ local function stopFragment()
 end
 
 coAlgs.stopFragment = stopFragment
+
+-- from file: words.tex after line: 0
+
+local function newWord(aWord)
+end
+
+joylol.newWord = newWord
+
+-- from file: words.tex after line: 0
+
+local function endWord()
+end
+
+joylol.endWord = endWord
+
+-- from file: words.tex after line: 50
+
+local function startImplementation(implementationType)
+  theCoAlg.curImpl      = { }
+  theCoAlg.curImpl.type = implType
+end
+
+coAlgs.startImplementation = startImplementation
+
+local function stopImplementation()
+  local curImpl  = setDefs(theCoAlg, 'curImpl')
+  local implType = setDefs(curImpl, 'type', 'ansic')
+  local wordName = 'something'
+  local implBody = buffers.getcontent('_implementation_buffer_'):gsub("\13", "\n")
+
+  local pp = require 'pl.pretty'
+  texio.write_nl('---------impl-buffer-------------')
+  texio.write_nl(pp.write(implBody))
+  texio.write_nl('---------impl-buffer-------------')
+
+  joylol.crossCompilers.addImplementation(
+    implType,
+    wordName,
+    implBody
+  )
+
+  tex.sprint("\\starttyping")
+  tex.print(implBody)
+  tex.sprint("\\stoptyping")
+end
+
+coAlgs.stopImplementation = stopImplementation
 
 -- from file: lmsfile.tex after line: 0
 

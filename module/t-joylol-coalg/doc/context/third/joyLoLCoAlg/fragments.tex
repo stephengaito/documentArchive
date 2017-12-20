@@ -1,0 +1,87 @@
+% A ConTeXt document [master document: joylolCoAlg.tex]
+
+\chapter[title=JoyLoL code fragments]
+
+\section{JoyLoL implementation fragment}
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\def\startJoyLoLFragment[#1]{
+  \directlua{thirddata.joylol.newFragment('#1')}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function newFragment(aFragment)
+end
+
+joylol.newFragment = newFragment
+\stopLuaCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\def\stopJoyLoLFragment{
+  \directlua{thirddata.joylol.endFragment()}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function endFragment()
+end
+
+joylol.endFragment = endFragment
+\stopLuaCode
+
+\section[title=fragment definition environment]
+
+\startMkIVCode
+\let\stopFragment\relax
+
+\def\stopFragmentDone{
+  \directlua{thirddata.joyLoLCoAlgs.stopFragment()}
+}
+
+\def\startFragment[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.startFragment('#1')}
+  \buff_pickup{_fragment_buffer_}%
+    {startFragment}{stopFragment}%
+    {\relax}{\stopFragmentDone}\plusone%
+}
+\stopMkIVCode
+
+\startLuaCode
+local function startFragment(fragmentType)
+  theCoAlg.curFragment      = { }
+  theCoAlg.curFragment.type = fragmentType
+end
+
+coAlgs.startFragment = startFragment
+
+local function stopFragment()
+  local curFragment  = setDefs(theCoAlg, 'curFragment')
+  local fragmentType = setDefs(curFragment, 'type', 'ansic')
+  local wordName     = 'something'
+  local fragmentBody = buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
+
+  local pp = require 'pl.pretty'
+  texio.write_nl('---------fragment-buffer-------------')
+  texio.write_nl(pp.write(implBody))
+  texio.write_nl('---------fragment-buffer-------------')
+
+  joylol.crossCompilers.addFragment(
+    fragmentType,
+    wordName,
+    fragmentBody
+  )
+
+  tex.sprint("\\starttyping")
+  tex.print(fragmentBody)
+  tex.sprint("\\stoptyping")
+end
+
+coAlgs.stopFragment = stopFragment
+\stopLuaCode

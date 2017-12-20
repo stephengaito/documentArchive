@@ -1,0 +1,91 @@
+% A ConTeXt document [master document: joylolCoAlg.tex]
+
+\chapter[title=JoyLoL words]
+
+\section{JoyLoL word environment}
+
+A JoyLoL word contains one or more sections of code, either JoyLoL, 
+ANSI-C or Lua, together with a collection of descriptors of the JoyLoL 
+\{pre, post\} \{data, process\} stacks. 
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\def\startJoyLoLWord[#1]{
+  \directlua{thirddata.joylol.newWord('#1')}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function newWord(aWord)
+end
+
+joylol.newWord = newWord
+\stopLuaCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\def\stopJoyLoLWord{
+  \directlua{thirddata.joylol.endWord()}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function endWord()
+end
+
+joylol.endWord = endWord
+\stopLuaCode
+
+\section[title=JoyLoL word implementation]
+
+\startMkIVCode
+\let\stopImplementation\relax
+
+\def\stopImplementationDone{
+  \directlua{thirddata.joyLoLCoAlgs.stopImplementation()}
+}
+
+\def\startImplementation[#1]{
+  \directlua{thirddata.joyLoLCoAlgs.startImplementation('#1')}
+  \buff_pickup{_implementation_buffer_}%
+    {startImplementation}{stopImplementation}%
+    {\relax}{\stopImplementationDone}\plusone%
+}
+\stopMkIVCode
+
+\startLuaCode
+local function startImplementation(implementationType)
+  theCoAlg.curImpl      = { }
+  theCoAlg.curImpl.type = implType
+end
+
+coAlgs.startImplementation = startImplementation
+
+local function stopImplementation()
+  local curImpl  = setDefs(theCoAlg, 'curImpl')
+  local implType = setDefs(curImpl, 'type', 'ansic')
+  local wordName = 'something'
+  local implBody = buffers.getcontent('_implementation_buffer_'):gsub("\13", "\n")
+
+  local pp = require 'pl.pretty'
+  texio.write_nl('---------impl-buffer-------------')
+  texio.write_nl(pp.write(implBody))
+  texio.write_nl('---------impl-buffer-------------')
+
+  joylol.crossCompilers.addImplementation(
+    implType,
+    wordName,
+    implBody
+  )
+
+  tex.sprint("\\starttyping")
+  tex.print(implBody)
+  tex.sprint("\\stoptyping")
+end
+
+coAlgs.stopImplementation = stopImplementation
+\stopLuaCode
