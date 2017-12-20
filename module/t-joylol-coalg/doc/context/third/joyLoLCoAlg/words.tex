@@ -19,7 +19,10 @@ ANSI-C or Lua, together with a collection of descriptors of the JoyLoL
 \stopMkIVCode
 
 \startLuaCode
-local function newWord(aWord)
+local function newWord(wordName)
+  local curWord = setDefs(theCoAlg, 'curWord')
+  curWord.name = wordName
+  setDefs(curWord, 'code')
 end
 
 joylol.newWord = newWord
@@ -35,6 +38,41 @@ joylol.newWord = newWord
 
 \startLuaCode
 local function endWord()
+  local curWord =
+    shouldExist(theCoAlg, 'curWord', {
+      '\\stopJoyLoLWord used outside of ',
+      '\\startJoyLoLWord environment'
+    })
+
+  local pp = require 'pl.pretty'
+  texio.write_nl('---------joylol-word-------------')
+  texio.write_nl(pp.write(curWord))
+  texio.write_nl('---------joylol-word-------------')
+
+  local wordName = 
+    shouldExist(curWord, 'name',
+      'joylol word not named'
+    )
+  local codeVersions =
+    shouldExist(curWord, 'code',
+      'incorrectly setup joylol word'
+    )
+  
+  local numCodeVersions = 0
+  for implType, implBody in pairs(codeVersions) do
+    joylol.crossCompilers.addImplementation(
+      implType,
+      wordName,
+      implBody
+    )
+    numCodeVersions = numCodeVersions + 1
+  end
+  if numCodeVersions < 1 then
+    error(tConcat({
+      'no \\startImplementation environment used ',
+      'inside a \\startJoyLoLWord environment'
+    }))
+  end
 end
 
 joylol.endWord = endWord
@@ -58,29 +96,34 @@ joylol.endWord = endWord
 \stopMkIVCode
 
 \startLuaCode
-local function startImplementation(implementationType)
-  theCoAlg.curImpl      = { }
-  theCoAlg.curImpl.type = implType
+local function startImplementation(implType)
+  local curWord =
+    shouldExist(theCoAlg, 'curWord', {
+      '\\startImplementation used outside of ',
+      '\\startJoyLoLWord environment'
+    })
+  curWord.curType = implType
 end
 
 coAlgs.startImplementation = startImplementation
 
 local function stopImplementation()
-  local curImpl  = setDefs(theCoAlg, 'curImpl')
-  local implType = setDefs(curImpl, 'type', 'ansic')
-  local wordName = 'something'
-  local implBody = buffers.getcontent('_implementation_buffer_'):gsub("\13", "\n")
-
-  local pp = require 'pl.pretty'
-  texio.write_nl('---------impl-buffer-------------')
-  texio.write_nl(pp.write(implBody))
-  texio.write_nl('---------impl-buffer-------------')
-
-  joylol.crossCompilers.addImplementation(
-    implType,
-    wordName,
-    implBody
-  )
+  local curWord =
+    shouldExist(theCoAlg, 'curWord', {
+      '\\stopImplementation used outside of ',
+      '\\startJoyLoLWord environment'
+    })
+  local codeVersions = 
+    shouldExist(curWord, 'code',
+      'incorrectly setup joylol word - missing code'
+    )
+  local curType =
+    shouldExist(curWord, 'curType',
+      'incorrectly setup joylol word - missing curType'
+    )
+  local implBody =
+    buffers.getcontent('_implementation_buffer_'):gsub("\13", "\n")
+  codeVersions[curType] = implBody
 
   tex.sprint("\\starttyping")
   tex.print(implBody)

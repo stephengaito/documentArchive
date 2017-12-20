@@ -44,9 +44,9 @@ options.systemPath = '/usr/lib/joylol'
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2017-12-20",
-  commitShortHash = "2d2011a",
-  commitLongHash  = "2d2011a0f58b6955b39d120ee82eaf1387eb3f4f",
-  subject         = "refactored t-joylol-coalg implementation and fragments into their own tex files",
+  commitShortHash = "0bbc604",
+  commitLongHash  = "0bbc604203950b72495abdd8f79ca90ca9b514ce",
+  subject         = "refactored fragment capture to work on whole joylol fragment definitions",
   notes           = ""
 }
 
