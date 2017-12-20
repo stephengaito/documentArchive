@@ -12,18 +12,19 @@ if not modules then modules = { } end modules ['t-joylol-coalg'] = {
     license   = "MIT License"
 }
 
-thirddata        = thirddata        or {}
-thirddata.joylol = thirddata.joylol or {}
+thirddata         = thirddata        or {}
+thirddata.joylol  = thirddata.joylol or {}
 
-local joylol     = thirddata.joylol
+local joylol      = thirddata.joylol
 
-local coAlgs     = thirddata.joyLoLCoAlgs
-coAlgs.theCoAlg  = {}
-local theCoAlg   = coAlgs.theCoAlg
+local coAlgs      = thirddata.joyLoLCoAlgs
+coAlgs.theCoAlg   = {}
+local theCoAlg    = coAlgs.theCoAlg
 
-local litProgs   = thirddata.literateProgs or {}
-local setDefs    = litProgs.setDefs
-local build      = setDefs(litProgs, 'build')
+local litProgs    = thirddata.literateProgs or {}
+local setDefs     = litProgs.setDefs
+local shouldExist = litProgs.shouldExist
+local build       = setDefs(litProgs, 'build')
 
 local tInsert = table.insert
 local tConcat = table.concat
@@ -542,7 +543,10 @@ coAlgs.stopRule = stopRule
 
 -- from file: fragments.tex after line: 0
 
-local function newFragment(aFragment)
+local function newFragment(fragmentName)
+  local curFragment = setDefs(theCoAlg, 'curFragment')
+  curFragment.name  = fragmentName
+  setDefs(curFragment, 'code')
 end
 
 joylol.newFragment = newFragment
@@ -550,6 +554,41 @@ joylol.newFragment = newFragment
 -- from file: fragments.tex after line: 0
 
 local function endFragment()
+  local curFragment =
+    shouldExist(theCoAlg, 'curFragment', {
+      '\\stopJoyLoLFragment used outside of ',
+      '\\startJoyLoLFragment environment'
+    })
+ 
+  local pp = require 'pl.pretty'
+  texio.write_nl('---------joylol-fragment-------------')
+  texio.write_nl(pp.write(curFragment))
+  texio.write_nl('---------joylol-fragment-------------')
+
+  local wordName =
+    shouldExist(curFragment, 'name',
+      'joylol fragment not named'
+    )
+  local codeVersions =
+    shouldExist(curFragment, 'code',
+      'incorrectly setup joylol fragment'
+    )
+ 
+  local numCodeVersions = 0
+  for fragmentType, fragmentBody in pairs(codeVersions) do
+    joylol.crossCompilers.addFragment(
+      fragmentType,
+      wordName,
+      fragmentBody
+    )
+    numCodeVersions = numCodeVersions + 1
+  end
+  if numCodeVersions < 1 then
+    error(tConcat({
+      'no \\startFragment environment used ',
+      'inside a \\startJoyLoLFragment environment'
+    }))
+  end
 end
 
 joylol.endFragment = endFragment
@@ -557,28 +596,33 @@ joylol.endFragment = endFragment
 -- from file: fragments.tex after line: 50
 
 local function startFragment(fragmentType)
-  theCoAlg.curFragment      = { }
-  theCoAlg.curFragment.type = fragmentType
+  local curFragment =
+    shouldExist(theCoAlg, 'curFragment', {
+      '\\startFragment used outside of ',
+      '\\startJoyLoLFragment environment'
+    })
+  curFragment.curType  = fragmentType
 end
 
 coAlgs.startFragment = startFragment
 
 local function stopFragment()
-  local curFragment  = setDefs(theCoAlg, 'curFragment')
-  local fragmentType = setDefs(curFragment, 'type', 'ansic')
-  local wordName     = 'something'
-  local fragmentBody = buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
-
-  local pp = require 'pl.pretty'
-  texio.write_nl('---------fragment-buffer-------------')
-  texio.write_nl(pp.write(implBody))
-  texio.write_nl('---------fragment-buffer-------------')
-
-  joylol.crossCompilers.addFragment(
-    fragmentType,
-    wordName,
-    fragmentBody
-  )
+  local curFragment  =
+    shouldExist(theCoAlg, 'curFragment', {
+      '\\stopFragment used outside of ',
+      '\\startJoyLoLFragment environment'
+    })
+  local codeVersions =
+    shouldExist(curFragment, 'code',
+      'incorrectly setup joylol fragment - missing code'
+    )
+  local curType =
+    shouldExist(curFragment, 'curType',
+      'incorrectly setup fragment - missing curType'
+    )
+  local fragmentBody =
+    buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
+  codeVersions[curType] = fragmentBody
 
   tex.sprint("\\starttyping")
   tex.print(fragmentBody)
