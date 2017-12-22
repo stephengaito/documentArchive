@@ -15,7 +15,7 @@
   )
 \stopRule
 
-\startImplementation[ansiC]
+\startImplementation[ansic]
   (
     (pushData true)
   )
@@ -36,7 +36,7 @@
   )
 \stopRule
 
-\startImplementation[ansiC]
+\startImplementation[ansic]
   (
     (pushData false)
   )
@@ -71,7 +71,7 @@
   )
 \stopRule
 
-\startImplementation[ansiC]
+\startImplementation[ansic]
   (
     (popData aBool)
     (doIfte aBool
@@ -111,15 +111,15 @@
   )
 \stopRule
 
-%\startImplementation[ansiC]
-%  (
-%    (popData aBool)
-%    (doIfte aBool
-%      (pushData false)
-%      (pushData true)
-%    )
-%  )
-%\stopImplementation
+\startImplementation[ansic]
+  (
+    (popData aBool)
+    (doIfte aBool
+      (pushData false)
+      (pushData true)
+    )
+  )
+\stopImplementation
 
 \stopJoyLoLWord
 
@@ -150,7 +150,7 @@
   )
 \stopRule
 
-\startImplementation[ansiC]
+\startImplementation[ansic]
   (
     (popData aBool)
     (doIfte aBool
@@ -204,7 +204,7 @@
   )
 \stopRule
 
-\startImplementation[ansiC]
+\startImplementation[ansic]
   (
     (popData aBool1)
     (popData aBool2)
@@ -264,7 +264,7 @@
   )
 \stopRule
 
-\startImplementation[ansiC]
+\startImplementation[ansic]
   (
     (popData aBool1)
     (popData aBool2)
@@ -359,7 +359,7 @@ static void ifteAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\startImplementation[ansiC]
+\startImplementation[ansic]
   (
     (popData topElse)
     (popData topThen)
@@ -420,7 +420,7 @@ static void ifteContAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\startImplementation[ansiC]
+\startImplementation[ansic]
   (
     (popData topIf)
     (popProcess topThen)
