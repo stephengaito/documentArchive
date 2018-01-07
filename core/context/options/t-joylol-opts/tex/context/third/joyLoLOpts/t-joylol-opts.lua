@@ -43,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-12-20",
-  commitShortHash = "0bbc604",
-  commitLongHash  = "0bbc604203950b72495abdd8f79ca90ca9b514ce",
-  subject         = "refactored fragment capture to work on whole joylol fragment definitions",
+  commitDate      = "2017-12-22",
+  commitShortHash = "c7bc126",
+  commitLongHash  = "c7bc126eed12814b40701f69b2500d949cef0e72",
+  subject         = "small update of boolean",
   notes           = ""
 }
 
