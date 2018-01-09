@@ -1,0 +1,11 @@
+-- A Lua Make System file
+
+require 'lms.context'
+
+context.targets{
+  mainDoc  = 'shaggyDoc.tex',
+  docFiles = {
+  },
+  docDir    = 'doc',
+}
+
