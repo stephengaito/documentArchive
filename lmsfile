@@ -5,6 +5,8 @@ require 'lms.context'
 context.targets{
   mainDoc  = 'shaggyDog.tex',
   docFiles = {
+    'preface.tex',
+    'abstract.tex',
   },
   docDir    = 'doc',
 }
