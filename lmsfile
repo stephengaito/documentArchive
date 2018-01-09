@@ -3,7 +3,7 @@
 require 'lms.context'
 
 context.targets{
-  mainDoc  = 'shaggyDoc.tex',
+  mainDoc  = 'shaggyDog.tex',
   docFiles = {
   },
   docDir    = 'doc',
