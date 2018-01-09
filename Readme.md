@@ -1,4 +1,4 @@
-# A [Wee Beastie](http://www.robertburns.org/works/75.shtml)'s Guide to Reality: A []Shaggy Dog Story](https://en.wikipedia.org/wiki/Shaggy_dog_story)
+# A [Wee Beastie](http://www.robertburns.org/works/75.shtml)'s Guide to Reality: A [Shaggy Dog Story](https://en.wikipedia.org/wiki/Shaggy_dog_story)
 
 This is an extended abstract outlining my personal attempt to provide a 
 mathematically rigorous theory of reality for any finite computational 
