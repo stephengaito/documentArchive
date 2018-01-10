@@ -40,9 +40,8 @@ local function endFragment()
       '\\startJoyLoLFragment environment'
     })
     
-  local pp = require 'pl.pretty'
   texio.write_nl('---------joylol-fragment-------------')
-  texio.write_nl(pp.write(curFragment))
+  texio.write_nl(lpPP(curFragment))
   texio.write_nl('---------joylol-fragment-------------')
 
   local wordName = 

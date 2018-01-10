@@ -71,9 +71,8 @@ local function stopRule()
   end
   rules[curSection] = lines
 
-  local pp = require 'pl.pretty'
   texio.write_nl('---------rules-buffer-------------')
-  texio.write_nl(pp.write(rules))
+  texio.write_nl(lpPP(rules))
   texio.write_nl('---------rules-buffer-------------')
 end
 

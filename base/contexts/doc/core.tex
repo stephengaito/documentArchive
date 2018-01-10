@@ -26,8 +26,8 @@
 \stopRule
 
 \startFragment[ansic]
-  assert(aCtx);
-  aCtx->data = newPair(aCtx->jInterp, lolToPush, aCtx->data);
+  {{aCtx}}->data =
+    newPair({{aCtx}}->jInterp, {{lolToPush}}, {{aCtx}}->data);
 \stopFragment
 
 \stopJoyLoLFragment

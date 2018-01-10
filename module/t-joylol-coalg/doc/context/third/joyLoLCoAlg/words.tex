@@ -44,9 +44,8 @@ local function endWord()
       '\\startJoyLoLWord environment'
     })
 
-  local pp = require 'pl.pretty'
   texio.write_nl('---------joylol-word-------------')
-  texio.write_nl(pp.write(curWord))
+  texio.write_nl(lpPP(curWord))
   texio.write_nl('---------joylol-word-------------')
 
   local wordName = 

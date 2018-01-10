@@ -97,10 +97,10 @@ end
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2017-12-22",
-  commitShortHash = "c7bc126",
-  commitLongHash  = "c7bc126eed12814b40701f69b2500d949cef0e72",
-  subject         = "small update of boolean",
+  commitDate      = "2018-01-07",
+  commitShortHash = "adc2353",
+  commitLongHash  = "adc2353347514b746ee0d134a9bc7823e916a900",
+  subject         = "re-started thinking about joylol",
   notes           = ""
 }
 

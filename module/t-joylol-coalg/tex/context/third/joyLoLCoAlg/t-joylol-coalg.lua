@@ -33,6 +33,7 @@ local tSort   = table.sort
 local sFmt    = string.format
 local sMatch  = string.match
 local toStr   = tostring
+local lpPP    = litProgs.prettyPrint
 
 -- **Problem**: we can not assume that a user *has* a compiled and working
 -- C based JoyLoL. This is the "Bootstrapping (Compiler)" problem (see
@@ -532,9 +533,8 @@ local function stopRule()
   end
   rules[curSection] = lines
 
-  local pp = require 'pl.pretty'
   texio.write_nl('---------rules-buffer-------------')
-  texio.write_nl(pp.write(rules))
+  texio.write_nl(lpPP(rules))
   texio.write_nl('---------rules-buffer-------------')
 end
 
@@ -560,9 +560,8 @@ local function endFragment()
       '\\startJoyLoLFragment environment'
     })
  
-  local pp = require 'pl.pretty'
   texio.write_nl('---------joylol-fragment-------------')
-  texio.write_nl(pp.write(curFragment))
+  texio.write_nl(lpPP(curFragment))
   texio.write_nl('---------joylol-fragment-------------')
 
   local wordName =
@@ -650,9 +649,8 @@ local function endWord()
       '\\startJoyLoLWord environment'
     })
 
-  local pp = require 'pl.pretty'
   texio.write_nl('---------joylol-word-------------')
-  texio.write_nl(pp.write(curWord))
+  texio.write_nl(lpPP(curWord))
   texio.write_nl('---------joylol-word-------------')
 
   local wordName =
