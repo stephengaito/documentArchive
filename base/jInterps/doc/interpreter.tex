@@ -324,6 +324,10 @@ typedef struct parsers_class_struct ParsersClass;
 #define getParsersClass(jInterp)                            \
   ((ParsersClass*)getJClass(jInterp, ParsersTag))
 
+typedef struct rules_class_struct RulesClass;
+#define getRulesClass(jInterp)                            \
+  ((RulesClass*)getJClass(jInterp, RulesTag))
+
 typedef struct stringBuffers_class_struct StringBuffersClass;
 #define getStringBuffersClass(jInterp)                      \
   ((StringBuffersClass*)getJClass(jInterp, StringBuffersTag))

@@ -43,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2018-01-07",
-  commitShortHash = "adc2353",
-  commitLongHash  = "adc2353347514b746ee0d134a9bc7823e916a900",
-  subject         = "re-started thinking about joylol",
+  commitDate      = "2018-01-10",
+  commitShortHash = "ca68048",
+  commitLongHash  = "ca68048e78f7c336667ab004cb01407dd8b966a5",
+  subject         = "removed dependence on penlight pretty",
   notes           = ""
 }
 

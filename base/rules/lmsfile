@@ -1,0 +1,75 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+lfs.mkdir('build')
+lfs.mkdir('build/joylol')
+lfs.mkdir('install')
+lfs.mkdir('install/joylol')
+
+require 'lms.litProgs'
+
+litProgs.targets{
+  mainDoc  = 'rules.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/rules.h',
+    'joylol/rules-private.h',
+    'rules.c',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets{
+  coAlgs = {
+    'rules',
+  },
+  srcFiles = {
+    'joylol/rules.h',
+    'joylol/rules-private.h',
+    'rules.c',
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+  buildDir = 'build',
+}
+
+require 'lms.contests'
+
+contests.targets{
+  testExecs = {
+    'allCTests',
+  },
+  mainDoc = 'rules.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol/rules.h',
+    'joylol/rules-private.h',
+    'rules.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}

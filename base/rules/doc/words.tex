@@ -1,0 +1,20 @@
+% A ConTeXt document [master document: rules.tex]
+
+\section[title=Words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerRuleWords(
+  JoyLoLInterp* jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerRuleWords(
+  JoyLoLInterp* jInterp
+) {
+  assert(jInterp);
+
+}
+\stopCCode

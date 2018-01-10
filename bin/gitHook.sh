@@ -107,6 +107,8 @@ cp $gitVTex base/pairs/doc
 cp $gitVC   base/pairs/doc
 cp $gitVTex base/parsers/doc
 cp $gitVC   base/parsers/doc
+cp $gitVTex base/rules/doc
+cp $gitVC   base/rules/doc
 cp $gitVTex base/stringBuffers/doc
 cp $gitVC   base/stringBuffers/doc
 cp $gitVTex base/symbols/doc

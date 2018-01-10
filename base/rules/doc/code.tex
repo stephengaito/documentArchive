@@ -1,0 +1,263 @@
+% A ConTeXt document [master document: rules.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\component gitVersion-c
+
+\startCHeader
+typedef struct rule_object_struct {
+  JObj    super;
+  Symbol *name;
+  Symbol *body;
+} RuleObj;
+\stopCHeader
+
+\startTestSuite[newRule]
+
+\startCHeader
+typedef RuleObj* (NewRule)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aName,
+  Symbol       *aBody
+);
+
+#define newRule(jInterp, aName, aBody)      \
+  (                                                   \
+    assert(getRulesClass(jInterp)           \
+      ->newRuleFunc),                       \
+    (getRulesClass(jInterp)                 \
+      ->newRuleFunc(jInterp, aName, aBody)) \
+  )
+
+//#define asRule(aLoL) (((aLoL)->flags) & BOOLEAN_FLAG_MASK)
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern RuleObj* newRuleImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aName,
+  Symbol       *aBody
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+RuleObj* newRuleImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aName,
+  Symbol       *aBody
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  RuleObj *result =
+    (RuleObj*)newObject(jInterp, RulesTag);
+  assert(result);
+  
+//  result->super.type  = jInterp->coAlgs[RulesTag];
+  result->name        = strdup(aName);
+  result->body        = strdup(aBody);
+ 
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new Rule]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  RuleObj* aNewRule =
+    newRule(jInterp, "ansiC", "a rule body");
+  AssertPtrNotNull(aNewRule);
+  AssertPtrNotNull(asType(aNewRule));
+  AssertIntEquals(asTag(aNewRule), RulesTag);
+  AssertIntTrue(isAtom(aNewRule));
+  AssertIntTrue(isRule(aNewRule));
+  AssertIntFalse(isPair(aNewRule));
+\stopCTest
+\stopTestCase
+
+\startTestCase[print Rule]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+
+  RuleObj* aLoL =
+    newRule(jInterp, "ansiC", "a rule body");
+  AssertPtrNotNull(aLoL);
+  printLoL(jInterp, aStrBuf, (JObj*)aLoL);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "rule ");
+  strBufClose(jInterp, aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[isRule]
+
+\startCHeader
+#define isRule(aLoL)            \
+  (                                       \
+    (                                     \
+      (aLoL) &&                           \
+      asType(aLoL) &&                     \
+      (asTag(aLoL) == RulesTag) \
+    ) ?                                   \
+      TRUE :                              \
+      FALSE                               \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityRuleCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj     *lolA,
+  JObj     *lolB
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityRuleCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj     *lolA,
+  JObj     *lolB
+) {
+  DEBUG(jInterp, "ruleCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != RulesTag) return FALSE;
+  if (lolA != lolB) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing rules]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printRuleCoAlg(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  JObj        *aLoL
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printRuleCoAlg(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  JObj        *aLoL
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == RulesTag);
+
+  strBufPrintf(jInterp, aStrBuf, "rule ");
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print rules]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[RulesTag]);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+  
+  RuleObj* aNewRule =
+    newRule(jInterp, "ansiC", "a rule body");
+  AssertPtrNotNull(aNewRule);
+  printLoL(jInterp, aStrBuf, (JObj*)aNewRule);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "rule ");
+  strBufClose(jInterp, aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerRules]
+
+\startCHeader
+typedef struct rules_class_struct {
+  JClass       super;
+  NewRule      *newRuleFunc;
+} RulesClass;
+
+\stopCHeader
+
+\startCCode
+static Boolean initializeRules(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  registerRuleWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerRules(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerRules(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  RulesClass* theCoAlg
+    = joyLoLCalloc(1, RulesClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name           = RulesName;
+  theCoAlg->super.objectSize     = sizeof(RuleObj);
+  theCoAlg->super.initializeFunc = initializeRules;
+  theCoAlg->super.equalityFunc   = equalityRuleCoAlg;
+  theCoAlg->super.printFunc      = printRuleCoAlg;
+  theCoAlg->newRuleFunc = newRuleImpl;
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == RulesTag);
+  assert(jInterp->coAlgs[tag]);
+   
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Rules coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerRules
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getRulesClass(jInterp));
+  RulesClass *coAlg = getRulesClass(jInterp);
+  registerRules(jInterp);
+  AssertPtrNotNull(getRulesClass(jInterp));
+  AssertPtrEquals(getRulesClass(jInterp), coAlg);
+  AssertIntEquals(
+    getRulesClass(jInterp)->super.objectSize,
+    sizeof(RuleObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite
