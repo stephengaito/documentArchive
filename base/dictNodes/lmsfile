@@ -9,7 +9,7 @@ lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
-litProgs.targets{
+lpTargets = litProgs.targets{
   mainDoc  = 'dictNodes.tex',
   docFiles = {
     'overview.tex',
@@ -22,25 +22,20 @@ litProgs.targets{
     'words.tex',
     'conclusion.tex',
   },
-  srcFiles = {
-    'joylol/dictNodes.h',
-    'joylol/dictNodes-private.h',
-    'dictNodes.c',
-  },
-  buildDir  = 'build',
   docDir    = 'doc',
-  moduleDir = 'install',
 }
 
 require 'lms.joyLoL'
 
-joylol.targets{
+joylol.targets(lpTargets, {
   coAlgs = {
     'dictNodes',
   },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/dictNodes.h',
     'joylol/dictNodes-private.h',
+  },
+  cCodeFiles = {
     'dictNodes.c',
   },
   coAlgLibs = {
@@ -48,30 +43,19 @@ joylol.targets{
     'symbols',
     'stringBuffers',
   },
-  buildDir = 'build',
-}
+})
 
 require 'lms.contests'
 
-contests.targets{
+contests.targets(lpTargets, {
   testExecs = {
     'allCTests',
   },
-  mainDoc = 'dictNodes.tex',
-  docFiles = {
-    'overview.tex',
-    'code.tex',
-    'find.tex',
-    'insert.tex',
-    'rotate.tex',
-    'check.tex',
-    'lua.tex',
-    'words.tex',
-    'conclusion.tex',
-  },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/dictNodes.h',
     'joylol/dictNodes-private.h',
+  },
+  cCodeFiles = {
     'dictNodes.c',
   },
   testLibDirs = {
@@ -79,7 +63,4 @@ contests.targets{
   testLibs = {
     '<HOME>/.joylol/joylol/jInterps',
   },
-  buildDir  = 'build',
-  docDir    = 'doc',
-  moduleDir = 'install',
-}
+})

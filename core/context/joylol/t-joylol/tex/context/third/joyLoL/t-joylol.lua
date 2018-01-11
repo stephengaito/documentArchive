@@ -98,9 +98,9 @@ end
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2018-01-10",
-  commitShortHash = "ca68048",
-  commitLongHash  = "ca68048e78f7c336667ab004cb01407dd8b966a5",
-  subject         = "removed dependence on penlight pretty",
+  commitShortHash = "1de7de3",
+  commitLongHash  = "1de7de30fa03b6a27a53a8017007a672309823f1",
+  subject         = "added rules coalg",
   notes           = ""
 }
 

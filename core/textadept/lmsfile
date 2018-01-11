@@ -16,7 +16,7 @@ lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
-litProgs.targets{
+lpTargets = litProgs.targets{
   mainDoc  = 'coreTextadept.tex',
   docFiles = {
     'overview.tex',
@@ -28,41 +28,38 @@ litProgs.targets{
     'luaInterface.tex',
     'conclusion.tex',
   },
-  srcFiles = {
+  docDir    = 'doc',
+}
+
+require 'lms.contextMod'
+
+contextMod.targets(lpTargets, {
+  moduleFiles = {
     'joylol.lua',
     'installJoyLoLLanguage.lua',
     'options.lua',
     'init.lua',
     'repl.lua',
-    'joylol/core/textadept.h',
-    'joylol/core/textadept-private.h',
-    'textadept.c',
   },
-  buildDir  = 'build',
-  docDir    = 'doc',
   moduleDir = 'install',
-}
+})
 
 require 'lms.joyLoL'
 
-joylol.targets{
+joylol.targets(lpTargets, {
   coAlgs = {
     'core/textadept',
   },
-  srcFiles = {
-    'joylol.lua',
-    'installJoyLoLLanguage.lua',
-    'options.lua',
-    'init.lua',
-    'repl.lua',
+  cHeaderFiles = {
     'joylol/core/textadept.h',
     'joylol/core/textadept-private.h',
+  },
+  cCodeFiles = {
     'textadept.c',
   },
   coAlgLibs = {
   },
-  buildDir = 'build',
-}
+})
 
 local joylolTarget =
   makePath{getEnv('HOME'), '.textadept', 'lexers', 'joylol.lua'}

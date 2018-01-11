@@ -16,7 +16,7 @@ lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
-litProgs.targets{
+lpTargets = litProgs.targets{
   mainDoc  = 'coreLua.tex',
   docFiles = {
     'overview.tex',
@@ -25,36 +25,37 @@ litProgs.targets{
     'luaInterface.tex',
     'conclusion.tex',
   },
-  srcFiles = {
+  docDir    = 'doc',
+}
+
+require 'lms.contextMod'
+
+contextMod.targets(lpTargets, {
+  moduleFiles = {
     'joylol.lua',
+  },
+  moduleDir = 'install',
+})
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'core/lua',
+  },
+  cHeaderFiles = {
     'joylol/core/lua.h',
     'joylol/core/lua-private.h',
+  },
+  cCodeFiles = {
     'lua.c',
   },
   cCodeLibs = {
     '-lreadline',
   },
-  buildDir  = 'build',
-  docDir    = 'doc',
-  moduleDir = 'install',
-}
-
-require 'lms.joyLoL'
-
-joylol.targets{
-  coAlgs = {
-    'core/lua',
-  },
-  srcFiles = {
-    'joylol.lua',
-    'joylol/core/lua.h',
-    'joylol/core/lua-private.h',
-    'lua.c',
-  },
   coAlgLibs = {
   },
-  buildDir = 'build',
-}
+})
 
 local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}
 local joylolDep    = makePath{'build', 'joylol.lua'}

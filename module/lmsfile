@@ -8,7 +8,7 @@ lfs.mkdir('build/joyLoLMinLua')
 
 require 'lms.litProgs'
 
-litProgs.targets{
+lpTargets = litProgs.targets{
   mainDoc  = 'joyLoLCoAlg.tex',
   docFiles = {
     'overview.tex',
@@ -20,13 +20,16 @@ litProgs.targets{
     'preamble.tex',
     'conclusion.tex',
   },
-  srcFiles = {
+  docDir    = 't-joylol-coalg/doc/context/third/joyLoLCoAlg',
+}
+
+require 'lms.contextMod'
+
+contextMod.targets(lpTargets, {
+  moduleFiles = {
     't-joylol-coalg.mkiv',
     't-joylol-coalg.lua',
-    't-joylol-coalg-templates.lua',
     'joyLoLMinLua/prettyPrint.lua',
   },
-  buildDir  = 'build',
-  docDir    = 't-joylol-coalg/doc/context/third/joyLoLCoAlg',
   moduleDir = 't-joylol-coalg/tex/context/third/joyLoLCoAlg',
-}
+})

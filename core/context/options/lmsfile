@@ -6,18 +6,22 @@ lfs.mkdir('build')
 
 require 'lms.litProgs'
 
-litProgs.targets{
+lpTargets = litProgs.targets{
   mainDoc  = 'coreContextOptions.tex',
   docFiles = {
     'overview.tex',
     'preamble.tex',
     'conclusion.tex',
   },
-  srcFiles = {
+  docDir    = 't-joylol-opts/doc/context/third/joyLoLOpts',
+}
+
+require 'lms.contextMod'
+
+contextMod.targets(lpTargets, {
+  moduleFiles = {
     't-joylol-opts.mkiv',
     't-joylol-opts.lua',
   },
-  buildDir  = 'build',
-  docDir    = 't-joylol-opts/doc/context/third/joyLoLOpts',
   moduleDir = 't-joylol-opts/tex/context/third/joyLoLOpts',
-}
+})

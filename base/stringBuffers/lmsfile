@@ -9,7 +9,7 @@ lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
-litProgs.targets{
+lpTargets = litProgs.targets{
   mainDoc  = 'stringBuffers.tex',
   docFiles = {
     'overview.tex',
@@ -18,51 +18,39 @@ litProgs.targets{
     'lua.tex',
     'conclusion.tex',
   },
-  srcFiles = {
-    'joylol/stringBuffers.h',
-    'joylol/stringBuffers-private.h',
-    'stringBuffers.c',
-  },
-  buildDir  = 'build',
   docDir    = 'doc',
-  moduleDir = 'install',
 }
 
 require 'lms.joyLoL'
 
-joylol.targets{
+joylol.targets(lpTargets, {
   coAlgs = {
     'stringBuffers',
   },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/stringBuffers.h',
     'joylol/stringBuffers-private.h',
+  },
+  cCodeFiles = {
     'stringBuffers.c',
   },
   coAlgLibs = {
     'jInterps',
     'symbols',
   },
-  buildDir = 'build',
-}
+})
 
 require 'lms.contests'
 
-contests.targets{
+contests.targets(lpTargets, {
   testExecs = {
     'allCTests',
   },
-  mainDoc = 'stringBuffers.tex',
-  docFiles = {
-    'overview.tex',
-    'code.tex',
-    'words.tex',
-    'lua.tex',
-    'conclusion.tex',
-  },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/stringBuffers.h',
     'joylol/stringBuffers-private.h',
+  },
+  cCodeFiles = {
     'stringBuffers.c',
   },
   testLibDirs = {
@@ -70,7 +58,4 @@ contests.targets{
   testLibs = {
     '<HOME>/.joylol/joylol/jInterps',
   },
-  buildDir  = 'build',
-  docDir    = 'doc',
-  moduleDir = 'install',
-}
+})

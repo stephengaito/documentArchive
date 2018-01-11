@@ -9,7 +9,7 @@ lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
-litProgs.targets{
+lpTargets = litProgs.targets{
   mainDoc  = 'contexts.tex',
   docFiles = {
     'overview.tex',
@@ -22,25 +22,20 @@ litProgs.targets{
     'words.tex',
     'conclusion.tex',
   },
-  srcFiles = {
-    'joylol/contexts.h',
-    'joylol/contexts-private.h',
-    'contexts.c',
-  },
-  buildDir  = 'build',
   docDir    = 'doc',
-  moduleDir = 'install',
 }
 
 require 'lms.joyLoL'
 
-joylol.targets{
+joylol.targets(lpTargets, {
   coAlgs = {
     'contexts',
   },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/contexts.h',
     'joylol/contexts-private.h',
+  },
+  cCodeFiles = {
     'contexts.c',
   },
   coAlgLibs = {
@@ -55,30 +50,19 @@ joylol.targets{
     'parsers',
     'dictNodes',
   },
-  buildDir = 'build',
-}
+})
 
 require 'lms.contests'
 
-contests.targets{
+contests.targets(lpTargets, {
   testExecs = {
     'allCTests',
   },
-  mainDoc = 'contexts.tex',
-  docFiles = {
-    'overview.tex',
-    'code.tex',
-    'core.tex',
-    'control.tex',
-    'support.tex',
-    'eval.tex',
-    'lua.tex',
-    'words.tex',
-    'conclusion.tex',
-  },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/contexts.h',
     'joylol/contexts-private.h',
+  },
+  cCodeFiles = {
     'contexts.c',
   },
   testLibDirs = {
@@ -87,7 +71,4 @@ contests.targets{
     '<HOME>/.joylol/joylol/jInterps',
     '-lgmp',
   },
-  buildDir  = 'build',
-  docDir    = 'doc',
-  moduleDir = 'install',
-}
+})

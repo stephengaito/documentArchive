@@ -9,7 +9,7 @@ lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
-litProgs.targets{
+lpTargets = litProgs.targets{
   mainDoc  = 'crossCompilers.tex',
   docFiles = {
     'overview.tex',
@@ -21,53 +21,38 @@ litProgs.targets{
     'words.tex',
     'conclusion.tex',
   },
-  srcFiles = {
-    'joylol/crossCompilers.h',
-    'joylol/crossCompilers-private.h',
-    'crossCompilers.c',
-  },
-  buildDir  = 'build',
   docDir    = 'doc',
-  moduleDir = 'install',
 }
 
 require 'lms.joyLoL'
 
-joylol.targets{
+joylol.targets(lpTargets, {
   coAlgs = {
     'crossCompilers',
   },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/crossCompilers.h',
     'joylol/crossCompilers-private.h',
+  },
+  cCodeFiles = {
     'crossCompilers.c',
   },
   coAlgLibs = {
     'jInterps',
   },
-  buildDir = 'build',
-}
+})
 
 require 'lms.contests'
 
-contests.targets{
+contests.targets(lpTargets, {
   testExecs = {
     'allCTests',
   },
-  mainDoc = 'crossCompilers.tex',
-  docFiles = {
-    'overview.tex',
-    'code.tex',
-    'ansic.tex',
-    'ansicLua.tex',
-    'pureLua.tex',
-    'lua.tex',
-    'words.tex',
-    'conclusion.tex',
-  },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/crossCompilers.h',
     'joylol/crossCompilers-private.h',
+  },
+  cCodeFiles = {
     'crossCompilers.c',
   },
   testLibDirs = {
@@ -75,7 +60,4 @@ contests.targets{
   testLibs = {
     '<HOME>/.joylol/joylol/jInterps',
   },
-  buildDir  = 'build',
-  docDir    = 'doc',
-  moduleDir = 'install',
-}
+})

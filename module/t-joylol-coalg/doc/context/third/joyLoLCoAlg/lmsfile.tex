@@ -24,24 +24,53 @@ local function addJoyLoLTargets(aCodeStream)
   litProgs.markCodeOrigin('Lmsfile')
   local lmsfile = {}
   tInsert(lmsfile, "require 'lms.joyLoL'\n")
-  tInsert(lmsfile, "joylol.targets{")
+  tInsert(lmsfile, "joylol.targets(lpTargets, {")
   tInsert(lmsfile, "  coAlgs = {")
   for i, aCoAlg in ipairs(build.coAlgsToBuild) do
     tInsert(lmsfile, "    '"..aCoAlg.."',")
   end
   tInsert(lmsfile, "  },")
-  tInsert(lmsfile, "  srcFiles = {")
-  for i, aSrcFile in ipairs(build.srcTargets) do
+  
+  build.srcTargets = build.srcTargets or { }
+  local srcTargets = build.srcTargets
+  
+  srcTargets.cHeader = srcTargets.cHeader or { }
+  local cHeader      = srcTargets.cHeader
+  tInsert(lmsfile, "  cHeaderFiles = {")
+  for i, aSrcFile in ipairs(cHeader) do
     tInsert(lmsfile, "    '"..aSrcFile.."',")
   end
   tInsert(lmsfile, "  },")
+  
+  srcTargets.cCode = srcTargets.cCode or { }
+  local cCode      = srcTargets.cCode
+  tInsert(lmsfile, "  cCodeFiles = {")
+  for i, aSrcFile in ipairs(cCode) do
+    tInsert(lmsfile, "    '"..aSrcFile.."',")
+  end
+  tInsert(lmsfile, "  },")
+
+  if build.cCodeLibDirs then 
+    tInsert(lmsfile, "  cCodeLibDirs = {")
+    for i, aLibDir in ipairs(build.cCodeLibDirs) do
+      tInsert(lmsfile, "    '"..aLibDir.."',")
+    end
+    tInsert(lmsfile, "  },")
+  end
+  if build.cCodeLibs then 
+    tInsert(lmsfile, "  cCodeLibs = {")
+    for i, aLib in ipairs(build.cCodeLibs) do
+      tInsert(lmsfile, "    '"..aLib.."',")
+    end
+    tInsert(lmsfile, "  },")
+  end
+
   tInsert(lmsfile, "  coAlgLibs = {")
   for i, aCoAlgDependency in ipairs(build.coAlgDependencies) do
     tInsert(lmsfile, "    '"..aCoAlgDependency.."',")
   end
   tInsert(lmsfile, "  },")
-  tInsert(lmsfile, "  buildDir = 'build',")
-  tInsert(lmsfile, "}")
+  tInsert(lmsfile, "})")
   litProgs.setPrepend('Lmsfile', aCodeStream, true)
   litProgs.addCode.default('Lmsfile', tConcat(lmsfile, '\n'))
 end

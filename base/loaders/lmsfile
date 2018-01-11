@@ -9,7 +9,7 @@ lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
-litProgs.targets{
+lpTargets = litProgs.targets{
   mainDoc  = 'loaders.tex',
   docFiles = {
     'overview.tex',
@@ -18,49 +18,37 @@ litProgs.targets{
     'words.tex',
     'conclusion.tex',
   },
-  srcFiles = {
-    'joylol/loaders.h',
-    'joylol/loaders-private.h',
-    'loaders.c',
-  },
-  buildDir  = 'build',
   docDir    = 'doc',
-  moduleDir = 'install',
 }
 
 require 'lms.joyLoL'
 
-joylol.targets{
+joylol.targets(lpTargets, {
   coAlgs = {
     'loaders',
   },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/loaders.h',
     'joylol/loaders-private.h',
+  },
+  cCodeFiles = {
     'loaders.c',
   },
   coAlgLibs = {
   },
-  buildDir = 'build',
-}
+})
 
 require 'lms.contests'
 
-contests.targets{
+contests.targets(lpTargets, {
   testExecs = {
     'allCTests',
   },
-  mainDoc = 'loaders.tex',
-  docFiles = {
-    'overview.tex',
-    'code.tex',
-    'lua.tex',
-    'words.tex',
-    'conclusion.tex',
-  },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/loaders.h',
     'joylol/loaders-private.h',
+  },
+  cCodeFiles = {
     'loaders.c',
   },
   testLibDirs = {
@@ -68,7 +56,4 @@ contests.targets{
   testLibs = {
     '<HOME>/.joylol/joylol/jInterps',
   },
-  buildDir  = 'build',
-  docDir    = 'doc',
-  moduleDir = 'install',
-}
+})

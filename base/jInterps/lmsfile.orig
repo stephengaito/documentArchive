@@ -9,7 +9,7 @@ lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
-lpTargets = litProgs.targets{
+litProgs.targets{
   mainDoc  = 'jInterps.tex',
   docFiles = {
     'overview.tex',
@@ -20,29 +20,30 @@ lpTargets = litProgs.targets{
     'luaScript.tex',
     'conclusion.tex',
   },
-  docDir    = 'doc',
-}
-
-require 'lms.contextMod'
-
-contextMod.targets(lpTargets, {
-  moduleFiles = {
+  srcFiles = {
     'joylol.lua',
+    'joylol/jInterps.h',
+    'joylol/jInterps-private.h',
+    'objects.c',
+    'interpreter.c',
+    'words.c',
+    'lua.c',
   },
+  buildDir  = 'build',
+  docDir    = 'doc',
   moduleDir = 'install',
-})
+}
 
 require 'lms.joyLoL'
 
-joylol.targets(lpTargets, {
+joylol.targets{
   coAlgs = {
     'jInterps',
   },
-  cHeaderFiles = {
+  srcFiles = {
+    'joylol.lua',
     'joylol/jInterps.h',
     'joylol/jInterps-private.h',
-  },
-  cCodeFiles = {
     'objects.c',
     'interpreter.c',
     'words.c',
@@ -50,19 +51,29 @@ joylol.targets(lpTargets, {
   },
   coAlgLibs = {
   },
-})
+  buildDir = 'build',
+}
 
 require 'lms.contests'
 
-contests.targets(lpTargets, {
+contests.targets{
   testExecs = {
     'allCTests',
   },
-  cHeaderFiles = {
+  mainDoc = 'jInterps.tex',
+  docFiles = {
+    'overview.tex',
+    'objects.tex',
+    'interpreter.tex',
+    'words.tex',
+    'luaInterface.tex',
+    'luaScript.tex',
+    'conclusion.tex',
+  },
+  srcFiles = {
+    'joylol.lua',
     'joylol/jInterps.h',
     'joylol/jInterps-private.h',
-  },
-  cCodeFiles = {
     'objects.c',
     'interpreter.c',
     'words.c',
@@ -72,7 +83,10 @@ contests.targets(lpTargets, {
   },
   testLibs = {
   },
-})
+  buildDir  = 'build',
+  docDir    = 'doc',
+  moduleDir = 'install',
+}
 
 local joylolTarget = makePath{getEnv('HOME'), '.joylol', 'joylol.lua'}
 local joylolDep    = makePath{'build', 'joylol.lua'}

@@ -9,7 +9,7 @@ lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
-litProgs.targets{
+lpTargets = litProgs.targets{
   mainDoc  = 'naturals.tex',
   docFiles = {
     'overview.tex',
@@ -18,61 +18,47 @@ litProgs.targets{
     'lua.tex',
     'conclusion.tex',
   },
-  srcFiles = {
+  docDir    = 'doc',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'naturals',
+  },
+  cHeaderFiles = {
     'joylol/naturals.h',
     'joylol/naturals-private.h',
+  },
+  cCodeFiles = {
     'naturals.c',
   },
   cCodeLibs = {
     '-lgmp',
   },
-  buildDir  = 'build',
-  docDir    = 'doc',
-  moduleDir = 'install',
-}
-
-require 'lms.joyLoL'
-
-joylol.targets{
-  coAlgs = {
-    'naturals',
-  },
-  srcFiles = {
-    'joylol/naturals.h',
-    'joylol/naturals-private.h',
-    'naturals.c',
-  },
   coAlgLibs = {
     'jInterps',
   },
-  buildDir = 'build',
-}
+})
 
 require 'lms.contests'
 
-contests.targets{
+contests.targets(lpTargets, {
   testExecs = {
     'allCTests',
   },
-  mainDoc = 'naturals.tex',
-  docFiles = {
-    'overview.tex',
-    'code.tex',
-    'words.tex',
-    'lua.tex',
-    'conclusion.tex',
-  },
-  srcFiles = {
+  cHeaderFiles = {
     'joylol/naturals.h',
     'joylol/naturals-private.h',
+  },
+  cCodeFiles = {
     'naturals.c',
   },
   testLibDirs = {
   },
   testLibs = {
     '<HOME>/.joylol/joylol/jInterps',
+    '-lgmp',
   },
-  buildDir  = 'build',
-  docDir    = 'doc',
-  moduleDir = 'install',
-}
+})
