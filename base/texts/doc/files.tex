@@ -114,7 +114,7 @@ TextObj* createTextFromInputFileImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  FILE* inputFile = fopen("doc/someLines.txt", "r");
+  FILE* inputFile = fopen("doc/testSomeLines.txt", "r");
   AssertPtrNotNull(inputFile);
   
   TextObj* aText = createTextFromInputFile(jInterp, inputFile);
@@ -173,7 +173,7 @@ TextObj* createTextFromInputFileImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  FILE* inputFile = fopen("doc/someLines.txt", "r");
+  FILE* inputFile = fopen("doc/testSomeLines.txt", "r");
   AssertPtrNotNull(inputFile);
   
   TextObj* aText = createTextFromInputFile(jInterp, inputFile);
