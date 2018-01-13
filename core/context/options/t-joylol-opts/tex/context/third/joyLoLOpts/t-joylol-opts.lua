@@ -43,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2018-01-10",
-  commitShortHash = "1de7de3",
-  commitLongHash  = "1de7de30fa03b6a27a53a8017007a672309823f1",
-  subject         = "added rules coalg",
+  commitDate      = "2018-01-13",
+  commitShortHash = "725662f",
+  commitLongHash  = "725662f50c4fca8368bd0f6c4c24cf2ca59e20e9",
+  subject         = "begun process of switching to standalone release files instead of minLuaJoyLoL",
   notes           = ""
 }
 

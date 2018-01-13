@@ -10,9 +10,6 @@ lfs.mkdir('install')
 lfs.mkdir('install/joylol')
 lfs.mkdir('install/joylol/core')
 lfs.mkdir('install/core')
-lfs.mkdir('build/joylol')
-lfs.mkdir('install')
-lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 

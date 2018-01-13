@@ -2,15 +2,11 @@
 
 lfs = require 'lfs'
 
-lfs.mkdir('build')
 lfs.mkdir('build/joylol')
 lfs.mkdir('build/joylol/core')
 lfs.mkdir('build/core')
 lfs.mkdir('/home/stg/.joylol/joylol/core')
 lfs.mkdir('/home/stg/.joylol/include/joylol/core')
-lfs.mkdir('build/joylol')
-lfs.mkdir('install')
-lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 

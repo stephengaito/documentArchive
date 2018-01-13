@@ -2,9 +2,6 @@
 
 lfs = require 'lfs'
 
-lfs.mkdir('build')
-lfs.mkdir('build/joyLoL')
-lfs.mkdir('build/joyLoLMinLua')
 
 require 'lms.litProgs'
 
@@ -29,7 +26,6 @@ contextMod.targets(lpTargets, {
   moduleFiles = {
     't-joylol-coalg.mkiv',
     't-joylol-coalg.lua',
-    'joyLoLMinLua/prettyPrint.lua',
   },
   moduleDir = 't-joylol-coalg/tex/context/third/joyLoLCoAlg',
 })

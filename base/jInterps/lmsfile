@@ -2,10 +2,6 @@
 
 lfs = require 'lfs'
 
-lfs.mkdir('build')
-lfs.mkdir('build/joylol')
-lfs.mkdir('install')
-lfs.mkdir('install/joylol')
 
 require 'lms.litProgs'
 
@@ -29,7 +25,7 @@ contextMod.targets(lpTargets, {
   moduleFiles = {
     'joylol.lua',
   },
-  moduleDir = 'install',
+  moduleDir = '<HOME>/.joylol',
 })
 
 require 'lms.joyLoL'
@@ -72,12 +68,4 @@ contests.targets(lpTargets, {
   },
   testLibs = {
   },
-})
-
-local joylolTarget = makePath{getEnv('HOME'), '.joylol', 'joylol.lua'}
-local joylolDep    = makePath{'build', 'joylol.lua'}
-tInsert(installTargets, target{
-  target       = joylolTarget,
-  dependencies = { joylolDep },
-  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
 })

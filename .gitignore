@@ -13,3 +13,4 @@ gitVersion-tex.tex
 *.pdf
 *-history
 releases
+deployReleases

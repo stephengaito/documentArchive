@@ -191,17 +191,17 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
 \addSubDocument{luaInterface.tex}
 \addSubDocument{luaScript.tex}
 \addSubDocument{conclusion.tex} 
-\addConTeXtModuleDirectory{install}
+\addConTeXtModuleDirectory{<HOME>/.joylol}
 
-\startLmsfile
-local joylolTarget = makePath{getEnv('HOME'), '.joylol', 'joylol.lua'}
-local joylolDep    = makePath{'build', 'joylol.lua'}
-tInsert(installTargets, target{
-  target       = joylolTarget,
-  dependencies = { joylolDep },
-  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
-})
-\stopLmsfile
+%\startLmsfile
+%local joylolTarget = makePath{getEnv('HOME'), '.joylol', 'joylol.lua'}
+%local joylolDep    = makePath{'build', 'joylol.lua'}
+%tInsert(installTargets, target{
+%  target       = joylolTarget,
+%  dependencies = { joylolDep },
+%  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
+%})
+%\stopLmsfile
 
 \addCTestTargets{default}
 
