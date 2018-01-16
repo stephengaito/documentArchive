@@ -1,7 +1,0 @@
--- A Lua Make System file
-
-target{
-  target       = 'install-lmsfile',
-  dependencies = { },
-  command      = 'echo install-lmsfile'
-}

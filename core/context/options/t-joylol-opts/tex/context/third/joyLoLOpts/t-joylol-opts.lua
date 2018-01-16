@@ -43,10 +43,10 @@ options.systemPath = '/usr/lib/joylol'
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2018-01-13",
-  commitShortHash = "5d20962",
-  commitLongHash  = "5d20962051508d7e6dc55dcf8ee76d82ce711af8",
-  subject         = "improved the use of install directories following changes in lms system",
+  commitDate      = "2018-01-16",
+  commitShortHash = "1b79fe5",
+  commitLongHash  = "1b79fe50a31c6930ddda24a00d5edf4dcd8d6e9d",
+  subject         = "improved creation of required directories; continued move towards new bootstrap process",
   notes           = ""
 }
 

@@ -97,10 +97,10 @@ end
 
 local gitVersion = {
   authorName      = "Stephen Gaito",
-  commitDate      = "2018-01-13",
-  commitShortHash = "5d20962",
-  commitLongHash  = "5d20962051508d7e6dc55dcf8ee76d82ce711af8",
-  subject         = "improved the use of install directories following changes in lms system",
+  commitDate      = "2018-01-16",
+  commitShortHash = "1b79fe5",
+  commitLongHash  = "1b79fe50a31c6930ddda24a00d5edf4dcd8d6e9d",
+  subject         = "improved creation of required directories; continued move towards new bootstrap process",
   notes           = ""
 }
 
@@ -133,47 +133,14 @@ package.cpath = table.concat(joylolCPaths, ';')
 
 if options.verbose then print('loading [joylol.core.context]') end
 
--- **Problem**: we can not assume that a user *has*
--- a compiled and working C based JoyLoL. This is
--- the "Bootstrapping (Compiler)" problem (see
--- Wikipedia). We solve this problem by writing a
--- minimal joyLoL interpreter in Lua.
-
--- SO if the user has requested to load the ANSI-C
--- version of JoyLoL then we first check to see if
--- the joyLoL (C shared libraries) exists and can be
--- required, if it can not be loaded, we load the
--- joyLoLMinLua version instead.
-
--- If the user has not requested to load the ANSI-C
--- version of JoyLoL then we simply load the Lua based
--- joyLoLMinLua version.
-
--- The following conditional require is adapted
--- from: shuva's answer to
---   "How to check if a module exists in Lua?"
--- see: http://stackoverflow.com/a/22686090
-
-if options.minimalJoylol then
+local hasJoylol, loadedJoylol =
+  pcall(require, 'joylol.core.context')
+if not hasJoylol then
   interfaces.writestatus("joyLoL",
-    "Loading MINIMAL Lua version as requested.")
-  lua.registercode('t-joylol-minimal')
-  loadedJoylol = thirddata.minJoylol
-  thirddata.joylol = loadedJoylol
-else
-  local hasJoylol, loadedJoylol =
-    pcall(require, 'joylol.core.context')
-  if not hasJoylol then
-    interfaces.writestatus("joyLoL",
-      "Could NOT load ANSI-C joyLoL... loading mininal Lua version instead.")
-    lua.registercode('t-joylol-minimal')
-    loadedJoylol = thirddata.minJoylol
-  else
-    interfaces.writestatus("joyLoL",
-      "Loaded ANSI-C version as requested.")
-  end
-  thirddata.joylol = loadedJoylol
+    "Could NOT load ANSI-C joyLoL....")
+  error('Could NOT load ANSI-C JoyLoL')
 end
+thirddata.joylol = loadedJoylol
 
 if options.verbose then print('loaded [joylol.core.context]\n') end
 

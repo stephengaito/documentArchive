@@ -8,7 +8,6 @@ lpTargets = litProgs.targets{
     'overview.tex',
     'luaInterface.tex',
     'luaMain.tex',
-    'minJoyLoL.tex',
     'preamble.tex',
     'conclusion.tex',
   },
@@ -20,7 +19,6 @@ require 'lms.contextMod'
 contextMod.targets(lpTargets, {
   moduleFiles = {
     't-joylol.mkiv',
-    't-joylol-minimal.lua',
     't-joylol.lua',
   },
   moduleDir = 't-joylol/tex/context/third/joyLoL',
