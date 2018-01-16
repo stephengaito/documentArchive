@@ -1,7 +1,8 @@
 -- A Lua Make System file
 
 testProbe = directorySeparator..'test'
-dirsToIgnore = '|archive|tmp|install|tex|bin|'
+-- dirsToIgnore = '|archive|tmp|installDir|tex|bin|'
+dirsToIgnore = '|archive|tmp|installDir|bin|'
 
 function findReleaseFiles(dir, filesIO)
   local dirList = { }
