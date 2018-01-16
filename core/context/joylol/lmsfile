@@ -1,13 +1,5 @@
 -- A Lua Make System file
 
-lfs = require 'lfs'
-
-lfs.mkdir('build/joylol')
-lfs.mkdir('build/joylol/core')
-lfs.mkdir('build/core')
-lfs.mkdir('/home/stg/.joylol/joylol/core')
-lfs.mkdir('/home/stg/.joylol/include/joylol/core')
-
 require 'lms.litProgs'
 
 lpTargets = litProgs.targets{

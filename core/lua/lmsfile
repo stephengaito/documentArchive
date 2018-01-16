@@ -1,16 +1,5 @@
 -- A Lua Make System file
 
-lfs = require 'lfs'
-
-lfs.mkdir('build')
-lfs.mkdir('build/joylol')
-lfs.mkdir('build/joylol/core')
-lfs.mkdir('build/core')
-lfs.mkdir('install')
-lfs.mkdir('install/joylol')
-lfs.mkdir('install/joylol/core')
-lfs.mkdir('install/core')
-
 require 'lms.litProgs'
 
 lpTargets = litProgs.targets{
@@ -31,7 +20,7 @@ contextMod.targets(lpTargets, {
   moduleFiles = {
     'joylol.lua',
   },
-  moduleDir = 'install',
+  moduleDir = '<HOME>/bin',
 })
 
 require 'lms.joyLoL'
@@ -55,7 +44,7 @@ joylol.targets(lpTargets, {
 })
 
 local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}
-local joylolDep    = makePath{'build', 'joylol.lua'}
+local joylolDep    = makePath{'buildDir', 'joylol.lua'}
 tInsert(installTargets, target{
   target       = joylolTarget,
   dependencies = { joylolDep },

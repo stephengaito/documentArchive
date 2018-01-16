@@ -2,7 +2,7 @@
 
 local pp     = require('pl.pretty')
 
-package.path = './languages/joyLoL/build/tests/?.lua;'..package.path
+package.path = './languages/joyLoL/buildDir/tests/?.lua;'..package.path
 
 local lt            = require('lunatest')
 local assert_equal  = lt.assert_equal

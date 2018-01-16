@@ -52,15 +52,6 @@
   {lua.c}%
   {}
 
-\ensureDirectoryExists{build/joylol}
-\ensureDirectoryExists{build/joylol/core}
-\ensureDirectoryExists{build/core}
-
-\ensureDirectoryExists{install}
-\ensureDirectoryExists{install/joylol}
-\ensureDirectoryExists{install/joylol/core}
-\ensureDirectoryExists{install/core}
-  
 \addMainDocument{coreLua.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{luaMain.tex}
@@ -71,7 +62,7 @@
 
 \startLmsfile
 local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}
-local joylolDep    = makePath{'build', 'joylol.lua'}
+local joylolDep    = makePath{'buildDir', 'joylol.lua'}
 tInsert(installTargets, target{
   target       = joylolTarget,
   dependencies = { joylolDep },

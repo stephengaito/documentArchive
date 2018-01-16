@@ -98,9 +98,9 @@ end
 local gitVersion = {
   authorName      = "Stephen Gaito",
   commitDate      = "2018-01-13",
-  commitShortHash = "725662f",
-  commitLongHash  = "725662f50c4fca8368bd0f6c4c24cf2ca59e20e9",
-  subject         = "begun process of switching to standalone release files instead of minLuaJoyLoL",
+  commitShortHash = "5d20962",
+  commitLongHash  = "5d20962051508d7e6dc55dcf8ee76d82ce711af8",
+  subject         = "improved the use of install directories following changes in lms system",
   notes           = ""
 }
 

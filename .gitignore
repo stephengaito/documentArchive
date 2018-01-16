@@ -3,8 +3,8 @@ TODO
 ToRead
 tmp
 *Bib.lua
-build
-install
+buildDir
+installDir
 gitVersion-c.tex
 gitVersion-lua.tex
 gitVersion-tex.tex

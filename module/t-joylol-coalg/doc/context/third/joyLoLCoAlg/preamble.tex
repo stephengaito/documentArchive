@@ -185,10 +185,10 @@ function coAlgs.createCoAlg()
   local aCtx = theCoAlg.ctx
   coAlgs.loadTemplates(aCtx) -- contains a jEval
   --
-  if theCoAlg.hasCHeader    then writeCodeFile(aCtx, coAlgName, 'cHeader',    'build', 'h')   end
-  if theCoAlg.hasCCode      then writeCodeFile(aCtx, coAlgName, 'cCode',      'build', 'c')   end
-  if theCoAlg.hasLuaCode    then writeCodeFile(aCtx, coAlgName, 'luaCode',    'build', 'lua') end
-  if theCoAlg.hasJoyLoLCode then writeCodeFile(aCtx, coAlgName, 'joyLoLCode', 'build', 'joy') end
+  if theCoAlg.hasCHeader    then writeCodeFile(aCtx, coAlgName, 'cHeader',    'buildDir', 'h')   end
+  if theCoAlg.hasCCode      then writeCodeFile(aCtx, coAlgName, 'cCode',      'buildDir', 'c')   end
+  if theCoAlg.hasLuaCode    then writeCodeFile(aCtx, coAlgName, 'luaCode',    'buildDir', 'lua') end
+  if theCoAlg.hasJoyLoLCode then writeCodeFile(aCtx, coAlgName, 'joyLoLCode', 'buildDir', 'joy') end
   --
   texio.write_nl(string.format(' created JoyLoL CoAlgebra: [%s]', coAlgName))
 end

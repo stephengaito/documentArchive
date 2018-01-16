@@ -1,8 +1,5 @@
 -- A Lua Make System file
 
-lfs = require 'lfs'
-
-
 require 'lms.litProgs'
 
 lpTargets = litProgs.targets{

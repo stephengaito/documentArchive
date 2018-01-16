@@ -69,15 +69,6 @@
   {textadept.c}%
   {}
 
-\ensureDirectoryExists{build/joylol}
-\ensureDirectoryExists{build/joylol/core}
-\ensureDirectoryExists{build/core}
-
-\ensureDirectoryExists{install}
-\ensureDirectoryExists{install/joylol}
-\ensureDirectoryExists{install/joylol/core}
-\ensureDirectoryExists{install/core}
-  
 \addMainDocument{coreTextadept.tex}
 \addSubDocument{overview.tex} 
 \addSubDocument{lexer.tex}
@@ -87,12 +78,12 @@
 \addSubDocument{repl.tex}
 \addSubDocument{luaInterface.tex}
 \addSubDocument{conclusion.tex} 
-\addConTeXtModuleDirectory{install}
+\addConTeXtModuleDirectory{installDir}
 
 \startLmsfile
 local joylolTarget =
   makePath{getEnv('HOME'), '.textadept', 'lexers', 'joylol.lua'}
-local joylolDep    = makePath{'build', 'joylol.lua'}
+local joylolDep    = makePath{'buildDir', 'joylol.lua'}
 tInsert(installTargets, target{
   target       = joylolTarget,
   dependencies = { joylolDep },
@@ -109,7 +100,7 @@ tInsert(installTargets, target{
 
 local installTarget =
   makePath{ joylolModuleDir, 'installJoyLoLLangauge.lua'}
-local installDep    = makePath{'build', 'installJoyLoLLanguage.lua'}
+local installDep    = makePath{'buildDir', 'installJoyLoLLanguage.lua'}
 tInsert(installTargets, target{
   target       = installTarget,
   dependencies = { installDep },
@@ -118,7 +109,7 @@ tInsert(installTargets, target{
 
 local initTarget =
   makePath{ joylolModuleDir, 'init.lua'}
-local initDep    = makePath{'build', 'init.lua'}
+local initDep    = makePath{'buildDir', 'init.lua'}
 tInsert(installTargets, target{
   target       = initTarget,
   dependencies = { initDep },
@@ -127,7 +118,7 @@ tInsert(installTargets, target{
 
 local optsTarget =
   makePath{ joylolModuleDir, 'options.lua'}
-local optsDep    = makePath{'build', 'options.lua'}
+local optsDep    = makePath{'buildDir', 'options.lua'}
 tInsert(installTargets, target{
   target       = optsTarget,
   dependencies = { optsDep },
@@ -136,7 +127,7 @@ tInsert(installTargets, target{
 
 local replTarget =
   makePath{ joylolModuleDir, 'repl.lua'}
-local replDep    = makePath{'build', 'repl.lua'}
+local replDep    = makePath{'buildDir', 'repl.lua'}
 tInsert(installTargets, target{
   target       = replTarget,
   dependencies = { replDep },

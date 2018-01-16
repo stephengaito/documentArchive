@@ -54,11 +54,11 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
 
 #define addBuildLuaPath(lstate)            \
   buildCWDPathInto(buildLuaPath,           \
-    "build/?.lua");                        \
+    "buildDir/?.lua");                     \
   addLuaPath(lstate, buildLuaPath, FALSE); \
   free(buildLuaPath);                      \
   buildCWDPathInto(buildCPath,             \
-    "build/?.so");                         \
+    "buildDir/?.so");                      \
   addLuaPath(lstate, buildCPath, TRUE);    \
   free(buildCPath)
   
