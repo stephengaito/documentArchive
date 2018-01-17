@@ -88,20 +88,6 @@ local function newCoAlg(coAlgName)
   build.coAlgsToBuild = build.coAlgsToBuild or {}
   tInsert(build.coAlgsToBuild, coAlgName)
   build.coAlgDependencies = build.coAlgDependencies or {}
-  -- 
-  --local aCtx = theCoAlg.ctx
-  --pushProcess(aCtx, 'addToDict')
-  --pushProcessQuoted(aCtx, coAlgName)
-  --pushProcessQuoted(aCtx, 'coAlgName')
-  --addNewList(aCtx, 'dependsOn')
-  --addNewList(aCtx, 'wordOrder')
-  --addNewDict(aCtx, 'words')
-  --newDictionary(aCtx)
-  --jEval(aCtx)
-  --
-  -- add the new word: "global"
-  --
-  --coAlgs.newWord('global')
 end
 
 coAlgs.newCoAlg = newCoAlg
@@ -202,14 +188,6 @@ joylol.createCoAlg = createCoAlg
 local function addDependency(dependencyName)
   build.coAlgDependencies = build.coAlgDependencies or {}
   tInsert(build.coAlgDependencies, dependencyName)
-  --texio.write_nl('addDependency: ['..dependencyName..']')
-  --local aCtx = theCoAlg.ctx
-  --pushProcess(aCtx, 'popData')
-  --pushProcess(aCtx, 'appendToEndList')
-  --pushProcessQuoted(aCtx, dependencyName)
-  --pushProcess(aCtx, 'lookupInDict')
-  --pushProcess(aCtx, 'dependsOn')
-  --jEval(aCtx)
 end
 
 coAlgs.addDependency = addDependency
