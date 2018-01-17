@@ -60,7 +60,7 @@ Lua source file artefacts produced by this literate code documentation.
 \def\declareJoyLoLCoAlg[#1][#2]{
   \startcomponent[#2]
   \startchapter[#1]
-  \directlua{thirddata.joyLoLCoAlgs.newCoAlg('#2')}
+  \directlua{thirddata.joylolCoAlgs.newCoAlg('#2')}
 }
 
 \let\startJoyLoLCoAlg=\declareJoyLoLCoAlg
@@ -105,7 +105,7 @@ coAlgs.newCoAlg = newCoAlg
   \assertMacroNthArgumentOnMthExpansionMatches%
     {startchapter}{1}{1}{title=List of Lists}{}
   \startLuaConTest
-    local theCoAlg = thirddata.joylol.theCoAlg
+    local theCoAlg = thirddata.joylolCoAlgs.theCoAlg
     assert.isTable(theCoAlg)
     assert.hasKey(theCoAlg, 'lists')
     local lists = theCoAlg.lists
@@ -124,7 +124,7 @@ coAlgs.newCoAlg = newCoAlg
 
 \startMkIVCode
 \def\stopJoyLoLCoAlg{
-  \directlua{thirddata.joylol.createCoAlg()}
+  \directlua{thirddata.joylolCoAlgs.createCoAlg()}
   \stopchapter
   \stopcomponent
 }
@@ -134,7 +134,7 @@ coAlgs.newCoAlg = newCoAlg
 local function createCoAlg()
 end
 
-joylol.createCoAlg = createCoAlg
+coAlgs.createCoAlg = createCoAlg
 \stopLuaCode
 
 \section{Source licenses}
@@ -180,7 +180,7 @@ joylol.createCoAlg = createCoAlg
 
 \startMkIVCode
 \def\dependsOn[#1]{
-  \directlua{thirddata.joyLoLCoAlgs.addDependency('#1')}
+  \directlua{thirddata.joylolCoAlgs.addDependency('#1')}
 }
 \stopMkIVCode
 
@@ -209,7 +209,7 @@ place it on either the data or process stacks.
 
 \startMkIVCode
 \def\startJoyLoLStackActionIn[#1]{
-  \directlua{thirddata.joylol.newStackActionIn('#1')}
+  \directlua{thirddata.joylolCoAlgs.newStackActionIn('#1')}
 }
 \stopMkIVCode
 
@@ -217,14 +217,14 @@ place it on either the data or process stacks.
 local function newStackActionIn(aWord)
 end
 
-joylol.newStackActionIn = newStackActionIn
+coAlgs.newStackActionIn = newStackActionIn
 \stopLuaCode
 
 \subsection{Implementation: stop}
 
 \startMkIVCode
 \def\stopJoyLoLStackActionIn{
-  \directlua{thirddata.joylol.endStackActionIn()}
+  \directlua{thirddata.joyloCoAlgs.endStackActionIn()}
 }
 \stopMkIVCode
 
@@ -232,7 +232,7 @@ joylol.newStackActionIn = newStackActionIn
 local function endStackActionIn()
 end
 
-joylol.endStackActionIn = endStackActionIn
+coAlgs.endStackActionIn = endStackActionIn
 \stopLuaCode
 
 \section{JoyLoL stack action: Out }
@@ -252,7 +252,7 @@ stack and place it into a data structure in a local variable and
 
 \startMkIVCode
 \def\startJoyLoLStackActionOut[#1]{
-  \directlua{thirddata.joylol.newStackActionOut('#1')}
+  \directlua{thirddata.joylolCoAlgs.newStackActionOut('#1')}
 }
 \stopMkIVCode
 
@@ -260,14 +260,14 @@ stack and place it into a data structure in a local variable and
 local function newStackActionOut(aWord)
 end
 
-joylol.newStackActionOut = newStackActionOut
+coAlgs.newStackActionOut = newStackActionOut
 \stopLuaCode
 
 \subsection{Implementation: stop}
 
 \startMkIVCode
 \def\stopJoyLoLStackActionOut{
-  \directlua{thirddata.joylol.endStackActionOut()}
+  \directlua{thirddata.joylolCoAlgs.endStackActionOut()}
 }
 \stopMkIVCode
 
@@ -275,7 +275,7 @@ joylol.newStackActionOut = newStackActionOut
 local function endStackActionOut()
 end
 
-joylol.endStackActionOut = endStackActionOut
+coAlgs.endStackActionOut = endStackActionOut
 \stopLuaCode
 
 \section{Describing the data stack}
@@ -286,11 +286,11 @@ joylol.endStackActionOut = endStackActionOut
 
 \startMkIVCode
 \def\preDataStack[#1][#2]{
-  \directlua{thirddata.joylol.addPreDataStackDescription('#1', '#2')}
+  \directlua{thirddata.joylolCoAlgs.addPreDataStackDescription('#1', '#2')}
 }
 
 \def\postDataStack[#1]{
-  \directlua{thirddata.joylol.addPostDataStackDescription('#1')}
+  \directlua{thirddata.joylolCoAlgs.addPostDataStackDescription('#1')}
 }
 \stopMkIVCode
 
@@ -298,12 +298,12 @@ joylol.endStackActionOut = endStackActionOut
 local function addPreDataStackDescription(arg1, arg2)
 end
 
-joylol.addPreDataStackDescription = addPreDataStackDescription
+coAlgs.addPreDataStackDescription = addPreDataStackDescription
 
 local function addPostDataStackDescription(arg1, arg2)
 end
 
-joylol.addPostDataStackDescription = addPostDataStackDescription
+coAlgs.addPostDataStackDescription = addPostDataStackDescription
 \stopLuaCode
 
 \section{Describing the process stack}
@@ -314,11 +314,11 @@ joylol.addPostDataStackDescription = addPostDataStackDescription
 
 \startMkIVCode
 \def\preProcessStack[#1][#2]{
-  \directlua{thirddata.joylol.addPreProcessStackDescription('#1', '#2')}
+  \directlua{thirddata.joylolCoAlgs.addPreProcessStackDescription('#1', '#2')}
 }
 
 \def\postProcessStack[#1]{
-  \directlua{thirddata.joylol.addPostProcessStackDescription('#1')}
+  \directlua{thirddata.joylolCoAlgs.addPostProcessStackDescription('#1')}
 }
 \stopMkIVCode
 
@@ -326,12 +326,12 @@ joylol.addPostDataStackDescription = addPostDataStackDescription
 local function addPreProcessStackDescription(arg1, arg2)
 end
 
-joylol.addPreProcessStackDescription = addPreProcessStackDescription
+coAlgs.addPreProcessStackDescription = addPreProcessStackDescription
 
 local function addPostProcessStackDescription(arg1, arg2)
 end
 
-joylol.addPostProcessStackDescription = addPostProcessStackDescription
+coAlgs.addPostProcessStackDescription = addPostProcessStackDescription
 \stopLuaCode
 
 \section{JoyLoL code environment}
@@ -357,7 +357,7 @@ joylol.addPostProcessStackDescription = addPostProcessStackDescription
 \startMkIVCode
 \def\addCTestJoyLoLCallbacks#1{%
   \directlua{
-    thirddata.joylol.addCTestJoyLoLCallbacks('#1')
+    thirddata.joylolCoAlgs.addCTestJoyLoLCallbacks('#1')
   }
 }
 \stopMkIVCode
@@ -409,5 +409,5 @@ setJoyLoLCallbackFrom(lstate, ctestsCallback);
 ]=])
 end
 
-joylol.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
+coAlgs.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
 \stopLuaCode

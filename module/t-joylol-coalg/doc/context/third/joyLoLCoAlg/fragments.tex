@@ -10,7 +10,7 @@
 
 \startMkIVCode
 \def\startJoyLoLFragment[#1]{
-  \directlua{thirddata.joylol.newFragment('#1')}
+  \directlua{thirddata.joylolCoAlgs.newFragment('#1')}
 }
 \stopMkIVCode
 
@@ -21,14 +21,14 @@ local function newFragment(fragmentName)
   setDefs(curFragment, 'code')
 end
 
-joylol.newFragment = newFragment
+coAlgs.newFragment = newFragment
 \stopLuaCode
 
 \subsection{Implementation: stop}
 
 \startMkIVCode
 \def\stopJoyLoLFragment{
-  \directlua{thirddata.joylol.endFragment()}
+  \directlua{thirddata.joylolCoAlgs.endFragment()}
 }
 \stopMkIVCode
 
@@ -70,7 +70,7 @@ local function endFragment()
   end
 end
 
-joylol.endFragment = endFragment
+coAlgs.endFragment = endFragment
 \stopLuaCode
 
 \section[title=fragment definition environment]
@@ -79,11 +79,11 @@ joylol.endFragment = endFragment
 \let\stopFragment\relax
 
 \def\stopFragmentDone{
-  \directlua{thirddata.joyLoLCoAlgs.stopFragment()}
+  \directlua{thirddata.joylolCoAlgs.stopFragment()}
 }
 
 \def\startFragment[#1]{
-  \directlua{thirddata.joyLoLCoAlgs.startFragment('#1')}
+  \directlua{thirddata.joylolCoAlgs.startFragment('#1')}
   \buff_pickup{_fragment_buffer_}%
     {startFragment}{stopFragment}%
     {\relax}{\stopFragmentDone}\plusone%

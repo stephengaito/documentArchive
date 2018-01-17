@@ -23,11 +23,11 @@
 \let\stopRule\relax
 
 \def\stopRuleDone{
-  \directlua{thirddata.joyLoLCoAlgs.stopRule()}
+  \directlua{thirddata.joylolCoAlgs.stopRule()}
 }
 
 \def\startRule[#1]{
-  \directlua{thirddata.joyLoLCoAlgs.startRule('#1')}
+  \directlua{thirddata.joylolCoAlgs.startRule('#1')}
   \buff_pickup{_rules_buffer_}%
     {startRule}{stopRule}%
     {\relax}{\stopRuleDone}\plusone%

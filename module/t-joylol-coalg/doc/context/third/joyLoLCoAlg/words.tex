@@ -14,7 +14,7 @@ ANSI-C or Lua, together with a collection of descriptors of the JoyLoL
 
 \startMkIVCode
 \def\startJoyLoLWord[#1]{
-  \directlua{thirddata.joylol.newWord('#1')}
+  \directlua{thirddata.joylolCoAlgs.newWord('#1')}
 }
 \stopMkIVCode
 
@@ -25,14 +25,14 @@ local function newWord(wordName)
   setDefs(curWord, 'code')
 end
 
-joylol.newWord = newWord
+coAlgs.newWord = newWord
 \stopLuaCode
 
 \subsection{Implementation: stop}
 
 \startMkIVCode
 \def\stopJoyLoLWord{
-  \directlua{thirddata.joylol.endWord()}
+  \directlua{thirddata.joylolCoAlgs.endWord()}
 }
 \stopMkIVCode
 
@@ -74,7 +74,7 @@ local function endWord()
   end
 end
 
-joylol.endWord = endWord
+coAlgs.endWord = endWord
 \stopLuaCode
 
 \section[title=JoyLoL word implementation]
@@ -83,11 +83,11 @@ joylol.endWord = endWord
 \let\stopImplementation\relax
 
 \def\stopImplementationDone{
-  \directlua{thirddata.joyLoLCoAlgs.stopImplementation()}
+  \directlua{thirddata.joylolCoAlgs.stopImplementation()}
 }
 
 \def\startImplementation[#1]{
-  \directlua{thirddata.joyLoLCoAlgs.startImplementation('#1')}
+  \directlua{thirddata.joylolCoAlgs.startImplementation('#1')}
   \buff_pickup{_implementation_buffer_}%
     {startImplementation}{stopImplementation}%
     {\relax}{\stopImplementationDone}\plusone%
