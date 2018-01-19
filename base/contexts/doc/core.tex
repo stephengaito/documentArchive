@@ -195,7 +195,7 @@ typedef void (PushParsedStringCtx)(
     assert(getContextsClass(aCtx->jInterp)          \
       ->pushParsedStringCtxDataFunc),               \
     (getContextsClass(aCtx->jInterp)                \
-      ->pushParsedStringCtxDataFunc(aCtx, aSring))  \
+      ->pushParsedStringCtxDataFunc(aCtx, aString)) \
   )
 \stopCHeader
 
@@ -399,6 +399,35 @@ void pushCtxProcessImpl(
 \stopCCode
 
 \startCHeader
+#define pushNullCtxProcess(aCtx)            \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->pushNullCtxProcessFunc),            \
+    (getContextsClass(aCtx->jInterp)        \
+      ->pushNullCtxProcessFunc(aCtx))       \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushNullCtxProcessImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushNullCtxProcessImpl(
+  ContextObj* aCtx
+) {
+  if (!aCtx) return;
+  assert(aCtx->jInterp);
+  aCtx->data = newPair(aCtx->jInterp, NULL, aCtx->process);
+}
+\stopCCode
+
+\startCHeader
 #define pushSymbolCtxProcess(aCtx, aSymbol)      \
   (                                              \
     assert(aCtx),                                \
@@ -477,7 +506,7 @@ void pushParsedArrayOfStringsCtxProcessImpl(
     assert(getContextsClass(aCtx->jInterp)             \
       ->pushParsedStringCtxProcessFunc),               \
     (getContextsClass(aCtx->jInterp)                   \
-      ->pushParsedStringCtxProcessFunc(aCtx, aSring))  \
+      ->pushParsedStringCtxProcessFunc(aCtx, aString)) \
   )
 \stopCHeader
 

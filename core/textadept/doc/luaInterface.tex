@@ -16,60 +16,8 @@ static int lua_core_textadept_getGitVersion (lua_State *lstate) {
   return 1;
 }
 
-static int lua_core_textadept_setVerbose(lua_State *lstate) {
-  Boolean verbose = 
-    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
-  getJoyLoLInterpInto(lstate, jInterp);
-  assert(jInterp);
-  assert(jInterp->rootCtx);
-  jInterp->verbose = verbose;
-  jInterp->rootCtx->verbose = verbose;
-  lua_pop(lstate, 1);
-  return 0;
-}
-
-static int lua_core_textadept_setDebugging(lua_State *lstate) {
-  Boolean debugFlag = 
-    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
-  getJoyLoLInterpInto(lstate, jInterp);
-  assert(jInterp);
-  jInterp->debug = debugFlag;
-  lua_pop(lstate, 1);
-  return 0;
-}
-
-static int lua_core_textadept_pushLoadPath(lua_State *lstate) {
-  Symbol *aPath = lua_tostring(lstate, 1);
-  getJoyLoLInterpInto(lstate, jInterp);
-  pushLoadPath(jInterp->loader, aPath);
-  lua_pop(lstate, 1);
-  return 0;
-}
-
-static int lua_core_textadept_loadFile(lua_State *lstate) {
-  Symbol *aFile = lua_tostring(lstate, 1);
-  getJoyLoLInterpInto(lstate, jInterp);
-  loadAFile(jInterp->rootCtx, aFile);
-  lua_pop(lstate, 1);
-  return 0;
-}
-
-static int lua_core_textadept_evalString(lua_State *lstate) {
-  Symbol *aString = lua_tostring(lstate, 1);
-  getJoyLoLInterpInto(lstate, jInterp);
-  evalStringInContext(jInterp->rootCtx, aString);
-  lua_pop(lstate, 1);
-  return 0;
-}
-
-
 static const struct luaL_Reg lua_core_textadept [] = {
   { "gitVersion",   lua_core_textadept_getGitVersion },
-  { "setVerbose",   lua_core_textadept_setVerbose    },
-  { "setDebugging", lua_core_textadept_setDebugging  },
-  { "pushLoadPath", lua_core_textadept_pushLoadPath  },
-  { "loadFile",     lua_core_textadept_loadFile      },
-  { "evalString",   lua_core_textadept_evalString    },
   {NULL, NULL}
 };
 

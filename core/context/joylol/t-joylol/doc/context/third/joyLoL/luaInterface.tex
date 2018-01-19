@@ -2,82 +2,49 @@
 
 \section[title=Lua interface]
 
-\component gitVersion-c
-
-\startCCode
-static int lua_core_context_getGitVersion (lua_State *lstate) {
-  const char* aKey   = lua_tostring(lstate, 1);
-  if (aKey) {
-    getGitVersionInto(gitVersionKeyValues, aKey, aValue);
-    lua_pushstring(lstate, aValue);
-  } else {
-    lua_pushstring(lstate, "no valid key provided");
+\startMkIVCode
+\def\setJoyLoLVerbose{%
+  \directlua{%
+    --thirddata.joylol.setVerbose(true)
   }
-  return 1;
 }
-\stopCCode
 
-\startCCode
-static int lua_core_context_setVerbose(lua_State *lstate) {
-  Boolean verbose = 
-    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
-  getJoyLoLInterpInto(lstate, jInterp);
-  assert(jInterp);
-  assert(jInterp->rootCtx);
-  jInterp->verbose = verbose;
-  jInterp->rootCtx->verbose = verbose;
-  lua_pop(lstate, 1);
-  return 0;
+\def\clearJoyLoLVerbose{%
+  \directlua{%
+    --thirddata.joylol.setVerbose(false)
+  }
 }
-\stopCCode
+\stopMkIVCode
 
-\startCCode
-static int lua_core_context_setDebugging(lua_State *lstate) {
-  Boolean debugFlag = 
-    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
-  getJoyLoLInterpInto(lstate, jInterp);
-  assert(jInterp);
-  jInterp->debug = debugFlag;
-  lua_pop(lstate, 1);
-  return 0;
+\startMkIVCode
+\def\setJoyLoLDebugging{%
+  \directlua{%
+    --thirddata.joylol.setDebugging(true)
+  }
 }
-\stopCCode
+
+\def\clearJoyLoLDebugging{%
+  \directlua{%
+    --thirddata.joylol.setDebugging(false)
+  }
+}
+\stopMkIVCode
 
 \startMkIVCode
 \def\pushJoyLoLLoadPath#1{%
   \directlua{%
-    thirddata.joylol.core.context.pushLoadPath('#1')
+    --thirddata.joylol.pushLoadPath('#1')
   }
 }
 \stopMkIVCode
-
-\startCCode
-static int lua_core_context_pushLoadPath(lua_State *lstate) {
-  Symbol *aPath = lua_tostring(lstate, 1);
-  getJoyLoLInterpInto(lstate, jInterp);
-  pushLoadPath(jInterp->loader, aPath);
-  lua_pop(lstate, 1);
-  return 0;
-}
-\stopCCode
 
 \startMkIVCode
 \def\loadJoyLoLFile#1{%
   \directlua{%
-    thirddata.joylol.core.context.loadFile('#1')
+    --thirddata.joylol.loadFile('#1')
   }
 }
 \stopMkIVCode
-
-\startCCode
-static int lua_core_context_loadFile(lua_State *lstate) {
-  Symbol *aFile = lua_tostring(lstate, 1);
-  getJoyLoLInterpInto(lstate, jInterp);
-  loadAFile(jInterp->rootCtx, aFile);
-  lua_pop(lstate, 1);
-  return 0;
-}
-\stopCCode
 
 \startMkIVCode
 \definetyping[JoyLoLCode]
@@ -94,30 +61,28 @@ static int lua_core_context_loadFile(lua_State *lstate) {
 local function evalBuffer(bufferName) 
   local bufferContents =
     buffers.getcontent(bufferName):gsub("\13", "\n")
-  joylol.core.context.evalString(bufferContents)
+  --joylol.evalString(bufferContents)
 end
 
 joylol.core.context.evalBuffer = evalBuffer
 \stopLuaCode
 
-\startCCode
-static int lua_core_context_evalString(lua_State *lstate) {
-  Symbol *aString = lua_tostring(lstate, 1);
-  getJoyLoLInterpInto(lstate, jInterp);
-  evalStringInContext(jInterp->rootCtx, aString);
-  lua_pop(lstate, 1);
-  return 0;
-}
-\stopCCode
+\component gitVersion-c
 
 \startCCode
+static int lua_core_context_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  if (aKey) {
+    getGitVersionInto(gitVersionKeyValues, aKey, aValue);
+    lua_pushstring(lstate, aValue);
+  } else {
+    lua_pushstring(lstate, "no valid key provided");
+  }
+  return 1;
+}
+
 static const struct luaL_Reg lua_core_context [] = {
   { "gitVersion",   lua_core_context_getGitVersion },
-  { "setVerbose",   lua_core_context_setVerbose    },
-  { "setDebugging", lua_core_context_setDebugging  },
-  { "pushLoadPath", lua_core_context_pushLoadPath  },
-  { "loadFile",     lua_core_context_loadFile      },
-  { "evalString",   lua_core_context_evalString    },
   {NULL, NULL}
 };
 \stopCCode

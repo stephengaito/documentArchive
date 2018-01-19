@@ -281,7 +281,7 @@ Boolean registerContexts(
   theCoAlg->popCtxDataFunc         = popCtxDataImpl;
   
   theCoAlg->pushCtxProcessFunc     = pushCtxProcessImpl;
-  theCoAlg->pushNullCtxProcessFunc = NULL;
+  theCoAlg->pushNullCtxProcessFunc = pushNullCtxProcessImpl;
   theCoAlg->pushSymbolCtxProcessFunc =
     pushSymbolCtxProcessImpl;
   theCoAlg->pushParsedArrayOfStringsCtxProcessFunc =
