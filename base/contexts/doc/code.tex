@@ -193,6 +193,8 @@ typedef struct contexts_class_struct {
   NewContext     *newContextFunc;
   PushCtx        *pushCtxDataFunc; 
   PushNullCtx    *pushNullCtxDataFunc;
+  PushBooleanCtx *pushBooleanCtxDataFunc;
+  PushNaturalCtx *pushNaturalCtxDataFunc;
   PushSymbolCtx  *pushSymbolCtxDataFunc;
   PushParsedArrayOfStringsCtx 
     *pushParsedArrayOfStringsCtxDataFunc;
@@ -204,6 +206,8 @@ typedef struct contexts_class_struct {
   PopCtx         *popCtxDataFunc;
   PushCtx        *pushCtxProcessFunc;
   PushNullCtx    *pushNullCtxProcessFunc;
+  PushBooleanCtx *pushBooleanCtxProcessFunc;
+  PushNaturalCtx *pushNaturalCtxProcessFunc;
   PushSymbolCtx  *pushSymbolCtxProcessFunc;
   PushParsedArrayOfStringsCtx
     *pushParsedArrayOfStringsCtxProcessFunc;
@@ -270,6 +274,8 @@ Boolean registerContexts(
   
   theCoAlg->pushCtxDataFunc        = pushCtxDataImpl;
   theCoAlg->pushNullCtxDataFunc    = pushNullCtxDataImpl;
+  theCoAlg->pushBooleanCtxDataFunc = pushBooleanCtxDataImpl;
+  theCoAlg->pushNaturalCtxDataFunc = pushNaturalCtxDataImpl;
   theCoAlg->pushSymbolCtxDataFunc  = pushSymbolCtxDataImpl;
   theCoAlg->pushParsedArrayOfStringsCtxDataFunc =
     pushParsedArrayOfStringsCtxDataImpl;
@@ -282,6 +288,10 @@ Boolean registerContexts(
   
   theCoAlg->pushCtxProcessFunc     = pushCtxProcessImpl;
   theCoAlg->pushNullCtxProcessFunc = pushNullCtxProcessImpl;
+  theCoAlg->pushBooleanCtxProcessFunc =
+    pushBooleanCtxProcessImpl;
+  theCoAlg->pushNaturalCtxProcessFunc =
+    pushNaturalCtxProcessImpl;
   theCoAlg->pushSymbolCtxProcessFunc =
     pushSymbolCtxProcessImpl;
   theCoAlg->pushParsedArrayOfStringsCtxProcessFunc =

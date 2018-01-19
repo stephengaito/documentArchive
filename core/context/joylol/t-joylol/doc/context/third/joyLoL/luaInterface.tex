@@ -5,13 +5,13 @@
 \startMkIVCode
 \def\setJoyLoLVerbose{%
   \directlua{%
-    --thirddata.joylol.setVerbose(true)
+    thirddata.joylol.setVerbose(true)
   }
 }
 
 \def\clearJoyLoLVerbose{%
   \directlua{%
-    --thirddata.joylol.setVerbose(false)
+    thirddata.joylol.setVerbose(false)
   }
 }
 \stopMkIVCode
@@ -19,13 +19,13 @@
 \startMkIVCode
 \def\setJoyLoLDebugging{%
   \directlua{%
-    --thirddata.joylol.setDebugging(true)
+    thirddata.joylol.setDebugging(true)
   }
 }
 
 \def\clearJoyLoLDebugging{%
   \directlua{%
-    --thirddata.joylol.setDebugging(false)
+    thirddata.joylol.setDebugging(false)
   }
 }
 \stopMkIVCode
@@ -33,7 +33,7 @@
 \startMkIVCode
 \def\pushJoyLoLLoadPath#1{%
   \directlua{%
-    --thirddata.joylol.pushLoadPath('#1')
+    thirddata.joylol.pushLoadPath('#1')
   }
 }
 \stopMkIVCode
@@ -41,7 +41,7 @@
 \startMkIVCode
 \def\loadJoyLoLFile#1{%
   \directlua{%
-    --thirddata.joylol.loadFile('#1')
+    thirddata.joylol.loadFile('#1')
   }
 }
 \stopMkIVCode

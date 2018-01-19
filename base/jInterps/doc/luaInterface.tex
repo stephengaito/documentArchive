@@ -57,9 +57,102 @@ static int lua_joylol_loadFile(lua_State *lstate) {
   return 0;
 }
 
+// The following is adapted from lamma's corrected version
+// at the end of his question:
+//   https://stackoverflow.com/q/29287988
+// as well as Joe Rossi's initial question
+//   http://lua-users.org/lists/lua-l/2006-03/msg00335.html
+//
+static void pushLuaTo(
+  lua_State  *lstate,
+  ContextObj *rootCtx,
+  Boolean     isData
+) {
+  int aType = lua_type(lstate, -1);
+  switch(aType) {
+  case LUA_TNIL : {
+    if (isData) {
+      pushNullCtxData(rootCtx);
+    } else {
+      pushNullCtxProcess(rootCtx);
+    }
+  } break;
+  case LUA_TNUMBER : {
+    lua_Number aDouble = lua_tonumber(lstate, 1);
+    char buffer[1060];
+    buffer[0] = 0;
+    snprintf(buffer, 1050, "%.0f", aDouble);
+    if (isData) {
+      pushNaturalCtxData(rootCtx, buffer);
+    } else {
+      pushNaturalCtxProcess(rootCtx, buffer);
+    }
+  } break;
+  case LUA_TBOOLEAN : {
+    int aBool = lua_toboolean(lstate, -1);
+    if (isData) {
+      pushBooleanCtxData(rootCtx, aBool);
+    } else {
+      pushBooleanCtxProcess(rootCtx, aBool);
+    }
+  } break;
+  case LUA_TSTRING : {
+    Symbol *aString = lua_tostring(lstate, -1);
+    if (isData) {
+      pushSymbolCtxData(rootCtx, aString);
+    } else {
+      pushSymbolCtxProcess(rootCtx, aString);
+    }
+  } break;
+  case LUA_TTABLE : {
+    // we ONLY take numerically keyed items from tables
+    // that is we treat all tables as ARRAYS not HashTables
+    size_t tableLen = lua_rawlen(lstate, -1);
+    for (size_t i = 1; i <= tableLen; i++) {
+      lua_rawgeti(lstate, -1, i);
+      pushLuaTo(lstate, rootCtx, isData);
+      lua_pop(lstate, 1);
+    }
+  } break;
+  case LUA_TFUNCTION :
+  case LUA_TUSERDATA :
+  case LUA_TTHREAD :
+  case LUA_TLIGHTUSERDATA :
+  default:
+    // ignore ....
+    break;
+  }
+}
+
+static int lua_joylol_pushData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushLuaTo(lstate, jInterp->rootCtx, TRUE);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
 static int lua_joylol_pushNullData(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   pushNullCtxData(jInterp->rootCtx);
+  return 0;
+}
+
+static int lua_joylol_pushBooleanData(lua_State *lstate) {
+  Boolean aBool = lua_toboolean(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushBooleanCtxData(jInterp->rootCtx, aBool);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_pushNaturalData(lua_State *lstate) {
+  double aDouble = lua_tonumber(lstate, 1);
+  char buffer[1060];
+  buffer[0] = 0;
+  snprintf(buffer, 1050, "%.0f", aDouble);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushNaturalCtxData(jInterp->rootCtx, buffer);
+  lua_pop(lstate, 1);
   return 0;
 }
 
@@ -129,7 +222,10 @@ static const struct luaL_Reg lua_joylol_interface [] = {
   { "setDebugging",            lua_joylol_setDebugging            },
   { "pushLoadPath",            lua_joylol_pushLoadPath            },
   { "loadFile",                lua_joylol_loadFile                },
+  { "pushData",                lua_joylol_pushData                },
   { "pushNullData",            lua_joylol_pushNullData            },
+  { "pushBooleanData",         lua_joylol_pushBooleanData         },
+  { "pushNaturalData",         lua_joylol_pushNaturalData         },
   { "pushSymbolData",          lua_joylol_pushSymbolData          },
   { "pushParsedStringData",    lua_joylol_pushParsedStringData    },
 //  { "popData",                 lua_joylol_popData                 },

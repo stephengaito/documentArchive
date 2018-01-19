@@ -102,6 +102,84 @@ void pushNullCtxDataImpl(
 \stopCCode
 
 \startCHeader
+typedef void (PushBooleanCtx)(
+  ContextObj *aCtx,
+  Boolean     aBool
+);
+
+#define pushBooleanCtxData(aCtx, aBool)      \
+  (                                          \
+    assert(aCtx),                            \
+    assert(getContextsClass(aCtx->jInterp)   \
+      ->pushBooleanCtxDataFunc),             \
+    (getContextsClass(aCtx->jInterp)         \
+      ->pushBooleanCtxDataFunc(aCtx, aBool)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushBooleanCtxDataImpl(
+  ContextObj *aCtx,
+  Boolean     aBool
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushBooleanCtxDataImpl(
+  ContextObj *aCtx,
+  Boolean     aBool
+) {
+  if (!aCtx) return;
+  assert(aCtx->jInterp);
+
+  JObj* aBoolPA = newBoolean(aCtx->jInterp, aBool);
+  if (!aBoolPA) return;
+  aCtx->data = newPair(aCtx->jInterp, aBoolPA, aCtx->data);
+}
+\stopCCode
+
+\startCHeader
+typedef void (PushNaturalCtx)(
+  ContextObj *aCtx,
+  Symbol     *anNaturalStr
+);
+
+#define pushNaturalCtxData(aCtx, aNaturalStr)      \
+  (                                                \
+    assert(aCtx),                                  \
+    assert(getContextsClass(aCtx->jInterp)         \
+      ->pushNaturalCtxDataFunc),                   \
+    (getContextsClass(aCtx->jInterp)               \
+      ->pushNaturalCtxDataFunc(aCtx, aNaturalStr)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushNaturalCtxDataImpl(
+  ContextObj *aCtx,
+  Symbol     *aNaturalStr
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushNaturalCtxDataImpl(
+  ContextObj *aCtx,
+  Symbol     *aNaturalStr
+) {
+  if (!aCtx) return;
+  assert(aCtx->jInterp);
+
+  JObj* aNaturalPA = newNatural(aCtx->jInterp, aNaturalStr);
+  if (!aNaturalPA) return;
+  aCtx->data = newPair(aCtx->jInterp, aNaturalPA, aCtx->data);
+}
+\stopCCode
+
+\startCHeader
 typedef void (PushSymbolCtx)(
   ContextObj *aCtx,
   Symbol     *aSymbol
@@ -424,6 +502,74 @@ void pushNullCtxProcessImpl(
   if (!aCtx) return;
   assert(aCtx->jInterp);
   aCtx->data = newPair(aCtx->jInterp, NULL, aCtx->process);
+}
+\stopCCode
+
+\startCHeader
+#define pushBooleanCtxProcess(aCtx, aBool)      \
+  (                                             \
+    assert(aCtx),                               \
+    assert(getContextsClass(aCtx->jInterp)      \
+      ->pushBooleanCtxProcessFunc),             \
+    (getContextsClass(aCtx->jInterp)            \
+      ->pushBooleanCtxProcessFunc(aCtx, aBool)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushBooleanCtxProcessImpl(
+  ContextObj *aCtx,
+  Boolean     aBool
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushBooleanCtxProcessImpl(
+  ContextObj *aCtx,
+  Boolean     aBool
+) {
+  if (!aCtx) return;
+  assert(aCtx->jInterp);
+
+  JObj* aBoolPA = newBoolean(aCtx->jInterp, aBool);
+  if (!aBoolPA) return;
+  aCtx->data = newPair(aCtx->jInterp, aBoolPA, aCtx->process);
+}
+\stopCCode
+
+\startCHeader
+#define pushNaturalCtxProcess(aCtx, aNaturalStr)      \
+  (                                                   \
+    assert(aCtx),                                     \
+    assert(getContextsClass(aCtx->jInterp)            \
+      ->pushNaturalCtxProcessFunc),                   \
+    (getContextsClass(aCtx->jInterp)                  \
+      ->pushNaturalCtxProcessFunc(aCtx, aNaturalStr)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushNaturalCtxProcessImpl(
+  ContextObj *aCtx,
+  Symbol     *aNaturalStr
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushNaturalCtxProcessImpl(
+  ContextObj *aCtx,
+  Symbol     *aNaturalStr
+) {
+  if (!aCtx) return;
+  assert(aCtx->jInterp);
+
+  JObj* aNaturalPA = newNatural(aCtx->jInterp, aNaturalStr);
+  if (!aNaturalPA) return;
+  aCtx->data = newPair(aCtx->jInterp, aNaturalPA, aCtx->process);
 }
 \stopCCode
 
