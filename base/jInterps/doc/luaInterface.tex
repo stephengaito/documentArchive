@@ -57,12 +57,6 @@ static int lua_joylol_loadFile(lua_State *lstate) {
   return 0;
 }
 
-// The following is adapted from lamma's corrected version
-// at the end of his question:
-//   https://stackoverflow.com/q/29287988
-// as well as Joe Rossi's initial question
-//   http://lua-users.org/lists/lua-l/2006-03/msg00335.html
-//
 static void pushLuaTo(
   lua_State  *lstate,
   ContextObj *rootCtx,
@@ -175,9 +169,35 @@ static int lua_joylol_pushParsedStringData(lua_State *lstate) {
 //popData
 //peekData
 
+static int lua_joylol_pushProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushLuaTo(lstate, jInterp->rootCtx, FALSE);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
 static int lua_joylol_pushNullProcess(lua_State *lstate) {
-  //getJoyLoLInterpInto(lstate, jInterp);
-  //pushNullCtxProcess(jInterp->rootCtx);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushNullCtxProcess(jInterp->rootCtx);
+  return 0;
+}
+
+static int lua_joylol_pushBooleanProcess(lua_State *lstate) {
+  Boolean aBool = lua_toboolean(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushBooleanCtxProcess(jInterp->rootCtx, aBool);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_pushNaturalProcess(lua_State *lstate) {
+  double aDouble = lua_tonumber(lstate, 1);
+  char buffer[1060];
+  buffer[0] = 0;
+  snprintf(buffer, 1050, "%.0f", aDouble);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushNaturalCtxProcess(jInterp->rootCtx, buffer);
+  lua_pop(lstate, 1);
   return 0;
 }
 
@@ -188,7 +208,6 @@ static int lua_joylol_pushSymbolProcess(lua_State *lstate) {
   lua_pop(lstate, 1);
   return 0;
 }
-
 
 static int lua_joylol_pushParsedStringProcess(lua_State *lstate) {
   Symbol *aString = lua_tostring(lstate, 1);
@@ -230,7 +249,10 @@ static const struct luaL_Reg lua_joylol_interface [] = {
   { "pushParsedStringData",    lua_joylol_pushParsedStringData    },
 //  { "popData",                 lua_joylol_popData                 },
 //  { "peekData",                lua_joylol_peekData                },
+  { "pushProcess",             lua_joylol_pushProcess             },
   { "pushNullProcess",         lua_joylol_pushNullProcess         },
+  { "pushBooleanProcess",      lua_joylol_pushBooleanProcess      },
+  { "pushNaturalProcess",      lua_joylol_pushNaturalProcess      },
   { "pushSymbolProcess",       lua_joylol_pushSymbolProcess       },
   { "pushParsedStringProcess", lua_joylol_pushParsedStringProcess },
 //  { "popProcess",              lua_joylol_popProcess              },
