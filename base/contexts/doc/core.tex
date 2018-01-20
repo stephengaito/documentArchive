@@ -777,7 +777,7 @@ void prependListCtxProcessImpl(
 
 #define popCtxProcessInto(aCtx, aVar)                           \
 assert(aCtx);                                                   \
-JObj* aVar = popCtxProcess(aCtx);                           \
+JObj* aVar = popCtxProcess(aCtx);                               \
 if (aCtx->tracingOn) {                                          \
   JoyLoLInterp *jInterp = aCtx->jInterp;                        \
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
@@ -804,7 +804,7 @@ JObj* popCtxProcessImpl(
   if (!aCtx->process) return NULL;
 
   JObj* poppedLoL = asCar(aCtx->process);
-  aCtx->process       = asCdr(aCtx->process);
+  aCtx->process   = asCdr(aCtx->process);
   return poppedLoL;
 }
 \stopCCode

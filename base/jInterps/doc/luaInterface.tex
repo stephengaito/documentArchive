@@ -56,7 +56,9 @@ static int lua_joylol_loadFile(lua_State *lstate) {
   lua_pop(lstate, 1);
   return 0;
 }
+\stopCCode
 
+\startCCode
 static void pushLuaToJoylol(
   lua_State  *lstate,
   ContextObj *rootCtx,
@@ -117,7 +119,40 @@ static void pushLuaToJoylol(
     break;
   }
 }
+\stopCCode
 
+\startCCode
+static void peekJoylolToLua(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp,
+  JObj         *aLoL
+) {
+  if (isAtom(aLoL)) {
+    if (!aLoL) {
+      lua_pushnil(lstate);
+    } else if (isSymbol(aLoL)) {
+      lua_pushstring(lstate, asSymbol(aLoL));
+    } else if (isNatural(aLoL)) {
+      lua_pushnumber(lstate, asNaturalDbl(jInterp, aLoL));
+    } else if (isBoolean(aLoL)) {
+      lua_pushboolean(lstate, (isTrue(aLoL) ? TRUE : FALSE));
+    } else {
+      lua_pushstring(lstate, "unknownAtom");
+    }
+  } else {
+    lua_newtable(lstate);
+    for (size_t i = 1; aLoL; i++) {
+      peekJoylolToLua(lstate, jInterp, asCar(aLoL));
+      lua_rawseti(lstate, -2, i);
+      aLoL = asCdr(aLoL);
+    }
+  }
+}
+\stopCCode
+
+
+\startTestSuite[push/pop root context data]
+\startCCode
 static int lua_joylol_pushData(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   pushLuaToJoylol(lstate, jInterp->rootCtx, TRUE);
@@ -166,33 +201,6 @@ static int lua_joylol_pushParsedStringData(lua_State *lstate) {
   return 0;
 }
 
-static void peekJoylolToLua(
-  lua_State    *lstate,
-  JoyLoLInterp *jInterp,
-  JObj         *aLoL
-) {
-  if (isAtom(aLoL)) {
-    if (!aLoL) {
-      lua_pushnil(lstate);
-    } else if (isSymbol(aLoL)) {
-      lua_pushstring(lstate, asSymbol(aLoL));
-    } else if (isNatural(aLoL)) {
-      lua_pushnumber(lstate, asNaturalDbl(jInterp, aLoL));
-    } else if (isBoolean(aLoL)) {
-      lua_pushboolean(lstate, (isTrue(aLoL) ? TRUE : FALSE));
-    } else {
-      lua_pushstring(lstate, "unknownAtom");
-    }
-  } else {
-    lua_newtable(lstate);
-    for (size_t i = 1; aLoL; i++) {
-      peekJoylolToLua(lstate, jInterp, asCar(aLoL));
-      lua_rawseti(lstate, -2, i);
-      aLoL = asCdr(aLoL);
-    }
-  }
-}
-
 static int lua_joylol_peekData(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   JObj *aLoL = popCtxData(jInterp->rootCtx);
@@ -207,7 +215,59 @@ static int lua_joylol_popData(lua_State *lstate) {
   peekJoylolToLua(lstate, jInterp, aLoL);
   return 1;
 }
+\stopCCode
 
+\startTestCase[should be able to push and pop on data]
+\startLuaTest
+  local joylol = thirddata.joylol
+  joylol.pushBooleanData(true)
+  local result = joylol.popData()
+  assert.isBoolean(result)
+  assert.isTrue(result)
+  
+  joylol.pushBooleanData(false)
+  result = joylol.popData()
+  assert.isBoolean(result)
+  assert.isFalse(result)
+  
+  joylol.pushNaturalData(1234.4999)
+  result = joylol.popData()
+  assert.isNumber(result)
+  -- note how we round down here
+  assert.isEqual(result, 1234)
+  
+  joylol.pushSymbolData("this is a test")
+  result = joylol.popData()
+  assert.isString(result)
+  assert.isEqual(result, "this is a test")
+  
+  joylol.pushParsedStringData("( hello there ( this is a test ) 1234 )")
+  result = joylol.popData()
+  assert.isTable(result)
+  assert.length(result, 1)
+  -- Not sure why we get a table wrapped in a table??!!
+  result = result[1]
+  assert.isTable(result)
+  assert.length(result, 4)
+  assert.isString(result[1])
+  assert.isEqual(result[1], "hello")
+  assert.isString(result[2])
+  assert.isEqual(result[2], "there")
+  local innerResult = result[3]
+  assert.isTable(innerResult)
+  assert.length(innerResult, 4)
+  assert.isEqual(innerResult[1], "this")
+  assert.isEqual(innerResult[2], "is")
+  assert.isEqual(innerResult[3], "a")
+  assert.isEqual(innerResult[4], "test")
+  assert.isNumber(result[4])
+  assert.isEqual(result[4], 1234)
+\stopLuaTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[push/pop root context process]
+\startCCode
 static int lua_joylol_pushProcess(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   pushLuaToJoylol(lstate, jInterp->rootCtx, FALSE);
@@ -270,7 +330,62 @@ static int lua_joylol_popProcess(lua_State *lstate) {
   peekJoylolToLua(lstate, jInterp, aLoL);
   return 1;
 }
+\stopCCode
 
+\startTestCase[should be able to push and pop on process]
+\startLuaTest
+  local joylol = thirddata.joylol
+  joylol.pushBooleanProcess(true)
+  local result = joylol.popProcess()
+  print("push pop process")
+  local pp = require 'pl.pretty'
+  pp.dump(result)
+--  assert.isBoolean(result)
+--  assert.isTrue(result)
+  
+--  joylol.pushBooleanProcess(false)
+--  result = joylol.popProcess()
+--  assert.isBoolean(result)
+--  assert.isFalse(result)
+  
+--  joylol.pushNaturalProcess(1234.56)
+--  result = joylol.popProcess()
+--  assert.isNumber(result)
+--  -- note how we round up here
+--  assert.isEqual(result, 1235)
+  
+--  joylol.pushSymbolProcess("this is a test")
+--  result = joylol.popProcess()
+--  assert.isString(result)
+--  assert.isEqual(result, "this is a test")
+  
+--  joylol.pushParsedStringProcess("( hello there ( this is a test ) 1234 )")
+--  result = joylol.popProcess()
+--  pp.dump(result)
+--  assert.isTable(result)
+--  assert.length(result, 1)
+--  -- Not sure why we get a table wrapped in a table??!!
+--  result = result[1]
+--  assert.isTable(result)
+--  assert.length(result, 4)
+--  assert.isString(result[1])
+--  assert.isEqual(result[1], "hello")
+--  assert.isString(result[2])
+--  assert.isEqual(result[2], "there")
+--  local innerResult = result[3]
+--  assert.isTable(innerResult)
+--  assert.length(innerResult, 4)
+--  assert.isEqual(innerResult[1], "this")
+--  assert.isEqual(innerResult[2], "is")
+--  assert.isEqual(innerResult[3], "a")
+--  assert.isEqual(innerResult[4], "test")
+--  assert.isNumber(result[4])
+--  assert.isEqual(result[4], 1234)
+\stopLuaTest
+\stopTestCase
+\stopTestSuite
+
+\startCCode
 static int lua_joylol_evalString(lua_State *lstate) {
   Symbol *aString = lua_tostring(lstate, 1);
   getJoyLoLInterpInto(lstate, jInterp);
@@ -284,7 +399,9 @@ static int lua_joylol_eval(lua_State *lstate) {
   evalContext(jInterp->rootCtx);
   return 0;
 }
+\stopCCode
 
+\startCCode
 #define NumJoyLoLInterfaceFunctions 15
 static const struct luaL_Reg lua_joylol_interface [] = {
   { "gitVersion",              lua_jInterps_getGitVersion         },
