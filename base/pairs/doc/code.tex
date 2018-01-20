@@ -195,7 +195,7 @@ JObj* copyLoLImpl(
   AssertPtrNotNull(asCar(asCar(aPair1)));
   AssertPtrEquals(asCar(asCar(aPair1)), bool);
   AssertIntTrue(isBoolean(asCar(asCar(aPair1))));
-  AssertIntTrue(isTrue(jInterp, asCar(asCar(aPair1))));
+  AssertIntTrue(isTrue(asCar(asCar(aPair1))));
 
   AssertPtrNull(asCdr(asCar(aPair1)));
 
@@ -208,7 +208,7 @@ JObj* copyLoLImpl(
   AssertPtrNotNull(asCdr(asCdr(aPair1)));
   AssertPtrEquals(asCdr(asCdr(aPair1)), bool);
   AssertIntTrue(isBoolean(asCdr(asCdr(aPair1))));
-  AssertIntTrue(isTrue(jInterp, asCdr(asCdr(aPair1))));
+  AssertIntTrue(isTrue(asCdr(asCdr(aPair1))));
 \stopCTest
 \stopTestCase
 \stopTestSuite

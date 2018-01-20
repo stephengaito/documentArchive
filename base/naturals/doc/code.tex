@@ -111,6 +111,50 @@ JObj* newNaturalImpl(
 \stopTestCase
 \stopTestSuite
 
+\startTestSuite[asNaturalDbl]
+
+\startCHeader
+typedef double (AsNaturalDbl)(
+  JObj* aNatural
+);
+
+#define asNaturalDbl(jInterp, aNatural) \
+  (                                     \
+    assert(getNaturalsClass(jInterp)    \
+      ->asNaturalDblFunc),              \
+    (getNaturalsClass(jInterp)          \
+      ->asNaturalDblFunc(aNatural))      \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern double asNaturalDblImpl(
+  JObj* aNatural
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+double asNaturalDblImpl(
+  JObj* aNatural
+) {
+  double result = 0.0;
+  if (isNatural(aNatural)) {
+    result = mpz_get_d(asNatural(aNatural));
+  }
+  return result;
+}
+\stopCCode
+
+\startTestCase[should convert naturals to doubles]
+\startCTest
+  JObj *aNat = newNatural(jInterp, "12345");
+  AssertDblEquals(asNaturalDbl(jInterp, aNat), 12345.0, 0.0001);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
 \startTestSuite[natural equality]
 
 \setCHeaderStream{private}
@@ -216,7 +260,8 @@ Boolean printNatCoAlg(
 \startCHeader
 typedef struct naturals_class_struct {
   JClass super;
-  NewNatural *newNaturalFunc;
+  NewNatural   *newNaturalFunc;
+  AsNaturalDbl *asNaturalDblFunc;
 } NaturalsClass;
 \stopCHeader
 
@@ -250,6 +295,7 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   theCoAlg->super.equalityFunc   = equalityNatCoAlg;
   theCoAlg->super.printFunc      = printNatCoAlg;
   theCoAlg->newNaturalFunc       = newNaturalImpl;
+  theCoAlg->asNaturalDblFunc     = asNaturalDblImpl;
 
   size_t tag =
     registerJClass(jInterp, (JClass*)theCoAlg);

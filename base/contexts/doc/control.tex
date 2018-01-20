@@ -272,7 +272,7 @@ static void raiseIfFalseAP(ContextObj* aCtx) {
   assert(jInterp);
   popCtxDataInto(aCtx, condition);
   popCtxProcessInto(aCtx, raiseExp);
-  if (isFalse(jInterp, condition)) {
+  if (isFalse(condition)) {
     pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
     prependListCtxProcess(aCtx, raiseExp);
   }

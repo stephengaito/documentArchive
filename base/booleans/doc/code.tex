@@ -120,57 +120,49 @@ typedef Boolean (AssertBoolValue)(
   JObj* aLoL
 );
 
-#define isTrue(jInterp, aLoL)                     \
-  (                                               \
-    assert(getBooleansClass(jInterp)->isTrueFunc),\
-    (getBooleansClass(jInterp)->isTrueFunc(aLoL)) \
+#define isTrue(aLoL)                  \
+  (                                   \
+    (                                 \
+      (aLoL) &&                       \
+      asType(aLoL) &&                 \
+      (asTag(aLoL) == BooleansTag) && \
+      asBoolean(aLoL)                 \
+    ) ?                               \
+      TRUE :                          \
+      FALSE                           \
   )
 
-#define isFalse(jInterp, aLoL)                     \
-  (                                                \
-    assert(getBooleansClass(jInterp)->isFalseFunc),\
-    (getBooleansClass(jInterp)->isFalseFunc(aLoL)) \
+#define isFalse(aLoL)                 \
+  (                                   \
+    (                                 \
+      (!aLoL) ||                      \
+      (!asType(aLoL)) ||              \
+      (asTag(aLoL) != BooleansTag) || \
+      !asBoolean(aLoL)                \
+    ) ?                               \
+      TRUE :                          \
+      FALSE                           \
   )
 \stopCHeader
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean isTrueImpl(JObj* aLoL);
-extern Boolean isFalseImpl(JObj* aLoL);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean isTrueImpl(JObj* aLoL) {
-  if (!aLoL) return FALSE;
-  if (!asType(aLoL)) return FALSE;
-  if (asTag(aLoL) != BooleansTag) return FALSE;
-  if (asBoolean(aLoL) == FALSE) return FALSE;
-  return TRUE;
-}
-
-Boolean isFalseImpl(JObj* aLoL) {
-  if (!aLoL) return TRUE;
-  if (asType(aLoL) &&
-     (asTag(aLoL) == BooleansTag) &&
-     (asBoolean(aLoL) == FALSE)) return TRUE;
-  return FALSE;
-}
-\stopCCode
 
 \startTestCase[should return appropriate boolean values]
 
 \startCTest
   JObj *aBool = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aBool);
+  AssertPtrNotNull(asType(aBool));
+  AssertIntEquals(asTag(aBool), BooleansTag);
   AssertIntTrue(asBoolean(aBool));
-  AssertIntTrue(isTrue(jInterp, aBool));
-  AssertIntFalse(isFalse(jInterp, aBool));
+  AssertIntTrue(isTrue(aBool));
+  AssertIntFalse(isFalse(aBool));
   aBool = newBoolean(jInterp, FALSE);
   AssertPtrNotNull(aBool);
+  AssertPtrNotNull(asType(aBool));
+  AssertIntEquals(asTag(aBool), BooleansTag);
   AssertIntFalse(asBoolean(aBool));
-  AssertIntFalse(isTrue(jInterp, aBool));
-  AssertIntTrue(isFalse(jInterp, aBool));
+  AssertIntFalse(asBoolean(aBool));
+  AssertIntFalse(isTrue(aBool));
+  AssertIntTrue(isFalse(aBool));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -260,8 +252,6 @@ Boolean printBoolCoAlg(
 typedef struct booleans_class_struct {
   JClass       super;
   NewBoolean      *newBooleanFunc;
-  AssertBoolValue *isTrueFunc;
-  AssertBoolValue *isFalseFunc;
 } BooleansClass;
 
 \stopCHeader
@@ -299,8 +289,6 @@ Boolean registerBooleans(JoyLoLInterp *jInterp) {
   theCoAlg->super.equalityFunc   = equalityBoolCoAlg;
   theCoAlg->super.printFunc      = printBoolCoAlg;
   theCoAlg->newBooleanFunc       = newBooleanImpl;
-  theCoAlg->isTrueFunc           = isTrueImpl;
-  theCoAlg->isFalseFunc          = isFalseImpl;
   size_t tag =
     registerJClass(jInterp, (JClass*)theCoAlg);
   

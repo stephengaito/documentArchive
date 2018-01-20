@@ -57,7 +57,7 @@ static int lua_joylol_loadFile(lua_State *lstate) {
   return 0;
 }
 
-static void pushLuaTo(
+static void pushLuaToJoylol(
   lua_State  *lstate,
   ContextObj *rootCtx,
   Boolean     isData
@@ -104,7 +104,7 @@ static void pushLuaTo(
     size_t tableLen = lua_rawlen(lstate, -1);
     for (size_t i = 1; i <= tableLen; i++) {
       lua_rawgeti(lstate, -1, i);
-      pushLuaTo(lstate, rootCtx, isData);
+      pushLuaToJoylol(lstate, rootCtx, isData);
       lua_pop(lstate, 1);
     }
   } break;
@@ -120,7 +120,7 @@ static void pushLuaTo(
 
 static int lua_joylol_pushData(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
-  pushLuaTo(lstate, jInterp->rootCtx, TRUE);
+  pushLuaToJoylol(lstate, jInterp->rootCtx, TRUE);
   lua_pop(lstate, 1);
   return 0;
 }
@@ -166,12 +166,51 @@ static int lua_joylol_pushParsedStringData(lua_State *lstate) {
   return 0;
 }
 
-//popData
-//peekData
+static void peekJoylolToLua(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp,
+  JObj         *aLoL
+) {
+  if (isAtom(aLoL)) {
+    if (!aLoL) {
+      lua_pushnil(lstate);
+    } else if (isSymbol(aLoL)) {
+      lua_pushstring(lstate, asSymbol(aLoL));
+    } else if (isNatural(aLoL)) {
+      lua_pushnumber(lstate, asNaturalDbl(jInterp, aLoL));
+    } else if (isBoolean(aLoL)) {
+      lua_pushboolean(lstate, (isTrue(aLoL) ? TRUE : FALSE));
+    } else {
+      lua_pushstring(lstate, "unknownAtom");
+    }
+  } else {
+    lua_newtable(lstate);
+    for (size_t i = 1; aLoL; i++) {
+      peekJoylolToLua(lstate, jInterp, asCar(aLoL));
+      lua_rawseti(lstate, -2, i);
+      aLoL = asCdr(aLoL);
+    }
+  }
+}
+
+static int lua_joylol_peekData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  JObj *aLoL = popCtxData(jInterp->rootCtx);
+  peekJoylolToLua(lstate, jInterp, aLoL);
+  pushCtxData(jInterp->rootCtx, aLoL);
+  return 1;
+}
+
+static int lua_joylol_popData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  JObj *aLoL = popCtxData(jInterp->rootCtx);
+  peekJoylolToLua(lstate, jInterp, aLoL);
+  return 1;
+}
 
 static int lua_joylol_pushProcess(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
-  pushLuaTo(lstate, jInterp->rootCtx, FALSE);
+  pushLuaToJoylol(lstate, jInterp->rootCtx, FALSE);
   lua_pop(lstate, 1);
   return 0;
 }
@@ -217,8 +256,20 @@ static int lua_joylol_pushParsedStringProcess(lua_State *lstate) {
   return 0;
 }
 
-//popProcess
-//peekProcess
+static int lua_joylol_peekProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  JObj *aLoL = popCtxProcess(jInterp->rootCtx);
+  peekJoylolToLua(lstate, jInterp, aLoL);
+  pushCtxProcess(jInterp->rootCtx, aLoL);
+  return 1;
+}
+
+static int lua_joylol_popProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  JObj *aLoL = popCtxProcess(jInterp->rootCtx);
+  peekJoylolToLua(lstate, jInterp, aLoL);
+  return 1;
+}
 
 static int lua_joylol_evalString(lua_State *lstate) {
   Symbol *aString = lua_tostring(lstate, 1);
@@ -247,16 +298,16 @@ static const struct luaL_Reg lua_joylol_interface [] = {
   { "pushNaturalData",         lua_joylol_pushNaturalData         },
   { "pushSymbolData",          lua_joylol_pushSymbolData          },
   { "pushParsedStringData",    lua_joylol_pushParsedStringData    },
-//  { "popData",                 lua_joylol_popData                 },
-//  { "peekData",                lua_joylol_peekData                },
+  { "peekData",                lua_joylol_peekData                },
+  { "popData",                 lua_joylol_popData                 },
   { "pushProcess",             lua_joylol_pushProcess             },
   { "pushNullProcess",         lua_joylol_pushNullProcess         },
   { "pushBooleanProcess",      lua_joylol_pushBooleanProcess      },
   { "pushNaturalProcess",      lua_joylol_pushNaturalProcess      },
   { "pushSymbolProcess",       lua_joylol_pushSymbolProcess       },
   { "pushParsedStringProcess", lua_joylol_pushParsedStringProcess },
-//  { "popProcess",              lua_joylol_popProcess              },
-//  { "peekProcess",             lua_joylol_peekProcess             },
+  { "peekProcess",             lua_joylol_peekProcess             },
+  { "popProcess",              lua_joylol_popProcess              },
   { "evalString",              lua_joylol_evalString              },
   { "eval",                    lua_joylol_eval                    },
   {NULL, NULL}

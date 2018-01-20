@@ -412,7 +412,7 @@ static void ifteContAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, topIf);
   popCtxProcessInto(aCtx, topThen);
   popCtxProcessInto(aCtx, topElse);
-  if (isTrue(jInterp, topIf)) {
+  if (isTrue(topIf)) {
     prependListCtxProcess(aCtx, topThen);
   } else {
     prependListCtxProcess(aCtx, topElse);
