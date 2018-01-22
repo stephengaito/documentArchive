@@ -8,6 +8,8 @@ lpTargets = litProgs.targets{
     'overview.tex',
     'code.tex',
     'core.tex',
+    'coreData.tex',
+    'coreProcess.tex',
     'control.tex',
     'support.tex',
     'eval.tex',

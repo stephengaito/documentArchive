@@ -1,0 +1,375 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Context core process code]
+\setCHeaderStream{public}
+
+\startCHeader
+#define pushCtxProcess(aCtx, lolToPush)        \
+  (                                            \
+    assert(aCtx),                              \
+    assert(getContextsClass(aCtx->jInterp)     \
+      ->pushCtxProcessFunc),                   \
+    (getContextsClass(aCtx->jInterp)           \
+      ->pushCtxProcessFunc(aCtx, lolToPush))   \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushCtxProcessImpl(
+  ContextObj* aCtx,
+  JObj* lolToPush
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushCtxProcessImpl(
+  ContextObj* aCtx,
+  JObj* lolToPush
+) {
+  if (!aCtx) return;
+  assert(aCtx->jInterp);
+  aCtx->process = newPair(aCtx->jInterp, lolToPush, aCtx->process);
+}
+\stopCCode
+
+\startCHeader
+#define pushNullCtxProcess(aCtx)            \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->pushNullCtxProcessFunc),            \
+    (getContextsClass(aCtx->jInterp)        \
+      ->pushNullCtxProcessFunc(aCtx))       \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushNullCtxProcessImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushNullCtxProcessImpl(
+  ContextObj* aCtx
+) {
+  if (!aCtx) return;
+  assert(aCtx->jInterp);
+  aCtx->data = newPair(aCtx->jInterp, NULL, aCtx->process);
+}
+\stopCCode
+
+\startCHeader
+#define pushBooleanCtxProcess(aCtx, aBool)      \
+  (                                             \
+    assert(aCtx),                               \
+    assert(getContextsClass(aCtx->jInterp)      \
+      ->pushBooleanCtxProcessFunc),             \
+    (getContextsClass(aCtx->jInterp)            \
+      ->pushBooleanCtxProcessFunc(aCtx, aBool)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushBooleanCtxProcessImpl(
+  ContextObj *aCtx,
+  Boolean     aBool
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushBooleanCtxProcessImpl(
+  ContextObj *aCtx,
+  Boolean     aBool
+) {
+  if (!aCtx) return;
+  assert(aCtx->jInterp);
+
+  JObj* aBoolPA = newBoolean(aCtx->jInterp, aBool);
+  if (!aBoolPA) return;
+  aCtx->data = newPair(aCtx->jInterp, aBoolPA, aCtx->process);
+}
+\stopCCode
+
+\startCHeader
+#define pushNaturalCtxProcess(aCtx, aNaturalStr)      \
+  (                                                   \
+    assert(aCtx),                                     \
+    assert(getContextsClass(aCtx->jInterp)            \
+      ->pushNaturalCtxProcessFunc),                   \
+    (getContextsClass(aCtx->jInterp)                  \
+      ->pushNaturalCtxProcessFunc(aCtx, aNaturalStr)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushNaturalCtxProcessImpl(
+  ContextObj *aCtx,
+  Symbol     *aNaturalStr
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushNaturalCtxProcessImpl(
+  ContextObj *aCtx,
+  Symbol     *aNaturalStr
+) {
+  if (!aCtx) return;
+  assert(aCtx->jInterp);
+
+  JObj* aNaturalPA = newNatural(aCtx->jInterp, aNaturalStr);
+  if (!aNaturalPA) return;
+  aCtx->data = newPair(aCtx->jInterp, aNaturalPA, aCtx->process);
+}
+\stopCCode
+
+\startCHeader
+#define pushSymbolCtxProcess(aCtx, aSymbol)      \
+  (                                              \
+    assert(aCtx),                                \
+    assert(getContextsClass(aCtx->jInterp)       \
+      ->pushSymbolCtxProcessFunc),               \
+    (getContextsClass(aCtx->jInterp)             \
+      ->pushSymbolCtxProcessFunc(aCtx, aSymbol)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushSymbolCtxProcessImpl(
+  ContextObj* aCtx,
+  Symbol* aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushSymbolCtxProcessImpl(
+  ContextObj* aCtx,
+  Symbol* aSymbol
+) {
+  if (!aCtx) return;
+  if (!aSymbol) return;
+  assert(aCtx->jInterp);
+
+  JObj* aSymbolPA =
+    getSymbol(aCtx->jInterp->dict, aSymbol);
+  if (!aSymbolPA) return;
+  aCtx->process = newPair(aCtx->jInterp, aSymbolPA, aCtx->process);
+}
+\stopCCode
+
+\startCHeader
+#define pushParsedArrayOfStringsCtxProcess(      \
+  aCtx, someStrings)                             \
+  (                                              \
+    assert(aCtx),                                \
+    assert(getContextsClass(aCtx->jInterp)       \
+      ->pushParsedArrayOfStringsCtxProcessFunc), \
+    (getContextsClass(aCtx->jInterp)             \
+      ->pushParsedArrayOfStringsCtxProcessFunc(  \
+        aCtx, someStrings))                      \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedArrayOfStringsCtxProcessImpl(
+  ContextObj* aCtx,
+  Symbol* someStrings[]
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushParsedArrayOfStringsCtxProcessImpl(
+  ContextObj* aCtx,
+  Symbol* someStrings[]
+) {
+  if (!aCtx) return;
+  if (!someStrings) return;
+  TextObj* aText =
+    createTextFromArrayOfStrings(aCtx->jInterp, someStrings);
+  pushParsedTextCtxProcess(aCtx, aText);
+  freeText(aText);
+}
+\stopCCode
+
+\startCHeader
+#define pushParsedStringCtxProcess(aCtx, aString)      \
+  (                                                    \
+    assert(aCtx),                                      \
+    assert(getContextsClass(aCtx->jInterp)             \
+      ->pushParsedStringCtxProcessFunc),               \
+    (getContextsClass(aCtx->jInterp)                   \
+      ->pushParsedStringCtxProcessFunc(aCtx, aString)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedStringCtxProcessImpl(
+  ContextObj* aCtx,
+  Symbol* aString
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushParsedStringCtxProcessImpl(
+  ContextObj* aCtx,
+  Symbol* aString
+) {
+  if (!aCtx) return;
+  if (!aString) return;
+  TextObj* aText =
+    createTextFromString(aCtx->jInterp, aString);
+  pushParsedTextCtxProcess(aCtx, aText);
+  freeText(aText);
+}
+\stopCCode
+
+\startCHeader
+#define pushParsedTextCtxProcess(aCtx, aText)      \
+  (                                                \
+    assert(aCtx),                                  \
+    assert(getContextsClass(aCtx->jInterp)         \
+      ->pushParsedTextCtxProcessFunc),             \
+    (getContextsClass(aCtx->jInterp)               \
+      ->pushParsedTextCtxProcessFunc(aCtx, aText)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedTextCtxProcessImpl(
+  ContextObj* aCtx,
+  TextObj* aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushParsedTextCtxProcessImpl(
+  ContextObj* aCtx,
+  TextObj* aText
+) {
+  if (!aCtx) return;
+  if (!aText) return;
+  assert(aCtx->jInterp);
+  JObj* aLoL = parseAllSymbols(aText);
+  if (!aLoL) return;
+  aCtx->process = newPair(aCtx->jInterp, aLoL, aCtx->process);
+}
+\stopCCode
+
+\startCHeader
+#define prependListCtxProcess(aCtx, lolToPrepend)      \
+  (                                                    \
+    assert(aCtx),                                      \
+    assert(getContextsClass(aCtx->jInterp)             \
+      ->prependListCtxProcessFunc),                    \
+    (getContextsClass(aCtx->jInterp)                   \
+      ->prependListCtxProcessFunc(aCtx, lolToPrepend)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void prependListCtxProcessImpl(
+  ContextObj* aCtx,
+  JObj* lolToPrepend
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void prependListCtxProcessImpl(
+  ContextObj* aCtx,
+  JObj* lolToPrepend
+) {
+  if (!aCtx) return;
+  if (!lolToPrepend) return;
+
+  // ensure lolToPrepend is a list
+  if (!isPair(lolToPrepend)) {
+    lolToPrepend = newPair(aCtx->jInterp, lolToPrepend, NULL);
+    assert(lolToPrepend);
+  }
+
+  // find end of lolToPrepend
+  JObj* lolList = lolToPrepend;
+  while(asCdr(lolList) && isPair(asCdr(lolList))) {
+    lolList = asCdr(lolList);
+  }
+
+  // ensure that if lolToPrepend ends in a non-pair we make it a pair
+  if (asCdr(lolList) && !isPair(asCdr(lolList))) {
+    asCdr(lolList) = newPair(aCtx->jInterp, asCdr(lolList), NULL);
+    assert(asCdr(lolList));
+  }
+
+  // place existing process stack at end of lolToPrepend
+  asCdr(lolList)  = aCtx->process;
+  aCtx->process   = lolToPrepend;
+}
+\stopCCode
+
+\startCHeader
+#define popCtxProcess(aCtx)                    \
+  (                                            \
+    assert(aCtx),                              \
+    assert(getContextsClass(aCtx->jInterp)     \
+      ->popCtxProcessFunc),                    \
+    (getContextsClass(aCtx->jInterp)           \
+      ->popCtxProcessFunc(aCtx))               \
+  )
+
+#define popCtxProcessInto(aCtx, aVar)                           \
+assert(aCtx);                                                   \
+JObj* aVar = popCtxProcess(aCtx);                               \
+if (aCtx->tracingOn) {                                          \
+  JoyLoLInterp *jInterp = aCtx->jInterp;                        \
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
+  strBufPrintf(jInterp, aStrBuf, "%s = ", #aVar);               \
+  printLoL(jInterp, aStrBuf, aVar);                             \
+  strBufPrintf(jInterp, aStrBuf, "\n");                         \
+  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));  \
+  strBufClose(jInterp, aStrBuf);                                \
+}
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* popCtxProcessImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* popCtxProcessImpl(
+  ContextObj* aCtx
+) {
+  if (!aCtx->process) return NULL;
+
+  JObj* poppedLoL = asCar(aCtx->process);
+  aCtx->process   = asCdr(aCtx->process);
+  return poppedLoL;
+}
+\stopCCode
+
+\startCHeader
+#define showCtxProcess(aCtx, aStrBuf)              \
+  assert(aCtx);                                    \
+  printLoL(aCtx->jInterp, aStrBuf, aCtx->process); \
+\stopCHeader
+
