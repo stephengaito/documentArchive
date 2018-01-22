@@ -215,6 +215,15 @@ static int lua_joylol_popData(lua_State *lstate) {
   peekJoylolToLua(lstate, jInterp, aLoL);
   return 1;
 }
+
+static int lua_joylol_showData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  showCtxData(jInterp->rootCtx, aStrBuf);
+  lua_pushstring (lstate, getCString(jInterp, aStrBuf));
+  strBufClose(jInterp, aStrBuf);
+  return 1;
+}
 \stopCCode
 
 \startTestCase[should be able to push and pop on data]
@@ -241,12 +250,8 @@ static int lua_joylol_popData(lua_State *lstate) {
   assert.isString(result)
   assert.isEqual(result, "this is a test")
   
-  joylol.pushParsedStringData("( hello there ( this is a test ) 1234 )")
+  joylol.pushParsedStringData("hello there ( this is a test ) 1234")
   result = joylol.popData()
-  assert.isTable(result)
-  assert.length(result, 1)
-  -- Not sure why we get a table wrapped in a table??!!
-  result = result[1]
   assert.isTable(result)
   assert.length(result, 4)
   assert.isString(result[1])
@@ -330,57 +335,62 @@ static int lua_joylol_popProcess(lua_State *lstate) {
   peekJoylolToLua(lstate, jInterp, aLoL);
   return 1;
 }
+
+static int lua_joylol_showProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  showCtxProcess(jInterp->rootCtx, aStrBuf);
+  lua_pushstring (lstate, getCString(jInterp, aStrBuf));
+  strBufClose(jInterp, aStrBuf);
+  return 1;
+}
 \stopCCode
 
 \startTestCase[should be able to push and pop on process]
 \startLuaTest
+  print(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
   local joylol = thirddata.joylol
   joylol.pushBooleanProcess(true)
   local result = joylol.popProcess()
-  print("push pop process")
-  local pp = require 'pl.pretty'
-  pp.dump(result)
---  assert.isBoolean(result)
---  assert.isTrue(result)
+  assert.isBoolean(result)
+  assert.isTrue(result)
   
---  joylol.pushBooleanProcess(false)
---  result = joylol.popProcess()
---  assert.isBoolean(result)
---  assert.isFalse(result)
+  joylol.pushBooleanProcess(false)
+  result = joylol.popProcess()
+  assert.isBoolean(result)
+  assert.isFalse(result)
   
---  joylol.pushNaturalProcess(1234.56)
---  result = joylol.popProcess()
---  assert.isNumber(result)
---  -- note how we round up here
---  assert.isEqual(result, 1235)
+  joylol.pushNaturalProcess(1234.56)
+  result = joylol.popProcess()
+  assert.isNumber(result)
+  -- note how we round up here
+  assert.isEqual(result, 1235)
   
---  joylol.pushSymbolProcess("this is a test")
---  result = joylol.popProcess()
---  assert.isString(result)
---  assert.isEqual(result, "this is a test")
-  
---  joylol.pushParsedStringProcess("( hello there ( this is a test ) 1234 )")
---  result = joylol.popProcess()
---  pp.dump(result)
---  assert.isTable(result)
---  assert.length(result, 1)
---  -- Not sure why we get a table wrapped in a table??!!
---  result = result[1]
---  assert.isTable(result)
---  assert.length(result, 4)
---  assert.isString(result[1])
---  assert.isEqual(result[1], "hello")
---  assert.isString(result[2])
---  assert.isEqual(result[2], "there")
---  local innerResult = result[3]
---  assert.isTable(innerResult)
---  assert.length(innerResult, 4)
---  assert.isEqual(innerResult[1], "this")
---  assert.isEqual(innerResult[2], "is")
---  assert.isEqual(innerResult[3], "a")
---  assert.isEqual(innerResult[4], "test")
---  assert.isNumber(result[4])
---  assert.isEqual(result[4], 1234)
+  joylol.pushSymbolProcess("this is a test")
+  result = joylol.popProcess()
+  assert.isString(result)
+  assert.isEqual(result, "this is a test")
+
+  joylol.pushParsedStringProcess("hello there ( this is a test ) 1234")
+  print(joylol.showProcess())
+  result = joylol.popProcess()
+  print(joylol.showProcess())
+  assert.isTable(result)
+  assert.length(result, 4)
+  assert.isString(result[1])
+  assert.isEqual(result[1], "hello")
+  assert.isString(result[2])
+  assert.isEqual(result[2], "there")
+  local innerResult = result[3]
+  assert.isTable(innerResult)
+  assert.length(innerResult, 4)
+  assert.isEqual(innerResult[1], "this")
+  assert.isEqual(innerResult[2], "is")
+  assert.isEqual(innerResult[3], "a")
+  assert.isEqual(innerResult[4], "test")
+  assert.isNumber(result[4])
+  assert.isEqual(result[4], 1234)
+  print("<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 \stopLuaTest
 \stopTestCase
 \stopTestSuite
@@ -417,6 +427,7 @@ static const struct luaL_Reg lua_joylol_interface [] = {
   { "pushParsedStringData",    lua_joylol_pushParsedStringData    },
   { "peekData",                lua_joylol_peekData                },
   { "popData",                 lua_joylol_popData                 },
+  { "showData",                lua_joylol_showData                },
   { "pushProcess",             lua_joylol_pushProcess             },
   { "pushNullProcess",         lua_joylol_pushNullProcess         },
   { "pushBooleanProcess",      lua_joylol_pushBooleanProcess      },
@@ -425,6 +436,7 @@ static const struct luaL_Reg lua_joylol_interface [] = {
   { "pushParsedStringProcess", lua_joylol_pushParsedStringProcess },
   { "peekProcess",             lua_joylol_peekProcess             },
   { "popProcess",              lua_joylol_popProcess              },
+  { "showProcess",             lua_joylol_showProcess             },
   { "evalString",              lua_joylol_evalString              },
   { "eval",                    lua_joylol_eval                    },
   {NULL, NULL}

@@ -59,7 +59,7 @@ void pushNullCtxProcessImpl(
 ) {
   if (!aCtx) return;
   assert(aCtx->jInterp);
-  aCtx->data = newPair(aCtx->jInterp, NULL, aCtx->process);
+  aCtx->process = newPair(aCtx->jInterp, NULL, aCtx->process);
 }
 \stopCCode
 
@@ -93,7 +93,7 @@ void pushBooleanCtxProcessImpl(
 
   JObj* aBoolPA = newBoolean(aCtx->jInterp, aBool);
   if (!aBoolPA) return;
-  aCtx->data = newPair(aCtx->jInterp, aBoolPA, aCtx->process);
+  aCtx->process = newPair(aCtx->jInterp, aBoolPA, aCtx->process);
 }
 \stopCCode
 
@@ -127,7 +127,7 @@ void pushNaturalCtxProcessImpl(
 
   JObj* aNaturalPA = newNatural(aCtx->jInterp, aNaturalStr);
   if (!aNaturalPA) return;
-  aCtx->data = newPair(aCtx->jInterp, aNaturalPA, aCtx->process);
+  aCtx->process = newPair(aCtx->jInterp, aNaturalPA, aCtx->process);
 }
 \stopCCode
 
