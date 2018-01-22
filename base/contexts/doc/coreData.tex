@@ -33,6 +33,38 @@
 \stopJoyLoLFragment
 
 \startCHeader
+typedef void (ClearCtx)(
+  ContextObj *aCtx
+);
+
+#define clearCtxData(aCtx)                  \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->clearCtxDataFunc),                  \
+    (getContextsClass(aCtx->jInterp)        \
+      ->clearCtxDataFunc(aCtx))             \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void clearCtxDataImpl(
+  ContextObj *aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void clearCtxDataImpl(
+  ContextObj *aCtx
+) {
+  if (!aCtx) return;
+  aCtx->data = NULL;
+}
+\stopCCode
+
+\startCHeader
 typedef void (PushCtx)(
   ContextObj *aCtx,
   JObj   *lolToPush

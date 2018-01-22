@@ -191,6 +191,7 @@ Boolean printContextsCoAlg(
 typedef struct contexts_class_struct {
   JClass      super;
   NewContext     *newContextFunc;
+  ClearCtx       *clearCtxDataFunc;
   PushCtx        *pushCtxDataFunc; 
   PushNullCtx    *pushNullCtxDataFunc;
   PushBooleanCtx *pushBooleanCtxDataFunc;
@@ -204,6 +205,7 @@ typedef struct contexts_class_struct {
     *pushParsedTextCtxDataFunc;
   PrependListCtx *prependListCtxDataFunc;
   PopCtx         *popCtxDataFunc;
+  ClearCtx       *clearCtxProcessFunc;
   PushCtx        *pushCtxProcessFunc;
   PushNullCtx    *pushNullCtxProcessFunc;
   PushBooleanCtx *pushBooleanCtxProcessFunc;
@@ -272,6 +274,7 @@ Boolean registerContexts(
   theCoAlg->super.printFunc        = printContextsCoAlg;
   theCoAlg->newContextFunc         = newContextImpl;
   
+  theCoAlg->clearCtxDataFunc       = clearCtxDataImpl;
   theCoAlg->pushCtxDataFunc        = pushCtxDataImpl;
   theCoAlg->pushNullCtxDataFunc    = pushNullCtxDataImpl;
   theCoAlg->pushBooleanCtxDataFunc = pushBooleanCtxDataImpl;
@@ -286,6 +289,7 @@ Boolean registerContexts(
   theCoAlg->prependListCtxDataFunc = prependListCtxDataImpl;
   theCoAlg->popCtxDataFunc         = popCtxDataImpl;
   
+  theCoAlg->clearCtxProcessFunc    = clearCtxProcessImpl;
   theCoAlg->pushCtxProcessFunc     = pushCtxProcessImpl;
   theCoAlg->pushNullCtxProcessFunc = pushNullCtxProcessImpl;
   theCoAlg->pushBooleanCtxProcessFunc =

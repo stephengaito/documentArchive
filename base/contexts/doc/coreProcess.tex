@@ -4,6 +4,35 @@
 \setCHeaderStream{public}
 
 \startCHeader
+#define clearCtxProcess(aCtx)               \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->clearCtxProcessFunc),               \
+    (getContextsClass(aCtx->jInterp)        \
+      ->clearCtxProcessFunc(aCtx))          \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void clearCtxProcessImpl(
+  ContextObj *aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void clearCtxProcessImpl(
+  ContextObj *aCtx
+) {
+  if (!aCtx) return;
+  aCtx->process = NULL;
+}
+\stopCCode
+
+
+\startCHeader
 #define pushCtxProcess(aCtx, lolToPush)        \
   (                                            \
     assert(aCtx),                              \

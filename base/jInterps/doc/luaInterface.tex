@@ -127,10 +127,10 @@ static void peekJoylolToLua(
   JoyLoLInterp *jInterp,
   JObj         *aLoL
 ) {
-  if (isAtom(aLoL)) {
-    if (!aLoL) {
-      lua_pushnil(lstate);
-    } else if (isSymbol(aLoL)) {
+  if (!aLoL) {
+    lua_pushnil(lstate);
+  } else if (isAtom(aLoL)) {
+    if (isSymbol(aLoL)) {
       lua_pushstring(lstate, asSymbol(aLoL));
     } else if (isNatural(aLoL)) {
       lua_pushnumber(lstate, asNaturalDbl(jInterp, aLoL));
@@ -216,6 +216,12 @@ static int lua_joylol_popData(lua_State *lstate) {
   return 1;
 }
 
+static int lua_joylol_clearData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  clearCtxData(jInterp->rootCtx);
+  return 0;
+}
+
 static int lua_joylol_showData(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
@@ -251,7 +257,7 @@ static int lua_joylol_showData(lua_State *lstate) {
   assert.isEqual(result, "this is a test")
   
   joylol.pushParsedStringData("hello there ( this is a test ) 1234")
-  result = joylol.popData()
+  result = joylol.peekData()
   assert.isTable(result)
   assert.length(result, 4)
   assert.isString(result[1])
@@ -267,6 +273,9 @@ static int lua_joylol_showData(lua_State *lstate) {
   assert.isEqual(innerResult[4], "test")
   assert.isNumber(result[4])
   assert.isEqual(result[4], 1234)
+  joylol.clearData()
+  result = joylol.popData()
+  assert.isNil(result)
 \stopLuaTest
 \stopTestCase
 \stopTestSuite
@@ -336,6 +345,12 @@ static int lua_joylol_popProcess(lua_State *lstate) {
   return 1;
 }
 
+static int lua_joylol_clearProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  clearCtxProcess(jInterp->rootCtx);
+  return 0;
+}
+
 static int lua_joylol_showProcess(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
@@ -348,7 +363,6 @@ static int lua_joylol_showProcess(lua_State *lstate) {
 
 \startTestCase[should be able to push and pop on process]
 \startLuaTest
-  print(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
   local joylol = thirddata.joylol
   joylol.pushBooleanProcess(true)
   local result = joylol.popProcess()
@@ -372,9 +386,7 @@ static int lua_joylol_showProcess(lua_State *lstate) {
   assert.isEqual(result, "this is a test")
 
   joylol.pushParsedStringProcess("hello there ( this is a test ) 1234")
-  print(joylol.showProcess())
-  result = joylol.popProcess()
-  print(joylol.showProcess())
+  result = joylol.peekProcess()
   assert.isTable(result)
   assert.length(result, 4)
   assert.isString(result[1])
@@ -390,7 +402,9 @@ static int lua_joylol_showProcess(lua_State *lstate) {
   assert.isEqual(innerResult[4], "test")
   assert.isNumber(result[4])
   assert.isEqual(result[4], 1234)
-  print("<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+  joylol.clearProcess()
+  result = joylol.popProcess()
+  assert.isNil(result)
 \stopLuaTest
 \stopTestCase
 \stopTestSuite
@@ -427,6 +441,7 @@ static const struct luaL_Reg lua_joylol_interface [] = {
   { "pushParsedStringData",    lua_joylol_pushParsedStringData    },
   { "peekData",                lua_joylol_peekData                },
   { "popData",                 lua_joylol_popData                 },
+  { "clearData",               lua_joylol_clearData               },
   { "showData",                lua_joylol_showData                },
   { "pushProcess",             lua_joylol_pushProcess             },
   { "pushNullProcess",         lua_joylol_pushNullProcess         },
@@ -436,6 +451,7 @@ static const struct luaL_Reg lua_joylol_interface [] = {
   { "pushParsedStringProcess", lua_joylol_pushParsedStringProcess },
   { "peekProcess",             lua_joylol_peekProcess             },
   { "popProcess",              lua_joylol_popProcess              },
+  { "clearProcess",            lua_joylol_clearProcess            },
   { "showProcess",             lua_joylol_showProcess             },
   { "evalString",              lua_joylol_evalString              },
   { "eval",                    lua_joylol_eval                    },
