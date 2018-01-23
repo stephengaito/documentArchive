@@ -444,7 +444,7 @@ typedef JObj *(PopCtx)(
 
 #define popCtxDataInto(aCtx, aVar)                              \
 assert(aCtx);                                                   \
-JObj* aVar = popCtxData(aCtx);                              \
+JObj* aVar = popCtxData(aCtx);                                  \
 if (aCtx->tracingOn) {                                          \
   JoyLoLInterp *jInterp = aCtx->jInterp;                        \
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \

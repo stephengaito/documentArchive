@@ -15,6 +15,6 @@ void registerCrossCompilerWords(
   JoyLoLInterp* jInterp
 ) {
   assert(jInterp);
-
+  extendJoyLoL(jInterp, "addFragment", addFragmentAP);
 }
 \stopCCode

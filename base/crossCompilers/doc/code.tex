@@ -206,43 +206,36 @@ static int lua_crossCompilers_addImplementation(lua_State *lstate) {
 
 \startTestSuite[addFragment]
 
-\startCHeader
-typedef void (AddFragment)(
-  JoyLoLInterp *jInterp,
-  Symbol       *ccType,
-  Symbol       *wordName,
-  Symbol       *fragmentBody
-);
-
-#define addFragment(jInterp, ccType, wordName, fragmentBody)      \
-  (                                                               \
-    assert(getCrossCompilersClass(jInterp)                        \
-      ->addFragmentFunc),                                         \
-    (getCrossCompilersClass(jInterp)                              \
-      ->addFragmentFunc(jInterp, ccType, wordName, fragmentBody)) \
-  )
-\stopCHeader
-
-\setCHeaderStream{private}
-\startCHeader
-extern void addFragmentImpl(
-  JoyLoLInterp *jInterp,
-  Symbol       *ccType,
-  Symbol       *wordName,
-  Symbol       *fragmentBody
-);
-\stopCHeader
-\setCHeaderStream{public}
-
 \startCCode
-void addFragmentImpl(
-  JoyLoLInterp *jInterp,
-  Symbol       *ccType,
-  Symbol       *wordName,
-  Symbol       *fragmentBody
-) {
-  assert(jInterp);
+static void addFragmentAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
 
+  popCtxDataInto(aCtx, ccTypeLoL);
+  if (!isSymbol(ccTypeLoL)) {
+    raiseException(aCtx,
+      "addFragment expected a symbol as ccType");
+    return;
+  }
+  Symbol *ccType = asSymbol(ccTypeLoL);
+  
+  popCtxDataInto(aCtx, wordNameLoL);
+  if (!isSymbol(wordNameLoL)) {
+    raiseException(aCtx,
+      "addFragment expected a symbol as wordName");
+    return;
+  }
+  Symbol *wordName = asSymbol(wordNameLoL);
+  
+  popCtxDataInto(aCtx, fragmentBodyLoL);
+  if (!isSymbol(fragmentBodyLoL)) {
+    raiseException(aCtx,
+      "addFragment expected a symbol as fragmentBody");
+    return;
+  }
+  Symbol *fragmentBody = asSymbol(fragmentBodyLoL);
+  
 //  if (jInterp->debug) {
   if (TRUE) {
     StringBufferObj *aStrBuf = newStringBuffer(jInterp);
@@ -287,10 +280,18 @@ void addFragmentImpl(
 
 static int lua_crossCompilers_addFragment(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
   Symbol *ccType       = luaL_checkstring(lstate, 1);
+  pushSymbolCtxProcess(jInterp->rootCtx, ccType);
   Symbol *wordName     = luaL_checkstring(lstate, 2);
+  pushSymbolCtxProcess(jInterp->rootCtx, wordName);
   Symbol *fragmentBody = luaL_checkstring(lstate, 3);
-  addFragmentImpl(jInterp, ccType, wordName, fragmentBody);
+  pushSymbolCtxProcess(jInterp->rootCtx, fragmentBody);
+  
+  pushSymbolCtxProcess(jInterp->rootCtx, "addFragment");
+  
+  //evalContext(jInterp->rootCtx);
+  
   lua_pop(lstate, 3);
   return 0;
 }
@@ -394,7 +395,6 @@ typedef struct crossCompilers_class_struct {
   JClass            super;
   NewCrossCompiler  *newCrossCompilerFunc;
   AddImplementation *addImplementationFunc;
-  AddFragment       *addFragmentFunc;
 } CrossCompilersClass;
 
 \stopCHeader
@@ -444,7 +444,6 @@ Boolean registerCrossCompilers(JoyLoLInterp *jInterp) {
   theCoAlg->super.printFunc       = printCrossCompilerCoAlg;
   theCoAlg->newCrossCompilerFunc  = newCrossCompilerImpl;
   theCoAlg->addImplementationFunc = addImplementationImpl;
-  theCoAlg->addFragmentFunc       = addFragmentImpl;
 
   size_t tag =
     registerJClass(jInterp, (JClass*)theCoAlg);

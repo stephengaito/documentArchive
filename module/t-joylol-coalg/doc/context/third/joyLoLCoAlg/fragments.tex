@@ -55,11 +55,11 @@ local function endFragment()
   
   local numCodeVersions = 0
   for fragmentType, fragmentBody in pairs(codeVersions) do
-    joylol.crossCompilers.addFragment(
-      fragmentType,
-      wordName,
-      fragmentBody
-    )
+--    joylol.crossCompilers.addFragment(
+--      fragmentType,
+--      wordName,
+--      fragmentBody
+--    )
     numCodeVersions = numCodeVersions + 1
   end
   if numCodeVersions < 1 then
