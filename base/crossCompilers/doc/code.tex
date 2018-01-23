@@ -298,15 +298,18 @@ static void addFragmentAP(ContextObj* aCtx) {
 static int lua_crossCompilers_addFragment(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   assert(jInterp);
-  Symbol *ccType       = luaL_checkstring(lstate, 1);
-  pushSymbolCtxProcess(jInterp->rootCtx, ccType);
-  Symbol *wordName     = luaL_checkstring(lstate, 2);
-  pushSymbolCtxProcess(jInterp->rootCtx, wordName);
-  Symbol *fragmentBody = luaL_checkstring(lstate, 3);
-  pushSymbolCtxProcess(jInterp->rootCtx, fragmentBody);
   
   pushSymbolCtxProcess(jInterp->rootCtx, "addFragment");
+
+  Symbol *ccType       = luaL_checkstring(lstate, 1);
+  pushSymbolCtxProcess(jInterp->rootCtx, ccType);
   
+  Symbol *wordName     = luaL_checkstring(lstate, 2);
+  pushSymbolCtxProcess(jInterp->rootCtx, wordName);
+  
+  Symbol *fragmentBody = luaL_checkstring(lstate, 3);
+  pushSymbolCtxProcess(jInterp->rootCtx, fragmentBody);
+    
   //evalContext(jInterp->rootCtx);
   
   lua_pop(lstate, 3);
