@@ -53,6 +53,9 @@ extern size_t joylol_register_crossCompilers(JoyLoLInterp *jInterp);
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/dictionaries.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/contexts.h>}
 \addCTestInclude{<joylol/crossCompilers.h>}
 \addCTestInclude{<joylol/crossCompilers-private.h>}
 \addCTestLib{<HOME>/.joylol/joylol/jInterps}
@@ -61,10 +64,17 @@ extern size_t joylol_register_crossCompilers(JoyLoLInterp *jInterp);
 \startCTest
   addJoyLoLLuaPath(lstate);
   requireStaticallyLinkedJInterps(lstate);
-  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.contexts");
+  requireLuaModule(lstate, "joylol.cFunctions");
   requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.dictNodes");
+  requireLuaModule(lstate, "joylol.fragments");
+  requireLuaModule(lstate, "joylol.pairs");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.symbols");
   requireStaticallyLinkedCrossCompilers(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

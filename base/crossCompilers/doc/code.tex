@@ -277,7 +277,24 @@ static void addFragmentAP(ContextObj* aCtx) {
     strBufClose(jInterp, aStrBuf);
   }
 }
+\stopCCode
 
+\startTestCase[should add a fragment to the appropriate compiler - ansic]
+\startCTest
+  pushSymbolCtxProcess(jInterp->rootCtx, "addFragment");
+  pushSymbolCtxProcess(jInterp->rootCtx, "ansic");
+  pushSymbolCtxProcess(jInterp->rootCtx, "test-ansic");
+  pushSymbolCtxProcess(jInterp->rootCtx, "this is a test");
+  pushSymbolCtxProcess(jInterp->rootCtx, "tracingOn");
+  pushSymbolCtxProcess(jInterp->rootCtx, "showStack");
+  evalContext(jInterp->rootCtx);
+  pushSymbolCtxProcess(jInterp->rootCtx, "showStack");
+  pushSymbolCtxProcess(jInterp->rootCtx, "tracingOff");
+  evalContext(jInterp->rootCtx);
+\stopCTest
+\stopTestCase
+
+\startCCode
 static int lua_crossCompilers_addFragment(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   assert(jInterp);
@@ -297,7 +314,19 @@ static int lua_crossCompilers_addFragment(lua_State *lstate) {
 }
 \stopCCode
 
-
+\startTestCase[should add a fragment to the appropriate compiler - lua]
+\startLuaTest
+  local joylol       = thirddata.joylol
+  local ccType       = "ansic"
+  local wordName     = "test"
+  local fragmentBody = "this is a test"
+  joylol.crossCompiler.addFragment(ccType, wordName, fragmentBody)
+  print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+  print(joylol.showData)
+  print(joylol.showProcess)
+  print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+\stopLuaTest
+\skipTestCase
 \stopTestSuite
 
 \startTestSuite[isCrossCompiler]
