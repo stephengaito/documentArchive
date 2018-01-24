@@ -5,6 +5,8 @@
 
 \dependsOn[jInterps]
 
+\startTestSuite[JoylolTestsTagMap]
+
 \setCHeaderStream{private}
 \startCHeader
 #define JoylolTestsName "joylolTests"
@@ -12,6 +14,7 @@
 #include <joylol/hash_map.h>
 typedef struct JoylolTestsTagMap JoylolTestsTagMap;
 extern JoylolTestsTagMap *jtTagMap;
+extern int    jtTagMap_set(JoylolTestsTagMap*, void*, size_t);
 extern size_t jtTagMap_get(JoylolTestsTagMap*, void*);
 \stopCHeader
 \setCHeaderStream{public}
@@ -31,12 +34,26 @@ JoylolTestsTagMap *jtTagMap = NULL;
 __attribute__((constructor)) 
 static void initializeSharedLibrary(void) {
   if (jtTagMap) {
-    printf("ERROR: jtTagMap already initialized: %p\n", jtTagMap);
+    printf("ERROR: JoylolTests TagMap already initialized: %p\n", jtTagMap);
     exit(-1);
   }
   jtTagMap = jtTagMap_new(16,3, 4);
 }
 \stopCCode
+
+\startTestCase[should be able to add multiple key-values]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jtTagMap);
+  jtTagMap_set(jtTagMap, (void*)0x100, 1);
+  jtTagMap_set(jtTagMap, (void*)0x200, 2);
+  jtTagMap_set(jtTagMap, (void*)0x300, 3);
+  AssertIntEquals(jtTagMap_get(jtTagMap, (void*)0x100), 1);
+  AssertIntEquals(jtTagMap_get(jtTagMap, (void*)0x200), 2);
+  AssertIntEquals(jtTagMap_get(jtTagMap, (void*)0x300), 3);
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \component gitVersion-c
 
