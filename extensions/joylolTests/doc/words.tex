@@ -1,0 +1,20 @@
+% A ConTeXt document [master document: joylolTests.tex]
+
+\section[title=Words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerJoylolTestWords(
+  JoyLoLInterp* jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerJoylolTestWords(
+  JoyLoLInterp* jInterp
+) {
+  assert(jInterp);
+
+}
+\stopCCode

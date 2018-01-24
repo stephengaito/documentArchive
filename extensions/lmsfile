@@ -1,0 +1,80 @@
+-- A Lua Make System file
+
+if clearScreen then os.execute('reset') end
+
+cmd = 'lms'
+if 0 < #arg then
+  arguments = table.concat(arg, ' ')
+  cmd = 'lms -c '..arguments
+end
+
+lfs = require 'lfs'
+
+-- the following coAlgebras MUST be loaded in order
+reqCoAlgs = {
+  'utils',
+}
+
+-- ensure the .joylol directories exist
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'include'
+})
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'include',
+  'joylol'
+})
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'joylol'
+})
+
+
+reqCoAlgStr = '|'..table.concat(reqCoAlgs, '|')..'|'
+
+-- collect the list of subdirectories of base
+subDirs = { }
+
+for entry in lfs.dir('.') do
+  if not entry:match('^%..*$') and
+    not reqCoAlgStr:match('|'..entry..'|') and
+    (lfs.attributes(entry, 'mode') == 'directory') then
+    table.insert(subDirs, entry)
+  end
+end
+
+-- sort the list of subDirectories
+
+table.sort(subDirs)
+
+-- Now add the critical coAlgs in 
+-- dependency order
+
+for i, aSubDir in ipairs(subDirs) do
+  table.insert(reqCoAlgs, aSubDir)
+end
+
+-- now walk through these subDirectories
+-- running the lms command on each one
+
+curDir = lfs.currentdir()
+for i, subDir in ipairs(reqCoAlgs) do
+  print('\n========================================================')
+  print('working in ['..subDir..']')
+  print('running    ['..cmd..']')
+  lfs.chdir(subDir)
+  if not os.execute(cmd) then
+    print('FAILED to run: ['..cmd..']')
+    os.exit(-1)
+  end
+  lfs.chdir(curDir)
+end
+
+os.exit(0)

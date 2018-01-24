@@ -71,6 +71,7 @@ lfs = require 'lfs'
 subDirs = {
   'module',
   'base',
+  'extensions',
   'core'
 }
 

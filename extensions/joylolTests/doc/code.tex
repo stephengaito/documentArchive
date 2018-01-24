@@ -1,0 +1,279 @@
+% A ConTeXt document [master document: joylolTests.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+
+\setCHeaderStream{private}
+\startCHeader
+#define JoylolTestsName "joylolTests"
+
+#include <joylol/hash_map.h>
+typedef struct JoylolTestsTagMap JoylolTestsTagMap;
+extern JoylolTestsTagMap *jtTagMap;
+extern size_t jtTagMap_get(JoylolTestsTagMap*, void*);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JOYLOL_HASH_MAP_DEFINE(
+  JoylolTestsTagMap,
+  void*,
+  size_t,
+  jtTagMap,
+  ptrHash,
+  ptrEquals
+)
+
+JoylolTestsTagMap *jtTagMap = NULL;
+
+__attribute__((constructor)) 
+static void initializeSharedLibrary(void) {
+  if (jtTagMap) {
+    printf("ERROR: jtTagMap already initialized: %p\n", jtTagMap);
+    exit(-1);
+  }
+  jtTagMap = jtTagMap_new(16,3, 4);
+}
+\stopCCode
+
+\component gitVersion-c
+
+\startTestSuite[newJoylolTest]
+
+\startCHeader
+typedef struct joylolTest_object_struct JTestObj;
+typedef struct joylolTest_object_struct {
+  JObj      super;
+} JTestObj;
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+#define JoylolTestsName "joylolTests"
+
+extern JObj* newJoylolTest(
+  JoyLoLInterp* jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* newJoylolTest(
+  JoyLoLInterp* jInterp
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  size_t jtTag = jtTagMap_get(jtTagMap, jInterp);
+  assert(jtTag); // should not be the unused tag
+  
+  JObj* result = newObject(jInterp, jtTag);
+  assert(result);
+  
+  result->type  = jInterp->coAlgs[jtTag];
+
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new joylolTest]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  JObj* aNewJoylolTest = newJoylolTest(jInterp);
+  AssertPtrNotNull(aNewJoylolTest);
+  AssertPtrNotNull(asType(aNewJoylolTest));
+  AssertIntEquals(asTag(aNewJoylolTest),
+    jtTagMap_get(jtTagMap, jInterp));
+  AssertIntTrue(isAtom(aNewJoylolTest));
+  AssertIntTrue(isJoylolTest(aNewJoylolTest));
+  AssertIntFalse(isPair(aNewJoylolTest));
+\stopCTest
+\stopTestCase
+
+\startTestCase[print JoylolTest]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+
+  JObj* aLoL = newJoylolTest(jInterp);
+  AssertPtrNotNull(aLoL);
+  printLoL(jInterp, aStrBuf, aLoL);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "joylolTest ");
+  strBufClose(jInterp, aStrBuf);
+\stopCTest
+\stopTestCase
+
+\stopTestSuite
+
+\startTestSuite[isJoylolTest]
+
+\startCHeader
+#define isJoylolTest(aLoL)                              \
+  (                                                     \
+    (                                                   \
+      (aLoL) &&                                         \
+      asType(aLoL) &&                                   \
+      (asTag(aLoL) == jtTagMap_get(jtTagMap, jInterp))  \
+    ) ?                                                 \
+      TRUE :                                            \
+      FALSE                                             \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityJoylolTestsCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj     *lolA,
+  JObj     *lolB
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityJoylolTestsCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj     *lolA,
+  JObj     *lolB
+) {
+  DEBUG(jInterp, "joylolTestsCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != jtTagMap_get(jtTagMap, jInterp)) return FALSE;
+  if (lolA != lolB) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing joylolTests]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printJoylolTestsCoAlg(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printJoylolTestsCoAlg(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == jtTagMap_get(jtTagMap, jInterp));
+
+  strBufPrintf(jInterp, aStrBuf, "joylolTest ");
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print joylolTests]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[jtTagMap_get(jtTagMap, jInterp)]);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+  
+  JObj* aNewJoylolTest = newJoylolTest(jInterp);
+  AssertPtrNotNull(aNewJoylolTest);
+  printLoL(jInterp, aStrBuf, aNewJoylolTest);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "joylolTest ");
+  strBufClose(jInterp, aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerJoylolTests]
+
+\startCHeader
+typedef struct joylolTests_class_struct {
+  JClass         super;
+} JoylolTestsClass;
+
+\stopCHeader
+
+\startCCode
+static Boolean initializeJoylolTests(
+  JoyLoLInterp *jInterp,
+  JClass       *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  registerJoylolTestWords(jInterp);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerJoylolTests(
+  JoyLoLInterp *jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerJoylolTests(
+  JoyLoLInterp *jInterp
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  JoylolTestsClass* theCoAlg
+    = joyLoLCalloc(1, JoylolTestsClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name           = JoylolTestsName;
+  theCoAlg->super.objectSize     = sizeof(JTestObj);
+  theCoAlg->super.initializeFunc = initializeJoylolTests;
+  theCoAlg->super.equalityFunc   = equalityJoylolTestsCoAlg;
+  theCoAlg->super.printFunc      = printJoylolTestsCoAlg;
+  
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  jtTagMap_set(jtTagMap, jInterp, tag);
+  
+  // do a sanity check...
+  assert(jInterp->coAlgs[tag]);
+   
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the JoylolTests coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerJoylolTests
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  size_t jtTag = jtTagMap_get(jtTagMap, jInterp);
+  JClass *coAlg = getJClass(jInterp, jtTag);
+  AssertPtrNotNull(coAlg);
+  registerJoylolTests(jInterp);
+  AssertPtrNotNull(getJClass(jInterp, jtTag));
+  AssertPtrEquals(getJClass(jInterp, jtTag), coAlg);
+  AssertIntEquals(
+    getJClass(jInterp, jtTag)->objectSize,
+    sizeof(JTestObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite
