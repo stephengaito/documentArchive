@@ -2,6 +2,141 @@
 
 \section[title=Words]
 
+\startTestSuite[start/stop joylol all tests]
+
+\starttyping
+\startJoylolCode
+  (
+    () -- testStats process
+    ( 
+      0 -- number of attempted tests
+      0 -- number of failed tests
+      () -- list of failure reports
+    ) -- testStats data
+    testStats
+    defineContext
+  ) -- definition of startAllTests
+  startAllTests
+  define
+\stopJoylolCode
+\stoptyping
+
+\stopTestSuite
+
+\startTestSuite[start/stop joylol test suite]
+
+\starttyping
+\startJoylolCode
+  (
+  )
+  startTestSuite
+  define
+  
+  (
+  )
+  stopTestSuite
+  define
+\stopJoylolCode
+\stoptyping
+
+\stopTestSuite
+
+\startTestSuite[start/stop/skip joylol test case]
+
+\starttyping
+\startJoylolCode
+  (
+    () -- process
+    (
+      true -- test case successful
+      false -- test case should fail
+      
+    ) -- data
+    curTestCase
+    defineContext
+  )
+  startTestCase
+  define
+  
+  (
+  )
+  stopTestCase
+  define
+\stopJoylolCode
+\stoptyping
+
+\stopTestSuite
+
+\startTestSuite[reportTestResult]
+
+\starttyping
+\startJoylolCode
+  (
+  )
+  reportTestResult
+  define
+\stopJoylolCode
+\stoptyping
+
+\stopTestSuite
+
+\startTestSuite[assertShouldFail]
+
+\stopTestSuite
+
+\startTestSuite[assertFail]
+
+\stopTestSuite
+
+\startTestSuite[assertSucceed]
+
+\stopTestSuite
+
+\startTestSuite[assertTrue]
+
+\stopTestSuite
+
+\startTestSuite[assertFalse]
+
+\stopTestSuite
+
+\startTestSuite[assertNil]
+
+\stopTestSuite
+
+\startTestSuite[assertNotNil]
+
+\stopTestSuite
+
+\startTestSuite[assertAtom]
+
+\stopTestSuite
+
+\startTestSuite[assertPair]
+
+\stopTestSuite
+
+\startTestSuite[assertNatural]
+
+\stopTestSuite
+
+\startTestSuite[assertSymbol]
+
+\stopTestSuite
+
+\startTestSuite[assertContext]
+
+\stopTestSuite
+
+\startTestSuite[assertDictionary]
+
+\stopTestSuite
+
+\startTestSuite[assertDictNode]
+
+\stopTestSuite
+
+
 \setCHeaderStream{private}
 \startCHeader
 extern void registerJoylolTestWords(

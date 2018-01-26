@@ -125,15 +125,15 @@ joylol.options = options
 --  deal with loadPaths, configFile, and loadFiles
 
 for i, aPath in ipairs(options.loadPaths) do
-  joylol.core.lua.pushLoadPath(aPath)
+  joylol.pushLoadPath(aPath)
 end
 
 if (options.configFile) then
-  joylol.core.lua.loadFile(options.configFile)
+  joylol.loadFile(options.configFile)
 end
 
 for i, aFile in ipairs(options.loadFiles) do
-  joylol.core.lua.loadFile(aFile)
+  joylol.loadFile(aFile)
 end
 
 -- Finally run the REPL
