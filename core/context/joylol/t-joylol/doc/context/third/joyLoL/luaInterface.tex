@@ -99,7 +99,7 @@ static void coreContextWriteStdOut(
   lua_getglobal(lstate, "tex");
   lua_getfield(lstate, -1, "print");
   lua_pushstring(lstate, aMessage);
-  if (lua_pcall(lstate, 1, 1, 0)) {
+  if (lua_pcall(lstate, 1, 0, 0)) {
     /*return*/ luaL_error(lstate,
       "Failed of coreContextWriteStdOut\nERROR:\n%s\n",
       lua_tostring(lstate, -1)
@@ -119,7 +119,7 @@ static void coreContextWriteStdErr(
   lua_getglobal(lstate, "texio");
   lua_getfield(lstate, -1, "write_nl");
   lua_pushstring(lstate, aMessage);
-  if (lua_pcall(lstate, 1, 1, 0)) {
+  if (lua_pcall(lstate, 1, 0, 0)) {
     /*return*/ luaL_error(lstate,
       "Failed of coreContextWriteStdErr\nERROR:\n%s\n",
       lua_tostring(lstate, -1)

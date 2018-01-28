@@ -117,3 +117,5 @@ cp $gitVTex base/templates/doc
 cp $gitVC   base/templates/doc
 cp $gitVTex base/texts/doc
 cp $gitVC   base/texts/doc
+cp $gitVTex extensions/joylolTests/doc
+cp $gitVC   extensions/joylolTests/doc

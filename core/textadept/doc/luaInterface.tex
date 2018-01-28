@@ -33,7 +33,7 @@ static void coreTextadeptWriteStdOut(
   lua_getfield(lstate, -1, "append_text");
   lua_getglobal(lstate, "buffer");
   lua_pushstring(lstate, aMessage);
-  if (lua_pcall(lstate, 2, 1, 0)) {
+  if (lua_pcall(lstate, 2, 0, 0)) {
     /*return*/ luaL_error(lstate,
       "Failed to append message [%s] to current buffer\nERROR:\n%s\n",
       aMessage,
@@ -54,7 +54,7 @@ static void coreTextadeptWriteStdErr(
   lua_getglobal(lstate, "ui");
   lua_getfield(lstate, -1, "print");
   lua_pushstring(lstate, aMessage);
-  if (lua_pcall(lstate, 1, 1, 0)) {
+  if (lua_pcall(lstate, 1, 0, 0)) {
     /*return*/ luaL_error(lstate,
       "Failed to append message [%s] to Message Buffer\nERROR:\n%s\n",
       aMessage,
@@ -101,8 +101,9 @@ static void *coreTextadeptCallback(
       coreTextadeptWriteStdErr;
     return (void*)coreWriteStdErr;
   } else if (resourceId == JoyLoLCallback_Verbose) {
-    Boolean verbose = getBooleanOption(lstate, "verbose");
-    return (void*)verbose;
+    //Boolean verbose = getBooleanOption(lstate, "verbose");
+    //return (void*)verbose;
+    return (void*)TRUE;
   } else if (resourceId == JoyLoLCallback_Debug) {
     Boolean debug = getBooleanOption(lstate, "debug");
     return (void*)debug;
@@ -126,6 +127,7 @@ static void *coreTextadeptCallback(
 } 
 
 int luaopen_joylol_core_textadept (lua_State *lstate) {
+  printf("luaopen_joylol_core_textadept start\n");
   setJoyLoLCallbackFrom(lstate, coreTextadeptCallback);
   lua_getglobal(lstate, "require");
   lua_pushstring(lstate, "joylol.jInterps");
@@ -142,6 +144,7 @@ int luaopen_joylol_core_textadept (lua_State *lstate) {
   luaL_newlib(lstate, lua_core_textadept);
   lua_settable(lstate, -3);
   lua_settable(lstate, -3);
+  printf("luaopen_joylol_core_textadept done\n");
   return 1;
 }
 \stopCCode

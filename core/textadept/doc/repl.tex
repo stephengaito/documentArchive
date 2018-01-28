@@ -39,7 +39,7 @@ local function evaluateJoyLoLREPL()
   
   buffer:document_end()
   buffer:new_line()
-  joylol.core.textadept.evalString(code)
+  joylol.evalString(code)
   buffer:new_line()
   buffer:set_save_point()
 end

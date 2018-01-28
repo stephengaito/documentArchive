@@ -76,9 +76,9 @@ memory allocation and alignment as well as a simple \type{DEBUG} system.
   assert(jInterp);                                \
   if (jInterp->debug) {                           \
     char output[1000];                            \
-    memset(output, 0, 1000);                     \
-    snprintf(output, 999, format, __VA_ARGS__ ); \
-    jInterp->writeStdOut(jInterp, output);        \
+    memset(output, 0, 1000);                      \
+    snprintf(output, 999, format, __VA_ARGS__ );  \
+    jInterp->writeStdErr(jInterp, output);        \
   }
 #else
 #define startDebugging(jInterp)

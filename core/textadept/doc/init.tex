@@ -52,11 +52,11 @@ if options.verbose then print('loaded [joylol.core.textadept]\n') end
 
 joylol.options = options
 
-joylol.core.textadept.setVerbose(options.verbose)
-joylol.core.textadept.setDebugging(options.debug)
+--joylol.setVerbose(options.verbose)
+--joylol.setDebugging(options.debug)
 
 if (options.configFile) then
-  joylol.core.textadept.loadFile(options.configFile)
+  joylol.loadFile(options.configFile)
 end
 
 -- Initialization for the JoyLoL language

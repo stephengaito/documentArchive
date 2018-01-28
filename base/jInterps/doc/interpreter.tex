@@ -381,8 +381,8 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
       "\nERROR:\n",
       "  Could not get the core output methods\n");
   }
-  jInterp->verbose = 
-    (Boolean)getCoreResources(lstate, JoyLoLCallback_Verbose);
+  jInterp->verbose = TRUE;
+//    (Boolean)getCoreResources(lstate, JoyLoLCallback_Verbose);
     
   jInterp->debug = 
     (Boolean)getCoreResources(lstate, JoyLoLCallback_Debug);
@@ -886,7 +886,7 @@ void initializeAllLoadedImpl(
         snprintf(output, 999, 
           "    initializing [joylol.%s]\n",
           aCoAlg->name);
-        jInterp->writeStdOut(jInterp, output);
+        jInterp->writeStdErr(jInterp, output);
       }
       assert(aCoAlg->initializeFunc);
       aCoAlg->initializeFunc(jInterp, aCoAlg);
@@ -896,7 +896,7 @@ void initializeAllLoadedImpl(
         snprintf(output, 999, 
           "    initialized [joylol.%s]\n",
           aCoAlg->name);
-        jInterp->writeStdOut(jInterp, output);
+        jInterp->writeStdErr(jInterp, output);
       }
     }
   }

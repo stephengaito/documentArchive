@@ -196,6 +196,28 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
         printf("%d: %g (number)\n",               \
           i, lua_tonumber(lstate, i));            \
         break;                                    \
+      case LUA_TTABLE:                            \
+        printf("%d: (%s)\n",                      \
+          i, lua_typename(lstate, aType));        \
+        lua_pushnil(lstate); /* first key */      \
+        while (lua_next(lstate, i) != 0) {        \
+          /* duplicate the key */                 \
+          lua_pushvalue (lstate, -2);             \
+          /* print:                           */  \
+          /*  tostring of duplicate key at -1 */  \
+          /*  type of value             at -2 */  \
+          /*  type of key               at -3 */  \
+          printf("   %s (%s) - %s\n",             \
+              lua_tostring(lstate, -1),           \
+              lua_typename(lstate,                \
+                lua_type(lstate, -3)),            \
+              lua_typename(lstate,                \
+                lua_type(lstate, -2)));           \
+          /* removes dupliate 'key' & 'value'; */ \
+          /* keeps 'key' for next iteration    */ \
+          lua_pop(lstate, 2);                     \
+        }                                         \
+        break;                                    \
       default:                                    \
         printf("%d: (%s)\n",                      \
           i, lua_typename(lstate, aType));        \
@@ -306,7 +328,7 @@ static void requireAllRequiredCoAlgs(
         snprintf(output, 999, 
           "    loading [joylol.%s]\n",
           curCoAlg->name);
-        jInterp->writeStdOut(jInterp, output);
+        jInterp->writeStdErr(jInterp, output);
       }
       lua_pushstring(lstate, curCoAlg->name); // -2
       lua_getglobal(lstate, "require");
@@ -330,7 +352,7 @@ static void requireAllRequiredCoAlgs(
         snprintf(output, 999,
           "    loaded [joylol.%s]\n",
           curCoAlg->name);
-        jInterp->writeStdOut(jInterp, output);
+        jInterp->writeStdErr(jInterp, output);
       }
     }
   }  
@@ -345,7 +367,7 @@ the shared library.
 int luaopen_joylol_jInterps (lua_State *lstate) {
   setJoyLoLInterpInto(lstate, jInterp);
   if (jInterp->verbose) {
-    jInterp->writeStdOut(jInterp,
+    jInterp->writeStdErr(jInterp,
       "  loading [joylol.jInterps]\n"
     );
   }
@@ -354,7 +376,7 @@ int luaopen_joylol_jInterps (lua_State *lstate) {
   initializeAllLoaded(lstate, jInterp);
   checkAllRequired(lstate, jInterp);
   if (jInterp->verbose) {
-    jInterp->writeStdOut(jInterp,
+    jInterp->writeStdErr(jInterp,
       "  loaded [joylol.jInterps]\n"
     );
   }
