@@ -259,7 +259,7 @@ Boolean loadAJoyLoLFile(
       StringBufferObj *aStrBuf = 
         newStringBuffer(jInterp);      
       strBufPrintf(jInterp, aStrBuf, "(%s)\n", filePath);
-      jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
     }
     TextObj* aText =
@@ -321,7 +321,7 @@ Boolean loadAFileImpl(
     StringBufferObj *aStrBuf = 
       newStringBuffer(jInterp);
     strBufPrintf(jInterp, aStrBuf, "\t%s ", aFileToLoad);
-    jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
 
@@ -371,7 +371,7 @@ Boolean loadAFileImpl(
     aLoadPathList = asCdr(aLoadPathList);
   }
   if(aCtx->verbose) {
-    jInterp->writeStdErr(jInterp, "FAILED\n");
+    jInterp->writeStdOut(jInterp, "FAILED\n");
   }
   DEBUG(jInterp, "loadAFile: FAILED%s\n", "");
   return FALSE; // we could not find this file in any of the load paths

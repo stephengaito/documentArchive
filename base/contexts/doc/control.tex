@@ -246,6 +246,14 @@ static void doneAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
+static void clearContextAP(ContextObj* aCtx) {
+  assert(aCtx);
+  aCtx->data    = NULL;
+  aCtx->process = NULL;
+}
+\stopCCode
+
+\startCCode
 static void tryAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, handlerExp);
   popCtxDataInto(aCtx, tryExp);
@@ -386,7 +394,7 @@ Boolean reportExceptionImpl(
   strBufPrintf(jInterp, aStrBuf, "\nUNHANDLED EXCEPTION:\n");
   printLoL(jInterp, aStrBuf, aCtx->data);
   strBufPrintf(jInterp, aStrBuf, "\n");
-  jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
   strBufClose(jInterp, aStrBuf);
   aCtx->exceptionRaised = FALSE;
   return TRUE;
@@ -469,6 +477,7 @@ void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoL(jInterp, "thisContext",         newContextAP);
   extendJoyLoL(jInterp, "newContext",          newContextAP);
   extendJoyLoL(jInterp, "done",                doneAP);
+  extendJoyLoL(jInterp, "clear",               clearContextAP);
   extendJoyLoL(jInterp, "try",                 tryAP);
   extendJoyLoL(jInterp, "raise",               raiseAP);
   extendJoyLoL(jInterp, "raiseIfFalse",        raiseIfFalseAP);

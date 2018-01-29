@@ -149,7 +149,7 @@ void addImplementationImpl(
       "DEBUG addImplementation crossCompiler: [%s]\n", ccType);
     strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
     strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", implBody);
-    jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
   
@@ -165,17 +165,17 @@ void addImplementationImpl(
   }
   
   if (theCC) {
-    jInterp->writeStdErr(jInterp, "addImplementation found theCC\n");
+    jInterp->writeStdOut(jInterp, "addImplementation found theCC\n");
     checkObj(jInterp, theCC, CrossCompilersTag);
     DictObj *ccDict = theCC->dict;
     checkObj(jInterp, ccDict, DictionariesTag);
     
     DictNodeObj *entry    = insertSymbol(ccDict, wordName);
     checkObj(jInterp, entry, DictNodesTag);
-    jInterp->writeStdErr(jInterp, "addImplementation inserted symbol\n");
+    jInterp->writeStdOut(jInterp, "addImplementation inserted symbol\n");
     ImplementationObj *implementation =
       newImplementation(jInterp, wordName, implBody);
-    jInterp->writeStdErr(jInterp, "addImplementation created fragment\n");
+    jInterp->writeStdOut(jInterp, "addImplementation created fragment\n");
     checkObj(jInterp, implementation, ImplementationsTag);
     entry->value = (JObj*)implementation;
   } else {
@@ -186,10 +186,10 @@ void addImplementationImpl(
       "ERROR(impl) could not find the [%s] cross compiler.\n", ccType);
     strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
     strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", implBody);
-    jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
-  jInterp->writeStdErr(jInterp, "addImplementation DONE\n");
+  jInterp->writeStdOut(jInterp, "addImplementation DONE\n");
 }
 
 static int lua_crossCompilers_addImplementation(lua_State *lstate) {
@@ -243,7 +243,7 @@ static void addFragmentAP(ContextObj* aCtx) {
       "DEBUG addFragment crossCompiler: [%s]\n", ccType);
     strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
     strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", fragmentBody);
-    jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
   assert(jInterp->compilers);
@@ -273,7 +273,7 @@ static void addFragmentAP(ContextObj* aCtx) {
       "ERROR could not find the [%s] cross compiler.\n", ccType);
     strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
     strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", fragmentBody);
-    jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
     strBufClose(jInterp, aStrBuf);
   }
 }

@@ -71,6 +71,40 @@ static void tracingOffAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
+static void debugOnAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  aCtx->jInterp->debug = TRUE;
+}
+\stopCCode
+
+\startCCode
+static void debugOffAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  aCtx->jInterp->debug = FALSE;
+}
+\stopCCode
+
+\startCCode
+static void verboseOnAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  aCtx->verbose = TRUE;
+  aCtx->jInterp->verbose = TRUE;
+}
+\stopCCode
+
+\startCCode
+static void verboseOffAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  aCtx->verbose = FALSE;
+  aCtx->jInterp->verbose = FALSE;
+}
+\stopCCode
+
+\startCCode
 static void checkingOnAP(ContextObj* aCtx) {
   assert(aCtx);
   aCtx->checkingOn = TRUE;
@@ -197,12 +231,6 @@ static void lispLoadFileAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\startCCode
-static void commentAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-}
-\stopCCode
-
 \setCHeaderStream{private}
 \startCHeader
 extern void initContextsAPSupport(JoyLoLInterp *jInterp);
@@ -217,8 +245,6 @@ void initContextsAPSupport(JoyLoLInterp *jInterp) {
   extendJoyLoL(jInterp, "loadPath",            loadPathAP);
   extendJoyLoL(jInterp, "load",                loadFileAP);
   extendJoyLoL(jInterp, "lispLoad",            lispLoadFileAP);
-  extendJoyLoL(jInterp, "comment",             commentAP);
-  extendJoyLoL(jInterp, "---",                 commentAP);
   extendJoyLoL(jInterp, "showLoadExtensions",  showLoadExtensionsAP);
   extendJoyLoL(jInterp, "showLoadPaths",       showLoadPathsAP);
   extendJoyLoL(jInterp, "showStack",           showStackAP);
@@ -226,6 +252,10 @@ void initContextsAPSupport(JoyLoLInterp *jInterp) {
   extendJoyLoL(jInterp, "showStackOff",        showStackOffAP);
   extendJoyLoL(jInterp, "tracingOn",           tracingOnAP);
   extendJoyLoL(jInterp, "tracingOff",          tracingOffAP);
+  extendJoyLoL(jInterp, "verboseOn",           verboseOnAP);
+  extendJoyLoL(jInterp, "verboseOff",          verboseOffAP);
+  extendJoyLoL(jInterp, "debugOn",             debugOnAP);
+  extendJoyLoL(jInterp, "debugOff",            debugOffAP);
   extendJoyLoL(jInterp, "checkingOn",          checkingOnAP);
   extendJoyLoL(jInterp, "checkingOff",         checkingOffAP);
 }

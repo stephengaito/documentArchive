@@ -29,8 +29,8 @@ local function evaluateJoyLoLREPL()
     local startLine = buffer:line_from_position(selStart)
     selStart = buffer:position_from_line(startLine)
     local endLine   = buffer:line_from_position(selEnd)
-    if buffer.column[e] > 0 then
-      selEnd = buffer:position_form_line(endLine+1)
+    if buffer.column[selEnd] > 0 then
+      selEnd = buffer:position_from_line(endLine+1)
     end
     code = buffer:text_range(selStart, selEnd)
   else
@@ -44,12 +44,17 @@ local function evaluateJoyLoLREPL()
   buffer:set_save_point()
 end
 
+keys.joylol = keys.joylol or { }
 keys.joylol['c>'] = newJoyLoLREPL
-keys.joylol['\n'] = function()
+keys.joylol['c\n'] = function()
   if buffer._type ~= '[JoyLoL REPL]' then
     -- propagate key event to next handler
     return false
   end
   evaluateJoyLoLREPL()
 end
+
+-- add creation of a JoyLoL-REPL to context
+keys.context = keys.context or { }
+keys.context['c>'] = newJoyLoLREPL
 \stopLuaCode

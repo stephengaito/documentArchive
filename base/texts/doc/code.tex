@@ -343,7 +343,7 @@ void reportErrorImpl(
   } else {
     strBufPrintf(jInterp, aStrBuf, "at end of text\n\n");
   }
-  jInterp->writeStdErr(jInterp, getCString(jInterp, aStrBuf));
+  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
   strBufClose(jInterp, aStrBuf);
 }
 \stopCCode

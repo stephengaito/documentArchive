@@ -328,7 +328,7 @@ static void requireAllRequiredCoAlgs(
         snprintf(output, 999, 
           "    loading [joylol.%s]\n",
           curCoAlg->name);
-        jInterp->writeStdErr(jInterp, output);
+        jInterp->writeStdOut(jInterp, output);
       }
       lua_pushstring(lstate, curCoAlg->name); // -2
       lua_getglobal(lstate, "require");
@@ -352,7 +352,7 @@ static void requireAllRequiredCoAlgs(
         snprintf(output, 999,
           "    loaded [joylol.%s]\n",
           curCoAlg->name);
-        jInterp->writeStdErr(jInterp, output);
+        jInterp->writeStdOut(jInterp, output);
       }
     }
   }  
@@ -367,7 +367,7 @@ the shared library.
 int luaopen_joylol_jInterps (lua_State *lstate) {
   setJoyLoLInterpInto(lstate, jInterp);
   if (jInterp->verbose) {
-    jInterp->writeStdErr(jInterp,
+    jInterp->writeStdOut(jInterp,
       "  loading [joylol.jInterps]\n"
     );
   }
@@ -376,7 +376,7 @@ int luaopen_joylol_jInterps (lua_State *lstate) {
   initializeAllLoaded(lstate, jInterp);
   checkAllRequired(lstate, jInterp);
   if (jInterp->verbose) {
-    jInterp->writeStdErr(jInterp,
+    jInterp->writeStdOut(jInterp,
       "  loaded [joylol.jInterps]\n"
     );
   }
