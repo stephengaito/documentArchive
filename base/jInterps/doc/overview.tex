@@ -142,11 +142,12 @@ extensions for this implementation are:
 #define PairsTag           14
 #define ParsersTag         15
 #define RulesTag           16
-#define StringBuffersTag   17
-#define SymbolsTag         18
-#define TemplatesTag       19
-#define TextsTag           20
-#define NumRequiredCoAlgs  21
+#define SignalsTag         17
+#define StringBuffersTag   18
+#define SymbolsTag         19
+#define TemplatesTag       20
+#define TextsTag           21
+#define NumRequiredCoAlgs  22
 
 #define JInterpsName        "jInterps"        /*  1 */
 #define DictionariesName    "dictionaries"    /*  2 */
@@ -164,10 +165,11 @@ extensions for this implementation are:
 #define PairsName           "pairs"           /* 14 */
 #define ParsersName         "parsers"         /* 15 */
 #define RulesName           "rules"           /* 16 */
-#define StringBuffersName   "stringBuffers"   /* 17 */
-#define SymbolsName         "symbols"         /* 18 */
-#define TemplatesName       "templates"       /* 19 */
-#define TextsName           "texts"           /* 20 */
+#define SignalsName         "signals"         /* 17 */
+#define StringBuffersName   "stringBuffers"   /* 18 */
+#define SymbolsName         "symbols"         /* 19 */
+#define TemplatesName       "templates"       /* 20 */
+#define TextsName           "texts"           /* 21 */
 \stopCHeader
 
 Since each CoAlgebraic extension can be developed separately, we need to 
@@ -228,10 +230,11 @@ RequiredObjects requiredCoAlgs[] = {
   { PairsName,           PairsTag,           {0, 1, 0 }}, // 14
   { ParsersName,         ParsersTag,         {0, 1, 0 }}, // 15
   { RulesName,           RulesTag,           {0, 1, 0 }}, // 16
-  { StringBuffersName,   StringBuffersTag,   {0, 1, 0 }}, // 17
-  { SymbolsName,         SymbolsTag,         {0, 1, 0 }}, // 18
-  { TemplatesName,       TemplatesTag,       {0, 1, 0 }}, // 19
-  { TextsName,           TextsTag,           {0, 1, 0 }}, // 20
+  { SignalsName,         SignalsTag,         {0, 1, 0 }}, // 17
+  { StringBuffersName,   StringBuffersTag,   {0, 1, 0 }}, // 18
+  { SymbolsName,         SymbolsTag,         {0, 1, 0 }}, // 19
+  { TemplatesName,       TemplatesTag,       {0, 1, 0 }}, // 20
+  { TextsName,           TextsTag,           {0, 1, 0 }}, // 21
   { NULL,                0,                  {0, 0, 0 }}
 };
 \stopCCode

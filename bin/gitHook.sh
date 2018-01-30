@@ -109,6 +109,8 @@ cp $gitVTex base/parsers/doc
 cp $gitVC   base/parsers/doc
 cp $gitVTex base/rules/doc
 cp $gitVC   base/rules/doc
+cp $gitVTex base/signals/doc
+cp $gitVC   base/signals/doc
 cp $gitVTex base/stringBuffers/doc
 cp $gitVC   base/stringBuffers/doc
 cp $gitVTex base/symbols/doc
