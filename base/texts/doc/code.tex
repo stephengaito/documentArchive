@@ -227,11 +227,24 @@ void nextSymbolImpl(
           // we have found the beginning of a single line comment
           // ... so restart search for the next symbol on the next line
           //
-          aText->nextLine(aText);
-          if (!aText->curLine) return; // no more symbols
-          symStart = aText->curChar;
-          symEnd   = aText->curChar;
-          lastChar = aText->lastChar;
+          while (++symEnd < lastChar) {
+            if (*symEnd == '\n' || *symEnd == '\r') {
+              //
+              // we have found the end of this line
+              //
+              while (++symEnd < lastChar) {
+                if (*symEnd != '\n' && *symEnd != '\r') {
+                  //
+                  // we have found the beginning of the next line
+                  //
+                  break;
+                }
+              }
+              break;
+            }
+          }
+          // ensure that the comment and all line-ends are skipped
+          symStart = symEnd;
         } else {
           //
           // ';' is a symbol in its own right
