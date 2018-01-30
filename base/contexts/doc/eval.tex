@@ -58,12 +58,7 @@ void evalCommandInContextImpl(
   assert(jInterp);
   DictObj *theDict = jInterp->dict;
   assert(theDict);
-  
-  //
-  // if there is no command... there is nothing to do
-  //
-  if (!command) return;
-  //
+
   DEBUG(jInterp, "evalCommandInContext > %p %p\n", aCtx, command);
   //
   // push this command onto the top of the process stack
@@ -271,7 +266,7 @@ void evalTextInContextImpl(
   DEBUG(jInterp, "evalTextInContext > %p %p\n", aCtx, aText);
   while(TRUE) {
     JObj* aLoL = parseOneSymbol(aText);
-/**/    if (aCtx->showStack) {
+    if (aCtx->showStack) {
       StringBufferObj *aStrBuf =
         newStringBuffer(jInterp);
       strBufPrintf(jInterp, aStrBuf, "<");
@@ -279,10 +274,10 @@ void evalTextInContextImpl(
       strBufPrintf(jInterp, aStrBuf, "\n");
       jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
-    } /**/
+    }
     if (!aLoL) break;
     evalCommandInContext(aCtx, aLoL);
-/**/    if (aCtx->showStack) {
+    if (aCtx->showStack) {
       StringBufferObj *aStrBuf =
         newStringBuffer(jInterp);
       strBufPrintf(jInterp, aStrBuf, ">");
@@ -290,7 +285,7 @@ void evalTextInContextImpl(
       strBufPrintf(jInterp, aStrBuf, "\n");
       jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
-    } /**/
+    }
     if (aCtx->exceptionRaised) break;
   }
   DEBUG(jInterp, "evalTextInContext < %p %p\n", aCtx, aText);

@@ -287,7 +287,7 @@ void nextSymbolImpl(
   DEBUG(aText->jInterp, "--nextSymbol == [%s]\n", aSymbol);
 
   // check to see if this is the exit or quit symbol ...
-  // ... and if so rest the nextLine function
+  // ... and if so reset the nextLine function
   if (strcmp(aSymbol, "exit") == 0 || strcmp(aSymbol, "quit") == 0) {
     aText->nextLine = nextLineExit;
   }

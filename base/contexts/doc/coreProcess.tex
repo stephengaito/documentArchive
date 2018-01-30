@@ -388,6 +388,7 @@ extern JObj* popCtxProcessImpl(
 JObj* popCtxProcessImpl(
   ContextObj* aCtx
 ) {
+  assert(aCtx);
   if (!aCtx->process) return NULL;
 
   JObj* poppedLoL = asCar(aCtx->process);
