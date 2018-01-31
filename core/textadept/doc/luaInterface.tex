@@ -101,9 +101,8 @@ static void *coreTextadeptCallback(
       coreTextadeptWriteStdErr;
     return (void*)coreWriteStdErr;
   } else if (resourceId == JoyLoLCallback_Verbose) {
-    //Boolean verbose = getBooleanOption(lstate, "verbose");
-    //return (void*)verbose;
-    return (void*)TRUE;
+    Boolean verbose = getBooleanOption(lstate, "verbose");
+    return (void*)verbose;
   } else if (resourceId == JoyLoLCallback_Debug) {
     Boolean debug = getBooleanOption(lstate, "debug");
     return (void*)debug;
