@@ -26,6 +26,7 @@
 #include <joylol/stringBuffers.h>
 #include <joylol/booleans.h>
 #include <joylol/symbols.h>
+#include <joylol/signals.h>
 #include <joylol/naturals.h>
 #include <joylol/pairs.h>
 #include <joylol/dictNodes.h>
@@ -45,6 +46,7 @@
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/booleans.h>}
 \addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/signals.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/naturals.h>}
 \addCTestInclude{<joylol/pairs.h>}
@@ -60,6 +62,7 @@
   addJoyLoLLuaPath(lstate);
   requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.booleans");
+  requireLuaModule(lstate, "joylol.signals");
   requireLuaModule(lstate, "joylol.symbols");
   requireLuaModule(lstate, "joylol.stringBuffers");
   requireLuaModule(lstate, "joylol.naturals");

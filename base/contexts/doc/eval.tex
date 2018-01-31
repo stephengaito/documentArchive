@@ -270,12 +270,18 @@ void evalTextInContextImpl(
       StringBufferObj *aStrBuf =
         newStringBuffer(jInterp);
       strBufPrintf(jInterp, aStrBuf, "<");
-      printLoL(jInterp, aStrBuf, aLoL);
+      if (aLoL && isSignal(aLoL) &&
+        asSignal(aLoL) == SIGNAL_END_OF_TEXT) {
+        strBufPrintf(jInterp, aStrBuf, " {EOT}");
+      } else {
+        printLoL(jInterp, aStrBuf, aLoL);
+      }
       strBufPrintf(jInterp, aStrBuf, "\n");
       jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
     }
-    if (!aLoL) break;
+    if (aLoL && isSignal(aLoL) &&
+      asSignal(aLoL) == SIGNAL_END_OF_TEXT) break;
     evalCommandInContext(aCtx, aLoL);
     if (aCtx->showStack) {
       StringBufferObj *aStrBuf =

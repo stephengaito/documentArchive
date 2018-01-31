@@ -11,6 +11,9 @@
 \startTestSuite[newSignal]
 
 \startCHeader
+
+#define SIGNAL_END_OF_TEXT 1
+
 typedef JObj* (NewSignal)(
   JoyLoLInterp*,
   size_t

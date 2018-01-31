@@ -278,7 +278,9 @@ JObj* parseOneSymbolImpl(
   assert(aText->jInterp);
   DEBUG(aText->jInterp, "parseOneSymbol %p\n", aText);
   nextSymbol(aText);
-  if (!aText->sym) return NULL;
+  if (!aText->sym) {
+    return newSignal(aText->jInterp, SIGNAL_END_OF_TEXT);
+  }
 
   if (aText->sym->type &&
      (asTag(aText->sym) != SymbolsTag)) return aText->sym;
@@ -331,7 +333,9 @@ JObj* parseOneSymbolImpl(
   AssertStrEquals(asSymbol(aLoL), "list");
 
   aLoL = parseOneSymbol(aText);
-  AssertPtrNull(aLoL);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isSignal(aLoL));
+  AssertIntEquals(asSignal(aLoL), SIGNAL_END_OF_TEXT);
   AssertIntTrue(aText->completed);
 \stopCTest
 \stopTestCase
@@ -394,7 +398,9 @@ JObj* parseOneSymbolImpl(
   AssertStrEquals(asSymbol(aLoL), "again");
 
   aLoL = parseOneSymbol(aText);
-  AssertPtrNull(aLoL);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isSignal(aLoL));
+  AssertIntEquals(asSignal(aLoL), SIGNAL_END_OF_TEXT);
   AssertIntTrue(aText->completed);
 \stopCTest
 \stopTestCase
@@ -423,7 +429,9 @@ JObj* parseOneSymbolImpl(
   strBufClose(jInterp, aStrBuf);
 
   aLoL = parseOneSymbol(aText);
-  AssertPtrNull(aLoL);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isSignal(aLoL));
+  AssertIntEquals(asSignal(aLoL), SIGNAL_END_OF_TEXT);
   AssertIntTrue(aText->completed);
 \stopCTest
 \stopTestCase
