@@ -324,37 +324,3 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
 \stopCTest
 \stopTestCase
 \stopTestSuite
-
-
-\starttyping
-// specs
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "CuTest.h"
-
-#include "joyLoL/macros.h"
-#include "joyLoL/coAlg/coAlgs.h"
-#include "joyLoL/lists.h"
-#include "joyLoL/dictionary.h"
-#include "joyLoL/printer.h"
-
-// suiteName: - Symbols CoAlgebra tests -
-
-void Test_checkSymbolsSymbols(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-
-  Symbols* symbols = coAlgs->symbols;
-  CuAssertPtrNotNull(tc, symbols);
-  Dictionary* mainDic = symbols->dictionary;
-  CuAssertPtrNotNull(tc, mainDic);
-
-  AVLNode* aNode = findSymbol(mainDic, "isSymbol");
-  CuAssertPtrNotNull(tc, aNode);
-  CuAssertStrEquals(tc, aNode->symbol, "isSymbol");
-  CuAssertPtrNotNull(tc, aNode->value);
-  CuAssertTrue(tc, isFunction(aNode->value));
-}
-\stoptyping

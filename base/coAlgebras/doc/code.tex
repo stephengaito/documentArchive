@@ -164,26 +164,6 @@ Boolean printCoAlgebraCoAlg(
 \stopTestCase
 \stopTestSuite
 
-\starttyping
-// suiteName: - Functions CoAlgebra tests -
-
-void Test_checkFunctionsSymbols(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-
-  Symbols* symbols = coAlgs->symbols;
-  CuAssertPtrNotNull(tc, symbols);
-  Dictionary* mainDic = symbols->dictionary;
-  CuAssertPtrNotNull(tc, mainDic);
-
-  AVLNode* aNode = findSymbol(mainDic, "isFunction");
-  CuAssertPtrNotNull(tc, aNode);
-  CuAssertStrEquals(tc, aNode->symbol, "isFunction");
-  CuAssertPtrNotNull(tc, aNode->value);
-  CuAssertTrue(tc, isFunction(aNode->value));
-}
-\stoptyping
-
 \startTestSuite[registerCoAlgebras]
 
 \startCHeader

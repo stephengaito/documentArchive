@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# This bash script archives the current .joylol directory
+# by moving it to .joylolArchive and creating a new .joylol directory
+# This ensures that the last working version of .joylol is not lost
+
+rm -rf $HOME/.joylolArchive
+mv $HOME/.joylol $HOME/.joylolArchive
+mkdir $HOME/.joylol
+

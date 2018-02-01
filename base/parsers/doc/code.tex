@@ -438,14 +438,13 @@ JObj* parseOneSymbolImpl(
 
 \startTestCase[parse Boolean and find it in main dictionary]
 \startCTest
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
-  Symbols* symbols = coAlgs->symbols;
-  AssertPtrNotNull(symbols);
-  Dictionary* mainDic = symbols->dictionary;
+  AssertPtrNotNull(jInterp);
+
+  DictObj* mainDic = jInterp->dict;
   AssertPtrNotNull(mainDic);
 
-  Text* aText = createTextFromString(coAlgs, " true false ");
+  TextObj* aText =
+    createTextFromString(jInterp, " true false ");
   AssertPtrNotNull(aText);
 
   JObj* aLoL = parseOneSymbol(aText);
@@ -453,11 +452,12 @@ JObj* parseOneSymbolImpl(
   AssertIntTrue(isAtom(aLoL));
   AssertIntTrue(isSymbol(aLoL));
   AssertStrEquals(asSymbol(aLoL), "true");
-  AVLNode* aNode = findSymbol(mainDic, asSymbol(aLoL));
+  DictNodeObj* aNode =
+    findSymbol(mainDic, asSymbol(aLoL));
   AssertPtrNotNull(aNode);
   AssertPtrNotNull(aNode->value);
   AssertIntTrue(isBoolean(aNode->value));
-  AssertIntTrue(aNode->value->boolean);
+  AssertIntTrue(asBoolean(aNode->value));
 
   aLoL = parseOneSymbol(aText);
   AssertPtrNotNull(aLoL);
@@ -468,9 +468,9 @@ JObj* parseOneSymbolImpl(
   AssertPtrNotNull(aNode);
   AssertPtrNotNull(aNode->value);
   AssertIntTrue(isBoolean(aNode->value));
-  AssertFalse(aNode->value->boolean);
+  AssertIntFalse(asBoolean(aNode->value));
 \stopCTest
-\skipTestCase
+\stopTestCase
 
 \startTestCase[parse Print Naturals]
 \startCTest

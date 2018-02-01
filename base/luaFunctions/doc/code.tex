@@ -1,4 +1,4 @@
-% A ConTeXt document [master document: luaFunctions.tex]
+34% A ConTeXt document [master document: luaFunctions.tex]
 
 \section[title=Code]
 \setCHeaderStream{public}
@@ -224,23 +224,6 @@ void Test_printJoyLoLFuncion(CuTest* tc) {
   CuAssertIntEquals(tc, printSizeDebug(aNewFunc, FALSE), 15);
   CuAssertStrEquals(tc, printLoLDebug(aNewFunc, FALSE), buffer);
 }
-
-void Test_checkFunctionsSymbols(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  CuAssertPtrNotNull(tc, coAlgs);
-
-  Symbols* symbols = coAlgs->symbols;
-  CuAssertPtrNotNull(tc, symbols);
-  Dictionary* mainDic = symbols->dictionary;
-  CuAssertPtrNotNull(tc, mainDic);
-
-  AVLNode* aNode = findSymbol(mainDic, "isFunction");
-  CuAssertPtrNotNull(tc, aNode);
-  CuAssertStrEquals(tc, aNode->symbol, "isFunction");
-  CuAssertPtrNotNull(tc, aNode->value);
-  CuAssertTrue(tc, isFunction(aNode->value));
-}
-
 \stoptyping
 
 \startTestSuite[registerLuaFunctions]
