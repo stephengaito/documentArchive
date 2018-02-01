@@ -243,7 +243,7 @@ typedef struct joylol_interpreter_struct {
   size_t            numCoAlgs;
   size_t            maxNumCoAlgs;
   JClass          **coAlgs;
-  DictObj          *dict;
+  //DictObj          *dict;
   LoaderObj        *loader;
   ContextObj       *rootCtx;
   size_t            numCompilers;
@@ -428,7 +428,7 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
 
   DEBUG(jInterp, "Initialized compilers %p\n", jInterp);
 
-  jInterp->dict    = NULL;
+  //jInterp->dict    = NULL;
   jInterp->loader  = NULL;
   jInterp->rootCtx = NULL;
     

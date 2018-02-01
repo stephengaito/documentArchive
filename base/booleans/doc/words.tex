@@ -499,12 +499,16 @@ void registerBooleanWords(
   JoyLoLInterp* jInterp
 ) {
   assert(jInterp);
+  ContextObj *rootCtx = jInterp->rootCtx;
+  assert(rootCtx);
+  DictObj *dict = rootCtx->dict;
+  assert(dict);
+  
+  DictNodeObj* true  = createSymbol(dict, "true");
+  true->value        = newBoolean(jInterp, TRUE);
 
-  DictNodeObj* true  = createSymbol(jInterp->dict, "true");
-  true->value    = newBoolean(jInterp, TRUE);
-
-  DictNodeObj* false = createSymbol(jInterp->dict, "false");
-  false->value   = newBoolean(jInterp, FALSE);
+  DictNodeObj* false = createSymbol(dict, "false");
+  false->value       = newBoolean(jInterp, FALSE);
 
   extendJoyLoL(jInterp, "isBoolean", isBooleanAP);
   extendJoyLoL(jInterp, "ifte",      ifteAP);

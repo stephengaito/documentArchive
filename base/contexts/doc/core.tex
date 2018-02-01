@@ -36,8 +36,9 @@ Boolean extendJoyLoLImpl(
   CFunction    *aFunc
 ) {
   assert(jInterp);
+  assert(jInterp->rootCtx);
   DictNodeObj* aSym =
-    createSymbol(jInterp->dict, definedName);
+    createSymbol(jInterp->rootCtx->dict, definedName);
   aSym->value =
     (JObj*)newCFunction(jInterp, aFunc);
 
@@ -78,8 +79,9 @@ Boolean defineJoyLoLImpl(
   JObj     *aLoL
 ) {
   assert(jInterp);
+  assert(jInterp->rootCtx);
   DictNodeObj* aSym =
-    createSymbol(jInterp->dict, definedName);
+    createSymbol(jInterp->rootCtx->dict, definedName);
   aSym->value = copyLoL(jInterp, aLoL);
 
   return TRUE;
@@ -121,8 +123,9 @@ Boolean defineContextImpl(
   DEBUG(jInterp, "defineContext %p [%s] %p\n",
         jInterp, definedName, newCtx);
   assert(jInterp);
+  assert(jInterp->rootCtx);
   DictNodeObj* aSym =
-    createSymbol(jInterp->dict, definedName);
+    createSymbol(jInterp->rootCtx->dict, definedName);
   aSym->value   = (JObj*)newCtx;
 
   return TRUE;

@@ -9,6 +9,7 @@ lpTargets = litProgs.targets{
     'objects.tex',
     'interpreter.tex',
     'words.tex',
+    'luaInit.tex',
     'luaInterface.tex',
     'luaScript.tex',
     'conclusion.tex',

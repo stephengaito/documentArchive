@@ -260,7 +260,6 @@ static void checkAllRequired(
   // finally check that all important interpreter 
   // objects have been assigned
   if (
-    !(jInterp->dict) || 
     !(jInterp->loader) ||
     !(jInterp->rootCtx)
   ) {
