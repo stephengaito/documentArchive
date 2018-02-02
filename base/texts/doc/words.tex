@@ -4,11 +4,18 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerTextWords(JoyLoLInterp *jInterp);
+extern Boolean registerTextWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerTextWords(JoyLoLInterp *jInterp){
+Boolean registerTextWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+){
+  return TRUE;
 }
 \stopCCode

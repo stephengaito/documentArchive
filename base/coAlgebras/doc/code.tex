@@ -180,7 +180,6 @@ static Boolean initializeCoAlgebras(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerCoAlgebraWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -200,6 +199,7 @@ Boolean registerCoAlgebras(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = CoAlgebrasName;
   theCoAlg->super.objectSize     = sizeof(CoAlgebraObj);
   theCoAlg->super.initializeFunc = initializeCoAlgebras;
+  theCoAlg->super.registerFunc   = registerCoAlgebraWords;
   theCoAlg->super.equalityFunc   = equalityCoAlgebraCoAlg;
   theCoAlg->super.printFunc      = printCoAlgebraCoAlg;
   theCoAlg->newCoAlgebraFunc     = newCoAlgebraImpl;

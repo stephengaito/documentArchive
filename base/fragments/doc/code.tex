@@ -205,7 +205,6 @@ static Boolean initializeFragments(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerFragmentWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -228,6 +227,7 @@ Boolean registerFragments(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = FragmentsName;
   theCoAlg->super.objectSize     = sizeof(FragmentObj);
   theCoAlg->super.initializeFunc = initializeFragments;
+  theCoAlg->super.registerFunc   = registerFragmentWords;
   theCoAlg->super.equalityFunc   = equalityFragmentCoAlg;
   theCoAlg->super.printFunc      = printFragmentCoAlg;
   theCoAlg->newFragmentFunc = newFragmentImpl;

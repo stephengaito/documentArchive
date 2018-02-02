@@ -231,7 +231,7 @@ for(size_t iAddLuaPath = 0; iAddLuaPath < 1; iAddLuaPath++) { \
 \stopCHeader
 
 \startCCode
-static void checkAllRequired(
+static void checkAllCoAlgs(
   lua_State    *lstate,
   JoyLoLInterp *jInterp
 ) {
@@ -257,6 +257,18 @@ static void checkAllRequired(
     }
   }
   
+  // Now check that all CoAlg extensions
+  // have the required callbacks
+  //
+  for (size_t i = 1; i < jInterp->numCoAlgs; i++ ) {
+    if (jInterp->coAlgs[i]) {
+      JClass *aCoAlg = getJClass(jInterp, i);
+      assert(0 < aCoAlg->objectSize);
+      assert(aCoAlg->initializeFunc);
+      assert(aCoAlg->registerFunc);
+    }
+  }
+  
   // finally check that all important interpreter 
   // objects have been assigned
   if (
@@ -269,10 +281,10 @@ static void checkAllRequired(
   }
 }
 
-static int lua_jInterps_checkAllRequired(lua_State *lstate) {
+static int lua_jInterps_checkAllCoAlgs(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
   assert(jInterp);
-  checkAllRequired(lstate, jInterp);
+  checkAllCoAlgs(lstate, jInterp);
   return 0;
 }
 
@@ -288,7 +300,7 @@ static int lua_jInterps_initializeAllLoaded(lua_State *lstate) {
 static const struct luaL_Reg lua_jInterps [] = {
   {"gitVersion",          lua_jInterps_getGitVersion},
   {"initializeAllLoaded", lua_jInterps_initializeAllLoaded},
-  {"checkAllRequired",    lua_jInterps_checkAllRequired},
+  {"checkAllCoAlgs",      lua_jInterps_checkAllCoAlgs},
   {NULL, NULL}
 };
 \stopCCode
@@ -373,7 +385,8 @@ int luaopen_joylol_jInterps (lua_State *lstate) {
   registerJInterps(jInterp);
   requireAllRequiredCoAlgs(lstate, jInterp);
   initializeAllLoaded(lstate, jInterp);
-  checkAllRequired(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
+  checkAllCoAlgs(lstate, jInterp);
   if (jInterp->verbose) {
     jInterp->writeStdOut(jInterp,
       "  loaded [joylol.jInterps]\n"

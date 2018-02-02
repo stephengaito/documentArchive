@@ -4,11 +4,18 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerParserWords(JoyLoLInterp* jInterp);
+extern Boolean registerParserWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-extern void registerParserWords(JoyLoLInterp* jInterp){
+Boolean registerParserWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+){
+  return TRUE;
 }
 \stopCCode

@@ -205,7 +205,6 @@ static Boolean initializeRules(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerRuleWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -228,6 +227,7 @@ Boolean registerRules(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = RulesName;
   theCoAlg->super.objectSize     = sizeof(RuleObj);
   theCoAlg->super.initializeFunc = initializeRules;
+  theCoAlg->super.registerFunc   = registerRuleWords;
   theCoAlg->super.equalityFunc   = equalityRuleCoAlg;
   theCoAlg->super.printFunc      = printRuleCoAlg;
   theCoAlg->newRuleFunc = newRuleImpl;

@@ -488,15 +488,17 @@ static void ifteContAP(ContextObj* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerBooleanWords(
-  JoyLoLInterp* jInterp
+extern Boolean registerBooleanWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerBooleanWords(
-  JoyLoLInterp* jInterp
+Boolean registerBooleanWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 ) {
   assert(jInterp);
   ContextObj *rootCtx = jInterp->rootCtx;
@@ -513,5 +515,7 @@ void registerBooleanWords(
   extendJoyLoL(jInterp, "isBoolean", isBooleanAP);
   extendJoyLoL(jInterp, "ifte",      ifteAP);
   extendJoyLoL(jInterp, "ifteCont",  ifteContAP);
+  
+  return TRUE;
 }
 \stopCCode

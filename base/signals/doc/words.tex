@@ -4,16 +4,19 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerSignalWords(
-  JoyLoLInterp* jInterp
+extern Boolean registerSignalWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerSignalWords(
-  JoyLoLInterp* jInterp
+Boolean registerSignalWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 ) {
   assert(jInterp);
+  return TRUE;
 }
 \stopCCode

@@ -72,12 +72,18 @@ static void dupAP(ContextObj* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerPairWords(JoyLoLInterp* jInterp);
+extern Boolean registerPairWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerPairWords(JoyLoLInterp* jInterp) {
+Boolean registerPairWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
   extendJoyLoL(jInterp, "isPair",        isPairAP);
   extendJoyLoL(jInterp, "isAtom",        isAtomAP);
   extendJoyLoL(jInterp, "pop",           popAP);
@@ -85,6 +91,8 @@ void registerPairWords(JoyLoLInterp* jInterp) {
   extendJoyLoL(jInterp, "pop2nd",        pop2ndAP);
   extendJoyLoL(jInterp, "pop2ndProcess", pop2ndProcessAP);
   extendJoyLoL(jInterp, "dup",           dupAP);
+  
+  return TRUE;
 }
 \stopCCode
 

@@ -4,17 +4,21 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerCrossCompilerWords(
-  JoyLoLInterp* jInterp
+extern Boolean registerCrossCompilerWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerCrossCompilerWords(
-  JoyLoLInterp* jInterp
+Boolean registerCrossCompilerWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 ) {
   assert(jInterp);
   extendJoyLoL(jInterp, "addFragment", addFragmentAP);
+  
+  return TRUE;
 }
 \stopCCode

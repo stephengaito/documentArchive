@@ -438,7 +438,6 @@ static Boolean initializeCrossCompilers(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerCrossCompilerWords(jInterp);
 
   CrossCompilerObj *ansic =
     newCrossCompilerImpl(jInterp, AnsicName);
@@ -472,6 +471,7 @@ Boolean registerCrossCompilers(JoyLoLInterp *jInterp) {
   theCoAlg->super.name            = CrossCompilersName;
   theCoAlg->super.objectSize      = sizeof(CrossCompilerObj);
   theCoAlg->super.initializeFunc  = initializeCrossCompilers;
+  theCoAlg->super.registerFunc    = registerCrossCompilerWords;
   theCoAlg->super.equalityFunc    = equalityCrossCompilerCoAlg;
   theCoAlg->super.printFunc       = printCrossCompilerCoAlg;
   theCoAlg->newCrossCompilerFunc  = newCrossCompilerImpl;

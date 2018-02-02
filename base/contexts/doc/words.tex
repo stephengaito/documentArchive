@@ -4,14 +4,22 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerContextWords(JoyLoLInterp *jInterp);
+extern Boolean registerContextWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerContextWords(JoyLoLInterp *jInterp) {
+Boolean registerContextWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
   initContextsAPControl(jInterp);
   initContextsAPSupport(jInterp);
+  
+  return TRUE;
 }
 \stopCCode
 

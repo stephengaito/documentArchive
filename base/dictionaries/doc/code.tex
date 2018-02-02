@@ -463,7 +463,6 @@ static Boolean initializeDictionaries(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerDictionaryWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -486,6 +485,7 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = DictionariesName;
   theCoAlg->super.objectSize     = sizeof(DictObj);
   theCoAlg->super.initializeFunc = initializeDictionaries;
+  theCoAlg->super.registerFunc   = registerDictionaryWords;
   theCoAlg->super.equalityFunc   = equalityDictionaryCoAlg;
   theCoAlg->super.printFunc      = printDictionaryCoAlg;
   theCoAlg->newDictionaryFunc = newDictionaryImpl;

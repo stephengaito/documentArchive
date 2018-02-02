@@ -431,7 +431,6 @@ static Boolean initializeLoaders(
   if (!jInterp->loader) {
     jInterp->loader = newLoader(jInterp);
   }
-  registerLoaderWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -457,6 +456,7 @@ Boolean registerLoaders(
   theCoAlg->super.name             = LoadersName;
   theCoAlg->super.objectSize       = sizeof(LoaderObj);
   theCoAlg->super.initializeFunc   = initializeLoaders;
+  theCoAlg->super.registerFunc     = registerLoaderWords;
   theCoAlg->super.equalityFunc     = NULL;
   theCoAlg->super.printFunc        = NULL;
   theCoAlg->newLoaderFunc          = newLoaderImpl;

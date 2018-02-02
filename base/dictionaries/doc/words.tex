@@ -4,17 +4,19 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerDictionaryWords(
-  JoyLoLInterp* jInterp
+extern Boolean registerDictionaryWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerDictionaryWords(
-  JoyLoLInterp* jInterp
+Boolean registerDictionaryWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 ) {
   assert(jInterp);
-
+  return TRUE;
 }
 \stopCCode

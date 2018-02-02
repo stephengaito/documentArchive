@@ -205,7 +205,6 @@ static Boolean initializeSignals(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerSignalWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -228,6 +227,7 @@ Boolean registerSignals(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = SignalsName;
   theCoAlg->super.objectSize     = sizeof(JObj);
   theCoAlg->super.initializeFunc = initializeSignals;
+  theCoAlg->super.registerFunc   = registerSignalWords;
   theCoAlg->super.equalityFunc   = equalityBoolCoAlg;
   theCoAlg->super.printFunc      = printBoolCoAlg;
   theCoAlg->newSignalFunc        = newSignalImpl;

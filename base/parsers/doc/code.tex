@@ -695,7 +695,6 @@ static Boolean initializeParsers(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerParserWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -718,6 +717,7 @@ Boolean registerParsers(
   theCoAlg->super.name            = ParsersName;
   theCoAlg->super.objectSize      = sizeof(JObj);
   theCoAlg->super.initializeFunc  = initializeParsers;
+  theCoAlg->super.registerFunc    = registerParserWords;
   theCoAlg->super.equalityFunc    = NULL;
   theCoAlg->super.printFunc       = NULL;
   theCoAlg->parseOneSymbolFunc    = parseOneSymbolImpl;

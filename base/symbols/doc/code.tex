@@ -269,7 +269,6 @@ static Boolean initializeSymbols(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerSymbolWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -289,6 +288,7 @@ Boolean registerSymbols(JoyLoLInterp* jInterp) {
   theCoAlg->super.name           = SymbolsName;
   theCoAlg->super.objectSize     = sizeof(SymbolObj);
   theCoAlg->super.initializeFunc = initializeSymbols;
+  theCoAlg->super.registerFunc   = registerSymbolWords;
   theCoAlg->super.equalityFunc   = symbolsEqual;
   theCoAlg->super.printFunc      = printSymbolCoAlg;
   theCoAlg->newSymbolFunc        = newSymbolImpl;

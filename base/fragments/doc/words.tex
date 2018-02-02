@@ -4,17 +4,19 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerFragmentWords(
-  JoyLoLInterp* jInterp
+extern Boolean registerFragmentWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerFragmentWords(
-  JoyLoLInterp* jInterp
+Boolean registerFragmentWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 ) {
   assert(jInterp);
-
+  return TRUE;
 }
 \stopCCode

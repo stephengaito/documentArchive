@@ -441,7 +441,6 @@ static Boolean initializeStringBuffers(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerStringBufferWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -462,6 +461,7 @@ Boolean registerStringBuffers(JoyLoLInterp* jInterp) {
   theCoAlg->super.name            = StringBuffersName;
   theCoAlg->super.objectSize      = sizeof(StringBufferObj);
   theCoAlg->super.initializeFunc  = initializeStringBuffers;
+  theCoAlg->super.registerFunc    = registerStringBufferWords;
   theCoAlg->super.equalityFunc    = stringBuffersEqual;
   theCoAlg->super.printFunc       = printStringBufferCoAlg;
   theCoAlg->newStringBufferFunc   = newStringBufferImpl;

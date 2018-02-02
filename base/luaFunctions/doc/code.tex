@@ -241,7 +241,6 @@ static Boolean initializeLuaFunctions(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerLuaFunctionWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -261,6 +260,7 @@ Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = LuaFunctionsName;
   theCoAlg->super.objectSize     = sizeof(JObj);
   theCoAlg->super.initializeFunc = initializeLuaFunctions;
+  theCoAlg->super.registerFunc   = registerLuaFunctionWords;
   theCoAlg->super.equalityFunc   = NULL;
   theCoAlg->super.printFunc      = NULL;
   

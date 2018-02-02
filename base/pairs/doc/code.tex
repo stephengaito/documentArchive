@@ -380,7 +380,6 @@ static Boolean initializePairs(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerPairWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -399,6 +398,7 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = PairsName;
   theCoAlg->super.objectSize     = sizeof(PairsObj);
   theCoAlg->super.initializeFunc = initializePairs;
+  theCoAlg->super.registerFunc   = registerPairWords;
   theCoAlg->super.equalityFunc   = equalLoLImpl;
   theCoAlg->super.printFunc      = printPairsCoAlg;
   theCoAlg->newPairFunc          = newPairImpl;

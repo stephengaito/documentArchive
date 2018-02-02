@@ -4,17 +4,19 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerImplementationWords(
-  JoyLoLInterp* jInterp
+extern Boolean registerImplementationWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerImplementationWords(
-  JoyLoLInterp* jInterp
+Boolean registerImplementationWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
 ) {
   assert(jInterp);
-
+  return TRUE;
 }
 \stopCCode

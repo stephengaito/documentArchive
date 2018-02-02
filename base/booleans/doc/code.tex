@@ -263,7 +263,6 @@ static Boolean initializeBooleans(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerBooleanWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -286,6 +285,7 @@ Boolean registerBooleans(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = BooleansName;
   theCoAlg->super.objectSize     = sizeof(JObj);
   theCoAlg->super.initializeFunc = initializeBooleans;
+  theCoAlg->super.registerFunc   = registerBooleanWords;
   theCoAlg->super.equalityFunc   = equalityBoolCoAlg;
   theCoAlg->super.printFunc      = printBoolCoAlg;
   theCoAlg->newBooleanFunc       = newBooleanImpl;

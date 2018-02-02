@@ -190,7 +190,6 @@ static Boolean initializeCFunctions(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerCFunctionWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -210,6 +209,7 @@ Boolean registerCFunctions(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = CFunctionsName;
   theCoAlg->super.objectSize     = sizeof(CFunctionObj);
   theCoAlg->super.initializeFunc = initializeCFunctions;
+  theCoAlg->super.registerFunc   = registerCFunctionWords;
   theCoAlg->super.equalityFunc   = equalityFuncCoAlg;
   theCoAlg->super.printFunc      = printFuncCoAlg;
   theCoAlg->newCFunctionFunc     = newCFunctionImpl;

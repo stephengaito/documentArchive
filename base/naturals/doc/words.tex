@@ -336,12 +336,18 @@ static void isNaturalAP(ContextObj* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerNaturalWords(JoyLoLInterp* jInterp);
+extern Boolean registerNaturalWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerNaturalWords(JoyLoLInterp* jInterp) {
+Boolean registerNaturalWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
   mpz_init(zero);
   extendJoyLoL(jInterp, "isNatural", isNaturalAP);
   extendJoyLoL(jInterp, "+",         addAP);
@@ -350,5 +356,7 @@ void registerNaturalWords(JoyLoLInterp* jInterp) {
   extendJoyLoL(jInterp, "*",         multiplyAP);
   extendJoyLoL(jInterp, "=nat",      equalNatAP);
   extendJoyLoL(jInterp, "isZero",    isZeroAP);
+  
+  return TRUE;
 }
 \stopCCode

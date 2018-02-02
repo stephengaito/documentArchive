@@ -205,7 +205,6 @@ static Boolean initializeImplementations(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerImplementationWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -228,6 +227,7 @@ Boolean registerImplementations(JoyLoLInterp *jInterp) {
   theCoAlg->super.name           = ImplementationsName;
   theCoAlg->super.objectSize     = sizeof(ImplementationObj);
   theCoAlg->super.initializeFunc = initializeImplementations;
+  theCoAlg->super.registerFunc   = registerImplementationWords;
   theCoAlg->super.equalityFunc   = equalityImplementationCoAlg;
   theCoAlg->super.printFunc      = printImplementationCoAlg;
   theCoAlg->newImplementationFunc = newImplementationImpl;

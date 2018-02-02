@@ -35,13 +35,20 @@ static void equalSymbolAP(ContextObj* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerSymbolWords(JoyLoLInterp* jInterp);
+extern Boolean registerSymbolWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerSymbolWords(JoyLoLInterp* jInterp) {
+Boolean registerSymbolWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
   extendJoyLoL(jInterp, "isSymbol", isSymbolAP);
   extendJoyLoL(jInterp, "=Sym",     equalSymbolAP);
+  return TRUE;
 }
 \stopCCode

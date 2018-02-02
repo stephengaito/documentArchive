@@ -5,11 +5,18 @@
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerDictNodeWords(JoyLoLInterp *jInterp);
+extern Boolean registerDictNodeWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerDictNodeWords(JoyLoLInterp *jInterp) {
+Boolean registerDictNodeWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  return TRUE;
 }
 \stopCCode

@@ -19,13 +19,21 @@ static void isCFunctionAP(ContextObj* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerCFunctionWords(JoyLoLInterp* jInterp);
+extern Boolean registerCFunctionWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerCFunctionWords(JoyLoLInterp* jInterp) {
+Boolean registerCFunctionWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoALg
+) {
   assert(jInterp);
   extendJoyLoL(jInterp, "isCFunction", isCFunctionAP);
+  
+  return TRUE;
 }
 \stopCCode

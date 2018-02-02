@@ -187,7 +187,6 @@ static Boolean initializeDictNodes(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerDictNodeWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -209,6 +208,7 @@ Boolean registerDictNodes(JoyLoLInterp *jInterp) {
   theCoAlg->super.name            = DictNodesName;
   theCoAlg->super.objectSize      = sizeof(DictNodeObj);
   theCoAlg->super.initializeFunc  = initializeDictNodes;
+  theCoAlg->super.registerFunc    = registerDictNodeWords;
   theCoAlg->super.equalityFunc    = NULL;
   theCoAlg->super.printFunc       = printDictionaryJObjInto;
   theCoAlg->newDictNodeFunc       = newDictNodeImpl;

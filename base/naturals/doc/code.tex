@@ -272,7 +272,6 @@ static Boolean initializeNaturals(
 ) {
   assert(jInterp);
   assert(aJClass);
-  registerNaturalWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -292,6 +291,7 @@ Boolean registerNaturals(JoyLoLInterp* jInterp) {
   theCoAlg->super.name           = NaturalsName;
   theCoAlg->super.objectSize     = sizeof(NaturalObj);
   theCoAlg->super.initializeFunc = initializeNaturals;
+  theCoAlg->super.registerFunc   = registerNaturalWords;
   theCoAlg->super.equalityFunc   = equalityNatCoAlg;
   theCoAlg->super.printFunc      = printNatCoAlg;
   theCoAlg->newNaturalFunc       = newNaturalImpl;

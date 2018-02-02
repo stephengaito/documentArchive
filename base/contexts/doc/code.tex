@@ -254,7 +254,6 @@ static Boolean initializeContexts(
     jInterp->rootCtx =
       newContext(jInterp, "joylol", NULL, aDict, NULL, NULL);
   }
-  registerContextWords(jInterp);
   return TRUE;
 }
 \stopCCode
@@ -276,6 +275,7 @@ Boolean registerContexts(
   theCoAlg->super.name             = ContextsName;
   theCoAlg->super.objectSize       = sizeof(ContextObj);
   theCoAlg->super.initializeFunc   = initializeContexts;
+  theCoAlg->super.registerFunc     = registerContextWords;
   theCoAlg->super.equalityFunc     = equalityContextsCoAlg;
   theCoAlg->super.printFunc        = printContextsCoAlg;
   theCoAlg->newContextFunc         = newContextImpl;

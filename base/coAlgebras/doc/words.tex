@@ -19,13 +19,20 @@ static void isCoAlgebraAP(ContextObj* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern void registerCoAlgebraWords(JoyLoLInterp* jInterp);
+extern Boolean registerCoAlgebraWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-void registerCoAlgebraWords(JoyLoLInterp* jInterp) {
+Boolean registerCoAlgebraWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
   assert(jInterp);
   extendJoyLoL(jInterp, "isCoAlgebra", isCoAlgebraAP);
+  return TRUE;
 }
 \stopCCode
