@@ -190,7 +190,7 @@ void pushSymbolCtxProcessImpl(
   assert(aCtx->jInterp);
 
   JObj* aSymbolPA =
-    getSymbol(aCtx->jInterp->dict, aSymbol);
+    getSymbol(aCtx->dict, aSymbol);
   if (!aSymbolPA) return;
   aCtx->process = newPair(aCtx->jInterp, aSymbolPA, aCtx->process);
 }

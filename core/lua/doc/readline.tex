@@ -107,14 +107,18 @@ static TextObj* currentReadLineText = NULL;
 \startCCode
 static char* dictionaryWalker(const char* text, int state) {
   if (!currentReadLineText) return NULL;
+  
+  JoyLoLInterp *jInterp = currentReadLineText->jInterp;
+  assert(jInterp);
+  
   if (!state) {
 
-    assert(currentReadLineText);
-    assert(currentReadLineText->jInterp);
+    ContextObj *rootCtx = jInterp->rootCtx;
+    assert(rootCtx);
 
     currentReadLineText->curNode =
-      findLUBSymbol(currentReadLineText->jInterp->dict, text);
-    DEBUG(currentReadLineText->jInterp,
+      findLUBSymbol(rootCtx->dict, text);
+    DEBUG(jInterp,
           "dictionaryWalker-start %p\n",
           currentReadLineText->curNode);
   }
@@ -123,7 +127,7 @@ static char* dictionaryWalker(const char* text, int state) {
   if (!curNode) return NULL;
 
   if (strncmp(curNode->symbol, text, strlen(text)) == 0) {
-    DEBUG(currentReadLineText->jInterp,
+    DEBUG(jInterp,
           "dictionaryWalker %p {%s}[%s]\n",
           curNode, text, curNode->symbol);
     currentReadLineText->curNode = curNode->next;

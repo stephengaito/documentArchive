@@ -463,7 +463,6 @@ static Boolean initializeDictionaries(
 ) {
   assert(jInterp);
   assert(aJClass);
-  jInterp->dict = newDictionary(jInterp);
   registerDictionaryWords(jInterp);
   return TRUE;
 }

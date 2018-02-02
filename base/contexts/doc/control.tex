@@ -307,6 +307,7 @@ static void findFirstTryHandlerAP(ContextObj* aCtx) {
         jInterp,
         "raiseFindFirstTryHander",
         aCtx->parent,
+        aCtx->dict,
         NULL,
         NULL
       );
@@ -435,6 +436,7 @@ static void defineContextAP(ContextObj* aCtx) {
     jInterp,
     asSymbol(contextName),
     aCtx,
+    aCtx->dict,
     contextData,
     contextProcess
   );
@@ -455,6 +457,7 @@ static void newContextAP(ContextObj* aCtx) {
     jInterp,
     "anonymous",
     aCtx,
+    aCtx->dict,
     contextData,
     contextProcess
   );

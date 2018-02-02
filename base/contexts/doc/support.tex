@@ -123,9 +123,8 @@ static void definitionsAP(ContextObj* aCtx) {
   assert(aCtx);
   assert(aCtx->jInterp);
   JoyLoLInterp *jInterp = aCtx->jInterp;
-  StringBufferObj *aStrBuf = 
-    newStringBuffer(jInterp);
-  listDefinitions(jInterp->dict, aStrBuf);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  listDefinitions(aCtx->dict, aStrBuf);
   jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
   strBufClose(jInterp, aStrBuf);
 }

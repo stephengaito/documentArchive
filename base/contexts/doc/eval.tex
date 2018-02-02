@@ -56,7 +56,7 @@ void evalCommandInContextImpl(
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
-  DictObj *theDict = jInterp->dict;
+  DictObj *theDict = aCtx->dict;
   assert(theDict);
 
   DEBUG(jInterp, "evalCommandInContext > %p %p\n", aCtx, command);

@@ -42,18 +42,19 @@ typedef ContextObj *(NewContext)(
   JoyLoLInterp *jInterp,
   Symbol       *name,
   ContextObj   *parent,
-  JObj     *dataLoL,
-  JObj     *processLoL
+  DictObj      *dict,
+  JObj         *dataLoL,
+  JObj         *processLoL
 );
 
 #define newContext(jInterp, name, parent,     \
-  dataLoL, processLoL)                        \
+  dict, dataLoL, processLoL)                  \
   (                                           \
     assert(getContextsClass(jInterp)          \
       ->newContextFunc),                      \
     (getContextsClass(jInterp)                \
       ->newContextFunc(jInterp, name, parent, \
-        dataLoL, processLoL))                 \
+        dict, dataLoL, processLoL))           \
   )
 \stopCHeader
 
@@ -63,8 +64,9 @@ extern ContextObj* newContextImpl(
   JoyLoLInterp *jInterp,
   Symbol       *name,
   ContextObj   *parent,
-  JObj     *dataLoL,
-  JObj     *processLoL
+  DictObj      *dict,
+  JObj         *dataLoL,
+  JObj         *processLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -74,11 +76,12 @@ ContextObj* newContextImpl(
   JoyLoLInterp *jInterp,
   Symbol       *name,
   ContextObj   *parent,
-  JObj     *dataLoL,
-  JObj     *processLoL
+  DictObj      *dict,
+  JObj         *dataLoL,
+  JObj         *processLoL
 ) {
-  DEBUG(jInterp, "newContext %p [%s] %p %p %p\n",
-    jInterp, name, parent, dataLoL, processLoL);
+  DEBUG(jInterp, "newContext %p [%s] %p %p %p %p\n",
+    jInterp, name, parent, dict, dataLoL, processLoL);
   assert(jInterp);
 
   ContextObj* context =
@@ -88,6 +91,7 @@ ContextObj* newContextImpl(
   context->jInterp            = jInterp;
   context->name               = name;
   context->parent             = parent;
+  context->dict               = dict;
   context->data               = dataLoL;
   context->command            = NULL;
   context->process            = processLoL;
@@ -246,8 +250,9 @@ static Boolean initializeContexts(
   assert(jInterp);
   assert(aJClass);
   if (!jInterp->rootCtx) {
+    DictObj* aDict = newDictionary(jInterp);
     jInterp->rootCtx =
-      newContext(jInterp, "joylol", NULL, NULL, NULL);
+      newContext(jInterp, "joylol", NULL, aDict, NULL, NULL);
   }
   registerContextWords(jInterp);
   return TRUE;
@@ -356,28 +361,3 @@ Boolean registerContexts(
 
 \stopTestCase
 \stopTestSuite
-
-
-\starttyping
-/******
-
-// TODO move to context
-
-
-void ignoreTest_defineFactorial(CuTest* tc) {
-  CoAlgebras* coAlgs = createCoAlgebras();
-  AssertPtrNotNull(coAlgs);
-  Context* aCtx = createContext(anInterp);
-  AssertPtrNotNull(aCtx);
-
-  Text* factorialText = createTextFromArrayOfStrings(coAlgs, factorialStrs);
-  AssertPtrNotNull(factorialText);
-
-  JObj* factorialLoL = parseAllSymbols(factorialText);
-  AssertPtrNotNull(factorialLoL);
-
-  defineJoyLoL(anInterp->coAlgebras, "factorial", factorialLoL);
-  freeText(factorialText);
-}
-******/
-\stoptyping
