@@ -651,7 +651,7 @@ We start by adding one single \type{CoAlgebra}.
   AssertPtrNotNull(coAlgsVec);
   AssertStrEquals(coAlgsVec[coAlgIdx]->name, "newCoAlgA");
   AssertPtrEquals(coAlgsVec[coAlgIdx]->initializeFunc, fakeInitializeFunc);
-  AssertPtrEquals(coAlgsVec[coAlgIdx]->registerFunc,   registerFunc);
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->registerFunc,   fakeRegisterFunc);
   AssertPtrEquals(coAlgsVec[coAlgIdx]->equalityFunc,   fakeEqualityFunc);
   AssertPtrEquals(coAlgsVec[coAlgIdx]->printFunc,      fakePrintFunc);
 \stopCTest
@@ -664,11 +664,13 @@ the existing one runs out of \quote{space}.
   for(size_t i = 1; i < 26; i++) {
     *coAlgNameEnd          = 'A' + i;
     fakeInitializeFunc    += 1;
+    fakeRegisterFunc      += 1;
     fakeEqualityFunc      += 1;
     fakePrintFunc         += 1;
     aCoAlg                 = joyLoLCalloc(1, JClass);
     aCoAlg->name           = strdup(coAlgName);
     aCoAlg->initializeFunc = fakeInitializeFunc;
+    aCoAlg->registerFunc   = fakeRegisterFunc;
     aCoAlg->equalityFunc   = fakeEqualityFunc;
     aCoAlg->printFunc      = fakePrintFunc;
 
@@ -679,7 +681,7 @@ the existing one runs out of \quote{space}.
     size_t idx = NumRequiredCoAlgs + i;
     AssertStrEquals(coAlgsVec[idx]->name, coAlgName);
     AssertPtrEquals(coAlgsVec[idx]->initializeFunc, fakeInitializeFunc);
-    AssertPtrEquals(coAlgsVec[idx]->registerFunc,   registerFunc);
+    AssertPtrEquals(coAlgsVec[idx]->registerFunc,   fakeRegisterFunc);
     AssertPtrEquals(coAlgsVec[idx]->equalityFunc,   fakeEqualityFunc);
     AssertPtrEquals(coAlgsVec[idx]->printFunc,      fakePrintFunc);
   }

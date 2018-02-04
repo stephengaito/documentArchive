@@ -439,8 +439,9 @@ JObj* parseOneSymbolImpl(
 \startTestCase[parse Boolean and find it in main dictionary]
 \startCTest
   AssertPtrNotNull(jInterp);
-
-  DictObj* mainDic = jInterp->dict;
+  AssertPtrNotNull(jInterp->rootCtx);
+  
+  DictObj* mainDic = jInterp->rootCtx->dict;
   AssertPtrNotNull(mainDic);
 
   TextObj* aText =
