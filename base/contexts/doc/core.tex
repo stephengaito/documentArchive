@@ -252,10 +252,10 @@ typedef Boolean (DefineNaming)(
   )
 
 #define defineNamingIn(jInterp, aDict, definedName, newDict)  \
-  defineContext(jInterp, aDict, definedName, newDict, FALSE)
+  defineNaming(jInterp, aDict, definedName, newDict, FALSE)
 
 #define reDefineNamingIn(jInterp, aDict, definedName, newDict)  \
-  defineContext(jInterp, aDict, definedName, newDict, TRUE)
+  defineNaming(jInterp, aDict, definedName, newDict, TRUE)
 
 #define defineNamingInRoot(jInterp, definedName, newDict) \
   (                                                       \

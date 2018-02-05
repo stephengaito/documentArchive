@@ -87,5 +87,7 @@ for i, subDir in ipairs(subDirs) do
   end
   lfs.chdir(curDir)
 end
+print('\n========================================================')
+print('completed running ['..cmd..']')
 
 os.exit(0)

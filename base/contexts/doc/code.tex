@@ -251,7 +251,17 @@ static Boolean initializeContexts(
   assert(jInterp);
   assert(aJClass);
   if (!jInterp->rootCtx) {
+    //
+    // create the globals dictionary
+    //
     DictObj* aDict = newDictionary(jInterp, NULL);
+    DictNodeObj *globals = 
+      createSymbolInThisDictionary(aDict, "globals");
+    assert(globals);
+    globals->value = (JObj*)aDict;
+    //
+    // create the root context using the globals dictionary
+    //
     jInterp->rootCtx =
       newContext(jInterp, "joylol", NULL, aDict, NULL, NULL);
   }
