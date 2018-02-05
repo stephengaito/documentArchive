@@ -414,7 +414,7 @@ static void defineAP(ContextObj* aCtx) {
       "define requires a symbol as name");
     return;
   }
-  defineJoyLoL(aCtx->jInterp, asSymbol(name), definition);
+  defineJoyLoLInRoot(aCtx->jInterp, asSymbol(name), definition);
 }
 \stopCCode
 
@@ -441,7 +441,7 @@ static void defineContextAP(ContextObj* aCtx) {
     contextProcess
   );
   assert(newCtx);
-  defineContext(jInterp, asSymbol(contextName), newCtx);
+  defineContextInRoot(jInterp, asSymbol(contextName), newCtx);
 }
 \stopCCode
 
@@ -468,23 +468,23 @@ static void newContextAP(ContextObj* aCtx) {
 
 \startCCode
 void initContextsAPControl(JoyLoLInterp *jInterp) {
-  extendJoyLoL(jInterp, "fail",                failAP);
-  extendJoyLoL(jInterp, "i",                   interpretAP);
-  extendJoyLoL(jInterp, "interpret",           interpretAP);
-  extendJoyLoL(jInterp, "for",                 forAP);
-  extendJoyLoL(jInterp, "forDone",             forDoneAP);
-  extendJoyLoL(jInterp, "lispInterpret",       lispInterpretAP);
-  extendJoyLoL(jInterp, "lispFor",             lispForAP);
-  extendJoyLoL(jInterp, "define",              defineAP);
-  extendJoyLoL(jInterp, "defineContext",       defineContextAP);
-  extendJoyLoL(jInterp, "thisContext",         newContextAP);
-  extendJoyLoL(jInterp, "newContext",          newContextAP);
-  extendJoyLoL(jInterp, "done",                doneAP);
-  extendJoyLoL(jInterp, "clear",               clearContextAP);
-  extendJoyLoL(jInterp, "try",                 tryAP);
-  extendJoyLoL(jInterp, "raise",               raiseAP);
-  extendJoyLoL(jInterp, "raiseIfFalse",        raiseIfFalseAP);
-  extendJoyLoL(jInterp, "findFirstTryHandler", findFirstTryHandlerAP);
-  extendJoyLoL(jInterp, "tryHandler",          tryHandlerAP);
+  extendJoyLoLInRoot(jInterp, "fail",                failAP);
+  extendJoyLoLInRoot(jInterp, "i",                   interpretAP);
+  extendJoyLoLInRoot(jInterp, "interpret",           interpretAP);
+  extendJoyLoLInRoot(jInterp, "for",                 forAP);
+  extendJoyLoLInRoot(jInterp, "forDone",             forDoneAP);
+  extendJoyLoLInRoot(jInterp, "lispInterpret",       lispInterpretAP);
+  extendJoyLoLInRoot(jInterp, "lispFor",             lispForAP);
+  extendJoyLoLInRoot(jInterp, "define",              defineAP);
+  extendJoyLoLInRoot(jInterp, "defineContext",       defineContextAP);
+  extendJoyLoLInRoot(jInterp, "thisContext",         newContextAP);
+  extendJoyLoLInRoot(jInterp, "newContext",          newContextAP);
+  extendJoyLoLInRoot(jInterp, "done",                doneAP);
+  extendJoyLoLInRoot(jInterp, "clear",               clearContextAP);
+  extendJoyLoLInRoot(jInterp, "try",                 tryAP);
+  extendJoyLoLInRoot(jInterp, "raise",               raiseAP);
+  extendJoyLoLInRoot(jInterp, "raiseIfFalse",        raiseIfFalseAP);
+  extendJoyLoLInRoot(jInterp, "findFirstTryHandler", findFirstTryHandlerAP);
+  extendJoyLoLInRoot(jInterp, "tryHandler",          tryHandlerAP);
 }
 \stopCCode

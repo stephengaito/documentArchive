@@ -238,24 +238,24 @@ extern void initContextsAPSupport(JoyLoLInterp *jInterp);
 
 \startCCode
 void initContextsAPSupport(JoyLoLInterp *jInterp) {
-  extendJoyLoL(jInterp, "isContext",           isContextAP);
-  extendJoyLoL(jInterp, "definitions",         definitionsAP);
-  extendJoyLoL(jInterp, "loadExtension",       loadExtensionAP);
-  extendJoyLoL(jInterp, "loadPath",            loadPathAP);
-  extendJoyLoL(jInterp, "load",                loadFileAP);
-  extendJoyLoL(jInterp, "lispLoad",            lispLoadFileAP);
-  extendJoyLoL(jInterp, "showLoadExtensions",  showLoadExtensionsAP);
-  extendJoyLoL(jInterp, "showLoadPaths",       showLoadPathsAP);
-  extendJoyLoL(jInterp, "showStack",           showStackAP);
-  extendJoyLoL(jInterp, "showStackOn",         showStackOnAP);
-  extendJoyLoL(jInterp, "showStackOff",        showStackOffAP);
-  extendJoyLoL(jInterp, "tracingOn",           tracingOnAP);
-  extendJoyLoL(jInterp, "tracingOff",          tracingOffAP);
-  extendJoyLoL(jInterp, "verboseOn",           verboseOnAP);
-  extendJoyLoL(jInterp, "verboseOff",          verboseOffAP);
-  extendJoyLoL(jInterp, "debugOn",             debugOnAP);
-  extendJoyLoL(jInterp, "debugOff",            debugOffAP);
-  extendJoyLoL(jInterp, "checkingOn",          checkingOnAP);
-  extendJoyLoL(jInterp, "checkingOff",         checkingOffAP);
+  extendJoyLoLInRoot(jInterp, "isContext",           isContextAP);
+  extendJoyLoLInRoot(jInterp, "definitions",         definitionsAP);
+  extendJoyLoLInRoot(jInterp, "loadExtension",       loadExtensionAP);
+  extendJoyLoLInRoot(jInterp, "loadPath",            loadPathAP);
+  extendJoyLoLInRoot(jInterp, "load",                loadFileAP);
+  extendJoyLoLInRoot(jInterp, "lispLoad",            lispLoadFileAP);
+  extendJoyLoLInRoot(jInterp, "showLoadExtensions",  showLoadExtensionsAP);
+  extendJoyLoLInRoot(jInterp, "showLoadPaths",       showLoadPathsAP);
+  extendJoyLoLInRoot(jInterp, "showStack",           showStackAP);
+  extendJoyLoLInRoot(jInterp, "showStackOn",         showStackOnAP);
+  extendJoyLoLInRoot(jInterp, "showStackOff",        showStackOffAP);
+  extendJoyLoLInRoot(jInterp, "tracingOn",           tracingOnAP);
+  extendJoyLoLInRoot(jInterp, "tracingOff",          tracingOffAP);
+  extendJoyLoLInRoot(jInterp, "verboseOn",           verboseOnAP);
+  extendJoyLoLInRoot(jInterp, "verboseOff",          verboseOffAP);
+  extendJoyLoLInRoot(jInterp, "debugOn",             debugOnAP);
+  extendJoyLoLInRoot(jInterp, "debugOff",            debugOffAP);
+  extendJoyLoLInRoot(jInterp, "checkingOn",          checkingOnAP);
+  extendJoyLoLInRoot(jInterp, "checkingOff",         checkingOffAP);
 }
 \stopCCode

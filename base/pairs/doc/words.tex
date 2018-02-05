@@ -84,13 +84,13 @@ Boolean registerPairWords(
   JoyLoLInterp *jInterp,
   JClass       *theCoAlg
 ) {
-  extendJoyLoL(jInterp, "isPair",        isPairAP);
-  extendJoyLoL(jInterp, "isAtom",        isAtomAP);
-  extendJoyLoL(jInterp, "pop",           popAP);
-  extendJoyLoL(jInterp, "popProcess",    popProcessAP);
-  extendJoyLoL(jInterp, "pop2nd",        pop2ndAP);
-  extendJoyLoL(jInterp, "pop2ndProcess", pop2ndProcessAP);
-  extendJoyLoL(jInterp, "dup",           dupAP);
+  extendJoyLoLInRoot(jInterp, "isPair",        isPairAP);
+  extendJoyLoLInRoot(jInterp, "isAtom",        isAtomAP);
+  extendJoyLoLInRoot(jInterp, "pop",           popAP);
+  extendJoyLoLInRoot(jInterp, "popProcess",    popProcessAP);
+  extendJoyLoLInRoot(jInterp, "pop2nd",        pop2ndAP);
+  extendJoyLoLInRoot(jInterp, "pop2ndProcess", pop2ndProcessAP);
+  extendJoyLoLInRoot(jInterp, "dup",           dupAP);
   
   return TRUE;
 }

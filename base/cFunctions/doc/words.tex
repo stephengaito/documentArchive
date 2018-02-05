@@ -32,7 +32,7 @@ Boolean registerCFunctionWords(
   JClass       *theCoALg
 ) {
   assert(jInterp);
-  extendJoyLoL(jInterp, "isCFunction", isCFunctionAP);
+  extendJoyLoLInRoot(jInterp, "isCFunction", isCFunctionAP);
   
   return TRUE;
 }

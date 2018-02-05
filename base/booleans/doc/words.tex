@@ -514,9 +514,9 @@ Boolean registerBooleanWords(
     createSymbolInThisDictionary(dict, "false");
   false->value = newBoolean(jInterp, FALSE);
 
-  extendJoyLoL(jInterp, "isBoolean", isBooleanAP);
-  extendJoyLoL(jInterp, "ifte",      ifteAP);
-  extendJoyLoL(jInterp, "ifteCont",  ifteContAP);
+  extendJoyLoLInRoot(jInterp, "isBoolean", isBooleanAP);
+  extendJoyLoLInRoot(jInterp, "ifte",      ifteAP);
+  extendJoyLoLInRoot(jInterp, "ifteCont",  ifteContAP);
   
   return TRUE;
 }

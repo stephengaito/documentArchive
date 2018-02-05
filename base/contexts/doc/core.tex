@@ -6,16 +6,42 @@
 \startCHeader
 typedef Boolean (ExtendJoyLoL)(
   JoyLoLInterp *jInterp,
+  DictObj      *aDict,
   Symbol       *definedName,
-  CFunction    *aFunc
+  CFunction    *aFunc,
+  Boolean       redefine
 );
 
-#define extendJoyLoL(jInterp, definedName, aFunc)       \
+#define extendJoyLoL(jInterp, aDict,      \
+  definedName, aFunc, redefine)           \
+  (                                       \
+    assert(getContextsClass(jInterp)      \
+      ->extendJoyLoLFunc),                \
+    (getContextsClass(jInterp)            \
+      ->extendJoyLoLFunc(jInterp, aDict,  \
+        definedName, aFunc, redefine))    \
+  )
+  
+#define extendJoyLoLIn(jInterp, aDict, definedName, aFunc) \
+  extendJoyLoL(jInterp, aDict, definedName, aFunc, FALSE)
+  
+#define reExtendJoyLoLIn(jInterp, aDict, definedName, aFunc) \
+  extendJoyLoL(jInterp, aDict, definedName, aFunc, TRUE)
+  
+#define extendJoyLoLInRoot(jInterp, definedName, aFunc) \
   (                                                     \
-    assert(getContextsClass(jInterp)                    \
-      ->extendJoyLoLFunc),                              \
-    (getContextsClass(jInterp)                          \
-      ->extendJoyLoLFunc(jInterp, definedName, aFunc))  \
+    assert(jInterp),                                    \
+    assert(jInterp->rootCtx),                           \
+    extendJoyLoL(jInterp, jInterp->rootCtx->dict,       \
+      definedName, aFunc, FALSE)                        \
+  )
+  
+#define reExtendJoyLoLInRoot(jInterp, definedName, aFunc) \
+  (                                                       \
+    assert(jInterp),                                      \
+    assert(jInterp->rootCtx),                             \
+    extendJoyLoL(jInterp, jInterp->rootCtx->dict,         \
+      definedName, aFunc, TRUE)                           \
   )
 \stopCHeader
 
@@ -23,8 +49,10 @@ typedef Boolean (ExtendJoyLoL)(
 \startCHeader
 extern Boolean extendJoyLoLImpl(
   JoyLoLInterp *jInterp,
+  DictObj      *aDict,
   Symbol       *definedName,
-  CFunction    *aFunc
+  CFunction    *aFunc,
+  Boolean       redefine
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -32,18 +60,20 @@ extern Boolean extendJoyLoLImpl(
 \startCCode
 Boolean extendJoyLoLImpl(
   JoyLoLInterp *jInterp,
+  DictObj      *aDict,
   Symbol       *definedName,
-  CFunction    *aFunc
+  CFunction    *aFunc,
+  Boolean       redefine
 ) {
-  assert(jInterp);
-  assert(jInterp->rootCtx);
+  assert(aDict);
+
   DictNodeObj* aSym =
-    createSymbolInThisDictionary(
-      jInterp->rootCtx->dict,
-      definedName
-    );
-  aSym->value =
-    (JObj*)newCFunction(jInterp, aFunc);
+    createSymbolInThisDictionary(aDict, definedName);
+
+  if (!aSym->value || redefine) {
+    aSym->value =
+      (JObj*)newCFunction(jInterp, aFunc);
+  }
 
   return TRUE;
 }
@@ -52,16 +82,42 @@ Boolean extendJoyLoLImpl(
 \startCHeader
 typedef Boolean (DefineJoyLoL)(
   JoyLoLInterp *jInterp,
+  DictObj      *aDict,
   Symbol       *definedName,
-  JObj     *aLoL
+  JObj         *aLoL,
+  Boolean       redefine
 );
 
-#define defineJoyLoL(jInterp, definedName, aLoL)      \
-  (                                                   \
-    assert(getContextsClass(jInterp)                  \
-      ->defineJoyLoLFunc),                            \
-    (getContextsClass(jInterp)                        \
-      ->defineJoyLoLFunc(jInterp, definedName, aLoL)) \
+#define defineJoyLoL(jInterp, aDict,      \
+  definedName, aLoL, redefine)            \
+  (                                       \
+    assert(getContextsClass(jInterp)      \
+      ->defineJoyLoLFunc),                \
+    (getContextsClass(jInterp)            \
+      ->defineJoyLoLFunc(jInterp, aDict,  \
+        definedName, aLoL, redefine))     \
+  )
+
+#define defineJoyLoLIn(jInterp, aDict, definedName, aLoL) \
+  defineJoyLoL(jInterp, aDict, definedName, aLoL, FALSE)
+
+#define reDefineJoyLoLIn(jInterp, aDict, definedName, aLoL) \
+  defineJoyLoL(jInterp, aDict, definedName, aLoL, TRUE)
+
+#define defineJoyLoLInRoot(jInterp, definedName, aLoL)  \
+  (                                                     \
+    assert(jInterp),                                    \
+    assert(jInterp->rootCtx),                           \
+    defineJoyLoL(jInterp, jInterp->rootCtx->dict,       \
+      definedName, aLoL, FALSE)                         \
+  )
+
+#define reDefineJoyLoLInRoot(jInterp, definedName, aLoL)  \
+  (                                                       \
+    assert(jInterp),                                      \
+    assert(jInterp->rootCtx),                             \
+    defineJoyLoL(jInterp, jInterp->rootCtx->dict,         \
+      definedName, aLoL, TRUE)                            \
   )
 \stopCHeader
 
@@ -69,8 +125,10 @@ typedef Boolean (DefineJoyLoL)(
 \startCHeader
 extern Boolean defineJoyLoLImpl(
   JoyLoLInterp *jInterp,
+  DictObj      *aDict,
   Symbol       *definedName,
-  JObj     *aLoL
+  JObj         *aLoL,
+  Boolean       redefine
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -78,17 +136,19 @@ extern Boolean defineJoyLoLImpl(
 \startCCode
 Boolean defineJoyLoLImpl(
   JoyLoLInterp *jInterp,
+  DictObj      *aDict,
   Symbol       *definedName,
-  JObj     *aLoL
+  JObj         *aLoL,
+  Boolean       redefine
 ) {
-  assert(jInterp);
-  assert(jInterp->rootCtx);
+  assert(aDict);
+  
   DictNodeObj* aSym =
-    createSymbolInThisDictionary(
-      jInterp->rootCtx->dict,
-      definedName
-    );
-  aSym->value = copyLoL(jInterp, aLoL);
+    createSymbolInThisDictionary(aDict, definedName);
+
+  if (!aSym->value || redefine) {
+    aSym->value = copyLoL(jInterp, aLoL);
+  }
 
   return TRUE;
 }
@@ -97,16 +157,42 @@ Boolean defineJoyLoLImpl(
 \startCHeader
 typedef Boolean (DefineContext)(
   JoyLoLInterp *jInterp,
+  DictObj      *aDict,
   Symbol       *definedName,
-  ContextObj   *newCtx
+  ContextObj   *newCtx,
+  Boolean       redefine
 );
 
-#define defineContext(jInterp, definedName, newCtx)       \
+#define defineContext(jInterp, aDict,     \
+  definedName, newCtx, redefine)          \
+  (                                       \
+    assert(getContextsClass(jInterp)      \
+      ->defineContextFunc),               \
+    (getContextsClass(jInterp)            \
+      ->defineContextFunc(jInterp, aDict, \
+        definedName, newCtx, redefine))   \
+  )
+
+#define defineContextIn(jInterp, aDict, definedName, newCtx)  \
+  defineContext(jInterp, aDict, definedName, newCtx, FALSE)
+
+#define reDefineContextIn(jInterp, aDict, definedName, newCtx)  \
+  defineContext(jInterp, aDict, definedName, newCtx, TRUE)
+
+#define defineContextInRoot(jInterp, definedName, newCtx) \
   (                                                       \
-    assert(getContextsClass(jInterp)                      \
-      ->defineContextFunc),                               \
-    (getContextsClass(jInterp)                            \
-      ->defineContextFunc(jInterp, definedName, newCtx))  \
+    assert(jInterp),                                      \
+    assert(jInterp->rootCtx),                             \
+    defineContext(jInterp, jInterp->rootCtx->dict,        \
+      definedName, newCtx, FALSE)                         \
+  )
+
+#define reDefineContextInRoot(jInterp, definedName, newCtx) \
+  (                                                         \
+    assert(jInterp),                                        \
+    assert(jInterp->rootCtx),                               \
+    defineContext(jInterp, jInterp->rootCtx->dict,          \
+      definedName, newCtx, TRUE)                            \
   )
 \stopCHeader
 
@@ -114,8 +200,10 @@ typedef Boolean (DefineContext)(
 \startCHeader
 extern Boolean defineContextImpl(
   JoyLoLInterp *jInterp,
+  DictObj      *aDict,
   Symbol       *definedName,
-  ContextObj   *newCtx
+  ContextObj   *newCtx,
+  Boolean       redefine
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -123,19 +211,22 @@ extern Boolean defineContextImpl(
 \startCCode
 Boolean defineContextImpl(
   JoyLoLInterp *jInterp,
+  DictObj      *aDict,
   Symbol       *definedName,
-  ContextObj   *newCtx
+  ContextObj   *newCtx,
+  Boolean       redefine
 ) {
-  DEBUG(jInterp, "defineContext %p [%s] %p\n",
-        jInterp, definedName, newCtx);
-  assert(jInterp);
-  assert(jInterp->rootCtx);
+  DEBUG(jInterp, "defineContext %p %p [%s] %p %zu\n",
+        jInterp, aDict, definedName, newCtx, redefine);
+
+  assert(aDict);
+  
   DictNodeObj* aSym =
-    createSymbolInThisDictionary(
-      jInterp->rootCtx->dict,
-      definedName
-    );
-  aSym->value   = (JObj*)newCtx;
+    createSymbolInThisDictionary(aDict, definedName);
+
+  if (!aSym->value || redefine) {
+    aSym->value   = (JObj*)newCtx;
+  }
 
   return TRUE;
 }

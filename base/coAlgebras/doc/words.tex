@@ -32,7 +32,7 @@ Boolean registerCoAlgebraWords(
   JClass       *theCoAlg
 ) {
   assert(jInterp);
-  extendJoyLoL(jInterp, "isCoAlgebra", isCoAlgebraAP);
+  extendJoyLoLInRoot(jInterp, "isCoAlgebra", isCoAlgebraAP);
   return TRUE;
 }
 \stopCCode

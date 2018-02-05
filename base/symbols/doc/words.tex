@@ -47,8 +47,8 @@ Boolean registerSymbolWords(
   JoyLoLInterp *jInterp,
   JClass       *theCoAlg
 ) {
-  extendJoyLoL(jInterp, "isSymbol", isSymbolAP);
-  extendJoyLoL(jInterp, "=Sym",     equalSymbolAP);
+  extendJoyLoLInRoot(jInterp, "isSymbol", isSymbolAP);
+  extendJoyLoLInRoot(jInterp, "=Sym",     equalSymbolAP);
   return TRUE;
 }
 \stopCCode
