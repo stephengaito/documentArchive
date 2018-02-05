@@ -506,11 +506,13 @@ Boolean registerBooleanWords(
   DictObj *dict = rootCtx->dict;
   assert(dict);
   
-  DictNodeObj* true  = createSymbol(dict, "true");
-  true->value        = newBoolean(jInterp, TRUE);
+  DictNodeObj* true  =
+    createSymbolInThisDictionary(dict, "true");
+  true->value = newBoolean(jInterp, TRUE);
 
-  DictNodeObj* false = createSymbol(dict, "false");
-  false->value       = newBoolean(jInterp, FALSE);
+  DictNodeObj* false =
+    createSymbolInThisDictionary(dict, "false");
+  false->value = newBoolean(jInterp, FALSE);
 
   extendJoyLoL(jInterp, "isBoolean", isBooleanAP);
   extendJoyLoL(jInterp, "ifte",      ifteAP);

@@ -38,7 +38,10 @@ Boolean extendJoyLoLImpl(
   assert(jInterp);
   assert(jInterp->rootCtx);
   DictNodeObj* aSym =
-    createSymbol(jInterp->rootCtx->dict, definedName);
+    createSymbolInThisDictionary(
+      jInterp->rootCtx->dict,
+      definedName
+    );
   aSym->value =
     (JObj*)newCFunction(jInterp, aFunc);
 
@@ -81,7 +84,10 @@ Boolean defineJoyLoLImpl(
   assert(jInterp);
   assert(jInterp->rootCtx);
   DictNodeObj* aSym =
-    createSymbol(jInterp->rootCtx->dict, definedName);
+    createSymbolInThisDictionary(
+      jInterp->rootCtx->dict,
+      definedName
+    );
   aSym->value = copyLoL(jInterp, aLoL);
 
   return TRUE;
@@ -125,7 +131,10 @@ Boolean defineContextImpl(
   assert(jInterp);
   assert(jInterp->rootCtx);
   DictNodeObj* aSym =
-    createSymbol(jInterp->rootCtx->dict, definedName);
+    createSymbolInThisDictionary(
+      jInterp->rootCtx->dict,
+      definedName
+    );
   aSym->value   = (JObj*)newCtx;
 
   return TRUE;

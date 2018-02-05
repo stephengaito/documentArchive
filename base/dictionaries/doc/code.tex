@@ -107,6 +107,11 @@ typedef DictNodeObj *(FindSymbol)(
 
 \setCHeaderStream{private}
 \startCHeader
+extern DictNodeObj* findSymbolInThisDictionary(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
 extern DictNodeObj* findSymbolImpl(
   DictObj *aDict,
   Symbol  *aSymbol
@@ -115,13 +120,37 @@ extern DictNodeObj* findSymbolImpl(
 \setCHeaderStream{public}
 
 \startCCode
-DictNodeObj* findSymbolImpl(
+DictNodeObj* findSymbolInThisDictionary(
   DictObj *aDict,
   Symbol  *aSymbol
 ) {
   if (!aSymbol) return NULL;
   assert(aDict);
   return findSymbolRecurse(aDict, aDict->root, aSymbol);
+}
+
+DictNodeObj* findSymbolImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  if (!aSymbol) return NULL;
+  while (aDict) {
+    //
+    // Look for this symbol in this naming scope
+    //
+    DictNodeObj *aDictNode = 
+      findSymbolRecurse(aDict, aDict->root, aSymbol);
+    if (aDictNode) return aDictNode;
+    //
+    // We have not found this symbol in this naming scope
+    // so look in the parent's naming scope
+    //
+    aDict = aDict->parent;
+  }
+  //
+  // Alas, we have not found this symbol in any naming scope
+  //
+  return NULL;
 }
 \stopCCode
 \stopTestSuite
@@ -216,24 +245,24 @@ DictNodeObj* findLUBSymbolImpl(
 \startTestSuite[createSymbol]
 
 \startCHeader
-typedef DictNodeObj *(CreateSymbol)(
+typedef DictNodeObj *(CreateSymbolInThisDictionary)(
   DictObj *aDict,
   Symbol  *aSymbol
 );
 
-#define createSymbol(aDict, aSymbol)            \
-  (                                             \
-    assert(aDict),                              \
-    assert(getDictionariesClass(aDict->jInterp) \
-      ->createSymbolFunc),                      \
-    (getDictionariesClass(aDict->jInterp)       \
-      ->createSymbolFunc(aDict, aSymbol))       \
+#define createSymbolInThisDictionary(aDict, aSymbol)      \
+        (                                                 \
+    assert(aDict),                                        \
+    assert(getDictionariesClass(aDict->jInterp)           \
+      ->createSymbolInThisDictionaryFunc),                \
+    (getDictionariesClass(aDict->jInterp)                 \
+      ->createSymbolInThisDictionaryFunc(aDict, aSymbol)) \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictNodeObj* createSymbolImpl(
+extern DictNodeObj* createSymbolInThisDictionaryImpl(
   DictObj *aDict,
   Symbol  *aSymbol
 );
@@ -241,16 +270,17 @@ extern DictNodeObj* createSymbolImpl(
 \setCHeaderStream{public}
 
 \startCCode
-DictNodeObj* createSymbolImpl(
+DictNodeObj* createSymbolInThisDictionaryImpl(
   DictObj *aDict,
   Symbol  *aSymbol
 ) {
   assert(aDict);
   if (!aSymbol) return NULL;
-  DictNodeObj* aSym = findSymbol(aDict, aSymbol);
+  DictNodeObj* aSym =
+    findSymbolInThisDictionary(aDict, aSymbol);
   if (!aSym) {
     aDict->root = insertSymbol(aDict, aSymbol);
-    aSym = findSymbol(aDict, aSymbol);
+    aSym = findSymbolInThisDictionary(aDict, aSymbol);
   }
   return aSym;
 }
@@ -290,7 +320,10 @@ JObj* getSymbolImpl(
   Symbol  *aSymbol
 ) {
   assert(aDict);
-  DictNodeObj* aSym = createSymbol(aDict, aSymbol);
+  DictNodeObj* aSym = findSymbol(aDict, aSymbol);
+  if (!aSym) {
+    aSym = createSymbolInThisDictionary(aDict, aSymbol);
+  }
   return newSymbol(aDict->jInterp, aSym->symbol);
 }
 \stopCCode
@@ -450,7 +483,8 @@ Boolean printDictionaryCoAlg(
 typedef struct dictionaries_class_struct {
   JClass           super;
   NewDictionary   *newDictionaryFunc;
-  CreateSymbol    *createSymbolFunc;
+  CreateSymbolInThisDictionary
+                  *createSymbolInThisDictionaryFunc;
   GetSymbol       *getSymbolFunc;
   FindSymbol      *findSymbolFunc;
   InsertSymbol    *insertSymbolFunc;
@@ -492,13 +526,14 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   theCoAlg->super.registerFunc   = registerDictionaryWords;
   theCoAlg->super.equalityFunc   = equalityDictionaryCoAlg;
   theCoAlg->super.printFunc      = printDictionaryCoAlg;
-  theCoAlg->newDictionaryFunc = newDictionaryImpl;
-  theCoAlg->createSymbolFunc      = createSymbolImpl;
-  theCoAlg->getSymbolFunc         = getSymbolImpl;
-  theCoAlg->findSymbolFunc        = findSymbolImpl;
-  theCoAlg->insertSymbolFunc      = insertSymbolImpl;
-  theCoAlg->findLUBSymbolFunc     = findLUBSymbolImpl;
-  theCoAlg->listDefinitionsFunc   = listDefinitionsImpl;  
+  theCoAlg->newDictionaryFunc    = newDictionaryImpl;
+  theCoAlg->createSymbolInThisDictionaryFunc =
+    createSymbolInThisDictionaryImpl;
+  theCoAlg->getSymbolFunc        = getSymbolImpl;
+  theCoAlg->findSymbolFunc       = findSymbolImpl;
+  theCoAlg->insertSymbolFunc     = insertSymbolImpl;
+  theCoAlg->findLUBSymbolFunc    = findLUBSymbolImpl;
+  theCoAlg->listDefinitionsFunc  = listDefinitionsImpl;  
   size_t tag =
     registerJClass(jInterp, (JClass*)theCoAlg);
   

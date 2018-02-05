@@ -306,7 +306,10 @@ void nextSymbolImpl(
     assert(aText->jInterp->rootCtx);
     assert(aText->jInterp->rootCtx->dict);
     DictNodeObj* aSym =
-      createSymbol(aText->jInterp->rootCtx->dict, aSymbol);
+      createSymbolInThisDictionary(
+        aText->jInterp->rootCtx->dict,
+        aSymbol
+      );
     aText->sym = newSymbol(aText->jInterp, aSym->symbol);
     //
     DEBUG(aText->jInterp, "<-nextSymbol [%s] (symbol)\n",
