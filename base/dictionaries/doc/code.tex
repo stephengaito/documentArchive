@@ -153,6 +153,48 @@ DictNodeObj* findSymbolImpl(
   return NULL;
 }
 \stopCCode
+
+\startTestCase[should find symbols in parent dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  DictObj* parentDict = newDictionary(jInterp, NULL);
+  AssertPtrNotNull(parentDict);
+  AssertPtrNull(parentDict->parent);
+  DictObj* childDict  = newDictionary(jInterp, parentDict);
+  AssertPtrNotNull(childDict);
+  AssertPtrNotNull(childDict->parent);
+  AssertPtrEquals(childDict->parent, parentDict);
+  //
+  DictNodeObj* parentSym = findSymbol(childDict, "test");
+  AssertPtrNull(parentSym);
+  //
+  parentSym = 
+    createSymbolInThisDictionary(parentDict, "test");
+  AssertPtrNotNull(parentSym);
+  AssertStrEquals(parentSym->symbol, "test");
+  //
+  DictNodeObj* testSym = findSymbol(childDict, "test");
+  AssertPtrNotNull(testSym);
+  AssertPtrEquals(testSym, parentSym);
+  //
+  DictNodeObj* childSym =
+    createSymbolInThisDictionary(childDict, "test");
+  AssertPtrNotNull(childSym);
+  AssertPtrNotEquals(parentSym, childSym);
+  AssertStrEquals(childSym->symbol, "test");
+  //
+  testSym = findSymbol(childDict, "test");
+  AssertPtrNotNull(testSym);
+  AssertPtrEquals(testSym, childSym);
+  AssertPtrNotEquals(testSym, parentSym);
+  //
+  testSym = findSymbol(parentDict, "test");
+  AssertPtrNotNull(testSym);
+  AssertPtrNotEquals(testSym, childSym);
+  AssertPtrEquals(testSym, parentSym);
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[insertSymbol]
