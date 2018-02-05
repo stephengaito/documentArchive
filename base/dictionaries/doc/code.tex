@@ -12,6 +12,7 @@
 typedef struct dictionary_object_struct {
   JObj          super;
   JoyLoLInterp *jInterp;
+  DictObj      *parent;
   DictNodeObj  *root;
   DictNodeObj  *firstSymbol;
 } DictObj;
@@ -23,31 +24,32 @@ typedef struct dictionary_object_struct {
 
 \startCHeader
 typedef DictObj* (NewDictionary)(
-  JoyLoLInterp*
+  JoyLoLInterp *jInterp,
+  DictObj      *parent
 );
 
-#define newDictionary(jInterp)            \
-  (                                       \
-    assert(getDictionariesClass(jInterp)  \
-      ->newDictionaryFunc),               \
-    (getDictionariesClass(jInterp)        \
-      ->newDictionaryFunc(jInterp))       \
+#define newDictionary(jInterp, parent)      \
+  (                                         \
+    assert(getDictionariesClass(jInterp)    \
+      ->newDictionaryFunc),                 \
+    (getDictionariesClass(jInterp)          \
+      ->newDictionaryFunc(jInterp, parent)) \
   )
-
-//#define asDictionary(aLoL) (((aLoL)->flags) & BOOLEAN_FLAG_MASK)
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
 extern DictObj* newDictionaryImpl(
-  JoyLoLInterp *jInterp
+  JoyLoLInterp *jInterp,
+  DictObj      *parent
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 DictObj* newDictionaryImpl(
-  JoyLoLInterp *jInterp
+  JoyLoLInterp *jInterp,
+  DictObj      *parent
 ) {
   assert(jInterp);
   assert(jInterp->coAlgs);
@@ -55,6 +57,7 @@ DictObj* newDictionaryImpl(
   DictObj* result =
     (DictObj*)newObject(jInterp, DictionariesTag);
   result->jInterp     = jInterp;
+  result->parent      = parent;
   result->root        = NULL;
   result->firstSymbol = NULL;
   assert(result);
@@ -70,9 +73,10 @@ DictObj* newDictionaryImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  JObj* aNewDictionary = newDictionary(jInterp);
+  JObj* aNewDictionary = newDictionary(jInterp, NULL);
   AssertPtrNotNull(aNewDictionary);
   AssertPtrEquals(aNewDictionary->jInterp, jInterp);
+  AssertPtrNull(aNewDictionary->parent);
   AssertPtrNull(aNewDictionary->root);
   AssertPrtNull(aNewDictionary->firstSymbol);
   AssertPtrNotNull(asType(aNewDictionary));
@@ -344,7 +348,7 @@ void listDefinitionsImpl(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
 
-  DictObj* aLoL = newDictionary(jInterp);
+  DictObj* aLoL = newDictionary(jInterp, NULL);
   AssertPtrNotNull(aLoL);
   printLoL(jInterp, aStrBuf, (JObj*)aLoL);
   AssertStrEquals(getCString(jInterp, aStrBuf), "dictionary ");
@@ -431,7 +435,7 @@ Boolean printDictionaryCoAlg(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  DictObj* aNewDictionary = newDictionary(jInterp);
+  DictObj* aNewDictionary = newDictionary(jInterp, NULL);
   AssertPtrNotNull(aNewDictionary);
   printLoL(jInterp, aStrBuf, (JObj*)aNewDictionary);
   AssertStrEquals(getCString(jInterp, aStrBuf), "dictionary ");

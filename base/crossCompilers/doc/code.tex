@@ -59,7 +59,7 @@ CrossCompilerObj* newCrossCompilerImpl(
   assert(result);
   
   result->type = strdup(aType);
-  result->dict         = newDictionary(jInterp);
+  result->dict         = newDictionary(jInterp, NULL);
   
   result->super.type   = jInterp->coAlgs[CrossCompilersTag];
  

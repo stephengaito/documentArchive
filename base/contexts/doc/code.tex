@@ -250,7 +250,7 @@ static Boolean initializeContexts(
   assert(jInterp);
   assert(aJClass);
   if (!jInterp->rootCtx) {
-    DictObj* aDict = newDictionary(jInterp);
+    DictObj* aDict = newDictionary(jInterp, NULL);
     jInterp->rootCtx =
       newContext(jInterp, "joylol", NULL, aDict, NULL, NULL);
   }

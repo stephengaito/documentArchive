@@ -156,7 +156,7 @@ DictNodeObj* insertSymbolRecurseImpl(
 \startTestCase[should insert Symbol In Dictionary]
 \startCTest
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
   
   DictNodeObj* aSimpleDic = newDictNode(jInterp, "aNodeSymbol");
   DictNodeObj* aNewDic = insertSymbolRecurse(aDict, aSimpleDic, "aNodeSymbol");
@@ -179,7 +179,7 @@ DictNodeObj* insertSymbolRecurseImpl(
   DEBUG(jInterp, "\n%s insert many symbols %s", "---------", "---------");
 
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
 
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
@@ -284,7 +284,7 @@ DictNodeObj* insertSymbolRecurseImpl(
   DEBUG(jInterp, "\n%s should invoke an LL %s\n", "---------", "---------");
 
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
 
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
@@ -316,7 +316,7 @@ DictNodeObj* insertSymbolRecurseImpl(
   DEBUG(jInterp, "\n%s should invoke an RR %s\n", "---------", "---------");
 
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
 
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
@@ -355,7 +355,7 @@ DictNodeObj* insertSymbolRecurseImpl(
   DEBUG(jInterp, "\n%s should invoke an LR %s\n", "---------", "---------");
 
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
 
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
@@ -388,7 +388,7 @@ DictNodeObj* insertSymbolRecurseImpl(
   DEBUG(jInterp, "\n%s should invoke an RL %s\n", "---------", "---------");
 
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
 
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
@@ -421,7 +421,7 @@ DictNodeObj* insertSymbolRecurseImpl(
   srand(time(NULL));
 
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
 
   DictNodeObj* avlDic = newDictNode(jInterp,"0");
   aDict->root         = avlDic;
@@ -446,7 +446,7 @@ DictNodeObj* insertSymbolRecurseImpl(
 \startTestCase[should insert Symbol linearly]
 \startCTest
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
 
   DictNodeObj* avlDic = newDictNode(jInterp,"10");
   aDict->root         = avlDic;
