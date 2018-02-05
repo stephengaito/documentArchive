@@ -467,6 +467,38 @@ static void newContextAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
+static void defineNamingAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataInto(aCtx, dictionaryName);
+  if (!isSymbol(dictionaryName)) {
+    raiseException(aCtx,
+      "defineNaming required a symbol as top");
+    return;
+  }
+  DictObj* newDict =
+    newDictionary(jInterp, aCtx->dict);
+  assert(newDict);
+  defineNamingInRoot(jInterp, asSymbol(dictionaryName), newDict);
+}
+\stopCCode
+
+\startCCode
+static void newNamingAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  DictObj* newDict =
+    newDictionary(jInterp, aCtx->dict);
+  assert(newDict);
+  pushCtxData(aCtx, (JObj*)newDict);
+}
+\stopCCode
+
+\startCCode
 void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "fail",                failAP);
   extendJoyLoLInRoot(jInterp, "i",                   interpretAP);
@@ -479,6 +511,8 @@ void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "defineContext",       defineContextAP);
   extendJoyLoLInRoot(jInterp, "thisContext",         newContextAP);
   extendJoyLoLInRoot(jInterp, "newContext",          newContextAP);
+  extendJoyLoLInRoot(jInterp, "defineNaming",        defineNamingAP);
+  extendJoyLoLInRoot(jInterp, "newNaming",           newNamingAP);
   extendJoyLoLInRoot(jInterp, "done",                doneAP);
   extendJoyLoLInRoot(jInterp, "clear",               clearContextAP);
   extendJoyLoLInRoot(jInterp, "try",                 tryAP);

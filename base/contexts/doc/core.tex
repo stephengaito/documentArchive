@@ -231,3 +231,81 @@ Boolean defineContextImpl(
   return TRUE;
 }
 \stopCCode
+
+\startCHeader
+typedef Boolean (DefineNaming)(
+  JoyLoLInterp *jInterp,
+  DictObj      *aDict,
+  Symbol       *definedName,
+  DictObj      *newDict,
+  Boolean       redefine
+);
+
+#define defineNaming(jInterp, aDict,      \
+  definedName, newCtx, redefine)          \
+  (                                       \
+    assert(getContextsClass(jInterp)      \
+      ->defineNamingFunc),                \
+    (getContextsClass(jInterp)            \
+      ->defineNamingFunc(jInterp, aDict,  \
+        definedName, newDict, redefine))  \
+  )
+
+#define defineNamingIn(jInterp, aDict, definedName, newDict)  \
+  defineContext(jInterp, aDict, definedName, newDict, FALSE)
+
+#define reDefineNamingIn(jInterp, aDict, definedName, newDict)  \
+  defineContext(jInterp, aDict, definedName, newDict, TRUE)
+
+#define defineNamingInRoot(jInterp, definedName, newDict) \
+  (                                                       \
+    assert(jInterp),                                      \
+    assert(jInterp->rootCtx),                             \
+    defineNaming(jInterp, jInterp->rootCtx->dict,         \
+      definedName, newDict, FALSE)                        \
+  )
+
+#define reDefineNamingInRoot(jInterp, definedName, newDict) \
+  (                                                         \
+    assert(jInterp),                                        \
+    assert(jInterp->rootCtx),                               \
+    defineNaming(jInterp, jInterp->rootCtx->dict,           \
+      definedName, newDict, TRUE)                           \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean defineNamingImpl(
+  JoyLoLInterp *jInterp,
+  DictObj      *aDict,
+  Symbol       *definedName,
+  DictObj      *newDict,
+  Boolean       redefine
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean defineNamingImpl(
+  JoyLoLInterp *jInterp,
+  DictObj      *aDict,
+  Symbol       *definedName,
+  DictObj      *newDict,
+  Boolean       redefine
+) {
+  DEBUG(jInterp, "defineNaming %p %p [%s] %p %zu\n",
+        jInterp, aDict, definedName, newDict, redefine);
+
+  assert(aDict);
+  
+  DictNodeObj* aSym =
+    createSymbolInThisDictionary(aDict, definedName);
+
+  if (!aSym->value || redefine) {
+    aSym->value   = (JObj*)newDict;
+  }
+
+  return TRUE;
+}
+\stopCCode
