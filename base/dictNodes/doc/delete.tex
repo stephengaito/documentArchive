@@ -56,6 +56,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
 
   int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
   if (aStrCmp < 0) {
+    printf("start delete left\n");
     // aSymbol < anAVLNode->symbol // delete from LEFT subtree
     if (jInterp->debug) {
       printDicInto(jInterp, aStrBuf, anAVLNode);
@@ -65,22 +66,9 @@ DictNodeObj* deleteSymbolRecurseImpl(
             getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
     }
-    DictNodeObj* leftResult =
+
+    anAVLNode->left =
       deleteSymbolRecurse(aDict, anAVLNode->left, aSymbol);
-//    if (!anAVLNode->left) {
-//      // we have deleted a node ...
-//      // ... delete this node from the doubly linked list
-//      //
-//      DictNodeObj* oldPrevious           = anAVLNode->previous;
-//      assert(aDict->firstSymbol);
-//      if (oldPrevious) oldPrevious->next = leftResult;
-//      else aDict->firstSymbol            = leftResult;
-//      leftResult->next                   = anAVLNode;
-//      leftResult->previous               = oldPrevious;
-//      anAVLNode->previous                = leftResult;
-//      //
-//    }
-    anAVLNode->left = leftResult;
     reCalculateAVLNodeHeightBalance(anAVLNode);
     if (jInterp->debug) {
       printDicInto(jInterp, aStrBuf, anAVLNode);
@@ -101,7 +89,9 @@ DictNodeObj* deleteSymbolRecurseImpl(
         anAVLNode = rotateRightLeft(aDict, anAVLNode);
       }
     }
+    printf("stop delete left\n");
   } else if (0 < aStrCmp) {
+    printf("start delete right\n");
     // aSymbol > anAVLNode->symbol // delete in RIGHT subtree
     if (jInterp->debug) {
       printDicInto(jInterp, aStrBuf, anAVLNode);
@@ -111,20 +101,8 @@ DictNodeObj* deleteSymbolRecurseImpl(
           getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
     }
-    DictNodeObj* rightResult =
+    anAVLNode->right =
       deleteSymbolRecurse(aDict, anAVLNode->right, aSymbol);
-//    if (!anAVLNode->right) {
-//      // we have deleted a node ...
-//      // ... delete this node from the doubly linked list
-//      //
-//      DictNodeObj* oldNext           = anAVLNode->next;
-//      if (oldNext) oldNext->previous = rightResult;
-//      rightResult->previous          = anAVLNode;
-//      rightResult->next              = oldNext;
-//      anAVLNode->next                = rightResult;
-//      //
-//    }
-    anAVLNode->right = rightResult;
     reCalculateAVLNodeHeightBalance(anAVLNode);
     if (jInterp->debug) {
       printDicInto(jInterp, aStrBuf, anAVLNode);
@@ -145,33 +123,23 @@ DictNodeObj* deleteSymbolRecurseImpl(
         anAVLNode = rotateLeftRight(aDict, anAVLNode);
       }
     }
+    printf("stop delete right\n");
   } else {
+    printf("start delete equals\n");
+    //
     // aSymbol == anAVLNode->symbol
-    // we need to find the next node greater than this one (gtNode)
-    // copy it(gtNode) to this node
-    // and then delete it(gtNode) from right branch of this node
+    //
     DEBUG(jInterp,"symols equal <%s>[%s]\n",
           anAVLNode->symbol, aSymbol);
-    if (anAVLNode->right) {
-      DictNodeObj *gtNode = anAVLNode->right;
-      while ( gtNode->left ) {
-        gtNode = gtNode->left;
-      }
-      copyDictNodeFromTo(jInterp, gtNode, anAVLNode);
-      DictNodeObj* rightResult =
+    if (anAVLNode->next) {
+      //
+      // there is a next node... make it this node
+      // and fix up doubly linked list...
+      //
+      copyDictNodeFromTo(jInterp, anAVLNode->next, anAVLNode);
+      anAVLNode->next = anAVLNode->next->next;
+      anAVLNode->right =
         deleteSymbolRecurse(aDict, anAVLNode->right, anAVLNode->symbol);
-//     if (!anAVLNode->right) {
-//        // we have deleted a node ...
-//        // ... delete this node from the doubly linked list
-//        //
-//        DictNodeObj* oldNext           = anAVLNode->next;
-//        if (oldNext) oldNext->previous = rightResult;
-//        rightResult->previous          = anAVLNode;
-//        rightResult->next              = oldNext;
-//        anAVLNode->next                = rightResult;
-//        //
-//      }
-      anAVLNode->right = rightResult;
       reCalculateAVLNodeHeightBalance(anAVLNode);
       if (jInterp->debug) {
         printDicInto(jInterp, aStrBuf, anAVLNode);
@@ -193,8 +161,18 @@ DictNodeObj* deleteSymbolRecurseImpl(
         }
       }
     } else {
+      //
+      // there is NO next node...
+      // unlink this node from the doubly linked list...
+      //
+      DictNodeObj* oldPrevious           = anAVLNode->previous;
+      assert(aDict->firstSymbol);
+      if (oldPrevious) oldPrevious->next = NULL;
+      else aDict->firstSymbol            = NULL;
+      printf("return delete equals\n");
       return anAVLNode->left;
     }
+    printf("stop delete equals\n");
   }
 
   reCalculateAVLNodeHeightBalance(anAVLNode);
@@ -370,15 +348,41 @@ DictNodeObj* deleteSymbolRecurseImpl(
 
   for (int i = 0; i < 1000; i++) {
     char itoa[100];
-    sprintf(itoa, "%d", rand() % 100);
+    sprintf(itoa, "%03d", rand() % 100);
     avlDic = insertSymbolRecurse(aDict, avlDic, itoa);
   }
+  avlDic = insertSymbolRecurse(aDict, avlDic, "0");
+  avlDic = insertSymbolRecurse(aDict, avlDic, "100");
   checkAVLNode(jInterp, avlDic);
 
+  DictNodeObj *aNode = findSymbolRecurse(aDict, avlDic, "0");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "0");
+  AssertPtrEquals(aDict->firstSymbol, aNode);
+  
+  aNode = findSymbolRecurse(aDict, avlDic, "100");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "100");
+  aNode = aDict->firstSymbol;
+  while (aNode->next) aNode = aNode->next;
+  AssertStrEquals(aNode->symbol, "100");
+  
   for (int i = 0; i < 1000; i++) {
     char itoa[100];
-    sprintf(itoa, "%d", rand() % 100);
+    int randNum = rand() % 100;
+    //
+    if (randNum == 0 || randNum == 100) continue;
+    //
+    sprintf(itoa, "%03d", randNum);
+    printf("\ndeleting: %s\n", itoa);
     avlDic = deleteSymbolRecurse(aDict, avlDic, itoa);
+    DictNodeObj *aNode = aDict->firstSymbol;
+    AssertStrEquals(aNode->symbol, "0");
+    while (aNode->next) {
+      AssertStrNotEquals(aNode->symbol, itoa);
+      aNode = aNode->next;
+    }
+    AssertStrEquals(aNode->symbol, "100");    
     checkAVLNode(jInterp, avlDic);
   }
   

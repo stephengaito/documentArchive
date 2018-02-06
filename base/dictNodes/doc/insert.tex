@@ -429,11 +429,28 @@ DictNodeObj* insertSymbolRecurseImpl(
 
   for (int i = 0; i < 1000; i++) {
     char itoa[100];
-    sprintf(itoa, "%d", rand() % 100);
+    sprintf(itoa, "%03d", rand() % 100);
     avlDic = insertSymbolRecurse(aDict, avlDic, itoa);
   }
+  DictNodeObj *aNode = findSymbolRecurse(aDict, avlDic, "0");
+  if (!aNode) avlDic = insertSymbolRecurse(aDict, avlDic, "0");
+  aNode = findSymbolRecurse(aDict, avlDic, "100");
+  if (!aNode) avlDic = insertSymbolRecurse(aDict, avlDic, "100");
   checkAVLNode(jInterp, avlDic);
 
+  aNode = findSymbolRecurse(aDict, avlDic, "0");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "0");
+  AssertPtrEquals(aDict->firstSymbol, aNode);
+  
+  aNode = findSymbolRecurse(aDict, avlDic, "100");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "100");
+  aNode = aDict->firstSymbol;
+  while (aNode->next) aNode = aNode->next;
+  AssertStrEquals(aNode->symbol, "100");
+  checkAVLNode(jInterp, avlDic);
+  
 //  StringBufferObj* aStrBuf = newStringBuffer(jInterp);
 //  printDictInto(aStrBuf, avlDic);
 //  printf("%s\n", getCString(jInterp, aStrBuf));
@@ -454,7 +471,7 @@ DictNodeObj* insertSymbolRecurseImpl(
 
   for (int i = 10; i < 100; i++) {
     char itoa[100];
-    sprintf(itoa, "%d", i);
+    sprintf(itoa, "%03d", i);
     avlDic = insertSymbolRecurse(aDict, avlDic, itoa);
   }
   checkAVLNode(jInterp, avlDic);
