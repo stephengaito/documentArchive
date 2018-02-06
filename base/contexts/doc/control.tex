@@ -41,6 +41,46 @@ static void failAP(ContextObj* aCtx) {
 \subsection[title=Combinators]
 
 \startCCode
+static void extractAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  prependListCtxData(aCtx, top);
+}
+\stopCCode
+
+\starttyping
+
+\startWord[extract]
+
+\preDataStack
+  (
+    top : list
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preConditions
+  (top isFinite)
+\stopPreStack
+
+\postDataStack
+  (
+    top (prepended)
+    dataStack
+  )
+\postProcessStack
+  (
+    processStack
+  )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
+\startCCode
 static void interpretAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   prependListCtxProcess(aCtx, top);
@@ -565,6 +605,7 @@ static void newNamingAP(ContextObj* aCtx) {
 \startCCode
 void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "fail",                failAP);
+  extendJoyLoLInRoot(jInterp, "extract",             extractAP);
   extendJoyLoLInRoot(jInterp, "i",                   interpretAP);
   extendJoyLoLInRoot(jInterp, "interpret",           interpretAP);
   extendJoyLoLInRoot(jInterp, "for",                 forAP);
