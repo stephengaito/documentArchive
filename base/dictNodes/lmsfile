@@ -9,6 +9,7 @@ lpTargets = litProgs.targets{
     'code.tex',
     'find.tex',
     'insert.tex',
+    'delete.tex',
     'rotate.tex',
     'check.tex',
     'lua.tex',

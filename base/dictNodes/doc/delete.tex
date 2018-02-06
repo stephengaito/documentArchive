@@ -1,0 +1,393 @@
+% A ConTeXt document [master document: dictNodes.tex]
+
+\section[title=Delete]
+
+\startTestSuite[deleteSymbol]
+
+\setCHeaderStream{public}
+\startCHeader
+typedef DictNodeObj *(DeleteSymbolRecurse)(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
+);
+
+#define deleteSymbolRecurse(aDict, anAVLNode, aSymbol)      \
+  (                                                         \
+    assert(aDict),                                          \
+    assert(getDictNodesClass(aDict->jInterp)                \
+      ->deleteSymbolRecurseFunc),                           \
+    (getDictNodesClass(aDict->jInterp)                      \
+      ->deleteSymbolRecurseFunc(aDict, anAVLNode, aSymbol)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern DictNodeObj* deleteSymbolRecurseImpl(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+DictNodeObj* deleteSymbolRecurseImpl(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+  
+  if (!anAVLNode) return NULL;
+
+  StringBufferObj *aStrBuf = 
+    (jInterp->debug ? newStringBuffer(jInterp) : NULL);
+
+  DEBUG(jInterp, "\ndeleteSymbol %p <%s>[%s] %ld:%zu\n",
+        anAVLNode, anAVLNode->symbol, aSymbol,
+        anAVLNode->balance, anAVLNode->height);
+
+  DEBUG(jInterp, "deleteSymbol strncmp %d\n",
+        strcmp(aSymbol, anAVLNode->symbol));
+
+  int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
+  if (aStrCmp < 0) {
+    // aSymbol < anAVLNode->symbol // delete from LEFT subtree
+    if (jInterp->debug) {
+      printDicInto(jInterp, aStrBuf, anAVLNode);
+      DEBUG(jInterp, ">-delete LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+            anAVLNode, aSymbol, anAVLNode->balance,
+            anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+            getCString(jInterp, aStrBuf));
+      strBufClose(jInterp, aStrBuf);
+    }
+    DictNodeObj* leftResult =
+      deleteSymbolRecurse(aDict, anAVLNode->left, aSymbol);
+//    if (!anAVLNode->left) {
+//      // we have deleted a node ...
+//      // ... delete this node from the doubly linked list
+//      //
+//      DictNodeObj* oldPrevious           = anAVLNode->previous;
+//      assert(aDict->firstSymbol);
+//      if (oldPrevious) oldPrevious->next = leftResult;
+//      else aDict->firstSymbol            = leftResult;
+//      leftResult->next                   = anAVLNode;
+//      leftResult->previous               = oldPrevious;
+//      anAVLNode->previous                = leftResult;
+//      //
+//    }
+    anAVLNode->left = leftResult;
+    reCalculateAVLNodeHeightBalance(anAVLNode);
+    if (jInterp->debug) {
+      printDicInto(jInterp, aStrBuf, anAVLNode);
+      DEBUG(jInterp, "<-delete LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(jInterp, aStrBuf));
+      strBufClose(jInterp, aStrBuf);
+    }
+    //
+    if (anAVLNode->balance < -2) {
+      if (
+        anAVLNode->right && 
+        strcmp(aSymbol, anAVLNode->right->symbol) < 0
+      ) {
+        anAVLNode = rotateRightRight(aDict, anAVLNode);
+      } else {
+        anAVLNode = rotateRightLeft(aDict, anAVLNode);
+      }
+    }
+  } else if (0 < aStrCmp) {
+    // aSymbol > anAVLNode->symbol // delete in RIGHT subtree
+    if (jInterp->debug) {
+      printDicInto(jInterp, aStrBuf, anAVLNode);
+      DEBUG(jInterp, ">-delete RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(jInterp, aStrBuf));
+      strBufClose(jInterp, aStrBuf);
+    }
+    DictNodeObj* rightResult =
+      deleteSymbolRecurse(aDict, anAVLNode->right, aSymbol);
+//    if (!anAVLNode->right) {
+//      // we have deleted a node ...
+//      // ... delete this node from the doubly linked list
+//      //
+//      DictNodeObj* oldNext           = anAVLNode->next;
+//      if (oldNext) oldNext->previous = rightResult;
+//      rightResult->previous          = anAVLNode;
+//      rightResult->next              = oldNext;
+//      anAVLNode->next                = rightResult;
+//      //
+//    }
+    anAVLNode->right = rightResult;
+    reCalculateAVLNodeHeightBalance(anAVLNode);
+    if (jInterp->debug) {
+      printDicInto(jInterp, aStrBuf, anAVLNode);
+      DEBUG(jInterp, "<-delete RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(jInterp, aStrBuf));
+      strBufClose(jInterp, aStrBuf);
+    }
+    //
+    if (2 < anAVLNode->balance) {
+      if (
+        anAVLNode->left &&
+        strcmp(aSymbol, anAVLNode->left->symbol) > 0
+      ) {
+        anAVLNode = rotateLeftLeft(aDict, anAVLNode);
+      } else {
+        anAVLNode = rotateLeftRight(aDict, anAVLNode);
+      }
+    }
+  } else {
+    // aSymbol == anAVLNode->symbol
+    // we need to find the next node greater than this one (gtNode)
+    // copy it(gtNode) to this node
+    // and then delete it(gtNode) from right branch of this node
+    DEBUG(jInterp,"symols equal <%s>[%s]\n",
+          anAVLNode->symbol, aSymbol);
+    if (anAVLNode->right) {
+      DictNodeObj *gtNode = anAVLNode->right;
+      while ( gtNode->left ) {
+        gtNode = gtNode->left;
+      }
+      copyDictNodeFromTo(jInterp, gtNode, anAVLNode);
+      DictNodeObj* rightResult =
+        deleteSymbolRecurse(aDict, anAVLNode->right, anAVLNode->symbol);
+//     if (!anAVLNode->right) {
+//        // we have deleted a node ...
+//        // ... delete this node from the doubly linked list
+//        //
+//        DictNodeObj* oldNext           = anAVLNode->next;
+//        if (oldNext) oldNext->previous = rightResult;
+//        rightResult->previous          = anAVLNode;
+//        rightResult->next              = oldNext;
+//        anAVLNode->next                = rightResult;
+//        //
+//      }
+      anAVLNode->right = rightResult;
+      reCalculateAVLNodeHeightBalance(anAVLNode);
+      if (jInterp->debug) {
+        printDicInto(jInterp, aStrBuf, anAVLNode);
+        DEBUG(jInterp, "<-delete RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+            anAVLNode, aSymbol, anAVLNode->balance,
+            anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+            getCString(jInterp, aStrBuf));
+        strBufClose(jInterp, aStrBuf);
+      }
+      //
+      if (2 < anAVLNode->balance) {
+        if (
+          anAVLNode->left &&
+          strcmp(aSymbol, anAVLNode->left->symbol) > 0
+          ) {
+          anAVLNode = rotateLeftLeft(aDict, anAVLNode);
+        } else {
+          anAVLNode = rotateLeftRight(aDict, anAVLNode);
+        }
+      }
+    } else {
+      return anAVLNode->left;
+    }
+  }
+
+  reCalculateAVLNodeHeightBalance(anAVLNode);
+  return anAVLNode;
+}
+\stopCCode
+
+\startTestCase[should delete Symbols from simple Dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+  
+  DictNodeObj* aSimpleDic = newDictNode(jInterp, "20");
+  aDict->root             = aSimpleDic;
+  aDict->firstSymbol      = aSimpleDic;
+
+  DictNodeObj* aNewDic = insertSymbolRecurse(aDict, aSimpleDic, "15");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic);
+  AssertStrEquals(getCString(jInterp, aStrBuf),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  ) ");
+  strBufClose(jInterp, aStrBuf);
+  //
+  // test insertion on the left into doubly linked list
+  //
+  AssertPtrNotNull(aNewDic->previous);
+  AssertPtrNull(aNewDic->next);
+  AssertPtrEquals(aDict->firstSymbol, aNewDic->previous);
+  AssertPtrEquals(aDict->firstSymbol->next, aNewDic);
+  AssertPtrNull(aDict->firstSymbol->previous);
+  AssertPtrNull(aNewDic->next);
+
+  // should invoke an LL
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "10");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic);
+  AssertStrEquals(getCString(jInterp, aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  ) ");
+  strBufClose(jInterp, aStrBuf);
+  //
+  // test insertion on the right into doubly linked list
+  // as well as a rotate right
+  //
+  AssertPtrNotNull(aNewDic->previous);
+  AssertPtrNotNull(aNewDic->next);
+  AssertPtrEquals(aDict->firstSymbol, aNewDic->previous);
+  AssertPtrEquals(aDict->firstSymbol->next, aNewDic);
+  AssertStrEquals(aDict->firstSymbol->symbol, "10");
+  AssertStrEquals(aNewDic->next->symbol, "20");
+  AssertPtrEquals(aNewDic->next->previous, aNewDic);
+  AssertPtrNull(aNewDic->next->next);
+
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "30");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic);
+  AssertStrEquals(getCString(jInterp, aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [30] l:(  ) r:(  )  )  ) ");
+  strBufClose(jInterp, aStrBuf);
+  
+  // should invoke an RR
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "35");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic);
+  AssertStrEquals(getCString(jInterp, aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [20] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(jInterp, aStrBuf);
+
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "25");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic);
+  AssertStrEquals(getCString(jInterp, aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [20] l:(  ) r:( [25] l:(  ) r:(  )  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(jInterp, aStrBuf);
+
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "23");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic);
+  AssertStrEquals(getCString(jInterp, aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [23] l:( [20] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(jInterp, aStrBuf);
+  
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "22");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic);
+  AssertStrEquals(getCString(jInterp, aStrBuf),
+  "[23] l:( [15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [22] l:(  ) r:(  )  )  )  ) r:( [30] l:( [25] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(jInterp, aStrBuf);
+  
+  // now try and find all of the symbols...
+  DictNodeObj* aNode = findSymbolRecurse(aDict, aNewDic, "15");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "15");
+
+  aNode = findSymbolRecurse(aDict, aNewDic, "20");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "20");
+
+  aNode = findSymbolRecurse(aDict, aNewDic, "23");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "23");
+
+  checkAVLNode(jInterp, aNewDic);
+  
+  // now delete a symbol which is NOT in the dictionary
+  aNode = findSymbolRecurse(aDict, aNewDic, "21");
+  AssertPtrNull(aNode);
+  
+  aNode = deleteSymbolRecurse(aDict, aNewDic, "21");
+  AssertPtrEquals(aNode, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic);
+  AssertStrEquals(getCString(jInterp, aStrBuf),
+  "[23] l:( [15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [22] l:(  ) r:(  )  )  )  ) r:( [30] l:( [25] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(jInterp, aStrBuf);
+
+  // now try and find all of the symbols...
+  aNode = findSymbolRecurse(aDict, aNewDic, "15");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "15");
+
+  aNode = findSymbolRecurse(aDict, aNewDic, "20");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "20");
+
+  aNode = findSymbolRecurse(aDict, aNewDic, "23");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "23");
+
+  checkAVLNode(jInterp, aNewDic);
+
+  // now delete a symbol which IS in the dictionary
+  aNode = findSymbolRecurse(aDict, aNewDic, "15");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "15");
+  
+  aNode = deleteSymbolRecurse(aDict, aNewDic, "15");
+  AssertPtrEquals(aNode, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic);
+  AssertStrEquals(getCString(jInterp, aStrBuf),
+  "[23] l:( [20] l:( [10] l:(  ) r:(  )  ) r:( [22] l:(  ) r:(  )  )  ) r:( [30] l:( [25] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(jInterp, aStrBuf);
+
+  // now try and find all of the symbols...
+  aNode = findSymbolRecurse(aDict, aNewDic, "15");
+  AssertPtrNull(aNode);
+
+  aNode = findSymbolRecurse(aDict, aNewDic, "20");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "20");
+
+  aNode = findSymbolRecurse(aDict, aNewDic, "23");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "23");
+
+  checkAVLNode(jInterp, aNewDic);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should randomly delete Symbols from randomly built dictionary]
+\startCTest
+
+  srand(time(NULL));
+
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
+
+  DictNodeObj* avlDic = newDictNode(jInterp,"0");
+  aDict->root         = avlDic;
+  aDict->firstSymbol  = avlDic;
+
+  for (int i = 0; i < 1000; i++) {
+    char itoa[100];
+    sprintf(itoa, "%d", rand() % 100);
+    avlDic = insertSymbolRecurse(aDict, avlDic, itoa);
+  }
+  checkAVLNode(jInterp, avlDic);
+
+  for (int i = 0; i < 1000; i++) {
+    char itoa[100];
+    sprintf(itoa, "%d", rand() % 100);
+    avlDic = deleteSymbolRecurse(aDict, avlDic, itoa);
+    checkAVLNode(jInterp, avlDic);
+  }
+  
+//  StringBufferObj* aStrBuf = newStringBuffer(jInterp);
+//  printDictInto(aStrBuf, avlDic);
+//  printf("%s\n", getCString(jInterp, aStrBuf));
+//  printf("avl node height: %zu\n", deepCalculateAVLNodeHeight(avlDic));
+//  printf("avl node height: %zu\n", avlDic->height);
+//  printf("avl node balance: %d\n", avlDic->balance);
+\stopCTest
+\stopTestCase
+\stopTestSuite

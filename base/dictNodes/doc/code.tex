@@ -25,6 +25,47 @@ typedef struct dictNode_object_struct {
 } DictNodeObj;
 \stopCHeader
 
+\startTestSuite[copyDictNodeFromTo]
+
+\startCHeader
+typedef void CopyDictNodeFromTo(
+  DictNodeObj *fromNode,
+  DictNodeObj *toNode
+);
+
+#define copyDictNodeFromTo(jInterp, fromNode, toNode) \
+  (                                                   \
+    assert(getDictNodesClass(jInterp)                 \
+      ->copyDictNodeFromToFunc),                      \
+    (getDictNodesClass(jInterp)                       \
+      ->copyDictNodeFromToFunc(fromNode, toNode))     \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void copyDictNodeFromToImpl(
+  DictNodeObj *fromNode,
+  DictNodeObj *toNode
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void copyDictNodeFromToImpl(
+  DictNodeObj *fromNode,
+  DictNodeObj *toNode
+) {
+  toNode->super.flags = fromNode->super.flags;
+  toNode->symbol      = fromNode->symbol;
+  toNode->preObs      = fromNode->preObs;
+  toNode->value       = fromNode->value;
+  toNode->postObs     = fromNode->postObs;
+}
+\stopCCode
+
+\stopTestSuite
+
 \startTestSuite[newDict]
 
 \startCHeader
@@ -174,8 +215,10 @@ Boolean printDicInto(
 typedef struct dictNodes_class_struct {
   JClass super;
   NewDictNode          *newDictNodeFunc;
+  CopyDictNodeFromTo   *copyDictNodeFromToFunc;
   FindSymbolRecurse    *findSymbolRecurseFunc;
   InsertSymbolRecurse  *insertSymbolRecurseFunc;
+  DeleteSymbolRecurse  *deleteSymbolRecurseFunc;
   FindLUBSymbolRecurse *findLUBSymbolRecurseFunc;
 } DictNodesClass;
 \stopCHeader
@@ -205,16 +248,19 @@ Boolean registerDictNodes(JoyLoLInterp *jInterp) {
     joyLoLCalloc(1, DictNodesClass);
   assert(theCoAlg);
   
-  theCoAlg->super.name            = DictNodesName;
-  theCoAlg->super.objectSize      = sizeof(DictNodeObj);
-  theCoAlg->super.initializeFunc  = initializeDictNodes;
-  theCoAlg->super.registerFunc    = registerDictNodeWords;
-  theCoAlg->super.equalityFunc    = NULL;
-  theCoAlg->super.printFunc       = printDictionaryJObjInto;
-  theCoAlg->newDictNodeFunc       = newDictNodeImpl;
-  theCoAlg->findSymbolRecurseFunc = findSymbolRecurseImpl;
+  theCoAlg->super.name             = DictNodesName;
+  theCoAlg->super.objectSize       = sizeof(DictNodeObj);
+  theCoAlg->super.initializeFunc   = initializeDictNodes;
+  theCoAlg->super.registerFunc     = registerDictNodeWords;
+  theCoAlg->super.equalityFunc     = NULL;
+  theCoAlg->super.printFunc        = printDictionaryJObjInto;
+  theCoAlg->newDictNodeFunc        = newDictNodeImpl;
+  theCoAlg->copyDictNodeFromToFunc = copyDictNodeFromToImpl;
+  theCoAlg->findSymbolRecurseFunc  = findSymbolRecurseImpl;
   theCoAlg->insertSymbolRecurseFunc =
     insertSymbolRecurseImpl;
+  theCoAlg->deleteSymbolRecurseFunc =
+    deleteSymbolRecurseImpl;
   theCoAlg->findLUBSymbolRecurseFunc =
     findLUBSymbolRecurseImpl;
 
