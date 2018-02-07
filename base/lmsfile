@@ -10,20 +10,6 @@ end
 
 lfs = require 'lfs'
 
--- the following coAlgebras MUST be loaded in order
-reqCoAlgs = {
-  'jInterps',
-  'stringBuffers',
-  'symbols',
-  'pairs',
-  'naturals',
-  'dictNodes',
-  'booleans',
-  'texts',
-  'parsers',
-  'loaders'
-}
-
 -- ensure the .joylol directories exist
 
 lfs.mkdir(makePath{
@@ -45,15 +31,11 @@ lfs.mkdir(makePath{
   'joylol'
 })
 
-
-reqCoAlgStr = '|'..table.concat(reqCoAlgs, '|')..'|'
-
 -- collect the list of subdirectories of base
 subDirs = { }
 
 for entry in lfs.dir('.') do
   if not entry:match('^%..*$') and
-    not reqCoAlgStr:match('|'..entry..'|') and
     (lfs.attributes(entry, 'mode') == 'directory') then
     table.insert(subDirs, entry)
   end
@@ -63,18 +45,11 @@ end
 
 table.sort(subDirs)
 
--- Now add the critical coAlgs in 
--- dependency order
-
-for i, aSubDir in ipairs(subDirs) do
-  table.insert(reqCoAlgs, aSubDir)
-end
-
 -- now walk through these subDirectories
 -- running the lms command on each one
 
 curDir = lfs.currentdir()
-for i, subDir in ipairs(reqCoAlgs) do
+for i, subDir in ipairs(subDirs) do
   print('\n========================================================')
   print('working in ['..subDir..']')
   print('running    ['..cmd..']')
