@@ -56,6 +56,8 @@ void copyDictNodeFromToImpl(
   DictNodeObj *fromNode,
   DictNodeObj *toNode
 ) {
+  assert(fromNode);
+  assert(toNode);
   toNode->super.flags = fromNode->super.flags;
   toNode->symbol      = fromNode->symbol;
   toNode->preObs      = fromNode->preObs;
