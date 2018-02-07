@@ -294,6 +294,7 @@ void evalTextInContextImpl(
     }
     if (aCtx->exceptionRaised) break;
   }
+  reportException(aCtx);
   DEBUG(jInterp, "evalTextInContext < %p %p\n", aCtx, aText);
 }
 \stopCCode

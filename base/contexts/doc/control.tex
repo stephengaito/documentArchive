@@ -428,12 +428,13 @@ Boolean reportExceptionImpl(
 ) {
   assert(aCtx);
   if (!aCtx->exceptionRaised) return FALSE;
+  popCtxDataInto(aCtx, exceptionMsg);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   StringBufferObj *aStrBuf = 
     newStringBuffer(jInterp);
   strBufPrintf(jInterp, aStrBuf, "\nUNHANDLED EXCEPTION:\n");
-  printLoL(jInterp, aStrBuf, aCtx->data);
+  printLoL(jInterp, aStrBuf, exceptionMsg);
   strBufPrintf(jInterp, aStrBuf, "\n");
   jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
   strBufClose(jInterp, aStrBuf);

@@ -9,6 +9,7 @@
       () ;; list of failure reports
     ) ;; testStats data
     globals
+    globals
     testStats
     defineContext
   ) ;; definition of startAllTests
@@ -16,10 +17,17 @@
   startAllTests
   define
   
+  globals
   ( startAllTests )
+  extract
+  undefine
   
   clear
   showStack
   showStackOn
+  showStackOff
   tracingOn
+  tracingOff
+  debugOn
+  debugOff
   definitions
