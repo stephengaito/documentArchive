@@ -246,27 +246,27 @@ DictNodeObj* insertSymbolImpl(
 \stopCCode
 \stopTestSuite
 
-\startTestSuite[deleteSymbolInThisDictionary]
+\startTestSuite[deleteSymbolFromThisDictionary]
 
 \startCHeader
-typedef DictNodeObj *(DeleteSymbolInThisDictionary)(
+typedef void (DeleteSymbolFromThisDictionary)(
   DictObj *aDict,
   Symbol  *aSymbol
 );
 
-#define deleteSymbolInThisDictionary(aDict, aSymbol)      \
-  (                                                       \
-    assert(aDict->jInterp),                               \
-    assert(getDictionariesClass(aDict->jInterp)           \
-      ->deleteSymbolInThisDictionaryFunc),                \
-    (getDictionariesClass(aDict->jInterp)                 \
-      ->deleteSymbolInThisDictionaryFunc(aDict, aSymbol)) \
+#define deleteSymbolFromThisDictionary(aDict, aSymbol)      \
+  (                                                         \
+    assert(aDict->jInterp),                                 \
+    assert(getDictionariesClass(aDict->jInterp)             \
+      ->deleteSymbolFromThisDictionaryFunc),                \
+    (getDictionariesClass(aDict->jInterp)                   \
+      ->deleteSymbolFromThisDictionaryFunc(aDict, aSymbol)) \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictNodeObj* deleteSymbolInThisDictionaryImpl(
+extern void deleteSymbolFromThisDictionaryImpl(
   DictObj *aDict,
   Symbol  *aSymbol
 );
@@ -274,15 +274,66 @@ extern DictNodeObj* deleteSymbolInThisDictionaryImpl(
 \setCHeaderStream{public}
 
 \startCCode
-DictNodeObj* deleteSymbolInThisDictionaryImpl(
+void deleteSymbolFromThisDictionaryImpl(
   DictObj *aDict,
   Symbol  *aSymbol
 ) {
-  if (!aSymbol) return NULL;
+  if (!aSymbol) return;
   assert(aDict);
-  return deleteSymbolRecurse(aDict, aDict->root, aSymbol);
+  aDict->root = deleteSymbolRecurse(aDict, aDict->root, aSymbol);
 }
 \stopCCode
+
+\startTestCase[should delete random symbols from a randomly created dictionary]
+\startCTest
+  srand(time(NULL));
+
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, NULL);
+
+  for (int i = 0; i < 1000; i++) {
+    char itoa[100];
+    sprintf(itoa, "%03d", rand() % 100);
+    createSymbolInThisDictionary(aDict, itoa);
+  }
+  createSymbolInThisDictionary(aDict, "000");
+  createSymbolInThisDictionary(aDict, "100");
+
+  DictNodeObj *aNode = findSymbol(aDict, "000");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "000");
+  AssertPtrEquals(aDict->firstSymbol, aNode);
+  
+  aNode = findSymbol(aDict, "100");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "100");
+  aNode = aDict->firstSymbol;
+  while (aNode->next) aNode = aNode->next;
+  AssertStrEquals(aNode->symbol, "100");
+  
+  for (int i = 0; i < 1000; i++) {
+    char itoa[100];
+    int randNum = rand() % 100;
+    //
+    if (randNum == 0 || randNum == 100) continue;
+    //
+    sprintf(itoa, "%03d", randNum);
+    deleteSymbolFromThisDictionary(aDict, itoa);
+    DictNodeObj *aNode = aDict->firstSymbol;
+    AssertStrEquals(aNode->symbol, "000");
+    while (aNode->next) {
+      AssertStrNotEquals(aNode->symbol, itoa);
+      aNode = aNode->next;
+    }
+    AssertStrEquals(aNode->symbol, "100");   
+    while (aNode->previous) {
+      AssertStrNotEquals(aNode->symbol, itoa);
+      aNode = aNode->previous;
+    }
+    AssertStrEquals(aNode->symbol, "000");
+  }  
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[findLUBSymbol]
@@ -566,8 +617,8 @@ typedef struct dictionaries_class_struct {
   NewDictionary   *newDictionaryFunc;
   CreateSymbolInThisDictionary
                   *createSymbolInThisDictionaryFunc;
-  DeleteSymbolInThisDictionary
-                  *deleteSymbolInThisDictionaryFunc;
+  DeleteSymbolFromThisDictionary
+                  *deleteSymbolFromThisDictionaryFunc;
   GetSymbol       *getSymbolFunc;
   FindSymbol      *findSymbolFunc;
   InsertSymbol    *insertSymbolFunc;
@@ -612,8 +663,8 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   theCoAlg->newDictionaryFunc    = newDictionaryImpl;
   theCoAlg->createSymbolInThisDictionaryFunc =
     createSymbolInThisDictionaryImpl;
-  theCoAlg->deleteSymbolInThisDictionaryFunc =
-    deleteSymbolInThisDictionaryImpl;
+  theCoAlg->deleteSymbolFromThisDictionaryFunc =
+    deleteSymbolFromThisDictionaryImpl;
   theCoAlg->getSymbolFunc        = getSymbolImpl;
   theCoAlg->findSymbolFunc       = findSymbolImpl;
   theCoAlg->insertSymbolFunc     = insertSymbolImpl;

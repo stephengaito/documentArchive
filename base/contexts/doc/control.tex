@@ -603,6 +603,31 @@ static void newNamingAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
+static void undefineAP(ContextObj* aCtx) {
+  assert(aCtx);
+  
+  popCtxDataInto(aCtx, name);
+  if (!isSymbol(name)) {
+    raiseException(aCtx,
+      "undefine requires a symbol as top");
+    return;
+  }
+  
+  popCtxDataInto(aCtx, namingScope);
+  if (!isDictionary(namingScope)) {
+    raiseException(aCtx,
+      "undelete requires a dictionary as second");
+    return;
+  }
+  
+  deleteSymbolFromThisDictionary(
+    ((DictObj*)namingScope),
+    asSymbol(name)
+  );
+  }
+\stopCCode
+
+\startCCode
 void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "fail",                failAP);
   extendJoyLoLInRoot(jInterp, "extract",             extractAP);
@@ -618,6 +643,7 @@ void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "newContext",          newContextAP);
   extendJoyLoLInRoot(jInterp, "defineNaming",        defineNamingAP);
   extendJoyLoLInRoot(jInterp, "newNaming",           newNamingAP);
+  extendJoyLoLInRoot(jInterp, "undefine",            undefineAP);
   extendJoyLoLInRoot(jInterp, "done",                doneAP);
   extendJoyLoLInRoot(jInterp, "clear",               clearContextAP);
   extendJoyLoLInRoot(jInterp, "try",                 tryAP);
