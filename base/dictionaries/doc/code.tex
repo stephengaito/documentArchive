@@ -246,6 +246,45 @@ DictNodeObj* insertSymbolImpl(
 \stopCCode
 \stopTestSuite
 
+\startTestSuite[deleteSymbolInThisDictionary]
+
+\startCHeader
+typedef DictNodeObj *(DeleteSymbolInThisDictionary)(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
+#define deleteSymbolInThisDictionary(aDict, aSymbol)      \
+  (                                                       \
+    assert(aDict->jInterp),                               \
+    assert(getDictionariesClass(aDict->jInterp)           \
+      ->deleteSymbolInThisDictionaryFunc),                \
+    (getDictionariesClass(aDict->jInterp)                 \
+      ->deleteSymbolInThisDictionaryFunc(aDict, aSymbol)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern DictNodeObj* deleteSymbolInThisDictionaryImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+DictNodeObj* deleteSymbolInThisDictionaryImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  if (!aSymbol) return NULL;
+  assert(aDict);
+  return deleteSymbolRecurse(aDict, aDict->root, aSymbol);
+}
+\stopCCode
+\stopTestSuite
+
 \startTestSuite[findLUBSymbol]
 \startCHeader
 typedef DictNodeObj *(FindLUBSymbol)(
@@ -527,6 +566,8 @@ typedef struct dictionaries_class_struct {
   NewDictionary   *newDictionaryFunc;
   CreateSymbolInThisDictionary
                   *createSymbolInThisDictionaryFunc;
+  DeleteSymbolInThisDictionary
+                  *deleteSymbolInThisDictionaryFunc;
   GetSymbol       *getSymbolFunc;
   FindSymbol      *findSymbolFunc;
   InsertSymbol    *insertSymbolFunc;
@@ -571,6 +612,8 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   theCoAlg->newDictionaryFunc    = newDictionaryImpl;
   theCoAlg->createSymbolInThisDictionaryFunc =
     createSymbolInThisDictionaryImpl;
+  theCoAlg->deleteSymbolInThisDictionaryFunc =
+    deleteSymbolInThisDictionaryImpl;
   theCoAlg->getSymbolFunc        = getSymbolImpl;
   theCoAlg->findSymbolFunc       = findSymbolImpl;
   theCoAlg->insertSymbolFunc     = insertSymbolImpl;
