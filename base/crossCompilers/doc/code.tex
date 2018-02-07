@@ -170,9 +170,10 @@ void addImplementationImpl(
     DictObj *ccDict = theCC->dict;
     checkObj(jInterp, ccDict, DictionariesTag);
     
-    DictNodeObj *entry    = insertSymbol(ccDict, wordName);
+    DictNodeObj *entry =
+      createSymbolInThisDictionary(ccDict, wordName);
     checkObj(jInterp, entry, DictNodesTag);
-    jInterp->writeStdOut(jInterp, "addImplementation inserted symbol\n");
+    jInterp->writeStdOut(jInterp, "addImplementation created symbol\n");
     ImplementationObj *implementation =
       newImplementation(jInterp, wordName, implBody);
     jInterp->writeStdOut(jInterp, "addImplementation created fragment\n");
@@ -261,7 +262,8 @@ static void addFragmentAP(ContextObj* aCtx) {
     DictObj *ccDict = theCC->dict;
     checkObj(jInterp, ccDict, DictionariesTag);
     
-    DictNodeObj *entry    = insertSymbol(ccDict, wordName);
+    DictNodeObj *entry =
+      createSymbolInThisDictionary(ccDict, wordName);
     FragmentObj *fragment =
       newFragment(jInterp, wordName, fragmentBody);
     entry->value = (JObj*)fragment;
