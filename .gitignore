@@ -12,6 +12,6 @@ gitVersion-tex.tex
 *.tuc
 *.pdf
 *-history
-releases
+release-*
 deployReleases
 tex

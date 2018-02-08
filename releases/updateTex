@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# This bash script copies the tex directories from
+# releases/tmp into the "live" tex directories
+
+cp -R tmp/module/t-joylol-coalg/tex \
+  ../module/t-joylol-coalg/tex
+
+cp -R tmp/core/context/joylol/t-joylol/tex \
+  ../core/context/joylol/t-joylol/tex
+
+cp -R tmp/core/context/options/t-joylol-opts/tex \
+  ../core/context/options/t-joylol-opts/tex
+
