@@ -2,6 +2,7 @@
 
 \chapter[title=JoyLoL] 
 
+QUESTION: How do we load a *.joy file? Where do we put this command?
 
 \section{JoyLoL code environment}
 
@@ -94,3 +95,17 @@ end
 
 coAlgs.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
 \stopLuaCode
+
+\subsection{JoylolTests}
+
+see ConTests LuaTests.tex file
+
+To integrate into ConTests inside ConTeXt runner we need to create something like:
+
+local function runCurLuaTestCase(suite, case)
+  runALuaTest(case.lua, suite, case)
+end
+
+contests.testRunners.runCurLuaTestCase = runCurLuaTestCase
+
+Anything in the testRunners table must be a function taking two arguments as above.
