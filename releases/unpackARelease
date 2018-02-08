@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# This bash script unpacks a specific release into the tmp directory
+
+if [ "$#" -ne 1 ]; then
+  echo "usage: unpackARelease <releaseFileName>"
+  exit -1
+fi
+
+# Ensure the tmp directory exists
+mkdir -p tmp
+
+# Clean out any old release files
+rm -rf tmp/*
+
+# Now untar the specified release into tmp
+tar xvf $1 --directory tmp
