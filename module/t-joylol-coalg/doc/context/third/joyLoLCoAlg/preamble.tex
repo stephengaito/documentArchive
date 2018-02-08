@@ -73,6 +73,8 @@ coAlgs.theCoAlg   = {}
 local theCoAlg    = coAlgs.theCoAlg
 
 local litProgs    = thirddata.literateProgs or {}
+litProgs.code     = litProgs.code or {}
+local code        = litProgs.code
 local setDefs     = litProgs.setDefs
 local shouldExist = litProgs.shouldExist
 local build       = setDefs(litProgs, 'build')
@@ -84,6 +86,7 @@ local tSort   = table.sort
 local sFmt    = string.format
 local sMatch  = string.match
 local toStr   = tostring
+local mFloor  = math.floor
 local lpPP    = litProgs.prettyPrint
 
 --local pushData, pushProcess = joylol.pushData, joylol.pushProcess

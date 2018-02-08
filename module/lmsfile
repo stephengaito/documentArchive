@@ -7,6 +7,7 @@ lpTargets = litProgs.targets{
   docFiles = {
     'overview.tex',
     'codeManipulation.tex',
+    'joylol.tex',
     'rules.tex',
     'fragments.tex',
     'words.tex',
