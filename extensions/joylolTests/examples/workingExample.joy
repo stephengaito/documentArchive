@@ -1,33 +1,45 @@
 ;; Initial working example of how to use JoyLoL contexts
 ;; to store information for later reuse
 
-  (
-    () ;; testStats process
-    ( 
-      0 ;; number of attempted tests
-      0 ;; number of failed tests
-      () ;; list of failure reports
-    ) ;; testStats data
-    globals
-    globals
-    testStats
-    defineContext
-  ) ;; definition of startAllTests
+( 
+  ( interpret ) ;; testStats process
+  ( 
+    0 ;; number of attempted tests
+    0 ;; number of failed tests
+    () ;; list of failure reports
+  ) ;; testStats data
   globals
-  startAllTests
-  define
-  
   globals
-  ( startAllTests )
-  extract
-  undefine
-  
-  clear
-  showStack
-  showStackOn
-  showStackOff
-  tracingOn
-  tracingOff
-  debugOn
-  debugOff
-  definitions
+  testStats
+  defineContext
+) ;; definition of startAllTests
+globals
+startAllTests
+define
+
+globals
+( startAllTests )
+extract
+undefine
+
+globals
+( testStats )
+extract
+undefine
+
+( 1 + )
+globals
+addOne
+define
+
+( addOne dup main interpret ) testStats
+
+clear
+showStack
+showStackOn
+showStackOff
+tracingOn
+tracingOff
+debugOn
+debugOff
+definitions

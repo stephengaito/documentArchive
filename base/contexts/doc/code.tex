@@ -260,10 +260,15 @@ static Boolean initializeContexts(
     assert(globals);
     globals->value = (JObj*)aDict;
     //
-    // create the root context using the globals dictionary
+    // create the root/main context using the 
+    // globals dictionary
     //
     jInterp->rootCtx =
-      newContext(jInterp, "joylol", NULL, aDict, NULL, NULL);
+      newContext(jInterp, "joylol-main", NULL, aDict, NULL, NULL);
+    DictNodeObj *mainCtx = 
+      createSymbolInThisDictionary(aDict, "main");
+    assert(mainCtx);
+    mainCtx->value = (JObj*)(jInterp->rootCtx);
   }
   return TRUE;
 }
