@@ -26,3 +26,32 @@ identified with POSIX-threads, then there is no sense to our previous
 \startCHeader
 typedef struct context_object_struct ContextObj;
 \stopCHeader
+
+\subsection{Thoughts}
+
+The current implementation pops the top of the data of the old context and 
+pushes it onto the *data* of the new context. 
+
+However once something gets onto the data of a context it is "inert"... 
+and won't be executed... any commands that we want to run in a different 
+context need to be pushed on the process NOT the data 
+
+What should happen with a given context's process stack is emptied? Should 
+all processing (of everything) cease.. or should a context switch to its 
+parent context? At the moment.... processing stops, which is I guess the 
+correct continuation. 
+
+The best way to think about context switching is as a potentially very 
+large number of cooperating entities working on separate parts of a very 
+large list of lists structure. The fact that they are cooperating means 
+that they choose to hand-off to another context and hope to be resumed at 
+some point in the "future" and restart computation where the original 
+context handed off. This means that the process stack MUST NOT be altered. 
+However the data stack might be and this represents the only way of 
+communication between the contexts. Note that any given context can ignore 
+the top item on its data stack.... 
+
+Computations involving processes, will by necessity require cooperating 
+contexts to perform useful but potentially infinite computations. 
+
+What does switching contexts *mean* categorically?
