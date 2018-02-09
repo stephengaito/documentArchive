@@ -97,7 +97,7 @@ static void coreContextWriteStdOut(
   assert(lstate);
   
   lua_getglobal(lstate, "tex");
-  lua_getfield(lstate, -1, "print");
+  lua_getfield(lstate, -1, "sprint");
   lua_pushstring(lstate, aMessage);
   if (lua_pcall(lstate, 1, 0, 0)) {
     /*return*/ luaL_error(lstate,
@@ -117,7 +117,7 @@ static void coreContextWriteStdErr(
   assert(lstate);
   
   lua_getglobal(lstate, "texio");
-  lua_getfield(lstate, -1, "write_nl");
+  lua_getfield(lstate, -1, "write");
   lua_pushstring(lstate, aMessage);
   if (lua_pcall(lstate, 1, 0, 0)) {
     /*return*/ luaL_error(lstate,

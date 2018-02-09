@@ -4,6 +4,8 @@
 
 \startTestSuite[start/stop joylol all tests]
 
+\setJoylolTracingOff\setJoylolVerboseOff
+
 \startJoylolCode
   (
     () ;; testStats process
@@ -73,6 +75,12 @@
 
 \startTestSuite[assertShouldFail]
 
+\startTestCase[assert should fail]
+\startJoylolTest
+"this is a test"
+doSomeThing
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[assertFail]

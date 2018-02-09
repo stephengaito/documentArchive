@@ -41,6 +41,47 @@ static int lua_joylol_setDebugging(lua_State *lstate) {
   return 0;
 }
 
+static int lua_joylol_setTracing(lua_State *lstate) {
+  Boolean tracingFlag = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  jInterp->rootCtx->tracingOn = tracingFlag;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_setShowStack(lua_State *lstate) {
+  Boolean showStackFlag = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  jInterp->rootCtx->showStack = showStackFlag;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_setShowSpecifications(lua_State *lstate) {
+  Boolean showSpecsFlag = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  jInterp->rootCtx->showSpecifications = showSpecsFlag;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_setChecking(lua_State *lstate) {
+  Boolean checkingFlag = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  jInterp->rootCtx->checkingOn = checkingFlag;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+
 static int lua_joylol_pushLoadPath(lua_State *lstate) {
   Symbol *aPath = lua_tostring(lstate, 1);
   getJoyLoLInterpInto(lstate, jInterp);
@@ -431,6 +472,10 @@ static const struct luaL_Reg lua_joylol_interface [] = {
   { "gitVersion",              lua_jInterps_getGitVersion         },
   { "setVerbose",              lua_joylol_setVerbose              },
   { "setDebugging",            lua_joylol_setDebugging            },
+  { "setTracing",              lua_joylol_setTracing              },
+  { "setShowStack",            lua_joylol_setShowStack            },
+  { "setShowSpecifications",   lua_joylol_setShowSpecifications   },
+  { "setChecking",             lua_joylol_setChecking             },
   { "pushLoadPath",            lua_joylol_pushLoadPath            },
   { "loadFile",                lua_joylol_loadFile                },
   { "pushData",                lua_joylol_pushData                },

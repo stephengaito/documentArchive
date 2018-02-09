@@ -100,12 +100,212 @@ coAlgs.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
 
 see ConTests LuaTests.tex file
 
-To integrate into ConTests inside ConTeXt runner we need to create something like:
+To integrate into ConTests inside ConTeXt runner we need to create 
+something like: 
 
 local function runCurLuaTestCase(suite, case)
   runALuaTest(case.lua, suite, case)
 end
 
-contests.testRunners.runCurLuaTestCase = runCurLuaTestCase
+contests.testRunners.runCurLuaTestCase = runCurLuaTestCase 
 
-Anything in the testRunners table must be a function taking two arguments as above.
+Anything in the testRunners table must be a function taking two arguments 
+as above. 
+
+\startMkIVCode
+\def\setJoylolVerboseOn{%
+  \directlua{thirddata.joylol.setVerbose(true)}
+}
+
+\def\setJoylolVerboseOff{%
+  \directlua{thirddata.joylol.setVerbose(false)}
+}
+
+\def\setJoylolDebuggingOn{%
+  \directlua{thirddata.joylol.setDebugging(true)}
+}
+
+\def\setJoylolDebuggingOff{%
+  \directlua{thirddata.joylol.setVDebugging(false)}
+}
+
+\def\setJoylolTracingOn{%
+  \directlua{thirddata.joylol.setTracing(true)}
+}
+
+\def\setJoylolTracingOff{%
+  \directlua{thirddata.joylol.setTracing(false)}
+}
+
+\def\setJoylolShowStackOn{%
+  \directlua{thirddata.joylol.setShowStack(true)}
+}
+
+\def\setJoylolShowStackOff{%
+  \directlua{thirddata.joylol.setShowStack(false)}
+}
+
+\def\setJoylolShowSpecificationsOn{%
+  \directlua{thirddata.joylol.setShowSpecifications(true)}
+}
+
+\def\setJoylolShowSpecificationsOff{%
+  \directlua{thirddata.joylol.setShowSpecifications(false)}
+}
+
+\def\setJoylolCheckingOn{%
+  \directlua{thirddata.joylol.setChecking(true)}
+}
+
+\def\setJoylolCheckingOff{%
+  \directlua{thirddata.joylol.setChecking(false)}
+}
+\stopMkIVCode
+
+\startLuaCode
+function showStack(aMessage) 
+  texio.write_nl('-----------------------------------------------')
+  if aMessage and type(aMessage) == 'string' and 0 < #aMessage then
+    texio.write_nl(aMessage)
+  end
+  dataStack    = joylol.showData()
+  processStack = joylol.showProcess()
+  texio.write_nl("Data:")
+  texio.write_nl(dataStack)
+  texio.write_nl("Process:")
+  texio.write_nl(processStack)
+  texio.write_nl('AT: '..status.filename..'::'..status.linenumber)
+  texio.write_nl('-----------------------------------------------')
+
+end
+
+contests.showStack = showStack
+\stopLuaCode
+
+\startMkIVCode
+\definetyping[JoylolTest]
+\setuptyping[JoylolTest][option=lisp]
+
+\let\oldStopJoylolTest=\stopJoylolTest
+\def\stopJoylolTest{%
+  \oldStopJoylolTest%
+  \directlua{thirddata.contests.addJoylolTest('_typing_')}
+}
+
+\def\showJoylolTest{%
+  \directlua{thirddata.contests.showJoylolTest()}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function addJoylolTest(bufferName)
+  local bufferContents = buffers.getcontent(bufferName):gsub("\13", "\n")
+  local suite = tests.curSuite
+  local case  = suite.curCase
+  case.joylol    = case.joylol or {}
+  tInsert(case.joylol, bufferContents)
+end
+
+contests.addJoylolTest = addJoylolTest
+
+local function buildJoylolChunk(joylolChunk, curSuite, curCase)
+  if type(joylolChunk) == 'table' then
+    joylolChunk = tConcat(joylolChunk, '\n')
+  end
+
+  if type(joylolChunk) ~= 'string' then
+    return nil
+  end
+
+  if joylolChunk:match('^%s*$') then
+    return nil
+  end
+
+  return [=[
+(
+]=]..joylolChunk..[=[
+
+)
+(
+ "]=]..curCase.desc..[=["
+  ]=]..curCase.fileName..[=[
+
+  ]=]..curCase.startLine..[=[
+
+  ]=]..status.linenumber..[=[
+
+)
+runTestCase
+showStack
+true
+]=]
+end
+
+contests.buildJoylolChunk = buildJoylolChunk
+
+local function showJoylolTest()
+  local curSuite = setDefs(tests, 'curSuite')
+  local curCase  = setDefs(curSuite, 'curCase')
+  texio.write_nl('===============================================')
+  local joylolChunk =
+    buildJoylolChunk(curCase.joylol, curSuite, curCase)
+  if joylolChunk then
+    texio.write_nl('Joylol Test: ')
+    texio.write_nl('-----------------------------------------------')
+    texio.write_nl(joylolChunk)
+    texio.write_nl('-----------------------------------------------')
+  else
+    texio.write_nl('NO Joylol Test could be built')
+  end
+  texio.write_nl('AT: '..status.filename..'::'..status.linenumber)
+  texio.write_nl('===============================================')
+end
+
+contests.showJoylolTest = showJoylolTest
+\stopLuaCode
+
+\startLuaCode
+local function runAJoylolTest(joylolTest, suite, case)
+  case.passed = case.passed or true
+  local joylolChunk = buildJoylolChunk(joylolTest, suite, case)
+  if not joylolChunk then
+    -- nothing to test
+    return true
+  end
+
+  local caseStats = tests.stats.joylol.cases
+  caseStats.attempted = caseStats.attempted + 1
+  tex.print("\\starttyping")
+  joylol.evalString(joylolChunk)
+  tex.print("\\stoptyping")
+  local testResult = joylol.popData()
+  if not testResult then
+    local errObj = joylol.popData()
+    local failure = logFailure(
+      "LuaTest FAILED",
+      suite.desc,
+      case.desc,
+      errObj.message,
+      toStr(errObj[1]),
+      sFmt("in file: %s between lines %s and %s",
+        case.fileName, toStr(case.startLine), toStr(case.lastLine))
+      )
+    reportFailure(failure, false)
+    tInsert(tests.failures, failure)
+    return false
+  end
+
+  -- all tests passed
+  caseStats.passed = caseStats.passed + 1
+  tex.print("\\noindent{\\green PASSED}")
+  return true
+end
+
+contests.runAJoylolTest = runAJoylolTest
+
+local function runCurJoylolTestCase(suite, case)
+  runAJoylolTest(case.joylol, suite, case)
+end
+
+contests.testRunners.runCurJoylolTestCase = runCurJoylolTestCase
+\stopLuaCode
