@@ -8,6 +8,7 @@ installDir
 gitVersion-c.tex
 gitVersion-lua.tex
 gitVersion-tex.tex
+gitVersion-joylol.tex
 *.log
 *.tuc
 *.pdf

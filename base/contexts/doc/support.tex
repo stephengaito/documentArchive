@@ -131,6 +131,24 @@ static void definitionsAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
+static void definitionsInAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  popCtxDataInto(aCtx, namingScope);
+  if (!isDictionary(namingScope)) {
+    raiseException(aCtx,
+      "definitionsIn requires a dictionary as top");
+    return;
+  }
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  listDefinitions(((DictObj*)namingScope), aStrBuf);
+  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
+  strBufClose(jInterp, aStrBuf);
+}
+\stopCCode
+
+\startCCode
 static void showLoadExtensionsAP(ContextObj* aCtx) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
@@ -240,6 +258,7 @@ extern void initContextsAPSupport(JoyLoLInterp *jInterp);
 void initContextsAPSupport(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "isContext",           isContextAP);
   extendJoyLoLInRoot(jInterp, "definitions",         definitionsAP);
+  extendJoyLoLInRoot(jInterp, "definitionsIn",       definitionsInAP);
   extendJoyLoLInRoot(jInterp, "loadExtension",       loadExtensionAP);
   extendJoyLoLInRoot(jInterp, "loadPath",            loadPathAP);
   extendJoyLoLInRoot(jInterp, "load",                loadFileAP);

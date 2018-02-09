@@ -8,8 +8,8 @@
     0 ;; number of failed tests
     () ;; list of failure reports
   ) ;; testStats data
-  globals
-  globals
+  tests
+  tests
   testStats
   defineContext
 ) ;; definition of startAllTests

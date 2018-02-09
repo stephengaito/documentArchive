@@ -6,23 +6,38 @@
 
 \setJoylolTracingOff\setJoylolVerboseOff
 
+We start by defining a naming scope to contain all of the Joylol test 
+associated words. This naming space is denoted \quote{tests} in the 
+\quote{globals} naming scope. The \quote{tests} naming scope's parent 
+naming scope is \quote{globals}. 
+
 \startJoylolCode
-  (
-    () ;; testStats process
-    ( 
-      0 ;; number of attempted tests
-      0 ;; number of failed tests
-      () ;; list of failure reports
-    ) ;; testStats data
-    testStats
-    defineContext
-  ) ;; definition of startAllTests
-  startAllTests
-  define
+;; create a tests naming scope
+globals      ;; parent naming scope
+globals      ;; defining naming scope
+tests        ;; defined name of this new naming scope
+defineNaming ;; make the definition
+\stopJoylolCode
+
+Now we create a context in the tests naming scope, which will keep track 
+of the test results. 
+
+\startJoylolCode
+( interpret ) ;; testStats process
+( 
+  0           ;; number of attempted tests
+  0           ;; number of failed tests
+  ()          ;; list of failure reports
+)             ;; testStats data
+tests         ;; the new context's naming scope
+tests         ;; defining naming scope
+testStats     ;; defined name of this new context
+defineContext ;; create and define the context
 \stopJoylolCode
 
 \stopTestSuite
 
+\starttyping
 \startTestSuite[start/stop joylol test suite]
 
 \startJoylolCode
@@ -38,26 +53,24 @@
 \stopJoylolCode
 
 \stopTestSuite
+\stoptyping
 
-\startTestSuite[start/stop/skip joylol test case]
+\startTestSuite[run/skip joylol test case]
 
 \startJoylolCode
+(
+  ( interpret ) ;; process
   (
-    () ;; process
-    (
-      true ;; test case successful
-      false ;; test case should fail
-    ) ;; data
-    curTestCase
-    defineContext
-  )
-  startTestCase
-  define
-  
-  (
-  )
-  stopTestCase
-  define
+    true ;; test case successful
+    false ;; test case should fail
+  ) ;; data
+  tests
+  curTestCase
+  defineContext
+)
+tests
+runTestCase
+define
 \stopJoylolCode
 
 \stopTestSuite
