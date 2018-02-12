@@ -4,11 +4,11 @@
 # releases/tmp into the "live" tex directories
 
 cp -R tmp/module/t-joylol-coalg/tex \
-  ../module/t-joylol-coalg/tex
+  ../module/t-joylol-coalg
 
 cp -R tmp/core/context/joylol/t-joylol/tex \
-  ../core/context/joylol/t-joylol/tex
+  ../core/context/joylol/t-joylol
 
 cp -R tmp/core/context/options/t-joylol-opts/tex \
-  ../core/context/options/t-joylol-opts/tex
+  ../core/context/options/t-joylol-opts
 
