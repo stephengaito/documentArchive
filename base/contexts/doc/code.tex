@@ -160,6 +160,19 @@ extern Boolean printContextsCoAlg(
 \setCHeaderStream{public}
 
 \startCCode
+static void printContextName(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  ContextObj      *aCtx
+) {
+  assert(aCtx);
+  if (aCtx->parent) {
+    printContextName(jInterp, aStrBuf, aCtx->parent);
+    strBufPrintf(jInterp, aStrBuf, ":");
+  }
+  strBufPrintf(jInterp, aStrBuf, aCtx->name);
+}
+
 Boolean printContextsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
@@ -169,14 +182,15 @@ Boolean printContextsCoAlg(
   assert(aLoL);
   assert(asType(aLoL));
   assert(asTag(aLoL) == ContextsTag);
-
-//  if (!(aLoL->tag & PRINT_MARKER)) return TRUE;
-//  aLoL->tag = aLoL->tag & (~ PRINT_MARKER);
+  ContextObj* aCtx = (ContextObj*)aLoL;
 
   size_t printedOk = TRUE;
-  strBufPrintf(jInterp, aStrBuf, "\n[%s[ ", asName(aLoL));
+  strBufPrintf(jInterp, aStrBuf, "\n[");
+  printContextName(jInterp, aStrBuf, aCtx);
+  strBufPrintf(jInterp, aStrBuf, "(");
+  printLoL(jInterp, aStrBuf, ((JObj*)aCtx->dict));
   lolPrintStr(jInterp, printedOk, asData(aLoL),
-              "d:( ", ") ", aStrBuf);
+              ")[ d:( ", ") ", aStrBuf);
   lolPrintStr(jInterp, printedOk, asCommand(aLoL),
               "c:( ", ") ", aStrBuf);
   lolPrintStr(jInterp, printedOk, asProcess(aLoL),

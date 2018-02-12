@@ -203,7 +203,7 @@ DictNodeObj* findSymbolImpl(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   printLoL(jInterp, aStrBuf, (JObj*)childDict);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:parent:child");
+  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:parent:child ");
   strBufClose(jInterp, aStrBuf);  
 \stopCTest
 \stopTestCase
@@ -528,7 +528,7 @@ void listDefinitionsImpl(
   DictObj* aLoL = newDictionary(jInterp, "tests", NULL);
   AssertPtrNotNull(aLoL);
   printLoL(jInterp, aStrBuf, (JObj*)aLoL);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:tests");
+  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:tests ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
@@ -584,31 +584,40 @@ Boolean equalityDictionaryCoAlg(
 extern Boolean printDictionaryCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
+static void printDictionaryName(
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStrBuf,
+  DictObj         *aDict
+) {
+  assert(aDict);
+  if (aDict->parent) {
+    printDictionaryName(jInterp, aStrBuf, aDict->parent);
+    strBufPrintf(jInterp, aStrBuf, ":");
+  } else {
+    strBufPrintf(jInterp, aStrBuf, "dict:");
+  }
+  strBufPrintf(jInterp, aStrBuf, aDict->name);
+}
+
 Boolean printDictionaryCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == DictionariesTag);
   
   DictObj* theDict = (DictObj*)aLoL;
   
-  DictObj* parent = theDict->parent;
-  if (parent) {
-    printDictionaryCoAlg(jInterp, aStrBuf, ((JObj*)parent));
-    strBufPrintf(jInterp, aStrBuf, ":");
-  } else {
-    strBufPrintf(jInterp, aStrBuf, "dict:");
-  }
+  printDictionaryName(jInterp, aStrBuf, theDict);
+  strBufPrintf(jInterp, aStrBuf, " ");
   
-  strBufPrintf(jInterp, aStrBuf, theDict->name);
   return TRUE;
 }
 \stopCCode
@@ -625,7 +634,7 @@ Boolean printDictionaryCoAlg(
   DictObj* aNewDictionary = newDictionary(jInterp, "tests", NULL);
   AssertPtrNotNull(aNewDictionary);
   printLoL(jInterp, aStrBuf, (JObj*)aNewDictionary);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:tests");
+  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:tests ");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
