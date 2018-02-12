@@ -568,6 +568,7 @@ static void defineNamingAP(ContextObj* aCtx) {
   DictObj* newDict =
     newDictionary(
       jInterp,
+      asSymbol(dictName),
       (DictObj*)dictNamingScope
     );
   assert(newDict);
@@ -596,6 +597,7 @@ static void newNamingAP(ContextObj* aCtx) {
   DictObj* newDict =
     newDictionary(
       jInterp,
+      "unnamed",
       (DictObj*)dictNamingScope
     );
   assert(newDict);

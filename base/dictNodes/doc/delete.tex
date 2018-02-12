@@ -195,7 +195,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
 \startTestCase[should delete Symbols from simple Dictionary]
 \startCTest
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp, NULL);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
 
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
@@ -352,7 +352,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
   srand(time(NULL));
 
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp, NULL);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
 
   DictNodeObj* avlDic = newDictNode(jInterp,"000");
   aDict->root         = avlDic;

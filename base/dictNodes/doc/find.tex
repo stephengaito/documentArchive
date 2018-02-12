@@ -57,7 +57,7 @@ DictNodeObj* findSymbolRecurseImpl(
 \startTestCase[should find Symbol In Empty Dictionary]
 \startCTest
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp, NULL);
+  DictObj *aDict = newDictionary(jInterp, "test", NULL);
   
   AssertPtrNull(findSymbolRecurse(aDict, NULL, "aSymbol"));
 \stopCTest
@@ -66,7 +66,7 @@ DictNodeObj* findSymbolRecurseImpl(
 \startTestCase[should find Symbol In Non Empty Dictionary]
 \startCTest
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp, NULL);
+  DictObj *aDict = newDictionary(jInterp, "test", NULL);
 
   DictNodeObj* aNode = newDictNode(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aNode);
@@ -79,7 +79,7 @@ DictNodeObj* findSymbolRecurseImpl(
 \startTestCase[should find Symbol Not In Dictionary]
 \startCTest
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp, NULL);
+  DictObj *aDict = newDictionary(jInterp, "test", NULL);
 
   DictNodeObj* aSimpleDic = newDictNode(jInterp, "aNodeSymbol");
   AssertPtrNotNull(aSimpleDic);

@@ -254,7 +254,7 @@ static Boolean initializeContexts(
     //
     // create the globals dictionary
     //
-    DictObj* aDict = newDictionary(jInterp, NULL);
+    DictObj* aDict = newDictionary(jInterp, "globals", NULL);
     DictNodeObj *globals = 
       createSymbolInThisDictionary(aDict, "globals");
     assert(globals);

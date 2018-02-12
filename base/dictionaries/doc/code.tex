@@ -12,6 +12,7 @@
 typedef struct dictionary_object_struct {
   JObj          super;
   JoyLoLInterp *jInterp;
+  Symbol       *name;
   DictObj      *parent;
   DictNodeObj  *root;
   DictNodeObj  *firstSymbol;
@@ -25,15 +26,16 @@ typedef struct dictionary_object_struct {
 \startCHeader
 typedef DictObj* (NewDictionary)(
   JoyLoLInterp *jInterp,
+  Symbol       *name,
   DictObj      *parent
 );
 
-#define newDictionary(jInterp, parent)      \
-  (                                         \
-    assert(getDictionariesClass(jInterp)    \
-      ->newDictionaryFunc),                 \
-    (getDictionariesClass(jInterp)          \
-      ->newDictionaryFunc(jInterp, parent)) \
+#define newDictionary(jInterp, name, parent)      \
+  (                                               \
+    assert(getDictionariesClass(jInterp)          \
+      ->newDictionaryFunc),                       \
+    (getDictionariesClass(jInterp)                \
+      ->newDictionaryFunc(jInterp, name, parent)) \
   )
 \stopCHeader
 
@@ -41,6 +43,7 @@ typedef DictObj* (NewDictionary)(
 \startCHeader
 extern DictObj* newDictionaryImpl(
   JoyLoLInterp *jInterp,
+  Symbol       *name,
   DictObj      *parent
 );
 \stopCHeader
@@ -49,6 +52,7 @@ extern DictObj* newDictionaryImpl(
 \startCCode
 DictObj* newDictionaryImpl(
   JoyLoLInterp *jInterp,
+  Symbol       *name,
   DictObj      *parent
 ) {
   assert(jInterp);
@@ -57,6 +61,7 @@ DictObj* newDictionaryImpl(
   DictObj* result =
     (DictObj*)newObject(jInterp, DictionariesTag);
   result->jInterp     = jInterp;
+  result->name        = strdup(name);
   result->parent      = parent;
   result->root        = NULL;
   result->firstSymbol = NULL;
@@ -73,9 +78,10 @@ DictObj* newDictionaryImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  JObj* aNewDictionary = newDictionary(jInterp, NULL);
+  JObj* aNewDictionary = newDictionary(jInterp, "aName", NULL);
   AssertPtrNotNull(aNewDictionary);
   AssertPtrEquals(aNewDictionary->jInterp, jInterp);
+  AssertStrEquals(aNewDictionary->name, "aName");
   AssertPtrNull(aNewDictionary->parent);
   AssertPtrNull(aNewDictionary->root);
   AssertPrtNull(aNewDictionary->firstSymbol);
@@ -158,10 +164,10 @@ DictNodeObj* findSymbolImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  DictObj* parentDict = newDictionary(jInterp, NULL);
+  DictObj* parentDict = newDictionary(jInterp, "parent", NULL);
   AssertPtrNotNull(parentDict);
   AssertPtrNull(parentDict->parent);
-  DictObj* childDict  = newDictionary(jInterp, parentDict);
+  DictObj* childDict  = newDictionary(jInterp, "child", parentDict);
   AssertPtrNotNull(childDict);
   AssertPtrNotNull(childDict->parent);
   AssertPtrEquals(childDict->parent, parentDict);
@@ -193,6 +199,12 @@ DictNodeObj* findSymbolImpl(
   AssertPtrNotNull(testSym);
   AssertPtrNotEquals(testSym, childSym);
   AssertPtrEquals(testSym, parentSym);
+  //
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  AssertPtrNotNull(aStrBuf);
+  printLoL(jInterp, aStrBuf, (JObj*)childDict);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:parent:child");
+  strBufClose(jInterp, aStrBuf);  
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -289,7 +301,7 @@ void deleteSymbolFromThisDictionaryImpl(
   srand(time(NULL));
 
   AssertPtrNotNull(jInterp);
-  DictObj *aDict = newDictionary(jInterp, NULL);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
 
   for (int i = 0; i < 1000; i++) {
     char itoa[100];
@@ -513,10 +525,10 @@ void listDefinitionsImpl(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
 
-  DictObj* aLoL = newDictionary(jInterp, NULL);
+  DictObj* aLoL = newDictionary(jInterp, "tests", NULL);
   AssertPtrNotNull(aLoL);
   printLoL(jInterp, aStrBuf, (JObj*)aLoL);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "dictionary ");
+  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:tests");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
@@ -585,8 +597,18 @@ Boolean printDictionaryCoAlg(
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == DictionariesTag);
-
-  strBufPrintf(jInterp, aStrBuf, "dictionary ");
+  
+  DictObj* theDict = (DictObj*)aLoL;
+  
+  DictObj* parent = theDict->parent;
+  if (parent) {
+    printDictionaryCoAlg(jInterp, aStrBuf, ((JObj*)parent));
+    strBufPrintf(jInterp, aStrBuf, ":");
+  } else {
+    strBufPrintf(jInterp, aStrBuf, "dict:");
+  }
+  
+  strBufPrintf(jInterp, aStrBuf, theDict->name);
   return TRUE;
 }
 \stopCCode
@@ -600,10 +622,10 @@ Boolean printDictionaryCoAlg(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   
-  DictObj* aNewDictionary = newDictionary(jInterp, NULL);
+  DictObj* aNewDictionary = newDictionary(jInterp, "tests", NULL);
   AssertPtrNotNull(aNewDictionary);
   printLoL(jInterp, aStrBuf, (JObj*)aNewDictionary);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "dictionary ");
+  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:tests");
   strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
