@@ -55,7 +55,7 @@ defineContext ;; create and define the context
 \stopTestSuite
 \stoptyping
 
-\startTestSuite[run/skip joylol test case]
+\startTestSuite[start/stop/skip/run a joylol test case]
 
 \startJoylolCode
 (
@@ -88,6 +88,16 @@ define
 
 \startTestSuite[assertShouldFail]
 
+\startJoylolCode
+
+(
+  
+)
+tests
+assertShouldFail
+define
+\stopJoylolCode
+
 \startTestCase[assert should fail]
 \startJoylolTest
 "this is a test"
@@ -98,6 +108,19 @@ doSomeThing
 
 \startTestSuite[assertFail]
 
+\startJoylolCode
+(
+)
+tests
+assertFail
+define
+\stopJoylolCode
+
+\startTestCase[assertFail should fail]
+\startJoylolTest
+assertFail
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[assertSucceed]

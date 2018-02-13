@@ -12,6 +12,7 @@ gitVersion-joylol.tex
 *.log
 *.tuc
 *.pdf
+*.svg
 *-history
 release-*
 deployReleases

@@ -1,0 +1,48 @@
+sequenceDiagram
+  participant m as joylol-main
+  participant tf as testFactory
+  participant ts as testStats
+  participant tr as testRunner
+ 
+  activate m
+  m->>tf: create
+  deactivate m
+  activate tf
+  tf-->>m:switch
+  deactivate tf
+  activate m
+  m->>tf:runTestCase
+  deactivate m
+  activate tf
+  tf->>ts:create
+  deactivate tf
+  activate ts
+  ts-->>tf:switch
+  deactivate ts
+  activate tf
+  tf->>tr:create
+  deactivate tf
+  activate tr
+  loop assertions
+    tr->>ts:assert
+    deactivate tr
+   activate ts
+    ts->>tr:switch
+   deactivate ts
+   activate tr
+    note over ts,tr :     ...
+    tr->>ts:assert
+    deactivate tr
+    activate ts
+    ts->>tr:switch
+    deactivate ts
+    activate tr
+  end
+  tr->>ts:results
+  deactivate tr
+  activate ts
+  ts->>m:results
+  deactivate ts
+  activate m
+  deactivate m
+
