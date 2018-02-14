@@ -95,22 +95,6 @@ DictObj* newDictionaryImpl(
 
 \startTestSuite[findSymbol]
 
-\startCHeader
-typedef DictNodeObj *(FindSymbol)(
-  DictObj *aDict,
-  Symbol  *aSymbol
-);
-
-#define findSymbol(aDict, aSymbol)              \
-  (                                             \
-    assert(aDict->jInterp),                     \
-    assert(getDictionariesClass(aDict->jInterp) \
-      ->findSymbolFunc),                        \
-    (getDictionariesClass(aDict->jInterp)       \
-      ->findSymbolFunc(aDict, aSymbol))         \
-  )
-\stopCHeader
-
 \setCHeaderStream{private}
 \startCHeader
 extern DictNodeObj* findSymbolInThisDictionary(
@@ -118,7 +102,7 @@ extern DictNodeObj* findSymbolInThisDictionary(
   Symbol  *aSymbol
 );
 
-extern DictNodeObj* findSymbolImpl(
+extern DictNodeObj* findSymbol(
   DictObj *aDict,
   Symbol  *aSymbol
 );
@@ -135,7 +119,7 @@ DictNodeObj* findSymbolInThisDictionary(
   return findSymbolRecurse(aDict, aDict->root, aSymbol);
 }
 
-DictNodeObj* findSymbolImpl(
+DictNodeObj* findSymbol(
   DictObj *aDict,
   Symbol  *aSymbol
 ) {
@@ -649,7 +633,6 @@ typedef struct dictionaries_class_struct {
   GetSymbolEntry  *getSymbolEntryFunc;
   GetAsSymbol     *getAsSymbolFunc;
   DeleteSymbol    *deleteSymbolFunc;
-  FindSymbol      *findSymbolFunc;
   FindLUBSymbol   *findLUBSymbolFunc;
   ListDefinitions *listDefinitionsFunc;  
 } DictionariesClass;
@@ -692,7 +675,6 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   theCoAlg->getSymbolEntryFunc   = getSymbolEntryImpl;
   theCoAlg->getAsSymbolFunc      = getAsSymbolImpl;
   theCoAlg->deleteSymbolFunc     = deleteSymbolImpl;
-  theCoAlg->findSymbolFunc       = findSymbolImpl;
   theCoAlg->findLUBSymbolFunc    = findLUBSymbolImpl;
   theCoAlg->listDefinitionsFunc  = listDefinitionsImpl;  
   size_t tag =

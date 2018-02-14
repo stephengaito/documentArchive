@@ -454,7 +454,7 @@ JObj* parseOneSymbolImpl(
   AssertIntTrue(isSymbol(aLoL));
   AssertStrEquals(asSymbol(aLoL), "true");
   DictNodeObj* aNode =
-    findSymbol(mainDic, asSymbol(aLoL));
+    getSymbolEntry(mainDic, asSymbol(aLoL));
   AssertPtrNotNull(aNode);
   AssertPtrNotNull(aNode->value);
   AssertIntTrue(isBoolean(aNode->value));
@@ -465,7 +465,7 @@ JObj* parseOneSymbolImpl(
   AssertIntTrue(isAtom(aLoL));
   AssertIntTrue(isSymbol(aLoL));
   AssertStrEquals(asSymbol(aLoL), "false");
-  aNode = findSymbol(mainDic, asSymbol(aLoL));
+  aNode = getSymbolEntry(mainDic, asSymbol(aLoL));
   AssertPtrNotNull(aNode);
   AssertPtrNotNull(aNode->value);
   AssertIntTrue(isBoolean(aNode->value));
