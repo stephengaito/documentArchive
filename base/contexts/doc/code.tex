@@ -269,8 +269,7 @@ static Boolean initializeContexts(
     // create the globals dictionary
     //
     DictObj* aDict = newDictionary(jInterp, "globals", NULL);
-    DictNodeObj *globals = 
-      createSymbolInThisDictionary(aDict, "globals");
+    DictNodeObj *globals = getSymbolEntry(aDict, "globals");
     assert(globals);
     globals->value = (JObj*)aDict;
     //
@@ -279,8 +278,7 @@ static Boolean initializeContexts(
     //
     jInterp->rootCtx =
       newContext(jInterp, "joylol-main", NULL, aDict, NULL, NULL);
-    DictNodeObj *mainCtx = 
-      createSymbolInThisDictionary(aDict, "main");
+    DictNodeObj *mainCtx = getSymbolEntry(aDict, "main");
     assert(mainCtx);
     mainCtx->value = (JObj*)(jInterp->rootCtx);
   }

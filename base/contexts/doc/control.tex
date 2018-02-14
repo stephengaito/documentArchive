@@ -623,10 +623,7 @@ static void undefineAP(ContextObj* aCtx) {
     return;
   }
   
-  deleteSymbolFromThisDictionary(
-    ((DictObj*)namingScope),
-    asSymbol(name)
-  );
+  deleteSymbol(((DictObj*)namingScope), asSymbol(name));
   }
 \stopCCode
 

@@ -203,7 +203,7 @@ DictNodeObj* findSymbolImpl(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
   AssertPtrNotNull(aStrBuf);
   printLoL(jInterp, aStrBuf, (JObj*)childDict);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:parent:child ");
+  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:parent.child ");
   strBufClose(jInterp, aStrBuf);  
 \stopCTest
 \stopTestCase
@@ -211,33 +211,8 @@ DictNodeObj* findSymbolImpl(
 
 \startTestSuite[insertSymbol]
 
-\startCHeader
-typedef DictNodeObj *(InsertSymbol)(
-  DictObj *aDict,
-  Symbol  *aSymbol
-);
-
-#define insertSymbol(aDict, aSymbol)            \
-  (                                             \
-    assert(aDict),                              \
-    assert(getDictionariesClass(aDict->jInterp) \
-      ->insertSymbolFunc),                      \
-    (getDictionariesClass(aDict->jInterp)       \
-      ->insertSymbolFunc(aDict, aSymbol))       \
-  )
-\stopCHeader
-
-\setCHeaderStream{private}
-\startCHeader
-extern DictNodeObj* insertSymbolImpl(
-  DictObj *aDict,
-  Symbol  *aSymbol
-);
-\stopCHeader
-\setCHeaderStream{public}
-
 \startCCode
-DictNodeObj* insertSymbolImpl(
+static DictNodeObj* insertSymbol(
   DictObj *aDict,
   Symbol  *aSymbol
 ) {
@@ -258,27 +233,27 @@ DictNodeObj* insertSymbolImpl(
 \stopCCode
 \stopTestSuite
 
-\startTestSuite[deleteSymbolFromThisDictionary]
+\startTestSuite[deleteSymbol]
 
 \startCHeader
-typedef void (DeleteSymbolFromThisDictionary)(
+typedef void (DeleteSymbol)(
   DictObj *aDict,
   Symbol  *aSymbol
 );
 
-#define deleteSymbolFromThisDictionary(aDict, aSymbol)      \
-  (                                                         \
-    assert(aDict->jInterp),                                 \
-    assert(getDictionariesClass(aDict->jInterp)             \
-      ->deleteSymbolFromThisDictionaryFunc),                \
-    (getDictionariesClass(aDict->jInterp)                   \
-      ->deleteSymbolFromThisDictionaryFunc(aDict, aSymbol)) \
+#define deleteSymbol(aDict, aSymbol)            \
+  (                                             \
+    assert(aDict->jInterp),                     \
+    assert(getDictionariesClass(aDict->jInterp) \
+      ->deleteSymbolFunc),                      \
+    (getDictionariesClass(aDict->jInterp)       \
+      ->deleteSymbolFunc(aDict, aSymbol))       \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern void deleteSymbolFromThisDictionaryImpl(
+extern void deleteSymbolImpl(
   DictObj *aDict,
   Symbol  *aSymbol
 );
@@ -286,13 +261,14 @@ extern void deleteSymbolFromThisDictionaryImpl(
 \setCHeaderStream{public}
 
 \startCCode
-void deleteSymbolFromThisDictionaryImpl(
+void deleteSymbolImpl(
   DictObj *aDict,
   Symbol  *aSymbol
 ) {
   if (!aSymbol) return;
   assert(aDict);
-  aDict->root = deleteSymbolRecurse(aDict, aDict->root, aSymbol);
+  aDict->root = 
+    deleteSymbolRecurse(aDict, aDict->root, aSymbol);
 }
 \stopCCode
 
@@ -330,7 +306,7 @@ void deleteSymbolFromThisDictionaryImpl(
     if (randNum == 0 || randNum == 100) continue;
     //
     sprintf(itoa, "%03d", randNum);
-    deleteSymbolFromThisDictionary(aDict, itoa);
+    deleteSymbol(aDict, itoa);
     DictNodeObj *aNode = aDict->firstSymbol;
     AssertStrEquals(aNode->symbol, "000");
     while (aNode->next) {
@@ -386,27 +362,11 @@ DictNodeObj* findLUBSymbolImpl(
 \stopCCode
 \stopTestSuite
 
-\startTestSuite[createSymbol]
-
-\startCHeader
-typedef DictNodeObj *(CreateSymbolInThisDictionary)(
-  DictObj *aDict,
-  Symbol  *aSymbol
-);
-
-#define createSymbolInThisDictionary(aDict, aSymbol)      \
-        (                                                 \
-    assert(aDict),                                        \
-    assert(getDictionariesClass(aDict->jInterp)           \
-      ->createSymbolInThisDictionaryFunc),                \
-    (getDictionariesClass(aDict->jInterp)                 \
-      ->createSymbolInThisDictionaryFunc(aDict, aSymbol)) \
-  )
-\stopCHeader
+\startTestSuite[createSymbolInThisDictionary]
 
 \setCHeaderStream{private}
 \startCHeader
-extern DictNodeObj* createSymbolInThisDictionaryImpl(
+extern DictNodeObj* createSymbolInThisDictionary(
   DictObj *aDict,
   Symbol  *aSymbol
 );
@@ -414,7 +374,7 @@ extern DictNodeObj* createSymbolInThisDictionaryImpl(
 \setCHeaderStream{public}
 
 \startCCode
-DictNodeObj* createSymbolInThisDictionaryImpl(
+DictNodeObj* createSymbolInThisDictionary(
   DictObj *aDict,
   Symbol  *aSymbol
 ) {
@@ -431,27 +391,27 @@ DictNodeObj* createSymbolInThisDictionaryImpl(
 \stopCCode
 \stopTestSuite
 
-\startTestSuite[getSymbol]
+\startTestSuite[getSymbolEntry]
 
 \startCHeader
-typedef JObj *(GetSymbol)(
+typedef DictNodeObj *(GetSymbolEntry)(
   DictObj *aDict,
   Symbol  *aSymbol
 );
 
-#define getSymbol(aDict, aSymbol)               \
+#define getSymbolEntry(aDict, aSymbol)          \
   (                                             \
     assert(aDict),                              \
     assert(getDictionariesClass(aDict->jInterp) \
-      ->getSymbolFunc),                         \
+      ->getSymbolEntryFunc),                    \
     (getDictionariesClass(aDict->jInterp)       \
-      ->getSymbolFunc(aDict, aSymbol))          \
+      ->getSymbolEntryFunc(aDict, aSymbol))     \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
-extern JObj* getSymbolImpl(
+extern DictNodeObj* getSymbolEntryImpl(
   DictObj *aDict,
   Symbol  *aSymbol
 );
@@ -459,7 +419,7 @@ extern JObj* getSymbolImpl(
 \setCHeaderStream{public}
 
 \startCCode
-JObj* getSymbolImpl(
+DictNodeObj* getSymbolEntryImpl(
   DictObj *aDict,
   Symbol  *aSymbol
 ) {
@@ -468,6 +428,46 @@ JObj* getSymbolImpl(
   if (!aSym) {
     aSym = createSymbolInThisDictionary(aDict, aSymbol);
   }
+  return aSym;
+}
+\stopCCode
+\stopTestSuite
+
+\startTestSuite[getAsSymbol]
+
+\startCHeader
+typedef JObj *(GetAsSymbol)(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
+#define getAsSymbol(aDict, aSymbol)             \
+  (                                             \
+    assert(aDict),                              \
+    assert(getDictionariesClass(aDict->jInterp) \
+      ->getAsSymbolFunc),                       \
+    (getDictionariesClass(aDict->jInterp)       \
+      ->getAsSymbolFunc(aDict, aSymbol))        \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* getAsSymbolImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* getAsSymbolImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  assert(aDict);
+  DictNodeObj* aSym = getSymbolEntryImpl(aDict, aSymbol);
+  assert(aSym);
   return newSymbol(aDict->jInterp, aSym->symbol);
 }
 \stopCCode
@@ -598,7 +598,7 @@ static void printDictionaryName(
   assert(aDict);
   if (aDict->parent) {
     printDictionaryName(jInterp, aStrBuf, aDict->parent);
-    strBufPrintf(jInterp, aStrBuf, ":");
+    strBufPrintf(jInterp, aStrBuf, ".");
   } else {
     strBufPrintf(jInterp, aStrBuf, "dict:");
   }
@@ -646,13 +646,10 @@ Boolean printDictionaryCoAlg(
 typedef struct dictionaries_class_struct {
   JClass           super;
   NewDictionary   *newDictionaryFunc;
-  CreateSymbolInThisDictionary
-                  *createSymbolInThisDictionaryFunc;
-  DeleteSymbolFromThisDictionary
-                  *deleteSymbolFromThisDictionaryFunc;
-  GetSymbol       *getSymbolFunc;
+  GetSymbolEntry  *getSymbolEntryFunc;
+  GetAsSymbol     *getAsSymbolFunc;
+  DeleteSymbol    *deleteSymbolFunc;
   FindSymbol      *findSymbolFunc;
-  InsertSymbol    *insertSymbolFunc;
   FindLUBSymbol   *findLUBSymbolFunc;
   ListDefinitions *listDefinitionsFunc;  
 } DictionariesClass;
@@ -692,13 +689,10 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
   theCoAlg->super.equalityFunc   = equalityDictionaryCoAlg;
   theCoAlg->super.printFunc      = printDictionaryCoAlg;
   theCoAlg->newDictionaryFunc    = newDictionaryImpl;
-  theCoAlg->createSymbolInThisDictionaryFunc =
-    createSymbolInThisDictionaryImpl;
-  theCoAlg->deleteSymbolFromThisDictionaryFunc =
-    deleteSymbolFromThisDictionaryImpl;
-  theCoAlg->getSymbolFunc        = getSymbolImpl;
+  theCoAlg->getSymbolEntryFunc   = getSymbolEntryImpl;
+  theCoAlg->getAsSymbolFunc      = getAsSymbolImpl;
+  theCoAlg->deleteSymbolFunc     = deleteSymbolImpl;
   theCoAlg->findSymbolFunc       = findSymbolImpl;
-  theCoAlg->insertSymbolFunc     = insertSymbolImpl;
   theCoAlg->findLUBSymbolFunc    = findLUBSymbolImpl;
   theCoAlg->listDefinitionsFunc  = listDefinitionsImpl;  
   size_t tag =

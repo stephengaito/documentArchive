@@ -67,9 +67,8 @@ Boolean extendJoyLoLImpl(
 ) {
   assert(aDict);
 
-  DictNodeObj* aSym =
-    createSymbolInThisDictionary(aDict, definedName);
-
+  DictNodeObj* aSym = getSymbolEntry(aDict, definedName);
+  assert(aSym);
   if (!aSym->value || redefine) {
     aSym->value =
       (JObj*)newCFunction(jInterp, aFunc);
@@ -143,9 +142,8 @@ Boolean defineJoyLoLImpl(
 ) {
   assert(aDict);
   
-  DictNodeObj* aSym =
-    createSymbolInThisDictionary(aDict, definedName);
-
+  DictNodeObj* aSym = getSymbolEntry(aDict, definedName);
+  assert(aSym);
   if (!aSym->value || redefine) {
     aSym->value = copyLoL(jInterp, aLoL);
   }
@@ -221,9 +219,8 @@ Boolean defineContextImpl(
 
   assert(aDict);
   
-  DictNodeObj* aSym =
-    createSymbolInThisDictionary(aDict, definedName);
-
+  DictNodeObj* aSym = getSymbolEntry(aDict, definedName);
+  assert(aSym);
   if (!aSym->value || redefine) {
     aSym->value   = (JObj*)newCtx;
   }
@@ -299,9 +296,8 @@ Boolean defineNamingImpl(
 
   assert(aDict);
   
-  DictNodeObj* aSym =
-    createSymbolInThisDictionary(aDict, definedName);
-
+  DictNodeObj* aSym = getSymbolEntry(aDict, definedName);
+  assert(aSym);
   if (!aSym->value || redefine) {
     aSym->value   = (JObj*)newDict;
   }

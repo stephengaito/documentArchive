@@ -506,12 +506,10 @@ Boolean registerBooleanWords(
   DictObj *dict = rootCtx->dict;
   assert(dict);
   
-  DictNodeObj* true  =
-    createSymbolInThisDictionary(dict, "true");
+  DictNodeObj* true  = getSymbolEntry(dict, "true");
   true->value = newBoolean(jInterp, TRUE);
 
-  DictNodeObj* false =
-    createSymbolInThisDictionary(dict, "false");
+  DictNodeObj* false = getSymbolEntry(dict, "false");
   false->value = newBoolean(jInterp, FALSE);
 
   extendJoyLoLInRoot(jInterp, "isBoolean", isBooleanAP);

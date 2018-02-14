@@ -305,11 +305,11 @@ void nextSymbolImpl(
     assert(aText->jInterp);
     assert(aText->jInterp->rootCtx);
     assert(aText->jInterp->rootCtx->dict);
-    DictNodeObj* aSym =
-      createSymbolInThisDictionary(
+    DictNodeObj* aSym = getSymbolEntry(
         aText->jInterp->rootCtx->dict,
         aSymbol
       );
+    assert(aSym);
     aText->sym = newSymbol(aText->jInterp, aSym->symbol);
     //
     DEBUG(aText->jInterp, "<-nextSymbol [%s] (symbol)\n",

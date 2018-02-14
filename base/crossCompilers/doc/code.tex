@@ -170,14 +170,18 @@ void addImplementationImpl(
     DictObj *ccDict = theCC->dict;
     checkObj(jInterp, ccDict, DictionariesTag);
     
-    DictNodeObj *entry =
-      createSymbolInThisDictionary(ccDict, wordName);
+    DictNodeObj *entry = getSymbolEntry(ccDict, wordName);
+    assert(entry);
+    
     checkObj(jInterp, entry, DictNodesTag);
+    
     jInterp->writeStdOut(jInterp, "addImplementation created symbol\n");
     ImplementationObj *implementation =
       newImplementation(jInterp, wordName, implBody);
     jInterp->writeStdOut(jInterp, "addImplementation created fragment\n");
+    
     checkObj(jInterp, implementation, ImplementationsTag);
+    
     entry->value = (JObj*)implementation;
   } else {
     // raise error -- NEEDS Context!
@@ -262,8 +266,8 @@ static void addFragmentAP(ContextObj* aCtx) {
     DictObj *ccDict = theCC->dict;
     checkObj(jInterp, ccDict, DictionariesTag);
     
-    DictNodeObj *entry =
-      createSymbolInThisDictionary(ccDict, wordName);
+    DictNodeObj *entry = getSymbolEntry(ccDict, wordName);
+    assert(entry);
     FragmentObj *fragment =
       newFragment(jInterp, wordName, fragmentBody);
     entry->value = (JObj*)fragment;

@@ -1,47 +1,39 @@
 sequenceDiagram
-  participant m as joylol-main
-  participant tf as testFactory
-  participant ts as testStats
-  participant tr as testRunner
- 
+  participant m as joylol-main (globals)
+  participant tf as testFactory (tests)
+  participant ts as testStats (tests)
+  participant tr as testRunner (globals)
+
+  %% specify context switches
   activate m
-  m->>tf: create
+  m -X tf : create (globals)
+  m ->> tf : globals.runTestCase
   deactivate m
   activate tf
-  tf-->>m:switch
-  deactivate tf
-  activate m
-  m->>tf:runTestCase
-  deactivate m
-  activate tf
-  tf->>ts:create
-  deactivate tf
-  activate ts
-  ts-->>tf:switch
-  deactivate ts
-  activate tf
-  tf->>tr:create
+  tf -X ts : create (tests)
+  tf -X tr : create (tests)
+  tf ->> tr : tests.runTestCase
   deactivate tf
   activate tr
   loop assertions
-    tr->>ts:assert
+    tr ->> ts : assert
     deactivate tr
    activate ts
-    ts->>tr:switch
+    ts ->> tr : switch
    deactivate ts
    activate tr
     note over ts,tr :     ...
-    tr->>ts:assert
+    tr ->> ts : assert
     deactivate tr
     activate ts
-    ts->>tr:switch
+    ts ->> tr : switch
     deactivate ts
     activate tr
   end
-  tr->>ts:results
+  tr ->> ts : results
   deactivate tr
   activate ts
-  ts->>m:results
+  ts ->> m : results
   deactivate ts
   activate m
   deactivate m

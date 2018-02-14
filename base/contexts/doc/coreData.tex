@@ -245,8 +245,7 @@ void pushSymbolCtxDataImpl(
   if (!aSymbol) return;
   assert(aCtx->jInterp);
 
-  JObj* aSymbolPA =
-    getSymbol(aCtx->dict, aSymbol);
+  JObj* aSymbolPA = getAsSymbol(aCtx->dict, aSymbol);
   if (!aSymbolPA) return;
   aCtx->data = newPair(aCtx->jInterp, aSymbolPA, aCtx->data);
 }

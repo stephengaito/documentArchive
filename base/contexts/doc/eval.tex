@@ -119,7 +119,7 @@ void evalCommandInContextImpl(
       // if the command is a symbol ...
       //  ... look up the symbol's association in the dictionary
       //
-      DictNodeObj* assoc = findSymbol(theDict, asSymbol(command));
+      DictNodeObj* assoc = getSymbolEntry(theDict, asSymbol(command));
       assert(assoc);
       //
       if (!assoc->value) {

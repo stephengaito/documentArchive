@@ -2,7 +2,7 @@
 
 \section[title=Insert]
 
-\startTestSuite[insertSymbol]
+\startTestSuite[insertSymbolRecurse]
 
 \setCHeaderStream{public}
 \startCHeader
@@ -47,11 +47,11 @@ DictNodeObj* insertSymbolRecurseImpl(
   StringBufferObj *aStrBuf = 
     (jInterp->debug ? newStringBuffer(jInterp) : NULL);
 
-  DEBUG(jInterp, "\ninsertSymbol %p <%s>[%s] %ld:%zu\n",
+  DEBUG(jInterp, "\ninsertSymbolRecurse %p <%s>[%s] %ld:%zu\n",
         anAVLNode, anAVLNode->symbol, aSymbol,
         anAVLNode->balance, anAVLNode->height);
 
-  DEBUG(jInterp, "insertSymbol strncmp %d\n",
+  DEBUG(jInterp, "insertSymbolRecurse strncmp %d\n",
         strcmp(aSymbol, anAVLNode->symbol));
 
   int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
