@@ -408,10 +408,85 @@ DictNodeObj* getSymbolEntryImpl(
   Symbol  *aSymbol
 ) {
   assert(aDict);
-  DictNodeObj* aSym = findSymbol(aDict, aSymbol);
-  if (!aSym) {
-    aSym = createSymbolInThisDictionary(aDict, aSymbol);
+  assert(aSymbol);
+  //
+  // Look for the first dot
+  //
+  char* symPrefix = strdup(aSymbol);
+  char* restOfSym = strrchr(symPrefix, '.');
+  //
+  if (!restOfSym) {
+    //
+    // no dot found so this is the end of the recursion
+    // just find the symbol or create one
+    //
+    DictNodeObj* aSym = findSymbol(aDict, aSymbol);
+    if (!aSym) {
+      aSym = createSymbolInThisDictionary(aDict, aSymbol);
+    }
+    free(symPrefix); // this is *our* duplicate of aSymbol
+    return aSym;
   }
+  //
+  // a dot has been found...
+  // so split the symbol into two at the first dot...
+  //
+  *restOfSym = 0; // terminate the symDup at the dot
+  restOfSym++;    // move onto the next char
+  //
+  // setup the prefix dictionary
+  //
+  DictObj* prefixDict = NULL;
+  //
+  // now look for the prefix dictionary
+  //
+  DictNodeObj *aDictSym =
+    getSymbolEntryImpl(aDict, symPrefix);
+  assert(aDictSym);
+  //
+  if (!aDictSym->value) {
+    //
+    // no dictionary found...
+    // create a new one...
+    // and use it as the prefix Dictionary
+    //
+    prefixDict = 
+      newDictionary(aDict->jInterp, symPrefix, aDict);
+    aDictSym->value = (JObj*)prefixDict;
+    //
+  } else {
+    //
+    // The prefix entry has been found...
+    //
+    if (isDictionary(aDictSym->value)) {
+      //
+      // the symbol IS a dictionary
+      // so use it as the prefix dictionary
+      //
+      prefixDict = (DictObj*)(aDictSym->value);
+    } else {
+      //
+      // the symbol is NOT a dictionary...
+      // so replace the dot with an '_'
+      restOfSym--;
+      *restOfSym = '_';
+      // and retry...
+      //
+      // use the original dictionary
+      //
+      prefixDict = aDict;
+      //
+      // and use the modified symbol
+      //
+      restOfSym = symPrefix;
+    }
+  }
+  assert(prefixDict);
+  //
+  DictNodeObj* aSym =
+    getSymbolEntryImpl(prefixDict, restOfSym);
+  //
+  free(symPrefix); // this is *our* duplicate of aSymbol
   return aSym;
 }
 \stopCCode
