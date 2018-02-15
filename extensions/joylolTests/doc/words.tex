@@ -19,21 +19,74 @@ tests        ;; defined name of this new naming scope
 defineNaming ;; make the definition
 \stopJoylolCode
 
-Now we create a context in the tests naming scope, which will keep track 
-of the test results. 
+We also create a naming scope to contain all of the asertion related 
+words. 
 
 \startJoylolCode
-( interpret ) ;; testStats process
+;; create an assert naming scope
+tests        ;; parent naming scope
+globals      ;; defining naming scope
+assert       ;; defined name of this new naming scope
+defineNaming ;; make the definition
+\stopJoylolCode
+
+Our next task, over the next couple of code fragments, is to define the 
+runTestCase word. This word takes a test case, as a list of the words to 
+be tested intermingled with assertions, and creates the testMonitor and 
+testRunner contexts which together run the test case provided. To be 
+completely re-entrant, the testMonitor and testRunner contexts are not 
+stored in any naming scope, they only exist on various stacks as they are 
+used. 
+
+First we create a context which will run of the test case provide. The 
+list of test words is located on the top of the joylol-main context and 
+are used by the newContext word as the initial process stack for the 
+testRunner context. 
+
+PROBLEM: I need to define the contexts in each \emph{other's} naming 
+scope. Which means, to inhibit infinite cycles of definitions, I need to 
+predefine the two naming scopes and use them "twice", once as the 
+context's naming scope and once as the naming scope in which the context 
+is defined. To do this I could place them in a \quote{local} naming scope 
+of the testFactory, or I could keep them on the stack, but I will need to 
+duplicate them and at some point swap them. 
+
+\startJoylolCode
+
+globals
+testRunner
+defineNaming
+
+              ;; testRunner process (uses provided list of words)
+( 
+)             ;; testRunner data
+
+(
+  globals     ;; parent naming scope
+  testRunner  ;; name of the new naming scope
+  newNaming   ;; create a new naming scope
+) interpret   ;; place the testRunner naming scope on stack
+              ;; to be used as the new context's naming scope
+
+testRunner    ;; defined name of this new context
+defineContext ;; create and define the context
+\stopJoylolCode
+
+Now we create a context which will keep track of the test results. 
+
+\startJoylolCode
+( interpret ) ;; testMonitor process
 ( 
   0           ;; number of attempted tests
   0           ;; number of failed tests
   ()          ;; list of failure reports
-)             ;; testStats data
+)             ;; testMonitor data
 tests         ;; the new context's naming scope
-tests         ;; defining naming scope
-testStats     ;; defined name of this new context
-defineContext ;; create and define the context
+testMonitor   ;; defined name of this new context
+newContext    ;; create and define the context
 \stopJoylolCode
+
+
 
 \stopTestSuite
 

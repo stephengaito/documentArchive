@@ -68,6 +68,32 @@ static void dupAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\startCCode
+static void dupProcessAP(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  pushCtxProcess(aCtx, top);
+  pushCtxProcess(aCtx, copyLoL(aCtx->jInterp, top));
+}
+\stopCCode
+
+\startCCode
+static void swapAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, second);
+}
+\stopCCode
+
+\startCCode
+static void swapProcessAP(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  pushCtxProcess(aCtx, top);
+  pushCtxProcess(aCtx, second);
+}
+\stopCCode
+
 \startTestSuite[initPairsCoAlgebra]
 
 \setCHeaderStream{private}
@@ -91,6 +117,9 @@ Boolean registerPairWords(
   extendJoyLoLInRoot(jInterp, "pop2nd",        pop2ndAP);
   extendJoyLoLInRoot(jInterp, "pop2ndProcess", pop2ndProcessAP);
   extendJoyLoLInRoot(jInterp, "dup",           dupAP);
+  extendJoyLoLInRoot(jInterp, "dupProcess",    dupProcessAP);
+  extendJoyLoLInRoot(jInterp, "swap",          swapAP);
+  extendJoyLoLInRoot(jInterp, "swapProcess",   swapProcessAP);
   
   return TRUE;
 }

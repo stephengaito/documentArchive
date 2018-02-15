@@ -477,7 +477,7 @@ static void defineContextAP(ContextObj* aCtx) {
   assert(jInterp);
   
   popCtxDataInto(aCtx, contextName);
-  popCtxDataInto(aCtx, contextNaming);
+  popCtxDataInto(aCtx, contextNamedIn);
   popCtxDataInto(aCtx, contextNamingScope);
   popCtxDataInto(aCtx, contextData);
   popCtxDataInto(aCtx, contextProcess);
@@ -486,7 +486,7 @@ static void defineContextAP(ContextObj* aCtx) {
       "defineContext required a symbol as top");
     return;
   }
-  if (!isDictionary(contextNaming)) {
+  if (!isDictionary(contextNamedIn)) {
     raiseException(aCtx,
       "defineContext required a dictionary as second");
     return;
@@ -507,7 +507,7 @@ static void defineContextAP(ContextObj* aCtx) {
   assert(newCtx);
   defineContextIn(
     jInterp,
-    (DictObj*)contextNaming,
+    (DictObj*)contextNamedIn,
     asSymbol(contextName),
     newCtx
   );
@@ -520,19 +520,25 @@ static void newContextAP(ContextObj* aCtx) {
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
 
-  popCtxDataInto(aCtx, contextNaming);
+  popCtxDataInto(aCtx, contextName);
+  popCtxDataInto(aCtx, contextNamingScope);
   popCtxDataInto(aCtx, contextData);
   popCtxDataInto(aCtx, contextProcess);
-  if (!isDictionary(contextNaming)) {
+  if (!isSymbol(contextName)) {
     raiseException(aCtx,
-      "newContext requires a dictionary as top");
+      "newContext requires a symbol as top");
+    return;
+  }
+  if (!isDictionary(contextNamingScope)) {
+    raiseException(aCtx,
+      "newContext requires a dictionary as second");
     return;
   }
   ContextObj* newCtx = newContext(
     jInterp,
-    "anonymous",
+    asSymbol(contextName),
     aCtx,
-    (DictObj*)contextNaming,
+    (DictObj*)contextNamingScope,
     contextData,
     contextProcess
   );
@@ -548,14 +554,14 @@ static void defineNamingAP(ContextObj* aCtx) {
   assert(jInterp);
   
   popCtxDataInto(aCtx, dictName);
-  popCtxDataInto(aCtx, dictNaming);
+  popCtxDataInto(aCtx, dictNamedIn);
   popCtxDataInto(aCtx, dictNamingScope);
   if (!isSymbol(dictName)) {
     raiseException(aCtx,
       "defineNaming required a symbol as top");
     return;
   }
-  if (!isDictionary(dictNaming)) {
+  if (!isDictionary(dictNamedIn)) {
     raiseException(aCtx,
       "defineNaming requires a dictionary as second");
     return;
@@ -574,7 +580,7 @@ static void defineNamingAP(ContextObj* aCtx) {
   assert(newDict);
   defineNamingIn(
     jInterp,
-    (DictObj*)dictNaming,
+    (DictObj*)dictNamedIn,
     asSymbol(dictName),
     newDict
   );
@@ -587,17 +593,23 @@ static void newNamingAP(ContextObj* aCtx) {
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
 
+  popCtxDataInto(aCtx, dictName);
   popCtxDataInto(aCtx, dictNamingScope);
+  if (!isSymbol(dictName)) {
+    raiseException(aCtx,
+      "defineNaming requires a symbol as top");
+    return;
+  }
   if (!isDictionary(dictNamingScope)) {
     raiseException(aCtx,
-      "defineNaming requires a dictionary as top");
+      "defineNaming requires a dictionary as second");
     return;
   }
 
   DictObj* newDict =
     newDictionary(
       jInterp,
-      "unnamed",
+      asSymbol(dictName),
       (DictObj*)dictNamingScope
     );
   assert(newDict);
