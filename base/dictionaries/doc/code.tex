@@ -251,8 +251,57 @@ void deleteSymbolImpl(
 ) {
   if (!aSymbol) return;
   assert(aDict);
-  aDict->root = 
-    deleteSymbolRecurse(aDict, aDict->root, aSymbol);
+  //
+  // Look for the first dot
+  //
+  char* symPrefix = strdup(aSymbol);
+  char* restOfSym = strchr(symPrefix, '.');
+  //
+  if (!restOfSym) {
+    //
+    // no dot found so this is the end of the recursion
+    // just delete the symbol
+    //
+    aDict->root = 
+      deleteSymbolRecurse(aDict, aDict->root, aSymbol);
+    free(symPrefix); // this is *our* duplicate of aSymbol
+    return;
+  }
+  //
+  // a dot has been found...
+  // so split the symbol into two a the first dot...
+  //
+  *restOfSym = 0; // terminate the symPrefix at the dot
+  restOfSym++;    // move onto the next char
+  //
+  // now look for the prefix dictionary
+  // start by looking in the dictionary provided
+  //
+  // there is NO dot in the prefix...
+  // so just simply find the symbol
+  //
+  DictNodeObj* aDictSym = findSymbol(aDict, symPrefix);
+  if (!aDictSym || !isDictionary(aDictSym->value)) {
+    //
+    // there is no prefix dictionary
+    // there is nothing to delete...
+    // so free our duplicate of aSymbol
+    // and return
+    //
+    free(symPrefix);
+    return;
+  }
+  //
+  // a prefix dictionary HAS been found
+  // so setup the prefix dictionary
+  //
+  DictObj* prefixDict = (DictObj*)(aDictSym->value);
+  //
+  // and delete the restOfSym from the prefixDict
+  //
+  deleteSymbolImpl(prefixDict, restOfSym);
+  //
+  free(symPrefix); // this is *our* duplicate of aSymbol
 }
 \stopCCode
 
@@ -439,7 +488,7 @@ DictNodeObj* getSymbolEntryImpl(
   DictObj* prefixDict = NULL;
   //
   // now look for the prefix dictionary
-  // starting by looking in the dictionary provided
+  // start by looking in the dictionary provided
   //
   DictNodeObj *aDictSym =
     getSymbolEntryImpl(aDict, symPrefix);
@@ -495,7 +544,7 @@ DictNodeObj* getSymbolEntryImpl(
 }
 \stopCCode
 
-\startTestCase[should find dotted symbols]
+\startTestCase[should get and delete dotted symbols]
 \startCTest
   AssertPtrNotNull(jInterp);
 
@@ -552,6 +601,20 @@ DictNodeObj* getSymbolEntryImpl(
   foundSym = getSymbolEntry(aDict, "test");
   AssertPtrNotNull(foundSym);
   AssertPtrEquals(foundSym, aTestSym);
+  
+  deleteSymbol(childDict, "assert.test");
+  foundSym = findSymbol(childDict, "assert");
+  AssertPtrNotNull(foundSym);
+  AssertPtrEquals(foundSym, aDictSym);
+  AssertPtrNotNull(foundSym->value);
+  AssertIntTrue(isDictionary(foundSym->value));
+  AssertPtrEquals(foundSym->value, (JObj*)aDict);
+  
+  foundSym = findSymbol(aDict, "test");
+  AssertPtrNull(foundSym);
+  
+  foundSym = findSymbol(childDict, "test");
+  AssertPtrNotNull(foundSym);
 \stopCTest
 \stopTestCase
 \stopTestSuite
