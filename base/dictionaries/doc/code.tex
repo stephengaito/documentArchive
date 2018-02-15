@@ -413,7 +413,7 @@ DictNodeObj* getSymbolEntryImpl(
   // Look for the first dot
   //
   char* symPrefix = strdup(aSymbol);
-  char* restOfSym = strrchr(symPrefix, '.');
+  char* restOfSym = strchr(symPrefix, '.');
   //
   if (!restOfSym) {
     //
@@ -431,7 +431,7 @@ DictNodeObj* getSymbolEntryImpl(
   // a dot has been found...
   // so split the symbol into two at the first dot...
   //
-  *restOfSym = 0; // terminate the symDup at the dot
+  *restOfSym = 0; // terminate the symPrefix at the dot
   restOfSym++;    // move onto the next char
   //
   // setup the prefix dictionary
@@ -439,6 +439,7 @@ DictNodeObj* getSymbolEntryImpl(
   DictObj* prefixDict = NULL;
   //
   // now look for the prefix dictionary
+  // starting by looking in the dictionary provided
   //
   DictNodeObj *aDictSym =
     getSymbolEntryImpl(aDict, symPrefix);
@@ -449,6 +450,8 @@ DictNodeObj* getSymbolEntryImpl(
     // no dictionary found...
     // create a new one...
     // and use it as the prefix Dictionary
+    //
+    // WHICH PARENT DICTIONARY SHOULD WE USE?
     //
     prefixDict = 
       newDictionary(aDict->jInterp, symPrefix, aDict);
@@ -464,6 +467,7 @@ DictNodeObj* getSymbolEntryImpl(
       // so use it as the prefix dictionary
       //
       prefixDict = (DictObj*)(aDictSym->value);
+      //
     } else {
       //
       // the symbol is NOT a dictionary...
@@ -490,6 +494,66 @@ DictNodeObj* getSymbolEntryImpl(
   return aSym;
 }
 \stopCCode
+
+\startTestCase[should find dotted symbols]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  DictObj* parentDict =
+    newDictionary(jInterp, "parent", NULL);
+  AssertPtrNotNull(parentDict);
+  AssertPtrNull(parentDict->parent);
+  DictNodeObj* parentEntry =
+    createSymbolInThisDictionary(parentDict, "parent");
+  AssertPtrNotNull(parentEntry);
+  parentEntry->value = (JObj*)parentDict;
+  
+  DictObj* childDict =
+    newDictionary(jInterp, "child", parentDict);
+  AssertPtrNotNull(childDict);
+  AssertPtrNotNull(childDict->parent);
+  AssertPtrEquals(childDict->parent, parentDict);
+  DictNodeObj* childEntry =
+    createSymbolInThisDictionary(parentDict, "child");
+  AssertPtrNotNull(childEntry);
+  childEntry->value = (JObj*)childDict;
+  
+  DictNodeObj* testSym = 
+    createSymbolInThisDictionary(childDict, "test");
+  AssertPtrNotNull(testSym);
+  AssertStrEquals(testSym->symbol, "test");
+  
+  DictNodeObj* foundSym =
+    getSymbolEntry(childDict, "test");
+  AssertPtrNotNull(foundSym);
+  AssertPtrEquals(foundSym, testSym);
+
+  foundSym = getSymbolEntry(parentDict, "child.test");
+  AssertPtrNotNull(foundSym);
+  AssertPtrEquals(foundSym, testSym);
+  
+  foundSym = getSymbolEntry(childDict, "child.test");
+  AssertPtrNotNull(foundSym);
+  AssertPtrEquals(foundSym, testSym);
+  
+  DictNodeObj* aTestSym =
+    getSymbolEntry(parentDict, "assert.test");
+  AssertPtrNotNull(aTestSym);
+  AssertPtrNotEquals(aTestSym, testSym);
+  AssertStrEquals(aTestSym->symbol, "test");
+  
+  DictNodeObj* aDictSym =
+    getSymbolEntry(childDict, "assert");
+  AssertPtrNotNull(aDictSym);
+  AssertPtrNotNull(aDictSym->value);
+  AssertIntTrue(isDictionary(aDictSym->value));
+  DictObj* aDict = (DictObj*)(aDictSym->value);
+  
+  foundSym = getSymbolEntry(aDict, "test");
+  AssertPtrNotNull(foundSym);
+  AssertPtrEquals(foundSym, aTestSym);
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[getAsSymbol]
