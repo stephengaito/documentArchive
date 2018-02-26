@@ -41,6 +41,22 @@ static void failAP(ContextObj* aCtx) {
 \subsection[title=Combinators]
 
 \startCCode
+static void appendAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  if (!isList(second)) {
+    raiseException(aCtx,
+      "append required a list as second");
+    return;
+  }
+  JObj *quotedTop =
+    newPair(aCtx->jInterp, top, NULL);
+  assert(quotedTop);
+  concatLists(aCtx->jInterp, second, quotedTop);
+  pushCtxData(aCtx, second);
+}
+
+\startCCode
 static void extractAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   prependListCtxData(aCtx, top);

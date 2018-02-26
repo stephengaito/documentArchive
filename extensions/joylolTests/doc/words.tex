@@ -9,7 +9,7 @@
 We start by defining a naming scope to contain all of the Joylol test 
 associated words. This naming space is denoted \quote{tests} in the 
 \quote{globals} naming scope. The \quote{tests} naming scope's parent 
-naming scope is \quote{globals}. 
+naming scope is also \quote{globals}. 
 
 \startJoylolCode
 ;; create a tests naming scope
@@ -38,9 +38,9 @@ completely re-entrant, the testMonitor and testRunner contexts are not
 stored in any naming scope, they only exist on various stacks as they are 
 used. 
 
-First we create a context which will run of the test case provide. The 
-list of test words is located on the top of the joylol-main context and 
-are used by the newContext word as the initial process stack for the 
+First we create a context which will run the test case provide. The list 
+of test words is located on the top of the joylol-main context and are 
+used by the newContext word as the initial process stack for the 
 testRunner context. 
 
 PROBLEM: I need to define the contexts in each \emph{other's} naming 
@@ -53,10 +53,6 @@ duplicate them and at some point swap them.
 
 \startJoylolCode
 
-globals
-testRunner
-defineNaming
-
               ;; testRunner process (uses provided list of words)
 ( 
 )             ;; testRunner data
@@ -67,7 +63,15 @@ defineNaming
   newNaming   ;; create a new naming scope
 ) interpret   ;; place the testRunner naming scope on stack
               ;; to be used as the new context's naming scope
+(
+  globals     ;; parent naming scope
+  testMonitor ;; name of the new naming scope
+  newNaming   ;; create a new naming scope
+) interpret   ;; place the testMonitor naming scope on stack
+              ;; to be used as the new context's naming scope
 
+              
+???           ;; defining naming scope
 testRunner    ;; defined name of this new context
 defineContext ;; create and define the context
 \stopJoylolCode
@@ -76,14 +80,17 @@ Now we create a context which will keep track of the test results.
 
 \startJoylolCode
 ( interpret ) ;; testMonitor process
+
 ( 
   0           ;; number of attempted tests
   0           ;; number of failed tests
   ()          ;; list of failure reports
 )             ;; testMonitor data
-tests         ;; the new context's naming scope
+
+
+???           ;; defining naming scope
 testMonitor   ;; defined name of this new context
-newContext    ;; create and define the context
+defineContext ;; create and define the context
 \stopJoylolCode
 
 

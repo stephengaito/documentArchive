@@ -130,6 +130,45 @@ JObj* cdrImpl(JObj* aLoL) {
 \stopTestCase
 \stopTestSuite
 
+\startTestSuite[concatLists]
+\startCHeader
+typedef JObj *(ConcatLists)(
+  JoyLoLInterp *jInterp,
+  PairsObj     *firstList,
+  PairsObj     *secondList
+);
+
+#define concatLists(jInterp, firstList, secondList)     \
+  (                                                     \
+    assert(getPairsClass(jInterp)->concatListFunc),     \
+    (getPairsClass(jInterp)                             \
+      ->concatListFunc(jInterp, firstList, secondList)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* concatListsImpl(
+  JoyLoLInterp *jInterp,
+  PairsObj     *firstList,
+  PairsObj     *secondList
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* concatListsImpl(
+  JoyLoLInterp *jInterp,
+  PairsObj     *firstList,
+  PairsObj     *secondList
+) {
+  
+}
+
+\stopCCode
+
+\stopTestSuite
+
 \startTestSuite[copyLoL]
 
 \startCHeader
