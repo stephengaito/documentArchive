@@ -44,17 +44,10 @@ static void failAP(ContextObj* aCtx) {
 static void appendAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
-  if (!isList(second)) {
-    raiseException(aCtx,
-      "append required a list as second");
-    return;
-  }
-  JObj *quotedTop =
-    newPair(aCtx->jInterp, top, NULL);
-  assert(quotedTop);
-  concatLists(aCtx->jInterp, second, quotedTop);
-  pushCtxData(aCtx, second);
+  JObj* result = concatLists(aCtx->jInterp, second, top);
+  pushCtxData(aCtx, result);
 }
+\stopCCode
 
 \startCCode
 static void extractAP(ContextObj* aCtx) {
@@ -658,6 +651,7 @@ static void undefineAP(ContextObj* aCtx) {
 \startCCode
 void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "fail",                failAP);
+  extendJoyLoLInRoot(jInterp, "append",              appendAP);
   extendJoyLoLInRoot(jInterp, "extract",             extractAP);
   extendJoyLoLInRoot(jInterp, "i",                   interpretAP);
   extendJoyLoLInRoot(jInterp, "interpret",           interpretAP);

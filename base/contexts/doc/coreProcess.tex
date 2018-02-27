@@ -327,27 +327,8 @@ void prependListCtxProcessImpl(
   if (!aCtx) return;
   if (!lolToPrepend) return;
 
-  // ensure lolToPrepend is a list
-  if (!isPair(lolToPrepend)) {
-    lolToPrepend = newPair(aCtx->jInterp, lolToPrepend, NULL);
-    assert(lolToPrepend);
-  }
-
-  // find end of lolToPrepend
-  JObj* lolList = lolToPrepend;
-  while(asCdr(lolList) && isPair(asCdr(lolList))) {
-    lolList = asCdr(lolList);
-  }
-
-  // ensure that if lolToPrepend ends in a non-pair we make it a pair
-  if (asCdr(lolList) && !isPair(asCdr(lolList))) {
-    asCdr(lolList) = newPair(aCtx->jInterp, asCdr(lolList), NULL);
-    assert(asCdr(lolList));
-  }
-
-  // place existing process stack at end of lolToPrepend
-  asCdr(lolList)  = aCtx->process;
-  aCtx->process   = lolToPrepend;
+  aCtx->process =
+    concatLists(aCtx->jInterp, lolToPrepend, aCtx->process);
 }
 \stopCCode
 

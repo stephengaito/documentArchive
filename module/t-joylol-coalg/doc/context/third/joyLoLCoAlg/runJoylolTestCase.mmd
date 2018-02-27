@@ -5,14 +5,14 @@ sequenceDiagram
 
   %% specify context switches
   activate m
-  m ->> m : runTestCase
-  m ->> m : defineNaming (testRunner)
-  m -X tr : defineContext (testRunner)
-  m ->> m : defineNaming (testMonitor)
-  m -X tm : defineContext (testMonitor)
-  m ->> tr : switch
+  m  ->> m : runTestCase
+  m  ->> m : defineNaming (testRunner)
+  m  ->> m : defineNaming (testMonitor)
+  m  -X tr : defineContext (testRunner)
+  m  ->> tr : switch
   deactivate m
   activate tr
+  tr -X tm : defineContext (testMonitor)
   loop assertions
     tr ->> tm : assert
     deactivate tr

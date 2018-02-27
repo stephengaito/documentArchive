@@ -134,15 +134,15 @@ JObj* cdrImpl(JObj* aLoL) {
 \startCHeader
 typedef JObj *(ConcatLists)(
   JoyLoLInterp *jInterp,
-  PairsObj     *firstList,
-  PairsObj     *secondList
+  JObj         *firstList,
+  JObj         *secondList
 );
 
-#define concatLists(jInterp, firstList, secondList)     \
-  (                                                     \
-    assert(getPairsClass(jInterp)->concatListFunc),     \
-    (getPairsClass(jInterp)                             \
-      ->concatListFunc(jInterp, firstList, secondList)) \
+#define concatLists(jInterp, firstList, secondList)       \
+  (                                                       \
+    assert(getPairsClass(jInterp)->concatListsFunc),      \
+    (getPairsClass(jInterp)                               \
+      ->concatListsFunc(jInterp, firstList, secondList))  \
   )
 \stopCHeader
 
@@ -150,8 +150,8 @@ typedef JObj *(ConcatLists)(
 \startCHeader
 extern JObj* concatListsImpl(
   JoyLoLInterp *jInterp,
-  PairsObj     *firstList,
-  PairsObj     *secondList
+  JObj         *firstList,
+  JObj         *secondList
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -159,14 +159,98 @@ extern JObj* concatListsImpl(
 \startCCode
 JObj* concatListsImpl(
   JoyLoLInterp *jInterp,
-  PairsObj     *firstList,
-  PairsObj     *secondList
+  JObj         *firstList,
+  JObj         *secondList
 ) {
+  assert(jInterp);
   
+  JObj *result = NULL;
+  
+  if (firstList && isPair(firstList)) {
+    result = firstList;
+  } else {
+    result = newPairImpl(jInterp, firstList, NULL);
+  }
+  
+  if (!secondList) return result;
+
+  // find end of firstList/result
+  JObj* lolList = result;
+  while(asCdr(lolList) && isPair(asCdr(lolList))) {
+    lolList = asCdr(lolList);
+  }
+
+  // ensure that if firstList/result ends in a non-pair we make it a pair
+  if (asCdr(lolList) && !isPair(asCdr(lolList))) {
+    asCdr(lolList) = newPair(jInterp, asCdr(lolList), NULL);
+    assert(asCdr(lolList));
+    lolList = asCdr(lolList);
+  }
+
+  // place secondList at the end of firstList/result
+  assert(!asCdr(lolList));
+  asCdr(lolList) = secondList;
+  
+  return result;
 }
 
 \stopCCode
 
+\startTestCase[should concatinate two LoLs]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  
+  JObj* result = concatLists(jInterp, NULL, NULL);
+  AssertPtrNotNull(result);
+  AssertIntTrue(isPair(result));
+  printLoL(jInterp, aStrBuf, result);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "( ) ");
+  strBufClose(jInterp, aStrBuf);
+  
+  JObj *trueBool  = newBoolean(jInterp, TRUE);
+  result = concatLists(jInterp, trueBool, NULL);
+  AssertPtrNotNull(result);
+  AssertIntTrue(isPair(result));
+  AssertPtrNotNull(asCar(result));
+  AssertIntTrue(isTrue(asCar(result)));
+  AssertPtrNull(asCdr(result));
+  printLoL(jInterp, aStrBuf, result);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "true ");
+  strBufClose(jInterp, aStrBuf);
+  
+  JObj *falseBool = newBoolean(jInterp, FALSE);
+  result = concatLists(jInterp, trueBool, falseBool);
+  AssertPtrNotNull(result);
+  AssertIntTrue(isPair(result));
+  AssertPtrNotNull(asCar(result));
+  AssertIntTrue(isTrue(asCar(result)));
+  AssertPtrNotNull(asCdr(result));
+  AssertIntTrue(isFalse(asCdr(result)));
+  printLoL(jInterp, aStrBuf, result);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "true false ");
+  strBufClose(jInterp, aStrBuf);
+  
+  JObj* firstList = result;
+  result = concatLists(jInterp, result, NULL);
+  AssertPtrEquals(firstList, result);
+  printLoL(jInterp, aStrBuf, result);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "true false ");
+  strBufClose(jInterp, aStrBuf);
+  
+  result = concatLists(jInterp, firstList, trueBool);
+  AssertPtrNotNull(result);
+  AssertPtrEquals(firstList, result);
+  AssertPtrNotNull(asCar(result));
+  AssertIntTrue(isTrue(asCar(result)));
+  AssertPtrNotNull(asCdr(result));
+  AssertIntTrue(isPair(asCdr(result)));
+  AssertIntTrue(isFalse(asCar(asCdr(result))));
+  printLoL(jInterp, aStrBuf, result);
+  AssertStrEquals(getCString(jInterp, aStrBuf), "true false true ");
+  strBufClose(jInterp, aStrBuf);
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[copyLoL]
@@ -403,12 +487,13 @@ Boolean printPairsCoAlg(
 
 \startCHeader
 typedef struct pairs_class_struct {
-  JClass  super;
-  NewPair    *newPairFunc;
-  CarCdr     *carFunc;
-  CarCdr     *cdrFunc;
-  EqualLoL   *equalLoLFunc;
-  CopyLoL    *copyLoLFunc;
+  JClass       super;
+  NewPair     *newPairFunc;
+  CarCdr      *carFunc;
+  CarCdr      *cdrFunc;
+  ConcatLists *concatListsFunc;
+  EqualLoL    *equalLoLFunc;
+  CopyLoL     *copyLoLFunc;
 } PairsClass;
 \stopCHeader
 
@@ -443,6 +528,7 @@ Boolean registerPairs(JoyLoLInterp *jInterp) {
   theCoAlg->newPairFunc          = newPairImpl;
   theCoAlg->carFunc              = carImpl;
   theCoAlg->cdrFunc              = cdrImpl;
+  theCoAlg->concatListsFunc      = concatListsImpl;
   theCoAlg->equalLoLFunc         = equalLoLImpl;
   theCoAlg->copyLoLFunc          = copyLoLImpl;
   size_t tag =
