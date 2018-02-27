@@ -5,21 +5,21 @@
 \startCCode
 static void lookupAP(ContextObj* aCtx) {
   assert(aCtx);
-  popCtxDataInto(aCtx, aDict);
   popCtxDataInto(aCtx, name2lookup);
+  popCtxDataInto(aCtx, aDict);
+
+  if (!isSymbol(name2lookup)) {
+    raiseException(aCtx,
+      "lookup requires a symbol as top");
+    return;
+  }
 
   if (!isDict(aDict)) {
     raiseException(aCtx,
-      "lookup requires a dictionary as top");
+      "lookup requires a dictionary as second");
     return;
   }
-  
-  if (!isSymbol(name2lookup)) {
-    raiseException(aCtx,
-      "lookup requires a symbol as second");
-    return;
-  }
-  
+
   DictNodeObj* entry =
     findSymbol((DictObj*)aDict, asSymbol(name2lookup));
   JObj* entryValue = NULL;
