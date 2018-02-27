@@ -1,0 +1,36 @@
+;; Current test examples of how to use JoyLoL contexts
+;; to store information for later reuse
+
+clear
+showStack
+showStackOn
+showStackOff
+tracingOn
+tracingOff
+debugOn
+debugOff
+definitions
+
+tests
+definitionsIn
+
+(
+  globals      ;; parent naming scope
+  testRunnerNS ;; name of the new naming scope
+  newNaming    ;; create a new naming scope
+) interpret    ;; place the testRunner naming scope on stack
+               ;; to be used as the new context's naming scope
+
+dup
+
+globals 
+
+swap
+
+testMonitorNS  ;; name of the new naming scope
+defineNaming 
+
+dup
+
+testMonitorNS
+lookup

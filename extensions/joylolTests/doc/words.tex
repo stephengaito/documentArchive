@@ -53,27 +53,33 @@ duplicate them and at some point swap them.
 
 \startJoylolCode
 
-              ;; testRunner process (uses provided list of words)
+                 ;; testRunner process (uses provided list of words)
 ( 
-)             ;; testRunner data
+)                ;; testRunner data
 
 (
-  globals     ;; parent naming scope
-  testRunner  ;; name of the new naming scope
-  newNaming   ;; create a new naming scope
-) interpret   ;; place the testRunner naming scope on stack
-              ;; to be used as the new context's naming scope
-(
-  globals     ;; parent naming scope
-  testMonitor ;; name of the new naming scope
-  newNaming   ;; create a new naming scope
-) interpret   ;; place the testMonitor naming scope on stack
-              ;; to be used as the new context's naming scope
+  (
+    globals      ;; parent naming scope
+    testRunnerNS ;; name of the new naming scope
+    newNaming    ;; create a new naming scope
+  ) interpret    ;; place the testRunner naming scope on stack
+                 ;; to be used as the new context's naming scope
 
-              
-???           ;; defining naming scope
-testRunner    ;; defined name of this new context
-defineContext ;; create and define the context
+  dup            ;; make a second copy of the testRunnerNS 
+                 ;; for use later to lookup testMonitorNS
+  
+  globals        ;; parent naming scope
+  swap           ;; make testRunnerNS the defining naming scope
+  testMonitorNS  ;; name of the new naming scope
+  defineNaming   ;; create a new naming scope
+) interpret      ;; place the testMonitor naming scope on stack
+                 ;; to be used as the new context's naming scope
+                 
+  testMonitorNS  ;; use the dup'ed copy of testRunnerNS
+  lookup         ;; to lookup testMonitorNS
+  
+testRunner       ;; defined name of this new context
+defineContext    ;; create and define the context
 \stopJoylolCode
 
 Now we create a context which will keep track of the test results. 

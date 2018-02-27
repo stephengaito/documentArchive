@@ -93,10 +93,28 @@ DictObj* newDictionaryImpl(
 \stopCTest
 \stopTestCase
 
+\startCHeader
+#define isDict(aLoL)                    \
+  (                                     \
+    (                                   \
+      (aLoL) &&                         \
+      asType(aLoL) &&                   \
+      (asTag(aLoL) == DictionariesTag)  \
+    ) ?                                 \
+      TRUE :                            \
+      FALSE                             \
+  )
+\stopCHeader
+
 \startTestSuite[findSymbol]
 
 \setCHeaderStream{private}
 \startCHeader
+typedef DictNodeObj* (FindSymbol)(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
 extern DictNodeObj* findSymbolInThisDictionary(
   DictObj *aDict,
   Symbol  *aSymbol
@@ -426,38 +444,17 @@ DictNodeObj* createSymbolInThisDictionary(
 
 \startTestSuite[getSymbolEntry]
 
-\startCHeader
-typedef DictNodeObj *(GetSymbolEntry)(
-  DictObj *aDict,
-  Symbol  *aSymbol
-);
-
-#define getSymbolEntry(aDict, aSymbol)          \
-  (                                             \
-    assert(aDict),                              \
-    assert(getDictionariesClass(aDict->jInterp) \
-      ->getSymbolEntryFunc),                    \
-    (getDictionariesClass(aDict->jInterp)       \
-      ->getSymbolEntryFunc(aDict, aSymbol))     \
-  )
-\stopCHeader
-
-\setCHeaderStream{private}
-\startCHeader
-extern DictNodeObj* getSymbolEntryImpl(
-  DictObj *aDict,
-  Symbol  *aSymbol
-);
-\stopCHeader
-\setCHeaderStream{public}
-
 \startCCode
-DictNodeObj* getSymbolEntryImpl(
-  DictObj *aDict,
-  Symbol  *aSymbol
+DictNodeObj* walkEntryPath(
+  DictObj    *aDict,
+  Symbol     *aSymbol,
+  FindSymbol *symbolFinder
 ) {
   assert(aDict);
   assert(aSymbol);
+  DEBUG(aDict->jInterp,
+    "walkEntryPath: %p [%s] %p\n", aDict, aSymbol, symbolFinder
+  );
   //
   // Look for the first dot
   //
@@ -465,12 +462,16 @@ DictNodeObj* getSymbolEntryImpl(
   char* restOfSym = strchr(symPrefix, '.');
   //
   if (!restOfSym) {
+    DEBUG(aDict->jInterp, "no dot found in [%s]\n", aSymbol);
     //
     // no dot found so this is the end of the recursion
     // just find the symbol or create one
     //
-    DictNodeObj* aSym = findSymbol(aDict, aSymbol);
+    DictNodeObj* aSym = symbolFinder(aDict, aSymbol);
     if (!aSym) {
+      DEBUG(aDict->jInterp,
+        "no entry found using %p [%s]\n", aDict, aSymbol
+      );
       aSym = createSymbolInThisDictionary(aDict, aSymbol);
     }
     free(symPrefix); // this is *our* duplicate of aSymbol
@@ -491,7 +492,7 @@ DictNodeObj* getSymbolEntryImpl(
   // start by looking in the dictionary provided
   //
   DictNodeObj *aDictSym =
-    getSymbolEntryImpl(aDict, symPrefix);
+    walkEntryPath(aDict, symPrefix, symbolFinder);
   assert(aDictSym);
   //
   if (!aDictSym->value) {
@@ -537,10 +538,83 @@ DictNodeObj* getSymbolEntryImpl(
   assert(prefixDict);
   //
   DictNodeObj* aSym =
-    getSymbolEntryImpl(prefixDict, restOfSym);
+    walkEntryPath(prefixDict, restOfSym, symbolFinder);
   //
   free(symPrefix); // this is *our* duplicate of aSymbol
   return aSym;
+}
+\stopCCode
+
+\startCHeader
+typedef DictNodeObj *(GetSymbolEntry)(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
+#define getSymbolEntry(aDict, aSymbol)          \
+  (                                             \
+    assert(aDict),                              \
+    assert(getDictionariesClass(aDict->jInterp) \
+      ->getSymbolEntryFunc),                    \
+    (getDictionariesClass(aDict->jInterp)       \
+      ->getSymbolEntryFunc(aDict, aSymbol))     \
+  )
+
+#define getSymbolEntryInChild(aDict, aSymbol)       \
+  (                                                 \
+    assert(aDict),                                  \
+    assert(getDictionariesClass(aDict->jInterp)     \
+      ->getSymbolEntryFunc),                        \
+    (getDictionariesClass(aDict->jInterp)           \
+      ->getSymbolEntryInChildFunc(aDict, aSymbol))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern DictNodeObj* getSymbolEntryImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
+extern DictNodeObj* getSymbolEntryInChildImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+DictNodeObj* getSymbolEntryImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  assert(aDict);
+  assert(aSymbol);
+  DEBUG(aDict->jInterp,
+    "getSymbolEntry: %p [%s]\n", aDict, aSymbol
+  );
+  return walkEntryPath(
+    aDict,
+    aSymbol,
+    findSymbol
+  );
+}
+
+DictNodeObj* getSymbolEntryInChildImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  assert(aDict);
+  assert(aSymbol);
+  DEBUG(aDict->jInterp,
+    "getSymbolEntryInChild: %p [%s]\n", aDict, aSymbol
+  );
+  return walkEntryPath(
+    aDict,
+    aSymbol,
+    findSymbolInThisDictionary
+  );
 }
 \stopCCode
 
@@ -833,6 +907,7 @@ typedef struct dictionaries_class_struct {
   JClass           super;
   NewDictionary   *newDictionaryFunc;
   GetSymbolEntry  *getSymbolEntryFunc;
+  GetSymbolEntry  *getSymbolEntryInChildFunc;
   GetAsSymbol     *getAsSymbolFunc;
   DeleteSymbol    *deleteSymbolFunc;
   FindLUBSymbol   *findLUBSymbolFunc;
@@ -867,18 +942,19 @@ Boolean registerDictionaries(JoyLoLInterp *jInterp) {
     = joyLoLCalloc(1, DictionariesClass);
   assert(theCoAlg);
   
-  theCoAlg->super.name           = DictionariesName;
-  theCoAlg->super.objectSize     = sizeof(DictObj);
-  theCoAlg->super.initializeFunc = initializeDictionaries;
-  theCoAlg->super.registerFunc   = registerDictionaryWords;
-  theCoAlg->super.equalityFunc   = equalityDictionaryCoAlg;
-  theCoAlg->super.printFunc      = printDictionaryCoAlg;
-  theCoAlg->newDictionaryFunc    = newDictionaryImpl;
-  theCoAlg->getSymbolEntryFunc   = getSymbolEntryImpl;
-  theCoAlg->getAsSymbolFunc      = getAsSymbolImpl;
-  theCoAlg->deleteSymbolFunc     = deleteSymbolImpl;
-  theCoAlg->findLUBSymbolFunc    = findLUBSymbolImpl;
-  theCoAlg->listDefinitionsFunc  = listDefinitionsImpl;  
+  theCoAlg->super.name                = DictionariesName;
+  theCoAlg->super.objectSize          = sizeof(DictObj);
+  theCoAlg->super.initializeFunc      = initializeDictionaries;
+  theCoAlg->super.registerFunc        = registerDictionaryWords;
+  theCoAlg->super.equalityFunc        = equalityDictionaryCoAlg;
+  theCoAlg->super.printFunc           = printDictionaryCoAlg;
+  theCoAlg->newDictionaryFunc         = newDictionaryImpl;
+  theCoAlg->getSymbolEntryFunc        = getSymbolEntryImpl;
+  theCoAlg->getSymbolEntryInChildFunc = getSymbolEntryInChildImpl;
+  theCoAlg->getAsSymbolFunc           = getAsSymbolImpl;
+  theCoAlg->deleteSymbolFunc          = deleteSymbolImpl;
+  theCoAlg->findLUBSymbolFunc         = findLUBSymbolImpl;
+  theCoAlg->listDefinitionsFunc       = listDefinitionsImpl;  
   size_t tag =
     registerJClass(jInterp, (JClass*)theCoAlg);
   

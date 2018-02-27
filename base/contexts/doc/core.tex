@@ -296,7 +296,7 @@ Boolean defineNamingImpl(
 
   assert(aDict);
   
-  DictNodeObj* aSym = getSymbolEntry(aDict, definedName);
+  DictNodeObj* aSym = getSymbolEntryInChild(aDict, definedName);
   assert(aSym);
   if (!aSym->value || redefine) {
     aSym->value   = (JObj*)newDict;

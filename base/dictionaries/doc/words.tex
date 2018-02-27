@@ -2,6 +2,33 @@
 
 \section[title=Words]
 
+\startCCode
+static void lookupAP(ContextObj* aCtx) {
+  assert(aCtx);
+  popCtxDataInto(aCtx, aDict);
+  popCtxDataInto(aCtx, name2lookup);
+
+  if (!isDict(aDict)) {
+    raiseException(aCtx,
+      "lookup requires a dictionary as top");
+    return;
+  }
+  
+  if (!isSymbol(name2lookup)) {
+    raiseException(aCtx,
+      "lookup requires a symbol as second");
+    return;
+  }
+  
+  DictNodeObj* entry =
+    findSymbol((DictObj*)aDict, asSymbol(name2lookup));
+  JObj* entryValue = NULL;
+  if (entry) entryValue = entry->value;
+  
+  pushCtxData(aCtx, entryValue);
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerDictionaryWords(
@@ -17,6 +44,7 @@ Boolean registerDictionaryWords(
   JClass       *theCoAlg
 ) {
   assert(jInterp);
+  extendJoyLoLInRoot(jInterp, "lookup", lookupAP);
   return TRUE;
 }
 \stopCCode

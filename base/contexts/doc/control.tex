@@ -557,6 +557,13 @@ static void newContextAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
+static void thisContextAP(ContextObj* aCtx) {
+  assert(aCtx);
+  pushCtxData(aCtx, (JObj*)aCtx);
+}
+\stopCCode
+
+\startCCode
 static void defineNamingAP(ContextObj* aCtx) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
@@ -627,6 +634,13 @@ static void newNamingAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
+static void thisNamingAP(ContextObj* aCtx) {
+  assert(aCtx);
+  pushCtxData(aCtx, (JObj*)(aCtx->dict));
+}
+\stopCCode
+
+\startCCode
 static void undefineAP(ContextObj* aCtx) {
   assert(aCtx);
   
@@ -661,10 +675,11 @@ void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "lispFor",             lispForAP);
   extendJoyLoLInRoot(jInterp, "define",              defineAP);
   extendJoyLoLInRoot(jInterp, "defineContext",       defineContextAP);
-  extendJoyLoLInRoot(jInterp, "thisContext",         newContextAP);
   extendJoyLoLInRoot(jInterp, "newContext",          newContextAP);
+  extendJoyLoLInRoot(jInterp, "thisContext",         thisContextAP);
   extendJoyLoLInRoot(jInterp, "defineNaming",        defineNamingAP);
   extendJoyLoLInRoot(jInterp, "newNaming",           newNamingAP);
+  extendJoyLoLInRoot(jInterp, "thisNaming",          thisNamingAP);
   extendJoyLoLInRoot(jInterp, "undefine",            undefineAP);
   extendJoyLoLInRoot(jInterp, "done",                doneAP);
   extendJoyLoLInRoot(jInterp, "clear",               clearContextAP);
