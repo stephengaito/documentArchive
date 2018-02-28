@@ -14,6 +14,16 @@ definitions
 tests
 definitionsIn
 
+( something here ) ;; testRunner process (already on stack)
+
+( createTestMonitor ) ;; needs to be run before the tests
+
+swap
+
+append
+
+( ) ;; testRunner Data
+
 (
   globals      ;; parent naming scope
   testRunnerNS ;; name of the new naming scope
@@ -34,3 +44,4 @@ dup
 
 testMonitorNS
 lookup
+

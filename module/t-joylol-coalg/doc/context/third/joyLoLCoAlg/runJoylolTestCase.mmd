@@ -9,10 +9,10 @@ sequenceDiagram
   m  ->> m : defineNaming (testRunner)
   m  ->> m : defineNaming (testMonitor)
   m  -X tr : defineContext (testRunner)
+  m  -X tm : defineContext (testMonitor)
   m  ->> tr : switch
   deactivate m
   activate tr
-  tr -X tm : defineContext (testMonitor)
   loop assertions
     tr ->> tm : assert
     deactivate tr

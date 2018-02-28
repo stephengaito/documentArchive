@@ -87,6 +87,12 @@ typedef struct joylol_object_struct {
 #define asTag(aLoL)   (((JObj*)(aLoL))->tag)
 #define asFlags(aLoL) (((JObj*)(aLoL))->flags)
 
+#define flagsSet(aLoL, bitMask)       \
+  (((JObj*)(aLoL))->flags & (bitMask))
+
+#define flagsClear(aLoL, bitMask)           \
+  ((~(((JObj*)(aLoL))->flags)) & (bitMask))
+
 #define checkObj(jInterp, theObj, theTag) \
   (                                       \
     assert(jInterp),                      \

@@ -12,6 +12,14 @@ typedef Boolean (ExtendJoyLoL)(
   Boolean       redefine
 );
 
+typedef Boolean (ExtendCtxJoyLoL)(
+  JoyLoLInterp *jInterp,
+  DictObj      *aDict,
+  Symbol       *definedName,
+  CtxCFunction *aFunc,
+  Boolean       redefine
+);
+
 #define extendJoyLoL(jInterp, aDict,      \
   definedName, aFunc, redefine)           \
   (                                       \
@@ -43,6 +51,38 @@ typedef Boolean (ExtendJoyLoL)(
     extendJoyLoL(jInterp, jInterp->rootCtx->dict,         \
       definedName, aFunc, TRUE)                           \
   )
+
+#define extendCtxJoyLoL(jInterp, aDict,     \
+  definedName, aFunc, redefine)             \
+  (                                         \
+    assert(getContextsClass(jInterp)        \
+      ->extendCtxJoyLoLFunc),               \
+    (getContextsClass(jInterp)              \
+      ->extendCtxJoyLoLFunc(jInterp, aDict, \
+        definedName, aFunc, redefine))      \
+  )
+  
+#define extendCtxJoyLoLIn(jInterp, aDict, definedName, aFunc) \
+  extendCtxJoyLoL(jInterp, aDict, definedName, aFunc, FALSE)
+  
+#define reExtendCtxJoyLoLIn(jInterp, aDict, definedName, aFunc) \
+  extendCtxJoyLoL(jInterp, aDict, definedName, aFunc, TRUE)
+  
+#define extendCtxJoyLoLInRoot(jInterp, definedName, aFunc)\
+  (                                                       \
+    assert(jInterp),                                      \
+    assert(jInterp->rootCtx),                             \
+    extendCtxJoyLoL(jInterp, jInterp->rootCtx->dict,      \
+      definedName, aFunc, FALSE)                          \
+  )
+  
+#define reExtendCtxJoyLoLInRoot(jInterp, definedName, aFunc)\
+  (                                                         \
+    assert(jInterp),                                        \
+    assert(jInterp->rootCtx),                               \
+    extendCtxJoyLoL(jInterp, jInterp->rootCtx->dict,        \
+      definedName, aFunc, TRUE)                             \
+  )
 \stopCHeader
 
 \setCHeaderStream{private}
@@ -52,6 +92,14 @@ extern Boolean extendJoyLoLImpl(
   DictObj      *aDict,
   Symbol       *definedName,
   CFunction    *aFunc,
+  Boolean       redefine
+);
+
+extern Boolean extendCtxJoyLoLImpl(
+  JoyLoLInterp *jInterp,
+  DictObj      *aDict,
+  Symbol       *definedName,
+  CtxCFunction *aFunc,
   Boolean       redefine
 );
 \stopCHeader
@@ -67,11 +115,30 @@ Boolean extendJoyLoLImpl(
 ) {
   assert(aDict);
 
-  DictNodeObj* aSym = getSymbolEntry(aDict, definedName);
+  DictNodeObj* aSym = getSymbolEntryInChild(aDict, definedName);
   assert(aSym);
   if (!aSym->value || redefine) {
     aSym->value =
       (JObj*)newCFunction(jInterp, aFunc);
+  }
+
+  return TRUE;
+}
+
+Boolean extendCtxJoyLoLImpl(
+  JoyLoLInterp *jInterp,
+  DictObj      *aDict,
+  Symbol       *definedName,
+  CtxCFunction *aFunc,
+  Boolean       redefine
+) {
+  assert(aDict);
+
+  DictNodeObj* aSym = getSymbolEntryInChild(aDict, definedName);
+  assert(aSym);
+  if (!aSym->value || redefine) {
+    aSym->value =
+      (JObj*)newCtxCFunction(jInterp, aFunc);
   }
 
   return TRUE;
@@ -142,7 +209,7 @@ Boolean defineJoyLoLImpl(
 ) {
   assert(aDict);
   
-  DictNodeObj* aSym = getSymbolEntry(aDict, definedName);
+  DictNodeObj* aSym = getSymbolEntryInChild(aDict, definedName);
   assert(aSym);
   if (!aSym->value || redefine) {
     aSym->value = copyLoL(jInterp, aLoL);
@@ -219,7 +286,7 @@ Boolean defineContextImpl(
 
   assert(aDict);
   
-  DictNodeObj* aSym = getSymbolEntry(aDict, definedName);
+  DictNodeObj* aSym = getSymbolEntryInChild(aDict, definedName);
   assert(aSym);
   if (!aSym->value || redefine) {
     aSym->value   = (JObj*)newCtx;

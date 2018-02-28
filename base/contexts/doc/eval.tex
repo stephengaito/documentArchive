@@ -6,8 +6,8 @@
 static void traceAction(
   JoyLoLInterp *jInterp,
   Symbol       *action,
-  JObj     *aLoL,
-  JObj     *command
+  JObj         *aLoL,
+  JObj         *command
 ) {
   assert(jInterp);
   StringBufferObj *aStrBuf =
@@ -83,28 +83,23 @@ void evalCommandInContextImpl(
       //
       // if the command is a function.. call the function
       //
-      if (aCtx->tracingOn) 
-        traceAction(jInterp, "calling", command, NULL);
-      (asCFunc(command))(aCtx);
-      //
-    } else if (isContext(command)) {
-      //
-      // if the command is a context... switch to this context
-      //
-      DEBUG(jInterp, "evalCommandInContext -> switching origCtx: %s\n",
-            aCtx->name);
-      if (aCtx->tracingOn)
-        traceAction(jInterp, "switching", command, NULL);
-      ContextObj* switchCtx = (ContextObj*)command;
-      assert(switchCtx);
-
-      popCtxDataInto(aCtx, oldCtxTop);
-      pushCtxData(switchCtx, oldCtxTop);
-      switchCtx->tracingOn = aCtx->tracingOn;
-      aCtx = switchCtx;
-      DEBUG(jInterp, "evalCommandInContext <- switching newCtx: %s\n",
-            aCtx->name);
-      //
+      if (isCtxCFunction(command)) {
+        //
+        // this is a CTX CFunction
+        //
+        if (aCtx->tracingOn) 
+          traceAction(jInterp, "calling(ctx)", command, NULL);
+        aCtx = (asCtxCFunc(command))(aCtx);
+        //
+      } else {
+        //
+        // this is a normal CFunction
+        //
+        if (aCtx->tracingOn) 
+          traceAction(jInterp, "calling", command, NULL);
+        (asCFunc(command))(aCtx);
+        //
+      }
     } else if (!isSymbol(command)) {
       //
       // if the command is not a Symbol ...
@@ -149,24 +144,6 @@ void evalCommandInContextImpl(
         if (aCtx->tracingOn)
           traceAction(jInterp, "calling", command, NULL);
         (asCFunc(assoc->value))(aCtx);
-        //
-      } else if (isContext(assoc->value)) {
-        //
-        // if the association is a context... switch to this contex
-        //
-        DEBUG(jInterp, "evalCommandInContext -> switching origCtx: %s\n",
-              aCtx->name);
-        if (aCtx->tracingOn)
-          traceAction(jInterp, "switching", command, NULL);
-        ContextObj* switchCtx = (ContextObj*)(assoc->value);
-        assert(switchCtx);
-
-        popCtxDataInto(aCtx, oldCtxTop);
-        pushCtxData(switchCtx, oldCtxTop);
-        switchCtx->tracingOn = aCtx->tracingOn;
-        aCtx = switchCtx;
-        DEBUG(jInterp, "evalCommandInContext <- switching newCtx: %s\n",
-              aCtx->name);
         //
       } else {
         //

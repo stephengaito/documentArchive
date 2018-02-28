@@ -41,6 +41,15 @@ static void failAP(ContextObj* aCtx) {
 \subsection[title=Combinators]
 
 \startCCode
+static void prependAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  JObj* result = concatLists(aCtx->jInterp, top, second);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\startCCode
 static void appendAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
@@ -559,7 +568,38 @@ static void newContextAP(ContextObj* aCtx) {
 \startCCode
 static void thisContextAP(ContextObj* aCtx) {
   assert(aCtx);
-  pushCtxData(aCtx, (JObj*)aCtx);
+  DEBUG(aCtx->jInterp, "thisContextAP > %p\n", aCtx);
+  //pushCtxData(aCtx, (JObj*)aCtx);
+  DEBUG(aCtx->jInterp, "thisContextAP < %p\n", aCtx);
+}
+\stopCCode
+
+\startCCode
+static ContextObj* switchContextAP(ContextObj* aCtx) {
+  assert(aCtx);
+
+  popCtxDataInto(aCtx, newContext);
+  popCtxDataInto(aCtx, oldContextTop);
+  if (!isContext(newContext)) {
+    raiseException(aCtx,
+      "switchContext required a context as top");
+    return aCtx;
+  }
+  
+  //
+  // switch to newContext
+  //
+  DEBUG(aCtx->jInterp, "switchContextAP -> switching origCtx: %s\n",
+    aCtx->name);
+  ContextObj* newCtx = (ContextObj*)newContext;
+  assert(newCtx);
+
+  pushCtxData(newCtx, oldContextTop);
+  newCtx->tracingOn = aCtx->tracingOn;
+  DEBUG(aCtx->jInterp, "switchContextAP <- switching newCtx: %s\n",
+            newCtx->name);
+  //
+  return newCtx;
 }
 \stopCCode
 
@@ -634,6 +674,30 @@ static void newNamingAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
+static void localizeNamingAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataInto(aCtx, localNaming);
+  if (!isSymbol(localNaming)){
+    raiseException(aCtx,
+      "localizeNaming requires a symbol as top");
+    return;
+  }
+  
+  DictObj* newDict = 
+    newDictionary(
+      jInterp,
+      asSymbol(localNaming),
+      aCtx->dict
+    );
+  assert(newDict);
+  aCtx->dict = newDict;
+}
+\stopCCode
+
+\startCCode
 static void thisNamingAP(ContextObj* aCtx) {
   assert(aCtx);
   pushCtxData(aCtx, (JObj*)(aCtx->dict));
@@ -665,6 +729,7 @@ static void undefineAP(ContextObj* aCtx) {
 \startCCode
 void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "fail",                failAP);
+  extendJoyLoLInRoot(jInterp, "prepend",             prependAP);
   extendJoyLoLInRoot(jInterp, "append",              appendAP);
   extendJoyLoLInRoot(jInterp, "extract",             extractAP);
   extendJoyLoLInRoot(jInterp, "i",                   interpretAP);
@@ -679,6 +744,7 @@ void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "thisContext",         thisContextAP);
   extendJoyLoLInRoot(jInterp, "defineNaming",        defineNamingAP);
   extendJoyLoLInRoot(jInterp, "newNaming",           newNamingAP);
+  extendJoyLoLInRoot(jInterp, "localizeNaming",      localizeNamingAP);
   extendJoyLoLInRoot(jInterp, "thisNaming",          thisNamingAP);
   extendJoyLoLInRoot(jInterp, "undefine",            undefineAP);
   extendJoyLoLInRoot(jInterp, "done",                doneAP);
@@ -688,5 +754,7 @@ void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "raiseIfFalse",        raiseIfFalseAP);
   extendJoyLoLInRoot(jInterp, "findFirstTryHandler", findFirstTryHandlerAP);
   extendJoyLoLInRoot(jInterp, "tryHandler",          tryHandlerAP);
+  
+  extendCtxJoyLoLInRoot(jInterp, "switchContext",    switchContextAP);
 }
 \stopCCode

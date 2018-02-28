@@ -208,46 +208,47 @@ Boolean printContextsCoAlg(
 
 \startCHeader
 typedef struct contexts_class_struct {
-  JClass      super;
-  NewContext     *newContextFunc;
-  ClearCtx       *clearCtxDataFunc;
-  PushCtx        *pushCtxDataFunc; 
-  PushNullCtx    *pushNullCtxDataFunc;
-  PushBooleanCtx *pushBooleanCtxDataFunc;
-  PushNaturalCtx *pushNaturalCtxDataFunc;
-  PushSymbolCtx  *pushSymbolCtxDataFunc;
+  JClass           super;
+  NewContext      *newContextFunc;
+  ClearCtx        *clearCtxDataFunc;
+  PushCtx         *pushCtxDataFunc; 
+  PushNullCtx     *pushNullCtxDataFunc;
+  PushBooleanCtx  *pushBooleanCtxDataFunc;
+  PushNaturalCtx  *pushNaturalCtxDataFunc;
+  PushSymbolCtx   *pushSymbolCtxDataFunc;
   PushParsedArrayOfStringsCtx 
     *pushParsedArrayOfStringsCtxDataFunc;
   PushParsedStringCtx
     *pushParsedStringCtxDataFunc;
   PushParsedTextCtx
     *pushParsedTextCtxDataFunc;
-  PrependListCtx *prependListCtxDataFunc;
-  PopCtx         *popCtxDataFunc;
-  ClearCtx       *clearCtxProcessFunc;
-  PushCtx        *pushCtxProcessFunc;
-  PushNullCtx    *pushNullCtxProcessFunc;
-  PushBooleanCtx *pushBooleanCtxProcessFunc;
-  PushNaturalCtx *pushNaturalCtxProcessFunc;
-  PushSymbolCtx  *pushSymbolCtxProcessFunc;
+  PrependListCtx  *prependListCtxDataFunc;
+  PopCtx          *popCtxDataFunc;
+  ClearCtx        *clearCtxProcessFunc;
+  PushCtx         *pushCtxProcessFunc;
+  PushNullCtx     *pushNullCtxProcessFunc;
+  PushBooleanCtx  *pushBooleanCtxProcessFunc;
+  PushNaturalCtx  *pushNaturalCtxProcessFunc;
+  PushSymbolCtx   *pushSymbolCtxProcessFunc;
   PushParsedArrayOfStringsCtx
     *pushParsedArrayOfStringsCtxProcessFunc;
   PushParsedStringCtx
     *pushParsedStringCtxProcessFunc;
   PushParsedTextCtx
     *pushParsedTextCtxProcessFunc;
-  PrependListCtx *prependListCtxProcessFunc;
-  PopCtx         *popCtxProcessFunc;
-  ExtendJoyLoL   *extendJoyLoLFunc;
-  DefineJoyLoL   *defineJoyLoLFunc;
-  DefineContext  *defineContextFunc;
-  DefineNaming   *defineNamingFunc;
-  RaiseException *raiseExceptionFunc;
+  PrependListCtx  *prependListCtxProcessFunc;
+  PopCtx          *popCtxProcessFunc;
+  ExtendJoyLoL    *extendJoyLoLFunc;
+  ExtendCtxJoyLoL *extendCtxJoyLoLFunc;
+  DefineJoyLoL    *defineJoyLoLFunc;
+  DefineContext   *defineContextFunc;
+  DefineNaming    *defineNamingFunc;
+  RaiseException  *raiseExceptionFunc;
   ReportException
     *reportExceptionFunc;
   EvalCommandInContext
     *evalCommandInContextFunc;
-  EvalContext    *evalContextFunc;
+  EvalContext     *evalContextFunc;
   EvalTextInContext
     *evalTextInContextFunc;
   EvalArrayOfStringsInContext
@@ -343,6 +344,7 @@ Boolean registerContexts(
   theCoAlg->popCtxProcessFunc      = popCtxProcessImpl;
   
   theCoAlg->extendJoyLoLFunc       = extendJoyLoLImpl;
+  theCoAlg->extendCtxJoyLoLFunc    = extendCtxJoyLoLImpl;
   theCoAlg->defineJoyLoLFunc       = defineJoyLoLImpl;
   theCoAlg->defineContextFunc      = defineContextImpl;
   theCoAlg->defineNamingFunc       = defineNamingImpl;

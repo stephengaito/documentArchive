@@ -10,13 +10,20 @@
 \startCHeader
 typedef struct context_object_struct ContextObj;
 typedef void (CFunction)(ContextObj*);
+typedef ContextObj* (CtxCFunction)(ContextObj*);
+
+#define CTX_CFUNCTION_FLAG 0x8L
 
 typedef struct cFunction_object_struct {
   JObj   super;
   CFunction *func;
 } CFunctionObj;
 
-#define asCFunc(aLoL) (((CFunctionObj*)(aLoL))->func)
+#define asCFunc(aLoL)             \
+  (((CFunctionObj*)(aLoL))->func)
+  
+#define asCtxCFunc(aLoL)                            \
+  ((CtxCFunction*)(((CFunctionObj*)(aLoL))->func))
 \stopCHeader
 
 \startTestSuite[newCFunction]
@@ -34,6 +41,19 @@ typedef CFunctionObj *(NewCFunction)(
     (getCFunctionsClass(jInterp)          \
       ->newCFunctionFunc(jInterp, aFunc)) \
   )
+
+typedef CFunctionObj *(NewCtxCFunction)(
+  JoyLoLInterp *jInterp,
+  CtxCFunction *aFunc
+);
+
+#define newCtxCFunction(jInterp, aFunc)       \
+  (                                           \
+    assert(getCFunctionsClass(jInterp)        \
+      ->newCtxCFunctionFunc),                 \
+    (getCFunctionsClass(jInterp)              \
+      ->newCtxCFunctionFunc(jInterp, aFunc))  \
+  )
 \stopCHeader
 
 \setCHeaderStream{private}
@@ -42,13 +62,18 @@ extern CFunctionObj *newCFunctionImpl(
   JoyLoLInterp *jInterp,
   CFunction *aFunc
 );
+
+extern CFunctionObj *newCtxCFunctionImpl(
+  JoyLoLInterp *jInterp,
+  CtxCFunction *aFunc
+);
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 CFunctionObj *newCFunctionImpl(
   JoyLoLInterp *jInterp,
-  CFunction *aFunc
+  CFunction    *aFunc
 ) {
   assert(jInterp);
   CFunctionObj* aNewFunc =
@@ -57,11 +82,27 @@ CFunctionObj *newCFunctionImpl(
   aNewFunc->func  = aFunc;
   return aNewFunc;
 }
+
+CFunctionObj *newCtxCFunctionImpl(
+  JoyLoLInterp *jInterp,
+  CtxCFunction *aFunc
+) {
+  assert(jInterp);
+  CFunctionObj* aNewFunc =
+    (CFunctionObj*)newObject(jInterp, CFunctionsTag);
+  assert(aNewFunc);
+  aNewFunc->func  = (CFunction*)aFunc;
+  aNewFunc->super.flags |= CTX_CFUNCTION_FLAG;
+  return aNewFunc;
+}
 \stopCCode
 
 \CTestsSetup\
 \startCTest
   void testCFunction(ContextObj* aCtx) { }
+  ContextObj* testCtxCFunction(ContextObj* aCtx) {
+    return aCtx;
+  }
 \stopCTest
 
 \startTestCase[should create a new CFunction]
@@ -76,8 +117,21 @@ CFunctionObj *newCFunctionImpl(
   AssertIntEquals(aNewFunc->super.tag, CFunctionsTag);
   AssertPtrEquals(aNewFunc->func, testCFunction);
   AssertIntTrue(isCFunction((JObj*)aNewFunc));
+  AssertIntFalse(isCtxCFunction((JObj*)aNewFunc));
   AssertIntTrue(isAtom((JObj*)aNewFunc));
   AssertIntFalse(isPair((JObj*)aNewFunc));
+  
+  CFunctionObj *aNewCtxFunc =
+    newCtxCFunction(jInterp, testCtxCFunction);
+  AssertPtrNotNull(aNewCtxFunc);
+  AssertPtrNotEquals((void*)aNewCtxFunc, (void*)testCtxCFunction);
+  AssertPtrNotNull(aNewCtxFunc->super.type);
+  AssertIntEquals(aNewCtxFunc->super.tag, CFunctionsTag);
+  AssertPtrEquals((void*)aNewCtxFunc->func, (void*)testCtxCFunction);
+  AssertIntTrue(isCFunction((JObj*)aNewCtxFunc));
+  AssertIntTrue(isCtxCFunction((JObj*)aNewCtxFunc));
+  AssertIntTrue(isAtom((JObj*)aNewCtxFunc));
+  AssertIntFalse(isPair((JObj*)aNewCtxFunc));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -93,6 +147,19 @@ CFunctionObj *newCFunctionImpl(
     ) ?                                 \
       TRUE :                            \
       FALSE                             \
+  )
+
+#define isCtxCFunction(aLoL)                \
+  (                                         \
+    (                                       \
+      (aLoL) &&                             \
+      asType(aLoL) &&                       \
+      (asTag(aLoL) == CFunctionsTag) &&     \
+      flagsSet(aLoL, CTX_CFUNCTION_FLAG) && \
+       asCFunc(aLoL)                        \
+    ) ?                                     \
+      TRUE :                                \
+      FALSE                                 \
   )
 
 \stopCHeader
@@ -132,7 +199,7 @@ Boolean equalityFuncCoAlg(
 extern Boolean printFuncCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -146,9 +213,13 @@ Boolean printFuncCoAlg(
   assert(aLoL);
   assert(asTag(aLoL) == CFunctionsTag);
 
-  char ptoa[100];
-  sprintf(ptoa, "<%p> ", asCFunc(aLoL));
-  strBufPrintf(jInterp, aStrBuf, ptoa);
+  strBufPrintf(
+    jInterp,
+    aStrBuf,
+    "<%s%p> ",
+    (flagsSet(aLoL, CTX_CFUNCTION_FLAG) ? "ctx:" : ""),
+    asCFunc(aLoL)
+  );
   return TRUE;
 }
 \stopCCode
@@ -170,6 +241,17 @@ Boolean printFuncCoAlg(
   printLoL(jInterp, aStrBuf, aNewFunc);
   AssertStrEquals(getCString(jInterp, aStrBuf), buffer);
   strBufClose(jInterp, aStrBuf);
+
+  char ctxBuffer[100];
+  ctxBuffer[0] = 0;
+  sprintf((char*)&ctxBuffer, "<ctx:%p> ", testCtxCFunction);
+
+  JObj* aNewCtxFunc =
+    (JObj*)newCtxCFunction(jInterp, testCtxCFunction);
+  AssertPtrNotNull(aNewCtxFunc);
+  printLoL(jInterp, aStrBuf, aNewCtxFunc);
+  AssertStrEquals(getCString(jInterp, aStrBuf), ctxBuffer);
+  strBufClose(jInterp, aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -178,8 +260,9 @@ Boolean printFuncCoAlg(
 
 \startCHeader
 typedef struct cFunctions_class_struct {
-  JClass    super;
-  NewCFunction *newCFunctionFunc;
+  JClass           super;
+  NewCFunction    *newCFunctionFunc;
+  NewCtxCFunction *newCtxCFunctionFunc;
 } CFunctionsClass;
 \stopCHeader
 
@@ -213,6 +296,7 @@ Boolean registerCFunctions(JoyLoLInterp *jInterp) {
   theCoAlg->super.equalityFunc   = equalityFuncCoAlg;
   theCoAlg->super.printFunc      = printFuncCoAlg;
   theCoAlg->newCFunctionFunc     = newCFunctionImpl;
+  theCoAlg->newCtxCFunctionFunc  = newCtxCFunctionImpl;
   
   size_t tag =
     registerJClass(jInterp, (JClass*)theCoAlg);
