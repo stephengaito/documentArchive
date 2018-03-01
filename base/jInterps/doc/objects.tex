@@ -31,13 +31,12 @@ typedef uint16_t TagType;
 #endif
 \stopCHeader
 
-\subsection[title=Flag part] The third (flag) part is a collection of 
-bits to provide useful meta-flags associated with a particula instance. At 
-least three of these meta-flags are reserved by the JoyLoL interpreter to 
-signal ongoing garbage collection, equality determination as well as 
-printing. Since any object is potentially part of a cyclic structure, 
-these meta-flags ensure garbage collection, equality detection and 
-printing do not fall into infinite cycles. 
+\subsection[title=Flag part] The third (flag) part is a collection of bits 
+to provide useful meta-flags associated with a particula instance. At 
+least one of these meta-flags are reserved by the JoyLoL interpreter to 
+signal ongoing garbage collection. Since any object is potentially part of 
+a cyclic structure, these meta-flags ensure garbage collection does not 
+fall into infinite cycles. 
 
 All non-reserved meta-flags may be used by the implementation of a 
 CoAlgebra extension for its own internal purposes. Typically meta-flags 
@@ -62,10 +61,8 @@ number of reserved bits to shift (left).
 
 \startCHeader
 #define MARK_SWEEP_FLAG     0x1L
-#define PRINT_FLAG          0x2L
-#define EQUAL_FLAG          0x4L
-#define RESERVED_FLAG_MASK  0x7L
-#define RESERVED_FLAG_SHIFT 3
+#define RESERVED_FLAG_MASK  0x1L
+#define RESERVED_FLAG_SHIFT 1
 
 #ifdef __LP64__
 typedef uint32_t FlagsType;
