@@ -813,8 +813,9 @@ void listDefinitionsImpl(
 \startCHeader
 extern Boolean equalityDictionaryCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -822,8 +823,9 @@ extern Boolean equalityDictionaryCoAlg(
 \startCCode
 Boolean equalityDictionaryCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
   DEBUG(jInterp, "dictionaryCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -844,7 +846,8 @@ Boolean equalityDictionaryCoAlg(
 extern Boolean printDictionaryCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj            *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -868,7 +871,8 @@ static void printDictionaryName(
 Boolean printDictionaryCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj            *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == DictionariesTag);

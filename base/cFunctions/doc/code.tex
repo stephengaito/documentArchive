@@ -168,8 +168,9 @@ CFunctionObj *newCtxCFunctionImpl(
 \startCHeader
 Boolean equalityFuncCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -177,8 +178,9 @@ Boolean equalityFuncCoAlg(
 \startCCode
 Boolean equalityFuncCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
   DEBUG(jInterp, "funcCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -199,7 +201,8 @@ Boolean equalityFuncCoAlg(
 extern Boolean printFuncCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj            *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -208,7 +211,8 @@ extern Boolean printFuncCoAlg(
 Boolean printFuncCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == CFunctionsTag);

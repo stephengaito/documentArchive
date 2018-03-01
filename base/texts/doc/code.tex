@@ -372,8 +372,9 @@ void reportErrorImpl(
 \startCHeader
 extern Boolean equalityTextsCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -381,8 +382,9 @@ extern Boolean equalityTextsCoAlg(
 \startCCode
 Boolean equalityTextsCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
   assert(jInterp);
   DEBUG(jInterp, "textsCoAlg-equal a:%p b:%p\n", lolA, lolB);
@@ -404,7 +406,8 @@ Boolean equalityTextsCoAlg(
 extern Boolean printStrTextsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -413,7 +416,8 @@ extern Boolean printStrTextsCoAlg(
 Boolean printStrTextsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == TextsTag);

@@ -147,8 +147,9 @@ JObj* newJoylolTest(
 \startCHeader
 extern Boolean equalityJoylolTestsCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -156,8 +157,9 @@ extern Boolean equalityJoylolTestsCoAlg(
 \startCCode
 Boolean equalityJoylolTestsCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
   DEBUG(jInterp, "joylolTestsCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -178,7 +180,8 @@ Boolean equalityJoylolTestsCoAlg(
 extern Boolean printJoylolTestsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj            *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -187,7 +190,8 @@ extern Boolean printJoylolTestsCoAlg(
 Boolean printJoylolTestsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj            *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == jtTagMap_get(jtTagMap, jInterp));

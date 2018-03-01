@@ -161,16 +161,18 @@ double asNaturalDblImpl(
 \startCHeader
 Boolean equalityNatCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 
 \startCCode
 Boolean equalityNatCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
   DEBUG(jInterp, "natCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -187,10 +189,10 @@ Boolean equalityNatCoAlg(
 \startTestCase[should return true if naturals are equal]
 
 \startCTest
-  AssertIntTrue(equalityNatCoAlg(jInterp, NULL, NULL));
+  AssertIntTrue(equalityNatCoAlg(jInterp, NULL, NULL, 10));
   JObj *natA = newNatural(jInterp, "12345");
   JObj *natB = newNatural(jInterp, "12345");
-  AssertIntTrue(equalityNatCoAlg(jInterp, natA, natB));
+  AssertIntTrue(equalityNatCoAlg(jInterp, natA, natB, 10));
 \stopCTest
 \stopTestCase
 
@@ -199,9 +201,9 @@ Boolean equalityNatCoAlg(
 \startCTest
   JObj *natA = newNatural(jInterp, "12346");
   JObj *natB = newNatural(jInterp, "12345");
-  AssertIntFalse(equalityNatCoAlg(jInterp, NULL, natB));
-  AssertIntFalse(equalityNatCoAlg(jInterp, natA, NULL));
-  AssertIntFalse(equalityNatCoAlg(jInterp, natA, natB));
+  AssertIntFalse(equalityNatCoAlg(jInterp, NULL, natB, 10));
+  AssertIntFalse(equalityNatCoAlg(jInterp, natA, NULL, 10));
+  AssertIntFalse(equalityNatCoAlg(jInterp, natA, natB, 10));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -214,7 +216,8 @@ Boolean equalityNatCoAlg(
 extern Boolean printNatCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -223,7 +226,8 @@ extern Boolean printNatCoAlg(
 Boolean printNatCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == NaturalsTag);
@@ -248,7 +252,7 @@ Boolean printNatCoAlg(
   JObj* aNewNat = newNatural(jInterp, testNum);
   AssertPtrNotNull(aNewNat);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printNatCoAlg(jInterp, aStrBuf, aNewNat);
+  printNatCoAlg(jInterp, aStrBuf, aNewNat, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf), testNum);
   strBufClose(jInterp, aStrBuf);
 \stopCTest

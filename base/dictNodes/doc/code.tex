@@ -11,17 +11,17 @@
 typedef struct dictNode_object_struct DictNodeObj;
 
 typedef struct dictNode_object_struct {
-  JObj  super;
-  Symbol*   symbol;
-  JObj* preObs;
-  JObj* value;
-  JObj* postObs;
-  DictNodeObj*  left;
-  DictNodeObj*  right;
-  DictNodeObj*  previous;
-  DictNodeObj*  next;
-  size_t    height;
-  long      balance;
+  JObj         super;
+  Symbol      *symbol;
+  JObj        *preObs;
+  JObj        *value;
+  JObj        *postObs;
+  DictNodeObj *left;
+  DictNodeObj *right;
+  DictNodeObj *previous;
+  DictNodeObj *next;
+  size_t       height;
+  long         balance;
 } DictNodeObj;
 \stopCHeader
 
@@ -175,12 +175,14 @@ DictNodeObj *newDictNodeImpl(
 extern Boolean printDicionaryJObjInto(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *anAVLNode
+  JObj            *anAVLNode,
+  size_t           timeToLive
 );
 extern Boolean printDicInto(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  DictNodeObj         *anAVLNode
+  DictNodeObj     *anAVLNode,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -189,23 +191,33 @@ extern Boolean printDicInto(
 Boolean printDictionaryJObjInto(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *anAVLNode
+  JObj            *anAVLNode,
+  size_t           timeToLive
 ) {
   if (!anAVLNode) return FALSE;
   if (asTag(anAVLNode) != DictNodesTag) return FALSE;
-  return printDicInto(jInterp, aStrBuf, (DictNodeObj*)anAVLNode);
+  return printDicInto(
+    jInterp,
+    aStrBuf,
+    (DictNodeObj*)anAVLNode,
+    timeToLive
+  );
 }
 
 Boolean printDicInto(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  DictNodeObj         *anAVLNode
+  DictNodeObj     *anAVLNode,
+  size_t           timeToLive
 ) {
   if (!anAVLNode) return TRUE;
+  if (timeToLive < 1) return TRUE;
+  timeToLive -= 1;
+  
   strBufPrintf(jInterp, aStrBuf, "[%s] l:( ", anAVLNode->symbol);
-  printDicInto(jInterp, aStrBuf, anAVLNode->left);
+  printDicInto(jInterp, aStrBuf, anAVLNode->left, timeToLive);
   strBufPrintf(jInterp, aStrBuf, " ) r:( ");
-  printDicInto(jInterp, aStrBuf, anAVLNode->right);
+  printDicInto(jInterp, aStrBuf, anAVLNode->right, timeToLive);
   strBufPrintf(jInterp, aStrBuf, " ) ");
   return TRUE;
 }

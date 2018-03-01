@@ -120,8 +120,9 @@ JObj* newSignalImpl(
 \startCHeader
 extern Boolean equalityBoolCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -129,8 +130,9 @@ extern Boolean equalityBoolCoAlg(
 \startCCode
 Boolean equalityBoolCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
   DEBUG(jInterp, "boolCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -151,7 +153,8 @@ Boolean equalityBoolCoAlg(
 extern Boolean printBoolCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -160,7 +163,8 @@ extern Boolean printBoolCoAlg(
 Boolean printBoolCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj            *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == SignalsTag);

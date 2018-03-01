@@ -58,7 +58,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
   if (aStrCmp < 0) {
     // aSymbol < anAVLNode->symbol // delete from LEFT subtree
     if (jInterp->debug) {
-      printDicInto(jInterp, aStrBuf, anAVLNode);
+      printDicInto(jInterp, aStrBuf, anAVLNode, 10);
       DEBUG(jInterp, ">-delete LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
             anAVLNode, aSymbol, anAVLNode->balance,
             anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
@@ -70,7 +70,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
       deleteSymbolRecurse(aDict, anAVLNode->left, aSymbol);
     reCalculateAVLNodeHeightBalance(anAVLNode);
     if (jInterp->debug) {
-      printDicInto(jInterp, aStrBuf, anAVLNode);
+      printDicInto(jInterp, aStrBuf, anAVLNode, 10);
       DEBUG(jInterp, "<-delete LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
           anAVLNode, aSymbol, anAVLNode->balance,
           anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
@@ -91,7 +91,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
   } else if (0 < aStrCmp) {
     // aSymbol > anAVLNode->symbol // delete in RIGHT subtree
     if (jInterp->debug) {
-      printDicInto(jInterp, aStrBuf, anAVLNode);
+      printDicInto(jInterp, aStrBuf, anAVLNode, 10);
       DEBUG(jInterp, ">-delete RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
           anAVLNode, aSymbol, anAVLNode->balance,
           anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
@@ -102,7 +102,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
       deleteSymbolRecurse(aDict, anAVLNode->right, aSymbol);
     reCalculateAVLNodeHeightBalance(anAVLNode);
     if (jInterp->debug) {
-      printDicInto(jInterp, aStrBuf, anAVLNode);
+      printDicInto(jInterp, aStrBuf, anAVLNode, 10);
       DEBUG(jInterp, "<-delete RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
           anAVLNode, aSymbol, anAVLNode->balance,
           anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
@@ -147,7 +147,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
       reCalculateAVLNodeHeightBalance(anAVLNode);
       //
       if (jInterp->debug) {
-        printDicInto(jInterp, aStrBuf, anAVLNode);
+        printDicInto(jInterp, aStrBuf, anAVLNode, 10);
         DEBUG(jInterp, "<-delete RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
             anAVLNode, aSymbol, anAVLNode->balance,
             anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
@@ -207,7 +207,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
   DictNodeObj* aNewDic = insertSymbolRecurse(aDict, aSimpleDic, "15");
   AssertPtrNotNull(aNewDic);
   AssertPtrEquals(aSimpleDic, aNewDic);
-  printDicInto(jInterp, aStrBuf, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[20] l:( [15] l:(  ) r:(  )  ) r:(  ) ");
   strBufClose(jInterp, aStrBuf);
@@ -224,7 +224,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
   // should invoke an LL
   aNewDic = insertSymbolRecurse(aDict, aNewDic, "10");
   AssertPtrNotNull(aNewDic);
-  printDicInto(jInterp, aStrBuf, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  ) ");
   strBufClose(jInterp, aStrBuf);
@@ -243,7 +243,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
 
   aNewDic = insertSymbolRecurse(aDict, aNewDic, "30");
   AssertPtrNotNull(aNewDic);
-  printDicInto(jInterp, aStrBuf, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [30] l:(  ) r:(  )  )  ) ");
   strBufClose(jInterp, aStrBuf);
@@ -251,28 +251,28 @@ DictNodeObj* deleteSymbolRecurseImpl(
   // should invoke an RR
   aNewDic = insertSymbolRecurse(aDict, aNewDic, "35");
   AssertPtrNotNull(aNewDic);
-  printDicInto(jInterp, aStrBuf, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [20] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
   strBufClose(jInterp, aStrBuf);
 
   aNewDic = insertSymbolRecurse(aDict, aNewDic, "25");
   AssertPtrNotNull(aNewDic);
-  printDicInto(jInterp, aStrBuf, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [20] l:(  ) r:( [25] l:(  ) r:(  )  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
   strBufClose(jInterp, aStrBuf);
 
   aNewDic = insertSymbolRecurse(aDict, aNewDic, "23");
   AssertPtrNotNull(aNewDic);
-  printDicInto(jInterp, aStrBuf, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [23] l:( [20] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
   strBufClose(jInterp, aStrBuf);
   
   aNewDic = insertSymbolRecurse(aDict, aNewDic, "22");
   AssertPtrNotNull(aNewDic);
-  printDicInto(jInterp, aStrBuf, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[23] l:( [15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [22] l:(  ) r:(  )  )  )  ) r:( [30] l:( [25] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
   strBufClose(jInterp, aStrBuf);
@@ -298,7 +298,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
   
   aNode = deleteSymbolRecurse(aDict, aNewDic, "21");
   AssertPtrEquals(aNode, aNewDic);
-  printDicInto(jInterp, aStrBuf, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[23] l:( [15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [22] l:(  ) r:(  )  )  )  ) r:( [30] l:( [25] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
   strBufClose(jInterp, aStrBuf);
@@ -325,7 +325,7 @@ DictNodeObj* deleteSymbolRecurseImpl(
   
   aNode = deleteSymbolRecurse(aDict, aNewDic, "15");
   AssertPtrEquals(aNode, aNewDic);
-  printDicInto(jInterp, aStrBuf, aNewDic);
+  printDicInto(jInterp, aStrBuf, aNewDic, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[23] l:( [20] l:( [10] l:(  ) r:(  )  ) r:( [22] l:(  ) r:(  )  )  ) r:( [30] l:( [25] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
   strBufClose(jInterp, aStrBuf);

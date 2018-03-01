@@ -119,8 +119,9 @@ ContextObj* newContextImpl(
 \startCHeader
 extern Boolean equalityContextsCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -128,8 +129,9 @@ extern Boolean equalityContextsCoAlg(
 \startCCode
 Boolean equalityContextsCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
   DEBUG(jInterp, "contextCoAlg->equal a:%p b:%p\n",
     lolA, lolB);
@@ -139,12 +141,16 @@ Boolean equalityContextsCoAlg(
   if (asType(lolA) != asType(lolB)) return FALSE;
   if (!asType(lolA)) return FALSE;
   if (asTag(lolA) != ContextsTag) return FALSE;
+  
+  if (timeToLive < 1) return TRUE;
+  timeToLive -= 1;
+  
   size_t areEqual = TRUE;
-  lolEqual(jInterp, areEqual, asData(lolA),      asData(lolB));
-  lolEqual(jInterp, areEqual, asCommand(lolA),   asCommand(lolB));
-  lolEqual(jInterp, areEqual, asProcess(lolA),   asProcess(lolB));
-  lolEqual(jInterp, areEqual, asMessages(lolA),  asMessages(lolB));
-  lolEqual(jInterp, areEqual, asListeners(lolA), asListeners(lolB));
+  lolEqual(jInterp, areEqual, asData(lolA),      asData(lolB),      timeToLive);
+  lolEqual(jInterp, areEqual, asCommand(lolA),   asCommand(lolB),   timeToLive);
+  lolEqual(jInterp, areEqual, asProcess(lolA),   asProcess(lolB),   timeToLive);
+  lolEqual(jInterp, areEqual, asMessages(lolA),  asMessages(lolB),  timeToLive);
+  lolEqual(jInterp, areEqual, asListeners(lolA), asListeners(lolB), timeToLive);
   return areEqual;
 }
 \stopCCode
@@ -154,7 +160,8 @@ Boolean equalityContextsCoAlg(
 extern Boolean printContextsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -176,7 +183,8 @@ static void printContextName(
 Boolean printContextsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(jInterp);
   assert(aLoL);
@@ -184,21 +192,24 @@ Boolean printContextsCoAlg(
   assert(asTag(aLoL) == ContextsTag);
   ContextObj* aCtx = (ContextObj*)aLoL;
 
+  if (timeToLive < 1) return TRUE;
+  timeToLive -= 1;
+  
   size_t printedOk = TRUE;
   strBufPrintf(jInterp, aStrBuf, "\n[");
   printContextName(jInterp, aStrBuf, aCtx);
   strBufPrintf(jInterp, aStrBuf, "(");
   printLoL(jInterp, aStrBuf, ((JObj*)aCtx->dict));
   lolPrintStr(jInterp, printedOk, asData(aLoL),
-              ")[ d:( ", ") ", aStrBuf);
+              ")[ d:( ", ") ", aStrBuf, timeToLive);
   lolPrintStr(jInterp, printedOk, asCommand(aLoL),
-              "c:( ", ") ", aStrBuf);
+              "c:( ", ") ", aStrBuf, timeToLive);
   lolPrintStr(jInterp, printedOk, asProcess(aLoL),
-              "p:( ", ") ", aStrBuf);
+              "p:( ", ") ", aStrBuf, timeToLive);
   lolPrintStr(jInterp, printedOk, asMessages(aLoL),
-              "m:( ", ") ", aStrBuf);
+              "m:( ", ") ", aStrBuf, timeToLive);
   lolPrintStr(jInterp, printedOk, asListeners(aLoL),
-              "l:( ", ") ", aStrBuf);
+              "l:( ", ") ", aStrBuf, timeToLive);
   strBufPrintf(jInterp, aStrBuf, " ]]\n");
   return printedOk;
 }

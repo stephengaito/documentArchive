@@ -41,7 +41,7 @@ void reCalculateAVLNodeHeightBalance(DictNodeObj* anAVLNode) {
   
   DictNodeObj* aNode = newDictNode(jInterp, "20");
   AssertPtrNotNull(aNode);
-  printDicInto(jInterp, aStrBuf, aNode);
+  printDicInto(jInterp, aStrBuf, aNode, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[20] l:(  ) r:(  ) ");
   strBufClose(jInterp, aStrBuf);
@@ -52,7 +52,7 @@ void reCalculateAVLNodeHeightBalance(DictNodeObj* anAVLNode) {
   AssertIntEquals(aNode->balance, 0);
 
   aNode->left = newDictNode(jInterp, "15");
-  printDicInto(jInterp, aStrBuf, aNode);
+  printDicInto(jInterp, aStrBuf, aNode, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[20] l:( [15] l:(  ) r:(  )  ) r:(  ) ");
   strBufClose(jInterp, aStrBuf);
@@ -61,7 +61,7 @@ void reCalculateAVLNodeHeightBalance(DictNodeObj* anAVLNode) {
   AssertIntEquals(aNode->balance, 2);
 
   aNode->right = newDictNode(jInterp, "25");
-  printDicInto(jInterp, aStrBuf, aNode);
+  printDicInto(jInterp, aStrBuf, aNode, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
   "[20] l:( [15] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  ) ");
   strBufClose(jInterp, aStrBuf);
@@ -106,7 +106,7 @@ Boolean checkAVLNode(
   if (jInterp->debug) {
     StringBufferObj *aStrBuf = 
       newStringBuffer(jInterp);
-    printDicInto(jInterp, aStrBuf, anAVLNode);
+    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, "checkAVLNode %p %ld:%zu=%zu %s\n",
           anAVLNode, anAVLNode->balance, anAVLNode->height,
           deepCalculateAVLNodeHeight(anAVLNode),

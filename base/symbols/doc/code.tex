@@ -161,8 +161,9 @@ Boolean symbolIsImpl(
 \startCHeader
 Boolean symbolsEqual(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -170,8 +171,9 @@ Boolean symbolsEqual(
 \startCCode
 Boolean symbolsEqual(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
   DEBUG(jInterp, "symbolsEqual a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -187,10 +189,10 @@ Boolean symbolsEqual(
 \startTestCase[should return true if symbols are equal]
 
 \startCTest
-  AssertIntTrue(symbolsEqual(jInterp, NULL, NULL));
+  AssertIntTrue(symbolsEqual(jInterp, NULL, NULL, 10));
   JObj *symA = newSymbol(jInterp, "the same text");
   JObj *symB = newSymbol(jInterp, "the same text");
-  AssertIntTrue(symbolsEqual(jInterp, symA, symB));
+  AssertIntTrue(symbolsEqual(jInterp, symA, symB, 10));
 \stopCTest
 \stopTestCase
 
@@ -199,9 +201,9 @@ Boolean symbolsEqual(
 \startCTest
   JObj *symA = newSymbol(jInterp, "text A");
   JObj *symB = newSymbol(jInterp, "text B");
-  AssertIntFalse(symbolsEqual(jInterp, NULL, symB));
-  AssertIntFalse(symbolsEqual(jInterp, symA, NULL));
-  AssertIntFalse(symbolsEqual(jInterp, symA, symB));
+  AssertIntFalse(symbolsEqual(jInterp, NULL, symB, 10));
+  AssertIntFalse(symbolsEqual(jInterp, symA, NULL, 10));
+  AssertIntFalse(symbolsEqual(jInterp, symA, symB, 10));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -214,7 +216,8 @@ Boolean symbolsEqual(
 extern size_t printSymbolCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrObj,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -223,7 +226,8 @@ extern size_t printSymbolCoAlg(
 Boolean printSymbolCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == SymbolsTag);

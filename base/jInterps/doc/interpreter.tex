@@ -156,15 +156,17 @@ typedef Boolean (JClassInitialize)(
 
 typedef Boolean (JObjEquality)(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 
 typedef struct string_buffer_object_struct StringBufferObj;
 typedef Boolean (JObjPrint)(
-  JoyLoLInterp*,
-  StringBufferObj*,
-  JObj*
+  JoyLoLInterp    *jInterp,
+  StringBufferObj *aStBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 
 typedef JObj* (JObjCopy)(
@@ -245,7 +247,6 @@ typedef struct joylol_interpreter_struct {
   size_t            numCoAlgs;
   size_t            maxNumCoAlgs;
   JClass          **coAlgs;
-  //DictObj          *dict;
   LoaderObj        *loader;
   ContextObj       *rootCtx;
   size_t            numCompilers;

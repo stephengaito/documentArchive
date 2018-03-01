@@ -423,7 +423,7 @@ JObj* parseOneSymbolImpl(
   AssertPtrNotNull(asType(aLoL));
   AssertIntEquals(asTag(aLoL), PairsTag);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoLTTL(jInterp, aStrBuf, aLoL, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
     "is ( a ( more ( complex ( list ( ) ) ) ) ) ");
   strBufClose(jInterp, aStrBuf);
@@ -487,7 +487,7 @@ JObj* parseOneSymbolImpl(
   AssertIntTrue(isNatural(aLoL));
   AssertIntEquals( mpz_cmp_si(asNatural(aLoL), 1234567890), 0);
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoLTTL(jInterp, aStrBuf, aLoL, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf), "1234567890 ");
   strBufClose(jInterp, aStrBuf);
 
@@ -552,7 +552,7 @@ paths} in our parsing code.
 
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoLTTL(jInterp, aStrBuf, aLoL, 30);
   AssertStrEquals(getCString(jInterp, aStrBuf),
     "this ; is ; a test with some semi-colons and ; again ; 123 ; 456 ; 789 12 ; 34 and ; one ; more ; time ");
   strBufClose(jInterp, aStrBuf);
@@ -570,13 +570,13 @@ paths} in our parsing code.
   JObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoLTTL(jInterp, aStrBuf, aLoL, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf), "this is a simple list ");
   strBufClose(jInterp, aStrBuf);
 
   JObj* lolCopy = copyLoL(jInterp, aLoL);
   AssertPtrNotEquals(aLoL, lolCopy);
-  AssertIntTrue(equalLoL(jInterp, aLoL, lolCopy));
+  AssertIntTrue(equalLoL(jInterp, aLoL, lolCopy, 10));
 \stopCTest
 \stopTestCase
 
@@ -592,7 +592,7 @@ paths} in our parsing code.
 
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoLTTL(jInterp, aStrBuf, aLoL, 20);
   AssertStrEquals(getCString(jInterp, aStrBuf),
     "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ");
   strBufClose(jInterp, aStrBuf);
@@ -610,14 +610,14 @@ paths} in our parsing code.
   JObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoLTTL(jInterp, aStrBuf, aLoL, 20);
   AssertStrEquals(getCString(jInterp, aStrBuf),
     "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ");
   strBufClose(jInterp, aStrBuf);
   
   JObj* lolCopy = copyLoL(jInterp, aLoL);
   AssertPtrNotEquals(aLoL, lolCopy);
-  AssertIntTrue(equalLoL(jInterp, aLoL, lolCopy));
+  AssertIntTrue(equalLoL(jInterp, aLoL, lolCopy, 10));
 \stopCTest
 \stopTestCase
 
@@ -632,7 +632,7 @@ paths} in our parsing code.
   JObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoLTTL(jInterp, aStrBuf, aLoL, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
     "this is a different ( ( ( ) ( ) ( ) ) ( ( ( ) ) ) ) list ");
   strBufClose(jInterp, aStrBuf);
@@ -653,7 +653,7 @@ in our parsing code.
   JObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoLTTL(jInterp, aStrBuf, aLoL, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
     "this ( is a list with incorrectly ) matched list markers");
   strBufClose(jInterp, aStrBuf);
@@ -671,7 +671,7 @@ in our parsing code.
   JObj* aLoL = parseAllSymbols(aText);
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, aLoL);
+  printLoLTTL(jInterp, aStrBuf, aLoL, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf),
     "this ( is a list ( with unmatched list markers ) )");
   strBufClose(jInterp, aStrBuf);

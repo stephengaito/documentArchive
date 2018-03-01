@@ -357,8 +357,9 @@ static int lua_crossCompilers_addFragment(lua_State *lstate) {
 \startCHeader
 extern Boolean equalityCrossCompilerCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -366,8 +367,9 @@ extern Boolean equalityCrossCompilerCoAlg(
 \startCCode
 Boolean equalityCrossCompilerCoAlg(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
   DEBUG(jInterp, "crossCompilerCoAlg-equal a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -388,7 +390,8 @@ Boolean equalityCrossCompilerCoAlg(
 extern Boolean printCrossCompilerCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -397,7 +400,8 @@ extern Boolean printCrossCompilerCoAlg(
 Boolean printCrossCompilerCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(aLoL);
   assert(asTag(aLoL) == CrossCompilersTag);

@@ -341,23 +341,24 @@ JObj* copyLoLImpl(
 \startCHeader
 typedef Boolean (EqualLoL)(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 
-#define equalLoL(jInterp, lolA, lolB)       \
-  (                                         \
-    assert(getPairsClass(jInterp)           \
-      ->equalLoLFunc),                      \
-    (getPairsClass(jInterp)                 \
-      ->equalLoLFunc(jInterp, lolA, lolB))  \
+#define equalLoL(jInterp, lolA, lolB, ttl)      \
+  (                                             \
+    assert(getPairsClass(jInterp)               \
+      ->equalLoLFunc),                          \
+    (getPairsClass(jInterp)                     \
+      ->equalLoLFunc(jInterp, lolA, lolB, ttl)) \
   )
 
-#define lolEqual(jInterp, areEqual, lolA, lolB) \
-  if (areEqual && (lolA)) {			                \
-    assert(asType(lolA));  			                \
-    areEqual = (asType(lolA)->equalityFunc)	    \
-      (jInterp, (lolA), (lolB));                \
+#define lolEqual(jInterp, areEqual, lolA, lolB, ttl)  \
+  if (areEqual && (lolA)) {			                      \
+    assert(asType(lolA));  			                      \
+    areEqual = (asType(lolA)->equalityFunc)	          \
+      (jInterp, (lolA), (lolB), (ttl));               \
   }
 \stopCHeader
 
@@ -365,8 +366,9 @@ typedef Boolean (EqualLoL)(
 \startCHeader
 Boolean equalLoLImpl(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -374,22 +376,36 @@ Boolean equalLoLImpl(
 \startCCode
 Boolean equalLoLImpl(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
-  DEBUG(jInterp, "equalLoL %p %p\n", lolA, lolB);
+  DEBUG(jInterp, "equalLoL %p %p %zu\n", lolA, lolB, timeToLive);
   if (!lolA && !lolB) return TRUE;
   if (!lolA || !lolB) return FALSE;
   if (asType(lolA) != asType(lolB)) return FALSE;
   if (asType(lolA) && 
      (asTag(lolA) != PairsTag)) {
-    return (asType(lolA)->equalityFunc)(jInterp, lolA, lolB);
+    return (asType(lolA)->equalityFunc)
+      (jInterp, lolA, lolB, timeToLive);
   }
-  
-  if (!equalLoLImpl(jInterp, asCar(lolA), asCar(lolB))) {
+
+  if (timeToLive < 1) return TRUE;
+
+  if (!equalLoLImpl(
+      jInterp, 
+      asCar(lolA),
+      asCar(lolB),
+      (timeToLive-1)
+    )) {
     return FALSE;
   }
-  return equalLoLImpl(jInterp, asCdr(lolA), asCdr(lolB));
+  return equalLoLImpl(
+    jInterp,
+    asCdr(lolA),
+    asCdr(lolB),
+    (timeToLive -1)
+  );
 }
 \stopCCode
 
@@ -401,8 +417,8 @@ Boolean equalLoLImpl(
   AssertPtrNotNull(jInterp->coAlgs);
   AssertPtrNotNull(getPairsClass(jInterp));
   AssertPtrNotNull(getPairsClass(jInterp)->equalLoLFunc);
-  AssertIntTrue(equalLoL(jInterp, NULL, NULL));
-  AssertIntTrue(equalLoL(jInterp, pairA, pairB));
+  AssertIntTrue(equalLoL(jInterp, NULL, NULL, 10));
+  AssertIntTrue(equalLoL(jInterp, pairA, pairB, 10));
   // need to test with NON-Pairs
 \stopCTest
 \stopTestCase
@@ -411,7 +427,7 @@ Boolean equalLoLImpl(
 \startCTest
   JObj *pairA = newPair(jInterp, NULL,  NULL);
   JObj *pairB = newPair(jInterp, pairA, NULL);
-  AssertIntFalse(equalLoL(jInterp, pairA, pairB));
+  AssertIntFalse(equalLoL(jInterp, pairA, pairB, 10));
   // need to test with NON-Pairs
 \stopCTest
 \stopTestCase
@@ -421,13 +437,14 @@ Boolean equalLoLImpl(
 
 \startCHeader
 #define lolPrintStr(                                           \
-  jInterp, printedOk, aLoL, opener, closer, aStrBuf)           \
+  jInterp, printedOk, aLoL, opener, closer, aStrBuf, ttl)      \
   if (aLoL) {								                                   \
     size_t isList = asTag(aLoL) == PairsTag;        			     \
     if (isList) strBufPrintf((jInterp), (aStrBuf), (opener));  \
     assert(asType(aLoL));						                           \
     (printedOk) = (printedOk) && 						                   \
-      (asType(aLoL)->printFunc)((jInterp), (aStrBuf), (aLoL)); \
+      (asType(aLoL)->printFunc)                                \
+        ((jInterp), (aStrBuf), (aLoL), (ttl));                 \
     if (isList) strBufPrintf((jInterp), (aStrBuf), (closer));  \
   } else {								                                     \
     strBufPrintf((jInterp), (aStrBuf), (opener));						   \
@@ -440,7 +457,8 @@ Boolean equalLoLImpl(
 extern Boolean printPairsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -449,18 +467,32 @@ extern Boolean printPairsCoAlg(
 Boolean printPairsCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(aLoL);
   assert(asType(aLoL));
   assert(asTag(aLoL) == PairsTag);
 
-//  if (!(AS_TAG(aLoL->coAlg) & PRINT_MARKER)) return TRUE;
-//  aLoL->coAlg = (CoAlgebra*)(AS_TAG(aLoL->coAlg) & (~ PRINT_MARKER));
-
+  if (timeToLive < 1) return TRUE;
+  
   size_t printedOk = TRUE;
-  lolPrintStr(jInterp, printedOk, asCar(aLoL), "( ", ") ", aStrBuf);
-  lolPrintStr(jInterp, printedOk, asCdr(aLoL), "",   "",   aStrBuf);
+  lolPrintStr(
+    jInterp,
+    printedOk,
+    asCar(aLoL),
+    "( ", ") ",
+    aStrBuf,
+    timeToLive-1
+  );
+  lolPrintStr(
+    jInterp,
+    printedOk,
+    asCdr(aLoL),
+    "",   "",
+    aStrBuf,
+    timeToLive-1
+  );
   return printedOk;
 }
 \stopCCode

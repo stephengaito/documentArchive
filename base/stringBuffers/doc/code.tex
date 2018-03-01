@@ -260,16 +260,18 @@ Boolean strBufPrintfImpl(
 \startCHeader
 Boolean stringBuffersEqual(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 );
 \stopCHeader
 
 \startCCode
 Boolean stringBuffersEqual(
   JoyLoLInterp *jInterp,
-  JObj     *lolA,
-  JObj     *lolB
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
 ) {
   DEBUG(jInterp, "stringBuffersEqual a:%p b:%p\n", lolA, lolB);
   if (!lolA && !lolB) return TRUE;
@@ -287,13 +289,13 @@ Boolean stringBuffersEqual(
 \startTestCase[should return true if stringBuffers are equal]
 
 \startCTest
-  AssertIntTrue(stringBuffersEqual(jInterp, NULL, NULL));
+  AssertIntTrue(stringBuffersEqual(jInterp, NULL, NULL, 10));
   StringBufferObj *strBufA = newStringBuffer(jInterp);
   strBufPrintf(jInterp, strBufA, "test");
   StringBufferObj *strBufB = newStringBuffer(jInterp);
   strBufPrintf(jInterp, strBufB, "test");
   AssertIntTrue(stringBuffersEqual(
-    jInterp, (JObj*)strBufA, (JObj*)strBufB));
+    jInterp, (JObj*)strBufA, (JObj*)strBufB, 10));
 \stopCTest
 \stopTestCase
 
@@ -305,11 +307,11 @@ Boolean stringBuffersEqual(
   StringBufferObj *strBufB = newStringBuffer(jInterp);
   strBufPrintf(jInterp, strBufB, "testB");
   AssertIntFalse(stringBuffersEqual(
-    jInterp, NULL, (JObj*)strBufB));
+    jInterp, NULL, (JObj*)strBufB, 10));
   AssertIntFalse(stringBuffersEqual(
-    jInterp, (JObj*)strBufA, NULL));
+    jInterp, (JObj*)strBufA, NULL, 10));
   AssertIntFalse(stringBuffersEqual(
-    jInterp, (JObj*)strBufA, (JObj*)strBufB));
+    jInterp, (JObj*)strBufA, (JObj*)strBufB, 10));
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -321,7 +323,8 @@ Boolean stringBuffersEqual(
 extern size_t printStringBufferCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -330,7 +333,8 @@ extern size_t printStringBufferCoAlg(
 Boolean printStringBufferCoAlg(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
   assert(aStrBuf);
   assert(asTag(aStrBuf) == StringBuffersTag);
@@ -344,30 +348,28 @@ Boolean printStringBufferCoAlg(
 }
 \stopCCode
 
-\startCCode
-// We need to protect our list walking printer from the possibility that a
-// structure (and dictionaries will be) contain cycles...
-//
-// We do this by re-using the garbage collector's mark-sweep bit.
-// This is crude and will certainly need to be chaged at some point...
-// but it should work now... the likely future change will be to add
-// further fields to the PairAtom structure.
-// (or to use a hash table).
-\stopCCode
-
 \startCHeader
 typedef void (PrintLoL)(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 
-#define printLoL(jInterp, aStrBuf, aLoL)       \ 
-  (                                            \
-    assert(getStringBuffersClass(jInterp)      \
-      ->printLoLFunc),                         \
-    (getStringBuffersClass(jInterp)            \
-      ->printLoLFunc(jInterp, aStrBuf, aLoL))  \
+#define printLoL(jInterp, aStrBuf, aLoL)          \ 
+  (                                               \
+    assert(getStringBuffersClass(jInterp)         \
+      ->printLoLFunc),                            \
+    (getStringBuffersClass(jInterp)               \
+      ->printLoLFunc(jInterp, aStrBuf, aLoL, 2))  \
+  )
+
+#define printLoLTTL(jInterp, aStrBuf, aLoL, ttl)    \ 
+  (                                                 \
+    assert(getStringBuffersClass(jInterp)           \
+      ->printLoLFunc),                              \
+    (getStringBuffersClass(jInterp)                 \
+      ->printLoLFunc(jInterp, aStrBuf, aLoL, ttl))  \
   )
 \stopCHeader
 
@@ -376,7 +378,8 @@ typedef void (PrintLoL)(
 void printLoLImpl(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -385,14 +388,16 @@ void printLoLImpl(
 void printLoLImpl(
   JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
-  JObj        *aLoL
+  JObj            *aLoL,
+  size_t           timeToLive
 ) {
-  DEBUG(jInterp, "printLoL %p %p\n", aStrBuf, aLoL);
+  DEBUG(jInterp, "printLoL %p %p %zu\n", aStrBuf, aLoL, timeToLive);
 
   if (aLoL) {
     assert(asType(aLoL));
     Boolean result =
-      (asType(aLoL)->printFunc)(jInterp, aStrBuf, aLoL);
+      (asType(aLoL)->printFunc)
+        (jInterp, aStrBuf, aLoL, timeToLive);
     assert(result);
   }
 }
@@ -409,7 +414,7 @@ void printLoLImpl(
   
   StringBufferObj* aStrBuf = newStringBuffer(jInterp);
   printStringBufferCoAlg(
-    jInterp, aStrBuf, (JObj*)aTestStrBuf);
+    jInterp, aStrBuf, (JObj*)aTestStrBuf, 10);
   AssertStrEquals(getCString(jInterp, aStrBuf), "test string ");
   
   strBufClose(jInterp, aStrBuf);
