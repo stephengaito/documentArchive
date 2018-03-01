@@ -569,7 +569,7 @@ static void newContextAP(ContextObj* aCtx) {
 static void thisContextAP(ContextObj* aCtx) {
   assert(aCtx);
   DEBUG(aCtx->jInterp, "thisContextAP > %p\n", aCtx);
-  //pushCtxData(aCtx, (JObj*)aCtx);
+  pushCtxData(aCtx, (JObj*)aCtx);
   DEBUG(aCtx->jInterp, "thisContextAP < %p\n", aCtx);
 }
 \stopCCode
