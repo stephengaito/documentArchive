@@ -361,7 +361,7 @@ typedef void (PrintLoL)(
     assert(getStringBuffersClass(jInterp)         \
       ->printLoLFunc),                            \
     (getStringBuffersClass(jInterp)               \
-      ->printLoLFunc(jInterp, aStrBuf, aLoL, 2))  \
+      ->printLoLFunc(jInterp, aStrBuf, aLoL, 20)) \
   )
 
 #define printLoLTTL(jInterp, aStrBuf, aLoL, ttl)    \ 

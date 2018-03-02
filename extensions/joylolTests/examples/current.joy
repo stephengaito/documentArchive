@@ -3,45 +3,102 @@
 
 clear
 showStack
+
 showStackOn
-showStackOff
 tracingOn
-tracingOff
 debugOn
+
+showStackOff
+tracingOff
 debugOff
+
 definitions
 
 tests
 definitionsIn
 
-( something here ) ;; testRunner process (already on stack)
+;; from file: words.tex after line: 0
 
-( createTestMonitor ) ;; needs to be run before the tests
+;; create a tests naming scope
+globals      ;; parent naming scope
+globals      ;; defining naming scope
+tests        ;; defined name of this new naming scope
+defineNaming ;; make the definition
 
-swap
+;; from file: words.tex after line: 0
 
-append
+;; create an assert naming scope
+tests        ;; parent naming scope
+globals      ;; defining naming scope
+assert       ;; defined name of this new naming scope
+defineNaming ;; make the definition
 
-( ) ;; testRunner Data
+;; from file: words.tex after line: 0
 
-(
+(               ;; start of the runTestCase word
+
+;; from file: words.tex after line: 0
+
+  locals
+  localizeNaming
+
+;; from file: words.tex after line: 50
+
+;; create the testRunnerNS
   globals      ;; parent naming scope
+  thisNaming   ;; define in localized naming scope
   testRunnerNS ;; name of the new naming scope
-  newNaming    ;; create a new naming scope
-) interpret    ;; place the testRunner naming scope on stack
-               ;; to be used as the new context's naming scope
+  defineNaming ;; create a new naming scope
+               ;; to be used as the testRunner's naming scope
 
-dup
+;; from file: words.tex after line: 50
 
-globals 
+;; create the testMonitorNS
+  globals       ;; parent naming scope
+  thisNaming    ;; define in the localized naming scope
+  testMonitorNS ;; name of the new naming scope
+  defineNaming  ;; create a new naming scope
+                ;; to be used as the testMonitor's naming scope
 
-swap
+;; from file: words.tex after line: 50
 
-testMonitorNS  ;; name of the new naming scope
-defineNaming 
+;; define the testRunner context
+                ;; testRunner process (uses provided list of words)
+  (
+  )             ;; testRunner data
+  testRunnerNS  ;; the naming scope of the new context
+  thisNaming    ;; define in the localized naming scope
+  testRunner    ;; name of the new context
+  defineContext ;; create and define the context
 
-dup
+;; from file: words.tex after line: 100
 
-testMonitorNS
-lookup
+;; define the testMonitor context
+  ( interpret ) ;; begin the testMonitor process stack
+  thisContext   ;; interpret thisContext
+  append        ;; append the result of interpreting thisContext
+  ( switch )    ;;
+  append        ;; append the word switch to the
+                ;; testMonitor's initial process stack
+ 
+  (
+    0           ;; number of attempted tests
+    0           ;; number of failed tests
+    ()          ;; list of failure reports
+  )             ;; testMonitor data
+
+  testMonitorNS ;; the naming scope of the new context
+  thisNaming    ;; defining naming scope
+  testMonitor   ;; defined name of this new context
+  defineContext ;; create and define the context
+
+;; from file: words.tex after line: 100
+
+;; switch to the testRunner context and run the tests
+  testRunner ;;
+  switchContext
+)            ;; end of the runTestCase definition
+tests        ;; define the new word in this naming scope
+runTestCase  ;; the name of the new word
+define       ;; define the new runTestCase word
 

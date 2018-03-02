@@ -453,7 +453,8 @@ DictNodeObj* walkEntryPath(
   assert(aDict);
   assert(aSymbol);
   DEBUG(aDict->jInterp,
-    "walkEntryPath: %p [%s] %p\n", aDict, aSymbol, symbolFinder
+    "walkEntryPath: [%s](%p) [%s] %p\n",
+    aDict->name, aDict, aSymbol, symbolFinder
   );
   //
   // Look for the first dot
@@ -470,11 +471,18 @@ DictNodeObj* walkEntryPath(
     DictNodeObj* aSym = symbolFinder(aDict, aSymbol);
     if (!aSym) {
       DEBUG(aDict->jInterp,
-        "no entry found using %p [%s]\n", aDict, aSymbol
+        "creating new entry in [%s](%p) using [%s]\n",
+        aDict->name, aDict, aSymbol
       );
       aSym = createSymbolInThisDictionary(aDict, aSymbol);
     }
     free(symPrefix); // this is *our* duplicate of aSymbol
+    DEBUG(aDict->jInterp,
+      "using symbol [%s](%p) value: %p\n",
+      (aSym ? aSym->symbol : ""),
+      aSym,
+      (aSym ? aSym->value : NULL)
+    );
     return aSym;
   }
   //
@@ -483,6 +491,11 @@ DictNodeObj* walkEntryPath(
   //
   *restOfSym = 0; // terminate the symPrefix at the dot
   restOfSym++;    // move onto the next char
+  DEBUG(aDict->jInterp,
+    "dot found in [%s] splitting into [%s] and [%s]\n",
+    aSymbol, symPrefix, restOfSym
+  );
+
   //
   // setup the prefix dictionary
   //
@@ -506,6 +519,10 @@ DictNodeObj* walkEntryPath(
     prefixDict = 
       newDictionary(aDict->jInterp, symPrefix, aDict);
     aDictSym->value = (JObj*)prefixDict;
+    DEBUG(aDict->jInterp,
+      "no dictionary found in [%s](%p) created new dictionary: [%s](%p)\n",
+      symPrefix, aDict, prefixDict->name, prefixDict
+    );
     //
   } else {
     //
@@ -517,6 +534,10 @@ DictNodeObj* walkEntryPath(
       // so use it as the prefix dictionary
       //
       prefixDict = (DictObj*)(aDictSym->value);
+      DEBUG(aDict->jInterp,
+        "prefix dictionary found: [%s](%p)\n",
+        prefixDict->name, prefixDict
+      );
       //
     } else {
       //
@@ -533,6 +554,13 @@ DictNodeObj* walkEntryPath(
       // and use the modified symbol
       //
       restOfSym = symPrefix;
+      DEBUG(aDict->jInterp,
+        "non-dictionary found for prefix [%s]\n", symPrefix
+      );
+      DEBUG(aDict->jInterp,
+        "re-trying with dictionary: [%s](%p) and symbol [%s]\n",
+        prefixDict->name, prefixDict, restOfSym
+      );
     }
   }
   assert(prefixDict);
@@ -541,6 +569,13 @@ DictNodeObj* walkEntryPath(
     walkEntryPath(prefixDict, restOfSym, symbolFinder);
   //
   free(symPrefix); // this is *our* duplicate of aSymbol
+  DEBUG(aDict->jInterp,
+    "using symbol [%s](%p) value: %p\n",
+    (aSym ? aSym->symbol : ""),
+    aSym,
+    (aSym ? aSym->value : NULL)
+  );
+
   return aSym;
 }
 \stopCCode

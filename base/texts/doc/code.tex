@@ -310,7 +310,10 @@ void nextSymbolImpl(
         aSymbol
       );
     assert(aSym);
-    aText->sym = newSymbol(aText->jInterp, aSym->symbol);
+    aText->sym =
+      newSymbol(aText->jInterp,
+        (strchr(aSymbol, '.') ? aSymbol : aSym->symbol)
+      );
     //
     DEBUG(aText->jInterp, "<-nextSymbol [%s] (symbol)\n",
       ((SymbolObj*)(aText->sym))->sym);

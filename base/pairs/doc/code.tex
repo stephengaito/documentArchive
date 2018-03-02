@@ -474,7 +474,10 @@ Boolean printPairsCoAlg(
   assert(asType(aLoL));
   assert(asTag(aLoL) == PairsTag);
 
-  if (timeToLive < 1) return TRUE;
+  if (timeToLive < 1) {
+    strBufPrintf(jInterp, aStrBuf, "... ");
+    return TRUE;
+  }
   
   size_t printedOk = TRUE;
   lolPrintStr(

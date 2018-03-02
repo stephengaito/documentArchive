@@ -46,13 +46,13 @@ defining the testRunnerNS and testMonitorNS naming scopes in the localized
 naming scope. 
 
 \startJoylolCode
-;; localize the naming
+  ;; localize the naming scope of the current context
   locals
   localizeNaming
 \stopJoylolCode
 
 \startJoylolCode
-;; create the testRunnerNS
+  ;; create the testRunnerNS
   globals      ;; parent naming scope
   thisNaming   ;; define in localized naming scope
   testRunnerNS ;; name of the new naming scope
@@ -61,7 +61,7 @@ naming scope.
 \stopJoylolCode
 
 \startJoylolCode
-;; create the testMonitorNS
+  ;; create the testMonitorNS
   globals       ;; parent naming scope
   thisNaming    ;; define in the localized naming scope
   testMonitorNS ;; name of the new naming scope
@@ -76,7 +76,7 @@ context, and then setup the new context's naming scope, the defining
 naming scope and finally the name of the new context.
 
 \startJoylolCode
-;; define the testRunner context
+  ;; define the testRunner context
                 ;; testRunner process (uses provided list of words)
   ( 
   )             ;; testRunner data
@@ -107,7 +107,7 @@ context, we have to \type{append} the result of interpreting the
 word directly on the testMonitor's process stack. Once the 
 
 \startJoylolCode
-;; define the testMonitor context
+  ;; define the testMonitor context
   ( interpret ) ;; begin the testMonitor process stack
   thisContext   ;; interpret thisContext 
   append        ;; append the result of interpreting thisContext
@@ -130,10 +130,12 @@ word directly on the testMonitor's process stack. Once the
 Finally we switch to the testRunner context.
 
 \startJoylolCode
-;; switch to the testRunner context and run the tests
-  testRunner ;;
-  switch
+  ;; switch to the testRunner context and run the tests
+  testRunner ;; place the testRunner context on the stack
+  switch     ;; switch to the testRunner context
+  
 )            ;; end of the runTestCase definition
+
 tests        ;; define the new word in this naming scope
 runTestCase  ;; the name of the new word
 define       ;; define the new runTestCase word
