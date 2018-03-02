@@ -211,7 +211,10 @@ Boolean printDicInto(
   size_t           timeToLive
 ) {
   if (!anAVLNode) return TRUE;
-  if (timeToLive < 1) return TRUE;
+  if (timeToLive < 1) {
+    strBufPrintf(jInterp, aStrBuf, "... ");
+    return TRUE;
+  }
   timeToLive -= 1;
   
   strBufPrintf(jInterp, aStrBuf, "[%s] l:( ", anAVLNode->symbol);

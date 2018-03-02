@@ -56,8 +56,6 @@ void evalCommandInContextImpl(
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
-  DictObj *theDict = aCtx->dict;
-  assert(theDict);
 
   DEBUG(jInterp, "evalCommandInContext > %p %p\n", aCtx, command);
   //
@@ -66,10 +64,19 @@ void evalCommandInContextImpl(
   pushCtxProcess(aCtx, command);
   //
   while(aCtx->process) {
+    //
+    // ensure we have the most recent dictionary
+    //
+    DictObj *theDict = aCtx->dict;
+    assert(theDict);
+    
     if (aCtx->tracingOn) {
       StringBufferObj *aStrBuf = 
         newStringBuffer(jInterp);
-      strBufPrintf(jInterp, aStrBuf, "\n ctx: %s\n", aCtx->name);
+      strBufPrintf(jInterp, aStrBuf,
+        "\n ctx: %s(%s)\n",
+        aCtx->name, theDict->name
+      );
       jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
       strBufClose(jInterp, aStrBuf);
     }
@@ -90,6 +97,7 @@ void evalCommandInContextImpl(
         if (aCtx->tracingOn) 
           traceAction(jInterp, "calling(ctx)", command, NULL);
         aCtx = (asCtxCFunc(command))(aCtx);
+        assert(aCtx);
         //
       } else {
         //
@@ -141,10 +149,24 @@ void evalCommandInContextImpl(
         //
         // if the association is a function.. call the function
         //
-        if (aCtx->tracingOn)
-          traceAction(jInterp, "calling", command, NULL);
-        (asCFunc(assoc->value))(aCtx);
-        //
+        if (isCtxCFunction(assoc->value)) {
+          //
+          // this is a CTX CFunction
+          //
+          if (aCtx->tracingOn) 
+            traceAction(jInterp, "calling(ctx)", command, NULL);
+          aCtx = (asCtxCFunc(assoc->value))(aCtx);
+          assert(aCtx);
+          //
+        } else {
+          //
+          // this is a normal CFunction
+          //
+          if (aCtx->tracingOn)
+            traceAction(jInterp, "calling", command, NULL);
+          (asCFunc(assoc->value))(aCtx);
+          //
+        }
       } else {
         //
         // if the association is NOT a PairAtom or Function...
