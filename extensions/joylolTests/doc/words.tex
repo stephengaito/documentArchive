@@ -1,10 +1,9 @@
 % A ConTeXt document [master document: joylolTests.tex]
 
 \section[title=Words]
-
-\startTestSuite[start/stop joylol all tests]
-
 \setJoylolTracingOff\setJoylolVerboseOff
+
+\startTestSuite[tests and assert naming scopes]
 
 We start by defining a naming scope to contain all of the Joylol test 
 associated words. This naming space is denoted \quote{tests} in the 
@@ -29,6 +28,9 @@ globals      ;; defining naming scope
 assert       ;; defined name of this new naming scope
 defineNaming ;; make the definition
 \stopJoylolCode
+\stopTestSuite
+
+\startTestSuite[runTestCase]
 
 Our next task, over the next following code fragments, is to define the 
 runTestCase word. This word takes a test case, as a list of the words to 
@@ -36,6 +38,11 @@ be tested intermingled with assertions, and creates the testMonitor and
 testRunner contexts which together run the test case provided. To be 
 completely re-entrant, the testMonitor and testRunner contexts are stored 
 in the running context's localized naming scope. 
+
+The following figure is a summary of the word/switch pattern of 
+\type{runTestCase} word: 
+
+\externalfigure[runJoylolTestCase.pdf][width=10cm]
 
 \startJoylolCode
 (               ;; start of the runTestCase word
@@ -140,25 +147,14 @@ tests        ;; define the new word in this naming scope
 runTestCase  ;; the name of the new word
 define       ;; define the new runTestCase word
 \stopJoylolCode
+\stopTestSuite
 
-\startJoylolCode
-testRunner ;;
-testMonitorNS ;;
-(
-  testRunner
-) extract
-define
+\startTestSuite[reportAssertion]
 
-testMonitor ;;
-testRunnerNS ;;
-(
-  testMonitor
-) extract
-define
-
-
-\stopJoylolCode
-
+In this section we develop the \type{reportAssertion} word in the 
+\type{assert} naming scope. This word takes the result of an individual 
+assertion, switches to the \type{testMonitor} context and records it 
+before switching back to the \type{testRunner} context. 
 
 \stopTestSuite
 
@@ -182,21 +178,6 @@ define
 
 \startTestSuite[start/stop/skip/run a joylol test case]
 
-\startJoylolCode
-(
-  ( interpret ) ;; process
-  (
-    true ;; test case successful
-    false ;; test case should fail
-  ) ;; data
-  tests
-  curTestCase
-  defineContext
-)
-tests
-runTestCase
-define
-\stopJoylolCode
 
 \stopTestSuite
 
