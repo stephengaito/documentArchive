@@ -14,14 +14,16 @@ sequenceDiagram
   deactivate m
   activate tr
   loop assertions
-    tr ->> tm : assert
+    tr ->> tr : assert.something
+    tr ->> tm : reportAssertion
     deactivate tr
     activate tm
     tm ->> tr : switch
     deactivate tm
     activate tr
     note over tr,tm :     ...
-    tr ->> tm : assert
+    tr ->> tr : assert.somethingElse
+    tr ->> tm : reportAssertion
     deactivate tr
     activate tm
     tm ->> tr : switch
