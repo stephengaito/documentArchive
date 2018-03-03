@@ -1,37 +1,33 @@
 % A ConTeXt document [master document: contexts.tex]
 
-\section[title=JoyLoL words]
+\section[title=JoyLoL operators]
+
+In this section we develop the primary JoyLoL operators. These operators 
+are modelled upon those used by Manfred von Thun in his language Joy, 
+\cite{vonThun1994overview}. We will implement his full range of unary, 
+binary and ternary operators as defined in the \quote{General Operators} 
+section of \cite{vonThun1995atomicPrograms}. We provide a duplicate set 
+for each of the data and process stacks of a given context. We will also 
+provide a set which transfer items between the data and process stacks. We 
+will use slightly more mnemonic names. 
+
+\subsection[title=Unary operators]
 
 \startCCode
-static void popAP(ContextObj* aCtx) {
+static void pop1DAP(ContextObj* aCtx) {
   popCtxData(aCtx);
 }
 \stopCCode
 
 \startCCode
-static void popProcessAP(ContextObj* aCtx) {
+static void pop1PAP(ContextObj* aCtx) {
   popCtxProcess(aCtx);
 }
 \stopCCode
 
-\startCCode
-static void pop2ndAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxData(aCtx);
-  pushCtxData(aCtx, top);
-}
-\stopCCode
 
 \startCCode
-static void pop2ndProcessAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcess(aCtx);
-  pushCtxProcess(aCtx, top);
-}
-\stopCCode
-
-\startCCode
-static void dupAP(ContextObj* aCtx) {
+static void dup1DAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   pushCtxData(aCtx, top);
   pushCtxData(aCtx, copyLoL(aCtx->jInterp, top));
@@ -39,15 +35,17 @@ static void dupAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void dupProcessAP(ContextObj* aCtx) {
+static void dup1PAP(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   pushCtxProcess(aCtx, top);
   pushCtxProcess(aCtx, copyLoL(aCtx->jInterp, top));
 }
 \stopCCode
 
+\subsection[title=Binary operators]
+
 \startCCode
-static void swapAP(ContextObj* aCtx) {
+static void swap12DAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   pushCtxData(aCtx, top);
@@ -56,7 +54,7 @@ static void swapAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void swapProcessAP(ContextObj* aCtx) {
+static void swap12PAP(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   popCtxProcessInto(aCtx, second);
   pushCtxProcess(aCtx, top);
@@ -64,7 +62,172 @@ static void swapProcessAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\startTestSuite[initPairsCoAlgebra]
+\startCCode
+static void pop2DAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxData(aCtx);
+  pushCtxData(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void pop2PAP(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcess(aCtx);
+  pushCtxProcess(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void pop12DAP(ContextObj* aCtx) {
+  popCtxData(aCtx);
+  popCtxData(aCtx);
+}
+\stopCCode
+
+\startCCode
+static void pop12PAP(ContextObj* aCtx) {
+  popCtxProcess(aCtx);
+  popCtxProcess(aCtx);
+}
+\stopCCode
+
+\startCCode
+static void dup2DAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, copyLoL(aCtx->jInterp, second));
+  pushCtxData(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void dup2PAP(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  pushCtxProcess(aCtx, second);
+  pushCtxProcess(aCtx, copyLoL(aCtx->jInterp, second));
+  pushCtxProcess(aCtx, top);
+}
+\stopCCode
+
+\subsection[title=Ternary operators]
+
+\startCCode
+static void swap13DAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, third);
+}
+\stopCCode
+
+\startCCode
+static void swap13PAP(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  popCtxProcessInto(aCtx, third);
+  pushCtxProcess(aCtx, top);
+  pushCtxProcess(aCtx, second);
+  pushCtxProcess(aCtx, third);
+}
+\stopCCode
+
+\startCCode
+static void swap23DAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, third);
+  pushCtxData(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void swap23PAP(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  popCtxProcessInto(aCtx, third);
+  pushCtxProcess(aCtx, second);
+  pushCtxProcess(aCtx, third);
+  pushCtxProcess(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void rollupDAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, third);
+  pushCtxData(aCtx, second);
+}
+\stopCCode
+
+\startCCode
+static void rollupPAP(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  popCtxProcessInto(aCtx, third);
+  pushCtxProcess(aCtx, top);
+  pushCtxProcess(aCtx, third);
+  pushCtxProcess(aCtx, second);
+}
+\stopCCode
+
+\startCCode
+static void rolldownDAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, third);
+}
+\stopCCode
+
+\startCCode
+static void rolldownPAP(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  popCtxProcessInto(aCtx, third);
+  pushCtxProcess(aCtx, second);
+  pushCtxProcess(aCtx, top);
+  pushCtxProcess(aCtx, third);
+}
+\stopCCode
+
+\startCCode
+static void choiceDAP(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  if (isTrue(top)) {
+    pushCtxData(aCtx, second);
+  } else {
+    pushCtxData(aCtx, third);
+  }
+}
+\stopCCode
+
+\startCCode
+static void choicePAP(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  popCtxProcessInto(aCtx, third);
+  if (isTrue(top)) {
+    pushCtxProcess(aCtx, second);
+  } else {
+    pushCtxProcess(aCtx, third);
+  }
+}
+\stopCCode
+
 
 \setCHeaderStream{private}
 \startCHeader
@@ -80,17 +243,36 @@ Boolean registerContextOperatorWords(
   JoyLoLInterp *jInterp,
   JClass       *theCoAlg
 ) {
-  extendJoyLoLInRoot(jInterp, "pop",           popAP);
-  extendJoyLoLInRoot(jInterp, "popProcess",    popProcessAP);
-  extendJoyLoLInRoot(jInterp, "pop2nd",        pop2ndAP);
-  extendJoyLoLInRoot(jInterp, "pop2ndProcess", pop2ndProcessAP);
-  extendJoyLoLInRoot(jInterp, "dup",           dupAP);
-  extendJoyLoLInRoot(jInterp, "dupProcess",    dupProcessAP);
-  extendJoyLoLInRoot(jInterp, "swap",          swapAP);
-  extendJoyLoLInRoot(jInterp, "swapProcess",   swapProcessAP);
+  // unary operators
+  extendJoyLoLInRoot(jInterp, "pop1D", pop1DAP);
+  extendJoyLoLInRoot(jInterp, "pop1P", pop1PAP);
+  extendJoyLoLInRoot(jInterp, "dup1D", dup1DAP);
+  extendJoyLoLInRoot(jInterp, "dup1P", dup1PAP);
+  //
+  // binary operators
+  //
+  extendJoyLoLInRoot(jInterp, "swap12D", swap12DAP);
+  extendJoyLoLInRoot(jInterp, "swap12P", swap12PAP);
+  extendJoyLoLInRoot(jInterp, "pop2D",   pop2DAP);
+  extendJoyLoLInRoot(jInterp, "pop2P",   pop2PAP);
+  extendJoyLoLInRoot(jInterp, "pop12D",  pop12DAP);
+  extendJoyLoLInRoot(jInterp, "pop12P",  pop12PAP);
+  extendJoyLoLInRoot(jInterp, "dup2D",   dup2DAP);
+  extendJoyLoLInRoot(jInterp, "dup2P",   dup2PAP);
+  //
+  // ternary operators
+  //
+  extendJoyLoLInRoot(jInterp, "swap13D",   swap13DAP);
+  extendJoyLoLInRoot(jInterp, "swap13P",   swap13PAP);
+  extendJoyLoLInRoot(jInterp, "swap23D",   swap23DAP);
+  extendJoyLoLInRoot(jInterp, "swap23P",   swap23PAP);
+  extendJoyLoLInRoot(jInterp, "rollupD",   rollupDAP);
+  extendJoyLoLInRoot(jInterp, "rollupP",   rollupPAP);
+  extendJoyLoLInRoot(jInterp, "rolldownD", rolldownDAP);
+  extendJoyLoLInRoot(jInterp, "rolldownP", rolldownPAP);
+  extendJoyLoLInRoot(jInterp, "choiceD",   choiceDAP);
+  extendJoyLoLInRoot(jInterp, "choiceP",   choicePAP);
   
   return TRUE;
 }
 \stopCCode
-
-\stopTestSuite
