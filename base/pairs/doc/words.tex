@@ -32,68 +32,6 @@ static void isAtomAP(ContextObj* aCtx) {
 }
 \stopCCode
 
-\startCCode
-static void popAP(ContextObj* aCtx) {
-  popCtxData(aCtx);
-}
-\stopCCode
-
-\startCCode
-static void popProcessAP(ContextObj* aCtx) {
-  popCtxProcess(aCtx);
-}
-\stopCCode
-
-\startCCode
-static void pop2ndAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxData(aCtx);
-  pushCtxData(aCtx, top);
-}
-\stopCCode
-
-\startCCode
-static void pop2ndProcessAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcess(aCtx);
-  pushCtxProcess(aCtx, top);
-}
-\stopCCode
-
-\startCCode
-static void dupAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, copyLoL(aCtx->jInterp, top));
-}
-\stopCCode
-
-\startCCode
-static void dupProcessAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  pushCtxProcess(aCtx, top);
-  pushCtxProcess(aCtx, copyLoL(aCtx->jInterp, top));
-}
-\stopCCode
-
-\startCCode
-static void swapAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxDataInto(aCtx, second);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, second);
-}
-\stopCCode
-
-\startCCode
-static void swapProcessAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcessInto(aCtx, second);
-  pushCtxProcess(aCtx, top);
-  pushCtxProcess(aCtx, second);
-}
-\stopCCode
-
 \startTestSuite[initPairsCoAlgebra]
 
 \setCHeaderStream{private}
@@ -112,14 +50,6 @@ Boolean registerPairWords(
 ) {
   extendJoyLoLInRoot(jInterp, "isPair",        isPairAP);
   extendJoyLoLInRoot(jInterp, "isAtom",        isAtomAP);
-  extendJoyLoLInRoot(jInterp, "pop",           popAP);
-  extendJoyLoLInRoot(jInterp, "popProcess",    popProcessAP);
-  extendJoyLoLInRoot(jInterp, "pop2nd",        pop2ndAP);
-  extendJoyLoLInRoot(jInterp, "pop2ndProcess", pop2ndProcessAP);
-  extendJoyLoLInRoot(jInterp, "dup",           dupAP);
-  extendJoyLoLInRoot(jInterp, "dupProcess",    dupProcessAP);
-  extendJoyLoLInRoot(jInterp, "swap",          swapAP);
-  extendJoyLoLInRoot(jInterp, "swapProcess",   swapProcessAP);
   
   return TRUE;
 }
