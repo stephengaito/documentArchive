@@ -95,7 +95,7 @@ naming scope and finally the name of the new context.
 
 Now we create a testMonitor context which will keep track of the test 
 results. The testMonitor's initial process stack should contain the three 
-words, \type{interpret}, the current context, and \type{switch} in this 
+words, \type{interpret}, the current context, and \type{switchCtx} in this 
 order. When an assertion switches from the testRunner's context to the 
 testMonitor context the top of the testRunner's stack is place onto the 
 top of the testMonitor's data stack. The \type{interpret} word will then 
@@ -104,7 +104,7 @@ testMonitor's process stack to be interpreted. The assertion being
 interpreted \emph{should} ensure it re-places the \type{interpret} word 
 back on the testMonitor's process stack for use by the next assertion. 
 
-The last two words, the current context and \type{switch}, as used by the 
+The last two words, the current context and \type{switchCtx}, as used by the 
 textMonitor interpreting the \type{results} word to know which context to 
 switch to with the summary results. 
 
@@ -118,7 +118,7 @@ word directly on the testMonitor's process stack. Once the
   ( interpret ) ;; begin the testMonitor process stack
   thisContext   ;; interpret thisContext 
   append        ;; append the result of interpreting thisContext
-  ( switch )    ;; 
+  ( switchCtx ) ;; 
   append        ;; append the word switch to the
                 ;; testMonitor's initial process stack
   
@@ -139,7 +139,7 @@ Finally we switch to the testRunner context.
 \startJoylolCode
   ;; switch to the testRunner context and run the tests
   testRunner ;; place the testRunner context on the stack
-  switch     ;; switch to the testRunner context
+  switchCtx  ;; switch to the testRunner context
   
 )            ;; end of the runTestCase definition
 
@@ -167,12 +167,12 @@ report list (only if the assertion failed).
   (
     assert.recordAssertion  ;; the task to be done
     testRunner  ;; return to testRunner
-    switch      ;; perform the switch/return
+    switchCtx   ;; perform the switch/return
     interpret   ;; leave an initial interpret for the next switch/call
   )
   append
   testMonitor   ;; place the testMonitor context on top of stack
-  switch        ;; switch to the testMonitor context
+  switchCtx     ;; switch to the testMonitor context
                 ;; (the testMonitor context will interpret to
                 ;;  current top of the stack)
 )               ;; end of the reportAssertion word
@@ -188,7 +188,7 @@ The \type{recordAssertion} word is run on the testMonitor context. It
 assumes that the top of the data stack is a true/false depending upon the 
 success/failure of the previous assertion. If the top of the stack is 
 false, then the \type{recordAssertion} word also expects a list containing 
-the asertion failure reasons as the second item on the stack. The 
+the assertion failure reasons as the second item on the stack. The 
 subsequent item on the stack is then the context to which to return so 
 that any further assertions can be run. Finally the last item on the stack 
 is the testMonitor's record of assertion results. 
@@ -212,18 +212,20 @@ is the testMonitor's record of assertion results.
   (
     ;; the top of the stack is an assertion failure report list
     ;; then comes the testMonitor's record of assertion results
-    
-    ;; then comes the number of attempts value
-    ;; then comes the number of failures value
-    ;; then comes the collection of failure reports
     append
     extract
+    ;; top    comes the number of attempts value
+    ;; second comes the number of failures value
+    ;; third  comes the collection of failure reports
+    ;; fourth comes the assertion failure report list
     1 + ;; add one to the number of attempted
-    swap
+    swap12D
     1 + ;; add one to the number of failed
     append
-    swap
-    
+    rollupD ;; put current record third
+    append  ;; append the assertion failure report to list or failures
+    append  ;; complete the record of assertion results
+    ;; top comes the updated record of assertion results
   )  ;; else action ;; update everything
   ifte
 )

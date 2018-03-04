@@ -716,28 +716,28 @@ static void thisContextAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static ContextObj* switchContextAP(ContextObj* aCtx) {
+static ContextObj* switchCtxAP(ContextObj* aCtx) {
   assert(aCtx);
 
   popCtxDataIntoImpl(aCtx, newContext);
   popCtxDataIntoImpl(aCtx, oldContextTop);
   if (!isContext(newContext)) {
     raiseException(aCtx,
-      "switchContext required a context as top");
+      "switchCtx required a context as top");
     return aCtx;
   }
   
   //
   // switch to newContext
   //
-  DEBUG(aCtx->jInterp, "switchContextAP -> switching origCtx: %s\n",
+  DEBUG(aCtx->jInterp, "switchCtxAP -> switching origCtx: %s\n",
     aCtx->name);
   ContextObj* newCtx = (ContextObj*)newContext;
   assert(newCtx);
 
   pushCtxDataImpl(newCtx, oldContextTop);
   newCtx->tracingOn = aCtx->tracingOn;
-  DEBUG(aCtx->jInterp, "switchContextAP <- switching newCtx: %s\n",
+  DEBUG(aCtx->jInterp, "switchCtxAP <- switching newCtx: %s\n",
             newCtx->name);
   //
   return newCtx;
@@ -898,6 +898,6 @@ void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "findFirstTryHandler", findFirstTryHandlerAP);
   extendJoyLoLInRoot(jInterp, "tryHandler",          tryHandlerAP);
   
-  extendCtxJoyLoLInRoot(jInterp, "switchContext",    switchContextAP);
+  extendCtxJoyLoLInRoot(jInterp, "switchCtx",        switchCtxAP);
 }
 \stopCCode
