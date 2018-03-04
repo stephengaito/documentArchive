@@ -231,17 +231,15 @@ static void choicePAP(ContextObj* aCtx) {
 
 \setCHeaderStream{private}
 \startCHeader
-extern Boolean registerContextOperatorWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
+extern Boolean initContextAOOperators(
+  JoyLoLInterp *jInterp
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
-Boolean registerContextOperatorWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
+Boolean initContextAOOperators(
+  JoyLoLInterp *jInterp
 ) {
   // unary operators
   extendJoyLoLInRoot(jInterp, "pop1D", pop1DAP);
