@@ -61,7 +61,7 @@ void evalCommandInContextImpl(
   //
   // push this command onto the top of the process stack
   //
-  pushCtxProcess(aCtx, command);
+  pushCtxProcessImpl(aCtx, command);
   //
   while(aCtx->process) {
     //
@@ -83,7 +83,7 @@ void evalCommandInContextImpl(
     //
     // pop the next command off the process stack
     //
-    command = popCtxProcess(aCtx);
+    command = popCtxProcessImpl(aCtx);
     aCtx->command = command;
     //
     if (isCFunction(command)) {
@@ -115,7 +115,7 @@ void evalCommandInContextImpl(
       //
       if (aCtx->tracingOn)
         traceAction(jInterp, "adding", command, NULL);
-      pushCtxData(aCtx, command);
+      pushCtxDataImpl(aCtx, command);
       //
     } else {
       //
@@ -133,7 +133,7 @@ void evalCommandInContextImpl(
         //
         if (aCtx->tracingOn)
           traceAction(jInterp, "adding", command, NULL);
-        pushCtxData(aCtx, command);
+        pushCtxDataImpl(aCtx, command);
         //
       } else if (isPair(assoc->value)) {
         //
@@ -174,7 +174,7 @@ void evalCommandInContextImpl(
         //
         if (aCtx->tracingOn)
           traceAction(jInterp, "evaluating", assoc->value, command);
-        pushCtxProcess(aCtx, assoc->value);
+        pushCtxProcessImpl(aCtx, assoc->value);
         //
       }
     }
@@ -223,7 +223,7 @@ void evalContextImpl(
 void evalContextImpl(
   ContextObj *aCtx
 ) {
-  popCtxProcessInto(aCtx, aCommand);
+  popCtxProcessIntoImpl(aCtx, aCommand);
   evalCommandInContext(aCtx, aCommand);
 }
 \stopCCode

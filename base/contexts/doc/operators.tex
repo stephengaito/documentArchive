@@ -15,30 +15,30 @@ will use slightly more mnemonic names.
 
 \startCCode
 static void pop1DAP(ContextObj* aCtx) {
-  popCtxData(aCtx);
+  popCtxDataImpl(aCtx);
 }
 \stopCCode
 
 \startCCode
 static void pop1PAP(ContextObj* aCtx) {
-  popCtxProcess(aCtx);
+  popCtxProcessImpl(aCtx);
 }
 \stopCCode
 
 
 \startCCode
 static void dup1DAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, copyLoL(aCtx->jInterp, top));
+  popCtxDataIntoImpl(aCtx, top);
+  pushCtxDataImpl(aCtx, top);
+  pushCtxDataImpl(aCtx, copyLoL(aCtx->jInterp, top));
 }
 \stopCCode
 
 \startCCode
 static void dup1PAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  pushCtxProcess(aCtx, top);
-  pushCtxProcess(aCtx, copyLoL(aCtx->jInterp, top));
+  popCtxProcessIntoImpl(aCtx, top);
+  pushCtxProcessImpl(aCtx, top);
+  pushCtxProcessImpl(aCtx, copyLoL(aCtx->jInterp, top));
 }
 \stopCCode
 
@@ -46,69 +46,69 @@ static void dup1PAP(ContextObj* aCtx) {
 
 \startCCode
 static void swap12DAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxDataInto(aCtx, second);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, second);
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  pushCtxDataImpl(aCtx, top);
+  pushCtxDataImpl(aCtx, second);
 }
 \stopCCode
 
 \startCCode
 static void swap12PAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcessInto(aCtx, second);
-  pushCtxProcess(aCtx, top);
-  pushCtxProcess(aCtx, second);
+  popCtxProcessIntoImpl(aCtx, top);
+  popCtxProcessIntoImpl(aCtx, second);
+  pushCtxProcessImpl(aCtx, top);
+  pushCtxProcessImpl(aCtx, second);
 }
 \stopCCode
 
 \startCCode
 static void pop2DAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxData(aCtx);
-  pushCtxData(aCtx, top);
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataImpl(aCtx);
+  pushCtxDataImpl(aCtx, top);
 }
 \stopCCode
 
 \startCCode
 static void pop2PAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcess(aCtx);
-  pushCtxProcess(aCtx, top);
+  popCtxProcessIntoImpl(aCtx, top);
+  popCtxProcessImpl(aCtx);
+  pushCtxProcessImpl(aCtx, top);
 }
 \stopCCode
 
 \startCCode
 static void pop12DAP(ContextObj* aCtx) {
-  popCtxData(aCtx);
-  popCtxData(aCtx);
+  popCtxDataImpl(aCtx);
+  popCtxDataImpl(aCtx);
 }
 \stopCCode
 
 \startCCode
 static void pop12PAP(ContextObj* aCtx) {
-  popCtxProcess(aCtx);
-  popCtxProcess(aCtx);
+  popCtxProcessImpl(aCtx);
+  popCtxProcessImpl(aCtx);
 }
 \stopCCode
 
 \startCCode
 static void dup2DAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxDataInto(aCtx, second);
-  pushCtxData(aCtx, second);
-  pushCtxData(aCtx, copyLoL(aCtx->jInterp, second));
-  pushCtxData(aCtx, top);
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  pushCtxDataImpl(aCtx, second);
+  pushCtxDataImpl(aCtx, copyLoL(aCtx->jInterp, second));
+  pushCtxDataImpl(aCtx, top);
 }
 \stopCCode
 
 \startCCode
 static void dup2PAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcessInto(aCtx, second);
-  pushCtxProcess(aCtx, second);
-  pushCtxProcess(aCtx, copyLoL(aCtx->jInterp, second));
-  pushCtxProcess(aCtx, top);
+  popCtxProcessIntoImpl(aCtx, top);
+  popCtxProcessIntoImpl(aCtx, second);
+  pushCtxProcessImpl(aCtx, second);
+  pushCtxProcessImpl(aCtx, copyLoL(aCtx->jInterp, second));
+  pushCtxProcessImpl(aCtx, top);
 }
 \stopCCode
 
@@ -116,114 +116,114 @@ static void dup2PAP(ContextObj* aCtx) {
 
 \startCCode
 static void swap13DAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxDataInto(aCtx, second);
-  popCtxDataInto(aCtx, third);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, second);
-  pushCtxData(aCtx, third);
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  popCtxDataIntoImpl(aCtx, third);
+  pushCtxDataImpl(aCtx, top);
+  pushCtxDataImpl(aCtx, second);
+  pushCtxDataImpl(aCtx, third);
 }
 \stopCCode
 
 \startCCode
 static void swap13PAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcessInto(aCtx, second);
-  popCtxProcessInto(aCtx, third);
-  pushCtxProcess(aCtx, top);
-  pushCtxProcess(aCtx, second);
-  pushCtxProcess(aCtx, third);
+  popCtxProcessIntoImpl(aCtx, top);
+  popCtxProcessIntoImpl(aCtx, second);
+  popCtxProcessIntoImpl(aCtx, third);
+  pushCtxProcessImpl(aCtx, top);
+  pushCtxProcessImpl(aCtx, second);
+  pushCtxProcessImpl(aCtx, third);
 }
 \stopCCode
 
 \startCCode
 static void swap23DAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxDataInto(aCtx, second);
-  popCtxDataInto(aCtx, third);
-  pushCtxData(aCtx, second);
-  pushCtxData(aCtx, third);
-  pushCtxData(aCtx, top);
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  popCtxDataIntoImpl(aCtx, third);
+  pushCtxDataImpl(aCtx, second);
+  pushCtxDataImpl(aCtx, third);
+  pushCtxDataImpl(aCtx, top);
 }
 \stopCCode
 
 \startCCode
 static void swap23PAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcessInto(aCtx, second);
-  popCtxProcessInto(aCtx, third);
-  pushCtxProcess(aCtx, second);
-  pushCtxProcess(aCtx, third);
-  pushCtxProcess(aCtx, top);
+  popCtxProcessIntoImpl(aCtx, top);
+  popCtxProcessIntoImpl(aCtx, second);
+  popCtxProcessIntoImpl(aCtx, third);
+  pushCtxProcessImpl(aCtx, second);
+  pushCtxProcessImpl(aCtx, third);
+  pushCtxProcessImpl(aCtx, top);
 }
 \stopCCode
 
 \startCCode
 static void rollupDAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxDataInto(aCtx, second);
-  popCtxDataInto(aCtx, third);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, third);
-  pushCtxData(aCtx, second);
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  popCtxDataIntoImpl(aCtx, third);
+  pushCtxDataImpl(aCtx, top);
+  pushCtxDataImpl(aCtx, third);
+  pushCtxDataImpl(aCtx, second);
 }
 \stopCCode
 
 \startCCode
 static void rollupPAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcessInto(aCtx, second);
-  popCtxProcessInto(aCtx, third);
-  pushCtxProcess(aCtx, top);
-  pushCtxProcess(aCtx, third);
-  pushCtxProcess(aCtx, second);
+  popCtxProcessIntoImpl(aCtx, top);
+  popCtxProcessIntoImpl(aCtx, second);
+  popCtxProcessIntoImpl(aCtx, third);
+  pushCtxProcessImpl(aCtx, top);
+  pushCtxProcessImpl(aCtx, third);
+  pushCtxProcessImpl(aCtx, second);
 }
 \stopCCode
 
 \startCCode
 static void rolldownDAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxDataInto(aCtx, second);
-  popCtxDataInto(aCtx, third);
-  pushCtxData(aCtx, second);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, third);
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  popCtxDataIntoImpl(aCtx, third);
+  pushCtxDataImpl(aCtx, second);
+  pushCtxDataImpl(aCtx, top);
+  pushCtxDataImpl(aCtx, third);
 }
 \stopCCode
 
 \startCCode
 static void rolldownPAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcessInto(aCtx, second);
-  popCtxProcessInto(aCtx, third);
-  pushCtxProcess(aCtx, second);
-  pushCtxProcess(aCtx, top);
-  pushCtxProcess(aCtx, third);
+  popCtxProcessIntoImpl(aCtx, top);
+  popCtxProcessIntoImpl(aCtx, second);
+  popCtxProcessIntoImpl(aCtx, third);
+  pushCtxProcessImpl(aCtx, second);
+  pushCtxProcessImpl(aCtx, top);
+  pushCtxProcessImpl(aCtx, third);
 }
 \stopCCode
 
 \startCCode
 static void choiceDAP(ContextObj* aCtx) {
-  popCtxDataInto(aCtx, top);
-  popCtxDataInto(aCtx, second);
-  popCtxDataInto(aCtx, third);
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  popCtxDataIntoImpl(aCtx, third);
   if (isTrue(top)) {
-    pushCtxData(aCtx, second);
+    pushCtxDataImpl(aCtx, second);
   } else {
-    pushCtxData(aCtx, third);
+    pushCtxDataImpl(aCtx, third);
   }
 }
 \stopCCode
 
 \startCCode
 static void choicePAP(ContextObj* aCtx) {
-  popCtxProcessInto(aCtx, top);
-  popCtxProcessInto(aCtx, second);
-  popCtxProcessInto(aCtx, third);
+  popCtxProcessIntoImpl(aCtx, top);
+  popCtxProcessIntoImpl(aCtx, second);
+  popCtxProcessIntoImpl(aCtx, third);
   if (isTrue(top)) {
-    pushCtxProcess(aCtx, second);
+    pushCtxProcessImpl(aCtx, second);
   } else {
-    pushCtxProcess(aCtx, third);
+    pushCtxProcessImpl(aCtx, third);
   }
 }
 \stopCCode

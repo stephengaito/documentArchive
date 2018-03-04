@@ -434,6 +434,19 @@ if (aCtx->tracingOn) {                                          \
   jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));  \
   strBufClose(jInterp, aStrBuf);                                \
 }
+
+#define popCtxDataIntoImpl(aCtx, aVar)                          \
+assert(aCtx);                                                   \
+JObj* aVar = popCtxDataImpl(aCtx);                              \
+if (aCtx->tracingOn) {                                          \
+  JoyLoLInterp *jInterp = aCtx->jInterp;                        \
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
+  strBufPrintf(jInterp, aStrBuf, "%s = ", #aVar);               \
+  printLoL(jInterp, aStrBuf, aVar);                             \
+  strBufPrintf(jInterp, aStrBuf, "\n");                         \
+  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));  \
+  strBufClose(jInterp, aStrBuf);                                \
+}
 \stopCHeader
 
 \setCHeaderStream{private}
