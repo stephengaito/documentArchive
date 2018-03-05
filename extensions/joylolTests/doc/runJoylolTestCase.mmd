@@ -1,40 +1,42 @@
 sequenceDiagram
-  participant m as joylol-main (globals)
-  participant tr as testRunner (testRunner globals)
-  participant tm as testMonitor (testMonitor tests globals)
+  participant sr as suiteRunner (globals)
+  participant cr as caseRunner (caseRunner globals)
+  participant cm as caseMonitor (caseMonitor tests globals)
 
   %% specify context switches
-  activate m
-  m  ->> m : runTestCase
-  m  ->> m : defineNaming (testRunner)
-  m  ->> m : defineNaming (testMonitor)
-  m  -X tr : defineContext (testRunner)
-  m  -X tm : defineContext (testMonitor)
-  m  ->> tr : switch
-  deactivate m
-  activate tr
+  activate sr
+  sr  ->> sr : runTestCase
+  sr  ->> sr : defineNaming (caseRunner)
+  sr  ->> sr : defineNaming (caseMonitor)
+  sr  -X cr : defineContext (caseRunner)
+  sr  -X cm : defineContext (caseMonitor)
+  sr  ->> cr : switchCtx
+  deactivate sr
+  activate cr
   loop assertions
-    tr ->> tr : assert.something
-    tr ->> tm : reportAssertion
-    deactivate tr
-    activate tm
-    tm ->> tr : switch
-    deactivate tm
-    activate tr
-    note over tr,tm :     ...
-    tr ->> tr : assert.somethingElse
-    tr ->> tm : reportAssertion
-    deactivate tr
-    activate tm
-    tm ->> tr : switch
-    deactivate tm
-    activate tr
+    cr ->> cr : assert.something
+    cr ->> cm : reportAssertion
+    deactivate cr
+    activate cm
+    cm ->> cm : recordAssertion
+    cm ->> cr : switchCtx
+    deactivate cm
+    activate cr
+    note over cr,cm :     ...
+    cr ->> cr : assert.somethingElse
+    cr ->> cm : reportAssertion
+    deactivate cr
+    activate cm
+    cm ->> cm : recordAssertion
+    cm ->> cr : switchCtx
+    deactivate cm
+    activate cr
   end
-  tr ->> tm : results
-  deactivate tr
-  activate tm
-  tm ->> m : results
-  deactivate tm
-  activate m
-  deactivate m
+  cr ->> cm : results
+  deactivate cr
+  activate cm
+  cm ->> sr : results
+  deactivate cm
+  activate sr
+  deactivate sr
 

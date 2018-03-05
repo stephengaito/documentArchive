@@ -254,31 +254,23 @@ define
 \stopTestSuite
 \stoptyping
 
+\starttyping
 \startTestSuite[start/stop/skip/run a joylol test case]
 
 
 \stopTestSuite
-
-\startTestSuite[reportTestResult]
-
-\startJoylolCode
-  (
-  )
-  reportTestResult
-  define
-\stopJoylolCode
-
-\stopTestSuite
+\stoptyping
 
 \startTestSuite[assertShouldFail]
 
+\starttyping
 \startJoylolCode
 
 (
   
 )
-tests
-assertShouldFail
+assert
+shouldFail
 define
 \stopJoylolCode
 
@@ -289,20 +281,23 @@ doSomeThing
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite
+\stoptyping
 
 \startTestSuite[assertFail]
 
 \startJoylolCode
 (
+  fail
+  assert.reportAssertion
 )
-tests
-assertFail
+assert
+fail
 define
 \stopJoylolCode
 
 \startTestCase[assertFail should fail]
 \startJoylolTest
-assertFail
+  assert.fail
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite
