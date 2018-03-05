@@ -309,3 +309,61 @@ end
 
 contests.testRunners.runCurJoylolTestCase = runCurJoylolTestCase
 \stopLuaCode
+
+\startMkIVCode
+\def\createJoylolTestFile#1#2#3{%
+  \directlua{
+    thirddata.contests.createJoylolTestFile('#1', '#2', '#3')
+  }
+}
+\stopMkIVCode
+
+\startLuaCode
+local function createJoylolTestFile(
+  aCodeStream, aFilePath, aFileHeader
+)
+  if not build.buildDir then
+    texio.write('\nERROR: document directory NOT yet defined\n')
+    texio.write('       NOT creating code file ['..aFilePath..']\n\n')
+    return
+  end
+
+  if type(aFilePath) ~= 'string'
+    or #aFilePath < 1 then
+    texio.write('\nERROR: no file name provided for cTests\n\n')
+    return
+  end
+
+--  build.testTargets = build.testTargets or { }
+--  local aTestExec = aFilePath:gsub('%..+$','')
+--  tInsert(build.testTargets, aTestExec)
+
+  aFilePath = build.buildDir .. '/buildDir/' .. aFilePath
+  local outFile = io.open(aFilePath, 'w')
+  if not outFile then
+    return
+  end
+  
+  texio.write('creating JoylolTest file: ['..aFilePath..']\n')
+
+  outFile:write('#!/usr/bin/env joylol\n')
+  outFile:write('\n\n')
+  
+  if type(aFileHeader) == 'string'
+    and 0 < #aFileHeader then
+    outFile:write(aFileHeader)
+    outFile:write('\n\n')
+  end
+
+  tests.suites = tests.suites or { }
+
+  if type(aCodeStream) ~= 'string'
+    or #aCodeStream < 1 then
+    aCodeStream = 'default'
+  end
+
+  outFile:close()
+end
+
+contests.createJoylolTestFile = createJoylolTestFile
+\stopLuaCode
