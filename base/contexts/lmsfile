@@ -48,9 +48,9 @@ joylol.targets(lpTargets, {
   },
 })
 
-require 'lms.contests'
+require 'lms.cTests'
 
-contests.targets(lpTargets, {
+cTests.targets(lpTargets, {
   testExecs = {
     'allCTests',
   },
