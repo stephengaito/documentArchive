@@ -14,6 +14,24 @@ lpTargets = litProgs.targets{
   docDir    = 'doc',
 }
 
+require 'lms.joylolTests'
+
+joylolTests.targets(lpTargets, {
+  testExecs = {
+    'allJoylolTests',
+  },
+  cHeaderFiles = {
+    'joylol/joylolTests.h',
+    'joylol/joylolTests-private.h',
+  },
+  cCodeFiles = {
+    'joylolTests.c',
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+})
+
 require 'lms.joyLoL'
 
 joylol.targets(lpTargets, {

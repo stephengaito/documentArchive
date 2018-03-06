@@ -25,7 +25,6 @@ options.configFile    = 'config'
 options.userPath      = os.getenv('HOME')..'/.joylol'
 options.localPath     = '/usr/local/lib/joylol'
 options.systemPath    = '/usr/lib/joylol'
-options.minimalJoylol = false
 
 helpText = {
   "usage: joylol [options] [files to load]",
@@ -41,8 +40,6 @@ helpText = {
   " -u --userPath    sets the user load path",
   " -L --localPath   sets the local load path",
   " -s --systemPath  sets the system load path",
-  " -j --minJoylol   only load the Lua based minimal JoyLoL",
-  " -J --maxJoylol   attempt to load the C based maximal JoyLol",
   "",
   "files to load:",
   "  Any remaining options are treated as files to be loaded.",
@@ -83,13 +80,9 @@ while(0 < #arg) do
     options.verbose = true
   elseif anArg:match('-d') or anArg:match('--debug') then
     options.debug = true
-  elseif anArg:match('-j') or anArg:match('--minJoylol') then
-    options.minimalJoylol = true
-  elseif anArg:match('-J') or anArg:match('--maxJoylol') then
-    options.minimalJoylol = false
   else
-    optArg = table.remove(arg, 1)
-    table.insert(options.loadFiles, optArg)
+    --optArg = table.remove(arg, 1)
+    table.insert(options.loadFiles, anArg)
   end
 end
 
@@ -114,9 +107,9 @@ package.cpath = table.concat(joylolCPaths, ';')
 
 -- Now load joylol
 
-if verbose then print('loading [joylol.core.lua]') end
+if options.verbose then print('loading [joylol.core.lua]') end
 joylol = require 'joylol.core.lua'
-if verbose then print('loaded [joylol.core.lua]\n') end
+if options.verbose then print('loaded [joylol.core.lua]\n') end
 
 -- replace the options
 
@@ -125,6 +118,7 @@ joylol.options = options
 --  deal with loadPaths, configFile, and loadFiles
 
 for i, aPath in ipairs(options.loadPaths) do
+  if options.verbose then print('adding loadPath ['..aPath..']\n') end
   joylol.pushLoadPath(aPath)
 end
 
@@ -133,11 +127,14 @@ if (options.configFile) then
 end
 
 for i, aFile in ipairs(options.loadFiles) do
+  if options.verbose then print('loading ['..aFile..']\n') end
   joylol.loadFile(aFile)
+  if options.verbose then print('loaded ['..aFile..']\n') end
 end
 
--- Finally run the REPL
-
-joylol.core.lua.runREPL();
+if #options.loadFiles < 1 then
+  -- Finally run the REPL
+  joylol.core.lua.runREPL();
+end
 
 \stopLuaCode
