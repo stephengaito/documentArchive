@@ -47,8 +47,18 @@ Boolean registerSymbolWords(
   JoyLoLInterp *jInterp,
   JClass       *theCoAlg
 ) {
+  assert(jInterp);
+  ContextObj *rootCtx = jInterp->rootCtx;
+  assert(rootCtx);
+  DictObj *dict = rootCtx->dict;
+  assert(dict);
+  
+  DictNodeObj* newLine = getSymbolEntry(dict, "newLine");
+  newLine->value = newSymbolImpl(jInterp, "\n");
+
   extendJoyLoLInRoot(jInterp, "isSymbol", isSymbolAP);
   extendJoyLoLInRoot(jInterp, "=Sym",     equalSymbolAP);
+
   return TRUE;
 }
 \stopCCode

@@ -2,6 +2,36 @@
 
 \section[title=Words]
 
+\startCCode
+static void printLoLAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataInto(aCtx, lol);
+  popCtxDataInto(aCtx, depth);
+  
+  if (!isNatural(depth)) {
+    raiseException(aCtx,
+      "printLoL expected a natural as depth");
+    return;
+  }
+  size_t depthInt = SIZE_MAX;
+  double depthDbl = asNaturalDbl(jInterp, depth);
+  if (depthDbl < ((double)depthInt)) {
+    depthInt = ((size_t)depthDbl);
+  }
+  
+  StringBufferObj* aStrBuf = newStringBufferImpl(jInterp);
+  
+  printLoLImpl(jInterp, aStrBuf, lol, depthInt);
+  JObj* result = newSymbol(jInterp, getCString(jInterp, aStrBuf));
+  pushCtxData(aCtx, result);
+  
+  strBufClose(jInterp, aStrBuf);
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerStringBufferWords(
@@ -16,6 +46,7 @@ Boolean registerStringBufferWords(
   JoyLoLInterp *jInterp,
   JClass       *theCoAlg
 ) {
+  extendJoyLoLInRoot(jInterp, "printLoL", printLoLAP);
   return TRUE;
 }
 \stopCCode

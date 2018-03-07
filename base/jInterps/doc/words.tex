@@ -2,6 +2,61 @@
 
 \section[title=JoyLoL words]
 
+\startCCode
+static void doWrite(
+  ContextObj      *aCtx,
+  StdOutputMethod *writeMethod,
+  Boolean          newLine
+) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  assert(writeMethod);
+  
+  popCtxDataInto(aCtx, aString);
+  if (!isSymbol(aString)) {
+    raiseException(aCtx,
+      "write expected a symbol as aString");
+    return;
+  }
+
+  (writeMethod)(jInterp, asSymbol(aString));
+  if (newLine) (writeMethod)(jInterp, "\n");
+}
+
+static void writeOutAP(ContextObj *aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  doWrite(aCtx, jInterp->writeStdOut, FALSE);
+}
+
+static void writeOutNLAP(ContextObj *aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  doWrite(aCtx, jInterp->writeStdOut, TRUE);
+}
+
+static void writeErrAP(ContextObj *aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  doWrite(aCtx, jInterp->writeStdErr, FALSE);
+}
+
+static void writeErrNLAP(ContextObj *aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  doWrite(aCtx, jInterp->writeStdErr, TRUE);
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean registerJInterpWords(
@@ -16,6 +71,10 @@ Boolean registerJInterpWords(
   JoyLoLInterp *jInterp,
   JClass       *theCoAlg
 ) {
+  extendJoyLoLInRoot(jInterp, "writeOut",   writeOutAP);
+  extendJoyLoLInRoot(jInterp, "writeOutNL", writeOutNLAP);
+  extendJoyLoLInRoot(jInterp, "writeErr",   writeErrAP);
+  extendJoyLoLInRoot(jInterp, "writeErrNL", writeErrNLAP);
   return TRUE;
 }
 \stopCCode
