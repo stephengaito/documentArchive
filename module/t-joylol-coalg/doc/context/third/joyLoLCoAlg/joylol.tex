@@ -111,3 +111,131 @@ end
 
 coAlgs.addJoyLoLTargets = addJoyLoLTargets
 \stopLuaCode
+
+\startMkIVCode
+\def\addCTestJoyLoLCallbacks#1{%
+  \directlua{
+    thirddata.joylolCoAlgs.addCTestJoyLoLCallbacks('#1')
+  }
+}
+\stopMkIVCode
+
+\startLuaCode
+local function addCTestJoyLoLCallbacks(aCodeStream)
+  local contests      = setDefs(thirddata, 'contests')
+  local tests         = setDefs(contests, 'tests')
+  local methods       = setDefs(tests, 'methods')
+  local setup         = setDefs(methods, 'setup')
+  local cTests        = setDefs(setup, 'cTests')
+  aCodeStream         = aCodeStream         or 'default'
+  cTests[aCodeStream] = cTests[aCodeStream] or { }
+  tInsert(cTests[aCodeStream], [=[
+void ctestsWriteStdOut(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
+  fprintf(stdout, "%s", aMessage);
+}
+
+void ctestsWriteStdErr(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
+  fprintf(stderr, "%s", aMessage);
+}
+void *ctestsCallback(
+  lua_State *lstate,
+  size_t resourceId
+) {
+  if (resourceId == JoyLoLCallback_StdOutMethod) {
+    return (void*)ctestsWriteStdOut;
+  } else if (resourceId == JoyLoLCallback_StdErrMethod) {
+    return (void*)ctestsWriteStdErr;
+  } else if (resourceId == JoyLoLCallback_Verbose) {
+    return (void*)FALSE;
+  } else if (resourceId == JoyLoLCallback_Debug) {
+    return (void*)FALSE;
+  }
+  return NULL;
+} 
+]=])
+  setup               = setDefs(tests, 'setup')
+  cTests              = setDefs(setup, 'cTests')
+  cTests[aCodeStream] = cTests[aCodeStream] or { }
+  tInsert(cTests[aCodeStream], [=[
+setJoyLoLCallbackFrom(lstate, ctestsCallback);
+]=])
+end
+
+coAlgs.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
+\stopLuaCode
+
+\startMkIVCode
+\def\setJoylolVerboseOn{%
+  \directlua{thirddata.joylol.setVerbose(true)}
+}
+
+\def\setJoylolVerboseOff{%
+  \directlua{thirddata.joylol.setVerbose(false)}
+}
+
+\def\setJoylolDebuggingOn{%
+  \directlua{thirddata.joylol.setDebugging(true)}
+}
+
+\def\setJoylolDebuggingOff{%
+  \directlua{thirddata.joylol.setVDebugging(false)}
+}
+
+\def\setJoylolTracingOn{%
+  \directlua{thirddata.joylol.setTracing(true)}
+}
+
+\def\setJoylolTracingOff{%
+  \directlua{thirddata.joylol.setTracing(false)}
+}
+
+\def\setJoylolShowStackOn{%
+  \directlua{thirddata.joylol.setShowStack(true)}
+}
+
+\def\setJoylolShowStackOff{%
+  \directlua{thirddata.joylol.setShowStack(false)}
+}
+
+\def\setJoylolShowSpecificationsOn{%
+  \directlua{thirddata.joylol.setShowSpecifications(true)}
+}
+
+\def\setJoylolShowSpecificationsOff{%
+  \directlua{thirddata.joylol.setShowSpecifications(false)}
+}
+
+\def\setJoylolCheckingOn{%
+  \directlua{thirddata.joylol.setChecking(true)}
+}
+
+\def\setJoylolCheckingOff{%
+  \directlua{thirddata.joylol.setChecking(false)}
+}
+\stopMkIVCode
+
+\startLuaCode
+function showStack(aMessage) 
+  texio.write_nl('-----------------------------------------------')
+  if aMessage and type(aMessage) == 'string' and 0 < #aMessage then
+    texio.write_nl(aMessage)
+  end
+  dataStack    = joylol.showData()
+  processStack = joylol.showProcess()
+  texio.write_nl("Data:")
+  texio.write_nl(dataStack)
+  texio.write_nl("Process:")
+  texio.write_nl(processStack)
+  texio.write_nl('AT: '..status.filename..'::'..status.linenumber)
+  texio.write_nl('-----------------------------------------------')
+
+end
+
+contests.showStack = showStack
+\stopLuaCode

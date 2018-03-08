@@ -4,64 +4,6 @@
 
 QUESTION: How do we load a *.joy file? Where do we put this command?
 
-\startMkIVCode
-\def\addCTestJoyLoLCallbacks#1{%
-  \directlua{
-    thirddata.joylolCoAlgs.addCTestJoyLoLCallbacks('#1')
-  }
-}
-\stopMkIVCode
-
-\startLuaCode
-local function addCTestJoyLoLCallbacks(aCodeStream)
-  local contests      = setDefs(thirddata, 'contests')
-  local tests         = setDefs(contests, 'tests')
-  local methods       = setDefs(tests, 'methods')
-  local setup         = setDefs(methods, 'setup')
-  local cTests        = setDefs(setup, 'cTests')
-  aCodeStream         = aCodeStream         or 'default'
-  cTests[aCodeStream] = cTests[aCodeStream] or { }
-  tInsert(cTests[aCodeStream], [=[
-void ctestsWriteStdOut(
-  JoyLoLInterp *jInterp,
-  Symbol       *aMessage
-) {
-  fprintf(stdout, "%s", aMessage);
-}
-
-void ctestsWriteStdErr(
-  JoyLoLInterp *jInterp,
-  Symbol       *aMessage
-) {
-  fprintf(stderr, "%s", aMessage);
-}
-void *ctestsCallback(
-  lua_State *lstate,
-  size_t resourceId
-) {
-  if (resourceId == JoyLoLCallback_StdOutMethod) {
-    return (void*)ctestsWriteStdOut;
-  } else if (resourceId == JoyLoLCallback_StdErrMethod) {
-    return (void*)ctestsWriteStdErr;
-  } else if (resourceId == JoyLoLCallback_Verbose) {
-    return (void*)FALSE;
-  } else if (resourceId == JoyLoLCallback_Debug) {
-    return (void*)FALSE;
-  }
-  return NULL;
-} 
-]=])
-  setup               = setDefs(tests, 'setup')
-  cTests              = setDefs(setup, 'cTests')
-  cTests[aCodeStream] = cTests[aCodeStream] or { }
-  tInsert(cTests[aCodeStream], [=[
-setJoyLoLCallbackFrom(lstate, ctestsCallback);
-]=])
-end
-
-coAlgs.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
-\stopLuaCode
-
 \subsection{JoylolTests}
 
 see ConTests LuaTests.tex file
@@ -79,76 +21,6 @@ Anything in the testRunners table must be a function taking two arguments
 as above. 
 
 \startMkIVCode
-\def\setJoylolVerboseOn{%
-  \directlua{thirddata.joylol.setVerbose(true)}
-}
-
-\def\setJoylolVerboseOff{%
-  \directlua{thirddata.joylol.setVerbose(false)}
-}
-
-\def\setJoylolDebuggingOn{%
-  \directlua{thirddata.joylol.setDebugging(true)}
-}
-
-\def\setJoylolDebuggingOff{%
-  \directlua{thirddata.joylol.setVDebugging(false)}
-}
-
-\def\setJoylolTracingOn{%
-  \directlua{thirddata.joylol.setTracing(true)}
-}
-
-\def\setJoylolTracingOff{%
-  \directlua{thirddata.joylol.setTracing(false)}
-}
-
-\def\setJoylolShowStackOn{%
-  \directlua{thirddata.joylol.setShowStack(true)}
-}
-
-\def\setJoylolShowStackOff{%
-  \directlua{thirddata.joylol.setShowStack(false)}
-}
-
-\def\setJoylolShowSpecificationsOn{%
-  \directlua{thirddata.joylol.setShowSpecifications(true)}
-}
-
-\def\setJoylolShowSpecificationsOff{%
-  \directlua{thirddata.joylol.setShowSpecifications(false)}
-}
-
-\def\setJoylolCheckingOn{%
-  \directlua{thirddata.joylol.setChecking(true)}
-}
-
-\def\setJoylolCheckingOff{%
-  \directlua{thirddata.joylol.setChecking(false)}
-}
-\stopMkIVCode
-
-\startLuaCode
-function showStack(aMessage) 
-  texio.write_nl('-----------------------------------------------')
-  if aMessage and type(aMessage) == 'string' and 0 < #aMessage then
-    texio.write_nl(aMessage)
-  end
-  dataStack    = joylol.showData()
-  processStack = joylol.showProcess()
-  texio.write_nl("Data:")
-  texio.write_nl(dataStack)
-  texio.write_nl("Process:")
-  texio.write_nl(processStack)
-  texio.write_nl('AT: '..status.filename..'::'..status.linenumber)
-  texio.write_nl('-----------------------------------------------')
-
-end
-
-contests.showStack = showStack
-\stopLuaCode
-
-\startMkIVCode
 \definetyping[JoylolTest]
 \setuptyping[JoylolTest][option=lisp]
 
@@ -161,19 +33,160 @@ contests.showStack = showStack
 \def\showJoylolTest{%
   \directlua{thirddata.contests.showJoylolTest()}
 }
+
+\def\setJoylolTestStage#1#2{%
+  \directlua{%
+    thirddata.contests.setJoylolTestStage('#1', '#2')
+  }
+}
+
+\def\JoylolTestsMethodSetup{%
+  \setJoylolTestStage{Methods}{Setup}
+}
+
+\def\JoylolTestsMethodTeardown{%
+  \setJoylolTestStage{Methods}{Teardown}
+}
+
+\def\JoylolTestsSetup{%
+  \setJoylolTestStage{Global}{Setup}
+}
+
+\def\JoylolTestsTeardown{%
+  \setJoylolTestStage{Global}{Teardown}
+}
+
+\def\JoylolTestSuiteSetup{%
+  \setJoylolTestStage{TestSuite}{Setup}
+}
+
+\def\JoylolTestSuiteTeardown{%
+  \setJoylolTestStage{TestSuite}{Teardown}
+}
+
+\def\setJoylolTestStream#1{%
+  \directlua{
+    thirddata.contests.setJoylolTestStream('#1')
+  }
+}
+
+\def\addJoylolTestInclude#1{%
+  \directlua{
+    thirddata.contests.addJoylolTestInclude('#1')
+  }
+}
+
+\def\addJoylolTestLibDir#1{%
+  \directlua{
+    thirddata.contests.addJoylolTestLibDir('#1')
+  }
+}
+
+\def\addJoylolTestLib#1{%
+  \directlua{
+    thirddata.contests.addJoylolTestLib('#1')
+  }
+}
+
+\def\createJoylolTestFile#1#2#3{%
+  \directlua{
+    thirddata.contests.createJoylolTestFile('#1', '#2', '#3')
+  }
+}
+
+\def\addJoylolTestTargets#1{%
+  \directlua{
+    thirddata.contests.addJoylolTestTargets('#1')
+  }
+}
 \stopMkIVCode
 
 \startLuaCode
 local function addJoylolTest(bufferName)
   local bufferContents = buffers.getcontent(bufferName):gsub("\13", "\n")
-  local suite = tests.curSuite
-  local case  = suite.curCase
-  case.joylol    = case.joylol or {}
-  tInsert(case.joylol, bufferContents)
+  local methods        = setDefs(tests, 'methods')
+  local suite          = setDefs(tests, 'curSuite')
+  local case           = setDefs(suite, 'curCase')
+  local joylolTests    = setDefs(case,  'joylolTests')
+  local curStage       = tests.stage:lower()
+  if curStage:find('global') then
+    if curStage:find('up') then
+      local setup      = setDefs(tests,    'setup')
+      joylolTests      = setDefs(setup,    'joylolTests')
+    elseif curStage:find('down') then
+      local teardown   = setDefs(tests,    'teardown')
+      joylolTests      = setDefs(teardown, 'joylolTests')
+    end
+  elseif curStage:find('suite') then
+    if curStage:find('up') then
+      local setup      = setDefs(suite,    'setup')
+      joylolTests      = setDefs(setup,    'joylolTests')
+    elseif curStage:find('down') then
+      local teardown   = setDefs(suite,    'teardown')
+      joylolTests      = setDefs(teardown, 'joylolTests')
+    end
+  elseif curStage:find('method') then
+    if curStage:find('up') then
+      local setup      = setDefs(methods,  'setup')
+      joylolTests      = setDefs(setup,    'joylolTests')
+    elseif curStage:find('down') then
+      local teardown   = setDefs(methods,  'teardown')
+      joylolTests      = setDefs(teardown, 'joylolTests')
+    end
+  end
+  tests.stage            = ''
+  local joylolTestStream = setDefs(tests, 'curJoylolTestStream', 'default')
+  joylolTestStream       = setDefs(joylolTests, joylolTestStream)
+  tInsert(joylolTestStream, bufferContents)
 end
 
 contests.addJoylolTest = addJoylolTest
 
+local function setJoylolTestStage(suiteCase, setupTeardown)
+  tests.stage = suiteCase..'-'..setupTeardown
+end
+
+contests.setJoylolTestStage = setJoylolTestStage
+
+local function setJoylolTestStream(aCodeStream)
+  if type(aCodeStream) ~= 'string'
+    or #aCodeStream < 1 then
+    aCodeStream = 'default'
+  end
+  tests.curJoylolTestStream = aCodeStream
+end
+
+contests.setJoylolTestStream = setJoylolTestStream
+
+local function addJoylolTestInclude(anInclude)
+  local joylolIncludes   = setDefs(tests, 'joylolIncludes')
+  local joylolTestStream = setDefs(tests, 'curJoylolTestStream', 'default')
+  joylolTestStream       = setDefs(joylolIncludes, joylolTestStream)
+  tInsert(joylolTestStream, anInclude)
+end
+
+contests.addJoylolTestInclude = addJoylolTestInclude
+
+local function addJoylolTestLibDir(aLibDir)
+  local joylolLibDirs    = setDefs(tests, 'joylolLibDirs')
+  local joylolTestStream = setDefs(tests, 'curJoylolTestStream', 'default')
+  joylolTestStream       = setDefs(joylolLibDirs, joylolTestStream)
+  tInsert(joylolTestStream, aLibDir)
+end
+
+contests.addJoylolTestLibDir = addJoylolTestLibDir
+
+local function addJoylolTestLib(aLib)
+  local joylolLibs       = setDefs(tests, 'joylolLibs')
+  local joylolTestStream = setDefs(tests, 'curJoylolTestStream', 'default')
+  joylolTestStream       = setDefs(joylolLibs, joylolTestStream)
+  tInsert(joylolTestStream, aLib)
+end
+
+contests.addJoylolTestLib = addJoylolTestLib
+\stopLuaCode
+
+\startLuaCode
 local function buildJoylolChunk(joylolChunk, curSuite, curCase)
   if type(joylolChunk) == 'table' then
     joylolChunk = tConcat(joylolChunk, '\n')
@@ -316,9 +329,6 @@ local function createJoylolTestFile(
   end
   
   texio.write('creating JoylolTest file: ['..aFilePath..']\n')
-
-  outFile:write('#!/usr/bin/env joylol\n')
-  outFile:write('\n\n')
   
   if type(aFileHeader) == 'string'
     and 0 < #aFileHeader then
@@ -333,6 +343,143 @@ local function createJoylolTestFile(
     aCodeStream = 'default'
   end
 
+  outFile:write('#include <t-contests.h>\n')
+  outFile:write('\n\n')
+
+  outFile:write(';;-------------------------------------------------------\n')
+  local joylolIncludes = setDefs(tests, 'joylolIncludes')
+
+  joylolIncludes[aCodeStream] = joylolIncludes[aCodeStream] or { }
+
+  for i, anInclude in ipairs(joylolIncludes[aCodeStream]) do
+    outFile:write(anInclude..'load \n')
+  end
+  outFile:write('\n\n')
+
+  tests.methods = tests.methods or { }
+  local methods = tests.methods
+  methods.setup = methods.setup or { }
+  local mSetup  = methods.setup
+  mSetup.joylolTests = mSetup.joylolTests or { }
+  msJoylolTests      = mSetup.joylolTests
+
+  --msJoylolTests[aCodeStream] = msJoylolTests[aCodeStream] or { }
+
+  if msJoylolTests and
+    msJoylolTests[aCodeStream] then
+    outFile:write('  (\n')
+    local setupCode = tConcat(msJoylolTests[aCodeStream],'\n')
+    setupCode       = litProgs.splitString(setupCode)
+    outFile:write('  '..tConcat(setupCode, '\n  '))
+    outFile:write('  ) ;; JoylolTests methods setup\n')
+    outFile:write('  setupMethods\n')
+    outFile:write('\n\n')
+  end
+  outFile:write('\n\n')
+
+  outFile:write(';;-------------------------------------------------------\n')
+
+  outFile:write('  (\n')
+  tests.setup = tests.setup or { }
+  if tests.setup.joylolTests and
+    tests.setup.joylolTests[aCodeStream] then
+    local setupCode = tConcat(tests.setup.joylolTests[aCodeStream],'\n')
+    setupCode       = litProgs.splitString(setupCode)
+    outFile:write('  '..tConcat(setupCode, '\n  '))
+    outFile:write('\n\n')
+  end
+  outFile:write('  ) ;; JoylolTests setup\n')
+  outFile:write('  (\n')
+
+  for i, aTestSuite in ipairs(tests.suites) do
+    aTestSuite.cases = aTestSuite.cases or { }
+    local suiteCaseBuf = { }
+
+    for j, aTestCase in ipairs(aTestSuite.cases) do
+      local joylolTests     = setDefs(aTestCase, 'joylolTests')
+      if aTestCase.desc and
+        aTestCase.fileName and
+        aTestCase.startLine and
+        aTestCase.lastLine and
+        joylolTests[aCodeStream] then
+        tInsert(suiteCaseBuf, '      (\n')
+        tInsert(suiteCaseBuf, '        "'..aTestCase.desc..'"\n')
+        tInsert(suiteCaseBuf, '        "'..aTestCase.fileName..'"\n')
+        tInsert(suiteCaseBuf, '        '..toStr(aTestCase.startLine)..'\n')
+        tInsert(suiteCaseBuf, '        '..toStr(aTestCase.lastLine)..'\n')
+        tInsert(suiteCaseBuf, '      ) ;; test case details\n')
+        tInsert(suiteCaseBuf, '      (\n  ')
+        local joylolTestsCode = tConcat(joylolTests[aCodeStream], '\n')
+        joylolTestsCode       = litProgs.splitString(joylolTestsCode)
+        tInsert(suiteCaseBuf, '    '..tConcat(joylolTestsCode, '\n      '))
+        tInsert(suiteCaseBuf, '\n      ) ;; tests\n\n')
+      elseif (not aTestCase.desc or
+        not aTestCase.fileName or
+        not aTestCase.startLine or
+        not aTestCase.lastLine) and
+        joylolTests[aCodeStream] then
+        texio.write("\nERROR missing \\startTestCase\n")
+        texio.write("near:\n")
+        texio.write(tConcat(joylolTests[aCodeStream], '\n'))
+        texio.write('\n')
+      end
+    end
+
+    if aTestSuite.desc and (0 < #suiteCaseBuf) then
+      outFile:write(';;-------------------------------------------------------\n')
+      outFile:write('  (\n')
+      outFile:write('    (\n')
+      outFile:write('      "'..aTestSuite.desc..'"\n')
+      outFile:write('    ) ;; test suite details\n\n')
+
+      outFile:write('    (\n')
+      aTestSuite.setup = aTestSuite.setup or { }
+      if aTestSuite.setup.joylolTests and
+        aTestSuite.setup.joylolTests[aCodeStream] then
+        local setupCode = tConcat(aTestSuite.setup.joylolTests[aCodeStream],'\n  ')
+        setupCode = litProgs.splitString(setupCode, '\n')
+        outFile:write('    '..tConcat(setupCode, '\n    '))
+      end
+      outFile:write('    ) ;; test suite setup\n')
+
+      outFile:write('    (\n')
+      outFile:write(tConcat(suiteCaseBuf))
+      outFile:write('    ) ;; test case\n')
+      outFile:write('    runTestCase\n')
+
+      outFile:write('    (\n')
+      aTestSuite.teardown = aTestSuite.teardown or { }
+      if aTestSuite.teardown.joylolTests and
+        aTestSuite.teardown.joylolTests[aCodeStream] then
+        local teardownCode = tConcat(aTestSuite.teardown.joylolTests[aCodeStream],'\n  ')
+        teardownCode = litProgs.splitString(teardownCode, '\n')
+        outFile:write('    '..tConcat(teardownCode, '\n    '))
+      end
+      outFile:write('    ) ;; test suite teardown\n')
+      outFile:write('  )\n')
+
+      outFile:write('  runTestSuite\n')
+    elseif not aTestSuite.desc and (0 < #suiteCaseBuf) then
+      texio.write("\nERROR missing \\startTestSuite\n")
+      texio.write("near:\n")
+      texio.write(tConcat(suiteCaseBuf, '\n'))
+      texio.write('\n')
+    end
+  end
+
+  outFile:write('  (\n')
+  tests.teardown = tests.teardown or { }
+  if tests.teardown.joylolTests and
+    tests.teardown.joylolTests[aCodeStream] then
+    local teardownCode =tConcat(tests.teardown.joylolTests[aCodeStream],'\n  ')
+    teardownCode = litProgs.splitString(teardownCode, '\n')
+    outFile:write('  '..tConcat(teardownCode, '\n  '))
+    outFile:write('\n\n')
+  end
+  outFile:write('  ) ;; JoylolTests teardown\n')
+
+  outFile:write('  runAllTests\n\n')
+  
   outFile:close()
 end
 
