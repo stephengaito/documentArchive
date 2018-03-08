@@ -304,6 +304,21 @@ define
 
 \startTestSuite[assertSucceed]
 
+\startJoylolCode
+(
+  succeed
+  assert.reportAssertion
+)
+assert
+succeed
+define
+\stopJoylolCode
+
+\startTestCase[assert.succeed should succeed]
+\startJoylolTest
+  assert.succeed
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[assertTrue]

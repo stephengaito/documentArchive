@@ -343,9 +343,6 @@ local function createJoylolTestFile(
     aCodeStream = 'default'
   end
 
-  outFile:write('#include <t-contests.h>\n')
-  outFile:write('\n\n')
-
   outFile:write(';;-------------------------------------------------------\n')
   local joylolIncludes = setDefs(tests, 'joylolIncludes')
 
@@ -378,7 +375,10 @@ local function createJoylolTestFile(
   outFile:write('\n\n')
 
   outFile:write(';;-------------------------------------------------------\n')
+  outFile:write(';; all tests\n')
+  outFile:write(';;-------------------------------------------------------\n')
 
+  outFile:write('(\n')
   outFile:write('  (\n')
   tests.setup = tests.setup or { }
   if tests.setup.joylolTests and
@@ -388,8 +388,7 @@ local function createJoylolTestFile(
     outFile:write('  '..tConcat(setupCode, '\n  '))
     outFile:write('\n\n')
   end
-  outFile:write('  ) ;; JoylolTests setup\n')
-  outFile:write('  (\n')
+  outFile:write('  ) ;; JoylolTests setup\n\n')
 
   for i, aTestSuite in ipairs(tests.suites) do
     aTestSuite.cases = aTestSuite.cases or { }
@@ -402,17 +401,23 @@ local function createJoylolTestFile(
         aTestCase.startLine and
         aTestCase.lastLine and
         joylolTests[aCodeStream] then
+        tInsert(suiteCaseBuf, '    ;;-------------------------------------------------------\n')
+        tInsert(suiteCaseBuf, '    ;; '..aTestCase.desc..' test case\n')
+        tInsert(suiteCaseBuf, '    ;;-------------------------------------------------------\n')
+        tInsert(suiteCaseBuf, '    (\n')
         tInsert(suiteCaseBuf, '      (\n')
         tInsert(suiteCaseBuf, '        "'..aTestCase.desc..'"\n')
         tInsert(suiteCaseBuf, '        "'..aTestCase.fileName..'"\n')
         tInsert(suiteCaseBuf, '        '..toStr(aTestCase.startLine)..'\n')
         tInsert(suiteCaseBuf, '        '..toStr(aTestCase.lastLine)..'\n')
-        tInsert(suiteCaseBuf, '      ) ;; test case details\n')
+        tInsert(suiteCaseBuf, '      ) ;; test case details\n\n')
         tInsert(suiteCaseBuf, '      (\n  ')
         local joylolTestsCode = tConcat(joylolTests[aCodeStream], '\n')
         joylolTestsCode       = litProgs.splitString(joylolTestsCode)
         tInsert(suiteCaseBuf, '    '..tConcat(joylolTestsCode, '\n      '))
         tInsert(suiteCaseBuf, '\n      ) ;; tests\n\n')
+        tInsert(suiteCaseBuf, '    ) ;; test case\n')
+        tInsert(suiteCaseBuf, '    runTestCase\n\n')
       elseif (not aTestCase.desc or
         not aTestCase.fileName or
         not aTestCase.startLine or
@@ -426,7 +431,9 @@ local function createJoylolTestFile(
     end
 
     if aTestSuite.desc and (0 < #suiteCaseBuf) then
-      outFile:write(';;-------------------------------------------------------\n')
+      outFile:write('  ;;-------------------------------------------------------\n')
+      outFile:write('  ;; '..aTestSuite.desc..' test suite\n')
+      outFile:write('  ;;-------------------------------------------------------\n')
       outFile:write('  (\n')
       outFile:write('    (\n')
       outFile:write('      "'..aTestSuite.desc..'"\n')
@@ -440,12 +447,9 @@ local function createJoylolTestFile(
         setupCode = litProgs.splitString(setupCode, '\n')
         outFile:write('    '..tConcat(setupCode, '\n    '))
       end
-      outFile:write('    ) ;; test suite setup\n')
+      outFile:write('    ) ;; test suite setup\n\n')
 
-      outFile:write('    (\n')
       outFile:write(tConcat(suiteCaseBuf))
-      outFile:write('    ) ;; test case\n')
-      outFile:write('    runTestCase\n')
 
       outFile:write('    (\n')
       aTestSuite.teardown = aTestSuite.teardown or { }
@@ -455,10 +459,11 @@ local function createJoylolTestFile(
         teardownCode = litProgs.splitString(teardownCode, '\n')
         outFile:write('    '..tConcat(teardownCode, '\n    '))
       end
-      outFile:write('    ) ;; test suite teardown\n')
+      outFile:write('    ) ;; test suite teardown\n\n')
+      
       outFile:write('  )\n')
-
-      outFile:write('  runTestSuite\n')
+      outFile:write('  runTestSuite\n\n')
+      
     elseif not aTestSuite.desc and (0 < #suiteCaseBuf) then
       texio.write("\nERROR missing \\startTestSuite\n")
       texio.write("near:\n")
@@ -474,11 +479,11 @@ local function createJoylolTestFile(
     local teardownCode =tConcat(tests.teardown.joylolTests[aCodeStream],'\n  ')
     teardownCode = litProgs.splitString(teardownCode, '\n')
     outFile:write('  '..tConcat(teardownCode, '\n  '))
-    outFile:write('\n\n')
   end
-  outFile:write('  ) ;; JoylolTests teardown\n')
-
-  outFile:write('  runAllTests\n\n')
+  outFile:write('  ) ;; JoylolTests teardown\n\n')
+  
+  outFile:write(')\n')
+  outFile:write('runAllTests\n\n')
   
   outFile:close()
 end
