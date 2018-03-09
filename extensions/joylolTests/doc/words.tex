@@ -321,6 +321,33 @@ define
 \stopTestCase
 \stopTestSuite
 
+\startTestSuite[assert.isBoolean]
+
+\startJoylolCode
+(
+  isBoolean
+  assert.reportAssertion
+)
+assert
+isBoolean
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a boolean ]
+\startJoylolTest
+  true
+  assert.isBoolean
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is not a boolean]
+\startJoylolTest
+  notABoolean
+  assert.isBoolean
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
 \startTestSuite[assertTrue]
 
 \stopTestSuite

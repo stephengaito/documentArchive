@@ -402,7 +402,7 @@ local function createJoylolTestFile(
         aTestCase.lastLine and
         joylolTests[aCodeStream] then
         tInsert(suiteCaseBuf, '    ;;-------------------------------------------------------\n')
-        tInsert(suiteCaseBuf, '    ;; '..aTestCase.desc..' test case\n')
+        tInsert(suiteCaseBuf, '    ;; jTC: '..aTestCase.desc..'\n')
         tInsert(suiteCaseBuf, '    ;;-------------------------------------------------------\n')
         tInsert(suiteCaseBuf, '    (\n')
         tInsert(suiteCaseBuf, '      (\n')
@@ -410,13 +410,12 @@ local function createJoylolTestFile(
         tInsert(suiteCaseBuf, '        "'..aTestCase.fileName..'"\n')
         tInsert(suiteCaseBuf, '        '..toStr(aTestCase.startLine)..'\n')
         tInsert(suiteCaseBuf, '        '..toStr(aTestCase.lastLine)..'\n')
-        tInsert(suiteCaseBuf, '      ) ;; test case details\n\n')
-        tInsert(suiteCaseBuf, '      (\n  ')
+        tInsert(suiteCaseBuf, '      ) ;; test case details\n')
+        tInsert(suiteCaseBuf, '      recordTestCaseDetails\n\n')
         local joylolTestsCode = tConcat(joylolTests[aCodeStream], '\n')
         joylolTestsCode       = litProgs.splitString(joylolTestsCode)
-        tInsert(suiteCaseBuf, '    '..tConcat(joylolTestsCode, '\n      '))
-        tInsert(suiteCaseBuf, '\n      ) ;; tests\n\n')
-        tInsert(suiteCaseBuf, '    ) ;; test case\n')
+        tInsert(suiteCaseBuf, '    '..tConcat(joylolTestsCode, '\n    '))
+        tInsert(suiteCaseBuf, '\n    ) ;; test case\n')
         tInsert(suiteCaseBuf, '    runTestCase\n\n')
       elseif (not aTestCase.desc or
         not aTestCase.fileName or
@@ -432,12 +431,13 @@ local function createJoylolTestFile(
 
     if aTestSuite.desc and (0 < #suiteCaseBuf) then
       outFile:write('  ;;-------------------------------------------------------\n')
-      outFile:write('  ;; '..aTestSuite.desc..' test suite\n')
+      outFile:write('  ;; jTS:'..aTestSuite.desc..'\n')
       outFile:write('  ;;-------------------------------------------------------\n')
       outFile:write('  (\n')
       outFile:write('    (\n')
       outFile:write('      "'..aTestSuite.desc..'"\n')
-      outFile:write('    ) ;; test suite details\n\n')
+      outFile:write('    ) ;; test suite details\n')
+      outFile:write('    recordTestSuiteDetails\n\n')
 
       outFile:write('    (\n')
       aTestSuite.setup = aTestSuite.setup or { }
@@ -447,9 +447,8 @@ local function createJoylolTestFile(
         setupCode = litProgs.splitString(setupCode, '\n')
         outFile:write('    '..tConcat(setupCode, '\n    '))
       end
-      outFile:write('    ) ;; test suite setup\n\n')
-
-      outFile:write(tConcat(suiteCaseBuf))
+      outFile:write('    ) ;; test suite setup\n')
+      outFile:write('    defineTestSuiteSetup\n\n')
 
       outFile:write('    (\n')
       aTestSuite.teardown = aTestSuite.teardown or { }
@@ -459,8 +458,11 @@ local function createJoylolTestFile(
         teardownCode = litProgs.splitString(teardownCode, '\n')
         outFile:write('    '..tConcat(teardownCode, '\n    '))
       end
-      outFile:write('    ) ;; test suite teardown\n\n')
-      
+      outFile:write('    ) ;; test suite teardown\n')
+      outFile:write('    defineTestSuiteTeardown\n\n')
+
+      outFile:write(tConcat(suiteCaseBuf))
+
       outFile:write('  )\n')
       outFile:write('  runTestSuite\n\n')
       
@@ -484,7 +486,26 @@ local function createJoylolTestFile(
   
   outFile:write(')\n')
   outFile:write('runAllTests\n\n')
-  
+
+  methods.teardown      = methods.teardown or { }
+  local mTeardown       = methods.teardown
+  mTeardown.joylolTests = mTeardown.joylolTests or { }
+  mtJoylolTests         = mTeardown.joylolTests
+
+  --mtJoylolTests[aCodeStream] = mtJoylolTests[aCodeStream] or { }
+
+  if mtJoylolTests and
+    mtJoylolTests[aCodeStream] then
+    outFile:write('  (\n')
+    local teardownCode = tConcat(mtJoylolTests[aCodeStream],'\n')
+    teardownCode       = litProgs.splitString(teardownCode)
+    outFile:write('  '..tConcat(teardownCode, '\n  '))
+    outFile:write('  ) ;; JoylolTests methods teardown\n')
+    outFile:write('  teardownMethods\n')
+    outFile:write('\n\n')
+  end
+  outFile:write('\n\n')
+
   outFile:close()
 end
 
