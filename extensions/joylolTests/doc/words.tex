@@ -3,6 +3,102 @@
 \section[title=Words]
 \setJoylolTracingOff\setJoylolVerboseOff
 
+
+\startJoylolCode
+( 
+  "running ALL TESTS"
+  writeOutNL
+  interpret
+  "finished ALL TESTS"
+  writeOutNL
+)
+globals
+runAllTests
+define
+
+(
+  "defined tests setup"
+  writeOutNL
+  pop1D
+)
+globals
+defineTestsSetup
+define
+
+(
+  "defined tests teardown"
+  writeOutNL
+  pop1D
+)
+globals
+defineTestsTeardown
+define
+
+(
+  "running test suite"
+  writeOutNL
+  interpret
+)
+globals
+runTestSuite
+define
+
+(
+  "jTS:"
+  prepend
+  100
+  swap12D
+  printLoL
+  writeOutNL
+)
+globals
+recordTestSuiteDetails
+define
+
+(
+  "defined test suite setup"
+  writeOutNL
+  pop1D
+)
+globals
+defineTestSuiteSetup
+define
+
+(
+  "defined test suite teardown"
+  writeOutNL
+  pop1D
+)
+globals
+defineTestSuiteTeardown
+define
+
+(
+  "running test case"
+  writeOutNL
+  interpret
+)
+globals
+runTestCase
+define
+
+(
+  "  jTC:"
+  prepend
+  100
+  swap12D
+  printLoL
+  writeOutNL
+)
+globals
+recordTestCaseDetails
+define
+
+;; a comment
+
+\stopJoylolCode
+
+\starttyping
 \startTestSuite[tests and assert naming scopes]
 
 We start by defining a naming scope to contain all of the Joylol test 
@@ -233,8 +329,8 @@ assert
 recordAssertion
 define
 \stopJoylolCode
-
 \stopTestSuite
+\stoptyping
 
 \starttyping
 \startTestSuite[start/stop joylol test suite]
@@ -285,6 +381,7 @@ doSomeThing
 
 \startTestSuite[assertFail]
 
+\starttyping
 \startJoylolCode
 (
   fail
@@ -294,16 +391,17 @@ assert
 fail
 define
 \stopJoylolCode
+\stoptyping
 
 \startTestCase[assertFail should fail]
 \startJoylolTest
-  assert.fail
+  ;;assert.fail
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite
 
 \startTestSuite[assertSucceed]
-
+\starttyping
 \startJoylolCode
 (
   succeed
@@ -313,16 +411,17 @@ assert
 succeed
 define
 \stopJoylolCode
+\stoptyping
 
 \startTestCase[assert.succeed should succeed]
 \startJoylolTest
-  assert.succeed
+  ;;assert.succeed
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite
 
 \startTestSuite[assert.isBoolean]
-
+\starttyping
 \startJoylolCode
 (
   isBoolean
@@ -332,18 +431,19 @@ assert
 isBoolean
 define
 \stopJoylolCode
+\stoptyping
 
 \startTestCase[should succeed if an object is a boolean ]
 \startJoylolTest
-  true
-  assert.isBoolean
+  ;;true
+  ;;assert.isBoolean
 \stopJoylolTest
 \stopTestCase
 
 \startTestCase[should fail if an object is not a boolean]
 \startJoylolTest
-  notABoolean
-  assert.isBoolean
+  ;;notABoolean
+  ;;assert.isBoolean
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite

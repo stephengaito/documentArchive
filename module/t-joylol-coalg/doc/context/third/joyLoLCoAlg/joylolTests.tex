@@ -343,15 +343,20 @@ local function createJoylolTestFile(
     aCodeStream = 'default'
   end
 
+  outFile:write(';; A JoylolTest file\n\n')
+  
   outFile:write(';;-------------------------------------------------------\n')
+  outFile:write(';; global setup\n')
+  outFile:write(';;-------------------------------------------------------\n\n')
   local joylolIncludes = setDefs(tests, 'joylolIncludes')
 
   joylolIncludes[aCodeStream] = joylolIncludes[aCodeStream] or { }
 
   for i, anInclude in ipairs(joylolIncludes[aCodeStream]) do
-    outFile:write(anInclude..'load \n')
+    outFile:write(anInclude..'\n')
+    outFile:write('load \n\n')
   end
-  outFile:write('\n\n')
+  outFile:write('\n')
 
   tests.methods = tests.methods or { }
   local methods = tests.methods
@@ -361,18 +366,15 @@ local function createJoylolTestFile(
   msJoylolTests      = mSetup.joylolTests
 
   --msJoylolTests[aCodeStream] = msJoylolTests[aCodeStream] or { }
-
+  
   if msJoylolTests and
     msJoylolTests[aCodeStream] then
-    outFile:write('  (\n')
     local setupCode = tConcat(msJoylolTests[aCodeStream],'\n')
     setupCode       = litProgs.splitString(setupCode)
-    outFile:write('  '..tConcat(setupCode, '\n  '))
-    outFile:write('  ) ;; JoylolTests methods setup\n')
-    outFile:write('  setupMethods\n')
-    outFile:write('\n\n')
+    outFile:write(tConcat(setupCode, '\n'))
+    outFile:write('\n')
   end
-  outFile:write('\n\n')
+  outFile:write('\n')
 
   outFile:write(';;-------------------------------------------------------\n')
   outFile:write(';; all tests\n')
@@ -386,9 +388,21 @@ local function createJoylolTestFile(
     local setupCode = tConcat(tests.setup.joylolTests[aCodeStream],'\n')
     setupCode       = litProgs.splitString(setupCode)
     outFile:write('  '..tConcat(setupCode, '\n  '))
-    outFile:write('\n\n')
+    outFile:write('\n')
   end
-  outFile:write('  ) ;; JoylolTests setup\n\n')
+  outFile:write('  ) ;; JoylolTests setup\n')
+  outFile:write('  defineTestsSetup\n\n')
+
+  outFile:write('  (\n')
+  tests.teardown = tests.teardown or { }
+  if tests.teardown.joylolTests and
+    tests.teardown.joylolTests[aCodeStream] then
+    local teardownCode =tConcat(tests.teardown.joylolTests[aCodeStream],'\n  ')
+    teardownCode = litProgs.splitString(teardownCode, '\n')
+    outFile:write('  '..tConcat(teardownCode, '\n  '))
+  end
+  outFile:write('  ) ;; JoylolTests teardown\n')
+  outFile:write('  defineTestsTeardown\n\n')
 
   for i, aTestSuite in ipairs(tests.suites) do
     aTestSuite.cases = aTestSuite.cases or { }
@@ -473,20 +487,14 @@ local function createJoylolTestFile(
       texio.write('\n')
     end
   end
-
-  outFile:write('  (\n')
-  tests.teardown = tests.teardown or { }
-  if tests.teardown.joylolTests and
-    tests.teardown.joylolTests[aCodeStream] then
-    local teardownCode =tConcat(tests.teardown.joylolTests[aCodeStream],'\n  ')
-    teardownCode = litProgs.splitString(teardownCode, '\n')
-    outFile:write('  '..tConcat(teardownCode, '\n  '))
-  end
-  outFile:write('  ) ;; JoylolTests teardown\n\n')
   
   outFile:write(')\n')
   outFile:write('runAllTests\n\n')
 
+  outFile:write(';;-------------------------------------------------------\n')
+  outFile:write(';; global teardown\n')
+  outFile:write(';;-------------------------------------------------------\n\n')
+  
   methods.teardown      = methods.teardown or { }
   local mTeardown       = methods.teardown
   mTeardown.joylolTests = mTeardown.joylolTests or { }
@@ -496,15 +504,13 @@ local function createJoylolTestFile(
 
   if mtJoylolTests and
     mtJoylolTests[aCodeStream] then
-    outFile:write('  (\n')
     local teardownCode = tConcat(mtJoylolTests[aCodeStream],'\n')
     teardownCode       = litProgs.splitString(teardownCode)
     outFile:write('  '..tConcat(teardownCode, '\n  '))
-    outFile:write('  ) ;; JoylolTests methods teardown\n')
-    outFile:write('  teardownMethods\n')
-    outFile:write('\n\n')
+    outFile:write('\n')
   end
-  outFile:write('\n\n')
+  outFile:write('\n')
+  outFile:write(';;-------------------------------------------------------\n')
 
   outFile:close()
 end
