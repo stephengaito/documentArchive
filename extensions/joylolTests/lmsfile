@@ -45,6 +45,9 @@ joylol.targets(lpTargets, {
   cCodeFiles = {
     'joylolTests.c',
   },
+  joylolCodeFiles = {
+    'joylolTests-tests.joy',
+  },
   coAlgLibs = {
     'jInterps',
   },

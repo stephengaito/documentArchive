@@ -10,6 +10,16 @@ QUESTION: How do we load a *.joy file? Where do we put this command?
 
 \subsection{Implementation}
 
+We begin by registering the \type{JoylolCode} code type with the build 
+srcTypes system. This will ensure the \type{\createJoylolCodeFile} macro 
+(and corresponding lua code) knows how to deal with files of 
+\type{JoylolCode}. 
+
+\startLuaCode
+build.srcTypes = build.srcTypes or { }
+build.srcTypes['JoylolCode'] = 'joylolCode'
+\stopLuaCode
+
 \startMkIVCode
 \defineLitProgs
   [JoylolCode]
@@ -80,6 +90,14 @@ local function addJoyLoLTargets(aCodeStream)
   local cCode      = srcTargets.cCode
   tInsert(lmsfile, "  cCodeFiles = {")
   for i, aSrcFile in ipairs(cCode) do
+    tInsert(lmsfile, "    '"..aSrcFile.."',")
+  end
+  tInsert(lmsfile, "  },")
+
+  srcTargets.joylolCode = srcTargets.joylolCode or { }
+  local joylolCode      = srcTargets.joylolCode
+  tInsert(lmsfile, "  joylolCodeFiles = {")
+  for i, aSrcFile in ipairs(joylolCode) do
     tInsert(lmsfile, "    '"..aSrcFile.."',")
   end
   tInsert(lmsfile, "  },")
