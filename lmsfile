@@ -23,6 +23,7 @@ function findReleaseFiles(dir, filesIO)
         or string.find(fullPath, '%.lua$')
         or string.find(fullPath, '%.c$')
         or string.find(fullPath, '%.h$')
+        or string.find(fullPath, '%.joy$')
         or string.find(fullPath, testProbe)
         or string.find(fullPath, 'lmsfile$')
         then
