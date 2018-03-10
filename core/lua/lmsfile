@@ -36,6 +36,8 @@ joylol.targets(lpTargets, {
   cCodeFiles = {
     'lua.c',
   },
+  joylolCodeFiles = {
+  },
   cCodeLibs = {
     '-lreadline',
   },

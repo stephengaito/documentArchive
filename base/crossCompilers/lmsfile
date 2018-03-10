@@ -30,6 +30,8 @@ joylol.targets(lpTargets, {
   cCodeFiles = {
     'crossCompilers.c',
   },
+  joylolCodeFiles = {
+  },
   coAlgLibs = {
     'jInterps',
   },

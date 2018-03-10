@@ -43,6 +43,8 @@ joylol.targets(lpTargets, {
   cCodeFiles = {
     'textadept.c',
   },
+  joylolCodeFiles = {
+  },
   coAlgLibs = {
   },
 })

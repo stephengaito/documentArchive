@@ -27,6 +27,8 @@ joylol.targets(lpTargets, {
   cCodeFiles = {
     'booleans.c',
   },
+  joylolCodeFiles = {
+  },
   coAlgLibs = {
     'jInterps',
   },

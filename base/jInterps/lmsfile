@@ -42,6 +42,8 @@ joylol.targets(lpTargets, {
     'words.c',
     'lua.c',
   },
+  joylolCodeFiles = {
+  },
   coAlgLibs = {
   },
 })

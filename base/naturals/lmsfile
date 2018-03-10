@@ -27,6 +27,8 @@ joylol.targets(lpTargets, {
   cCodeFiles = {
     'naturals.c',
   },
+  joylolCodeFiles = {
+  },
   cCodeLibs = {
     '-lgmp',
   },

@@ -27,6 +27,8 @@ joylol.targets(lpTargets, {
   cCodeFiles = {
     'pairs.c',
   },
+  joylolCodeFiles = {
+  },
   coAlgLibs = {
     'jInterps',
     'symbols',
