@@ -54,7 +54,6 @@ The currently well known resources are:
 #define JoyLoLCallback_UserPath       7
 #define JoyLoLCallback_LocalPath      8
 #define JoyLoLCallback_SystemPath     9
-#define JoyLoLCallback_MinimalJoylol 10
 
 typedef void (StdOutputMethod)(
   JoyLoLInterp *jInterp,
@@ -254,7 +253,7 @@ typedef struct joylol_interpreter_struct {
   CrossCompilerObj **compilers;
   Boolean           verbose;
   Boolean           debug;
-  Boolean           minimalJoylol;
+  Boolean           quiet;
   StdOutputMethod  *writeStdOut;
   StdOutputMethod  *writeStdErr;
 } JoyLoLInterp;
@@ -394,8 +393,8 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   jInterp->debug = 
     (Boolean)getCoreResources(lstate, JoyLoLCallback_Debug);
     
-  jInterp->minimalJoylol =
-    (Boolean)getCoreResources(lstate, JoyLoLCallback_MinimalJoylol);
+  jInterp->quiet =
+    (Boolean)getCoreResources(lstate, JoyLoLCallback_Quiet);
 
   DEBUG(jInterp, "Creating jInterp %p\n", jInterp);
     

@@ -97,8 +97,13 @@ ContextObj* newContextImpl(
   context->process            = processLoL;
   context->messages           = NULL;
   context->listeners          = NULL;
-  context->showSpecifications = TRUE;
-  context->showStack          = TRUE;
+  if (jInterp->quiet) {
+    context->showSpecifications = FALSE;
+    context->showStack          = FALSE;
+  } else {
+    context->showSpecifications = TRUE;
+    context->showStack          = TRUE;
+  }
   context->tracingOn          = FALSE;
   context->checkingOn         = FALSE;
   context->verbose            = FALSE;
