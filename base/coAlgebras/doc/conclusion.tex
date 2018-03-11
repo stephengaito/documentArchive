@@ -39,6 +39,9 @@
 
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/contexts.h>}
 \addCTestInclude{<joylol/coAlgebras.h>}
 \addCTestInclude{<joylol/coAlgebras-private.h>}
 \addCTestLib{<HOME>/.joylol/joylol/jInterps}
@@ -48,8 +51,14 @@
   addJoyLoLLuaPath(lstate);
   requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.cFunctions");
+  requireLuaModule(lstate, "joylol.contexts");
+  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.dictNodes");
   requireStaticallyLinkedCoAlgebras(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
 \stopCTest
 
 \createCTestFile%

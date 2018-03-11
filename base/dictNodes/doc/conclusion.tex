@@ -23,10 +23,13 @@
 #include <assert.h>
 
 #include <joylol/jInterps.h>
+#include <joylol/cFunctions.h>
 #include <joylol/stringBuffers.h>
 #include <joylol/symbols.h>
+#include <joylol/texts.h>
 #include <joylol/dictionaries.h>
 #include <joylol/dictNodes.h>
+#include <joylol/contexts.h>
 #include <joylol/dictNodes-private.h>
 // dictionary
 // printer
@@ -41,6 +44,9 @@
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/contexts.h>}
 \addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/dictNodes.h>}
 \addCTestInclude{<joylol/dictNodes-private.h>}
@@ -51,10 +57,15 @@
   addJoyLoLLuaPath(lstate);
   requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.cFunctions");
+  requireLuaModule(lstate, "joylol.texts");
+  requireLuaModule(lstate, "joylol.contexts");
   requireLuaModule(lstate, "joylol.symbols");
   requireLuaModule(lstate, "joylol.dictionaries");
   requireStaticallyLinkedDictNodes(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp); 
 \stopCTest
 \createCTestFile%
   {default}%

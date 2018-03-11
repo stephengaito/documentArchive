@@ -89,15 +89,15 @@ CrossCompilerObj* newCrossCompilerImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
 
   CrossCompilerObj* aLoL =
     newCrossCompiler(jInterp, "ansiC");
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, (JObj*)aLoL);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "crossCompiler ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, (JObj*)aLoL);
+  AssertStrEquals(getCString(aStrBuf), "crossCompiler ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 
@@ -144,13 +144,13 @@ void addImplementationImpl(
   
 //  if (jInterp->debug) {
   if (TRUE) {
-    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-    strBufPrintf(jInterp, aStrBuf, 
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    strBufPrintf(aStrBuf, 
       "DEBUG addImplementation crossCompiler: [%s]\n", ccType);
-    strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
-    strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", implBody);
-    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+    strBufPrintf(aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(aStrBuf, "Body: [%s]\n", implBody);
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   
   assert(jInterp->compilers);
@@ -186,13 +186,13 @@ void addImplementationImpl(
   } else {
     // raise error -- NEEDS Context!
     
-    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-    strBufPrintf(jInterp, aStrBuf, 
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    strBufPrintf(aStrBuf, 
       "ERROR(impl) could not find the [%s] cross compiler.\n", ccType);
-    strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
-    strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", implBody);
-    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+    strBufPrintf(aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(aStrBuf, "Body: [%s]\n", implBody);
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   jInterp->writeStdOut(jInterp, "addImplementation DONE\n");
 }
@@ -243,13 +243,13 @@ static void addFragmentAP(ContextObj* aCtx) {
   
 //  if (jInterp->debug) {
   if (TRUE) {
-    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-    strBufPrintf(jInterp, aStrBuf, 
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    strBufPrintf(aStrBuf, 
       "DEBUG addFragment crossCompiler: [%s]\n", ccType);
-    strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
-    strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", fragmentBody);
-    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+    strBufPrintf(aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(aStrBuf, "Body: [%s]\n", fragmentBody);
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   assert(jInterp->compilers);
 
@@ -274,13 +274,13 @@ static void addFragmentAP(ContextObj* aCtx) {
   } else {
     // raise error -- NEEDS Context!
     
-    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-    strBufPrintf(jInterp, aStrBuf, 
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    strBufPrintf(aStrBuf, 
       "ERROR could not find the [%s] cross compiler.\n", ccType);
-    strBufPrintf(jInterp, aStrBuf, "Word: [%s]\n", wordName);
-    strBufPrintf(jInterp, aStrBuf, "Body: [%s]\n", fragmentBody);
-    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+    strBufPrintf(aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(aStrBuf, "Body: [%s]\n", fragmentBody);
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
 }
 \stopCCode
@@ -388,7 +388,6 @@ Boolean equalityCrossCompilerCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printCrossCompilerCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -398,7 +397,6 @@ extern Boolean printCrossCompilerCoAlg(
 
 \startCCode
 Boolean printCrossCompilerCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -406,7 +404,7 @@ Boolean printCrossCompilerCoAlg(
   assert(aLoL);
   assert(asTag(aLoL) == CrossCompilersTag);
 
-  strBufPrintf(jInterp, aStrBuf, "crossCompiler ");
+  strBufPrintf(aStrBuf, "crossCompiler ");
   return TRUE;
 }
 \stopCCode
@@ -417,15 +415,15 @@ Boolean printCrossCompilerCoAlg(
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[CrossCompilersTag]);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
   
   CrossCompilerObj* aNewCrossCompiler =
     newCrossCompiler(jInterp, "ansiC");
   AssertPtrNotNull(aNewCrossCompiler);
-  printLoL(jInterp, aStrBuf, (JObj*)aNewCrossCompiler);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "crossCompiler ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, (JObj*)aNewCrossCompiler);
+  AssertStrEquals(getCString(aStrBuf), "crossCompiler ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

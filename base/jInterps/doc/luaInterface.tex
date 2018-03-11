@@ -269,10 +269,10 @@ static int lua_joylol_clearData(lua_State *lstate) {
 
 static int lua_joylol_showData(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   showCtxData(jInterp->rootCtx, aStrBuf);
-  lua_pushstring (lstate, getCString(jInterp, aStrBuf));
-  strBufClose(jInterp, aStrBuf);
+  lua_pushstring (lstate, getCString(aStrBuf));
+  strBufClose(aStrBuf);
   return 1;
 }
 \stopCCode
@@ -398,10 +398,10 @@ static int lua_joylol_clearProcess(lua_State *lstate) {
 
 static int lua_joylol_showProcess(lua_State *lstate) {
   getJoyLoLInterpInto(lstate, jInterp);
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   showCtxProcess(jInterp->rootCtx, aStrBuf);
-  lua_pushstring (lstate, getCString(jInterp, aStrBuf));
-  strBufClose(jInterp, aStrBuf);
+  lua_pushstring (lstate, getCString(aStrBuf));
+  strBufClose(aStrBuf);
   return 1;
 }
 \stopCCode

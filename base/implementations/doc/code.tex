@@ -87,15 +87,15 @@ ImplementationObj* newImplementationImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
 
   ImplementationObj* aLoL =
     newImplementation(jInterp, "ansiC", "a implementation body");
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, (JObj*)aLoL);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "implementation ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, (JObj*)aLoL);
+  AssertStrEquals(getCString(aStrBuf), "implementation ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -150,7 +150,6 @@ Boolean equalityImplementationCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printImplementationCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -160,7 +159,6 @@ extern Boolean printImplementationCoAlg(
 
 \startCCode
 Boolean printImplementationCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -168,7 +166,7 @@ Boolean printImplementationCoAlg(
   assert(aLoL);
   assert(asTag(aLoL) == ImplementationsTag);
 
-  strBufPrintf(jInterp, aStrBuf, "implementation ");
+  strBufPrintf(aStrBuf, "implementation ");
   return TRUE;
 }
 \stopCCode
@@ -179,15 +177,15 @@ Boolean printImplementationCoAlg(
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[ImplementationsTag]);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
   
   ImplementationObj* aNewImplementation =
     newImplementation(jInterp, "ansiC", "a implementation body");
   AssertPtrNotNull(aNewImplementation);
-  printLoL(jInterp, aStrBuf, (JObj*)aNewImplementation);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "implementation ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, (JObj*)aNewImplementation);
+  AssertStrEquals(getCString(aStrBuf), "implementation ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

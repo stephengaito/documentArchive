@@ -21,14 +21,14 @@ DictNodeObj* rotateLeft(
   assert(jInterp);
   
   StringBufferObj *aStrBuf =
-    (jInterp->debug ? newStringBuffer(jInterp) : NULL);
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
   if (jInterp->debug) {
-    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
+    printDicInto(aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, ">-rotateLeft %p %ld:%zu=%zu %s\n",
           anAVLNode, anAVLNode->balance, anAVLNode->height,
           deepCalculateAVLNodeHeight(anAVLNode),
-          getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   assert(anAVLNode->right);
 
@@ -40,18 +40,18 @@ DictNodeObj* rotateLeft(
   reCalculateAVLNodeHeightBalance(newRoot);
 
   if (jInterp->debug) {
-    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
+    printDicInto(aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, "<o-rotateLeft %p %ld:%zu=%zu %s\n",
           anAVLNode, anAVLNode->balance, anAVLNode->height,
           deepCalculateAVLNodeHeight(anAVLNode),
-          getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
-    printDicInto(jInterp, aStrBuf, newRoot, 10);
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+    printDicInto(aStrBuf, newRoot, 10);
     DEBUG(jInterp, "<n-rotateLeft %p %ld:%zu=%zu %s\n",
           newRoot, newRoot->balance, newRoot->height,
           deepCalculateAVLNodeHeight(newRoot),
-          getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
   assert(newRoot->height == deepCalculateAVLNodeHeight(newRoot));
@@ -76,14 +76,14 @@ DictNodeObj* rotateRight(
   assert(jInterp);
   
   StringBufferObj *aStrBuf =
-    (jInterp->debug ? newStringBuffer(jInterp) : NULL);
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
   if (jInterp->debug) {
-    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
+    printDicInto(aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, ">-rotateRight %p %ld:%zu=%zu %s\n",
           anAVLNode, anAVLNode->balance, anAVLNode->height,
           deepCalculateAVLNodeHeight(anAVLNode),
-          getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   assert(anAVLNode->left);
 
@@ -95,18 +95,18 @@ DictNodeObj* rotateRight(
   reCalculateAVLNodeHeightBalance(newRoot);
 
   if (jInterp->debug) {
-    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
+    printDicInto(aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, "<o-rotateRight %p %ld:%zu=%zu %s\n",
           anAVLNode, anAVLNode->balance, anAVLNode->height,
           deepCalculateAVLNodeHeight(anAVLNode),
-          getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
-    printDicInto(jInterp, aStrBuf, newRoot, 10);
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+    printDicInto(aStrBuf, newRoot, 10);
     DEBUG(jInterp, "<n-rotateRight %p %ld:%zu=%zu %s\n",
           newRoot, newRoot->balance, newRoot->height,
           deepCalculateAVLNodeHeight(newRoot),
-          getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
   assert(newRoot->height == deepCalculateAVLNodeHeight(newRoot));
@@ -131,11 +131,11 @@ DictNodeObj* rotateLeftLeft(
   assert(jInterp);
   
   if (jInterp->debug) {
-    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    printDicInto(aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, "LL %p %s\n",
-      anAVLNode, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   return rotateRight(aDict, anAVLNode);
 }
@@ -158,19 +158,19 @@ DictNodeObj* rotateLeftRight(
   assert(jInterp);
   
   StringBufferObj *aStrBuf =
-    (jInterp->debug ? newStringBuffer(jInterp) : NULL);
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
   if (jInterp->debug) {
-    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
+    printDicInto(aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, "0-LR %p %s\n",
-      anAVLNode, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   anAVLNode->left = rotateLeft(aDict, anAVLNode->left);
   if (jInterp->debug) {
-    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
+    printDicInto(aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, "1-LR %p %s\n",
-      anAVLNode, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   return rotateRight(aDict, anAVLNode);
 }
@@ -193,19 +193,19 @@ DictNodeObj* rotateRightLeft(
   assert(jInterp);
   
   StringBufferObj *aStrBuf =
-    (jInterp->debug ? newStringBuffer(jInterp) : NULL);
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
   if (jInterp->debug) {
-    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
+    printDicInto(aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, "0-RL %p %s\n",
-      anAVLNode, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   anAVLNode->right = rotateRight(aDict, anAVLNode->right);
   if (jInterp->debug) {
-    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
+    printDicInto(aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, "1-RL %p %s\n",
-      anAVLNode, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   return rotateLeft(aDict, anAVLNode);
 }
@@ -228,11 +228,11 @@ DictNodeObj* rotateRightRight(
   assert(jInterp);
   
   if (jInterp->debug) {
-    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-    printDicInto(jInterp, aStrBuf, anAVLNode, 10);
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    printDicInto(aStrBuf, anAVLNode, 10);
     DEBUG(jInterp, "RR %p %s\n",
-      anAVLNode, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
   return rotateLeft(aDict, anAVLNode);
 }

@@ -199,7 +199,6 @@ Boolean equalityFuncCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printFuncCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -209,7 +208,6 @@ extern Boolean printFuncCoAlg(
 
 \startCCode
 Boolean printFuncCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -218,7 +216,6 @@ Boolean printFuncCoAlg(
   assert(asTag(aLoL) == CFunctionsTag);
 
   strBufPrintf(
-    jInterp,
     aStrBuf,
     "<%s%p> ",
     (flagsSet(aLoL, CTX_CFUNCTION_FLAG) ? "ctx:" : ""),
@@ -236,15 +233,15 @@ Boolean printFuncCoAlg(
   buffer[0] = 0;
   sprintf((char*)&buffer, "<%p> ", testCFunction);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
   
   JObj* aNewFunc =
     (JObj*)newCFunction(jInterp, testCFunction);
   AssertPtrNotNull(aNewFunc);
-  printLoL(jInterp, aStrBuf, aNewFunc);
-  AssertStrEquals(getCString(jInterp, aStrBuf), buffer);
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aNewFunc);
+  AssertStrEquals(getCString(aStrBuf), buffer);
+  strBufClose(aStrBuf);
 
   char ctxBuffer[100];
   ctxBuffer[0] = 0;
@@ -253,9 +250,9 @@ Boolean printFuncCoAlg(
   JObj* aNewCtxFunc =
     (JObj*)newCtxCFunction(jInterp, testCtxCFunction);
   AssertPtrNotNull(aNewCtxFunc);
-  printLoL(jInterp, aStrBuf, aNewCtxFunc);
-  AssertStrEquals(getCString(jInterp, aStrBuf), ctxBuffer);
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aNewCtxFunc);
+  AssertStrEquals(getCString(aStrBuf), ctxBuffer);
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

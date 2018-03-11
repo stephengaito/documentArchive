@@ -47,6 +47,9 @@ extern size_t joylol_register_rules(JoyLoLInterp *jInterp);
 
   
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/contexts.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/rules.h>}
 \addCTestInclude{<joylol/rules-private.h>}
@@ -56,9 +59,16 @@ extern size_t joylol_register_rules(JoyLoLInterp *jInterp);
 \startCTest
   addJoyLoLLuaPath(lstate);
   requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.cFunctions");
+  requireLuaModule(lstate, "joylol.texts");
+  requireLuaModule(lstate, "joylol.contexts");
+  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.dictNodes");
   requireLuaModule(lstate, "joylol.stringBuffers");
   requireStaticallyLinkedRules(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

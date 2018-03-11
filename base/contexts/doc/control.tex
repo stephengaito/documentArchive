@@ -590,13 +590,12 @@ Boolean reportExceptionImpl(
   popCtxDataIntoImpl(aCtx, exceptionMsg);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
-  StringBufferObj *aStrBuf = 
-    newStringBuffer(jInterp);
-  strBufPrintf(jInterp, aStrBuf, "\nUNHANDLED EXCEPTION:\n");
-  printLoL(jInterp, aStrBuf, exceptionMsg);
-  strBufPrintf(jInterp, aStrBuf, "\n");
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-  strBufClose(jInterp, aStrBuf);
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  strBufPrintf(aStrBuf, "\nUNHANDLED EXCEPTION:\n");
+  printLoL(aStrBuf, exceptionMsg);
+  strBufPrintf(aStrBuf, "\n");
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
   aCtx->exceptionRaised = FALSE;
   return TRUE;
 }

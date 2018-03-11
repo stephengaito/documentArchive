@@ -87,15 +87,15 @@ RuleObj* newRuleImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
 
   RuleObj* aLoL =
     newRule(jInterp, "ansiC", "a rule body");
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, (JObj*)aLoL);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "rule ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, (JObj*)aLoL);
+  AssertStrEquals(getCString(aStrBuf), "rule ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -150,7 +150,6 @@ Boolean equalityRuleCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printRuleCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -160,7 +159,6 @@ extern Boolean printRuleCoAlg(
 
 \startCCode
 Boolean printRuleCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -168,7 +166,7 @@ Boolean printRuleCoAlg(
   assert(aLoL);
   assert(asTag(aLoL) == RulesTag);
 
-  strBufPrintf(jInterp, aStrBuf, "rule ");
+  strBufPrintf(aStrBuf, "rule ");
   return TRUE;
 }
 \stopCCode
@@ -179,15 +177,15 @@ Boolean printRuleCoAlg(
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[RulesTag]);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
   
   RuleObj* aNewRule =
     newRule(jInterp, "ansiC", "a rule body");
   AssertPtrNotNull(aNewRule);
-  printLoL(jInterp, aStrBuf, (JObj*)aNewRule);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "rule ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, (JObj*)aNewRule);
+  AssertStrEquals(getCString(aStrBuf), "rule ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

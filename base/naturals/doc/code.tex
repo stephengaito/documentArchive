@@ -214,7 +214,6 @@ Boolean equalityNatCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printNatCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -224,7 +223,6 @@ extern Boolean printNatCoAlg(
 
 \startCCode
 Boolean printNatCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -236,7 +234,7 @@ Boolean printNatCoAlg(
   mpztoa = NULL;
   long numChars = gmp_asprintf(&mpztoa, "%Zd ", asNatural(aLoL));
   assert(0 < numChars);
-  strBufPrintf(jInterp, aStrBuf, mpztoa);
+  strBufPrintf(aStrBuf, mpztoa);
   free(mpztoa);
   return TRUE;
 }
@@ -251,10 +249,10 @@ Boolean printNatCoAlg(
   const char* testNum = "12345 ";
   JObj* aNewNat = newNatural(jInterp, testNum);
   AssertPtrNotNull(aNewNat);
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printNatCoAlg(jInterp, aStrBuf, aNewNat, 10);
-  AssertStrEquals(getCString(jInterp, aStrBuf), testNum);
-  strBufClose(jInterp, aStrBuf);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printNatCoAlg(aStrBuf, aNewNat, 10);
+  AssertStrEquals(getCString(aStrBuf), testNum);
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

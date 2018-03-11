@@ -121,7 +121,6 @@ Boolean equalityCoAlgebraCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printCoAlgebarCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -131,7 +130,6 @@ extern Boolean printCoAlgebarCoAlg(
 
 \startCCode
 Boolean printCoAlgebraCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -141,7 +139,7 @@ Boolean printCoAlgebraCoAlg(
 
   char ptoa[100];
   sprintf(ptoa, "<CoAlgebra:%p> ", aLoL);
-  strBufPrintf(jInterp, aStrBuf, ptoa);
+  strBufPrintf(aStrBuf, ptoa);
   return TRUE;
 }
 \stopCCode
@@ -153,7 +151,7 @@ Boolean printCoAlgebraCoAlg(
   char buffer[100];
   buffer[0] = 0;
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
   
   JObj* aNewCoAlgebra = (JObj*)newCoAlgebra(jInterp);
@@ -161,9 +159,9 @@ Boolean printCoAlgebraCoAlg(
   
   sprintf((char*)&buffer, "<CoAlgebra:%p> ", aNewCoAlgebra);
   
-  printLoL(jInterp, aStrBuf, aNewCoAlgebra);
-  AssertStrEquals(getCString(jInterp, aStrBuf), buffer);
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aNewCoAlgebra);
+  AssertStrEquals(getCString(aStrBuf), buffer);
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

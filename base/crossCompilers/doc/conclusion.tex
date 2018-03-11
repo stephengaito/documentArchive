@@ -75,6 +75,7 @@ extern size_t joylol_register_crossCompilers(JoyLoLInterp *jInterp);
   requireStaticallyLinkedCrossCompilers(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
   initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

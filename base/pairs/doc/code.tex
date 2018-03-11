@@ -199,14 +199,14 @@ JObj* concatListsImpl(
 \startTestCase[should concatinate two LoLs]
 \startCTest
   AssertPtrNotNull(jInterp);
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   
   JObj* result = concatLists(jInterp, NULL, NULL);
   AssertPtrNotNull(result);
   AssertIntTrue(isPair(result));
-  printLoL(jInterp, aStrBuf, result);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "( ) ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, result);
+  AssertStrEquals(getCString(aStrBuf), "( ) ");
+  strBufClose(aStrBuf);
   
   JObj *trueBool  = newBoolean(jInterp, TRUE);
   result = concatLists(jInterp, trueBool, NULL);
@@ -215,9 +215,9 @@ JObj* concatListsImpl(
   AssertPtrNotNull(asCar(result));
   AssertIntTrue(isTrue(asCar(result)));
   AssertPtrNull(asCdr(result));
-  printLoL(jInterp, aStrBuf, result);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "true ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, result);
+  AssertStrEquals(getCString(aStrBuf), "true ");
+  strBufClose(aStrBuf);
   
   JObj *falseBool = newBoolean(jInterp, FALSE);
   result = concatLists(jInterp, trueBool, falseBool);
@@ -227,16 +227,16 @@ JObj* concatListsImpl(
   AssertIntTrue(isTrue(asCar(result)));
   AssertPtrNotNull(asCdr(result));
   AssertIntTrue(isFalse(asCdr(result)));
-  printLoL(jInterp, aStrBuf, result);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "true false ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, result);
+  AssertStrEquals(getCString(aStrBuf), "true false ");
+  strBufClose(aStrBuf);
   
   JObj* firstList = result;
   result = concatLists(jInterp, result, NULL);
   AssertPtrEquals(firstList, result);
-  printLoL(jInterp, aStrBuf, result);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "true false ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, result);
+  AssertStrEquals(getCString(aStrBuf), "true false ");
+  strBufClose(aStrBuf);
   
   result = concatLists(jInterp, firstList, trueBool);
   AssertPtrNotNull(result);
@@ -246,9 +246,9 @@ JObj* concatListsImpl(
   AssertPtrNotNull(asCdr(result));
   AssertIntTrue(isPair(asCdr(result)));
   AssertIntTrue(isFalse(asCar(asCdr(result))));
-  printLoL(jInterp, aStrBuf, result);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "true false true ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, result);
+  AssertStrEquals(getCString(aStrBuf), "true false true ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -436,26 +436,25 @@ Boolean equalLoLImpl(
 \startTestSuite[printing pairs]
 
 \startCHeader
-#define lolPrintStr(                                           \
-  jInterp, printedOk, aLoL, opener, closer, aStrBuf, ttl)      \
-  if (aLoL) {								                                   \
-    size_t isList = asTag(aLoL) == PairsTag;        			     \
-    if (isList) strBufPrintf((jInterp), (aStrBuf), (opener));  \
-    assert(asType(aLoL));						                           \
-    (printedOk) = (printedOk) && 						                   \
-      (asType(aLoL)->printFunc)                                \
-        ((jInterp), (aStrBuf), (aLoL), (ttl));                 \
-    if (isList) strBufPrintf((jInterp), (aStrBuf), (closer));  \
-  } else {								                                     \
-    strBufPrintf((jInterp), (aStrBuf), (opener));						   \
-    strBufPrintf((jInterp), (aStrBuf), (closer));						   \
+#define lolPrintStr(                                \
+  aStrBuf, printedOk, aLoL, opener, closer, ttl)    \
+  if (aLoL) {								                        \
+    size_t isList = asTag(aLoL) == PairsTag;        \
+    if (isList) strBufPrintf((aStrBuf), (opener));  \
+    assert(asType(aLoL));						                \
+    (printedOk) = (printedOk) && 						        \
+      (asType(aLoL)->printFunc)                     \
+        ((aStrBuf), (aLoL), (ttl));                 \
+    if (isList) strBufPrintf((aStrBuf), (closer));  \
+  } else {								                          \
+    strBufPrintf((aStrBuf), (opener));						  \
+    strBufPrintf((aStrBuf), (closer));						  \
   }
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printPairsCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -465,7 +464,6 @@ extern Boolean printPairsCoAlg(
 
 \startCCode
 Boolean printPairsCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -475,25 +473,23 @@ Boolean printPairsCoAlg(
   assert(asTag(aLoL) == PairsTag);
 
   if (timeToLive < 1) {
-    strBufPrintf(jInterp, aStrBuf, "... ");
+    strBufPrintf(aStrBuf, "... ");
     return TRUE;
   }
   
   size_t printedOk = TRUE;
   lolPrintStr(
-    jInterp,
+    aStrBuf,
     printedOk,
     asCar(aLoL),
     "( ", ") ",
-    aStrBuf,
     timeToLive-1
   );
   lolPrintStr(
-    jInterp,
+    aStrBuf,
     printedOk,
     asCdr(aLoL),
     "",   "",
-    aStrBuf,
     timeToLive-1
   );
   return printedOk;
@@ -510,10 +506,10 @@ Boolean printPairsCoAlg(
                                newPair(jInterp, NULL, NULL),
                                newPair(jInterp, NULL, NULL));
   AssertPtrNotNull(aNewPair);
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, aNewPair);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "( ( ) ) ( ) ");
-  strBufClose(jInterp, aStrBuf);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoL(aStrBuf, aNewPair);
+  AssertStrEquals(getCString(aStrBuf), "( ( ) ) ( ) ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

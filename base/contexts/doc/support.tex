@@ -44,15 +44,14 @@ static void showStackAP(ContextObj* aCtx) {
   assert(aCtx);
   assert(aCtx->jInterp);
   JoyLoLInterp *jInterp = aCtx->jInterp;
-  StringBufferObj *aStrBuf =
-    newStringBuffer(jInterp);
-  strBufPrintf(jInterp, aStrBuf, "d>>");
-  printLoL(jInterp, aStrBuf, aCtx->data);
-  strBufPrintf(jInterp, aStrBuf, "\np>>");
-  printLoL(jInterp, aStrBuf, aCtx->process);
-  strBufPrintf(jInterp, aStrBuf, "\n");
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-  strBufClose(jInterp, aStrBuf);
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  strBufPrintf(aStrBuf, "d>>");
+  printLoL(aStrBuf, aCtx->data);
+  strBufPrintf(aStrBuf, "\np>>");
+  printLoL(aStrBuf, aCtx->process);
+  strBufPrintf(aStrBuf, "\n");
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
 }
 \stopCCode
 
@@ -123,10 +122,10 @@ static void definitionsAP(ContextObj* aCtx) {
   assert(aCtx);
   assert(aCtx->jInterp);
   JoyLoLInterp *jInterp = aCtx->jInterp;
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
   listDefinitions(aCtx->dict, aStrBuf);
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-  strBufClose(jInterp, aStrBuf);
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
 }
 \stopCCode
 
@@ -141,10 +140,10 @@ static void definitionsInAP(ContextObj* aCtx) {
       "definitionsIn requires a dictionary as top");
     return;
   }
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
   listDefinitions(((DictObj*)namingScope), aStrBuf);
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-  strBufClose(jInterp, aStrBuf);
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
 }
 \stopCCode
 
@@ -155,13 +154,10 @@ static void showLoadExtensionsAP(ContextObj* aCtx) {
   assert(jInterp);
   LoaderObj* loader = jInterp->loader;
   assert(loader);
-  StringBufferObj *aStrBuf =
-    newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
   listLoadExtensions(loader, aStrBuf);
-  jInterp->writeStdOut(jInterp,
-    getCString(jInterp, aStrBuf)
-  );
-  strBufClose(jInterp, aStrBuf);
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
 }
 \stopCCode
 
@@ -172,13 +168,10 @@ static void showLoadPathsAP(ContextObj* aCtx) {
   assert(jInterp);
   LoaderObj* loader = jInterp->loader;
   assert(loader);
-  StringBufferObj *aStrBuf =
-    newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
   listLoadPaths(loader, aStrBuf);
-  jInterp->writeStdOut(jInterp,
-    getCString(jInterp, aStrBuf)
-  );
-  strBufClose(jInterp, aStrBuf);  
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
 }
 \stopCCode
 
@@ -250,52 +243,51 @@ static void lispLoadFileAP(ContextObj* aCtx) {
 
 \startCCode
 static void whatIsThis(
-  JoyLoLInterp *jInterp,
-  JObj         *top,
-  Symbol       *stackName
+  ContextObj *aCtx,
+  JObj       *top,
+  Symbol     *stackName
 ) {
-  StringBufferObj *aStrBuf =
-    newStringBuffer(jInterp);
-  strBufPrintf(jInterp, aStrBuf, "%s top ", stackName);
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  strBufPrintf(aStrBuf, "%s top ", stackName);
 
   if (!top) {
-    strBufPrintf(jInterp, aStrBuf, "is NIL\n");
+    strBufPrintf(aStrBuf, "is NIL\n");
   } else {
     if (!top->type) {
-      strBufPrintf(jInterp, aStrBuf, "has no type\n");
+      strBufPrintf(aStrBuf, "has no type\n");
     } else {
-      strBufPrintf(jInterp, aStrBuf,
+      strBufPrintf(aStrBuf,
         "data top is a %s [",
         top->type->name
       );
-      printLoL(jInterp, aStrBuf, top);
-      strBufPrintf(jInterp, aStrBuf, "]\n");
+      printLoL(aStrBuf, top);
+      strBufPrintf(aStrBuf, "]\n");
     }
   }
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-  strBufClose(jInterp, aStrBuf);      
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);      
 }
 
 static void whatIsThisDAP(ContextObj* aCtx) {
   assert(aCtx);
-  JoyLoLInterp* jInterp = aCtx->jInterp;
-  assert(jInterp);
   
   popCtxDataInto(aCtx, top);
   pushCtxData(aCtx, top);
   
-  whatIsThis(jInterp, top, "data");
+  whatIsThis(aCtx, top, "data");
 }
 
 static void whatIsThisPAP(ContextObj* aCtx) {
   assert(aCtx);
-  JoyLoLInterp* jInterp = aCtx->jInterp;
-  assert(jInterp);
   
   popCtxProcessInto(aCtx, top);
   pushCtxProcess(aCtx, top);
   
-  whatIsThis(jInterp, top, "process");
+  whatIsThis(aCtx, top, "process");
 }
 \stopCCode
 

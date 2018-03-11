@@ -173,13 +173,11 @@ DictNodeObj *newDictNodeImpl(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printDicionaryJObjInto(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *anAVLNode,
   size_t           timeToLive
 );
 extern Boolean printDicInto(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   DictNodeObj     *anAVLNode,
   size_t           timeToLive
@@ -189,7 +187,6 @@ extern Boolean printDicInto(
 
 \startCCode
 Boolean printDictionaryJObjInto(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *anAVLNode,
   size_t           timeToLive
@@ -197,7 +194,6 @@ Boolean printDictionaryJObjInto(
   if (!anAVLNode) return FALSE;
   if (asTag(anAVLNode) != DictNodesTag) return FALSE;
   return printDicInto(
-    jInterp,
     aStrBuf,
     (DictNodeObj*)anAVLNode,
     timeToLive
@@ -205,23 +201,22 @@ Boolean printDictionaryJObjInto(
 }
 
 Boolean printDicInto(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   DictNodeObj     *anAVLNode,
   size_t           timeToLive
 ) {
   if (!anAVLNode) return TRUE;
   if (timeToLive < 1) {
-    strBufPrintf(jInterp, aStrBuf, "... ");
+    strBufPrintf(aStrBuf, "... ");
     return TRUE;
   }
   timeToLive -= 1;
   
-  strBufPrintf(jInterp, aStrBuf, "[%s] l:( ", anAVLNode->symbol);
-  printDicInto(jInterp, aStrBuf, anAVLNode->left, timeToLive);
-  strBufPrintf(jInterp, aStrBuf, " ) r:( ");
-  printDicInto(jInterp, aStrBuf, anAVLNode->right, timeToLive);
-  strBufPrintf(jInterp, aStrBuf, " ) ");
+  strBufPrintf(aStrBuf, "[%s] l:( ", anAVLNode->symbol);
+  printDicInto(aStrBuf, anAVLNode->left, timeToLive);
+  strBufPrintf(aStrBuf, " ) r:( ");
+  printDicInto(aStrBuf, anAVLNode->right, timeToLive);
+  strBufPrintf(aStrBuf, " ) ");
   return TRUE;
 }
 \stopCCode

@@ -422,30 +422,30 @@ typedef JObj *(PopCtx)(
       ->popCtxDataFunc(aCtx))               \
   )
 
-#define popCtxDataInto(aCtx, aVar)                              \
-assert(aCtx);                                                   \
-JObj* aVar = popCtxData(aCtx);                                  \
-if (aCtx->tracingOn) {                                          \
-  JoyLoLInterp *jInterp = aCtx->jInterp;                        \
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
-  strBufPrintf(jInterp, aStrBuf, "%s = ", #aVar);               \
-  printLoL(jInterp, aStrBuf, aVar);                             \
-  strBufPrintf(jInterp, aStrBuf, "\n");                         \
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));  \
-  strBufClose(jInterp, aStrBuf);                                \
+#define popCtxDataInto(aCtx, aVar)                    \
+assert(aCtx);                                         \
+JObj* aVar = popCtxData(aCtx);                        \
+if (aCtx->tracingOn) {                                \
+  JoyLoLInterp *jInterp = aCtx->jInterp;              \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);   \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);              \
+  printLoL(aStrBuf, aVar);                            \
+  strBufPrintf(aStrBuf, "\n");                        \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf)); \
+  strBufClose(aStrBuf);                               \
 }
 
-#define popCtxDataIntoImpl(aCtx, aVar)                          \
-assert(aCtx);                                                   \
-JObj* aVar = popCtxDataImpl(aCtx);                              \
-if (aCtx->tracingOn) {                                          \
-  JoyLoLInterp *jInterp = aCtx->jInterp;                        \
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
-  strBufPrintf(jInterp, aStrBuf, "%s = ", #aVar);               \
-  printLoL(jInterp, aStrBuf, aVar);                             \
-  strBufPrintf(jInterp, aStrBuf, "\n");                         \
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));  \
-  strBufClose(jInterp, aStrBuf);                                \
+#define popCtxDataIntoImpl(aCtx, aVar)                \
+assert(aCtx);                                         \
+JObj* aVar = popCtxDataImpl(aCtx);                    \
+if (aCtx->tracingOn) {                                \
+  JoyLoLInterp *jInterp = aCtx->jInterp;              \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);   \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);              \
+  printLoL(aStrBuf, aVar);                            \
+  strBufPrintf(aStrBuf, "\n");                        \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf)); \
+  strBufClose(aStrBuf);                               \
 }
 \stopCHeader
 
@@ -471,8 +471,8 @@ JObj* popCtxDataImpl(
 \stopCCode
 
 \startCHeader
-#define showCtxData(aCtx, aStrBuf)              \
-  assert(aCtx);                                 \
-  printLoL(aCtx->jInterp, aStrBuf, aCtx->data); \
+#define showCtxData(aCtx, aStrBuf)  \
+  assert(aCtx);                     \
+  printLoL(aStrBuf, aCtx->data);    \
 \stopCHeader
 

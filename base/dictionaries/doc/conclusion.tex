@@ -50,6 +50,9 @@ extern size_t joylol_register_dictionaries(JoyLoLInterp *jInterp);
 \addCTestInclude{<joylol/jInterps.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/contexts.h>}
 \addCTestInclude{<joylol/dictNodes.h>}
 \addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/dictionaries-private.h>}
@@ -61,9 +64,14 @@ extern size_t joylol_register_dictionaries(JoyLoLInterp *jInterp);
   requireStaticallyLinkedJInterps(lstate);
   requireLuaModule(lstate, "joylol.stringBuffers");
   requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.cFunctions");
+  requireLuaModule(lstate, "joylol.texts");
+  requireLuaModule(lstate, "joylol.contexts");
   requireLuaModule(lstate, "joylol.dictNodes");
   requireStaticallyLinkedDictionaries(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

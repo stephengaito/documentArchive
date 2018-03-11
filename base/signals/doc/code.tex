@@ -76,14 +76,14 @@ JObj* newSignalImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
 
   JObj* aLoL = newSignal(jInterp, 12);
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, aLoL);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "signal:12 ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf), "signal:12 ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 
@@ -151,7 +151,6 @@ Boolean equalityBoolCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printBoolCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -161,7 +160,6 @@ extern Boolean printBoolCoAlg(
 
 \startCCode
 Boolean printBoolCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -169,7 +167,7 @@ Boolean printBoolCoAlg(
   assert(aLoL);
   assert(asTag(aLoL) == SignalsTag);
 
-  strBufPrintf(jInterp, aStrBuf, "signal:%zu ", asSignal(aLoL));
+  strBufPrintf(aStrBuf, "signal:%zu ", asSignal(aLoL));
   return TRUE;
 }
 \stopCCode
@@ -180,14 +178,14 @@ Boolean printBoolCoAlg(
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[SignalsTag]);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
   
   JObj* aNewSignal = newSignal(jInterp, 12);
   AssertPtrNotNull(aNewSignal);
-  printLoL(jInterp, aStrBuf, aNewSignal);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "signal:12 ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aNewSignal);
+  AssertStrEquals(getCString(aStrBuf), "signal:12 ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

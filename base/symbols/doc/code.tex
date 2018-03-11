@@ -214,8 +214,7 @@ Boolean symbolsEqual(
 \setCHeaderStream{private}
 \startCHeader
 extern size_t printSymbolCoAlg(
-  JoyLoLInterp    *jInterp,
-  StringBufferObj *aStrObj,
+  StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
 );
@@ -224,7 +223,6 @@ extern size_t printSymbolCoAlg(
 
 \startCCode
 Boolean printSymbolCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -232,7 +230,7 @@ Boolean printSymbolCoAlg(
   assert(aLoL);
   assert(asTag(aLoL) == SymbolsTag);
 
-  strBufPrintf(jInterp, aStrBuf, "%s ", asSymbol(aLoL));
+  strBufPrintf(aStrBuf, "%s ", asSymbol(aLoL));
   return TRUE;
 }
 \stopCCode
@@ -246,12 +244,12 @@ Boolean printSymbolCoAlg(
   JObj* aNewSymbol = newSymbol(jInterp, "test string");
   AssertPtrNotNull(aNewSymbol);
   
-  StringBufferObj* aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
   
-  printLoL(jInterp, aStrBuf, aNewSymbol);
-  AssertStrEquals(getCString(jInterp, aStrBuf),
+  printLoL(aStrBuf, aNewSymbol);
+  AssertStrEquals(getCString(aStrBuf),
     "test string ");
-  strBufClose(jInterp, aStrBuf);
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

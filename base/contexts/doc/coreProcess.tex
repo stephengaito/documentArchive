@@ -342,30 +342,30 @@ void prependListCtxProcessImpl(
       ->popCtxProcessFunc(aCtx))               \
   )
 
-#define popCtxProcessInto(aCtx, aVar)                           \
-assert(aCtx);                                                   \
-JObj* aVar = popCtxProcess(aCtx);                               \
-if (aCtx->tracingOn) {                                          \
-  JoyLoLInterp *jInterp = aCtx->jInterp;                        \
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
-  strBufPrintf(jInterp, aStrBuf, "%s = ", #aVar);               \
-  printLoL(jInterp, aStrBuf, aVar);                             \
-  strBufPrintf(jInterp, aStrBuf, "\n");                         \
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));  \
-  strBufClose(jInterp, aStrBuf);                                \
+#define popCtxProcessInto(aCtx, aVar)                  \
+assert(aCtx);                                          \
+JObj* aVar = popCtxProcess(aCtx);                      \
+if (aCtx->tracingOn) {                                 \
+  JoyLoLInterp *jInterp = aCtx->jInterp;               \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);    \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);               \
+  printLoL(aStrBuf, aVar);                             \
+  strBufPrintf(aStrBuf, "\n");                         \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));  \
+  strBufClose(aStrBuf);                                \
 }
 
-#define popCtxProcessIntoImpl(aCtx, aVar)                       \
-assert(aCtx);                                                   \
-JObj* aVar = popCtxProcessImpl(aCtx);                           \
-if (aCtx->tracingOn) {                                          \
-  JoyLoLInterp *jInterp = aCtx->jInterp;                        \
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);          \
-  strBufPrintf(jInterp, aStrBuf, "%s = ", #aVar);               \
-  printLoL(jInterp, aStrBuf, aVar);                             \
-  strBufPrintf(jInterp, aStrBuf, "\n");                         \
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));  \
-  strBufClose(jInterp, aStrBuf);                                \
+#define popCtxProcessIntoImpl(aCtx, aVar)              \
+assert(aCtx);                                          \
+JObj* aVar = popCtxProcessImpl(aCtx);                  \
+if (aCtx->tracingOn) {                                 \
+  JoyLoLInterp *jInterp = aCtx->jInterp;               \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);    \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);               \
+  printLoL(aStrBuf, aVar);                             \
+  strBufPrintf(aStrBuf, "\n");                         \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));  \
+  strBufClose(aStrBuf);                                \
 }
 \stopCHeader
 
@@ -391,8 +391,8 @@ JObj* popCtxProcessImpl(
 \stopCCode
 
 \startCHeader
-#define showCtxProcess(aCtx, aStrBuf)              \
-  assert(aCtx);                                    \
-  printLoL(aCtx->jInterp, aStrBuf, aCtx->process); \
+#define showCtxProcess(aCtx, aStrBuf) \
+  assert(aCtx);                       \
+  printLoL(aStrBuf, aCtx->process);   \
 \stopCHeader
 

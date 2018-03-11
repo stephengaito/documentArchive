@@ -202,11 +202,11 @@ DictNodeObj* findSymbol(
   AssertPtrNotEquals(testSym, childSym);
   AssertPtrEquals(testSym, parentSym);
   //
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
-  printLoL(jInterp, aStrBuf, (JObj*)childDict);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:parent.child ");
-  strBufClose(jInterp, aStrBuf);  
+  printLoL(aStrBuf, (JObj*)childDict);
+  AssertStrEquals(getCString(aStrBuf), "dict:parent.child ");
+  strBufClose(aStrBuf);  
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -804,9 +804,9 @@ void listDefinitionsImpl(
   DictNodeObj* curNode = aDict->firstSymbol;
   while(curNode) {
     if (curNode->value) {
-      strBufPrintf(aDict->jInterp, aStrBuf,"%s == ", curNode->symbol);
-      printLoL(aDict->jInterp, aStrBuf, curNode->value);
-      strBufPrintf(aDict->jInterp, aStrBuf,"\n");
+      strBufPrintf(aStrBuf,"%s == ", curNode->symbol);
+      printLoL(aStrBuf, curNode->value);
+      strBufPrintf(aStrBuf,"\n");
     }
     curNode = curNode->next;
   }
@@ -817,14 +817,14 @@ void listDefinitionsImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
 
   DictObj* aLoL = newDictionary(jInterp, "tests", NULL);
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, (JObj*)aLoL);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:tests ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, (JObj*)aLoL);
+  AssertStrEquals(getCString(aStrBuf), "dict:tests ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -879,7 +879,6 @@ Boolean equalityDictionaryCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printDictionaryCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -889,22 +888,20 @@ extern Boolean printDictionaryCoAlg(
 
 \startCCode
 static void printDictionaryName(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   DictObj         *aDict
 ) {
   assert(aDict);
   if (aDict->parent) {
-    printDictionaryName(jInterp, aStrBuf, aDict->parent);
-    strBufPrintf(jInterp, aStrBuf, ".");
+    printDictionaryName(aStrBuf, aDict->parent);
+    strBufPrintf(aStrBuf, ".");
   } else {
-    strBufPrintf(jInterp, aStrBuf, "dict:");
+    strBufPrintf(aStrBuf, "dict:");
   }
-  strBufPrintf(jInterp, aStrBuf, aDict->name);
+  strBufPrintf(aStrBuf, aDict->name);
 }
 
 Boolean printDictionaryCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -914,8 +911,8 @@ Boolean printDictionaryCoAlg(
   
   DictObj* theDict = (DictObj*)aLoL;
   
-  printDictionaryName(jInterp, aStrBuf, theDict);
-  strBufPrintf(jInterp, aStrBuf, " ");
+  printDictionaryName(aStrBuf, theDict);
+  strBufPrintf(aStrBuf, " ");
   
   return TRUE;
 }
@@ -927,14 +924,14 @@ Boolean printDictionaryCoAlg(
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[DictionariesTag]);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
   
   DictObj* aNewDictionary = newDictionary(jInterp, "tests", NULL);
   AssertPtrNotNull(aNewDictionary);
-  printLoL(jInterp, aStrBuf, (JObj*)aNewDictionary);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "dict:tests ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, (JObj*)aNewDictionary);
+  AssertStrEquals(getCString(aStrBuf), "dict:tests ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

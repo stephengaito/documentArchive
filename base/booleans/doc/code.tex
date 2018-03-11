@@ -79,20 +79,20 @@ JObj* newBooleanImpl(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
 
   JObj* aLoL = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, aLoL);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "true ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf), "true ");
+  strBufClose(aStrBuf);
 
   aLoL = newBoolean(jInterp, FALSE);
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, aLoL);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "false ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf), "false ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 
@@ -202,7 +202,6 @@ Boolean equalityBoolCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printBoolCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -212,7 +211,6 @@ extern Boolean printBoolCoAlg(
 
 \startCCode
 Boolean printBoolCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -220,8 +218,8 @@ Boolean printBoolCoAlg(
   assert(aLoL);
   assert(asTag(aLoL) == BooleansTag);
 
-  if (asBoolean(aLoL)) strBufPrintf(jInterp, aStrBuf, "true ");
-  else strBufPrintf(jInterp, aStrBuf, "false ");
+  if (asBoolean(aLoL)) strBufPrintf(aStrBuf, "true ");
+  else strBufPrintf(aStrBuf, "false ");
   return TRUE;
 }
 \stopCCode
@@ -232,20 +230,20 @@ Boolean printBoolCoAlg(
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[BooleansTag]);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
   
   JObj* aNewBoolean = newBoolean(jInterp, TRUE);
   AssertPtrNotNull(aNewBoolean);
-  printLoL(jInterp, aStrBuf, aNewBoolean);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "true ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aNewBoolean);
+  AssertStrEquals(getCString(aStrBuf), "true ");
+  strBufClose(aStrBuf);
   
   aNewBoolean = newBoolean(jInterp, FALSE);
   AssertPtrNotNull(aNewBoolean);  
-  printLoL(jInterp, aStrBuf, aNewBoolean);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "false ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aNewBoolean);
+  AssertStrEquals(getCString(aStrBuf), "false ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

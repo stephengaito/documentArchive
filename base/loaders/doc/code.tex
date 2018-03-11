@@ -143,14 +143,12 @@ void listLoadPathsImpl(
   StringBufferObj *aStrBuf
 ) {
   assert(loader);
-  JoyLoLInterp *jInterp = loader->jInterp;
-  assert(jInterp);
   assert(aStrBuf);
   JObj* pathList = loader->paths;
   while(pathList && isPair(pathList)) {
     JObj* aPath = asCar(pathList);
     if (isSymbol(aPath)) {
-      strBufPrintf(jInterp, aStrBuf,
+      strBufPrintf(aStrBuf,
         "%s\n", asSymbol(aPath)
       );
     }
@@ -219,14 +217,12 @@ void listLoadExtensionsImpl(
   StringBufferObj *aStrBuf
 ) {
   assert(loader);
-  JoyLoLInterp *jInterp = loader->jInterp;
-  assert(jInterp);
   assert(aStrBuf);
   JObj* extensionList = loader->extensions;
   while(extensionList && isPair(extensionList)) {
     JObj* anExtension = asCar(extensionList);
     if (isSymbol(anExtension)) {
-      strBufPrintf(jInterp, aStrBuf,
+      strBufPrintf(aStrBuf,
         "%s\n", asSymbol(anExtension)
       );
     }
@@ -256,11 +252,10 @@ Boolean loadAJoyLoLFile(
   FILE* inputFile = fopen(filePath, "r");
   if (inputFile) {
     if(aCtx->verbose) {
-      StringBufferObj *aStrBuf = 
-        newStringBuffer(jInterp);      
-      strBufPrintf(jInterp, aStrBuf, "(%s)\n", filePath);
-      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-      strBufClose(jInterp, aStrBuf);
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);      
+      strBufPrintf(aStrBuf, "(%s)\n", filePath);
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
     }
     TextObj* aText =
       createTextFromInputFile(jInterp, inputFile);
@@ -318,11 +313,10 @@ Boolean loadAFileImpl(
   if (!*aFileToLoad) return FALSE;
 
   if (aCtx->verbose) {
-    StringBufferObj *aStrBuf = 
-      newStringBuffer(jInterp);
-    strBufPrintf(jInterp, aStrBuf, "\t%s ", aFileToLoad);
-    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(aStrBuf, "\t%s ", aFileToLoad);
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
   }
 
   JObj* aLoadPathList = loader->paths;

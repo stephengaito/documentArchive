@@ -163,7 +163,6 @@ Boolean equalityContextsCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printContextsCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -173,52 +172,51 @@ extern Boolean printContextsCoAlg(
 
 \startCCode
 static void printContextName(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   ContextObj      *aCtx
 ) {
   assert(aCtx);
   if (aCtx->parent) {
-    printContextName(jInterp, aStrBuf, aCtx->parent);
-    strBufPrintf(jInterp, aStrBuf, ":");
+    printContextName(aStrBuf, aCtx->parent);
+    strBufPrintf(aStrBuf, ":");
   }
-  strBufPrintf(jInterp, aStrBuf, aCtx->name);
+  strBufPrintf(aStrBuf, aCtx->name);
 }
 
 Boolean printContextsCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
 ) {
-  assert(jInterp);
+  assert(aStrBuf);
+
   assert(aLoL);
   assert(asType(aLoL));
   assert(asTag(aLoL) == ContextsTag);
   ContextObj* aCtx = (ContextObj*)aLoL;
 
   if (timeToLive < 1) {
-    strBufPrintf(jInterp, aStrBuf, "... ");  
+    strBufPrintf(aStrBuf, "... ");  
     return TRUE;
   }
   timeToLive -= 1;
   
   size_t printedOk = TRUE;
-  strBufPrintf(jInterp, aStrBuf, "\n[");
-  printContextName(jInterp, aStrBuf, aCtx);
-  strBufPrintf(jInterp, aStrBuf, "(");
-  printLoL(jInterp, aStrBuf, ((JObj*)aCtx->dict));
-  lolPrintStr(jInterp, printedOk, asData(aLoL),
-              ")[ d:( ", ") ", aStrBuf, timeToLive);
-  lolPrintStr(jInterp, printedOk, asCommand(aLoL),
-              "c:( ", ") ", aStrBuf, timeToLive);
-  lolPrintStr(jInterp, printedOk, asProcess(aLoL),
-              "p:( ", ") ", aStrBuf, timeToLive);
-  lolPrintStr(jInterp, printedOk, asMessages(aLoL),
-              "m:( ", ") ", aStrBuf, timeToLive);
-  lolPrintStr(jInterp, printedOk, asListeners(aLoL),
-              "l:( ", ") ", aStrBuf, timeToLive);
-  strBufPrintf(jInterp, aStrBuf, " ]]\n");
+  strBufPrintf(aStrBuf, "\n[");
+  printContextName(aStrBuf, aCtx);
+  strBufPrintf(aStrBuf, "(");
+  printLoL(aStrBuf, ((JObj*)aCtx->dict));
+  lolPrintStr(aStrBuf, printedOk, asData(aLoL),
+              ")[ d:( ", ") ", timeToLive);
+  lolPrintStr(aStrBuf, printedOk, asCommand(aLoL),
+              "c:( ", ") ", timeToLive);
+  lolPrintStr(aStrBuf, printedOk, asProcess(aLoL),
+              "p:( ", ") ", timeToLive);
+  lolPrintStr(aStrBuf, printedOk, asMessages(aLoL),
+              "m:( ", ") ", timeToLive);
+  lolPrintStr(aStrBuf, printedOk, asListeners(aLoL),
+              "l:( ", ") ", timeToLive);
+  strBufPrintf(aStrBuf, " ]]\n");
   return printedOk;
 }
 \stopCCode

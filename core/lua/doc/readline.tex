@@ -204,13 +204,13 @@ void runREPLInContext(
 //  if (aCtx->verbose) {
     getGitVersionInto(gitVersionKeyValues, "commitShortHash", commitHash);
     getGitVersionInto(gitVersionKeyValues, "commitDate",      commitDate);
-    StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-    strBufPrintf(jInterp, aStrBuf, "Welcome to JoyLoL v0.1 ( %s ; %s )\n",
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(aStrBuf, "Welcome to JoyLoL v0.1 ( %s ; %s )\n",
       commitHash,
       commitDate
     );
-    jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-    strBufClose(jInterp, aStrBuf);
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
 //  }
   aCtx->showStack = TRUE;
   TextObj* aText = createTextFromReadline(jInterp);
@@ -229,12 +229,12 @@ void runREPLInContext(
     //
     if (aCtx->showStack) {
       DEBUG(jInterp, "runREPLInContext %p printing data %p\n", aCtx, aCtx->data);
-      StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-      strBufPrintf(jInterp, aStrBuf, ">>");
-      printLoL(jInterp, aStrBuf, aCtx->data);
-      strBufPrintf(jInterp, aStrBuf, "\n");
-      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-      strBufClose(jInterp, aStrBuf);
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      strBufPrintf(aStrBuf, ">>");
+      printLoL(aStrBuf, aCtx->data);
+      strBufPrintf(aStrBuf, "\n");
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
       DEBUG(jInterp, "runREPLInContext %p printed data %p\n", aCtx, aCtx->data);
     }
     //

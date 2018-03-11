@@ -22,13 +22,13 @@ static void printLoLAP(ContextObj* aCtx) {
     depthInt = ((size_t)depthDbl);
   }
   
-  StringBufferObj* aStrBuf = newStringBufferImpl(jInterp);
+  StringBufferObj* aStrBuf = newStringBufferImpl(aCtx);
   
-  printLoLImpl(jInterp, aStrBuf, lol, depthInt);
-  JObj* result = newSymbol(jInterp, getCString(jInterp, aStrBuf));
+  printLoLImpl(aStrBuf, lol, depthInt);
+  JObj* result = newSymbol(jInterp, getCString(aStrBuf));
   pushCtxData(aCtx, result);
   
-  strBufClose(jInterp, aStrBuf);
+  strBufClose(aStrBuf);
 }
 \stopCCode
 

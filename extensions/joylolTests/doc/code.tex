@@ -115,14 +115,14 @@ JObj* newJoylolTest(
 \startCTest
   AssertPtrNotNull(jInterp);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
 
   JObj* aLoL = newJoylolTest(jInterp);
   AssertPtrNotNull(aLoL);
-  printLoL(jInterp, aStrBuf, aLoL);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "joylolTest ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf), "joylolTest ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 
@@ -178,7 +178,6 @@ Boolean equalityJoylolTestsCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printJoylolTestsCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -188,15 +187,17 @@ extern Boolean printJoylolTestsCoAlg(
 
 \startCCode
 Boolean printJoylolTestsCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
 ) {
   assert(aLoL);
+  JoyLoLInterp *jInterp = aStrBuf->jInterp;
+  assert(jInterp);
+  
   assert(asTag(aLoL) == jtTagMap_get(jtTagMap, jInterp));
 
-  strBufPrintf(jInterp, aStrBuf, "joylolTest ");
+  strBufPrintf(aStrBuf, "joylolTest ");
   
   return TRUE;
 }
@@ -208,14 +209,14 @@ Boolean printJoylolTestsCoAlg(
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[jtTagMap_get(jtTagMap, jInterp)]);
 
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   AssertPtrNotNull(aStrBuf);
   
   JObj* aNewJoylolTest = newJoylolTest(jInterp);
   AssertPtrNotNull(aNewJoylolTest);
-  printLoL(jInterp, aStrBuf, aNewJoylolTest);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "joylolTest ");
-  strBufClose(jInterp, aStrBuf);
+  printLoL(aStrBuf, aNewJoylolTest);
+  AssertStrEquals(getCString(aStrBuf), "joylolTest ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

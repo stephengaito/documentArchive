@@ -40,11 +40,14 @@
   {}
 
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/naturals.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
 \addCTestInclude{<joylol/dictNodes.h>}
 \addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/contexts.h>}
 \addCTestInclude{<joylol/texts-private.h>}
 \addCTestLib{-lgmp}
 \addCTestLib{<HOME>/.joylol/joylol/jInterps}
@@ -63,6 +66,7 @@
   requireStaticallyLinkedTexts(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
   initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

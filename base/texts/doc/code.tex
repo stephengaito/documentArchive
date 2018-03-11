@@ -356,18 +356,18 @@ void reportErrorImpl(
   JoyLoLInterp *jInterp = aText->jInterp;
   assert(jInterp);
   StringBufferObj *aStrBuf = 
-    newStringBuffer(jInterp);
-  strBufPrintf(jInterp, aStrBuf, "\n\n%s\n", message);
+    newStringBuffer(jInterp->rootCtx);
+  strBufPrintf(aStrBuf, "\n\n%s\n", message);
   if (aText->curLine) {
-    strBufPrintf(jInterp, aStrBuf, "while parsing\n");
-    strBufPrintf(jInterp, aStrBuf, "\t[%s]\n", aText->curLine);
-    strBufPrintf(jInterp, aStrBuf,
+    strBufPrintf(aStrBuf, "while parsing\n");
+    strBufPrintf(aStrBuf, "\t[%s]\n", aText->curLine);
+    strBufPrintf(aStrBuf,
       "at character %zu\n\n", aText->curChar - aText->curLine);
   } else {
-    strBufPrintf(jInterp, aStrBuf, "at end of text\n\n");
+    strBufPrintf(aStrBuf, "at end of text\n\n");
   }
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-  strBufClose(jInterp, aStrBuf);
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
 }
 \stopCCode
 
@@ -407,7 +407,6 @@ Boolean equalityTextsCoAlg(
 \setCHeaderStream{private}
 \startCHeader
 extern Boolean printStrTextsCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -417,7 +416,6 @@ extern Boolean printStrTextsCoAlg(
 
 \startCCode
 Boolean printStrTextsCoAlg(
-  JoyLoLInterp    *jInterp,
   StringBufferObj *aStrBuf,
   JObj            *aLoL,
   size_t           timeToLive
@@ -425,7 +423,7 @@ Boolean printStrTextsCoAlg(
   assert(aLoL);
   assert(asTag(aLoL) == TextsTag);
 
-  strBufPrintf(jInterp, aStrBuf, "--texts-- ");
+  strBufPrintf(aStrBuf, "--texts-- ");
   return TRUE;
 }
 \stopCCode
@@ -438,10 +436,10 @@ Boolean printStrTextsCoAlg(
 
   TextObj* aNewText = createTextFromString(jInterp, "a string");
   AssertPtrNotNull(aNewText);
-  StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-  printLoL(jInterp, aStrBuf, (JObj*)aNewText);
-  AssertStrEquals(getCString(jInterp, aStrBuf), "--texts-- ");
-  strBufClose(jInterp, aStrBuf);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoL(aStrBuf, (JObj*)aNewText);
+  AssertStrEquals(getCString(aStrBuf), "--texts-- ");
+  strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
 \stopTestSuite

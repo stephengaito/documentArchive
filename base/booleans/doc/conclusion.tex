@@ -48,8 +48,11 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 
   
 \addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/texts.h>}
 \addCTestInclude{<joylol/booleans.h>}
+\addCTestInclude{<joylol/contexts.h>}
 \addCTestInclude{<joylol/booleans-private.h>}
 \addCTestLib{<HOME>/.joylol/joylol/jInterps}
 \addCTestJoyLoLCallbacks{default}
@@ -57,9 +60,16 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 \startCTest
   addJoyLoLLuaPath(lstate);
   requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.cFunctions");
   requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.texts");
+  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.dictNodes");
+  requireLuaModule(lstate, "joylol.contexts");
   requireStaticallyLinkedBooleans(lstate);
   getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
 \stopCTest
 \createCTestFile%
   {default}%

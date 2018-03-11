@@ -4,22 +4,24 @@
 
 \startCCode
 static void traceAction(
-  JoyLoLInterp *jInterp,
-  Symbol       *action,
-  JObj         *aLoL,
-  JObj         *command
+  ContextObj *aCtx,
+  Symbol     *action,
+  JObj       *aLoL,
+  JObj       *command
 ) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
-  StringBufferObj *aStrBuf =
-    newStringBuffer(jInterp);
-  strBufPrintf(jInterp, aStrBuf, "%s: ", action);
-  printLoL(jInterp, aStrBuf, aLoL);
+  
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  strBufPrintf(aStrBuf, "%s: ", action);
+  printLoL(aStrBuf, aLoL);
   if (command) {
-    printLoL(jInterp, aStrBuf, command);
+    printLoL(aStrBuf, command);
   }
-  strBufPrintf(jInterp, aStrBuf, "\n");
-  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-  strBufClose(jInterp, aStrBuf);
+  strBufPrintf(aStrBuf, "\n");
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
 }
 \stopCCode
 
@@ -71,14 +73,13 @@ void evalCommandInContextImpl(
     assert(theDict);
     
     if (aCtx->tracingOn) {
-      StringBufferObj *aStrBuf = 
-        newStringBuffer(jInterp);
-      strBufPrintf(jInterp, aStrBuf,
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      strBufPrintf(aStrBuf,
         "\n ctx: %s(%s)\n",
         aCtx->name, theDict->name
       );
-      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-      strBufClose(jInterp, aStrBuf);
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
     }
     //
     // pop the next command off the process stack
@@ -95,7 +96,7 @@ void evalCommandInContextImpl(
         // this is a CTX CFunction
         //
         if (aCtx->tracingOn) 
-          traceAction(jInterp, "calling(ctx)", command, NULL);
+          traceAction(aCtx, "calling(ctx)", command, NULL);
         aCtx = (asCtxCFunc(command))(aCtx);
         assert(aCtx);
         //
@@ -104,7 +105,7 @@ void evalCommandInContextImpl(
         // this is a normal CFunction
         //
         if (aCtx->tracingOn) 
-          traceAction(jInterp, "calling", command, NULL);
+          traceAction(aCtx, "calling", command, NULL);
         (asCFunc(command))(aCtx);
         //
       }
@@ -114,7 +115,7 @@ void evalCommandInContextImpl(
       //  ...  push it onto the top of the data stack
       //
       if (aCtx->tracingOn)
-        traceAction(jInterp, "adding", command, NULL);
+        traceAction(aCtx, "adding", command, NULL);
       pushCtxDataImpl(aCtx, command);
       //
     } else {
@@ -132,7 +133,7 @@ void evalCommandInContextImpl(
         // infinite loop)
         //
         if (aCtx->tracingOn)
-          traceAction(jInterp, "adding", command, NULL);
+          traceAction(aCtx, "adding", command, NULL);
         pushCtxDataImpl(aCtx, command);
         //
       } else if (isPair(assoc->value)) {
@@ -141,7 +142,7 @@ void evalCommandInContextImpl(
         // process stack
         //
         if (aCtx->tracingOn)
-          traceAction(jInterp, "evaluating", assoc->value, command);
+          traceAction(aCtx, "evaluating", assoc->value, command);
         prependListCtxProcess(aCtx,
           copyLoL(jInterp, assoc->value));
         //
@@ -154,7 +155,7 @@ void evalCommandInContextImpl(
           // this is a CTX CFunction
           //
           if (aCtx->tracingOn) 
-            traceAction(jInterp, "calling(ctx)", command, NULL);
+            traceAction(aCtx, "calling(ctx)", command, NULL);
           aCtx = (asCtxCFunc(assoc->value))(aCtx);
           assert(aCtx);
           //
@@ -163,7 +164,7 @@ void evalCommandInContextImpl(
           // this is a normal CFunction
           //
           if (aCtx->tracingOn)
-            traceAction(jInterp, "calling", command, NULL);
+            traceAction(aCtx, "calling", command, NULL);
           (asCFunc(assoc->value))(aCtx);
           //
         }
@@ -173,22 +174,22 @@ void evalCommandInContextImpl(
         // ... push this new ATOM onto the top of the process stack
         //
         if (aCtx->tracingOn)
-          traceAction(jInterp, "evaluating", assoc->value, command);
+          traceAction(aCtx, "evaluating", assoc->value, command);
         pushCtxProcessImpl(aCtx, assoc->value);
         //
       }
     }
     if (aCtx->tracingOn) {
       DEBUG(jInterp, "evalCommandInContext -> tracing%s\n", "");
-      StringBufferObj *aStrBuf = newStringBuffer(jInterp);
-      strBufPrintf(jInterp, aStrBuf, "d>>");
-      printLoL(jInterp, aStrBuf, aCtx->data);
-      strBufPrintf(jInterp, aStrBuf, "\n");
-      strBufPrintf(jInterp, aStrBuf, "p>>");
-      printLoL(jInterp, aStrBuf, aCtx->process);
-      strBufPrintf(jInterp, aStrBuf, "\n");
-      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-      strBufClose(jInterp, aStrBuf);
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      strBufPrintf(aStrBuf, "d>>");
+      printLoL(aStrBuf, aCtx->data);
+      strBufPrintf(aStrBuf, "\n");
+      strBufPrintf(aStrBuf, "p>>");
+      printLoL(aStrBuf, aCtx->process);
+      strBufPrintf(aStrBuf, "\n");
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
       DEBUG(jInterp, "evalCommandInContext <- tracing%s\n", "");
     }
   } // aCtx->process is empty
@@ -266,30 +267,28 @@ void evalTextInContextImpl(
   while(TRUE) {
     JObj* aLoL = parseOneSymbol(aText);
     if (aCtx->showStack) {
-      StringBufferObj *aStrBuf =
-        newStringBuffer(jInterp);
-      strBufPrintf(jInterp, aStrBuf, "<");
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      strBufPrintf(aStrBuf, "<");
       if (aLoL && isSignal(aLoL) &&
         asSignal(aLoL) == SIGNAL_END_OF_TEXT) {
-        strBufPrintf(jInterp, aStrBuf, " {EOT}");
+        strBufPrintf(aStrBuf, " {EOT}");
       } else {
-        printLoL(jInterp, aStrBuf, aLoL);
+        printLoL(aStrBuf, aLoL);
       }
-      strBufPrintf(jInterp, aStrBuf, "\n");
-      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-      strBufClose(jInterp, aStrBuf);
+      strBufPrintf(aStrBuf, "\n");
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
     }
     if (aLoL && isSignal(aLoL) &&
       asSignal(aLoL) == SIGNAL_END_OF_TEXT) break;
     evalCommandInContext(aCtx, aLoL);
     if (aCtx->showStack) {
-      StringBufferObj *aStrBuf =
-        newStringBuffer(jInterp);
-      strBufPrintf(jInterp, aStrBuf, ">");
-      printLoL(jInterp, aStrBuf, aCtx->data);
-      strBufPrintf(jInterp, aStrBuf, "\n");
-      jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
-      strBufClose(jInterp, aStrBuf);
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      strBufPrintf(aStrBuf, ">");
+      printLoL(aStrBuf, aCtx->data);
+      strBufPrintf(aStrBuf, "\n");
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
     }
     if (aCtx->exceptionRaised) break;
   }
