@@ -248,6 +248,57 @@ static void lispLoadFileAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\startCCode
+static void whatIsThis(
+  JoyLoLInterp *jInterp,
+  JObj         *top,
+  Symbol       *stackName
+) {
+  StringBufferObj *aStrBuf =
+    newStringBuffer(jInterp);
+  strBufPrintf(jInterp, aStrBuf, "%s top ", stackName);
+
+  if (!top) {
+    strBufPrintf(jInterp, aStrBuf, "is NIL\n");
+  } else {
+    if (!top->type) {
+      strBufPrintf(jInterp, aStrBuf, "has no type\n");
+    } else {
+      strBufPrintf(jInterp, aStrBuf,
+        "data top is a %s [",
+        top->type->name
+      );
+      printLoL(jInterp, aStrBuf, top);
+      strBufPrintf(jInterp, aStrBuf, "]\n");
+    }
+  }
+  jInterp->writeStdOut(jInterp, getCString(jInterp, aStrBuf));
+  strBufClose(jInterp, aStrBuf);      
+}
+
+static void whatIsThisDAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp* jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataInto(aCtx, top);
+  pushCtxData(aCtx, top);
+  
+  whatIsThis(jInterp, top, "data");
+}
+
+static void whatIsThisPAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp* jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxProcessInto(aCtx, top);
+  pushCtxProcess(aCtx, top);
+  
+  whatIsThis(jInterp, top, "process");
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern void initContextsAPSupport(JoyLoLInterp *jInterp);
@@ -276,5 +327,7 @@ void initContextsAPSupport(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "debugOff",            debugOffAP);
   extendJoyLoLInRoot(jInterp, "checkingOn",          checkingOnAP);
   extendJoyLoLInRoot(jInterp, "checkingOff",         checkingOffAP);
+  extendJoyLoLInRoot(jInterp, "whatIsThisD",         whatIsThisDAP);
+  extendJoyLoLInRoot(jInterp, "whatIsThisP",         whatIsThisPAP);
 }
 \stopCCode
