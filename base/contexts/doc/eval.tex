@@ -94,6 +94,9 @@ void evalCommandInContextImpl(
       if (isCtxCFunction(command)) {
         //
         // this is a CTX CFunction
+        // (we allow it to change the current context
+        //  in addition to any changes of the data and process stacks
+        //  of either the old or new contexts)
         //
         if (aCtx->tracingOn) 
           traceAction(aCtx, "calling(ctx)", command, NULL);
@@ -103,6 +106,7 @@ void evalCommandInContextImpl(
       } else {
         //
         // this is a normal CFunction
+        // (this ONLY makes changes to the data and process stacks)
         //
         if (aCtx->tracingOn) 
           traceAction(aCtx, "calling", command, NULL);

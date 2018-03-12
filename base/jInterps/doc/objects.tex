@@ -84,10 +84,10 @@ typedef struct joylol_object_struct {
 #define asTag(aLoL)   (((JObj*)(aLoL))->tag)
 #define asFlags(aLoL) (((JObj*)(aLoL))->flags)
 
-#define flagsSet(aLoL, bitMask)       \
+#define isFlagSet(aLoL, bitMask)        \
   (((JObj*)(aLoL))->flags & (bitMask))
 
-#define flagsClear(aLoL, bitMask)           \
+#define isFlagClear(aLoL, bitMask)          \
   ((~(((JObj*)(aLoL))->flags)) & (bitMask))
 
 #define checkObj(jInterp, theObj, theTag) \

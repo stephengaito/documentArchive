@@ -302,18 +302,23 @@ void nextSymbolImpl(
   } else {
     // we have parsed a symbol... so create a new symbol
     //
-    assert(aText->jInterp);
-    assert(aText->jInterp->rootCtx);
-    assert(aText->jInterp->rootCtx->dict);
-    DictNodeObj* aSym = getSymbolEntry(
-        aText->jInterp->rootCtx->dict,
-        aSymbol
-      );
-    assert(aSym);
-    aText->sym =
-      newSymbol(aText->jInterp,
-        (strchr(aSymbol, '.') ? aSymbol : aSym->symbol)
-      );
+    if (strchr(aSymbol, '.')) {
+      aText->sym = newSymbol(aText->jInterp, aSymbol);
+    } else {
+      assert(aText->jInterp);
+      assert(aText->jInterp->rootCtx);
+      assert(aText->jInterp->rootCtx->dict);
+      DictNodeObj* aSym = getSymbolEntry(
+          aText->jInterp->rootCtx->dict,
+          aSymbol
+        );
+      assert(aSym);
+      if (aSym->value && isSymbol(aSym->value)) {
+        aText->sym = aSym->value;
+      } else {
+        aText->sym = newSymbol(aText->jInterp, aSym->symbol);
+      }
+    }
     //
     DEBUG(aText->jInterp, "<-nextSymbol [%s] (symbol)\n",
       ((SymbolObj*)(aText->sym))->sym);

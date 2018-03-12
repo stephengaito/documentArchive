@@ -149,17 +149,17 @@ CFunctionObj *newCtxCFunctionImpl(
       FALSE                             \
   )
 
-#define isCtxCFunction(aLoL)                \
-  (                                         \
-    (                                       \
-      (aLoL) &&                             \
-      asType(aLoL) &&                       \
-      (asTag(aLoL) == CFunctionsTag) &&     \
-      flagsSet(aLoL, CTX_CFUNCTION_FLAG) && \
-       asCFunc(aLoL)                        \
-    ) ?                                     \
-      TRUE :                                \
-      FALSE                                 \
+#define isCtxCFunction(aLoL)                  \
+  (                                           \
+    (                                         \
+      (aLoL) &&                               \
+      asType(aLoL) &&                         \
+      (asTag(aLoL) == CFunctionsTag) &&       \
+      isFlagSet(aLoL, CTX_CFUNCTION_FLAG) &&  \
+       asCFunc(aLoL)                          \
+    ) ?                                       \
+      TRUE :                                  \
+      FALSE                                   \
   )
 
 \stopCHeader
@@ -218,7 +218,7 @@ Boolean printFuncCoAlg(
   strBufPrintf(
     aStrBuf,
     "<%s%p> ",
-    (flagsSet(aLoL, CTX_CFUNCTION_FLAG) ? "ctx:" : ""),
+    (isFlagSet(aLoL, CTX_CFUNCTION_FLAG) ? "ctx:" : ""),
     asCFunc(aLoL)
   );
   return TRUE;

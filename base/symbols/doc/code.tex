@@ -12,6 +12,8 @@ typedef struct symbol_object_struct {
   Symbol *sym;
 } SymbolObj;
 
+#define LOOKUP_SYMBOL_FLAG 0x8L
+
 #define asSymbol(aObj) (((SymbolObj*)(aObj))->sym)
 \stopCHeader
 
@@ -23,16 +25,17 @@ typedef struct symbol_object_struct {
 
 \startCHeader
 typedef JObj *(NewSymbol)(
-  JoyLoLInterp*,
-  Symbol*
+  JoyLoLInterp *jInterp,
+  Symbol       *theSymbol,
+  Boolean       isALookupSymbol
 );
 
-#define newSymbol(jInterp, aSymbol)       \
-  (                                       \
-    assert(getSymbolsClass(jInterp)       \
-      ->newSymbolFunc),                   \
-    (getSymbolsClass(jInterp)             \
-      ->newSymbolFunc(jInterp, aSymbol))  \
+#define newSymbol(jInterp, aSymbol)             \
+  (                                             \
+    assert(getSymbolsClass(jInterp)             \
+      ->newSymbolFunc),                         \
+    (getSymbolsClass(jInterp)                   \
+      ->newSymbolFunc(jInterp, aSymbol, FALSE)) \
   )
 \stopCHeader
 
@@ -40,7 +43,8 @@ typedef JObj *(NewSymbol)(
 \startCHeader
 extern JObj *newSymbolImpl(
   JoyLoLInterp *jInterp,
-  Symbol       *aSymbol
+  Symbol       *aSymbol,
+  Boolean       isALookupSymbol
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -48,7 +52,8 @@ extern JObj *newSymbolImpl(
 \startCCode
 JObj* newSymbolImpl(
   JoyLoLInterp *jInterp,
-  Symbol       *aSymbol
+  Symbol       *aSymbol,
+  Boolean       isALookupSymbol
 ) {
   assert(aSymbol);
   assert(jInterp);
@@ -56,6 +61,9 @@ JObj* newSymbolImpl(
   JObj* result = newObject(jInterp, SymbolsTag);
   assert(result);
   asSymbol(result) = strdup(aSymbol);
+  if (isALookupSymbol) {
+    result->flags |= LOOKUP_SYMBOL_FLAG;
+  }
   return result;
 }
 \stopCCode
@@ -94,7 +102,18 @@ JObj* newSymbolImpl(
       TRUE :                      \
       FALSE                       \
   )
-\stopCHeader
+
+#define isLookupSymbol(aLoL)                  \
+  (                                           \
+    (                                         \
+      (aLoL) &&                               \
+      asType(aLoL) &&                         \
+      (asTag(aLoL) == SymbolsTag)             \
+      isFlagSet(aLoL, LOOKUP_SYMBOL_FLAG) &&  \
+    ) ?                                       \
+      TRUE :                                  \
+      FALSE                                   \
+  )\stopCHeader
 
 \startCHeader
 typedef Boolean (SymbolIs)(
@@ -230,6 +249,20 @@ Boolean printSymbolCoAlg(
   assert(aLoL);
   assert(asTag(aLoL) == SymbolsTag);
 
+  if (isFlagSet(aLoL, LOOKUP_SYMBOL_FLAG)) {
+    ContextObj  *aCtx    = aStrBuf->theCtx;
+    assert(aCtx);
+    DictObj     *theDict = aCtx->dict;
+    assert(theDict);
+    DictNodeObj *assoc   =
+      getSymbolEntry(theDict, asSymbol(aLoL));
+  
+    if (assoc && assoc->value) {
+      printLoLTTL(aStrBuf, assoc->value, timeToLive-1);
+      return TRUE;
+    }
+  }
+  
   strBufPrintf(aStrBuf, "%s ", asSymbol(aLoL));
   return TRUE;
 }
