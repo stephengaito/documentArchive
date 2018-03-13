@@ -3,107 +3,6 @@
 \section[title=Words]
 \setJoylolTracingOff\setJoylolVerboseOff
 
-
-\startJoylolCode
-( 
-  "running ALL TESTS"
-  writeOutNL
-  interpret
-  "finished ALL TESTS"
-  writeOutNL
-)
-globals
-runAllTests
-define
-
-(
-  "defined tests setup"
-  writeOutNL
-  pop1D
-)
-globals
-defineTestsSetup
-define
-
-(
-  "defined tests teardown"
-  writeOutNL
-  pop1D
-)
-globals
-defineTestsTeardown
-define
-
-(
-  "running test suite"
-  writeOutNL
-  interpret
-)
-globals
-runTestSuite
-define
-
-(
-  (
-    newLine
-    "-------------------------------------"
-    newLine
-    "jTS:"
-  )
-  prepend
-  100
-  swap12D
-  printLoL
-  writeOutNL
-)
-globals
-recordTestSuiteDetails
-define
-
-(
-  "defined test suite setup"
-  writeOutNL
-  pop1D
-)
-globals
-defineTestSuiteSetup
-define
-
-(
-  "defined test suite teardown"
-  writeOutNL
-  pop1D
-)
-globals
-defineTestSuiteTeardown
-define
-
-(
-  "running test case"
-  writeOutNL
-  interpret
-)
-globals
-runTestCase
-define
-
-(
-  "  jTC:"
-  prepend
-  100
-  swap12D
-  printLoL
-  writeOutNL
-)
-globals
-recordTestCaseDetails
-define
-
-;; a comment
-
-\stopJoylolCode
-
-\starttyping
 \startTestSuite[tests and assert naming scopes]
 
 We start by defining a naming scope to contain all of the Joylol test 
@@ -131,6 +30,327 @@ defineNaming ;; make the definition
 \stopJoylolCode
 \stopTestSuite
 
+\startTestSuite[running all tests]
+
+The following figure is a summary of the word/switch pattern of 
+\type{runAllTests} word: 
+
+\externalfigure[runJoylolTestAll.pdf][width=10cm]
+
+\startJoylolCode
+(                     ;; start of the runAllTests word
+  "running ALL TESTS" ;;
+  writeOutNL          ;; announce our presence
+\stopJoylolCode
+
+We start by localizing the running context's naming scope and then 
+defining the testsRunnerNS and testsMonitorNS naming scopes in the 
+localized naming scope. 
+
+\startJoylolCode
+  ;; localize the naming scope of the current context
+  allTestsLocals  ;; name of the localized naming scope
+  localizeNaming  ;; localize the naming scope
+\stopJoylolCode
+
+\startJoylolCode
+  ;; create the testsRunnerNS
+  thisNaming    ;; define the parent's naming scope
+  thisNaming    ;; define in the localized naming scope
+  testsRunnerNS ;; name of the new naming scope
+  defineNaming  ;; create the new naming scope
+                ;; to be used as the testsRunner's naming scope
+\stopJoylolCode
+
+\startJoylolCode
+  ;; create the testsMonitorNS
+  thisNaming    ;; define the parent's naming scope
+  thisNaming    ;; define in the localized naming scope
+  testsMonitorNS;; name of the new naming scope
+  defineNaming  ;; create the new naming scope
+                ;; to be used as the testsMonitor's naming scope
+\stopJoylolCode
+
+We now want to define default tests setup and teardown words in the 
+testsRunnerNS. 
+
+\startJoylolCode
+  ()            ;; empty default setup actions
+  testsRunnerNS ;; define in the testRunnerNS
+  testsSetup    ;; name of the new word
+  define        ;; define the testsSetup word
+\stopJoylolCode
+
+\startJoylolCode
+  ()            ;; empty default teardown actions
+  testsRunnerNS ;; define in the testRunnerNS
+  testsTeardown ;; name of the new word
+  define        ;; define the testsTeardown word
+\stopJoylolCode
+
+We now create the testsRunner context.
+
+\startJoylolCode
+  ;; define the testsRunner context
+                ;; testsRunner process (uses provided list of words)
+  ()            ;; testsRunner data
+  testsRunnerNS ;; naming scope of the new context
+  thisNaming    ;; defined in the localized naming scope
+  testsRunner   ;; name of the new context
+  defineContext ;; define the new context
+\stopJoylolCode
+
+We now create the testsMonitor context.
+
+\startJoylolCode
+  ;; define the testsMonitor context
+  ( interpret )   ;; begin the testsMonitor process stack
+  thisContext     ;; interpret thisContext onto data stack
+  append          ;; append the result
+  ( switchCtx )   ;;
+  append          ;; append the word switchCtx to the
+                  ;; testsMonitor's initial process stack
+  
+  (
+    0             ;; number of attempted suites
+    0             ;; number of failed suites
+    ()            ;; list of failure reports
+  )               ;; testsMonitor data
+  
+  testsMonitorNS  ;; naming scope of the new context
+  thisNaming      ;; defining naming scope
+  testsMonitor    ;; defined name of the new context
+  defineContext   ;; define the context
+\stopJoylolCode
+
+Finally we want to switch to the testsRunner context, however, we also 
+want to specify what actions to take when the testsMonitor context 
+switches context back to this context. We do this by placing our context 
+switch to testsRunner and any subsequent actions into a list and then we 
+interpret this list. 
+
+\startJoylolCode
+  ;; switch to the testsRunner context and run all of the tests
+  (
+    ;; switch to the testsRunner context
+    testsRunner ;; place the testsRunner context on the stack
+    switchCtx   ;; switch to the testsRunner context
+    
+    ;; when we are re-activated
+    "finished ALL TESTS"  ;;
+    writeOutNL            ;; say we are done
+  )
+  interpret     ;; place this list of actions onto
+                ;; our process stack and do them
+)
+tests
+runAllTests
+define
+\stopJoylolCode
+
+We now define the \type{defineTestsSetup} and \type{defineTestsTeardown} 
+words. While defined in the tests naming scope, they will be run in the 
+testsRunner and its associated testsRunnerNS. 
+
+\startJoylolCode
+(
+  "defined tests setup"
+  writeOutNL  ;; tell everyone we have been run
+  
+              ;; we use the provided definition
+  thisNaming  ;; defining naming scope
+  setupTests  ;; name of the new word
+  define
+)
+tests
+defineTestsSetup
+define
+\stopJoylolCode
+
+\startJoylolCode
+(
+  "defined tests teardown"
+  writeOutNL    ;; tell everyone we have been run
+  
+                ;; we use the provided definition
+  thisNaming    ;; defining naming scope
+  teardownTests ;; name of the new word
+  define
+)
+tests
+defineTestsTeardown
+define
+\stopJoylolCode
+
+\stopTestSuite
+
+
+\startTestSuite[running a test suite]
+
+The following figure is a summary of the word/switch pattern of 
+\type{runTestSuite} word: 
+
+\externalfigure[runJoylolTestSuite.pdf][width=10cm]
+
+\startJoylolCode
+(                       ;; start of the runTestSuite word
+  "running test suite"  ;;
+  writeOutNL            ;; announce our presence
+\stopJoylolCode
+
+We are running in the testsRunner context so we already have a 
+\quote{localized} naming scope. So for the \type{runTestSuite} word we 
+only need to create the suiteRunnerNS and suiteMonitorNS naming scopes. 
+
+\startJoylolCode
+  ;; create the suiteRunnerNS
+  thisNaming    ;; define the parent's naming scope
+  thisNaming    ;; define in the localized naming scope
+  suiteRunnerNS ;; name of the new naming scope
+  defineNaming  ;; create the new naming scope
+                ;; to be used as the suiteRunner's naming scope
+\stopJoylolCode
+
+\startJoylolCode
+  ;; create the suiteMonitorNS
+  thisNaming      ;; define the parent's naming scope
+  thisNaming      ;; define in the localized naming scope
+  suiteMonitorNS  ;; name of the new naming scope
+  defineNaming    ;; create the new naming scope
+                  ;; to be used as the suiteMonitor's naming scope
+\stopJoylolCode
+
+We now want to define the default suite setup and teardown words in the 
+suiteRunnerNS. 
+
+\startJoylolCode
+  ()            ;; empty default setup actions
+  suiteRunnerNS ;; define in the suiteRunnerNS
+  suiteSetup    ;; name of the new word
+  define        ;; define the suiteSetup word
+\stopJoylolCode
+
+\startJoylolCode
+  ()            ;; empty default teardown actions
+  suiteRunnerNS ;; define in the suiteRunnerNS
+  suiteTeardown ;; name of the new word
+  define        ;; define the suiteTeardown word
+\stopJoylolCode
+
+We now create the suiteRunner context.
+
+\startJoylolCode
+  ;; define the suiteRunner context
+                ;; suiteRunner process (uses provided list of words)
+  ()            ;; suiteRunner data
+  suiteRunnerNS ;; naming scope of the new context
+  thisNaming    ;; defined in the localized naming scope
+  suiteRunner   ;; name of the new context
+  defineContext ;; define the new context
+\stopJoylolCode
+
+We now create the suiteMonitor context.
+
+\startJoylolCode
+  ;; define the suiteMonitor context
+  ( interpret )   ;; begin the suiteMonitor process stack
+  thisContext     ;; interpret thisContext onto data stack
+  append          ;; append the result
+  ( switchCtx )   ;;
+  append          ;; append the word switchCtx to the 
+                  ;; suiteMonitor's initial process stack
+  
+  (
+    0             ;; number of attempted cases
+    0             ;; number of failed cases
+    ()            ;; list of failure reports
+  )               ;; suiteMonitor data
+  
+  suiteMonitorNS  ;; naming scope of the new context
+  thisNaming      ;; defining naming scope
+  suiteMonitor    ;; name of the new context
+  defineContext   ;; define the context
+\stopJoylolCode
+
+Finally we want to switch to the suiteRunner context, however, again, we 
+also want to specify what actions to take when the suiteMonitor context 
+switches back to this context. We do this by placing our context switch to 
+suiteRunner and any subsequent actions into a list and then we interpret 
+this list. 
+
+\startJoylolCode
+  ;; switch to the suiteRunner context and run the suite
+  (
+    ;; switch to the suiteRunner context
+    suiteRunner ;; place the suiteRunner context on the stack
+    switchCtx   ;; switch to the suiteRunner context
+    
+    ;; when we are re-activated
+    ;; ... HOW DO WE SWITCH BACK???!!
+  )
+  interpret
+)
+tests
+runTestSuite
+define
+\stopJoylolCode
+
+We now define the \type{recordTestSutieDetails}, 
+\type{defineTestSuiteSetup}, and \type{defineTestSuiteTeardown} words. 
+
+\startJoylolCode
+(
+  (
+    newLine
+    "-------------------------------------"
+    newLine
+    "jTS:"
+  )           ;; format a sign that we are running
+              ;; the test suite
+  prepend     ;; prepend this sign to the name of the suite
+  100         ;; limit the printLoL
+  swap12D     ;; put the lol and the depth limit 
+              ;; in the correct order
+  printLoL    ;; print it to a string
+  writeOutNL  ;; write out the string
+)
+tests
+recordTestSuiteDetails
+define
+\stopJoylolCode
+
+\startJoylolCode
+(
+  "defined test suite setup"
+  writeOutNL  ;; tell everyone we have been run
+
+              ;; we use the provided definition
+  thisNaming  ;; defining naming scope
+  setupSuite  ;; name of the new word
+  define
+)
+tests
+defineTestSuiteSetup
+define
+\stopJoylolCode
+
+\startJoylolCode
+(
+  "defined test suite teardown"
+  writeOutNL    ;; tell everyone we have been run
+
+                ;; we use the provided definition
+  thisNaming    ;; defining naming scope
+  teardownSuite ;; name of the new word
+  define
+)
+tests
+defineTestSuiteTeardown
+define
+\stopJoylolCode
+
+\stopTestSuite
+
 \startTestSuite[runTestCase]
 
 Our next task, over the next following code fragments, is to define the 
@@ -149,32 +369,26 @@ The following figure is a summary of the word/switch pattern of
 (               ;; start of the runTestCase word
 \stopJoylolCode
 
-We start by localizing the running context's naming scope and then 
-defining the testRunnerNS and testMonitorNS naming scopes in the localized 
-naming scope. 
+We are running in the suiteRunner context so we already have a 
+\quote{localized} naming scope. So for the \type{runTestCase} word we only 
+need to create the testRunnerNS and testMonitorNS naming scopes. 
 
 \startJoylolCode
-  ;; localize the naming scope of the current context
-  locals
-  localizeNaming
-\stopJoylolCode
-
-\startJoylolCode
-  ;; create the testRunnerNS
-  globals      ;; parent naming scope
+  ;; create the caseRunnerNS
+  thisNaming   ;; parent naming scope
   thisNaming   ;; define in localized naming scope
-  testRunnerNS ;; name of the new naming scope
+  caseRunnerNS ;; name of the new naming scope
   defineNaming ;; create a new naming scope
-               ;; to be used as the testRunner's naming scope
+               ;; to be used as the caseRunner's naming scope
 \stopJoylolCode
 
 \startJoylolCode
-  ;; create the testMonitorNS
-  globals       ;; parent naming scope
+  ;; create the caseMonitorNS
+  thisNaming    ;; parent naming scope
   thisNaming    ;; define in the localized naming scope
-  testMonitorNS ;; name of the new naming scope
+  caseMonitorNS ;; name of the new naming scope
   defineNaming  ;; create a new naming scope
-                ;; to be used as the testMonitor's naming scope
+                ;; to be used as the caseMonitor's naming scope
 \stopJoylolCode
 
 At this point the test case's list of words and assertions are back on the 
@@ -184,17 +398,16 @@ context, and then setup the new context's naming scope, the defining
 naming scope and finally the name of the new context.
 
 \startJoylolCode
-  ;; define the testRunner context
-                ;; testRunner process (uses provided list of words)
-  ( 
-  )             ;; testRunner data
-  testRunnerNS  ;; the naming scope of the new context
+  ;; define the caseRunner context
+                ;; caseRunner process (uses provided list of words)
+  ()            ;; caseRunner data
+  caseRunnerNS  ;; the naming scope of the new context
   thisNaming    ;; define in the localized naming scope
-  testRunner    ;; name of the new context
+  caseRunner    ;; name of the new context
   defineContext ;; create and define the context
 \stopJoylolCode
 
-Now we create a testMonitor context which will keep track of the test 
+Now we create a caseMonitor context which will keep track of the test 
 results. The testMonitor's initial process stack should contain the three 
 words, \type{interpret}, the current context, and \type{switchCtx} in this 
 order. When an assertion switches from the testRunner's context to the 
@@ -215,38 +428,56 @@ context, we have to \type{append} the result of interpreting the
 word directly on the testMonitor's process stack. Once the 
 
 \startJoylolCode
-  ;; define the testMonitor context
-  ( interpret ) ;; begin the testMonitor process stack
+  ;; define the caseMonitor context
+  ( interpret ) ;; begin the caseMonitor process stack
   thisContext   ;; interpret thisContext 
   append        ;; append the result of interpreting thisContext
   ( switchCtx ) ;; 
   append        ;; append the word switch to the
-                ;; testMonitor's initial process stack
+                ;; caseMonitor's initial process stack
   
   ( 
-    0           ;; number of attempted tests
-    0           ;; number of failed tests
+    0           ;; number of attempted assertions
+    0           ;; number of failed assertions
     ()          ;; list of failure reports
-  )             ;; testMonitor data
+  )             ;; caseMonitor data
 
-  testMonitorNS ;; the naming scope of the new context
+  caseMonitorNS ;; the naming scope of the new context
   thisNaming    ;; defining naming scope
-  testMonitor   ;; defined name of this new context
+  caseMonitor   ;; defined name of this new context
   defineContext ;; create and define the context
 \stopJoylolCode
 
 Finally we switch to the testRunner context.
 
 \startJoylolCode
-  ;; switch to the testRunner context and run the tests
-  testRunner ;; place the testRunner context on the stack
-  switchCtx  ;; switch to the testRunner context
+  ;; switch to the caseRunner context and run the assertions
+  caseRunner ;; place the caseRunner context on the stack
+  switchCtx  ;; switch to the caseRunner context
   
 )            ;; end of the runTestCase definition
 
 tests        ;; define the new word in this naming scope
 runTestCase  ;; the name of the new word
 define       ;; define the new runTestCase word
+\stopJoylolCode
+
+We now define the \type{recordTestCaseDetails} word.
+
+\startJoylolCode
+(
+  "  jTC:"    ;; format a sign that we are running
+              ;; the test case
+  prepend     ;; prepend this sign to the name of the case
+  100         ;; limit the printLoL
+  swap12D     ;; put the lol and the depth limit
+              ;; in the correct order
+  printLoL    ;; print it to string
+  writeOutNL  ;; write out the string
+)
+tests
+recordTestCaseDetails
+define
 \stopJoylolCode
 \stopTestSuite
 
@@ -335,9 +566,7 @@ recordAssertion
 define
 \stopJoylolCode
 \stopTestSuite
-\stoptyping
 
-\starttyping
 \startTestSuite[start/stop joylol test suite]
 
 \startJoylolCode
@@ -353,18 +582,14 @@ define
 \stopJoylolCode
 
 \stopTestSuite
-\stoptyping
 
-\starttyping
 \startTestSuite[start/stop/skip/run a joylol test case]
 
 
 \stopTestSuite
-\stoptyping
 
 \startTestSuite[assertShouldFail]
 
-\starttyping
 \startJoylolCode
 
 (
@@ -382,11 +607,9 @@ doSomeThing
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite
-\stoptyping
 
 \startTestSuite[assertFail]
 
-\starttyping
 \startJoylolCode
 (
   fail
@@ -396,7 +619,6 @@ assert
 fail
 define
 \stopJoylolCode
-\stoptyping
 
 \startTestCase[assertFail should fail]
 \startJoylolTest
@@ -406,7 +628,6 @@ define
 \stopTestSuite
 
 \startTestSuite[assertSucceed]
-\starttyping
 \startJoylolCode
 (
   succeed
@@ -416,7 +637,6 @@ assert
 succeed
 define
 \stopJoylolCode
-\stoptyping
 
 \startTestCase[assert.succeed should succeed]
 \startJoylolTest
@@ -426,7 +646,6 @@ define
 \stopTestSuite
 
 \startTestSuite[assert.isBoolean]
-\starttyping
 \startJoylolCode
 (
   isBoolean
@@ -436,7 +655,6 @@ assert
 isBoolean
 define
 \stopJoylolCode
-\stoptyping
 
 \startTestCase[should succeed if an object is a boolean ]
 \startJoylolTest

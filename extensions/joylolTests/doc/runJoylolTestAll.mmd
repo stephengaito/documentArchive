@@ -1,37 +1,43 @@
 sequenceDiagram
   participant m as joylol-main (globals)
+  participant tr as testsRunner  (testsRunner  tests globals)
   participant tm as testsMonitor (testsMonitor tests globals)
 
   %% specify context switches
   activate m
   m  ->> m : runTestSuite
+  m  ->> m : defineNaming (testsRunner)
   m  ->> m : defineNaming (testsMonitor)
+  m  -X tr : defineContext (testsRunner)
   m  -X tm : defineContext (testsMonitor)
+  m  ->> tr : switchCtx
+  deactivate m
+  activate tr
   loop assertions
-    m ->> m  : startTestSuite
-    m ->> m  : runTestSuite
-    m ->> tm : reportSuiteResults
-    deactivate m
+    tr ->> tr : startTestSuite
+    tr ->> tr : runTestSuite
+    tr ->> tm : reportSuiteResults
+    deactivate tr
     activate tm
     tm ->> tm : recordSuiteResults
-    tm ->> m  : switchCtx
+    tm ->> tr  : switchCtx
     deactivate tm
-    activate m
-    m ->> m : stopTestSuite
-    note over m,tm :     ...
-    m ->> m  : startTestSuite
-    m ->> m  : runTestSuite
-    m ->> tm : reportSuiteResults
-    deactivate m
+    activate tr
+    tr ->> tr : stopTestSuite
+    note over tr,tm :     ...
+    tr ->> tr : startTestSuite
+    tr ->> tr : runTestSuite
+    tr ->> tm : reportSuiteResults
+    deactivate tr
     activate tm
     tm ->> tm : recordCaseResults
-    tm ->> m  : switchCtx
+    tm ->> tr  : switchCtx
     deactivate tm
-    activate m
-    m ->> m : stopTestSuite
+    activate tr
+    tr ->> tr : stopTestSuite
   end
-  m ->> tm : results
-  deactivate m
+  tr ->> tm : results
+  deactivate tr
   activate tm
   tm ->> m : results
   deactivate tm
