@@ -291,6 +291,30 @@ static void whatIsThisPAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\startCCode
+static void exitJoylolAP(ContextObj *aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataInto(aCtx, top);
+  double resultDbl  = asNaturalDbl(jInterp, top);
+  int    resultCode = (int)resultDbl;
+  
+  if (jInterp->verbose) {
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(
+      aStrBuf,
+      "exiting joylol with code: %d\n",
+      resultCode
+    );
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  exit(resultCode);
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern void initContextsAPSupport(JoyLoLInterp *jInterp);
@@ -321,5 +345,6 @@ void initContextsAPSupport(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "checkingOff",         checkingOffAP);
   extendJoyLoLInRoot(jInterp, "whatIsThisD",         whatIsThisDAP);
   extendJoyLoLInRoot(jInterp, "whatIsThisP",         whatIsThisPAP);
+  extendJoyLoLInRoot(jInterp, "exitJoylol",          exitJoylolAP);
 }
 \stopCCode
