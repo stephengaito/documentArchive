@@ -229,6 +229,7 @@ typedef struct contexts_class_struct {
   NewContext      *newContextFunc;
   ClearCtx        *clearCtxDataFunc;
   PushCtx         *pushCtxDataFunc; 
+  PushCtx         *pushOnTopCtxDataFunc; 
   PushNullCtx     *pushNullCtxDataFunc;
   PushBooleanCtx  *pushBooleanCtxDataFunc;
   PushNaturalCtx  *pushNaturalCtxDataFunc;
@@ -260,7 +261,6 @@ typedef struct contexts_class_struct {
   DefineJoyLoL    *defineJoyLoLFunc;
   DefineContext   *defineContextFunc;
   DefineNaming    *defineNamingFunc;
-  RaiseException  *raiseExceptionFunc;
   ReportException
     *reportExceptionFunc;
   EvalCommandInContext
@@ -328,6 +328,7 @@ Boolean registerContexts(
   
   theCoAlg->clearCtxDataFunc       = clearCtxDataImpl;
   theCoAlg->pushCtxDataFunc        = pushCtxDataImpl;
+  theCoAlg->pushOnTopCtxDataFunc   = pushOnTopCtxDataImpl;
   theCoAlg->pushNullCtxDataFunc    = pushNullCtxDataImpl;
   theCoAlg->pushBooleanCtxDataFunc = pushBooleanCtxDataImpl;
   theCoAlg->pushNaturalCtxDataFunc = pushNaturalCtxDataImpl;
@@ -366,7 +367,6 @@ Boolean registerContexts(
   theCoAlg->defineContextFunc      = defineContextImpl;
   theCoAlg->defineNamingFunc       = defineNamingImpl;
 
-  theCoAlg->raiseExceptionFunc     = raiseExceptionImpl;
   theCoAlg->reportExceptionFunc    = reportExceptionImpl;
   
   theCoAlg->evalCommandInContextFunc =

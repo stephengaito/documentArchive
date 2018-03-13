@@ -9,13 +9,13 @@ static void lookupAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, aDict);
 
   if (!isSymbol(name2lookup)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "lookup requires a symbol as top");
     return;
   }
 
   if (!isDict(aDict)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "lookup requires a dictionary as second");
     return;
   }

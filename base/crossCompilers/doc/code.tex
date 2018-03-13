@@ -219,7 +219,7 @@ static void addFragmentAP(ContextObj* aCtx) {
 
   popCtxDataInto(aCtx, ccTypeLoL);
   if (!isSymbol(ccTypeLoL)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "addFragment expected a symbol as ccType");
     return;
   }
@@ -227,7 +227,7 @@ static void addFragmentAP(ContextObj* aCtx) {
   
   popCtxDataInto(aCtx, wordNameLoL);
   if (!isSymbol(wordNameLoL)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "addFragment expected a symbol as wordName");
     return;
   }
@@ -235,7 +235,7 @@ static void addFragmentAP(ContextObj* aCtx) {
   
   popCtxDataInto(aCtx, fragmentBodyLoL);
   if (!isSymbol(fragmentBodyLoL)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "addFragment expected a symbol as fragmentBody");
     return;
   }

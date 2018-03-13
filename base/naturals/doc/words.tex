@@ -10,7 +10,7 @@ static void addAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
   if (!isNatural(top1) || !isNatural(top2)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "addition requires that the top two stack elements are naturals"
     );
     return;
@@ -58,7 +58,7 @@ static void subtractAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
   if (!isNatural(top1) || !isNatural(top2)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "subtraction requires that the top two stack elements are naturals"
     );
     return;
@@ -113,7 +113,7 @@ static void subtractReverseAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
   if (!isNatural(top1) || !isNatural(top2)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "(reverse) subtraction requires that the top two stack elements are naturals"
     );
     return;
@@ -163,7 +163,7 @@ static void multiplyAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
   if (!isNatural(top1) || !isNatural(top2)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "multiplication requires that the top two stack elements are naturals"
     );
     return;

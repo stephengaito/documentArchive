@@ -136,7 +136,7 @@ static void definitionsInAP(ContextObj* aCtx) {
   JoyLoLInterp *jInterp = aCtx->jInterp;
   popCtxDataIntoImpl(aCtx, namingScope);
   if (!isDictionary(namingScope)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "definitionsIn requires a dictionary as top");
     return;
   }
@@ -184,7 +184,7 @@ static void loadExtensionAP(ContextObj* aCtx) {
   assert(loader);
   popCtxDataIntoImpl(aCtx, top);
   if (!isSymbol(top)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "loadExtension requires a symbol as top");
     return;
   }
@@ -201,7 +201,7 @@ static void loadPathAP(ContextObj* aCtx) {
   assert(loader);
   popCtxDataIntoImpl(aCtx, top);
   if (!isSymbol(top)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "loadPath requires a symbol as top");
     return;
   }
@@ -217,7 +217,7 @@ static void loadFileAP(ContextObj* aCtx) {
   assert(aCtx);
   popCtxDataIntoImpl(aCtx, top);
   if (!isSymbol(top)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "loadFile requires a symbol as top");
     return;
   }

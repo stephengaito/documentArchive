@@ -12,7 +12,7 @@ static void printLoLAP(ContextObj* aCtx) {
   popCtxDataInto(aCtx, depth);
   
   if (!isNatural(depth)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "printLoL expected a natural as depth");
     return;
   }

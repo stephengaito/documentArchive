@@ -43,11 +43,11 @@ pushDataFalse(aCtx);
 \startCCode
 
 if (!aCFunc) then
-  raiseException(aCtx, "no atom (CFunction)");
+  raiseExceptionMsg(aCtx, "no atom (CFunction)");
 if (aCFunc->super.isA != CFUNCTIONS_COALG) then
-  raiseException(aCtx, "not a CFunction");
+  raiseExceptionMsg(aCtx, "not a CFunction");
 if (!aCFunc->theFunction) then
-  raiseException(aCtx, "no CFunction found");
+  raiseExceptionMsg(aCtx, "no CFunction found");
 
 (aCFunc->theFunction)(aCtx);
 

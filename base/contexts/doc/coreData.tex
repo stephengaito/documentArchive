@@ -67,7 +67,7 @@ void clearCtxDataImpl(
 \startCHeader
 typedef void (PushCtx)(
   ContextObj *aCtx,
-  JObj   *lolToPush
+  JObj       *lolToPush
 );
 
 #define pushCtxData(aCtx, lolToPush)        \
@@ -78,25 +78,49 @@ typedef void (PushCtx)(
     (getContextsClass(aCtx->jInterp)        \
       ->pushCtxDataFunc(aCtx, lolToPush))   \
   )
+
+#define pushOnTopCtxData(aCtx, lolToPush)       \
+  (                                             \
+    assert(aCtx),                               \
+    assert(getContextsClass(aCtx->jInterp)      \
+      ->pushOnTopCtxDataFunc),                  \
+    (getContextsClass(aCtx->jInterp)            \
+      ->pushOnTopCtxDataFunc(aCtx, lolToPush))  \
+  )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
 extern void pushCtxDataImpl(
-  ContextObj* aCtx,
-  JObj* lolToPush
+  ContextObj *aCtx,
+  JObj       *lolToPush
+);
+
+extern void pushOnTopCtxDataImpl(
+  ContextObj *aCtx,
+  JObj       *lolToPush
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 void pushCtxDataImpl(
-  ContextObj* aCtx,
-  JObj* lolToPush
+  ContextObj *aCtx,
+  JObj       *lolToPush
 ) {
   if (!aCtx) return;
   assert(aCtx->jInterp);
   aCtx->data = newPair(aCtx->jInterp, lolToPush, aCtx->data);
+}
+
+void pushOnTopCtxDataImpl(
+  ContextObj *aCtx,
+  JObj       *lolToPush
+) {
+  if (!aCtx) return;
+  assert(aCtx->jInterp);
+  asCar(aCtx->data) =
+    newPair(aCtx->jInterp, lolToPush, asCar(aCtx->data));
 }
 \stopCCode
 

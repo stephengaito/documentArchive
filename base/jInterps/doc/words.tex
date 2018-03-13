@@ -15,7 +15,7 @@ static void doWrite(
   
   popCtxDataInto(aCtx, aString);
   if (!isSymbol(aString)) {
-    raiseException(aCtx,
+    raiseExceptionMsg(aCtx,
       "write expected a symbol as aString");
     return;
   }
