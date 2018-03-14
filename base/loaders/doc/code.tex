@@ -107,7 +107,7 @@ void pushLoadPathImpl(
   loader->paths =
     newPair(
       loader->jInterp,
-      newSymbol(loader->jInterp, aLoadPath),
+      newSymbol(loader->jInterp, aLoadPath, "loadPath", 0),
       loader->paths
     );
 }
@@ -186,7 +186,7 @@ void pushLoadExtensionImpl(
   loader->extensions =
     newPair(
       loader->jInterp, 
-      newSymbol(loader->jInterp, aLoadExtension),
+      newSymbol(loader->jInterp, aLoadExtension, "loadExtension", 0),
       loader->extensions
     );
 }
@@ -258,7 +258,7 @@ Boolean loadAJoyLoLFile(
       strBufClose(aStrBuf);
     }
     TextObj* aText =
-      createTextFromInputFile(jInterp, inputFile);
+      createTextFromInputFile(jInterp, inputFile, filePath);
     evalTextInContext(aCtx, aText);
     freeText(aText);
     fclose(inputFile);

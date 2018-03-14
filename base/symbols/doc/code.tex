@@ -10,11 +10,15 @@
 typedef struct symbol_object_struct {
   JObj super;
   Symbol *sym;
+  Symbol *file;
+  size_t  line;
 } SymbolObj;
 
 #define LOOKUP_SYMBOL_FLAG 0x8L
 
 #define asSymbol(aObj) (((SymbolObj*)(aObj))->sym)
+#define asFile(aObj)   (((SymbolObj*)(aObj))->file)
+#define asLine(aObj)   (((SymbolObj*)(aObj))->line)
 \stopCHeader
 
 \startTestSuite[newString]
@@ -27,15 +31,17 @@ typedef struct symbol_object_struct {
 typedef JObj *(NewSymbol)(
   JoyLoLInterp *jInterp,
   Symbol       *theSymbol,
+  Symbol       *fileName,
+  size_t        line,
   Boolean       isALookupSymbol
 );
 
-#define newSymbol(jInterp, aSymbol)             \
-  (                                             \
-    assert(getSymbolsClass(jInterp)             \
-      ->newSymbolFunc),                         \
-    (getSymbolsClass(jInterp)                   \
-      ->newSymbolFunc(jInterp, aSymbol, FALSE)) \
+#define newSymbol(jInterp, aSymbol, fileName, line)             \
+  (                                                             \
+    assert(getSymbolsClass(jInterp)                             \
+      ->newSymbolFunc),                                         \
+    (getSymbolsClass(jInterp)                                   \
+      ->newSymbolFunc(jInterp, aSymbol, fileName, line, FALSE)) \
   )
 \stopCHeader
 
@@ -44,6 +50,8 @@ typedef JObj *(NewSymbol)(
 extern JObj *newSymbolImpl(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol,
+  Symbol       *fileName,
+  size_t        line,
   Boolean       isALookupSymbol
 );
 \stopCHeader
@@ -53,14 +61,18 @@ extern JObj *newSymbolImpl(
 JObj* newSymbolImpl(
   JoyLoLInterp *jInterp,
   Symbol       *aSymbol,
+  Symbol       *fileName,
+  size_t        line,
   Boolean       isALookupSymbol
 ) {
   assert(aSymbol);
   assert(jInterp);
-  
+  if (!fileName) fileName = "unknown(symbol)";
   JObj* result = newObject(jInterp, SymbolsTag);
   assert(result);
   asSymbol(result) = strdup(aSymbol);
+  asFile(result)   = strdup(fileName);
+  asLine(result)   = line;
   if (isALookupSymbol) {
     result->flags |= LOOKUP_SYMBOL_FLAG;
   }
@@ -75,16 +87,23 @@ JObj* newSymbolImpl(
   AssertPtrNotNull(jInterp->coAlgs);
 
   const char* testStr = "test string";
-  JObj* aNewSymbol = newSymbol(jInterp, testStr);
+  JObj* aNewSymbol = newSymbol(jInterp, testStr, "testStr", 11);
   AssertPtrNotNull(aNewSymbol);
   AssertPtrNotNull(asType(aNewSymbol));
   AssertIntEquals(asTag(aNewSymbol), SymbolsTag);
   AssertPtrNotNull(asSymbol(aNewSymbol));
   AssertPtrNotEquals(asSymbol(aNewSymbol), testStr);
   AssertIntEquals(strcmp(asSymbol(aNewSymbol), testStr), 0);
+  AssertStrEquals(asFile(aNewSymbol), "testStr");
+  AssertIntEquals(asLine(aNewSymbol), 11);
   AssertIntTrue(isSymbol(aNewSymbol));
   AssertIntTrue(isAtom(aNewSymbol));
   AssertIntFalse(isPair(aNewSymbol));
+  
+  aNewSymbol = newSymbol(jInterp, testStr, NULL, 0);
+  AssertPtrNotNull(aNewSymbol);
+  AssertStrEquals(asFile(aNewSymbol), "unknown(symbol)");
+  
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -155,7 +174,7 @@ Boolean symbolIsImpl(
 \startTestCase[should return true if a symbol]
 
 \startCTest
-  JObj *aSym = newSymbol(jInterp, "this is a test");
+  JObj *aSym = newSymbol(jInterp, "this is a test", NULL, 0);
   AssertIntTrue(isSymbol(aSym));
   AssertIntTrue(symbolIs(jInterp, aSym, "this is a test"));
 \stopCTest
@@ -168,7 +187,7 @@ Boolean symbolIsImpl(
   JObj *aObj = newObject(jInterp, BooleansTag);
   AssertIntFalse(isSymbol(aObj));
   AssertIntFalse(symbolIs(jInterp, aObj, "this is NOT a test"));
-  JObj *aSym = newSymbol(jInterp, "this is a test");
+  JObj *aSym = newSymbol(jInterp, "this is a test", NULL, 0);
   AssertIntFalse(symbolIs(jInterp, aSym, "this is NOT a test"));
 \stopCTest
 \stopTestCase
@@ -209,8 +228,8 @@ Boolean symbolsEqual(
 
 \startCTest
   AssertIntTrue(symbolsEqual(jInterp, NULL, NULL, 10));
-  JObj *symA = newSymbol(jInterp, "the same text");
-  JObj *symB = newSymbol(jInterp, "the same text");
+  JObj *symA = newSymbol(jInterp, "the same text", NULL, 0);
+  JObj *symB = newSymbol(jInterp, "the same text", NULL, 0);
   AssertIntTrue(symbolsEqual(jInterp, symA, symB, 10));
 \stopCTest
 \stopTestCase
@@ -218,8 +237,8 @@ Boolean symbolsEqual(
 \startTestCase[should return false if symbols are not equal]
 
 \startCTest
-  JObj *symA = newSymbol(jInterp, "text A");
-  JObj *symB = newSymbol(jInterp, "text B");
+  JObj *symA = newSymbol(jInterp, "text A", NULL, 0);
+  JObj *symB = newSymbol(jInterp, "text B", NULL, 0);
   AssertIntFalse(symbolsEqual(jInterp, NULL, symB, 10));
   AssertIntFalse(symbolsEqual(jInterp, symA, NULL, 10));
   AssertIntFalse(symbolsEqual(jInterp, symA, symB, 10));
@@ -274,7 +293,7 @@ Boolean printSymbolCoAlg(
   AssertPtrNotNull(jInterp);
   AssertPtrNotNull(jInterp->coAlgs[SymbolsTag]);
 
-  JObj* aNewSymbol = newSymbol(jInterp, "test string");
+  JObj* aNewSymbol = newSymbol(jInterp, "test string", NULL, 0);
   AssertPtrNotNull(aNewSymbol);
   
   StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);

@@ -199,16 +199,16 @@ void pushBooleanCtxDataImpl(
 \startCHeader
 typedef void (PushNaturalCtx)(
   ContextObj *aCtx,
-  Symbol     *anNaturalStr
+  size_t      anNatural
 );
 
-#define pushNaturalCtxData(aCtx, aNaturalStr)      \
-  (                                                \
-    assert(aCtx),                                  \
-    assert(getContextsClass(aCtx->jInterp)         \
-      ->pushNaturalCtxDataFunc),                   \
-    (getContextsClass(aCtx->jInterp)               \
-      ->pushNaturalCtxDataFunc(aCtx, aNaturalStr)) \
+#define pushNaturalCtxData(aCtx, aNatural)      \
+  (                                             \
+    assert(aCtx),                               \
+    assert(getContextsClass(aCtx->jInterp)      \
+      ->pushNaturalCtxDataFunc),                \
+    (getContextsClass(aCtx->jInterp)            \
+      ->pushNaturalCtxDataFunc(aCtx, aNatural)) \
   )
 \stopCHeader
 
@@ -216,7 +216,7 @@ typedef void (PushNaturalCtx)(
 \startCHeader
 extern void pushNaturalCtxDataImpl(
   ContextObj *aCtx,
-  Symbol     *aNaturalStr
+  size_t      aNatural
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -224,10 +224,14 @@ extern void pushNaturalCtxDataImpl(
 \startCCode
 void pushNaturalCtxDataImpl(
   ContextObj *aCtx,
-  Symbol     *aNaturalStr
+  size_t      aNatural
 ) {
   if (!aCtx) return;
   assert(aCtx->jInterp);
+
+  char aNaturalStr[100];
+  aNaturalStr[0] = 0;
+  snprintf(aNaturalStr, 90, "%zu", aNatural);
 
   JObj* aNaturalPA = newNatural(aCtx->jInterp, aNaturalStr);
   if (!aNaturalPA) return;
@@ -269,7 +273,13 @@ void pushSymbolCtxDataImpl(
   if (!aSymbol) return;
   assert(aCtx->jInterp);
 
-  JObj* aSymbolPA = getAsSymbol(aCtx->dict, aSymbol);
+  JObj* aSymbolPA = NULL;
+  if (strchr(aSymbol, '.')) {
+    aSymbolPA =
+      newSymbol(aCtx->jInterp, aSymbol, "pushSymbol", 0);
+  } else {
+    aSymbolPA = getAsSymbol(aCtx->dict, aSymbol, "pushSymbol", 0);
+  }
   if (!aSymbolPA) return;
   aCtx->data = newPair(aCtx->jInterp, aSymbolPA, aCtx->data);
 }

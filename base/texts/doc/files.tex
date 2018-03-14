@@ -44,7 +44,7 @@ void nextLineFromFile(TextObj* aText) {
   }
 
   aText->curLine    = linePtr;
-
+  aText->curLineNum++;
   aText->curChar    = aText->curLine;
   aText->lastChar   = aText->curChar + strlen(aText->curLine);
   DEBUG(aText->jInterp, "<-nextLineFromFile [%s]\n", aText->curLine);
@@ -54,34 +54,38 @@ void nextLineFromFile(TextObj* aText) {
 \startCHeader
 typedef TextObj *(CreateTextFromInputFile)(
   JoyLoLInterp *jInterp,
-  FILE         *anInputFile
+  FILE         *anInputFile,
+  Symbol       *aFileName
 );
 
-#define createTextFromInputFile(jInterp, aFile)       \
-  (                                                   \
-    assert(getTextsClass(jInterp)                     \
-      ->createTextFromInputFileFunc),                 \
-    (getTextsClass(jInterp)                           \
-      ->createTextFromInputFileFunc(jInterp, aFile))  \
+#define createTextFromInputFile(jInterp, aFile, aFileName)      \
+  (                                                             \
+    assert(getTextsClass(jInterp)                               \
+      ->createTextFromInputFileFunc),                           \
+    (getTextsClass(jInterp)                                     \
+      ->createTextFromInputFileFunc(jInterp, aFile, aFileName)) \
   )
 \stopCHeader
 
 \setCHeaderStream{private}
 \startCHeader
 extern TextObj* createTextFromInputFileImpl(
-  JoyLoLInterp* jInterp,
-  FILE *anInputFile
+  JoyLoLInterp *jInterp,
+  FILE         *anInputFile,
+  Symbol       *aFileName
 );
 \stopCHeader
 \setCHeaderStream{public}
 
 \startCCode
 TextObj* createTextFromInputFileImpl(
-  JoyLoLInterp* jInterp,
-  FILE *anInputFile
+  JoyLoLInterp *jInterp,
+  FILE         *anInputFile,
+  Symbol       *aFileName
 ) {
   assert(jInterp);
   assert(anInputFile);
+  if (!aFileName) aFileName = "unknown(file)";
   
   TextObj* aText = (TextObj*)newObject(jInterp, TextsTag);
   assert(aText);
@@ -101,6 +105,7 @@ TextObj* createTextFromInputFileImpl(
   aText->lastChar   = NULL;
   //
   aText->textLines  = NULL;
+  aText->fileName   = strdup(aFileName);
   aText->curLineNum = 0;
   //
   aText->newPrompt      = NULL;
@@ -117,7 +122,7 @@ TextObj* createTextFromInputFileImpl(
   FILE* inputFile = fopen("doc/testSomeLines.txt", "r");
   AssertPtrNotNull(inputFile);
   
-  TextObj* aText = createTextFromInputFile(jInterp, inputFile);
+  TextObj* aText = createTextFromInputFile(jInterp, inputFile, "testSomeLines.txt");
   AssertPtrNotNull(aText);
   AssertPtrNotNull(aText->inputFile);
   AssertPtrNull(aText->curLine);
@@ -176,7 +181,7 @@ TextObj* createTextFromInputFileImpl(
   FILE* inputFile = fopen("doc/testSomeLines.txt", "r");
   AssertPtrNotNull(inputFile);
   
-  TextObj* aText = createTextFromInputFile(jInterp, inputFile);
+  TextObj* aText = createTextFromInputFile(jInterp, inputFile, "testSomeLines.txt");
   AssertPtrNotNull(aText);
 
   nextSymbol(aText);

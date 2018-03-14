@@ -76,7 +76,8 @@ static void nextLineFromReadline(TextObj* aText) {
   aText->lastChar = NULL;
 
   aText->curLine = readline (aText->curPrompt);
-
+  aText->curLineNum++;
+  
   if (!aText->curLine) {
     aText->completed = TRUE;
     return;
@@ -176,6 +177,7 @@ static TextObj* createTextFromReadline(JoyLoLInterp *jInterp) {
   aText->lastChar   = NULL;
   //
   aText->inputFile = NULL;
+  aText->fileName  = strdup("readline");
   //
   aText->textLines  = NULL;
   aText->curLineNum = 0;

@@ -261,6 +261,7 @@ typedef struct contexts_class_struct {
   DefineJoyLoL    *defineJoyLoLFunc;
   DefineContext   *defineContextFunc;
   DefineNaming    *defineNamingFunc;
+  RaiseException  *raiseExceptionFunc;
   ReportException
     *reportExceptionFunc;
   EvalCommandInContext
@@ -367,6 +368,7 @@ Boolean registerContexts(
   theCoAlg->defineContextFunc      = defineContextImpl;
   theCoAlg->defineNamingFunc       = defineNamingImpl;
 
+  theCoAlg->raiseExceptionFunc     = raiseExceptionImpl;
   theCoAlg->reportExceptionFunc    = reportExceptionImpl;
   
   theCoAlg->evalCommandInContextFunc =

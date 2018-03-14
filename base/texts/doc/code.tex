@@ -18,17 +18,18 @@ typedef struct text_object_struct {
   // fields used by all backing types
   //
   size_t        completed;
-  JObj*     sym;
-  Symbol*       curLine;
-  Symbol*       curChar;
-  Symbol*       lastChar;
-  NextLineFunc* nextLine;
-  JoyLoLInterp* jInterp;
+  Symbol       *fileName;
+  size_t        curLineNum;
+  JObj         *sym;
+  Symbol       *curLine;
+  Symbol       *curChar;
+  Symbol       *lastChar;
+  NextLineFunc *nextLine;
+  JoyLoLInterp *jInterp;
   //
   // array of strings specific fields
   //
   Symbol** textLines;
-  size_t curLineNum;
   //
   // external file specific fields
   //
@@ -303,7 +304,9 @@ void nextSymbolImpl(
     // we have parsed a symbol... so create a new symbol
     //
     if (strchr(aSymbol, '.')) {
-      aText->sym = newSymbol(aText->jInterp, aSymbol);
+      aText->sym =
+        newSymbol(aText->jInterp, aSymbol,
+          aText->fileName, aText->curLineNum);
     } else {
       assert(aText->jInterp);
       assert(aText->jInterp->rootCtx);
@@ -316,7 +319,9 @@ void nextSymbolImpl(
       if (aSym->value && isSymbol(aSym->value)) {
         aText->sym = aSym->value;
       } else {
-        aText->sym = newSymbol(aText->jInterp, aSym->symbol);
+        aText->sym =
+          newSymbol(aText->jInterp, aSym->symbol,
+            aText->fileName, aText->curLineNum);
       }
     }
     //

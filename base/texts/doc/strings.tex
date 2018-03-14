@@ -110,6 +110,7 @@ TextObj* createTextFromStringImpl(
   aText->curPrompt       = NULL;
   //
   aText->textLines  = NULL;
+  aText->fileName   = strdup(aString);
   aText->curLineNum = 0;
 
   return aText;
@@ -312,6 +313,7 @@ TextObj* createTextFromArrayOfStringsImpl(
   aText->lastChar   = NULL;
   //
   aText->inputFile  = NULL;
+  aText->fileName   = strdup("arrayOfStrings");
   //
   aText->newPrompt       = NULL;
   aText->continuePrompt  = NULL;

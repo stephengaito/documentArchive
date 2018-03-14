@@ -127,13 +127,13 @@ void pushBooleanCtxProcessImpl(
 \stopCCode
 
 \startCHeader
-#define pushNaturalCtxProcess(aCtx, aNaturalStr)      \
-  (                                                   \
-    assert(aCtx),                                     \
-    assert(getContextsClass(aCtx->jInterp)            \
-      ->pushNaturalCtxProcessFunc),                   \
-    (getContextsClass(aCtx->jInterp)                  \
-      ->pushNaturalCtxProcessFunc(aCtx, aNaturalStr)) \
+#define pushNaturalCtxProcess(aCtx, aNatural)      \
+  (                                                \
+    assert(aCtx),                                  \
+    assert(getContextsClass(aCtx->jInterp)         \
+      ->pushNaturalCtxProcessFunc),                \
+    (getContextsClass(aCtx->jInterp)               \
+      ->pushNaturalCtxProcessFunc(aCtx, aNatural)) \
   )
 \stopCHeader
 
@@ -141,7 +141,7 @@ void pushBooleanCtxProcessImpl(
 \startCHeader
 extern void pushNaturalCtxProcessImpl(
   ContextObj *aCtx,
-  Symbol     *aNaturalStr
+  size_t      aNatural
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -149,11 +149,15 @@ extern void pushNaturalCtxProcessImpl(
 \startCCode
 void pushNaturalCtxProcessImpl(
   ContextObj *aCtx,
-  Symbol     *aNaturalStr
+  size_t      aNatural
 ) {
   if (!aCtx) return;
   assert(aCtx->jInterp);
 
+  char aNaturalStr[100];
+  aNaturalStr[0] = 0;
+  snprintf(aNaturalStr, 90, "%zu", aNatural);
+  
   JObj* aNaturalPA = newNatural(aCtx->jInterp, aNaturalStr);
   if (!aNaturalPA) return;
   aCtx->process = newPair(aCtx->jInterp, aNaturalPA, aCtx->process);
@@ -189,7 +193,7 @@ void pushSymbolCtxProcessImpl(
   if (!aSymbol) return;
   assert(aCtx->jInterp);
 
-  JObj* aSymbolPA = getAsSymbol(aCtx->dict, aSymbol);
+  JObj* aSymbolPA = getAsSymbol(aCtx->dict, aSymbol, "pushSymbol", 0);
   if (!aSymbolPA) return;
   aCtx->process = newPair(aCtx->jInterp, aSymbolPA, aCtx->process);
 }

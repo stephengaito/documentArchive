@@ -524,16 +524,61 @@ static void tryHandlerAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCHeader
-#define raiseExceptionMsg(aCtx, message)  \
-  pushNullCtxData(aCtx);                  \
-  pushSymbolCtxData(aCtx, message);       \
-  pushCtxData(aCtx, (JObj*)aCtx);         \
-  pushSymbolCtxProcess(aCtx, "raise")
+typedef void (RaiseException)(
+  ContextObj *aCtx,
+  Symbol     *message
+);
 
-#define raiseException(aCtx)          \
-  pushCtxData(aCtx, (JObj*)aCtx);     \
-  pushSymbolCtxProcess(aCtx, "raise")
+#define raiseException(aCtx, message)       \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->raiseExceptionFunc),                \
+    (getContextsClass(aCtx->jInterp)        \
+      ->raiseExceptionFunc(aCtx, message))  \
+  )
+
+#define raiseExceptionMsg(aCtx, message)    \
+  (                                         \
+    assert(aCtx),                           \
+    pushNullCtxData(aCtx),                  \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->raiseExceptionFunc),                \
+    (getContextsClass(aCtx->jInterp)        \
+      ->raiseExceptionFunc(aCtx, message))  \
+  )
 \stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void raiseExceptionImpl(
+  ContextObj *aCtx,
+  Symbol     *message
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void raiseExceptionImpl(
+  ContextObj *aCtx,
+  Symbol     *message
+) {
+  assert(aCtx);
+  if (!message) message = "unknown";
+
+  Symbol *file = "unknown(command)";
+  size_t  line = 0;
+  if (isSymbol(aCtx->command)) {
+    file = asFile(aCtx->command);
+    line = asLine(aCtx->command);
+  }
+  pushSymbolCtxData(aCtx, file);
+  pushNaturalCtxData(aCtx, line);
+  pushSymbolCtxData(aCtx, message);
+  pushCtxData(aCtx, (JObj*)aCtx);
+  pushSymbolCtxProcess(aCtx, "raise");
+}
+\stopCCode
 
 \startCHeader
 typedef Boolean (ReportException)(
@@ -565,24 +610,34 @@ Boolean reportExceptionImpl(
   assert(aCtx);
   if (!aCtx->exceptionRaised) return FALSE;
   
-  popCtxDataIntoImpl(aCtx, exceptionCtxObj);
-  ContextObj *exceptionCtx = aCtx;
-  if (isContext(exceptionCtxObj)) {
-    exceptionCtx = (ContextObj*)exceptionCtxObj;
+  popCtxDataIntoImpl(aCtx, expCtxObj);
+  ContextObj *expCtx = aCtx;
+  if (isContext(expCtxObj)) {
+    expCtx = (ContextObj*)expCtxObj;
   }
+  assert(expCtx->dict);
   
-  popCtxDataIntoImpl(aCtx, exceptionMsg);
-  popCtxDataIntoImpl(aCtx, exceptionStack);
+  popCtxDataIntoImpl(aCtx, expMsg);
+  popCtxDataIntoImpl(aCtx, expLine);
+  popCtxDataIntoImpl(aCtx, expFile);
+  popCtxDataIntoImpl(aCtx, expStack);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   StringBufferObj *aStrBuf = newStringBuffer(aCtx);
   strBufPrintf(aStrBuf, "\nUNHANDLED EXCEPTION:\n");
-  printLoL(aStrBuf, exceptionMsg);
+  printLoL(aStrBuf, expMsg);
+  strBufPrintf(aStrBuf, "\n\n     in file: ");
+  if (isSymbol(expFile)) {
+    strBufPrintf(aStrBuf, "%s", asSymbol(expFile));
+  } else {
+    printLoL(aStrBuf, expFile);
+  }
+  strBufPrintf(aStrBuf,   "\n     on line: ");
+  printLoL(aStrBuf, expLine);
   strBufPrintf(aStrBuf, "\n\n   wordStack: ");
-  printLoL(aStrBuf, exceptionStack);
+  printLoL(aStrBuf, expStack);
   strBufPrintf(aStrBuf,   "\n     context: %s(%s)",
-    exceptionCtx->name,
-    ( exceptionCtx->dict ? exceptionCtx->dict->name : "unknown"));
+    expCtx->name, expCtx->dict->name);
   strBufPrintf(aStrBuf,   "\n   dataStack: ");
   printLoL(aStrBuf, aCtx->data);
   strBufPrintf(aStrBuf,   "\nprocessStack: ");
@@ -608,10 +663,9 @@ static void defineAP(ContextObj* aCtx) {
     pushOnTopCtxDataImpl(aCtx, definition);
     pushOnTopCtxDataImpl(aCtx, naming);
     pushOnTopCtxDataImpl(aCtx, name);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "define requires a symbol as top"
     );
-    raiseException(aCtx);
     return;
   }
   if (!isDictionary(naming)) {
@@ -619,9 +673,8 @@ static void defineAP(ContextObj* aCtx) {
     pushOnTopCtxDataImpl(aCtx, definition);
     pushOnTopCtxDataImpl(aCtx, naming);
     pushOnTopCtxDataImpl(aCtx, name);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "define requires a dictionary as second");
-    raiseException(aCtx);
     return;
   }
   defineJoyLoLIn(
@@ -651,9 +704,8 @@ static void defineContextAP(ContextObj* aCtx) {
     pushOnTopCtxDataImpl(aCtx, contextNamingScope);
     pushOnTopCtxDataImpl(aCtx, contextNamedIn);
     pushOnTopCtxDataImpl(aCtx, contextName);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "defineContext required a symbol as top");
-    raiseException(aCtx);
     return;
   }
   if (!isDictionary(contextNamedIn)) {
@@ -663,9 +715,8 @@ static void defineContextAP(ContextObj* aCtx) {
     pushOnTopCtxDataImpl(aCtx, contextNamingScope);
     pushOnTopCtxDataImpl(aCtx, contextNamedIn);
     pushOnTopCtxDataImpl(aCtx, contextName);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "defineContext required a dictionary as second");
-    raiseException(aCtx);
     return;
   }
   if (!isDictionary(contextNamingScope)) {
@@ -675,9 +726,8 @@ static void defineContextAP(ContextObj* aCtx) {
     pushOnTopCtxDataImpl(aCtx, contextNamingScope);
     pushOnTopCtxDataImpl(aCtx, contextNamedIn);
     pushOnTopCtxDataImpl(aCtx, contextName);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "defineContext required a dictionary as third");
-    raiseException(aCtx);
     return;
   }
   ContextObj* newCtx = newContext(
@@ -714,9 +764,8 @@ static void newContextAP(ContextObj* aCtx) {
     pushOnTopCtxDataImpl(aCtx, contextData);
     pushOnTopCtxDataImpl(aCtx, contextNamingScope);
     pushOnTopCtxDataImpl(aCtx, contextName);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "newContext requires a symbol as top");
-    raiseException(aCtx);
     return;
   }
   if (!isDictionary(contextNamingScope)) {
@@ -725,9 +774,8 @@ static void newContextAP(ContextObj* aCtx) {
     pushOnTopCtxDataImpl(aCtx, contextData);
     pushOnTopCtxDataImpl(aCtx, contextNamingScope);
     pushOnTopCtxDataImpl(aCtx, contextName);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "newContext requires a dictionary as second");
-    raiseException(aCtx);
     return;
   }
   ContextObj* newCtx = newContext(
@@ -795,9 +843,8 @@ static void defineNamingAP(ContextObj* aCtx) {
     pushOnTopCtxDataImpl(aCtx, dictNamingScope);
     pushOnTopCtxDataImpl(aCtx, dictNamedIn);
     pushOnTopCtxDataImpl(aCtx, dictName);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "defineNaming required a symbol as top");
-    raiseException(aCtx);
     return;
   }
   if (!isDictionary(dictNamedIn)) {
@@ -805,9 +852,8 @@ static void defineNamingAP(ContextObj* aCtx) {
     pushOnTopCtxDataImpl(aCtx, dictNamingScope);
     pushOnTopCtxDataImpl(aCtx, dictNamedIn);
     pushOnTopCtxDataImpl(aCtx, dictName);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "defineNaming requires a dictionary as second");
-    raiseException(aCtx);
     return;
   }
   if (!isDictionary(dictNamingScope)) {
@@ -815,9 +861,8 @@ static void defineNamingAP(ContextObj* aCtx) {
     pushOnTopCtxDataImpl(aCtx, dictNamingScope);
     pushOnTopCtxDataImpl(aCtx, dictNamedIn);
     pushOnTopCtxDataImpl(aCtx, dictName);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "defineNaming requires a dictionary as third");
-    raiseException(aCtx);
     return;
   }
   DictObj* newDict =
@@ -848,18 +893,16 @@ static void newNamingAP(ContextObj* aCtx) {
     pushNullCtxDataImpl(aCtx);
     pushOnTopCtxDataImpl(aCtx, dictNamingScope);
     pushOnTopCtxDataImpl(aCtx, dictName);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "defineNaming requires a symbol as top");
-    raiseException(aCtx);
     return;
   }
   if (!isDictionary(dictNamingScope)) {
     pushNullCtxDataImpl(aCtx);
     pushOnTopCtxDataImpl(aCtx, dictNamingScope);
     pushOnTopCtxDataImpl(aCtx, dictName);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "defineNaming requires a dictionary as second");
-    raiseException(aCtx);
     return;
   }
 
@@ -916,9 +959,8 @@ static void undefineAP(ContextObj* aCtx) {
     pushNullCtxDataImpl(aCtx);
     pushOnTopCtxDataImpl(aCtx, namingScope);
     pushOnTopCtxDataImpl(aCtx, name);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "undefine requires a symbol as top");
-    raiseException(aCtx);
     return;
   }
   
@@ -926,9 +968,8 @@ static void undefineAP(ContextObj* aCtx) {
     pushNullCtxDataImpl(aCtx);
     pushOnTopCtxDataImpl(aCtx, namingScope);
     pushOnTopCtxDataImpl(aCtx, name);
-    pushSymbolCtxDataImpl(aCtx,
+    raiseException(aCtx,
       "undelete requires a dictionary as second");
-    raiseException(aCtx);
     return;
   }
   

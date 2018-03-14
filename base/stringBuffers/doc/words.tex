@@ -25,7 +25,8 @@ static void printLoLAP(ContextObj* aCtx) {
   StringBufferObj* aStrBuf = newStringBufferImpl(aCtx);
   
   printLoLImpl(aStrBuf, lol, depthInt);
-  JObj* result = newSymbol(jInterp, getCString(aStrBuf));
+  JObj* result =
+    newSymbol(jInterp, getCString(aStrBuf), "strBuf", 0);
   pushCtxData(aCtx, result);
   
   strBufClose(aStrBuf);

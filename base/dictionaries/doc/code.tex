@@ -733,16 +733,18 @@ DictNodeObj* getSymbolEntryInChildImpl(
 \startCHeader
 typedef JObj *(GetAsSymbol)(
   DictObj *aDict,
-  Symbol  *aSymbol
+  Symbol  *aSymbol,
+  Symbol  *fileName,
+  size_t   line
 );
 
-#define getAsSymbol(aDict, aSymbol)             \
-  (                                             \
-    assert(aDict),                              \
-    assert(getDictionariesClass(aDict->jInterp) \
-      ->getAsSymbolFunc),                       \
-    (getDictionariesClass(aDict->jInterp)       \
-      ->getAsSymbolFunc(aDict, aSymbol))        \
+#define getAsSymbol(aDict, aSymbol, fileName, line)       \
+  (                                                       \
+    assert(aDict),                                        \
+    assert(getDictionariesClass(aDict->jInterp)           \
+      ->getAsSymbolFunc),                                 \
+    (getDictionariesClass(aDict->jInterp)                 \
+      ->getAsSymbolFunc(aDict, aSymbol, fileName, line))  \
   )
 \stopCHeader
 
@@ -750,7 +752,9 @@ typedef JObj *(GetAsSymbol)(
 \startCHeader
 extern JObj* getAsSymbolImpl(
   DictObj *aDict,
-  Symbol  *aSymbol
+  Symbol  *aSymbol,
+  Symbol  *fileName,
+  size_t   line
 );
 \stopCHeader
 \setCHeaderStream{public}
@@ -758,12 +762,14 @@ extern JObj* getAsSymbolImpl(
 \startCCode
 JObj* getAsSymbolImpl(
   DictObj *aDict,
-  Symbol  *aSymbol
+  Symbol  *aSymbol,
+  Symbol  *fileName,
+  size_t   line
 ) {
   assert(aDict);
   DictNodeObj* aSym = getSymbolEntryImpl(aDict, aSymbol);
   assert(aSym);
-  return newSymbol(aDict->jInterp, aSym->symbol);
+  return newSymbol(aDict->jInterp, aSym->symbol, fileName, 0);
 }
 \stopCCode
 \stopTestSuite
