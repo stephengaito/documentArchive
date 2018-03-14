@@ -26,7 +26,7 @@ extern void clearCtxProcessImpl(
 void clearCtxProcessImpl(
   ContextObj *aCtx
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   aCtx->process = NULL;
 }
 \stopCCode
@@ -57,7 +57,7 @@ void pushCtxProcessImpl(
   ContextObj* aCtx,
   JObj* lolToPush
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   assert(aCtx->jInterp);
   aCtx->process = newPair(aCtx->jInterp, lolToPush, aCtx->process);
 }
@@ -86,7 +86,7 @@ extern void pushNullCtxProcessImpl(
 void pushNullCtxProcessImpl(
   ContextObj* aCtx
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   assert(aCtx->jInterp);
   aCtx->process = newPair(aCtx->jInterp, NULL, aCtx->process);
 }
@@ -117,7 +117,7 @@ void pushBooleanCtxProcessImpl(
   ContextObj *aCtx,
   Boolean     aBool
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   assert(aCtx->jInterp);
 
   JObj* aBoolPA = newBoolean(aCtx->jInterp, aBool);
@@ -151,7 +151,7 @@ void pushNaturalCtxProcessImpl(
   ContextObj *aCtx,
   size_t      aNatural
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   assert(aCtx->jInterp);
 
   char aNaturalStr[100];
@@ -189,7 +189,7 @@ void pushSymbolCtxProcessImpl(
   ContextObj* aCtx,
   Symbol* aSymbol
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   if (!aSymbol) return;
   assert(aCtx->jInterp);
 
@@ -226,7 +226,7 @@ void pushParsedArrayOfStringsCtxProcessImpl(
   ContextObj* aCtx,
   Symbol* someStrings[]
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   if (!someStrings) return;
   TextObj* aText =
     createTextFromArrayOfStrings(aCtx->jInterp, someStrings);
@@ -260,7 +260,7 @@ void pushParsedStringCtxProcessImpl(
   ContextObj* aCtx,
   Symbol* aString
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   if (!aString) return;
   TextObj* aText =
     createTextFromString(aCtx->jInterp, aString);
@@ -294,7 +294,7 @@ void pushParsedTextCtxProcessImpl(
   ContextObj* aCtx,
   TextObj* aText
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   if (!aText) return;
   assert(aCtx->jInterp);
   JObj* aLoL = parseAllSymbols(aText);
@@ -328,7 +328,7 @@ void prependListCtxProcessImpl(
   ContextObj* aCtx,
   JObj* lolToPrepend
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   if (!lolToPrepend) return;
 
   aCtx->process =

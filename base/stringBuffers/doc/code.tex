@@ -419,6 +419,7 @@ void printLoLImpl(
 
   if (aLoL) {
     assert(asType(aLoL));
+    assert(asType(aLoL)->printFunc);
     Boolean result =
       (asType(aLoL)->printFunc)
         (aStrBuf, aLoL, timeToLive);

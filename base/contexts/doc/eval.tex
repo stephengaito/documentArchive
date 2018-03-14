@@ -12,13 +12,23 @@ static void traceAction(
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
-  
+  DEBUG(jInterp, "traceAction: %p [%s] %p %p\n",
+    aCtx, action, aLoL, command);
+  if (aLoL && jInterp->debug) {
+    assert(asType(aLoL));
+    DEBUG(jInterp, "traceAction(lol): %p %p\n",
+      aLoL, asType(aLoL));
+  }
+  if (command && jInterp->debug) {
+    assert(asType(command));
+    DEBUG(jInterp, "traceAction(command): %p %p\n",
+      command, asType(command));
+  }
+
   StringBufferObj *aStrBuf = newStringBuffer(aCtx);
   strBufPrintf(aStrBuf, "%s: ", action);
   printLoL(aStrBuf, aLoL);
-  if (command) {
-    printLoL(aStrBuf, command);
-  }
+  printLoL(aStrBuf, command);
   strBufPrintf(aStrBuf, "\n");
   jInterp->writeStdOut(jInterp, getCString(aStrBuf));
   strBufClose(aStrBuf);
@@ -58,7 +68,8 @@ void evalCommandInContextImpl(
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
-
+  //assert(command);
+  
   DEBUG(jInterp, "evalCommandInContext > %p %p\n", aCtx, command);
   //
   // push this command onto the top of the process stack
@@ -86,12 +97,14 @@ void evalCommandInContextImpl(
     //
     command = popCtxProcessImpl(aCtx);
     aCtx->command = command;
+    //assert(command);
     //
     if (isCFunction(command)) {
       //
       // if the command is a function.. call the function
       //
       if (isCtxCFunction(command)) {
+        assert(asCtxCFunc(command));
         //
         // this is a CTX CFunction
         // (we allow it to change the current context
@@ -104,6 +117,7 @@ void evalCommandInContextImpl(
         assert(aCtx);
         //
       } else {
+        assert(asCFunc(command));
         //
         // this is a normal CFunction
         // (this ONLY makes changes to the data and process stacks)
@@ -119,7 +133,7 @@ void evalCommandInContextImpl(
       //  ...  push it onto the top of the data stack
       //
       if (aCtx->tracingOn)
-        traceAction(aCtx, "adding", command, NULL);
+        traceAction(aCtx, "adding(nonSym)", command, NULL);
       pushCtxDataImpl(aCtx, command);
       //
     } else {
@@ -137,7 +151,7 @@ void evalCommandInContextImpl(
         // infinite loop)
         //
         if (aCtx->tracingOn)
-          traceAction(aCtx, "adding", command, NULL);
+          traceAction(aCtx, "adding(noValue)", command, NULL);
         pushCtxDataImpl(aCtx, command);
         //
       } else if (isPair(assoc->value)) {
@@ -155,6 +169,7 @@ void evalCommandInContextImpl(
         // if the association is a function.. call the function
         //
         if (isCtxCFunction(assoc->value)) {
+          assert(asCtxCFunc(assoc->value));
           //
           // this is a CTX CFunction
           //
@@ -164,6 +179,7 @@ void evalCommandInContextImpl(
           assert(aCtx);
           //
         } else {
+          assert(asCFunc(assoc->value));
           //
           // this is a normal CFunction
           //

@@ -59,7 +59,7 @@ extern void clearCtxDataImpl(
 void clearCtxDataImpl(
   ContextObj *aCtx
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   aCtx->data = NULL;
 }
 \stopCCode
@@ -108,7 +108,7 @@ void pushCtxDataImpl(
   ContextObj *aCtx,
   JObj       *lolToPush
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   assert(aCtx->jInterp);
   aCtx->data = newPair(aCtx->jInterp, lolToPush, aCtx->data);
 }
@@ -117,7 +117,7 @@ void pushOnTopCtxDataImpl(
   ContextObj *aCtx,
   JObj       *lolToPush
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   assert(aCtx->jInterp);
   asCar(aCtx->data) =
     newPair(aCtx->jInterp, lolToPush, asCar(aCtx->data));
@@ -151,7 +151,7 @@ extern void pushNullCtxDataImpl(
 void pushNullCtxDataImpl(
   ContextObj* aCtx
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   assert(aCtx->jInterp);
   aCtx->data = newPair(aCtx->jInterp, NULL, aCtx->data);
 }
@@ -187,7 +187,7 @@ void pushBooleanCtxDataImpl(
   ContextObj *aCtx,
   Boolean     aBool
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   assert(aCtx->jInterp);
 
   JObj* aBoolPA = newBoolean(aCtx->jInterp, aBool);
@@ -226,7 +226,7 @@ void pushNaturalCtxDataImpl(
   ContextObj *aCtx,
   size_t      aNatural
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   assert(aCtx->jInterp);
 
   char aNaturalStr[100];
@@ -269,7 +269,7 @@ void pushSymbolCtxDataImpl(
   ContextObj* aCtx,
   Symbol* aSymbol
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   if (!aSymbol) return;
   assert(aCtx->jInterp);
 
@@ -317,7 +317,7 @@ void pushParsedArrayOfStringsCtxDataImpl(
   ContextObj* aCtx,
   Symbol* someStrings[]
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   if (!someStrings) return;
   TextObj* aText =
     createTextFromArrayOfStrings(aCtx->jInterp, someStrings);
@@ -356,7 +356,7 @@ void pushParsedStringCtxDataImpl(
   ContextObj* aCtx,
   Symbol* aString
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   if (!aString) return;
   TextObj* aText =
     createTextFromString(aCtx->jInterp, aString);
@@ -395,7 +395,7 @@ void pushParsedTextCtxDataImpl(
   ContextObj* aCtx,
   TextObj* aText
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   if (!aText) return;
   assert(aCtx->jInterp);
   JObj* aLoL = parseAllSymbols(aText);
@@ -434,7 +434,7 @@ void prependListCtxDataImpl(
   ContextObj* aCtx,
   JObj* lolToPrepend
 ) {
-  if (!aCtx) return;
+  assert(aCtx);
   if (!lolToPrepend) return;
 
   aCtx->data =
@@ -495,11 +495,11 @@ extern JObj* popCtxDataImpl(
 JObj* popCtxDataImpl(
   ContextObj* aCtx
 ) {
-  if (!aCtx) return NULL;
+  assert(aCtx);
   if (!aCtx->data) return NULL;
 
   JObj* poppedLoL = asCar(aCtx->data);
-  aCtx->data          = asCdr(aCtx->data);
+  aCtx->data      = asCdr(aCtx->data);
   return poppedLoL;
 }
 \stopCCode
