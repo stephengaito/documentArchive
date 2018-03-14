@@ -108,6 +108,13 @@ ContextObj* newContextImpl(
   context->checkingOn         = FALSE;
   context->verbose            = FALSE;
   context->exceptionRaised    = FALSE;
+  if (jInterp->tracing) {
+    context->tracingOn        = TRUE;
+    context->showStack        = TRUE;
+  }
+  if (jInterp->verbose) {
+    context->verbose          = TRUE;
+  }
 
   return context;
 }

@@ -103,6 +103,9 @@ static void *coreTextadeptCallback(
   } else if (resourceId == JoyLoLCallback_Verbose) {
     Boolean verbose = getBooleanOption(lstate, "verbose");
     return (void*)verbose;
+  } else if (resourceId == JoyLoLCallback_Trace) {
+    Boolean tracing = getBooleanOption(lstate, "tracing");
+    return (void*)tracing;
   } else if (resourceId == JoyLoLCallback_Debug) {
     Boolean debug = getBooleanOption(lstate, "debug");
     return (void*)debug;

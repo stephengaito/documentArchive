@@ -33,12 +33,19 @@ end
 options.debug = false
 
 function jOpts.debug()
-  options.deubg = true
+  options.debug = true
+end
+
+options.tracing = false
+
+function jOpts.trace()
+  options.tracing = true
 end
 
 function jOpts.beQuiet()
   options.verbose = false
   options.debug   = false
+  options.tracing = false
 end
 
 options.configFile = 'config'

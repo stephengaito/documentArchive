@@ -16,15 +16,16 @@ joylol.options = { }
 local options = joylol.options
 
 -- default options
-options.verbose       = false
-options.debug         = false
-options.quiet         = false
-options.loadFiles     = { }
-options.loadPaths     = { }  
-options.configFile    = 'config'
-options.userPath      = os.getenv('HOME')..'/.joylol'
-options.localPath     = '/usr/local/lib/joylol'
-options.systemPath    = '/usr/lib/joylol'
+options.verbose    = false
+options.debug      = false
+options.quiet      = false
+options.tracing    = false
+options.loadFiles  = { }
+options.loadPaths  = { }  
+options.configFile = 'config'
+options.userPath   = os.getenv('HOME')..'/.joylol'
+options.localPath  = '/usr/local/lib/joylol'
+options.systemPath = '/usr/lib/joylol'
 
 helpText = {
   "usage: joylol [options] [files to load]",
@@ -36,6 +37,7 @@ helpText = {
   " -p --path <path> adds <path> to the list of load paths",
   " -q --quiet       toggles verbose off",
   " -v --verbose     toggles verbose on",
+  " -t --trace       toggles tracing on",
   " -d --debug       turns on internal debugging",
   " -u --userPath    sets the user load path",
   " -L --localPath   sets the local load path",
@@ -75,11 +77,14 @@ while(0 < #arg) do
   elseif anArg:match('-q') or anArg:match('--quiet') then
     options.verbose = false
     options.debug   = false
+    options.tracing = false
     options.quiet   = true
   elseif anArg:match('-v') or anArg:match('--verbose') then
     options.verbose = true
   elseif anArg:match('-d') or anArg:match('--debug') then
     options.debug = true
+  elseif anArg:match('-t') or anArg:match('--trace') then
+    options.tracing = true
   else
     --optArg = table.remove(arg, 1)
     table.insert(options.loadFiles, anArg)

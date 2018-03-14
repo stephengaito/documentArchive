@@ -400,6 +400,9 @@ naming scope and finally the name of the new context.
 \startJoylolCode
   ;; define the caseRunner context
                 ;; caseRunner process (uses provided list of words)
+  ;;tests.caseResults
+  ;;doSomethingElse
+  ;;append        ;; ensure we get the case results at the end of the case
   ()            ;; caseRunner data
   caseRunnerNS  ;; the naming scope of the new context
   thisNaming    ;; define in the localized naming scope
@@ -591,11 +594,11 @@ doSomeThing
 
 \startJoylolCode
 (
-  fail
+  false
   assert.reportAssertion
 )
 assert
-fail
+( fail ) extract
 define
 \stopJoylolCode
 
@@ -609,7 +612,7 @@ define
 \startTestSuite[assertSucceed]
 \startJoylolCode
 (
-  succeed
+  true
   assert.reportAssertion
 )
 assert
@@ -631,7 +634,7 @@ define
   assert.reportAssertion
 )
 assert
-isBoolean
+( isBoolean ) extract
 define
 \stopJoylolCode
 
@@ -711,3 +714,7 @@ void registerJoylolTestWords(
 
 }
 \stopCCode
+
+\startJoylolCode
+;; a final line
+\stopJoylolCode

@@ -17,6 +17,20 @@
 \stopMkIVCode
 
 \startMkIVCode
+\def\setJoyLoLTracing{%
+  \directlua{%
+    thirddata.joylol.setTracing(true)
+  }
+}
+
+\def\clearJoyLoLTracing{%
+  \directlua{%
+    thirddata.joylol.setTracing(false)
+  }
+}
+\stopMkIVCode
+
+\startMkIVCode
 \def\setJoyLoLDebugging{%
   \directlua{%
     thirddata.joylol.setDebugging(true)
@@ -169,6 +183,9 @@ static void *coreContextCallback(
   } else if (resourceId == JoyLoLCallback_Verbose) {
     Boolean verbose = getBooleanOption(lstate, "verbose");
     return (void*)verbose;
+  } else if (resourceId == JoyLoLCallback_Trace) {
+    Boolean tracing = getBooleanOption(lstate, "tracing");
+    return (void*)tracing;
   } else if (resourceId == JoyLoLCallback_Debug) {
     Boolean debug = getBooleanOption(lstate, "debug");
     return (void*)debug;

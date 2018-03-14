@@ -49,11 +49,12 @@ The currently well known resources are:
 #define JoyLoLCallback_StdErrMethod   2
 #define JoyLoLCallback_Verbose        3
 #define JoyLoLCallback_Debug          4
-#define JoyLoLCallback_Quiet          5
-#define JoyLoLCallback_ConfigFile     6
-#define JoyLoLCallback_UserPath       7
-#define JoyLoLCallback_LocalPath      8
-#define JoyLoLCallback_SystemPath     9
+#define JoyLoLCallback_Trace          5
+#define JoyLoLCallback_Quiet          6
+#define JoyLoLCallback_ConfigFile     7
+#define JoyLoLCallback_UserPath       8
+#define JoyLoLCallback_LocalPath      9
+#define JoyLoLCallback_SystemPath     10
 
 typedef void (StdOutputMethod)(
   JoyLoLInterp *jInterp,
@@ -252,6 +253,7 @@ typedef struct joylol_interpreter_struct {
   CrossCompilerObj **compilers;
   Boolean           verbose;
   Boolean           debug;
+  Boolean           tracing;
   Boolean           quiet;
   StdOutputMethod  *writeStdOut;
   StdOutputMethod  *writeStdErr;
@@ -392,6 +394,9 @@ JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
   jInterp->debug = 
     (Boolean)getCoreResources(lstate, JoyLoLCallback_Debug);
     
+  jInterp->tracing = 
+    (Boolean)getCoreResources(lstate, JoyLoLCallback_Trace);
+
   jInterp->quiet =
     (Boolean)getCoreResources(lstate, JoyLoLCallback_Quiet);
 

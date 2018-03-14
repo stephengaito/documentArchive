@@ -48,6 +48,7 @@ if options.verbose then print('loaded [joylol.core.context]\n') end
 local joylol = thirddata.joylol
 
 joylol.setVerbose(options.verbose)
+joylol.setTracing(options.tracing)
 joylol.setDebugging(options.debug)
 
 if (options.configFile) then

@@ -22,24 +22,32 @@ options.gitVersion = gitVersion
 \stopLuaCode
 
 \startMkIVCode
+\def\joyLoLQuiet{
+  \directlua{
+    thirddata.joylol.options.verbose = false
+    thirddata.joylol.options.debug   = false
+    thirddata.joylol.options.tracing = false
+  }
+}
+
 \def\joyLoLVerbose{
   \directlua{
     thirddata.joylol.options.verbose = true
   }
 }
 
-\def\joyLoLQuiet{
+\def\joyLoLDebug{
   \directlua{
-    thirddata.joylol.options.verbose = false
-    thirddata.joylol.options.debug   = false
+    thirddata.joylol.options.debug   = true
   }
 }
 
-\def\joyLoLDebug{
+\def\joyLoLTrace{
   \directlua{
-    thirddata.joylol.options.debug = true
+    thirddata.joylol.options.tracing = true
   }
 }
+
 \def\joyLoLNoConfiguration{
   \directlua{
     thirddata.joylol.options.configFile = nil
