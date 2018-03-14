@@ -281,8 +281,12 @@ Boolean printSymbolCoAlg(
       return TRUE;
     }
   }
-  
-  strBufPrintf(aStrBuf, "%s ", asSymbol(aLoL));
+
+  if (strchr(asSymbol(aLoL), ' ')) {
+    strBufPrintf(aStrBuf, "\"%s\" ", asSymbol(aLoL));
+  } else {
+    strBufPrintf(aStrBuf, "%s ", asSymbol(aLoL));
+  }
   return TRUE;
 }
 \stopCCode
@@ -300,7 +304,7 @@ Boolean printSymbolCoAlg(
   
   printLoL(aStrBuf, aNewSymbol);
   AssertStrEquals(getCString(aStrBuf),
-    "test string ");
+    "\"test string\" ");
   strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
