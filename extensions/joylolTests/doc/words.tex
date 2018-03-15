@@ -54,6 +54,11 @@ localized naming scope.
 \stopJoylolCode
 
 \startJoylolCode
+  ;; undefine any existing testsRunnerNS
+  thisNaming
+  ( testsRunnerNS ) extract
+  undefine
+  
   ;; create the testsRunnerNS
   thisNaming    ;; define the parent's naming scope
   thisNaming    ;; define in the localized naming scope
@@ -63,6 +68,11 @@ localized naming scope.
 \stopJoylolCode
 
 \startJoylolCode
+  ;; undefine any existing testsMonitorNS
+  thisNaming
+  ( testsMonitorNS ) extract
+  undefine
+  
   ;; create the testsMonitorNS
   thisNaming    ;; define the parent's naming scope
   thisNaming    ;; define in the localized naming scope
@@ -91,6 +101,11 @@ testsRunnerNS.
 We now create the testsRunner context.
 
 \startJoylolCode
+  ;; undefine any existing testsRunner context
+  thisNaming
+  ( testsRunner ) extract
+  undefine
+
   ;; define the testsRunner context
                 ;; testsRunner process (uses provided list of words)
   ()            ;; testsRunner data
@@ -103,6 +118,11 @@ We now create the testsRunner context.
 We now create the testsMonitor context.
 
 \startJoylolCode
+  ;; undefine any existing testsMonitor context
+  thisNaming
+  ( testsMonitor ) extract
+  undefine
+
   ;; define the testsMonitor context
   ( interpret )   ;; begin the testsMonitor process stack
   thisContext     ;; interpret thisContext onto data stack
@@ -203,6 +223,11 @@ We are running in the testsRunner context so we already have a
 only need to create the suiteRunnerNS and suiteMonitorNS naming scopes. 
 
 \startJoylolCode
+  ;; undefine any existing suiteRunnerNS
+  thisNaming
+  ( suiteRunnerNS ) extract
+  undefine
+
   ;; create the suiteRunnerNS
   thisNaming    ;; define the parent's naming scope
   thisNaming    ;; define in the localized naming scope
@@ -212,6 +237,11 @@ only need to create the suiteRunnerNS and suiteMonitorNS naming scopes.
 \stopJoylolCode
 
 \startJoylolCode
+  ;; undefine any existing suiteMonitorNS
+  thisNaming
+  ( suiteMonitorNS ) extract
+  undefine
+
   ;; create the suiteMonitorNS
   thisNaming      ;; define the parent's naming scope
   thisNaming      ;; define in the localized naming scope
@@ -240,8 +270,16 @@ suiteRunnerNS.
 We now create the suiteRunner context.
 
 \startJoylolCode
+  ;; undefine any existing suiteRunner context
+  thisNaming
+  ( suiteRunner ) extract
+  undefine
+
   ;; define the suiteRunner context
                 ;; suiteRunner process (uses provided list of words)
+  ( tests.suiteFinished )
+  append        ;; ensure we get the suite results
+                ;; at the end of the suite
   ()            ;; suiteRunner data
   suiteRunnerNS ;; naming scope of the new context
   thisNaming    ;; defined in the localized naming scope
@@ -252,6 +290,11 @@ We now create the suiteRunner context.
 We now create the suiteMonitor context.
 
 \startJoylolCode
+  ;; undefine any existing suiteMonitor context
+  thisNaming
+  ( suiteMonitor ) extract
+  undefine
+
   ;; define the suiteMonitor context
   ( interpret )   ;; begin the suiteMonitor process stack
   thisContext     ;; interpret thisContext onto data stack
@@ -349,6 +392,33 @@ defineTestSuiteTeardown
 define
 \stopJoylolCode
 
+Once a particular test suite has finished, we need summarize the results 
+and pass them to the tests runner. We do this with a pair of words one, 
+\type{suiteFinished}, run in the suiteRunner and the other, 
+\type{reportSuiteResults}, run in the suiteMonitor. 
+
+\startJoylolCode
+(
+  ( tests.reportSuiteResults )
+  suiteMonitor
+  switchCtx
+)
+tests
+suiteFinished
+define
+\stopJoylolCode
+
+\startJoylolCode
+(
+          ;; there is nothing more to do
+          ;; the suiteMonitor already has
+          ;; the context switch 
+)
+tests
+reportSuiteResults
+define
+\stopJoylolCode
+
 \stopTestSuite
 
 \startTestSuite[runTestCase]
@@ -374,6 +444,11 @@ We are running in the suiteRunner context so we already have a
 need to create the testRunnerNS and testMonitorNS naming scopes. 
 
 \startJoylolCode
+  ;; undefine any existing caseRunnerNS
+  thisNaming
+  ( caseRunnerNS ) extract
+  undefine
+
   ;; create the caseRunnerNS
   thisNaming   ;; parent naming scope
   thisNaming   ;; define in localized naming scope
@@ -383,6 +458,11 @@ need to create the testRunnerNS and testMonitorNS naming scopes.
 \stopJoylolCode
 
 \startJoylolCode
+  ;; undefine any existing caseMonitorNS
+  thisNaming
+  ( caseMonitorNS ) extract
+  undefine
+
   ;; create the caseMonitorNS
   thisNaming    ;; parent naming scope
   thisNaming    ;; define in the localized naming scope
@@ -398,11 +478,16 @@ context, and then setup the new context's naming scope, the defining
 naming scope and finally the name of the new context.
 
 \startJoylolCode
+  ;; undefine any existing caseRunner context
+  thisNaming
+  ( caseRunner ) extract
+  undefine
+
   ;; define the caseRunner context
                 ;; caseRunner process (uses provided list of words)
-  ;;tests.caseResults
-  ;;doSomethingElse
-  ;;append        ;; ensure we get the case results at the end of the case
+  ( tests.caseFinished )
+  append        ;; ensure we get the case results
+                ;; at the end of the case
   ()            ;; caseRunner data
   caseRunnerNS  ;; the naming scope of the new context
   thisNaming    ;; define in the localized naming scope
@@ -431,6 +516,11 @@ context, we have to \type{append} the result of interpreting the
 word directly on the testMonitor's process stack. Once the 
 
 \startJoylolCode
+  ;; undefine any existing caseMonitor context
+  thisNaming
+  ( caseMonitor ) extract
+  undefine
+
   ;; define the caseMonitor context
   ( interpret ) ;; begin the caseMonitor process stack
   thisContext   ;; interpret thisContext 
@@ -482,6 +572,38 @@ tests
 recordTestCaseDetails
 define
 \stopJoylolCode
+\stopTestSuite
+
+\startTestSuite[communicate case results]
+
+Once a particular test case has finished, we need summarize the results 
+and pass them to the suite runner. We do this with a pair of words one, 
+\type{caseFinished}, run in the caseRunner and the other, 
+\type{reportCaseResults}, run in the caseMonitor. 
+
+\startJoylolCode
+(
+  ( tests.reportCaseResults )
+  caseMonitor
+  switchCtx
+)
+tests
+caseFinished
+define
+\stopJoylolCode
+
+\startJoylolCode
+(
+  pop1D   ;; ignore the should fail boolean
+          ;; there is nothing more to do
+          ;; the caseMonitor already has
+          ;; the context swtich 
+)
+tests
+reportCaseResults
+define
+\stopJoylolCode
+
 \stopTestSuite
 
 \startTestSuite[assert.reportAssertion]
