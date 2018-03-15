@@ -41,6 +41,14 @@ static void failAP(ContextObj* aCtx) {
 \subsection[title=Combinators]
 
 \startCCode
+static void wrapAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  popCtxDataIntoImpl(aCtx, top);
+  top = newPair(aCtx->jInterp, top, NULL);
+  pushCtxData(aCtx, top);
+}
+
 static void prependAP(ContextObj* aCtx) {
   popCtxDataIntoImpl(aCtx, top);
   popCtxDataIntoImpl(aCtx, second);
@@ -487,33 +495,53 @@ static void raiseIfFalseAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void findFirstTryHandlerAP(ContextObj* aCtx) {
+static ContextObj *findFirstTryHandlerAP(ContextObj* aCtx) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
+
   if (aCtx->process) {
     popCtxProcessIntoImpl(aCtx, aCommand);
     if (symbolIs(jInterp, aCommand, "tryHandler")) {
       aCtx->exceptionRaised = FALSE;
       popCtxProcessIntoImpl(aCtx, handlerExp);
       prependListCtxProcess(aCtx, handlerExp);
-      return;
+      return aCtx;
     }
     pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
-  } else {
-    if (aCtx->parent) {
-      ContextObj* parentCtx = newContext(
-        jInterp,
-        "raiseFindFirstTryHander",
-        aCtx->parent,
-        aCtx->dict,
-        NULL,
-        NULL
-      );
-      pushSymbolCtxProcess(aCtx->parent, "raise");
-      pushCtxProcessImpl(aCtx, (JObj*)parentCtx);
-    }
+    return aCtx;
   }
+
+  if (aCtx == jInterp->rootCtx) {
+    aCtx->exceptionRaised = TRUE;
+    return aCtx;
+  }
+  
+  ContextObj* parentCtx = aCtx->parent;
+  if (!parentCtx ) parentCtx = jInterp->rootCtx;
+  assert(parentCtx);
+  
+  popCtxDataIntoImpl(   aCtx,      oldContextTop );
+  pushCtxDataImpl(      parentCtx, oldContextTop );
+  
+  wrapAP(parentCtx);
+  
+  pushSymbolCtxProcess( parentCtx, "raise"       );
+
+  if (aCtx->tracingOn) {
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(aStrBuf,
+      "findFirstTryHandler(switchCtx)\n oldCtx: %s\n newCtx: %s\n",
+      aCtx->name, parentCtx->name
+    );
+    strBufPrintf(aStrBuf, "top = ");
+    printLoL(aStrBuf, oldContextTop);
+    strBufPrintf(aStrBuf, "\n");
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+
+  return parentCtx;
 }
 \stopCCode
 
@@ -572,10 +600,17 @@ void raiseExceptionImpl(
     file = asFile(aCtx->command);
     line = asLine(aCtx->command);
   }
+  
+  wrapAP(aCtx);
   pushSymbolCtxData(aCtx, file);
+  prependAP(aCtx);
   pushNaturalCtxData(aCtx, line);
+  prependAP(aCtx);
   pushSymbolCtxData(aCtx, message);
+  prependAP(aCtx);
   pushCtxData(aCtx, (JObj*)aCtx);
+  prependAP(aCtx);
+  wrapAP(aCtx);
   pushSymbolCtxProcess(aCtx, "raise");
 }
 \stopCCode
@@ -609,7 +644,9 @@ Boolean reportExceptionImpl(
 ) {
   assert(aCtx);
   if (!aCtx->exceptionRaised) return FALSE;
-  
+
+  extractAP(aCtx);
+
   popCtxDataIntoImpl(aCtx, expCtxObj);
   ContextObj *expCtx = aCtx;
   if (isContext(expCtxObj)) {
@@ -1005,9 +1042,9 @@ void initContextsAPControl(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "try",                 tryAP);
   extendJoyLoLInRoot(jInterp, "raise",               raiseAP);
   extendJoyLoLInRoot(jInterp, "raiseIfFalse",        raiseIfFalseAP);
-  extendJoyLoLInRoot(jInterp, "findFirstTryHandler", findFirstTryHandlerAP);
   extendJoyLoLInRoot(jInterp, "tryHandler",          tryHandlerAP);
   
-  extendCtxJoyLoLInRoot(jInterp, "switchCtx",        switchCtxAP);
+  extendCtxJoyLoLInRoot(jInterp, "findFirstTryHandler", findFirstTryHandlerAP);
+  extendCtxJoyLoLInRoot(jInterp, "switchCtx",           switchCtxAP);
 }
 \stopCCode
