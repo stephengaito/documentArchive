@@ -349,12 +349,13 @@ JObj* newObjectImpl(
   TagType aTag
 ) {
   assert(jInterp);
-  DEBUG(jInterp, "newObjectImpl %p %zu\n", jInterp, (size_t)aTag);
+  DEBUG(jInterp, "newObjectImpl(start) %p %zu\n", jInterp, (size_t)aTag);
   
   assert(jInterp->coAlgs);
   assert(aTag < jInterp->numCoAlgs);
   JClass *theClass = jInterp->coAlgs[aTag];
   assert(theClass);
+  assert(theClass->tag == aTag);
 
   DEBUG(jInterp, "newObjectImpl freeObjects %p objectBlock %p\n",
     theClass->freeObjects,
@@ -375,7 +376,8 @@ JObj* newObjectImpl(
   asType(aNewObject)  = jInterp->coAlgs[aTag];
   asTag(aNewObject)   = aTag;
   asFlags(aNewObject) = 0;
-
+  
+  DEBUG(jInterp, "newObjectImpl(done) %p %zu\n", aNewObject, (size_t)aTag);
   return aNewObject;
 }
 \stopCCode

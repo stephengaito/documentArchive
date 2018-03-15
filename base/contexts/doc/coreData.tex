@@ -498,6 +498,11 @@ JObj* popCtxDataImpl(
   assert(aCtx);
   if (!aCtx->data) return NULL;
 
+  DEBUG(aCtx->jInterp, "popCtxData: %p %p %zu\n",
+    aCtx->data, asType(aCtx->data), (size_t)asTag(aCtx->data)
+  );
+  assert(isPair(aCtx->data));
+  
   JObj* poppedLoL = asCar(aCtx->data);
   aCtx->data      = asCdr(aCtx->data);
   return poppedLoL;

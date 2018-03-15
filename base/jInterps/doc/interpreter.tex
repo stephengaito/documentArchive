@@ -183,6 +183,7 @@ typedef void*   CoAlgData;
 typedef struct joylol_class_struct {
   Symbol           *name;
   JoyLoLInterp     *jInterp;
+  size_t            tag;
   size_t            objectSize;
   size_t            numObjectsPerBlock;
   JObj             *freeObjects;
@@ -586,6 +587,7 @@ size_t registerJClassImpl(
       if (!(jInterp->coAlgs[tag])) {
         jInterp->coAlgs[tag] = theCoAlg;
       }
+      theCoAlg->tag = tag;
       return tag;
     }
   }
@@ -620,6 +622,7 @@ size_t registerJClassImpl(
   size_t newCoAlg = jInterp->numCoAlgs;
   
   jInterp->coAlgs[newCoAlg] = theCoAlg;
+  theCoAlg->tag             = newCoAlg;
   
   jInterp->numCoAlgs++;
   

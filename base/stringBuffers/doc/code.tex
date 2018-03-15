@@ -414,17 +414,28 @@ void printLoLImpl(
 ) {
   assert(aStrBuf);
   DEBUG(aStrBuf->jInterp,
-    "printLoL %p %p %zu\n", aStrBuf, aLoL, timeToLive
+    "printLoL(start) %p %p %zu\n", aStrBuf, aLoL, timeToLive
   );
 
   if (aLoL) {
     assert(asType(aLoL));
+    assert(asTag(aLoL));
+    DEBUG(aStrBuf->jInterp,
+      "printLoL(call) %p %p %p %uz\n",
+      aStrBuf, aLoL, asType(aLoL), asTag(aLoL)
+    );
+    assert(asType(aLoL)->tag == asTag(aLoL));
     assert(asType(aLoL)->printFunc);
+
     Boolean result =
       (asType(aLoL)->printFunc)
         (aStrBuf, aLoL, timeToLive);
     assert(result);
   }
+
+  DEBUG(aStrBuf->jInterp,
+    "printLoL(done) %p %p %zu\n", aStrBuf, aLoL, timeToLive
+  );
 }
 \stopCCode
 \startTestCase[should print stringBuffers]

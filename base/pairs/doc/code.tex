@@ -173,6 +173,10 @@ JObj* concatListsImpl(
   }
   
   if (!secondList) return result;
+  // ensure that the second list is a LIST
+  if (!isPair(secondList)) {
+    secondList = newPair(jInterp, secondList, NULL);
+  }
 
   // find end of firstList/result
   JObj* lolList = result;

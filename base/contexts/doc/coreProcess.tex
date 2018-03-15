@@ -388,6 +388,11 @@ JObj* popCtxProcessImpl(
   assert(aCtx);
   if (!aCtx->process) return NULL;
 
+  DEBUG(aCtx->jInterp, "popCtxProcess: %p %p %zu\n",
+    aCtx->process, asType(aCtx->process), (size_t)asTag(aCtx->process)
+  );
+  assert(isPair(aCtx->process));
+  
   JObj* poppedLoL = asCar(aCtx->process);
   aCtx->process   = asCdr(aCtx->process);
   return poppedLoL;
