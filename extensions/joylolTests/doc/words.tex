@@ -108,6 +108,9 @@ We now create the testsRunner context.
 
   ;; define the testsRunner context
                 ;; testsRunner process (uses provided list of words)
+  ( tests.testsFinished )
+  append        ;; ensure we get the tests results
+                ;; when all suites have been run
   ()            ;; testsRunner data
   testsRunnerNS ;; naming scope of the new context
   thisNaming    ;; defined in the localized naming scope
@@ -202,8 +205,34 @@ defineTestsTeardown
 define
 \stopJoylolCode
 
-\stopTestSuite
+Once a particular test suite has finished, we need summarize the results 
+and pass them to the tests runner. We do this with a pair of words one, 
+\type{suiteFinished}, run in the suiteRunner and the other, 
+\type{reportSuiteResults}, run in the suiteMonitor. 
 
+\startJoylolCode
+(
+  ( tests.reportTestsResult )
+  testsMonitor
+  switchCtx
+)
+tests
+testsFinished
+define
+\stopJoylolCode
+
+\startJoylolCode
+(
+          ;; there is nothing more to do
+          ;; the testsMonitor already has
+          ;; the context switch 
+)
+tests
+reportTestsResult
+define
+\stopJoylolCode
+
+\stopTestSuite
 
 \startTestSuite[running a test suite]
 
