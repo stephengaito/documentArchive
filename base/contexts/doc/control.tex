@@ -4,40 +4,6 @@
 
 \subsection[title=Operators]
 
-\startCCode
-static void failAP(ContextObj* aCtx) {
-  assert(aCtx);
-  aCtx->data    = NULL;
-  aCtx->process = NULL;
-}
-\stopCCode
-
-\starttyping
-
-\startWord[fail]
-
-\preDataStack
-  (
-    dataStack
-  )
-\preProcessStack
-  (
-    processStack
-  )
-\preConditions
-\stopPreStack
-
-\postDataStack
-  ( )
-\postProcessStack
-  ( )
-\postConditions
-\stopPostStack
-
-\stopWord
-
-\stoptyping
-
 \subsection[title=Combinators]
 
 \startCCode
@@ -1016,7 +982,6 @@ static void undefineAP(ContextObj* aCtx) {
 
 \startCCode
 void initContextsAPControl(JoyLoLInterp *jInterp) {
-  extendJoyLoLInRoot(jInterp, "fail",                failAP);
   extendJoyLoLInRoot(jInterp, "prepend",             prependAP);
   extendJoyLoLInRoot(jInterp, "append",              appendAP);
   extendJoyLoLInRoot(jInterp, "extract",             extractAP);
