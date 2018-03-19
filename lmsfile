@@ -1,0 +1,13 @@
+-- A Lua Make System file
+
+require 'lms.contextDoc'
+
+contextDoc.targets{
+  mainDoc  = 'programmingInJoyLoL.tex',
+  docFiles = {
+    'preface.tex',
+    'abstract.tex',
+  },
+  docDir    = 'doc',
+}
+
