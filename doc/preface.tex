@@ -1,14 +1,37 @@
 % A ConTeXt document [master document: programmingInJoyLoL.tex]
 
-\chapter[title=Preface]
+\chapter[title=Preface] 
 
-The programming language, \type{JoyLoL} (the Joy of Lists of Lists), is a 
-concatenative language based losely upon Manfred von Thun's programming 
-language \type{Joy}, \cite{vonThun1994mathematicalFoundations}, 
-\cite{vonThun1994overview}. The JoyLoL language's primary goal is, in its 
-most austere form, to be a fixed point of the semantics functor. Being a 
-fixed point of the semantic functor, it is its own denotational, 
-operational and axiomatic semantics. This means that, in particular, it 
-provides a sufficient foundation for both computational theory, as well 
-as, in its Vopěnka principled form, all of Mathematical discourse. 
+The programming language, \type{JoyLoL} (the Joy of Lists of 
+Lists\footnote{Or alternatively, the Joy of Laughing out Loud}), is a 
+concatenative programming language based loosely upon Manfred von Thun's 
+programming language \type{Joy}, 
+\cite{vonThun1994mathematicalFoundations}, \cite{vonThun1994overview}. 
+Most programming languages, whether imperative, like \type{C}, \type{C++}, 
+\type{C#} or Java, or functional, like \type{Lisp}, \type{ML}, or 
+\type{Haskell}, depend upon the \emph{application} of functions to 
+arguments. In a concatenative programming language, all expressions behave 
+as functions, and the juxtaposition of expressions denotes function 
+composition. The \quote{space} of all computations of a concatenative 
+language has a natural a categorical structure which we will explicitly 
+exploit. 
 
+The JoyLoL language's primary goal is, in its most austere form, to be a 
+fixed point of the semantics functor. Being a fixed point of the semantic 
+functor, it is its own denotational, operational and axiomatic semantics. 
+This means that, in particular, it provides a sufficient foundation for 
+both computational theory, as well as, if granted transfinite 
+computational power equivalent to Vopěnka's principle, all of 
+conventional Mathematical discourse\footnote{Transfinite computational 
+power is equivalent to the Axiom of choice, \emph{so} any one who accepts 
+the Axiom of Choice must accept transfinite computational power, 
+conversely, any one who rejects transfinite computational power, must 
+reject the Axiom of Choice.}. 
+
+Unfortunately for any mere human, JoyLoL's most austere form, while very 
+easy for computers to parse, is very difficult for humans to understand. 
+This document will instead discuss programming in an augmented form of 
+JoyLoL (probably best called \type{JoyLoL++}). Eventually we will show 
+that this augmented form of JoyLoL is in fact a \quote{conservative 
+extension} of the austere form of JoyLoL. However, for this document, we 
+will simply assume that the two variants of JoyLoL are equivalent. 
