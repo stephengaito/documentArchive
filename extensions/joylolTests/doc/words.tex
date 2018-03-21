@@ -559,7 +559,7 @@ word directly on the testMonitor's process stack. Once the
                 ;; caseMonitor's initial process stack
   
   ( 
-    false       ;; should fail
+    false       ;; should fail indicator
     0           ;; number of attempted assertions
     0           ;; number of failed assertions
     ()          ;; list of failure reports
@@ -757,6 +757,7 @@ stack.
   append
   caseMonitor
   switchCtx
+  pop1D
 )
 tests
 startShouldFail
@@ -776,6 +777,7 @@ define
   append
   caseMonitor
   switchCtx
+  pop1D
 )
 tests
 stopShouldFail
@@ -790,27 +792,22 @@ context's data stack.
 \startJoylolCode
 (
   tests.startShouldFail
-  pop1D
   interpret
   tests.stopShouldFail
-  pop1D
 )
 assert
 shouldFail
 define
 \stopJoylolCode
 
-\startTestCase[assert should fail]
+\startTestCase[assert.shouldFail]
 \startJoylolTest
-(
-  assert.fail
-) 
-shouldFail
+( assert.fail ) assert.shouldFail
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[assertFail]
+\startTestSuite[assert.fail]
 
 \startJoylolCode
 (
@@ -822,14 +819,14 @@ fail
 define
 \stopJoylolCode
 
-\startTestCase[assertFail should fail]
+\startTestCase[assert.fail should fail]
 \startJoylolTest
-  ;;assert.fail
+( assert.fail ) assert.shouldFail
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[assertSucceed]
+\startTestSuite[assert.succeed]
 \startJoylolCode
 (
   true
@@ -842,7 +839,7 @@ define
 
 \startTestCase[assert.succeed should succeed]
 \startJoylolTest
-  ;;assert.succeed
+assert.succeed
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite
@@ -860,63 +857,348 @@ define
 
 \startTestCase[should succeed if an object is a boolean ]
 \startJoylolTest
-  ;;true
-  ;;assert.isBoolean
+true
+assert.isBoolean
 \stopJoylolTest
 \stopTestCase
 
 \startTestCase[should fail if an object is not a boolean]
 \startJoylolTest
-  ;;notABoolean
-  ;;assert.isBoolean
+(
+  notABoolean
+  assert.isBoolean
+} assert.shouldFail
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[assertTrue]
+\startTestSuite[assert.isTrue]
+
+\startJoylolCode
+(
+  isTrue
+  assert.reportAssertion
+)
+assert
+( true ) extract
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is true]
+\startJoylolTest
+true
+assert.isTrue
+
+notABooleanButTrue
+assert.isTrue
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is not true]
+\startJoylolTest
+(
+  false
+  assert.isTrue 
+) assert.shouldFail
+(
+  ()
+  assert.isTrue
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isFalse]
+
+\startJoylolCode
+(
+  isFalse
+  assert.reportAssertion
+)
+assert
+( isFalse ) extract
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is false]
+\startJoylolTest
+false
+assert.isFalse
+
+()
+assert.isFalse
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is not false]
+\startJoylolTest
+(
+  true
+  assert.isFalse
+) assert.shouldFail
+(
+  notABooleanButTrue
+  assert.isFalse
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isNil]
+
+\startJoylolCode
+(
+  isNil
+  assert.reportAssertion
+)
+assert
+( isNil ) extract
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is nil]
+\startJoylolTest
+()
+assert.isNil
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is not nil]
+\startJoylolTest
+(
+  ( someThingNotNil )
+  assert.isNil
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
 
 \stopTestSuite
 
-\startTestSuite[assertFalse]
+\startTestSuite[assert.isNotNil]
 
+\startJoylolCode
+(
+  isNil
+  not
+  assert.reportAssertion
+)
+assert
+( isNotNil ) extract
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is not nil]
+\startJoylolTest
+( this is a list )
+assert.isNotNil
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is nil]
+\startJoylolTest
+(
+  ( )
+  assert.isNotNil
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
 
-\startTestSuite[assertNil]
+\startTestSuite[assert.isAnAtom]
 
+\startJoylolCode
+(
+  isAnAtom
+  assert.reportAssertion
+)
+assert
+( isAnAtom ) extract
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is an atom]
+\startJoylolTest
+thisIsAnAtom
+assert.isAnAtom
+thisContext
+assert.isAnAtom
+123
+assert.isAnAtom
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is not an atom]
+\startJoylolTest
+(
+  ( this is a list )
+  assert.isAnAtom
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
 
-\startTestSuite[assertNotNil]
+\startTestSuite[assert.isAPair]
 
+\startJoylolCode
+(
+  isAPair
+  assert.reportAssertion
+)
+assert
+( isAPair ) extract
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a pair]
+\startJoylolTest
+( this is a list)
+assert.isAPair
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not a pair]
+\startJoylolTest
+(
+  true
+  assert.isAPair
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
 
-\startTestSuite[assertAtom]
+\startTestSuite[assert.isANatural]
 
+\startJoylolCode
+(
+  isANatural
+  assert.reportAssertion
+)
+assert
+( isANatural ) extract
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a natural]
+\startJoylolTest
+1234
+assert.isANatural
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not a natural]
+\startJoylolTest
+(
+  aSymbol
+  assert.isANatural
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
 
-\startTestSuite[assertPair]
+\startTestSuite[assert.isASymbol]
 
+\startJoylolCode
+(
+  isASymbol
+  assert.reportAssertion
+)
+assert
+( isASymbol ) extract
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a symbol]
+\startJoylolTest
+aSymbol
+assert.isASymbol
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not a symbol]
+\startJoylolTest
+(
+  12345
+  assert.isASymbol
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
 
-\startTestSuite[assertNatural]
+\startTestSuite[assert.isAContext]
 
+\startJoylolCode
+(
+  isAContext
+  assert.reportAssertion
+)
+assert
+( isAContext ) extract
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a context]
+\startJoylolTest
+thisContext
+assert.isAContext
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not a context]
+\startJoylolTest
+(
+  1234
+  assert.isAContext
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
 
-\startTestSuite[assertSymbol]
+\startTestSuite[assert.isADictionary]
 
+\startJoylolCode
+(
+  isADictionary
+  assert.reportAssertion
+)
+assert
+( isADictionary ) extract
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a dictionary]
+\startJoylolTest
+thisNaming
+assert.isDictionary
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not a dictionary]
+\startJoylolTest
+(
+  1234
+  assert.isDictionary
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
 
-\startTestSuite[assertContext]
+\starttyping
+\startTestSuite[assert.isADictNode]
 
+\startJoylolCode
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is]
+\startJoylolTest
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not]
+\startJoylolTest
+\stopJoylolTest
+\stopTestCase
 \stopTestSuite
-
-\startTestSuite[assertDictionary]
-
-\stopTestSuite
-
-\startTestSuite[assertDictNode]
-
-\stopTestSuite
-
+\stoptyping
 
 \setCHeaderStream{private}
 \startCHeader
