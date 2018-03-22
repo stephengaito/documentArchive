@@ -86,14 +86,14 @@ testsRunnerNS.
 
 \startJoylolCode
   ()            ;; empty default setup actions
-  testsRunnerNS ;; define in the testRunnerNS
+  testsRunnerNS ;; define in the testsRunnerNS
   testsSetup    ;; name of the new word
   define        ;; define the testsSetup word
 \stopJoylolCode
 
 \startJoylolCode
   ()            ;; empty default teardown actions
-  testsRunnerNS ;; define in the testRunnerNS
+  testsRunnerNS ;; define in the testsRunnerNS
   testsTeardown ;; name of the new word
   define        ;; define the testsTeardown word
 \stopJoylolCode
@@ -454,9 +454,9 @@ define
 
 Our next task, over the next following code fragments, is to define the 
 runTestCase word. This word takes a test case, as a list of the words to 
-be tested intermingled with assertions, and creates the testMonitor and 
-testRunner contexts which together run the test case provided. To be 
-completely re-entrant, the testMonitor and testRunner contexts are stored 
+be tested intermingled with assertions, and creates the caseMonitor and 
+caseRunner contexts which together run the test case provided. To be 
+completely re-entrant, the caseMonitor and caseRunner contexts are stored 
 in the running context's localized naming scope. 
 
 The following figure is a summary of the word/switch pattern of 
@@ -470,7 +470,7 @@ The following figure is a summary of the word/switch pattern of
 
 We are running in the suiteRunner context so we already have a 
 \quote{localized} naming scope. So for the \type{runTestCase} word we only 
-need to create the testRunnerNS and testMonitorNS naming scopes. 
+need to create the caseRunnerNS and caseMonitorNS naming scopes. 
 
 \startJoylolCode
   ;; undefine any existing caseRunnerNS
@@ -501,8 +501,8 @@ need to create the testRunnerNS and testMonitorNS naming scopes.
 \stopJoylolCode
 
 At this point the test case's list of words and assertions are back on the 
-top of the stack. This list will be used as the testRunner's initial 
-process stack. We can now add the initial data stack for the testRunner 
+top of the stack. This list will be used as the caseRunner's initial 
+process stack. We can now add the initial data stack for the caseRunner 
 context, and then setup the new context's naming scope, the defining 
 naming scope and finally the name of the new context.
 
@@ -525,15 +525,15 @@ naming scope and finally the name of the new context.
 \stopJoylolCode
 
 Now we create a caseMonitor context which will keep track of the test 
-results. The testMonitor's initial process stack should contain the three 
+results. The caseMonitor's initial process stack should contain the three 
 words, \type{interpret}, the current context, and \type{switchCtx} in this 
-order. When an assertion switches from the testRunner's context to the 
-testMonitor context the top of the testRunner's stack is place onto the 
-top of the testMonitor's data stack. The \type{interpret} word will then 
-place the words on the top of the testMonitor's data stack onto the 
-testMonitor's process stack to be interpreted. The assertion being 
+order. When an assertion switches from the caseRunner's context to the 
+caseMonitor context the top of the caseRunner's stack is place onto the 
+top of the caseMonitor's data stack. The \type{interpret} word will then 
+place the words on the top of the caseMonitor's data stack onto the 
+caseMonitor's process stack to be interpreted. The assertion being 
 interpreted \emph{should} ensure it re-places the \type{interpret} word 
-back on the testMonitor's process stack for use by the next assertion. 
+back on the caseMonitor's process stack for use by the next assertion. 
 
 The last two words, the current context and \type{switchCtx}, as used by the 
 textMonitor interpreting the \type{results} word to know which context to 
@@ -542,7 +542,7 @@ switch to with the summary results.
 Since the \type{thisContext} word has to be interpreted in the calling 
 context, we have to \type{append} the result of interpreting the 
 \type{thisContext} word rather than just placing the \type{thisContext} 
-word directly on the testMonitor's process stack. Once the 
+word directly on the caseMonitor's process stack. Once the 
 
 \startJoylolCode
   ;; undefine any existing caseMonitor context
@@ -571,7 +571,7 @@ word directly on the testMonitor's process stack. Once the
   defineContext ;; create and define the context
 \stopJoylolCode
 
-Finally we switch to the testRunner context.
+Finally we switch to the caseRunner context.
 
 \startJoylolCode
   ;; switch to the caseRunner context and run the assertions
@@ -640,11 +640,11 @@ define
 
 In this section we develop the \type{reportAssertion} word in the 
 \type{assert} naming scope. This word takes the result of an individual 
-assertion, switches to the \type{testMonitor} context and records it 
-before switching back to the \type{testRunner} context. 
+assertion, switches to the \type{caseMonitor} context and records it 
+before switching back to the \type{caseRunner} context. 
 
 The \type{reportAssertion} word assumes that any previous assertion has 
-left an assertion result list on the top of the testRunner's data stack. 
+left an assertion result list on the top of the caseRunner's data stack. 
 This assertion result list consists of true/false followed by a failure 
 report list (only if the assertion failed). 
 
@@ -653,14 +653,14 @@ report list (only if the assertion failed).
                 ;; the assertion report is assumed to be on top
   (
     assert.recordAssertion  ;; the task to be done
-    testRunner  ;; return to testRunner
+    caseRunner  ;; return to caseRunner
     switchCtx   ;; perform the switch/return
     interpret   ;; leave an initial interpret for the next switch/call
   )
   append
-  testMonitor   ;; place the testMonitor context on top of stack
-  switchCtx     ;; switch to the testMonitor context
-                ;; (the testMonitor context will interpret to
+  caseMonitor   ;; place the caseMonitor context on top of stack
+  switchCtx     ;; switch to the caseMonitor context
+                ;; (the caseMonitor context will interpret to
                 ;;  current top of the stack)
 )               ;; end of the reportAssertion word
 assert          ;;define the new word in the assert naming scope
@@ -671,22 +671,23 @@ define          ;; define the reportAssertion word
 
 \startTestSuite[assert.recordAssertion]
 
-The \type{recordAssertion} word is run on the testMonitor context. It 
+The \type{recordAssertion} word is run on the caseMonitor context. It 
 assumes that the top of the data stack is a true/false depending upon the 
 success/failure of the previous assertion. If the top of the stack is 
 false, then the \type{recordAssertion} word also expects a list containing 
 the assertion failure reasons as the second item on the stack. The 
 subsequent item on the stack is then the context to which to return so 
 that any further assertions can be run. Finally the last item on the stack 
-is the testMonitor's record of assertion results. 
+is the caseMonitor's record of assertion results. 
 
 \startJoylolCode
 (
+  showStack
   (
     isTrue
   )  ;; test
   (
-    ;; the top of the stack is the testMonitor's
+    ;; the top of the stack is the caseMonitor's
     ;; record of assertion results
     extract
     ;; the top of the stack is the number of attempts value
@@ -698,7 +699,7 @@ is the testMonitor's record of assertion results.
   )  ;; then action ;; just update the number of attempted tests 
   (
     ;; the top of the stack is an assertion failure report list
-    ;; then comes the testMonitor's record of assertion results
+    ;; then comes the caseMonitor's record of assertion results
     append
     extract
     ;; top    comes the number of attempts value
@@ -867,7 +868,7 @@ assert.isBoolean
 (
   notABoolean
   assert.isBoolean
-} assert.shouldFail
+) assert.shouldFail
 \stopJoylolTest
 \stopTestCase
 \stopTestSuite
