@@ -93,6 +93,8 @@ cp $gitVTex    core/textadept/doc
 cp $gitVLua    core/textadept/doc
 cp $gitVC      core/textadept/doc
 
+cp $gitVTex    base/assertions/doc
+cp $gitVC      base/assertions/doc
 cp $gitVTex    base/booleans/doc
 cp $gitVC      base/booleans/doc
 cp $gitVTex    base/cFunctions/doc

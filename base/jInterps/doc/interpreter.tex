@@ -272,6 +272,10 @@ typedef struct joylol_interpreter_struct {
 #define getJInterpClass(jInterp)                            \
   ((JoyLoLInterpClass*)getJClass(jInterp, JInterpsTag))
 
+typedef struct assertions_class_struct AssertionsClass;
+#define getAssertionsClass(jInterp)                         \
+  ((AssertionsClass*)getJClass(jInterp, AssertionsTag))
+
 typedef struct booleans_class_struct BooleansClass;
 #define getBooleansClass(jInterp)                           \
   ((BooleansClass*)getJClass(jInterp, BooleansTag))
