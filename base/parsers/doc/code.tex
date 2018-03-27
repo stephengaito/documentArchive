@@ -230,7 +230,13 @@ JObj* parseList(
     if (isSymbol(aText->sym)) {
       char matchingSymbol = matchingListSymbol(asSymbol(aText->sym));
       if (0 < matchingSymbol) {
-        asCar(aNewPair) = parseList(aText, matchingSymbol);
+        JObj *newList = parseList(aText, matchingSymbol);
+        if (matchingSymbol == '}') {
+          DEBUG(aText->jInterp, "parseList(assertion) %p\n", newList)
+          newList = newAssertion(aText->jInterp, newList);
+          assert(isAssertion(newList));
+        }
+        asCar(aNewPair) = newList;
       } else asCar(aNewPair) = aText->sym;
     } else asCar(aNewPair) = aText->sym;
 
@@ -636,6 +642,24 @@ paths} in our parsing code.
   AssertStrEquals(getCString(aStrBuf),
     "this is a different ( ( ( ) ( ) ( ) ) ( ( ( ) ) ) ) list ");
   strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse assertion]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromString(jInterp, " { true } ");
+  AssertPtrNotNull(aText);
+
+  //jInterp->debug = TRUE;
+
+  JObj *aLoL = parseAllSymbols(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isPair(aLoL));
+  AssertIntTrue(isAssertion(asCar(aLoL)));
+  AssertPtrNull(asCdr(aLoL));
 \stopCTest
 \stopTestCase
 
