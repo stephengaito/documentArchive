@@ -63,14 +63,15 @@ void evalCommandInContextImpl(
 \startCCode
 void evalCommandInContextImpl(
   ContextObj *aCtx,
-  JObj   *command
+  JObj       *command
 ) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
   //assert(command);
   
-  DEBUG(jInterp, "evalCommandInContext > %p %p\n", aCtx, command);
+  DEBUG(jInterp, "evalCommandInContext > %p [%s] %p\n",
+    aCtx, aCtx->name, command);
   //
   // push this command onto the top of the process stack
   //
@@ -126,6 +127,22 @@ void evalCommandInContextImpl(
           traceAction(aCtx, "calling", command, NULL);
         (asCFunc(command))(aCtx);
         //
+      }
+    } else if (isAssertion(command)) {
+      //
+      // this is an assertion ...
+      //   ... so assert it 
+      //
+      if (!evalAssertionInContextImpl(aCtx, (AssertionObj*)command)) {
+        //
+        // this assertion failed... 
+        //   ... so report it
+        //
+        pushNullCtxDataImpl(aCtx);
+        pushOnTopCtxDataImpl(aCtx, command);
+        raiseException(aCtx,
+          "assertion failed"
+        );
       }
     } else if (!isSymbol(command)) {
       //
@@ -246,6 +263,126 @@ void evalContextImpl(
 ) {
   popCtxProcessIntoImpl(aCtx, aCommand);
   evalCommandInContext(aCtx, aCommand);
+}
+\stopCCode
+
+\startCHeader
+typedef Boolean (EvalAssertionInContext)(
+  ContextObj   *aCtx,
+  AssertionObj *anAssertion
+);
+
+#define evalAssertionInContext(aCtx, anAssertion)       \
+  (                                                     \
+    assert(aCtx),                                       \
+    assert(getContextsClass(aCtx->jInterp)              \
+      ->evalAssertionInContextFunc),                    \
+    (getContextsClass(aCtx->jInterp)                    \
+      ->evalAssertionInContextFunc(aCtx, anAssertion))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean evalAssertionInContextImpl(
+  ContextObj   *aCtx,
+  AssertionObj *anAssertion
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean evalAssertionInContextImpl(
+  ContextObj   *aCtx,
+  AssertionObj *anAssertion
+) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  DictObj *theDict = aCtx->dict;
+  assert(theDict);
+  
+  DEBUG(jInterp, "evalAssertionInContext > %p [%s] %p\n",
+    aCtx, aCtx->name, anAssertion);
+
+  char *metaDictName = calloc(10+strlen(theDict->name), sizeof(char));
+  assert(metaDictName);
+  strcat(metaDictName, "meta-");
+  strcat(metaDictName, theDict->name);
+  
+  DictObj *metaDict = newDictionary(
+    jInterp,
+    metaDictName,
+    theDict
+  );
+  
+  char *metaCtxName = calloc(10+strlen(aCtx->name), sizeof(char));
+  assert(metaCtxName);
+  strcat(metaCtxName, "meta-");
+  strcat(metaCtxName, aCtx->name);
+  
+  ContextObj *metaCtx = newContextImpl(
+    jInterp,
+    metaCtxName,
+    aCtx,
+    metaDict,
+    aCtx->data,
+    NULL
+  );
+  JObj *originalTop = aCtx->data;
+  
+  Boolean assertionTrue = TRUE;
+
+  JObj *assertionList = asAssertion(anAssertion);
+  while(assertionList) {
+    JObj *assertionTest = assertionList;
+    if (isPair(assertionList)) {
+      assertionTest = asCar(assertionList);
+      assertionList = asCdr(assertionList);
+    } else {
+      assertionList = NULL;
+    }
+
+    evalCommandInContextImpl(metaCtx, assertionTest);
+    
+    if (metaCtx->data == originalTop) {
+      // our assertion has not returned any result value
+      pushNullCtxDataImpl(metaCtx);
+      pushOnTopCtxDataImpl(metaCtx, assertionTest);
+      raiseExceptionImpl(metaCtx,
+        "assertion has not returned any result value"
+        );
+    } else if (!isPair(metaCtx->data) 
+      || asCdr(metaCtx->data) != originalTop ) {
+      // our assertions have corrupted the original context's data stack
+      pushNullCtxDataImpl(metaCtx);
+      pushOnTopCtxDataImpl(metaCtx, assertionTest);
+      raiseExceptionImpl(metaCtx,
+        "assertion has returned too many values OR corrupted the data stack"
+        );
+    } else {
+      popCtxDataIntoImpl(metaCtx, assertionResult);
+      if (isFalse(assertionResult)) {
+        assertionTrue = FALSE;
+      }
+    }
+  }
+  
+  if (metaCtx->exceptionRaised) {
+    assertionTrue = FALSE;
+    reportException(metaCtx);
+  }
+  
+  if (metaDictName) free(metaDictName);
+  metaDictName = NULL;
+  
+  if (metaCtxName) free(metaCtxName);
+  metaCtxName = NULL;
+  
+  DEBUG(jInterp, "evalAssertionInContext < %p [%s] %p\n",
+    aCtx, aCtx->name, anAssertion);
+    
+  return assertionTrue;
 }
 \stopCCode
 
