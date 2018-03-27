@@ -443,6 +443,72 @@ void prependListCtxDataImpl(
 \stopCCode
 
 \startCHeader
+typedef JObj *(PeekCtx)(
+  ContextObj *aCtx
+);
+
+#define peekCtxData(aCtx)                   \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->peekCtxDataFunc),                   \
+    (getContextsClass(aCtx->jInterp)        \
+      ->peekCtxDataFunc(aCtx))              \
+  )
+
+#define peekCtxDataInto(aCtx, aVar)                   \
+assert(aCtx);                                         \
+JObj* aVar = peekCtxData(aCtx);                       \
+if (aCtx->tracingOn) {                                \
+  JoyLoLInterp *jInterp = aCtx->jInterp;              \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);   \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);              \
+  printLoL(aStrBuf, aVar);                            \
+  strBufPrintf(aStrBuf, " (peek)\n");                 \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf)); \
+  strBufClose(aStrBuf);                               \
+}
+
+#define peekCtxDataIntoImpl(aCtx, aVar)               \
+assert(aCtx);                                         \
+JObj* aVar = peekCtxDataImpl(aCtx);                   \
+if (aCtx->tracingOn) {                                \
+  JoyLoLInterp *jInterp = aCtx->jInterp;              \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);   \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);              \
+  printLoL(aStrBuf, aVar);                            \
+  strBufPrintf(aStrBuf, " (peek)\n");                 \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf)); \
+  strBufClose(aStrBuf);                               \
+}
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* peekCtxDataImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* peekCtxDataImpl(
+  ContextObj* aCtx
+) {
+  assert(aCtx);
+  if (!aCtx->data) return NULL;
+
+  DEBUG(aCtx->jInterp, "peekCtxData: %p %p %zu\n",
+    aCtx->data, asType(aCtx->data), (size_t)asTag(aCtx->data)
+  );
+  assert(isPair(aCtx->data));
+  
+  JObj* peekedLoL = asCar(aCtx->data);
+  return peekedLoL;
+}
+\stopCCode
+
+\startCHeader
 typedef JObj *(PopCtx)(
   ContextObj *aCtx
 );

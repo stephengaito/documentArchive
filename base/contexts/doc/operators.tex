@@ -28,16 +28,14 @@ static void pop1PAP(ContextObj* aCtx) {
 
 \startCCode
 static void dup1DAP(ContextObj* aCtx) {
-  popCtxDataIntoImpl(aCtx, top);
-  pushCtxDataImpl(aCtx, top);
+  peekCtxDataIntoImpl(aCtx, top);
   pushCtxDataImpl(aCtx, copyLoL(aCtx->jInterp, top));
 }
 \stopCCode
 
 \startCCode
 static void dup1PAP(ContextObj* aCtx) {
-  popCtxProcessIntoImpl(aCtx, top);
-  pushCtxProcessImpl(aCtx, top);
+  peekCtxProcessIntoImpl(aCtx, top);
   pushCtxProcessImpl(aCtx, copyLoL(aCtx->jInterp, top));
 }
 \stopCCode

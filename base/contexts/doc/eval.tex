@@ -138,6 +138,9 @@ void evalCommandInContextImpl(
         // this assertion failed... 
         //   ... so report it
         //
+        if (aCtx->tracingOn) 
+          traceAction(aCtx, "asserting", command, NULL);
+        //
         pushNullCtxDataImpl(aCtx);
         pushOnTopCtxDataImpl(aCtx, command);
         raiseException(aCtx,
@@ -266,6 +269,9 @@ void evalContextImpl(
 }
 \stopCCode
 
+
+\startTestSuite[evalAssertionInContext]
+
 \startCHeader
 typedef Boolean (EvalAssertionInContext)(
   ContextObj   *aCtx,
@@ -329,12 +335,15 @@ Boolean evalAssertionInContextImpl(
     aCtx->data,
     NULL
   );
-  JObj *originalTop = aCtx->data;
+  assert(metaCtx);
+  metaCtx->showStack = aCtx->showStack;
+  metaCtx->tracingOn = aCtx->tracingOn;
+  JObj *originalTop  = aCtx->data;
   
   Boolean assertionTrue = TRUE;
 
   JObj *assertionList = asAssertion(anAssertion);
-  while(assertionList) {
+  while(assertionList && !(metaCtx->exceptionRaised)) {
     JObj *assertionTest = assertionList;
     if (isPair(assertionList)) {
       assertionTest = asCar(assertionList);
@@ -343,7 +352,14 @@ Boolean evalAssertionInContextImpl(
       assertionList = NULL;
     }
 
-    evalCommandInContextImpl(metaCtx, assertionTest);
+    if (metaCtx->tracingOn)
+      traceAction(aCtx,
+        "\n-------------------------\nevalAssertion(test)",
+        assertionTest, NULL
+      );
+    prependListCtxProcess(metaCtx, assertionTest);
+    popCtxProcessIntoImpl(metaCtx, aCommand);
+    evalCommandInContextImpl(metaCtx, aCommand);
     
     if (metaCtx->data == originalTop) {
       // our assertion has not returned any result value
@@ -352,14 +368,26 @@ Boolean evalAssertionInContextImpl(
       raiseExceptionImpl(metaCtx,
         "assertion has not returned any result value"
         );
-    } else if (!isPair(metaCtx->data) 
-      || asCdr(metaCtx->data) != originalTop ) {
+      metaCtx->exceptionRaised = TRUE;
+      extractAP(metaCtx);
+    } else if ( !isPair(metaCtx->data) ) {
+      // our assertions have corrupted the data stack
+      pushNullCtxDataImpl(metaCtx);
+      pushOnTopCtxDataImpl(metaCtx, assertionTest);
+      raiseExceptionImpl(metaCtx,
+        "assertion has corrupted the data stack"
+        );      
+      metaCtx->exceptionRaised = TRUE;
+      extractAP(metaCtx);
+    } else if ( asCdr(metaCtx->data) != originalTop ) {
       // our assertions have corrupted the original context's data stack
       pushNullCtxDataImpl(metaCtx);
       pushOnTopCtxDataImpl(metaCtx, assertionTest);
       raiseExceptionImpl(metaCtx,
         "assertion has returned too many values OR corrupted the data stack"
         );
+      metaCtx->exceptionRaised = TRUE;
+      extractAP(metaCtx);
     } else {
       popCtxDataIntoImpl(metaCtx, assertionResult);
       if (isFalse(assertionResult)) {
@@ -385,6 +413,63 @@ Boolean evalAssertionInContextImpl(
   return assertionTrue;
 }
 \stopCCode
+
+\startTestCase[should evaluate assertions]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  ContextObj *rootCtx = jInterp->rootCtx;
+  AssertPtrNotNull(rootCtx);
+  DictObj *rootDict = rootCtx->dict;
+  AssertPtrNotNull(rootDict);
+  
+  JObj *trueBoolean      = newBoolean(jInterp, TRUE);
+  JObj *aTrueAssertion   = newAssertion(jInterp, trueBoolean);
+  JObj *falseBoolean     = newBoolean(jInterp, FALSE);
+  JObj *aFalseAssertion  = newAssertion(jInterp, falseBoolean);
+  JObj *isBooleanSym     = newSymbol(jInterp, "isBoolean", "CTest", 1);
+  JObj *dupSym           = newSymbol(jInterp, "dup1D", "CTest", 2);
+  JObj *complexBody      = concatLists(jInterp,
+    trueBoolean,
+    newPair(jInterp, 
+      concatLists(jInterp, dupSym, isBooleanSym),
+      NULL
+    )
+  );
+  JObj *complexAssertion = newAssertion(jInterp, complexBody);
+  
+  DictObj    *aDict = newDictionary(
+    jInterp,
+    "assertionCTestsDict",
+    rootDict
+  );
+  ContextObj* aCtx = newContext(
+    jInterp,
+    "assertionCTestsCtx",
+    NULL,
+    aDict,
+    NULL,
+    NULL
+  );
+  AssertPtrNotNull(aCtx);
+  //aCtx->showStack = TRUE;
+  //aCtx->tracingOn = TRUE;
+  //jInterp->debug  = TRUE;
+  pushCtxData(aCtx, falseBoolean);
+
+  Boolean result =
+    evalAssertionInContextImpl(aCtx, (AssertionObj*)aTrueAssertion);
+  AssertIntTrue(result);
+  
+  result =
+    evalAssertionInContextImpl(aCtx, (AssertionObj*)aFalseAssertion);
+  AssertIntFalse(result);
+
+  result =
+    evalAssertionInContextImpl(aCtx, (AssertionObj*)complexAssertion);
+//  AssertIntTrue(result);
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \startCHeader
 typedef void (EvalTextInContext)(

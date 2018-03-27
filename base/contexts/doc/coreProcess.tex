@@ -337,6 +337,68 @@ void prependListCtxProcessImpl(
 \stopCCode
 
 \startCHeader
+#define peekCtxProcess(aCtx)                   \
+  (                                            \
+    assert(aCtx),                              \
+    assert(getContextsClass(aCtx->jInterp)     \
+      ->peekCtxProcessFunc),                   \
+    (getContextsClass(aCtx->jInterp)           \
+      ->peekCtxProcessFunc(aCtx))              \
+  )
+
+#define peekCtxProcessInto(aCtx, aVar)                 \
+assert(aCtx);                                          \
+JObj* aVar = peekCtxProcess(aCtx);                     \
+if (aCtx->tracingOn) {                                 \
+  JoyLoLInterp *jInterp = aCtx->jInterp;               \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);    \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);               \
+  printLoL(aStrBuf, aVar);                             \
+  strBufPrintf(aStrBuf, " (peek)\n");                  \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));  \
+  strBufClose(aStrBuf);                                \
+}
+
+#define peekCtxProcessIntoImpl(aCtx, aVar)             \
+assert(aCtx);                                          \
+JObj* aVar = peekCtxProcessImpl(aCtx);                 \
+if (aCtx->tracingOn) {                                 \
+  JoyLoLInterp *jInterp = aCtx->jInterp;               \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);    \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);               \
+  printLoL(aStrBuf, aVar);                             \
+  strBufPrintf(aStrBuf, " (peek)\n");                  \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));  \
+  strBufClose(aStrBuf);                                \
+}
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* peekCtxProcessImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* peekCtxProcessImpl(
+  ContextObj* aCtx
+) {
+  assert(aCtx);
+  if (!aCtx->process) return NULL;
+
+  DEBUG(aCtx->jInterp, "peekCtxProcess: %p %p %zu\n",
+    aCtx->process, asType(aCtx->process), (size_t)asTag(aCtx->process)
+  );
+  assert(isPair(aCtx->process));
+  
+  JObj* peekedLoL = asCar(aCtx->process);
+  return peekedLoL;
+}
+\stopCCode
+
+\startCHeader
 #define popCtxProcess(aCtx)                    \
   (                                            \
     assert(aCtx),                              \

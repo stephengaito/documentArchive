@@ -558,6 +558,8 @@ void raiseExceptionImpl(
   Symbol     *message
 ) {
   assert(aCtx);
+  JoyLoLInterp* jInterp = aCtx->jInterp;
+  assert(jInterp);
   if (!message) message = "unknown";
 
   Symbol *file = "unknown(command)";
@@ -566,7 +568,11 @@ void raiseExceptionImpl(
     file = asFile(aCtx->command);
     line = asLine(aCtx->command);
   }
-  
+
+  DEBUG(jInterp, "raiseException %p [%s] (%s) <%s> %zu\n",
+    aCtx, aCtx->name, message, file, line
+  );
+
   wrapAP(aCtx);
   pushSymbolCtxData(aCtx, file);
   prependAP(aCtx);
@@ -578,6 +584,20 @@ void raiseExceptionImpl(
   prependAP(aCtx);
   wrapAP(aCtx);
   pushSymbolCtxProcess(aCtx, "raise");
+  
+  if (aCtx->tracingOn) {
+    DEBUG(jInterp, "raiseException -> tracing%s\n", "");
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(aStrBuf, "d>>");
+    printLoL(aStrBuf, aCtx->data);
+    strBufPrintf(aStrBuf, "\n");
+    strBufPrintf(aStrBuf, "p>>");
+    printLoL(aStrBuf, aCtx->process);
+    strBufPrintf(aStrBuf, "\n");
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+    DEBUG(jInterp, "raiseException <- tracing%s\n", "");
+  }
 }
 \stopCCode
 
@@ -609,6 +629,11 @@ Boolean reportExceptionImpl(
   ContextObj* aCtx
 ) {
   assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  DEBUG(jInterp, "reportException %p [%s] %zu\n",
+    aCtx, aCtx->name, aCtx->exceptionRaised
+  );
   if (!aCtx->exceptionRaised) return FALSE;
 
   extractAP(aCtx);
@@ -624,8 +649,6 @@ Boolean reportExceptionImpl(
   popCtxDataIntoImpl(aCtx, expLine);
   popCtxDataIntoImpl(aCtx, expFile);
   popCtxDataIntoImpl(aCtx, expStack);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
   StringBufferObj *aStrBuf = newStringBuffer(aCtx);
   strBufPrintf(aStrBuf, "\nUNHANDLED EXCEPTION:\n");
   printLoL(aStrBuf, expMsg);

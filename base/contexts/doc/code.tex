@@ -248,6 +248,7 @@ typedef struct contexts_class_struct {
   PushParsedTextCtx
     *pushParsedTextCtxDataFunc;
   PrependListCtx  *prependListCtxDataFunc;
+  PeekCtx         *peekCtxDataFunc;
   PopCtx          *popCtxDataFunc;
   ClearCtx        *clearCtxProcessFunc;
   PushCtx         *pushCtxProcessFunc;
@@ -262,6 +263,7 @@ typedef struct contexts_class_struct {
   PushParsedTextCtx
     *pushParsedTextCtxProcessFunc;
   PrependListCtx  *prependListCtxProcessFunc;
+  PeekCtx         *peekCtxProcessFunc;
   PopCtx          *popCtxProcessFunc;
   ExtendJoyLoL    *extendJoyLoLFunc;
   ExtendCtxJoyLoL *extendCtxJoyLoLFunc;
@@ -348,6 +350,7 @@ Boolean registerContexts(
   theCoAlg->pushParsedTextCtxDataFunc =
     pushParsedTextCtxDataImpl;
   theCoAlg->prependListCtxDataFunc = prependListCtxDataImpl;
+  theCoAlg->peekCtxDataFunc        = peekCtxDataImpl;
   theCoAlg->popCtxDataFunc         = popCtxDataImpl;
   
   theCoAlg->clearCtxProcessFunc    = clearCtxProcessImpl;
@@ -367,6 +370,7 @@ Boolean registerContexts(
     pushParsedTextCtxProcessImpl;
   theCoAlg->prependListCtxProcessFunc =
     prependListCtxProcessImpl;
+  theCoAlg->peekCtxProcessFunc      = peekCtxProcessImpl;
   theCoAlg->popCtxProcessFunc      = popCtxProcessImpl;
   
   theCoAlg->extendJoyLoLFunc       = extendJoyLoLImpl;
