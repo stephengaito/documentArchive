@@ -108,7 +108,71 @@ JObj* newAssertionImpl(
   strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
+\stopTestSuite
 
+\startTestSuite[parseAssertion]
+
+\startCHeader
+typedef AssertionObj *(ParseAssertion)(
+  JoyLoLInterp *jInterp,
+  Symbol       *assertionStr
+);
+
+#define parseAssertion(jInterp, assertionStr)       \
+  (                                                 \
+    assert(getAssertionsClass(jInterp)              \
+      ->parseAssertionFunc),                        \
+    (getAssertionsClass(jInterp)                    \
+      ->parseAssertionFunc(jInterp, assertionStr))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern AssertionObj* parseAssertionImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *assertionStr
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+AssertionObj* parseAssertionImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *assertionStr
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  JObj *assertionList = NULL;
+  if (assertionStr && (assertionStr[0] != 0)) {
+    TextObj *assertionText = createTextFromString(jInterp, assertionStr);
+    assertionList = parseAllSymbols(assertionText);
+    freeText(assertionText);
+  }
+  if (!assertionList) assertionList = newPair(jInterp, NULL, NULL);
+
+  return (AssertionObj*)newAssertionImpl(jInterp, assertionList);
+}
+\stopCCode
+
+\startTestCase[should parse an assertion]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertionObj *aNewAssertion = parseAssertion(jInterp, " true ");
+  AssertPtrNotNull(aNewAssertion);
+  AssertPtrNotNull(asType(aNewAssertion));
+  AssertIntEquals(asTag(aNewAssertion), AssertionsTag);
+  AssertPtrNotNull(asAssertion(aNewAssertion));
+  AssertIntTrue(asFlags(aNewAssertion));
+  AssertIntTrue(isAtom(aNewAssertion));
+  AssertIntTrue(isAssertion(aNewAssertion));
+  AssertIntFalse(isPair(aNewAssertion));  
+  AssertIntTrue(isPair(asAssertion(aNewAssertion)));
+  AssertIntTrue(isSymbol(asCar(asAssertion(aNewAssertion))));
+  AssertStrEquals(asSymbol(asCar(asAssertion(aNewAssertion))), "true");
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[isAssertion]
@@ -277,6 +341,7 @@ Boolean printAssertionCoAlg(
 typedef struct assertions_class_struct {
   JClass       super;
   NewAssertion      *newAssertionFunc;
+  ParseAssertion    *parseAssertionFunc;
 } AssertionsClass;
 
 \stopCHeader
@@ -313,7 +378,8 @@ Boolean registerAssertions(JoyLoLInterp *jInterp) {
   theCoAlg->super.registerFunc   = registerAssertionWords;
   theCoAlg->super.equalityFunc   = equalityBoolCoAlg;
   theCoAlg->super.printFunc      = printAssertionCoAlg;
-  theCoAlg->newAssertionFunc       = newAssertionImpl;
+  theCoAlg->newAssertionFunc     = newAssertionImpl;
+  theCoAlg->parseAssertionFunc   = parseAssertionImpl;
   size_t tag =
     registerJClass(jInterp, (JClass*)theCoAlg);
   

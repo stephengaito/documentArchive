@@ -8,7 +8,9 @@ typedef Boolean (ExtendJoyLoL)(
   JoyLoLInterp *jInterp,
   DictObj      *aDict,
   Symbol       *definedName,
+  AssertionObj *preCondition,
   CFunction    *aFunc,
+  AssertionObj *postCondition,
   Boolean       redefine
 );
 

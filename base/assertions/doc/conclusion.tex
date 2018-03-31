@@ -33,6 +33,7 @@ extern size_t joylol_register_assertions(JoyLoLInterp *jInterp);
 //#include <joylol/dictNodes.h>
 //#include <joylol/dictionaries.h>
 #include <joylol/texts.h>
+#include <joylol/parsers.h>
 #include <joylol/pairs.h>
 #include <joylol/cFunctions.h>
 #include <joylol/booleans.h>
@@ -53,7 +54,9 @@ extern size_t joylol_register_assertions(JoyLoLInterp *jInterp);
 \addCTestInclude{<joylol/cFunctions.h>}
 \addCTestInclude{<joylol/stringBuffers.h>}
 \addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/pairs.h>}
 \addCTestInclude{<joylol/booleans.h>}
+\addCTestInclude{<joylol/symbols.h>}
 \addCTestInclude{<joylol/assertions.h>}
 \addCTestInclude{<joylol/contexts.h>}
 \addCTestInclude{<joylol/assertions-private.h>}
@@ -67,6 +70,9 @@ extern size_t joylol_register_assertions(JoyLoLInterp *jInterp);
   requireLuaModule(lstate, "joylol.cFunctions");
   requireLuaModule(lstate, "joylol.stringBuffers");
   requireLuaModule(lstate, "joylol.texts");
+  requireLuaModule(lstate, "joylol.parsers");
+  requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.pairs");
   requireLuaModule(lstate, "joylol.dictionaries");
   requireLuaModule(lstate, "joylol.dictNodes");
   requireLuaModule(lstate, "joylol.contexts");

@@ -58,6 +58,8 @@ JObj* newPairImpl(
   assert(result);
   asCar(result) = car;
   asCdr(result) = cdr;
+  DEBUG(jInterp, "newPair %p %p %p\n",
+    result, car, cdr);
   return result;
 }
 \stopCCode
