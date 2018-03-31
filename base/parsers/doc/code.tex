@@ -208,7 +208,8 @@ JObj* parseList(
 
     nextSymbol(aText);
     DEBUG(aText->jInterp,
-      "parseList ns: %p\n", aText->sym);
+      "parseList ns: %p %zu\n",
+        aText->sym, (aText->sym ? (size_t)asTag(aText->sym) : 0));
     if (!aText->sym) {
       reportUnmatchedClosingSymbol(aText, closingChar);
       return firstPair;
@@ -221,6 +222,14 @@ JObj* parseList(
         reportMismatchedClosingSymbol(aText, closingChar,
                                       asSymbol(aText->sym)[0]);
       }
+      if (closingChar == '}') {
+        DEBUG(aText->jInterp, "parseList(assertion-a) %p %zu\n",
+          firstPair, (firstPair ? (size_t)asTag(firstPair) : 0));
+        firstPair = newAssertion(aText->jInterp, firstPair);
+        assert(isAssertion(firstPair));
+        DEBUG(aText->jInterp, "parseList(assertion-b) %p %zu\n",
+          firstPair, (firstPair ? (size_t)asTag(firstPair) : 0));
+      }
       return firstPair;
     }
     assert(aText->jInterp);
@@ -231,11 +240,6 @@ JObj* parseList(
       char matchingSymbol = matchingListSymbol(asSymbol(aText->sym));
       if (0 < matchingSymbol) {
         JObj *newList = parseList(aText, matchingSymbol);
-        if (matchingSymbol == '}') {
-          DEBUG(aText->jInterp, "parseList(assertion) %p\n", newList)
-          newList = newAssertion(aText->jInterp, newList);
-          assert(isAssertion(newList));
-        }
         asCar(aNewPair) = newList;
       } else asCar(aNewPair) = aText->sym;
     } else asCar(aNewPair) = aText->sym;

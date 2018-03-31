@@ -282,40 +282,54 @@ typedef Boolean (DefineJoyLoL)(
   JoyLoLInterp *jInterp,
   DictObj      *aDict,
   Symbol       *definedName,
+  AssertionObj *preCondition,
   JObj         *aLoL,
+  AssertionObj *postCondition,
   Boolean       redefine
 );
 
-#define defineJoyLoL(jInterp, aDict,      \
-  definedName, aLoL, redefine)            \
-  (                                       \
-    assert(getContextsClass(jInterp)      \
-      ->defineJoyLoLFunc),                \
-    (getContextsClass(jInterp)            \
-      ->defineJoyLoLFunc(jInterp, aDict,  \
-        definedName, aLoL, redefine))     \
+#define defineJoyLoL(jInterp, aDict, definedName,     \
+  preCondition, aLoL, postCondition, redefine)        \
+  (                                                   \
+    assert(getContextsClass(jInterp)                  \
+      ->defineJoyLoLFunc),                            \
+    (getContextsClass(jInterp)                        \
+      ->defineJoyLoLFunc(jInterp, aDict, definedName, \
+        preCondition, aLoL, postCondition, redefine   \
+      )                                               \
+    )                                                 \
   )
 
-#define defineJoyLoLIn(jInterp, aDict, definedName, aLoL) \
-  defineJoyLoL(jInterp, aDict, definedName, aLoL, FALSE)
-
-#define reDefineJoyLoLIn(jInterp, aDict, definedName, aLoL) \
-  defineJoyLoL(jInterp, aDict, definedName, aLoL, TRUE)
-
-#define defineJoyLoLInRoot(jInterp, definedName, aLoL)  \
-  (                                                     \
-    assert(jInterp),                                    \
-    assert(jInterp->rootCtx),                           \
-    defineJoyLoL(jInterp, jInterp->rootCtx->dict,       \
-      definedName, aLoL, FALSE)                         \
+#define defineJoyLoLIn(jInterp, aDict, definedName, \
+  preCondition, aLoL, postCondition)                \
+  defineJoyLoL(jInterp, aDict, definedName,         \
+    preCondition, aLoL, postCondition, FALSE        \
   )
 
-#define reDefineJoyLoLInRoot(jInterp, definedName, aLoL)  \
-  (                                                       \
-    assert(jInterp),                                      \
-    assert(jInterp->rootCtx),                             \
-    defineJoyLoL(jInterp, jInterp->rootCtx->dict,         \
-      definedName, aLoL, TRUE)                            \
+#define reDefineJoyLoLIn(jInterp, aDict, definedName, \
+  preCondition, aLoL, postCondition)                  \
+  defineJoyLoL(jInterp, aDict, definedName,           \
+    preCondition, aLoL, postCondition, TRUE           \
+  )
+
+#define defineJoyLoLInRoot(jInterp, definedName,                \
+  preCondition, aLoL, postCondition)                            \
+  (                                                             \
+    assert(jInterp),                                            \
+    assert(jInterp->rootCtx),                                   \
+    defineJoyLoL(jInterp, jInterp->rootCtx->dict, definedName,  \
+      preCondition, aLoL, postCondition, FALSE                  \
+    )                                                           \
+  )
+
+#define reDefineJoyLoLInRoot(jInterp, definedName,              \
+  preCondition, aLoL, postCondition)                            \
+  (                                                             \
+    assert(jInterp),                                            \
+    assert(jInterp->rootCtx),                                   \
+    defineJoyLoL(jInterp, jInterp->rootCtx->dict, definedName,  \
+      preCondition, aLoL, postCondition, TRUE                   \
+    )                                                           \
   )
 \stopCHeader
 
@@ -325,7 +339,9 @@ extern Boolean defineJoyLoLImpl(
   JoyLoLInterp *jInterp,
   DictObj      *aDict,
   Symbol       *definedName,
+  AssertionObj *preCondition,
   JObj         *aLoL,
+  AssertionObj *postCondition,
   Boolean       redefine
 );
 \stopCHeader
@@ -336,10 +352,14 @@ Boolean defineJoyLoLImpl(
   JoyLoLInterp *jInterp,
   DictObj      *aDict,
   Symbol       *definedName,
+  AssertionObj *preCondition,
   JObj         *aLoL,
+  AssertionObj *postCondition,
   Boolean       redefine
 ) {
   assert(aDict);
+  assert(preCondition);
+  assert(postCondition);
   
   DictNodeObj* aSym = getSymbolEntryInChild(aDict, definedName);
   assert(aSym);

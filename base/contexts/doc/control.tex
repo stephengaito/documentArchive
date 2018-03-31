@@ -683,10 +683,14 @@ static void defineAP(ContextObj* aCtx) {
   assert(aCtx);
   popCtxDataIntoImpl(aCtx, name);
   popCtxDataIntoImpl(aCtx, naming);
+  popCtxDataIntoImpl(aCtx, postCondition);
   popCtxDataIntoImpl(aCtx, definition);
+  popCtxDataIntoImpl(aCtx, preCondition);
   if (!isSymbol(name)) {
     pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, preCondition);
     pushOnTopCtxDataImpl(aCtx, definition);
+    pushOnTopCtxDataImpl(aCtx, postCondition);
     pushOnTopCtxDataImpl(aCtx, naming);
     pushOnTopCtxDataImpl(aCtx, name);
     raiseException(aCtx,
@@ -696,18 +700,46 @@ static void defineAP(ContextObj* aCtx) {
   }
   if (!isDictionary(naming)) {
     pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, preCondition);
     pushOnTopCtxDataImpl(aCtx, definition);
+    pushOnTopCtxDataImpl(aCtx, postCondition);
     pushOnTopCtxDataImpl(aCtx, naming);
     pushOnTopCtxDataImpl(aCtx, name);
     raiseException(aCtx,
       "define requires a dictionary as second");
     return;
   }
+  if (!isAssertion(postCondition)) {
+    printf("postCondition: %p %zu\n",
+      postCondition, (size_t)asTag(postCondition));
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, preCondition);
+    pushOnTopCtxDataImpl(aCtx, definition);
+    pushOnTopCtxDataImpl(aCtx, postCondition);
+    pushOnTopCtxDataImpl(aCtx, naming);
+    pushOnTopCtxDataImpl(aCtx, name);
+    raiseException(aCtx,
+      "define requires an assertion as third");
+    return;
+  }
+  if (!isAssertion(preCondition)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, preCondition);
+    pushOnTopCtxDataImpl(aCtx, definition);
+    pushOnTopCtxDataImpl(aCtx, postCondition);
+    pushOnTopCtxDataImpl(aCtx, naming);
+    pushOnTopCtxDataImpl(aCtx, name);
+    raiseException(aCtx,
+      "define requires an assertion as fifth");
+    return;
+  }
   defineJoyLoLIn(
     aCtx->jInterp,
     (DictObj*)naming,
     asSymbol(name),
-    definition
+    (AssertionObj*)preCondition,
+    definition,
+    (AssertionObj*)postCondition
   );
 }
 \stopCCode
