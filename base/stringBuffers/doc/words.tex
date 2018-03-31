@@ -47,7 +47,7 @@ Boolean registerStringBufferWords(
   JoyLoLInterp *jInterp,
   JClass       *theCoAlg
 ) {
-  extendJoyLoLInRoot(jInterp, "printLoL", printLoLAP);
+  extendJoyLoLInRoot(jInterp, "printLoL", "", printLoLAP, "");
   return TRUE;
 }
 \stopCCode

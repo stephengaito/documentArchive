@@ -349,13 +349,13 @@ Boolean registerNaturalWords(
   JClass       *theCoAlg
 ) {
   mpz_init(zero);
-  extendJoyLoLInRoot(jInterp, "isNatural", isNaturalAP);
-  extendJoyLoLInRoot(jInterp, "+",         addAP);
-  extendJoyLoLInRoot(jInterp, "-",         subtractAP);
-  extendJoyLoLInRoot(jInterp, "-rev",      subtractReverseAP);
-  extendJoyLoLInRoot(jInterp, "*",         multiplyAP);
-  extendJoyLoLInRoot(jInterp, "=nat",      equalNatAP);
-  extendJoyLoLInRoot(jInterp, "isZero",    isZeroAP);
+  extendJoyLoLInRoot(jInterp, "isNatural", "", isNaturalAP,       "");
+  extendJoyLoLInRoot(jInterp, "+",         "", addAP,             "");
+  extendJoyLoLInRoot(jInterp, "-",         "", subtractAP,        "");
+  extendJoyLoLInRoot(jInterp, "-rev",      "", subtractReverseAP, "");
+  extendJoyLoLInRoot(jInterp, "*",         "", multiplyAP,        "");
+  extendJoyLoLInRoot(jInterp, "=nat",      "", equalNatAP,        "");
+  extendJoyLoLInRoot(jInterp, "isZero",    "", isZeroAP,          "");
   
   return TRUE;
 }

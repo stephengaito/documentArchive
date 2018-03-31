@@ -71,10 +71,10 @@ Boolean registerJInterpWords(
   JoyLoLInterp *jInterp,
   JClass       *theCoAlg
 ) {
-  extendJoyLoLInRoot(jInterp, "writeOut",   writeOutAP);
-  extendJoyLoLInRoot(jInterp, "writeOutNL", writeOutNLAP);
-  extendJoyLoLInRoot(jInterp, "writeErr",   writeErrAP);
-  extendJoyLoLInRoot(jInterp, "writeErrNL", writeErrNLAP);
+  extendJoyLoLInRoot(jInterp, "writeOut",   "", writeOutAP,   "");
+  extendJoyLoLInRoot(jInterp, "writeOutNL", "", writeOutNLAP, "");
+  extendJoyLoLInRoot(jInterp, "writeErr",   "", writeErrAP,   "");
+  extendJoyLoLInRoot(jInterp, "writeErrNL", "", writeErrNLAP, "");
   return TRUE;
 }
 \stopCCode

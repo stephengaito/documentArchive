@@ -323,28 +323,28 @@ extern void initContextsAPSupport(JoyLoLInterp *jInterp);
 
 \startCCode
 void initContextsAPSupport(JoyLoLInterp *jInterp) {
-  extendJoyLoLInRoot(jInterp, "isContext",           isContextAP);
-  extendJoyLoLInRoot(jInterp, "definitions",         definitionsAP);
-  extendJoyLoLInRoot(jInterp, "definitionsIn",       definitionsInAP);
-  extendJoyLoLInRoot(jInterp, "loadExtension",       loadExtensionAP);
-  extendJoyLoLInRoot(jInterp, "loadPath",            loadPathAP);
-  extendJoyLoLInRoot(jInterp, "load",                loadFileAP);
-  extendJoyLoLInRoot(jInterp, "lispLoad",            lispLoadFileAP);
-  extendJoyLoLInRoot(jInterp, "showLoadExtensions",  showLoadExtensionsAP);
-  extendJoyLoLInRoot(jInterp, "showLoadPaths",       showLoadPathsAP);
-  extendJoyLoLInRoot(jInterp, "showStack",           showStackAP);
-  extendJoyLoLInRoot(jInterp, "showStackOn",         showStackOnAP);
-  extendJoyLoLInRoot(jInterp, "showStackOff",        showStackOffAP);
-  extendJoyLoLInRoot(jInterp, "tracingOn",           tracingOnAP);
-  extendJoyLoLInRoot(jInterp, "tracingOff",          tracingOffAP);
-  extendJoyLoLInRoot(jInterp, "verboseOn",           verboseOnAP);
-  extendJoyLoLInRoot(jInterp, "verboseOff",          verboseOffAP);
-  extendJoyLoLInRoot(jInterp, "debugOn",             debugOnAP);
-  extendJoyLoLInRoot(jInterp, "debugOff",            debugOffAP);
-  extendJoyLoLInRoot(jInterp, "checkingOn",          checkingOnAP);
-  extendJoyLoLInRoot(jInterp, "checkingOff",         checkingOffAP);
-  extendJoyLoLInRoot(jInterp, "whatIsThisD",         whatIsThisDAP);
-  extendJoyLoLInRoot(jInterp, "whatIsThisP",         whatIsThisPAP);
-  extendJoyLoLInRoot(jInterp, "exitJoylol",          exitJoylolAP);
+  extendJoyLoLInRoot(jInterp, "isContext",          "", isContextAP,          "");
+  extendJoyLoLInRoot(jInterp, "definitions",        "", definitionsAP,        "");
+  extendJoyLoLInRoot(jInterp, "definitionsIn",      "", definitionsInAP,      "");
+  extendJoyLoLInRoot(jInterp, "loadExtension",      "", loadExtensionAP,      "");
+  extendJoyLoLInRoot(jInterp, "loadPath",           "", loadPathAP,           "");
+  extendJoyLoLInRoot(jInterp, "load",               "", loadFileAP,           "");
+  extendJoyLoLInRoot(jInterp, "lispLoad",           "", lispLoadFileAP,       "");
+  extendJoyLoLInRoot(jInterp, "showLoadExtensions", "", showLoadExtensionsAP, "");
+  extendJoyLoLInRoot(jInterp, "showLoadPaths",      "", showLoadPathsAP,      "");
+  extendJoyLoLInRoot(jInterp, "showStack",          "", showStackAP,          "");
+  extendJoyLoLInRoot(jInterp, "showStackOn",        "", showStackOnAP,        "");
+  extendJoyLoLInRoot(jInterp, "showStackOff",       "", showStackOffAP,       "");
+  extendJoyLoLInRoot(jInterp, "tracingOn",          "", tracingOnAP,          "");
+  extendJoyLoLInRoot(jInterp, "tracingOff",         "", tracingOffAP,         "");
+  extendJoyLoLInRoot(jInterp, "verboseOn",          "", verboseOnAP,          "");
+  extendJoyLoLInRoot(jInterp, "verboseOff",         "", verboseOffAP,         "");
+  extendJoyLoLInRoot(jInterp, "debugOn",            "", debugOnAP,            "");
+  extendJoyLoLInRoot(jInterp, "debugOff",           "", debugOffAP,           "");
+  extendJoyLoLInRoot(jInterp, "checkingOn",         "", checkingOnAP,         "");
+  extendJoyLoLInRoot(jInterp, "checkingOff",        "", checkingOffAP,        "");
+  extendJoyLoLInRoot(jInterp, "whatIsThisD",        "", whatIsThisDAP,        "");
+  extendJoyLoLInRoot(jInterp, "whatIsThisP",        "", whatIsThisPAP,        "");
+  extendJoyLoLInRoot(jInterp, "exitJoylol",         "", exitJoylolAP,         "");
 }
 \stopCCode

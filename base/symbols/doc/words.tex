@@ -56,8 +56,8 @@ Boolean registerSymbolWords(
   DictNodeObj* newLine = getSymbolEntry(dict, "newLine");
   newLine->value = newSymbolImpl(jInterp, "\n", "newLine", 0, TRUE);
 
-  extendJoyLoLInRoot(jInterp, "isSymbol", isSymbolAP);
-  extendJoyLoLInRoot(jInterp, "=Sym",     equalSymbolAP);
+  extendJoyLoLInRoot(jInterp, "isSymbol", "", isSymbolAP,    "");
+  extendJoyLoLInRoot(jInterp, "=Sym",     "", equalSymbolAP, "");
 
   return TRUE;
 }

@@ -17,7 +17,7 @@ Boolean registerCrossCompilerWords(
   JClass       *theCoAlg
 ) {
   assert(jInterp);
-  extendJoyLoLInRoot(jInterp, "addFragment", addFragmentAP);
+  extendJoyLoLInRoot(jInterp, "addFragment", "", addFragmentAP, "");
   
   return TRUE;
 }

@@ -18,72 +18,190 @@ typedef Boolean (ExtendCtxJoyLoL)(
   JoyLoLInterp *jInterp,
   DictObj      *aDict,
   Symbol       *definedName,
+  AssertionObj *preCondition,
   CtxCFunction *aFunc,
+  AssertionObj *postCondition,
   Boolean       redefine
 );
 
 #define extendJoyLoL(jInterp, aDict,      \
-  definedName, aFunc, redefine)           \
+  definedName, preStr, aFunc, postStr,    \
+  redefine)                               \
   (                                       \
     assert(getContextsClass(jInterp)      \
       ->extendJoyLoLFunc),                \
     (getContextsClass(jInterp)            \
       ->extendJoyLoLFunc(jInterp, aDict,  \
-        definedName, aFunc, redefine))    \
+        definedName,                      \
+        parseAssertion(jInterp, preStr),  \
+        aFunc,                            \
+        parseAssertion(jInterp, postStr), \
+        redefine                          \
+      )                                   \
+    )                                     \
   )
   
-#define extendJoyLoLIn(jInterp, aDict, definedName, aFunc) \
-  extendJoyLoL(jInterp, aDict, definedName, aFunc, FALSE)
-  
-#define reExtendJoyLoLIn(jInterp, aDict, definedName, aFunc) \
-  extendJoyLoL(jInterp, aDict, definedName, aFunc, TRUE)
-  
-#define extendJoyLoLInRoot(jInterp, definedName, aFunc) \
-  (                                                     \
-    assert(jInterp),                                    \
-    assert(jInterp->rootCtx),                           \
-    extendJoyLoL(jInterp, jInterp->rootCtx->dict,       \
-      definedName, aFunc, FALSE)                        \
-  )
-  
-#define reExtendJoyLoLInRoot(jInterp, definedName, aFunc) \
+#define extendJoyLoLObj(jInterp, aDict,                   \
+  definedName, preCond, aFunc, postCond, redefine)        \
   (                                                       \
-    assert(jInterp),                                      \
-    assert(jInterp->rootCtx),                             \
-    extendJoyLoL(jInterp, jInterp->rootCtx->dict,         \
-      definedName, aFunc, TRUE)                           \
+    assert(getContextsClass(jInterp)                      \
+      ->extendJoyLoLFunc),                                \
+    (getContextsClass(jInterp)                            \
+      ->extendJoyLoLFunc(jInterp, aDict,                  \
+        definedName, preCond, aFunc, postCond, redefine)) \
+  )
+
+#define extendJoyLoLIn(jInterp, aDict, definedName, \
+  preStr, aFunc, postStr)                           \
+  extendJoyLoL(jInterp, aDict, definedName,         \
+    preStr, aFunc, postStr, FALSE                   \
+  )
+  
+#define reExtendJoyLoLIn(jInterp, aDict, definedName, \
+  preStr, aFunc, postStr)                             \
+  extendJoyLoL(jInterp, aDict, definedName,           \
+    preStr, aFunc, postStr, TRUE                      \
+  )
+  
+#define extendJoyLoLObjIn(jInterp, aDict, definedName,  \
+  preCond, aFunc, postCond)                              \
+  extendJoyLoLObj(jInterp, aDict, definedName,          \
+    preCond, aFunc, postCond, FALSE                     \
+  )
+  
+#define reExtendJoyLoLObjIn(jInterp, aDict, definedName,  \
+  preCond, aFunc, postCond)                               \
+  extendJoyLoLObj(jInterp, aDict, definedName,            \
+    preCond, aFunc, postCond, TRUE                        \
+  )
+  
+#define extendJoyLoLInRoot(jInterp, definedName,  \
+  preStr, aFunc, postStr)                         \
+  (                                               \
+    assert(jInterp),                              \
+    assert(jInterp->rootCtx),                     \
+    extendJoyLoL(jInterp, jInterp->rootCtx->dict, \
+      definedName, preStr, aFunc, postStr, FALSE) \
+  )
+  
+#define reExtendJoyLoLInRoot(jInterp, definedName,  \
+  preStr, aFunc, postStr)                           \
+  (                                                 \
+    assert(jInterp),                                \
+    assert(jInterp->rootCtx),                       \
+    extendJoyLoL(jInterp, jInterp->rootCtx->dict,   \
+      definedName, preStr, aFunc, postStr, TRUE)    \
+  )
+
+#define extendJoyLoLObjInRoot(jInterp, definedName,   \
+  preCond, aFunc, postCond)                           \
+  (                                                   \
+    assert(jInterp),                                  \
+    assert(jInterp->rootCtx),                         \
+    extendJoyLoLObj(jInterp, jInterp->rootCtx->dict,  \
+      definedName, preCond, aFunc, postCond, FALSE)   \
+  )
+  
+#define reExtendJoyLoLObjInRoot(jInterp, definedName, \
+  preCond, aFunc, postCond)                           \
+  (                                                   \
+    assert(jInterp),                                  \
+    assert(jInterp->rootCtx),                         \
+    extendJoyLoLObj(jInterp, jInterp->rootCtx->dict,  \
+      definedName, preCond, aFunc, postCond, TRUE)    \
   )
 
 #define extendCtxJoyLoL(jInterp, aDict,     \
-  definedName, aFunc, redefine)             \
+  definedName, preStr, aFunc, postStr,      \
+  redefine)                                 \
   (                                         \
     assert(getContextsClass(jInterp)        \
       ->extendCtxJoyLoLFunc),               \
     (getContextsClass(jInterp)              \
       ->extendCtxJoyLoLFunc(jInterp, aDict, \
-        definedName, aFunc, redefine))      \
+        definedName,                        \
+        parseAssertion(jInterp, preStr),    \
+        aFunc,                              \
+        parseAssertion(jInterp, preStr),    \
+        redefine                            \
+      )                                     \
+    )                                       \
   )
   
-#define extendCtxJoyLoLIn(jInterp, aDict, definedName, aFunc) \
-  extendCtxJoyLoL(jInterp, aDict, definedName, aFunc, FALSE)
+#define extendCtxJoyLoLObj(jInterp, aDict,          \
+  definedName, preCond, aFunc, postCond, redefine)  \
+  (                                                 \
+    assert(getContextsClass(jInterp)                \
+      ->extendCtxJoyLoLFunc),                       \
+    (getContextsClass(jInterp)                      \
+      ->extendCtxJoyLoLFunc(jInterp, aDict,         \
+        definedName, preCond, aFunc, postCond,      \
+        redefine                                    \
+      )                                             \
+    )                                               \
+  )
   
-#define reExtendCtxJoyLoLIn(jInterp, aDict, definedName, aFunc) \
-  extendCtxJoyLoL(jInterp, aDict, definedName, aFunc, TRUE)
+#define extendCtxJoyLoLIn(jInterp, aDict, definedName,  \
+  preStr, aFunc, postStr)                               \
+  extendCtxJoyLoL(jInterp, aDict, definedName,          \
+    preStr, aFunc, postStr, FALSE                       \
+  )
   
-#define extendCtxJoyLoLInRoot(jInterp, definedName, aFunc)\
+#define reExtendCtxJoyLoLIn(jInterp, aDict, definedName,  \
+  preStr, aFunc, postStr)                                 \
+  extendCtxJoyLoL(jInterp, aDict, definedName,            \
+    preStr, aFunc, postStr, TRUE                          \
+  )
+  
+#define extendCtxJoyLoLObjIn(jInterp, aDict, definedName, \
+  preCond, aFunc, postCond)                               \
+  extendCtxJoyLoLObj(jInterp, aDict, definedName,         \
+    preCond, aFunc, postCond, FALSE                       \
+  )
+  
+#define reExtendCtxJoyLoLObjIn(jInterp, aDict, definedName, \
+  preCond, aFunc, postCond)                                 \
+  extendCtxJoyLoL(jInterp, aDict, definedName,              \
+    preCond, aFunc, postCond, TRUE                          \
+  )
+  
+#define extendCtxJoyLoLInRoot(jInterp, definedName,   \
+  preStr, aFunc, postStr)                             \
+  (                                                   \
+    assert(jInterp),                                  \
+    assert(jInterp->rootCtx),                         \
+    extendCtxJoyLoL(jInterp, jInterp->rootCtx->dict,  \
+      definedName, preStr, aFunc, postStr, FALSE)     \
+  )
+  
+#define reExtendCtxJoyLoLInRoot(jInterp, definedName, \
+  preStr, aFunc, postStr)                             \
+  (                                                   \
+    assert(jInterp),                                  \
+    assert(jInterp->rootCtx),                         \
+    extendCtxJoyLoL(jInterp, jInterp->rootCtx->dict,  \
+      definedName, preStr, aFunc, postStr, TRUE       \
+    )                                                 \
+  )
+
+#define extendCtxJoyLoLObjInRoot(jInterp, definedName,  \
+  preCond, aFunc, postCond)                             \
+  (                                                     \
+    assert(jInterp),                                    \
+    assert(jInterp->rootCtx),                           \
+    extendCtxJoyLoLObj(jInterp, jInterp->rootCtx->dict, \
+      definedName, preCond, aFunc, postCond, FALSE      \
+    )                                                   \
+  )
+  
+#define reExtendCtxJoyLoLObjInRoot(jInterp, definedName,  \
+  preCond, aFunc, postCond)                               \
   (                                                       \
     assert(jInterp),                                      \
     assert(jInterp->rootCtx),                             \
     extendCtxJoyLoL(jInterp, jInterp->rootCtx->dict,      \
-      definedName, aFunc, FALSE)                          \
-  )
-  
-#define reExtendCtxJoyLoLInRoot(jInterp, definedName, aFunc)\
-  (                                                         \
-    assert(jInterp),                                        \
-    assert(jInterp->rootCtx),                               \
-    extendCtxJoyLoL(jInterp, jInterp->rootCtx->dict,        \
-      definedName, aFunc, TRUE)                             \
+      definedName, preCond, aFunc, postCond, TRUE         \
+    )                                                     \
   )
 \stopCHeader
 
@@ -93,7 +211,9 @@ extern Boolean extendJoyLoLImpl(
   JoyLoLInterp *jInterp,
   DictObj      *aDict,
   Symbol       *definedName,
+  AssertionObj *preCondition,
   CFunction    *aFunc,
+  AssertionObj *postCondition,
   Boolean       redefine
 );
 
@@ -101,7 +221,9 @@ extern Boolean extendCtxJoyLoLImpl(
   JoyLoLInterp *jInterp,
   DictObj      *aDict,
   Symbol       *definedName,
+  AssertionObj *preCondition,
   CtxCFunction *aFunc,
+  AssertionObj *postCondition,
   Boolean       redefine
 );
 \stopCHeader
@@ -112,10 +234,14 @@ Boolean extendJoyLoLImpl(
   JoyLoLInterp *jInterp,
   DictObj      *aDict,
   Symbol       *definedName,
+  AssertionObj *preCondition,
   CFunction    *aFunc,
+  AssertionObj *postCondition,
   Boolean       redefine
 ) {
   assert(aDict);
+  assert(preCondition);
+  assert(postCondition);
 
   DictNodeObj* aSym = getSymbolEntryInChild(aDict, definedName);
   assert(aSym);
@@ -131,10 +257,14 @@ Boolean extendCtxJoyLoLImpl(
   JoyLoLInterp *jInterp,
   DictObj      *aDict,
   Symbol       *definedName,
+  AssertionObj *preCondition,
   CtxCFunction *aFunc,
+  AssertionObj *postCondition,
   Boolean       redefine
 ) {
   assert(aDict);
+  assert(preCondition);
+  assert(postCondition);
 
   DictNodeObj* aSym = getSymbolEntryInChild(aDict, definedName);
   assert(aSym);

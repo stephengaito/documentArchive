@@ -397,9 +397,9 @@ Boolean registerAssertionWords(
 ) {
   assert(jInterp);
   
-  extendJoyLoLInRoot(jInterp, "isAssertion",      isAssertionAP);
-  extendJoyLoLInRoot(jInterp, "assertionIsTrue",  assertionIsTrueAP);
-  extendJoyLoLInRoot(jInterp, "assertionIsFalse", assertionIsFalseAP);
+  extendJoyLoLInRoot(jInterp, "isAssertion",      "", isAssertionAP,      "");
+  extendJoyLoLInRoot(jInterp, "assertionIsTrue",  "", assertionIsTrueAP,  "");
+  extendJoyLoLInRoot(jInterp, "assertionIsFalse", "", assertionIsFalseAP, "");
 
   return TRUE;
 }

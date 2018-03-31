@@ -44,7 +44,7 @@ Boolean registerDictionaryWords(
   JClass       *theCoAlg
 ) {
   assert(jInterp);
-  extendJoyLoLInRoot(jInterp, "lookup", lookupAP);
+  extendJoyLoLInRoot(jInterp, "lookup", "", lookupAP, "");
   return TRUE;
 }
 \stopCCode

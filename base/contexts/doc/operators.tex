@@ -240,34 +240,34 @@ Boolean initContextAOOperators(
   JoyLoLInterp *jInterp
 ) {
   // unary operators
-  extendJoyLoLInRoot(jInterp, "pop1D", pop1DAP);
-  extendJoyLoLInRoot(jInterp, "pop1P", pop1PAP);
-  extendJoyLoLInRoot(jInterp, "dup1D", dup1DAP);
-  extendJoyLoLInRoot(jInterp, "dup1P", dup1PAP);
+  extendJoyLoLInRoot(jInterp, "pop1D", "", pop1DAP, "");
+  extendJoyLoLInRoot(jInterp, "pop1P", "", pop1PAP, "");
+  extendJoyLoLInRoot(jInterp, "dup1D", "", dup1DAP, "");
+  extendJoyLoLInRoot(jInterp, "dup1P", "", dup1PAP, "");
   //
   // binary operators
   //
-  extendJoyLoLInRoot(jInterp, "swap12D", swap12DAP);
-  extendJoyLoLInRoot(jInterp, "swap12P", swap12PAP);
-  extendJoyLoLInRoot(jInterp, "pop2D",   pop2DAP);
-  extendJoyLoLInRoot(jInterp, "pop2P",   pop2PAP);
-  extendJoyLoLInRoot(jInterp, "pop12D",  pop12DAP);
-  extendJoyLoLInRoot(jInterp, "pop12P",  pop12PAP);
-  extendJoyLoLInRoot(jInterp, "dup2D",   dup2DAP);
-  extendJoyLoLInRoot(jInterp, "dup2P",   dup2PAP);
+  extendJoyLoLInRoot(jInterp, "swap12D", "", swap12DAP, "");
+  extendJoyLoLInRoot(jInterp, "swap12P", "", swap12PAP, "");
+  extendJoyLoLInRoot(jInterp, "pop2D",   "", pop2DAP,   "");
+  extendJoyLoLInRoot(jInterp, "pop2P",   "", pop2PAP,   "");
+  extendJoyLoLInRoot(jInterp, "pop12D",  "", pop12DAP,  "");
+  extendJoyLoLInRoot(jInterp, "pop12P",  "", pop12PAP,  "");
+  extendJoyLoLInRoot(jInterp, "dup2D",   "", dup2DAP,   "");
+  extendJoyLoLInRoot(jInterp, "dup2P",   "", dup2PAP,   "");
   //
   // ternary operators
   //
-  extendJoyLoLInRoot(jInterp, "swap13D",   swap13DAP);
-  extendJoyLoLInRoot(jInterp, "swap13P",   swap13PAP);
-  extendJoyLoLInRoot(jInterp, "swap23D",   swap23DAP);
-  extendJoyLoLInRoot(jInterp, "swap23P",   swap23PAP);
-  extendJoyLoLInRoot(jInterp, "rollupD",   rollupDAP);
-  extendJoyLoLInRoot(jInterp, "rollupP",   rollupPAP);
-  extendJoyLoLInRoot(jInterp, "rolldownD", rolldownDAP);
-  extendJoyLoLInRoot(jInterp, "rolldownP", rolldownPAP);
-  extendJoyLoLInRoot(jInterp, "choiceD",   choiceDAP);
-  extendJoyLoLInRoot(jInterp, "choiceP",   choicePAP);
+  extendJoyLoLInRoot(jInterp, "swap13D",   "", swap13DAP,   "");
+  extendJoyLoLInRoot(jInterp, "swap13P",   "", swap13PAP,   "");
+  extendJoyLoLInRoot(jInterp, "swap23D",   "", swap23DAP,   "");
+  extendJoyLoLInRoot(jInterp, "swap23P",   "", swap23PAP,   "");
+  extendJoyLoLInRoot(jInterp, "rollupD",   "", rollupDAP,   "");
+  extendJoyLoLInRoot(jInterp, "rollupP",   "", rollupPAP,   "");
+  extendJoyLoLInRoot(jInterp, "rolldownD", "", rolldownDAP, "");
+  extendJoyLoLInRoot(jInterp, "rolldownP", "", rolldownPAP, "");
+  extendJoyLoLInRoot(jInterp, "choiceD",   "", choiceDAP,   "");
+  extendJoyLoLInRoot(jInterp, "choiceP",   "", choicePAP,   "");
   
   return TRUE;
 }

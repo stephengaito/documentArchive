@@ -66,6 +66,8 @@ extern size_t joylol_register_crossCompilers(JoyLoLInterp *jInterp);
 \startCTest
   addJoyLoLLuaPath(lstate);
   requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.assertions");
+  requireLuaModule(lstate, "joylol.pairs");
   requireLuaModule(lstate, "joylol.contexts");
   requireLuaModule(lstate, "joylol.cFunctions");
   requireLuaModule(lstate, "joylol.dictionaries");

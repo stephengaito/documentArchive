@@ -407,9 +407,9 @@ Boolean registerBooleanWords(
   DictNodeObj* false = getSymbolEntry(dict, "false");
   false->value = newBoolean(jInterp, FALSE);
 
-  extendJoyLoLInRoot(jInterp, "isBoolean", isBooleanAP);
-  extendJoyLoLInRoot(jInterp, "isTrue",    isTrueAP);
-  extendJoyLoLInRoot(jInterp, "isFalse",   isFalseAP);
+  extendJoyLoLInRoot(jInterp, "isBoolean", "", isBooleanAP, "");
+  extendJoyLoLInRoot(jInterp, "isTrue",    "", isTrueAP,    "");
+  extendJoyLoLInRoot(jInterp, "isFalse",   "", isFalseAP,   "");
 
   return TRUE;
 }

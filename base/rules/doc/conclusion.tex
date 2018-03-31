@@ -61,6 +61,8 @@ extern size_t joylol_register_rules(JoyLoLInterp *jInterp);
 \startCTest
   addJoyLoLLuaPath(lstate);
   requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.assertions");
+  requireLuaModule(lstate, "joylol.pairs");
   requireLuaModule(lstate, "joylol.cFunctions");
   requireLuaModule(lstate, "joylol.texts");
   requireLuaModule(lstate, "joylol.contexts");

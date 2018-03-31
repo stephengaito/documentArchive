@@ -48,8 +48,8 @@ Boolean registerPairWords(
   JoyLoLInterp *jInterp,
   JClass       *theCoAlg
 ) {
-  extendJoyLoLInRoot(jInterp, "isPair",        isPairAP);
-  extendJoyLoLInRoot(jInterp, "isAtom",        isAtomAP);
+  extendJoyLoLInRoot(jInterp, "isPair", "", isPairAP, "");
+  extendJoyLoLInRoot(jInterp, "isAtom", "", isAtomAP, "");
   
   return TRUE;
 }
