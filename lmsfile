@@ -6,7 +6,7 @@ contextDoc.targets{
   mainDoc  = 'hilbertsProgram.tex',
   docFiles = {
     'preface.tex',
-    'abstract.tex',
+    'introduction.tex',
   },
   docDir    = 'doc',
 }

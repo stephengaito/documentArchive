@@ -223,4 +223,5 @@ TSWLatexianTemp*
 *.pdf
 *.tuc
 *.swp
+*Bib.lua
 
