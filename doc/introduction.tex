@@ -2,13 +2,15 @@
 
 \chapter[title=Introduction]
 
+\section[title=Goals]
+
 Every long term researcher should have a silly question, if only to keep 
 them focused upon whole problems amidst all of the unending detail. My 
 silly question is:
 
 \startalignment[center] Why do babies babble?\stopalignment
 
-\vspace[eX]
+\blank[big]
 
 There are (at least) two aspects to this question:
 
@@ -33,7 +35,7 @@ Reality, you must first provide a mathematically rigorous theory of
 Mathematics itself. This document is devoted to providing just such a 
 rigorous foundation for Mathematics. 
 
-Since the Greeks, western influenced Philosophical, Scientific, 
+Since the ancient Greeks, western influenced Philosophical, Scientific, 
 Mathematical practice has been to equate rigour with proofs of 
 \quote{Truth}. Euclid's \quote{Elements} has, for just over two millennia, 
 provided the pre-eminent example of this paradigm of rigorous proof. 
@@ -41,5 +43,92 @@ However, G\"odel's two Incompleteness theorems, show that classical logic
 is unable to provide the rigorous foundations we require. This is the 
 failure of Hilbert's \emph{logical} Program. 
 
+Essentially, G\"odel's work around the early 1930's represent the first 
+contributions to the theory of computation. G\"odel's theorems from this 
+period concern themselves with our ability to compute \quote{Truth}, and 
+the fact that such computation of \quote{Truth}, is only partially 
+recursive, rather than totally recursive.
 
+Instead of computing \quote{Truth}, is there a more useful computation 
+which might provide a foundation of Mathematics? The objective of this 
+document is to show that the answer to this question is yes by exploring 
+Hilbert's Program within a \emph{computational} framework. 
+
+\section[title=Some philosophy]
+
+In Western philosophy, since at least the time of the ancient Greeks, 
+there have been a wide range of Philosophical theories of the 
+\quote{Reality} of \quote{Reality}. Our objective in building a rigorous 
+Mathematical theory of Reality is not to prove any of these Philosophical 
+theories (in)correct. Instead our objective, and really the only one 
+available \emph{Mathematically}, is to explore what a finite computational 
+device can learn about Reality. 
+
+Ignoring Hume's \quote{Problem of Induction} for the moment, as a 
+Scientist and Engineer, like any young child, I live in the belief that I 
+can both learn about and, more importantly, \emph{interact} with Reality. 
+To bastardize Descartes, \emph{from moment to moment, I can make marks in 
+the sand, therefore I am}.
+
+It is naive to assert that finite beings, such as ourselves, can not learn 
+to predict at least some of the future. Russell's farmyard birds, given 
+their limited cognitive abilities, \emph{are rational} to expect to be 
+feed daily. However, for any \emph{finite} being, there will always be 
+events, some highly critical events, which are outside of that being's 
+ability to know about and hence predict. Understanding these limits of 
+being finite beings, is the true import of Hume's Problem. 
+
+We \emph{can} build (finite) computational devices. I am writing this 
+document using one such device, you are no doubt reading this document 
+using at least one other. So it is reasonable to expect \emph{finitist} 
+Mathematics to be founded computationally. Hilbert's primary objective was 
+to provide a rigorous foundation for Analysis whose metamathematics is 
+finitist.
+
+\TODO{With standard computation... need to define ordinals.... need axiom 
+of choice to go beyond $\omega$.} 
+
+We can persue this objective in two distinct ways. Most \quote{simply}, we 
+can view Analysis to be about (measurement) \emph{processes}. If instead 
+we allow ourselves to assume the existence of a computation variant of the 
+Axiom of Choice, we can interpret Zermelo–Fraenkel set theory (with the 
+Axiom of Choice) computationally. This allows us (assuming the Axiom of 
+Choice) to found all of classical Analysis. In both cases, the 
+meta$^*$-mathematics will be finitist. The difference between these two 
+approaches will be in the slightly different (internal) logics associated 
+with the two approaches. I conjecture that these different logics provide 
+an explanation of the \quote{strangeness} of Quantum Mechanics. 
+
+\section[title=Strategy]
+
+This document will provide a rigorous \emph{computational} foundation of 
+Mathematics, by... 
+
+We will do this in a number of distinct steps. Firstly, by defining a 
+computational langauge, JoyLoL (\quote{The Joy of Lists of 
+Lists}\footnote{Or is it \quote{The Joy of Laughing out Loud}?}). JoyLoL 
+is a functional \emph{concatenative} language based upon Manfred von 
+Thun's language Joy, \cite{vonThun1994overview}. The critically important 
+aspect of JoyLoL is that it is constructed to be a fixed point of the 
+semantics functor. This means that JoyLoL provides its own denotation, 
+operational and axiomatic semantics. JoyLoL does not rely upon any other 
+\quote{pre-existing} structures or set theory to define its meaning. An 
+other important aspect of JoyLoL is that it is a \emph{concatenative} 
+function language. Almost all other functional programming languages are 
+based upon Church's $\lambda$-calculus, importantly, this means that most 
+such langauges are focused upon function evaluation and substitution. From 
+a categorical point of view, this means that the collection of 
+computational traces forms a Topos. Being \emph{concatenative}, the 
+collection of JoyLoL computational traces forms a Category, which also 
+happens to be a Topos. The distinction here is important. The requirements 
+of being a Category are much simpler and valid of many more distinct 
+sub-collections of computational traces. 
+
+, we can construct the structure of all JoyLoL computational traces. We 
+can define the collection of \emph{finite} substructures as those 
+substructures for which a simple \emph{short} JoyLoL program \emph{halts}. 
+These finite substructures 
+
+Since there \emph{are} JoyLoL computations which do not halt, this 
+structure 
 
