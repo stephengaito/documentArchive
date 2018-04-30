@@ -2,18 +2,28 @@
 
 \usemodule[t-diSimp]
 
+\setShortTitle{Hilbert's Program}
+
 \usebtxdataset[hilbertsProgramBib.lua]
 
 \starttext
 
-\component preface
+\placeTitlePage{Hilbert's Program Revisited}
 
+\startfrontmatter
+\component preface
+\startchapter[title=Contents]
+  \placecontent[criterium=all]
+\stopchapter
+\stopfrontmatter
+
+\startbodymatter
 \component introduction
+\stopbodymatter
 
 \startbackmatter
-  \startchapter[title=Bibliography]
-    \placelistofpublications
-  \stopchapter
+\chapter[title=Bibliography]
+  \placelistofpublications
 \stopbackmatter
 
 \stoptext
