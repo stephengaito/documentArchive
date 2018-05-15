@@ -17,3 +17,30 @@ operationalized correctly?
 talk about intuitive "ordinals", ""
 
 Need to "prove" something simple
+
+
+Define DictNode:
+
+\starttyping
+typedef struct joylol_object_struct {
+  JClass    *type;
+  TagType    tag;
+  FlagsType  flags; // an arbitrary collection of bits
+} JObj;
+
+typedef struct dictNode_object_struct {
+  JObj         super;
+  Symbol      *symbol;
+  JObj        *preObs;
+  JObj        *value;
+  JObj        *postObs;
+  DictNodeObj *left;
+  DictNodeObj *right;
+  DictNodeObj *previous;
+  DictNodeObj *next;
+  size_t       height;
+  long         balance;
+} DictNodeObj;
+\stoptyping
+
+
