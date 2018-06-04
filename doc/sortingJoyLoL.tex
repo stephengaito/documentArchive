@@ -1,0 +1,30 @@
+% A ConTeXt document
+
+\usemodule[t-diSimp]
+
+\setShortTitle{Sorting JoyLoL}
+
+\usebtxdataset[sortingJoyLoLBib.lua]
+
+\starttext
+
+\placeTitlePage{Exploring Proof in JoyLoL using Sorting}
+
+\startfrontmatter
+\component preface
+\startchapter[title=Contents]
+  \placecontent[criterium=all]
+\stopchapter
+\stopfrontmatter
+
+\startbodymatter
+\component introduction
+\component formal
+\stopbodymatter
+
+\startbackmatter
+\chapter[title=Bibliography]
+  \placelistofpublications
+\stopbackmatter
+
+\stoptext
