@@ -7,6 +7,9 @@ contextDoc.targets{
   docFiles = {
     'preface.tex',
     'introduction.tex',
+    'theory.tex',
+    'baseTypes.tex',
+    'mergeSort.tex',
   },
   docDir    = 'doc',
 }

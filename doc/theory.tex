@@ -1,0 +1,59 @@
+% A ConTeXt document [master document: sortingJoyLoL.tex]
+
+\chapter[title=Theory]
+
+How do we verify that a particular code fragment, such as an 
+implementation of the merge sort algorithm, actually computes what it 
+purports to compute? This is the most critical question if we are to 
+provide a rigorous \emph{computational} foundation for mathematics. 
+
+Fortunately, most of the hard work required to answer this question 
+already exists in one form or another. In the 1960's and 1970's, numerous 
+computer scientists attempted to answer this question. Their answer was in 
+the form of: 
+
+\startitemize
+
+\item {\bf Denotational semantics}
+
+\item {\bf Operational semantics}
+
+\item {\bf Axiomatic semantics}
+
+\stopitemize
+
+See \cite{winskel1993formalSemanticsProgrammingLanguages}, and 
+\cite{gunter1992semainticProgrammingLanguages}.
+
+Of course, denotational semantics and axiomatic semantics are effectively 
+based upon Tarski's work on formal concepts of Truth, 
+\cite{tarski1983truthFormalizedLanguages}, and Gentzen's work on both 
+Natural Deduction and Sequential Calculus, 
+\cite{gentzen1969collectedPapers}, all of which were conducted in the 
+1930's. 
+
+The syntax, semantics and computation of satisfaction will be taken from a 
+mixture of the more recent Dynamic Logic, 
+\cite{harelKozenTiuryn2000dynamicLogic}, and Modal $\mu$-Logic, 
+\cite{demriGorankoLange2016temporalLogics}. 
+
+\section[title=Syntax]
+
+Both Dynamic Logic and Modal $\mu$-Logic have been developed assuming an 
+external classical logic, which includes the use of the \quote{law of the 
+excluded middle}, and the axiom of choice. While ultimately both of these 
+principles will be valid in various sub-sections of computational theory, 
+we will not assume their validity until we have proven them valid. Hence 
+we will develop an intuitionistic and constructive logic, based upon the 
+type theory of Martin-L\"of, \cite{martinLofSambin1984typeTh}. 
+
+The effect of this upon our syntax is that we can not depend upon De 
+Morgan's laws to supply the duals of any of the operators we define. So 
+our syntax is more explicit. 
+
+
+
+\section[title=Semantics]
+
+\section[title=Satisfaction]
+
