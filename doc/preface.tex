@@ -2,3 +2,34 @@
 
 \chapter[title=Preface]
 
+This document is one of a number of \quote{finger pieces}, each designed 
+to explore a small part of the overall problem. \emph{This} finger piece 
+explores the syntax and semantics of \quote{Proof} in JoyLoL. 
+
+When using JoyLoL as a foundation for mathematics, we assert there is no 
+external logic, and hence no externally valid proof theory. However we are 
+still interested in \quote{proving} that a given program fragment actually 
+computes what it purports to compute. 
+
+This finger piece explores the notation and computations required to prove 
+a given program fragment correct. We do this using a combination of 
+Dynamic Logic, \cite{harelKozenTiuryn2000dynamicLogic}, and Modal 
+$\mu$-Logic, \cite{demriGorankoLange2016temporalLogics}. The dynamic logic 
+provides a focus upon the structure of the program fragments, while the 
+modal $\mu$-logic provides a focus upon the dual algebraic and coalgebraic 
+structure of the computation, via least and greatest fixed points 
+respectively. 
+
+We do this while exploring the relatively \quote{simple} problem of 
+\quote{sorting} a list of \quote{comparable} \quote{things}. The problem 
+of sorting is well developed with many different algorithms. This allows 
+us to explore how different specifications distinguish between these 
+different algorithms and their implementations. In particular we will 
+explore Moschovakis' definition of algorithm versus implementation, 
+\cite{moschovakis2012foundationsAlgorithms}.
+
+All of the \quote{classical} algorithms for sorting, assume that the list 
+is a finite, algebraic, structure. We will also be interested in how each 
+sorting algorithm performs with infinite, coalgebraic, processes. 
+\emph{Can processes be sorted?} 
+
