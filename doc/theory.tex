@@ -76,7 +76,7 @@ POSIX Extended Regular Expressions (ERE):
 
 \startformula\startmathalignment
 \NC \text{<whiteSpace>}
-  \NC \text{ ::= [\textbackslash x00-\textbackslash x1F ]+} \NR
+  \NC \text{ ::= [\textbackslash x00-\textbackslash x20]+} \NR
 \NC \text{<singleLineComment>}
   \NC \text{ ::= \quote{;} [^\textbackslash nl\textbackslash cr]* } \NR
 \NC \text{<naturalNumber>}
@@ -86,9 +86,20 @@ POSIX Extended Regular Expressions (ERE):
 \NC \text{<dQuotedString>}
   \NC \text{ ::= \quote{"} [^"]* \quote{"}} \NR
 \NC \text{<symbol>}
-  \NC \text{ ::= [^\textbackslash x00-\textbackslash x1F ;'"]+} \NR
+  \NC \text{ ::= [^\textbackslash x00-\textbackslash x20;'"]+} \NR
+\NC \text{<abLoL>}
+  \NC \text{ ::= \quote{<} <listOfLists> \quote{>}} \NR
+\NC \text{<cbLoL>}
+  \NC \text{ ::= \quote{\{} <listOfLists> \quote{\}}} \NR
+\NC \text{<rbLoL>}
+  \NC \text{ ::= \quote{(} <listOfLists> \quote{)}} \NR
+\NC \text{<sbLoL>}
+  \NC \text{ ::= \quote{[} <listOfLists> \quote{]}} \NR
 \NC \text{<listOfLists>}
-  \NC \text{ ::= \quote{(} <listOfLists> \quote{)} <listOfLists> } \NR
+  \NC \text{ ::= <abLoL> <listOfLists> } \NR
+\NC \NC \text{ \quad \| <cbLoL> <listofLists> } \NR
+\NC \NC \text{ \quad \| <rbLoL> <listofLists> } \NR
+\NC \NC \text{ \quad \| <sbLoL> <listofLists> } \NR
 \NC \NC \text{ \quad \| <naturalNumber> } \NR
 \NC \NC \text{ \quad \| <sQuotedString> } \NR
 \NC \NC \text{ \quad \| <dQuotedString> } \NR
