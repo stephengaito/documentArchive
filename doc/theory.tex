@@ -40,19 +40,38 @@ mixture of the more recent Dynamic Logic,
 \section[title=Syntax]
 
 Both Dynamic Logic and Modal $\mu$-Logic have been developed assuming an 
-external classical logic, which includes the use of the \quote{law of the 
-excluded middle}, and the axiom of choice. While ultimately both of these 
-principles will be valid in various sub-sections of computational theory, 
-we will not assume their validity until we have proven them valid. Hence 
-we will develop an intuitionistic and constructive logic, based upon the 
-type theory of Martin-L\"of, \cite{martinLofSambin1984typeTh}. 
+external \emph{classical} logic, which includes the use of the \quote{law 
+of the excluded middle}, and the axiom of choice. While ultimately both of 
+these principles will be valid in various sub-sections of computational 
+theory, we will not assume their validity until we have proven them valid. 
+Hence we will develop an intuitionistic and constructive logic, based upon 
+the type theory of Martin-L\"of, \cite{martinLofSambin1984typeTh}. 
 
 The effect of this upon our syntax is that we can not depend upon De 
 Morgan's laws to supply the duals of any of the operators we define. So 
 our syntax is more explicit. 
 
 In fact we need to consider the syntax of two languages, \joylolZero\ and 
-\joylol.
+\joylol. The syntax of \joylolZero\ is particularly simple, it consists of 
+lists of the characters \quote{(} and \quote{)}. Formally the syntax of 
+\joylolZero\ is an LL(1) context free language with the following 
+production rule: 
+
+\startformula \startmathalignment
+\NC S \NC \rightarrow ( S ) S \; \| \; \epsilon \NR
+\stopmathalignment \stopformula
+
+\noindent where $\epsilon$ is the null production.
+
+The syntax of \joylol\ is only slightly more complex. It is designed to be 
+slightly easier for a human to work with, as it adds quoted strings, 
+single line comments, numbers, and symbols. It is based upon the ASCII
+character set. 
+
+\startformula \startmathalignment
+\NC S \NC \rightarrow ( S ) S \; \| \; \epsilon \NR
+\stopmathalignment \stopformula
+
 
 \section[title=Semantics]
 
