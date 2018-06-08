@@ -10,6 +10,9 @@ contextDoc.targets{
     'theory.tex',
     'baseTypes.tex',
     'mergeSort.tex',
+    'quickSort.tex',
+    'heapSort.tex',
+    'avlSort.tex',
   },
   docDir    = 'doc',
 }
