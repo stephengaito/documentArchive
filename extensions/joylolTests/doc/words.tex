@@ -38,10 +38,11 @@ The following figure is a summary of the word/switch pattern of
 \externalfigure[runJoylolTestAll.pdf][width=10cm]
 
 \startJoylolCode
-( { true } ) extract  ;; pre condition
-(                     ;; start of the runAllTests word
-  "running ALL TESTS" ;;
-  writeOutNL          ;; announce our presence
+(
+  { true }              ;; pre condition
+  (                     ;; start of the runAllTests word
+    "running ALL TESTS" ;;
+    writeOutNL          ;; announce our presence
 \stopJoylolCode
 
 We start by localizing the running context's naming scope and then 
@@ -49,106 +50,110 @@ defining the testsRunnerNS and testsMonitorNS naming scopes in the
 localized naming scope. 
 
 \startJoylolCode
-  ;; localize the naming scope of the current context
-  allTestsLocals  ;; name of the localized naming scope
-  localizeNaming  ;; localize the naming scope
+    ;; localize the naming scope of the current context
+    allTestsLocals  ;; name of the localized naming scope
+    localizeNaming  ;; localize the naming scope
 \stopJoylolCode
 
 \startJoylolCode
-  ;; undefine any existing testsRunnerNS
-  thisNaming
-  ( testsRunnerNS ) extract
-  undefine
+    ;; undefine any existing testsRunnerNS
+    thisNaming
+    ( testsRunnerNS ) extract
+    undefine
   
-  ;; create the testsRunnerNS
-  thisNaming    ;; define the parent's naming scope
-  thisNaming    ;; define in the localized naming scope
-  testsRunnerNS ;; name of the new naming scope
-  defineNaming  ;; create the new naming scope
-                ;; to be used as the testsRunner's naming scope
+    ;; create the testsRunnerNS
+    thisNaming    ;; define the parent's naming scope
+    thisNaming    ;; define in the localized naming scope
+    testsRunnerNS ;; name of the new naming scope
+    defineNaming  ;; create the new naming scope
+                  ;; to be used as the testsRunner's naming scope
 \stopJoylolCode
 
 \startJoylolCode
-  ;; undefine any existing testsMonitorNS
-  thisNaming
-  ( testsMonitorNS ) extract
-  undefine
+    ;; undefine any existing testsMonitorNS
+    thisNaming
+    ( testsMonitorNS ) extract
+    undefine
   
-  ;; create the testsMonitorNS
-  thisNaming    ;; define the parent's naming scope
-  thisNaming    ;; define in the localized naming scope
-  testsMonitorNS;; name of the new naming scope
-  defineNaming  ;; create the new naming scope
-                ;; to be used as the testsMonitor's naming scope
+    ;; create the testsMonitorNS
+    thisNaming    ;; define the parent's naming scope
+    thisNaming    ;; define in the localized naming scope
+    testsMonitorNS;; name of the new naming scope
+    defineNaming  ;; create the new naming scope
+                  ;; to be used as the testsMonitor's naming scope
 \stopJoylolCode
 
 We now want to define default tests setup and teardown words in the 
 testsRunnerNS. 
 
 \startJoylolCode
-  ( { true } ) extract ;; pre condition
-  ()            ;; empty default setup actions
-  ( { true } ) extract ;; post condition
-  testsRunnerNS ;; define in the testsRunnerNS
-  testsSetup    ;; name of the new word
-  define        ;; define the testsSetup word
+    (
+      { true }    ;; pre condition
+      ()          ;; empty default setup actions
+      { true }    ;; post condition
+      testsSetup  ;; name of the new word
+    ) 
+    testsRunnerNS ;; define in the testsRunnerNS
+    define        ;; define the testsSetup word
 \stopJoylolCode
 
 \startJoylolCode
-  ( { true } ) extract ;; pre condition
-  ()            ;; empty default teardown actions
-  ( { true } ) extract ;; post condition
-  testsRunnerNS ;; define in the testsRunnerNS
-  testsTeardown ;; name of the new word
-  define        ;; define the testsTeardown word
+    (
+      { true }    ;; pre condition
+      ()          ;; empty default teardown actions
+      { true }    ;; post condition
+      testsTeardown ;; name of the new word
+    ) 
+    testsRunnerNS ;; define in the testsRunnerNS
+    define        ;; define the testsTeardown word
 \stopJoylolCode
 
 We now create the testsRunner context.
 
 \startJoylolCode
-  ;; undefine any existing testsRunner context
-  thisNaming
-  ( testsRunner ) extract
-  undefine
+    ;; undefine any existing testsRunner context
+    thisNaming
+    ( testsRunner ) extract
+    undefine
 
-  ;; define the testsRunner context
-                ;; testsRunner process (uses provided list of words)
-  ( tests.testsFinished )
-  append        ;; ensure we get the tests results
-                ;; when all suites have been run
-  ()            ;; testsRunner data
-  testsRunnerNS ;; naming scope of the new context
-  thisNaming    ;; defined in the localized naming scope
-  testsRunner   ;; name of the new context
-  defineContext ;; define the new context
+    ;; define the testsRunner context
+                  ;; testsRunner process (uses provided list of words)
+    ( tests.testsFinished )
+    append        ;; ensure we get the tests results
+                  ;; when all suites have been run
+    ()            ;; testsRunner data
+    testsRunnerNS ;; naming scope of the new context
+    thisNaming    ;; defined in the localized naming scope
+    testsRunner   ;; name of the new context
+    defineContext ;; define the new context
 \stopJoylolCode
 
 We now create the testsMonitor context.
 
 \startJoylolCode
-  ;; undefine any existing testsMonitor context
-  thisNaming
-  ( testsMonitor ) extract
-  undefine
+    ;; undefine any existing testsMonitor context
+    thisNaming
+    ( testsMonitor ) extract
+    undefine
 
-  ;; define the testsMonitor context
-  ( interpret )   ;; begin the testsMonitor process stack
-  thisContext     ;; interpret thisContext onto data stack
-  append          ;; append the result
-  ( switchCtx )   ;;
-  append          ;; append the word switchCtx to the
-                  ;; testsMonitor's initial process stack
+    ;; define the testsMonitor context
+    ( interpret )   ;; begin the testsMonitor process stack
+    thisContext     ;; interpret thisContext onto data stack
+    append          ;; append the result
+    ( switchCtx )   ;;
+    append          ;; append the word switchCtx to the
+                    ;; testsMonitor's initial process stack
   
-  (
-    0             ;; number of attempted suites
-    0             ;; number of failed suites
-    ()            ;; list of failure reports
-  )               ;; testsMonitor data
+    (
+      0             ;; number of attempted suites
+      0             ;; number of failed suites
+      ()            ;; list of failure reports
+    )               ;; testsMonitor data
   
-  testsMonitorNS  ;; naming scope of the new context
-  thisNaming      ;; defining naming scope
-  testsMonitor    ;; defined name of the new context
-  defineContext   ;; define the context
+    testsMonitorNS  ;; naming scope of the new context
+    thisNaming      ;; defining naming scope
+    testsMonitor    ;; defined name of the new context
+    defineContext   ;; define the context
 \stopJoylolCode
 
 Finally we want to switch to the testsRunner context, however, we also 
@@ -158,22 +163,23 @@ switch to testsRunner and any subsequent actions into a list and then we
 interpret this list. 
 
 \startJoylolCode
-  ;; switch to the testsRunner context and run all of the tests
-  (
-    ;; switch to the testsRunner context
-    testsRunner ;; place the testsRunner context on the stack
-    switchCtx   ;; switch to the testsRunner context
+    ;; switch to the testsRunner context and run all of the tests
+    (
+      ;; switch to the testsRunner context
+      testsRunner ;; place the testsRunner context on the stack
+      switchCtx   ;; switch to the testsRunner context
     
-    ;; when we are re-activated
-    "finished ALL TESTS"  ;;
-    writeOutNL            ;; say we are done
+      ;; when we are re-activated
+      "finished ALL TESTS"  ;;
+      writeOutNL            ;; say we are done
+    )
+    interpret     ;; place this list of actions onto
+                  ;; our process stack and do them
   )
-  interpret     ;; place this list of actions onto
-                ;; our process stack and do them
+  { true }        ;; post condition
+  runAllTests
 )
-( { true } ) extract ;; post condition
 tests
-runAllTests
 define
 \stopJoylolCode
 
