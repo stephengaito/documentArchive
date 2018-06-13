@@ -7,6 +7,16 @@
 \subsection[title=Combinators]
 
 \startCCode
+
+static void popListAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  popCtxDataIntoImpl(aCtx, aList);
+  popListInto(aCtx, aList, top);
+  pushCtxData(aCtx, aList);
+  pushCtxData(aCtx, top);
+}
+
 static void wrapAP(ContextObj* aCtx) {
   assert(aCtx);
   assert(aCtx->jInterp);
@@ -1042,6 +1052,8 @@ static void undefineAP(ContextObj* aCtx) {
 
 \startCCode
 void initContextsAPControl(JoyLoLInterp *jInterp) {
+  extendJoyLoLInRoot(jInterp, "popList",        "", popListAP,        "");
+  extendJoyLoLInRoot(jInterp, "wrap",           "", wrapAP,           "");
   extendJoyLoLInRoot(jInterp, "prepend",        "", prependAP,        "");
   extendJoyLoLInRoot(jInterp, "append",         "", appendAP,         "");
   extendJoyLoLInRoot(jInterp, "extract",        "", extractAP,        "");

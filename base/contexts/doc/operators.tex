@@ -157,7 +157,7 @@ static void swap23PAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void rollupDAP(ContextObj* aCtx) {
+static void rollup3DAP(ContextObj* aCtx) {
   popCtxDataIntoImpl(aCtx, top);
   popCtxDataIntoImpl(aCtx, second);
   popCtxDataIntoImpl(aCtx, third);
@@ -168,7 +168,7 @@ static void rollupDAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void rollupPAP(ContextObj* aCtx) {
+static void rollup3PAP(ContextObj* aCtx) {
   popCtxProcessIntoImpl(aCtx, top);
   popCtxProcessIntoImpl(aCtx, second);
   popCtxProcessIntoImpl(aCtx, third);
@@ -179,7 +179,7 @@ static void rollupPAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void rolldownDAP(ContextObj* aCtx) {
+static void rolldown3DAP(ContextObj* aCtx) {
   popCtxDataIntoImpl(aCtx, top);
   popCtxDataIntoImpl(aCtx, second);
   popCtxDataIntoImpl(aCtx, third);
@@ -190,7 +190,7 @@ static void rolldownDAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void rolldownPAP(ContextObj* aCtx) {
+static void rolldown3PAP(ContextObj* aCtx) {
   popCtxProcessIntoImpl(aCtx, top);
   popCtxProcessIntoImpl(aCtx, second);
   popCtxProcessIntoImpl(aCtx, third);
@@ -226,6 +226,23 @@ static void choicePAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\subsection[title=Quaternary operators]
+
+\startCCode
+static void swap14DAP(ContextObj* aCtx) {
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  popCtxDataIntoImpl(aCtx, third);
+  popCtxDataIntoImpl(aCtx, fourth);
+  pushCtxDataImpl(aCtx, top);
+  pushCtxDataImpl(aCtx, third);
+  pushCtxDataImpl(aCtx, second);
+  pushCtxDataImpl(aCtx, fourth);
+}
+\stopCCode
+
+
+\subsection[title=Registering operators]
 
 \setCHeaderStream{private}
 \startCHeader
@@ -262,13 +279,17 @@ Boolean initContextAOOperators(
   extendJoyLoLInRoot(jInterp, "swap13P",   "", swap13PAP,   "");
   extendJoyLoLInRoot(jInterp, "swap23D",   "", swap23DAP,   "");
   extendJoyLoLInRoot(jInterp, "swap23P",   "", swap23PAP,   "");
-  extendJoyLoLInRoot(jInterp, "rollupD",   "", rollupDAP,   "");
-  extendJoyLoLInRoot(jInterp, "rollupP",   "", rollupPAP,   "");
-  extendJoyLoLInRoot(jInterp, "rolldownD", "", rolldownDAP, "");
-  extendJoyLoLInRoot(jInterp, "rolldownP", "", rolldownPAP, "");
+  extendJoyLoLInRoot(jInterp, "rollupD",   "", rollup3DAP,   "");
+  extendJoyLoLInRoot(jInterp, "rollupP",   "", rollup3PAP,   "");
+  extendJoyLoLInRoot(jInterp, "rolldownD", "", rolldown3DAP, "");
+  extendJoyLoLInRoot(jInterp, "rolldownP", "", rolldown3PAP, "");
   extendJoyLoLInRoot(jInterp, "choiceD",   "", choiceDAP,   "");
   extendJoyLoLInRoot(jInterp, "choiceP",   "", choicePAP,   "");
-  
+  //
+  // quarternary operators
+  //
+  extendJoyLoLInRoot(jInterp, "swap14D",   "", swap14DAP,   "");
+
   return TRUE;
 }
 \stopCCode
