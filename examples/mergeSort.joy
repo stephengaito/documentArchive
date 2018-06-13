@@ -21,21 +21,47 @@ tracingOn
 ;; Now we look at the mergeSort algorithm
 
 (
-  {
-    sillyPrecondition
-  }       ;; precondition
+  mergeSort
+  { true } ;; precondition
   (
-          ;; expects an unsorted list on top
-    ()    ;; empty sorted stack
-    0     ;; current index
+           ;; expects an unsorted list on top
+    ()     ;; empty sorted stack
+    0      ;; current index
     mergeSortRecurse
-  )       ;; process stack
-  {
-    sillyPostcondition
-  }       ;; postcondition
-) extract
+  )        ;; process stack
+  { true } ;; postcondition
+)
 globals
-mergeSort
+define
+
+(
+  mergeSortRecurse
+  { true }
+  (
+    swap13D ;; swap the unsorted list to the top
+    (
+      isNull
+    )
+    (
+      pop
+      mergeSortRollUpAll
+    )
+    (
+      popList ;; pop the first item off the unsorted list
+      swap14D ;; swap the unsorted list back into place
+      swap23D ;; swap the sorted stack into the second place
+      prepend ;; place the ?? on to the sorted stack
+      dup     ;; duplicate the index
+      swap23D ;; swap a copy of the index out of the way
+      mergeSortRollUp
+      swap12D ;; swap the index back into place
+      mergeSortRecurse
+    )
+    ifte
+  )
+  { true }
+)
+globals
 define
 
 ((1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) mergeSort ) i
