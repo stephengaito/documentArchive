@@ -39,6 +39,7 @@ The following figure is a summary of the word/switch pattern of
 
 \startJoylolCode
 (
+  runAllTests           ;; name of word
   { true }              ;; pre condition
   (                     ;; start of the runAllTests word
     "running ALL TESTS" ;;
@@ -88,10 +89,10 @@ testsRunnerNS.
 
 \startJoylolCode
     (
+      testsSetup  ;; name of the new word
       { true }    ;; pre condition
       ()          ;; empty default setup actions
       { true }    ;; post condition
-      testsSetup  ;; name of the new word
     ) 
     testsRunnerNS ;; define in the testsRunnerNS
     define        ;; define the testsSetup word
@@ -99,10 +100,10 @@ testsRunnerNS.
 
 \startJoylolCode
     (
+      testsTeardown ;; name of the new word
       { true }    ;; pre condition
       ()          ;; empty default teardown actions
       { true }    ;; post condition
-      testsTeardown ;; name of the new word
     ) 
     testsRunnerNS ;; define in the testsRunnerNS
     define        ;; define the testsTeardown word
@@ -177,7 +178,6 @@ interpret this list.
                   ;; our process stack and do them
   )
   { true }        ;; post condition
-  runAllTests
 )
 tests
 define
@@ -188,42 +188,50 @@ words. While defined in the tests naming scope, they will be run in the
 testsRunner and its associated testsRunnerNS. 
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
-(
-  "defined tests setup"
-  writeOutNL  ;; tell everyone we have been run
+( 
+  defineTestsSetup ;; name of word
+  { true }         ;; pre condition
+  (
+    "defined tests setup"
+    writeOutNL     ;; tell everyone we have been run
   
-              ;; we use the provided definition
-  ( { true } ) extract ;; pre condition
-  swap12D
-  ( { true } ) extract ;; post condition
-  thisNaming  ;; defining naming scope
-  setupTests  ;; name of the new word
-  define
+                   ;; we use the provided definition
+    (
+      setupTests   ;; name of the new word
+      { true }     ;; pre condition
+      swap12D
+      { true }     ;; post condition
+    )
+    thisNaming     ;; defining naming scope
+    define
+  )
+  { true }         ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-defineTestsSetup
 define
 \stopJoylolCode
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  "defined tests teardown"
-  writeOutNL    ;; tell everyone we have been run
-  
-                ;; we use the provided definition
-  ( { true } ) extract ;; pre condition
-  swap12D
-  ( { true } ) extract ;; post condition
-  thisNaming    ;; defining naming scope
-  teardownTests ;; name of the new word
-  define
+  defineTestsTeardown ;; name of word
+  { true }            ;; pre condition
+  (
+    "defined tests teardown"
+    writeOutNL        ;; tell everyone we have been run
+
+                      ;; we use the provided definition
+    ( 
+      teardownTests   ;; name of the new word
+      { true }        ;; pre condition
+      swap12D
+      { true }        ;; post condition
+    )
+    thisNaming        ;; defining naming scope
+    define
+  )
+  { true }            ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-defineTestsTeardown
 define
 \stopJoylolCode
 
@@ -233,28 +241,32 @@ and pass them to the tests runner. We do this with a pair of words one,
 \type{reportSuiteResults}, run in the suiteMonitor. 
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  ( tests.reportTestsResult )
-  testsMonitor
-  switchCtx
+  testsFinished  ;; name of word
+  { true }       ;; pre condition
+  (
+    ( tests.reportTestsResult )
+    testsMonitor
+    switchCtx
+  )
+  { true }       ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-testsFinished
 define
 \stopJoylolCode
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-          ;; there is nothing more to do
-          ;; the testsMonitor already has
-          ;; the context switch 
+  reportTestsResult ;; name of word
+  { true }          ;; pre condition
+  (
+                    ;; there is nothing more to do
+                    ;; the testsMonitor already has
+                    ;; the context switch 
+  )
+  { true }          ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-reportTestsResult
 define
 \stopJoylolCode
 
@@ -268,10 +280,12 @@ The following figure is a summary of the word/switch pattern of
 \externalfigure[runJoylolTestSuite.pdf][width=10cm]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
-(                       ;; start of the runTestSuite word
-  "running test suite"  ;;
-  writeOutNL            ;; announce our presence
+(
+  runTestSuite
+  { true }                ;; pre condition
+  (                       ;; start of the runTestSuite word
+    "running test suite"  ;;
+    writeOutNL            ;; announce our presence
 \stopJoylolCode
 
 We are running in the testsRunner context so we already have a 
@@ -279,100 +293,104 @@ We are running in the testsRunner context so we already have a
 only need to create the suiteRunnerNS and suiteMonitorNS naming scopes. 
 
 \startJoylolCode
-  ;; undefine any existing suiteRunnerNS
-  thisNaming
-  ( suiteRunnerNS ) extract
-  undefine
+    ;; undefine any existing suiteRunnerNS
+    thisNaming
+    ( suiteRunnerNS ) extract
+    undefine
 
-  ;; create the suiteRunnerNS
-  thisNaming    ;; define the parent's naming scope
-  thisNaming    ;; define in the localized naming scope
-  suiteRunnerNS ;; name of the new naming scope
-  defineNaming  ;; create the new naming scope
-                ;; to be used as the suiteRunner's naming scope
+    ;; create the suiteRunnerNS
+    thisNaming    ;; define the parent's naming scope
+    thisNaming    ;; define in the localized naming scope
+    suiteRunnerNS ;; name of the new naming scope
+    defineNaming  ;; create the new naming scope
+                  ;; to be used as the suiteRunner's naming scope
 \stopJoylolCode
 
 \startJoylolCode
-  ;; undefine any existing suiteMonitorNS
-  thisNaming
-  ( suiteMonitorNS ) extract
-  undefine
+    ;; undefine any existing suiteMonitorNS
+    thisNaming
+    ( suiteMonitorNS ) extract
+    undefine
 
-  ;; create the suiteMonitorNS
-  thisNaming      ;; define the parent's naming scope
-  thisNaming      ;; define in the localized naming scope
-  suiteMonitorNS  ;; name of the new naming scope
-  defineNaming    ;; create the new naming scope
-                  ;; to be used as the suiteMonitor's naming scope
+    ;; create the suiteMonitorNS
+    thisNaming      ;; define the parent's naming scope
+    thisNaming      ;; define in the localized naming scope
+    suiteMonitorNS  ;; name of the new naming scope
+    defineNaming    ;; create the new naming scope
+                    ;; to be used as the suiteMonitor's naming scope
 \stopJoylolCode
 
 We now want to define the default suite setup and teardown words in the 
 suiteRunnerNS. 
 
 \startJoylolCode
-  ( { true } ) extract ;; pre condition
-  ()            ;; empty default setup actions
-  ( { true } ) extract ;; post condition
-  suiteRunnerNS ;; define in the suiteRunnerNS
-  suiteSetup    ;; name of the new word
-  define        ;; define the suiteSetup word
+    (
+      suiteSetup  ;; name of the new word
+      { true }    ;; pre condition
+      ()          ;; empty default setup actions
+      { true }    ;; post condition
+    )
+    suiteRunnerNS ;; define in the suiteRunnerNS
+    define        ;; define the suiteSetup word
 \stopJoylolCode
 
 \startJoylolCode
-  ( { true } ) extract ;; pre condition
-  ()            ;; empty default teardown actions
-  ( { true } ) extract ;; post condition
-  suiteRunnerNS ;; define in the suiteRunnerNS
-  suiteTeardown ;; name of the new word
-  define        ;; define the suiteTeardown word
+    (
+      suiteTeardown ;; name of the new word
+      { true } ;; pre condition
+      ()            ;; empty default teardown actions
+      { true } ;; post condition
+    )
+    suiteRunnerNS ;; define in the suiteRunnerNS
+    define        ;; define the suiteTeardown word
 \stopJoylolCode
 
 We now create the suiteRunner context.
 
 \startJoylolCode
-  ;; undefine any existing suiteRunner context
-  thisNaming
-  ( suiteRunner ) extract
-  undefine
+    ;; undefine any existing suiteRunner context
+    thisNaming
+    ( suiteRunner ) extract
+    undefine
 
-  ;; define the suiteRunner context
+    ;; define the suiteRunner context
                 ;; suiteRunner process (uses provided list of words)
-  ( tests.suiteFinished )
-  append        ;; ensure we get the suite results
-                ;; at the end of the suite
-  ()            ;; suiteRunner data
-  suiteRunnerNS ;; naming scope of the new context
-  thisNaming    ;; defined in the localized naming scope
-  suiteRunner   ;; name of the new context
-  defineContext ;; define the new context
+    ( tests.suiteFinished )
+    append        ;; ensure we get the suite results
+                  ;; at the end of the suite
+    ()            ;; suiteRunner data
+    suiteRunnerNS ;; naming scope of the new context
+    thisNaming    ;; defined in the localized naming scope
+    suiteRunner   ;; name of the new context
+    defineContext ;; define the new context
 \stopJoylolCode
 
 We now create the suiteMonitor context.
 
 \startJoylolCode
-  ;; undefine any existing suiteMonitor context
-  thisNaming
-  ( suiteMonitor ) extract
-  undefine
+    ;; undefine any existing suiteMonitor context
+    thisNaming
+    ( suiteMonitor ) extract
+    undefine
 
-  ;; define the suiteMonitor context
-  ( interpret )   ;; begin the suiteMonitor process stack
-  thisContext     ;; interpret thisContext onto data stack
-  append          ;; append the result
-  ( switchCtx )   ;;
-  append          ;; append the word switchCtx to the 
-                  ;; suiteMonitor's initial process stack
+    ;; define the suiteMonitor context
+    ( interpret )   ;; begin the suiteMonitor process stack
+    thisContext     ;; interpret thisContext onto data stack
+    append          ;; append the result
+    ( switchCtx )   ;;
+    append          ;; append the word switchCtx to the 
+                    ;; suiteMonitor's initial process stack
   
-  (
-    0             ;; number of attempted cases
-    0             ;; number of failed cases
-    ()            ;; list of failure reports
-  )               ;; suiteMonitor data
+    (
+      0             ;; number of attempted cases
+      0             ;; number of failed cases
+      ()            ;; list of failure reports
+    )               ;; suiteMonitor data
   
-  suiteMonitorNS  ;; naming scope of the new context
-  thisNaming      ;; defining naming scope
-  suiteMonitor    ;; name of the new context
-  defineContext   ;; define the context
+    suiteMonitorNS  ;; naming scope of the new context
+    thisNaming      ;; defining naming scope
+    suiteMonitor    ;; name of the new context
+    defineContext   ;; define the context
 \stopJoylolCode
 
 Finally we want to switch to the suiteRunner context, however, again, we 
@@ -382,20 +400,20 @@ suiteRunner and any subsequent actions into a list and then we interpret
 this list. 
 
 \startJoylolCode
-  ;; switch to the suiteRunner context and run the suite
-  (
-    ;; switch to the suiteRunner context
-    suiteRunner ;; place the suiteRunner context on the stack
-    switchCtx   ;; switch to the suiteRunner context
+    ;; switch to the suiteRunner context and run the suite
+    (
+      ;; switch to the suiteRunner context
+      suiteRunner ;; place the suiteRunner context on the stack
+      switchCtx   ;; switch to the suiteRunner context
     
-    ;; when we are re-activated
-    ;; ... HOW DO WE SWITCH BACK???!!
+      ;; when we are re-activated
+      ;; ... HOW DO WE SWITCH BACK???!!
+    )
+    interpret
   )
-  interpret
+  { true }        ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-runTestSuite
 define
 \stopJoylolCode
 
@@ -403,65 +421,75 @@ We now define the \type{recordTestSutieDetails},
 \type{defineTestSuiteSetup}, and \type{defineTestSuiteTeardown} words. 
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
+  recordTestSuiteDetails
+  { true } ;; pre condition
   (
-    newLine
-    "-------------------------------------"
-    newLine
-    "jTS:"
-  )           ;; format a sign that we are running
-              ;; the test suite
-  prepend     ;; prepend this sign to the name of the suite
-  100         ;; limit the printLoL
-  swap12D     ;; put the lol and the depth limit 
-              ;; in the correct order
-  printLoL    ;; print it to a string
-  writeOutNL  ;; write out the string
+    (
+      newLine
+      "-------------------------------------"
+      newLine
+      "jTS:"
+    )           ;; format a sign that we are running
+                ;; the test suite
+    prepend     ;; prepend this sign to the name of the suite
+    100         ;; limit the printLoL
+    swap12D     ;; put the lol and the depth limit 
+                ;; in the correct order
+    printLoL    ;; print it to a string
+    writeOutNL  ;; write out the string
+  )
+  { true }      ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-recordTestSuiteDetails
 define
 \stopJoylolCode
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  "defined test suite setup"
-  writeOutNL  ;; tell everyone we have been run
+  defineTestSuiteSetup
+  { true }        ;; pre condition
+  (
+    "defined test suite setup"
+    writeOutNL    ;; tell everyone we have been run
 
-              ;; we use the provided definition
-  ( { true } ) extract ;; pre condition
-  swap12D
-  ( { true } ) extract ;; post condition
-  thisNaming  ;; defining naming scope
-  setupSuite  ;; name of the new word
-  define
+                  ;; we use the provided definition
+    (
+      setupSuite  ;; name of the new word
+      { true }    ;; pre condition
+      swap12D
+      { true }    ;; post condition
+    )
+    thisNaming  ;; defining naming scope
+    define
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-defineTestSuiteSetup
 define
 \stopJoylolCode
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  "defined test suite teardown"
-  writeOutNL    ;; tell everyone we have been run
+  defineTestSuiteTeardown
+  { true } ;; pre condition
+  (
+    "defined test suite teardown"
+    writeOutNL    ;; tell everyone we have been run
 
-                ;; we use the provided definition
-  ( { true } ) extract ;; pre condition
-  swap12D
-  ( { true } ) extract ;; post condition
-  thisNaming    ;; defining naming scope
-  teardownSuite ;; name of the new word
-  define
+    (
+      teardownSuite ;; name of the new word
+                    ;; we use the provided definition
+      { true }      ;; pre condition
+      swap12D
+      { true }      ;; post condition
+    )
+    thisNaming      ;; defining naming scope
+    define
+  )
+  { true }        ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-defineTestSuiteTeardown
 define
 \stopJoylolCode
 
@@ -471,28 +499,32 @@ and pass them to the tests runner. We do this with a pair of words one,
 \type{reportSuiteResults}, run in the suiteMonitor. 
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  ( tests.reportSuiteResults )
-  suiteMonitor
-  switchCtx
+  suiteFinished
+  { true }   ;; pre condition
+  (
+    ( tests.reportSuiteResults )
+    suiteMonitor
+    switchCtx
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-suiteFinished
 define
 \stopJoylolCode
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
-(
-          ;; there is nothing more to do
-          ;; the suiteMonitor already has
-          ;; the context switch 
+( 
+  reportSuiteResults
+  { true }  ;; pre condition
+  (
+            ;; there is nothing more to do
+            ;; the suiteMonitor already has
+            ;; the context switch 
+  )
+  { true }  ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-reportSuiteResults
 define
 \stopJoylolCode
 
@@ -513,8 +545,10 @@ The following figure is a summary of the word/switch pattern of
 \externalfigure[runJoylolTestCase.pdf][width=10cm]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
-(               ;; start of the runTestCase word
+( 
+  runTestCase   ;; the name of the new word
+  { true }      ;; pre condition
+  (             ;; start of the runTestCase word
 \stopJoylolCode
 
 We are running in the suiteRunner context so we already have a 
@@ -522,31 +556,31 @@ We are running in the suiteRunner context so we already have a
 need to create the caseRunnerNS and caseMonitorNS naming scopes. 
 
 \startJoylolCode
-  ;; undefine any existing caseRunnerNS
-  thisNaming
-  ( caseRunnerNS ) extract
-  undefine
+    ;; undefine any existing caseRunnerNS
+    thisNaming
+    ( caseRunnerNS ) extract
+    undefine
 
-  ;; create the caseRunnerNS
-  thisNaming   ;; parent naming scope
-  thisNaming   ;; define in localized naming scope
-  caseRunnerNS ;; name of the new naming scope
-  defineNaming ;; create a new naming scope
-               ;; to be used as the caseRunner's naming scope
+    ;; create the caseRunnerNS
+    thisNaming   ;; parent naming scope
+    thisNaming   ;; define in localized naming scope
+    caseRunnerNS ;; name of the new naming scope
+    defineNaming ;; create a new naming scope
+                 ;; to be used as the caseRunner's naming scope
 \stopJoylolCode
 
 \startJoylolCode
-  ;; undefine any existing caseMonitorNS
-  thisNaming
-  ( caseMonitorNS ) extract
-  undefine
+    ;; undefine any existing caseMonitorNS
+    thisNaming
+    ( caseMonitorNS ) extract
+    undefine
 
-  ;; create the caseMonitorNS
-  thisNaming    ;; parent naming scope
-  thisNaming    ;; define in the localized naming scope
-  caseMonitorNS ;; name of the new naming scope
-  defineNaming  ;; create a new naming scope
-                ;; to be used as the caseMonitor's naming scope
+    ;; create the caseMonitorNS
+    thisNaming    ;; parent naming scope
+    thisNaming    ;; define in the localized naming scope
+    caseMonitorNS ;; name of the new naming scope
+    defineNaming  ;; create a new naming scope
+                  ;; to be used as the caseMonitor's naming scope
 \stopJoylolCode
 
 At this point the test case's list of words and assertions are back on the 
@@ -556,21 +590,21 @@ context, and then setup the new context's naming scope, the defining
 naming scope and finally the name of the new context.
 
 \startJoylolCode
-  ;; undefine any existing caseRunner context
-  thisNaming
-  ( caseRunner ) extract
-  undefine
+    ;; undefine any existing caseRunner context
+    thisNaming
+    ( caseRunner ) extract
+    undefine
 
-  ;; define the caseRunner context
-                ;; caseRunner process (uses provided list of words)
-  ( tests.caseFinished )
-  append        ;; ensure we get the case results
-                ;; at the end of the case
-  ()            ;; caseRunner data
-  caseRunnerNS  ;; the naming scope of the new context
-  thisNaming    ;; define in the localized naming scope
-  caseRunner    ;; name of the new context
-  defineContext ;; create and define the context
+    ;; define the caseRunner context
+                  ;; caseRunner process (uses provided list of words)
+    ( tests.caseFinished )
+    append        ;; ensure we get the case results
+                  ;; at the end of the case
+    ()            ;; caseRunner data
+    caseRunnerNS  ;; the naming scope of the new context
+    thisNaming    ;; define in the localized naming scope
+    caseRunner    ;; name of the new context
+    defineContext ;; create and define the context
 \stopJoylolCode
 
 Now we create a caseMonitor context which will keep track of the test 
@@ -594,64 +628,65 @@ context, we have to \type{append} the result of interpreting the
 word directly on the caseMonitor's process stack. Once the 
 
 \startJoylolCode
-  ;; undefine any existing caseMonitor context
-  thisNaming
-  ( caseMonitor ) extract
-  undefine
+    ;; undefine any existing caseMonitor context
+    thisNaming
+    ( caseMonitor ) extract
+    undefine
 
-  ;; define the caseMonitor context
-  ( interpret ) ;; begin the caseMonitor process stack
-  thisContext   ;; interpret thisContext 
-  append        ;; append the result of interpreting thisContext
-  ( switchCtx ) ;; 
-  append        ;; append the word switch to the
-                ;; caseMonitor's initial process stack
+    ;; define the caseMonitor context
+    ( interpret ) ;; begin the caseMonitor process stack
+    thisContext   ;; interpret thisContext 
+    append        ;; append the result of interpreting thisContext
+    ( switchCtx ) ;; 
+    append        ;; append the word switch to the
+                  ;; caseMonitor's initial process stack
   
-  ( 
-    false       ;; should fail indicator
-    0           ;; number of attempted assertions
-    0           ;; number of failed assertions
-    ()          ;; list of failure reports
-  )             ;; caseMonitor data
+    ( 
+      false       ;; should fail indicator
+      0           ;; number of attempted assertions
+      0           ;; number of failed assertions
+      ()          ;; list of failure reports
+    )             ;; caseMonitor data
 
-  caseMonitorNS ;; the naming scope of the new context
-  thisNaming    ;; defining naming scope
-  caseMonitor   ;; defined name of this new context
-  defineContext ;; create and define the context
+    caseMonitorNS ;; the naming scope of the new context
+    thisNaming    ;; defining naming scope
+    caseMonitor   ;; defined name of this new context
+    defineContext ;; create and define the context
 \stopJoylolCode
 
 Finally we switch to the caseRunner context.
 
 \startJoylolCode
-  ;; switch to the caseRunner context and run the assertions
-  caseRunner ;; place the caseRunner context on the stack
-  switchCtx  ;; switch to the caseRunner context
+    ;; switch to the caseRunner context and run the assertions
+    caseRunner    ;; place the caseRunner context on the stack
+    switchCtx     ;; switch to the caseRunner context
   
-)            ;; end of the runTestCase definition
-( { true } ) extract ;; post condition
-
-tests        ;; define the new word in this naming scope
-runTestCase  ;; the name of the new word
-define       ;; define the new runTestCase word
+  )               ;; end of the runTestCase definition
+  { true }        ;; post condition
+)
+tests             ;; define the new word in this naming scope
+define            ;; define the new runTestCase word
 \stopJoylolCode
 
 We now define the \type{recordTestCaseDetails} word.
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  "  jTC:"    ;; format a sign that we are running
-              ;; the test case
-  prepend     ;; prepend this sign to the name of the case
-  100         ;; limit the printLoL
-  swap12D     ;; put the lol and the depth limit
-              ;; in the correct order
-  printLoL    ;; print it to string
-  writeOutNL  ;; write out the string
+  recordTestCaseDetails
+  { true }      ;; pre condition
+  (
+    "  jTC:"    ;; format a sign that we are running
+                ;; the test case
+    prepend     ;; prepend this sign to the name of the case
+    100         ;; limit the printLoL
+    swap12D     ;; put the lol and the depth limit
+                ;; in the correct order
+    printLoL    ;; print it to string
+    writeOutNL  ;; write out the string
+  )
+  { true }      ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-recordTestCaseDetails
 define
 \stopJoylolCode
 \stopTestSuite
@@ -664,29 +699,33 @@ and pass them to the suite runner. We do this with a pair of words one,
 \type{reportCaseResults}, run in the caseMonitor. 
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  ( tests.reportCaseResults )
-  caseMonitor
-  switchCtx
+  caseFinished
+  { true } ;; pre condition
+  (
+    ( tests.reportCaseResults )
+    caseMonitor
+    switchCtx
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-caseFinished
 define
 \stopJoylolCode
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
-(
-  pop1D   ;; ignore the should fail boolean
-          ;; there is nothing more to do
-          ;; the caseMonitor already has
-          ;; the context swtich 
+( 
+  reportCaseResults
+  { true } ;; pre condition
+  (
+    pop1D   ;; ignore the should fail boolean
+            ;; there is nothing more to do
+            ;; the caseMonitor already has
+            ;; the context swtich 
+  )
+  { true }  ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-reportCaseResults
 define
 \stopJoylolCode
 
@@ -705,24 +744,26 @@ This assertion result list consists of true/false followed by a failure
 report list (only if the assertion failed). 
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
-(               ;; start of the reportAssertion word
-                ;; the assertion report is assumed to be on top
-  (
-    assert.recordAssertion  ;; the task to be done
-    caseRunner  ;; return to caseRunner
-    switchCtx   ;; perform the switch/return
-    interpret   ;; leave an initial interpret for the next switch/call
-  )
-  append
-  caseMonitor   ;; place the caseMonitor context on top of stack
-  switchCtx     ;; switch to the caseMonitor context
-                ;; (the caseMonitor context will interpret to
-                ;;  current top of the stack)
-)               ;; end of the reportAssertion word
-( { true } ) extract ;; post condition
+(
+  reportAssertion ;; the name of the new word
+  { true }        ;; pre condition
+  (               ;; start of the reportAssertion word
+                  ;; the assertion report is assumed to be on top
+    (
+      assert.recordAssertion  ;; the task to be done
+      caseRunner  ;; return to caseRunner
+      switchCtx   ;; perform the switch/return
+      interpret   ;; leave an initial interpret for the next switch/call
+    )
+    append
+    caseMonitor   ;; place the caseMonitor context on top of stack
+    switchCtx     ;; switch to the caseMonitor context
+                  ;; (the caseMonitor context will interpret to
+                  ;;  current top of the stack)
+  )               ;; end of the reportAssertion word
+  { true }        ;; post condition
+)
 assert          ;;define the new word in the assert naming scope
-reportAssertion ;; the name of the new word
 define          ;; define the reportAssertion word
 \stopJoylolCode
 \stopTestSuite
@@ -739,46 +780,48 @@ that any further assertions can be run. Finally the last item on the stack
 is the caseMonitor's record of assertion results. 
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  showStack ;; need to deal with shouldFail....
+  recordAssertion
+  { true }    ;; pre condition
   (
-    isTrue
-  )  ;; test
-  (
-    ;; the top of the stack is the caseMonitor's
-    ;; record of assertion results
-    extract
-    ;; the top of the stack is the number of attempts value
-    1 + ;; add one to the top of the stack
-    prepend
-    prepend
-    ;; the top of the stack is the
-    ;; updated record of assertion results
-  )  ;; then action ;; just update the number of attempted tests 
-  (
-    ;; the top of the stack is an assertion failure report list
-    ;; then comes the caseMonitor's record of assertion results
-    append
-    extract
-    ;; top    comes the number of attempts value
-    ;; second comes the number of failures value
-    ;; third  comes the collection of failure reports
-    ;; fourth comes the assertion failure report list
-    1 + ;; add one to the number of attempted
-    swap12D
-    1 + ;; add one to the number of failed
-    append
-    rollupD ;; put current record third
-    append  ;; append the assertion failure report to list or failures
-    append  ;; complete the record of assertion results
-    ;; top comes the updated record of assertion results
-  )  ;; else action ;; update everything
-  ifte
+    showStack ;; need to deal with shouldFail....
+    (
+      isTrue
+    )  ;; test
+    (
+      ;; the top of the stack is the caseMonitor's
+      ;; record of assertion results
+      extract
+      ;; the top of the stack is the number of attempts value
+      1 + ;; add one to the top of the stack
+      prepend
+      prepend
+      ;; the top of the stack is the
+      ;; updated record of assertion results
+    )  ;; then action ;; just update the number of attempted tests 
+    (
+      ;; the top of the stack is an assertion failure report list
+      ;; then comes the caseMonitor's record of assertion results
+      append
+      extract
+      ;; top    comes the number of attempts value
+      ;; second comes the number of failures value
+      ;; third  comes the collection of failure reports
+      ;; fourth comes the assertion failure report list
+      1 + ;; add one to the number of attempted
+      swap12D
+      1 + ;; add one to the number of failed
+      append
+      rollupD ;; put current record third
+      append  ;; append the assertion failure report to list or failures
+      append  ;; complete the record of assertion results
+      ;; top comes the updated record of assertion results
+    )  ;; else action ;; update everything
+    ifte
+  )
+  { true }   ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-recordAssertion
 define
 \stopJoylolCode
 \stopTestSuite
@@ -806,46 +849,50 @@ of actions copied over from the current context to the caseMonitor's data
 stack. 
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
+  startShouldFail
+  { true }        ;; pre condition
   (
+    (
+      pop1D
+      true
+      dup
+    ) 
+    thisContext
+    append
+    ( switchCtx )
+    append
+    caseMonitor
+    switchCtx
     pop1D
-    true
-    dup
-  ) 
-  thisContext
-  append
-  ( switchCtx )
-  append
-  caseMonitor
-  switchCtx
-  pop1D
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-startShouldFail
 define 
 \stopJoylolCode 
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
+  stopShouldFail
+  { true } ;; pre condition
   (
+    (
+      pop1D
+      false
+      dup
+    )
+    thisContext
+    append
+    ( switchCtx )
+    append
+    caseMonitor
+    switchCtx
     pop1D
-    false
-    dup
   )
-  thisContext
-  append
-  ( switchCtx )
-  append
-  caseMonitor
-  switchCtx
-  pop1D
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 tests
-stopShouldFail
 define
 \stopJoylolCode
 
@@ -855,15 +902,17 @@ bracket the interpretation of the actions found quoted on the current
 context's data stack. 
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  tests.startShouldFail
-  interpret
-  tests.stopShouldFail
+  shouldFail
+  { true } ;; pre condition
+  (
+    tests.startShouldFail
+    interpret
+    tests.stopShouldFail
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-shouldFail
 define
 \stopJoylolCode
 
@@ -877,14 +926,16 @@ define
 \startTestSuite[assert.fail]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  false
-  assert.reportAssertion
+  fail
+  { true } ;; pre condition
+  (
+    false
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-fail
 define
 \stopJoylolCode
 
@@ -897,14 +948,16 @@ define
 
 \startTestSuite[assert.succeed]
 \startJoylolCode
-( { true } ) extract ;; pre condition
-(
-  true
-  assert.reportAssertion
+( 
+  succeed
+  { true } ;; pre condition
+  (
+    true
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-succeed
 define
 \stopJoylolCode
 
@@ -917,14 +970,16 @@ assert.succeed
 
 \startTestSuite[assert.isBoolean]
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
   isBoolean
-  assert.reportAssertion
+  { true } ;; pre condition
+  (
+    isBoolean
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isBoolean ) extract
 define
 \stopJoylolCode
 
@@ -948,14 +1003,16 @@ assert.isBoolean
 \startTestSuite[assert.isTrue]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
   isTrue
-  assert.reportAssertion
+  { true } ;; pre condition
+  (
+    isTrue
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isTrue ) extract
 define
 \stopJoylolCode
 
@@ -986,14 +1043,16 @@ assert.isTrue
 \startTestSuite[assert.isFalse]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
   isFalse
-  assert.reportAssertion
+  { true } ;; pre condition
+  (
+    isFalse
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isFalse ) extract
 define
 \stopJoylolCode
 
@@ -1024,14 +1083,16 @@ assert.isFalse
 \startTestSuite[assert.isNil]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
   isNil
-  assert.reportAssertion
+  { true } ;; pre condition
+  (
+    isNil
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isNil ) extract
 define
 \stopJoylolCode
 
@@ -1056,15 +1117,17 @@ assert.isNil
 \startTestSuite[assert.isNotNil]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
-  isNil
-  not
-  assert.reportAssertion
+  isNotNil
+  { true } ;; pre condition
+  (
+    isNil
+    not
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isNotNil ) extract
 define
 \stopJoylolCode
 
@@ -1088,14 +1151,16 @@ assert.isNotNil
 \startTestSuite[assert.isAnAtom]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
   isAnAtom
-  assert.reportAssertion
+  { true } ;; pre condition
+  (
+    isAnAtom
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isAnAtom ) extract
 define
 \stopJoylolCode
 
@@ -1123,14 +1188,16 @@ assert.isAnAtom
 \startTestSuite[assert.isAPair]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
   isAPair
-  assert.reportAssertion
+  { true } ;; pre condition
+  (
+    isAPair
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isAPair ) extract
 define
 \stopJoylolCode
 
@@ -1154,14 +1221,16 @@ assert.isAPair
 \startTestSuite[assert.isANatural]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
   isANatural
-  assert.reportAssertion
+  { true } ;; pre condition
+  (
+    isANatural
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isANatural ) extract
 define
 \stopJoylolCode
 
@@ -1185,14 +1254,16 @@ assert.isANatural
 \startTestSuite[assert.isASymbol]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
   isASymbol
-  assert.reportAssertion
+  { true } ;; pre condition
+  (
+    isASymbol
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isASymbol ) extract
 define
 \stopJoylolCode
 
@@ -1216,14 +1287,16 @@ assert.isASymbol
 \startTestSuite[assert.isAContext]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
   isAContext
-  assert.reportAssertion
+  { true } ;; pre condition
+  (
+    isAContext
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isAContext ) extract
 define
 \stopJoylolCode
 
@@ -1247,14 +1320,16 @@ assert.isAContext
 \startTestSuite[assert.isADictionary]
 
 \startJoylolCode
-( { true } ) extract ;; pre condition
 (
   isADictionary
-  assert.reportAssertion
+  { true } ;; pre condition
+  (
+    isADictionary
+    assert.reportAssertion
+  )
+  { true } ;; post condition
 )
-( { true } ) extract ;; post condition
 assert
-( isADictionary ) extract
 define
 \stopJoylolCode
 

@@ -699,69 +699,57 @@ static void defineAP(ContextObj* aCtx) {
   assert(aCtx);
   popCtxDataIntoImpl(aCtx,    naming);
   popCtxDataIntoImpl(aCtx,    wordDefinition);
-  Boolean wordDefinitionIsList = isPair(wordDefinition);
   
   popListInto(aCtx, wordDefinition, name);
-  popListInto(aCtx, wordDefinition, postCondition);
-  popListInto(aCtx, wordDefinition, definition);
   popListInto(aCtx, wordDefinition, preCondition);
+  popListInto(aCtx, wordDefinition, definition);
+  popListInto(aCtx, wordDefinition, postCondition);
 
   if (!isDictionary(naming)) {
     pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, name);
     pushOnTopCtxDataImpl(aCtx, preCondition);
     pushOnTopCtxDataImpl(aCtx, definition);
     pushOnTopCtxDataImpl(aCtx, postCondition);
     pushOnTopCtxDataImpl(aCtx, naming);
-    pushOnTopCtxDataImpl(aCtx, name);
     raiseException(aCtx,
       "define requires a dictionary as top");
     return;
   }
-  if (wordDefinitionIsList) {
-    pushNullCtxDataImpl(aCtx);
-    pushOnTopCtxDataImpl(aCtx, preCondition);
-    pushOnTopCtxDataImpl(aCtx, definition);
-    pushOnTopCtxDataImpl(aCtx, postCondition);
-    pushOnTopCtxDataImpl(aCtx, naming);
-    pushOnTopCtxDataImpl(aCtx, name);
-    raiseException(aCtx,
-      "define requires a list as second");
-    return;
-  }
   if (!isSymbol(name)) {
     pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, name);
     pushOnTopCtxDataImpl(aCtx, preCondition);
     pushOnTopCtxDataImpl(aCtx, definition);
     pushOnTopCtxDataImpl(aCtx, postCondition);
     pushOnTopCtxDataImpl(aCtx, naming);
-    pushOnTopCtxDataImpl(aCtx, name);
     raiseException(aCtx,
       "define requires a symbol as wordDefinition top"
     );
+    return;
+  }
+  if (!isAssertion(preCondition)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, name);
+    pushOnTopCtxDataImpl(aCtx, preCondition);
+    pushOnTopCtxDataImpl(aCtx, definition);
+    pushOnTopCtxDataImpl(aCtx, postCondition);
+    pushOnTopCtxDataImpl(aCtx, naming);
+    raiseException(aCtx,
+      "define requires an assertion as wordDefinition second");
     return;
   }
   if (!isAssertion(postCondition)) {
     printf("postCondition: %p %zu\n",
       postCondition, (size_t)asTag(postCondition));
     pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, name);
     pushOnTopCtxDataImpl(aCtx, preCondition);
     pushOnTopCtxDataImpl(aCtx, definition);
     pushOnTopCtxDataImpl(aCtx, postCondition);
     pushOnTopCtxDataImpl(aCtx, naming);
-    pushOnTopCtxDataImpl(aCtx, name);
     raiseException(aCtx,
-      "define requires an assertion as wordDefinitoin second");
-    return;
-  }
-  if (!isAssertion(preCondition)) {
-    pushNullCtxDataImpl(aCtx);
-    pushOnTopCtxDataImpl(aCtx, preCondition);
-    pushOnTopCtxDataImpl(aCtx, definition);
-    pushOnTopCtxDataImpl(aCtx, postCondition);
-    pushOnTopCtxDataImpl(aCtx, naming);
-    pushOnTopCtxDataImpl(aCtx, name);
-    raiseException(aCtx,
-      "define requires an assertion as wordDefinition fourth");
+      "define requires an assertion as wordDefinitoin fourth");
     return;
   }
   defineJoyLoLIn(
