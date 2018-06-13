@@ -132,6 +132,28 @@ JObj* cdrImpl(JObj* aLoL) {
 \stopTestCase
 \stopTestSuite
 
+\startTestSuite[popListInto]
+
+\startCHeader
+#define popListInto(aCtx, aList, aJObjVar)                \
+  JObj* aJObjVar = NULL;                                  \
+  if (isPair(aList)) {                                    \
+    aJObjVar = asCar(aList);                              \
+    aList    = asCdr(aList);                              \
+  }                                                       \
+  if (aCtx->tracingOn) {                                  \
+    JoyLoLInterp *jInterp = aCtx->jInterp;                \
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);     \
+    strBufPrintf(aStrBuf, "%s.%s = ", #aList, #aJObjVar); \
+    printLoL(aStrBuf, aJObjVar);                          \
+    strBufPrintf(aStrBuf, "\n");                          \
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));   \
+    strBufClose(aStrBuf);                                 \
+  }
+\stopCHeader
+
+\stopTestSuite
+
 \startTestSuite[concatLists]
 \startCHeader
 typedef JObj *(ConcatLists)(

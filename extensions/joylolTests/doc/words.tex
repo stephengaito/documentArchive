@@ -3,6 +3,10 @@
 \section[title=Words]
 \setJoylolTracingOff\setJoylolVerboseOff
 
+\TODO{ Consider changing the defineContext and defineNaming syntax to be 
+similar to new define syntax; Fix dynamic definitions: defineTestsSetup, 
+defineTestsTeardown, defineTestSuiteSetup, defineTestSuiteTeardown, } 
+
 \startTestSuite[tests and assert naming scopes]
 
 We start by defining a naming scope to contain all of the Joylol test 
@@ -58,8 +62,8 @@ localized naming scope.
 
 \startJoylolCode
     ;; undefine any existing testsRunnerNS
+    ( testsRunnerNS )
     thisNaming
-    ( testsRunnerNS ) extract
     undefine
   
     ;; create the testsRunnerNS
@@ -72,8 +76,8 @@ localized naming scope.
 
 \startJoylolCode
     ;; undefine any existing testsMonitorNS
+    ( testsMonitorNS )
     thisNaming
-    ( testsMonitorNS ) extract
     undefine
   
     ;; create the testsMonitorNS
@@ -113,8 +117,8 @@ We now create the testsRunner context.
 
 \startJoylolCode
     ;; undefine any existing testsRunner context
+    ( testsRunner )
     thisNaming
-    ( testsRunner ) extract
     undefine
 
     ;; define the testsRunner context
@@ -133,8 +137,8 @@ We now create the testsMonitor context.
 
 \startJoylolCode
     ;; undefine any existing testsMonitor context
+    ( testsMonitor )
     thisNaming
-    ( testsMonitor ) extract
     undefine
 
     ;; define the testsMonitor context
@@ -294,8 +298,8 @@ only need to create the suiteRunnerNS and suiteMonitorNS naming scopes.
 
 \startJoylolCode
     ;; undefine any existing suiteRunnerNS
+    ( suiteRunnerNS )
     thisNaming
-    ( suiteRunnerNS ) extract
     undefine
 
     ;; create the suiteRunnerNS
@@ -308,8 +312,8 @@ only need to create the suiteRunnerNS and suiteMonitorNS naming scopes.
 
 \startJoylolCode
     ;; undefine any existing suiteMonitorNS
+    ( suiteMonitorNS )
     thisNaming
-    ( suiteMonitorNS ) extract
     undefine
 
     ;; create the suiteMonitorNS
@@ -349,8 +353,8 @@ We now create the suiteRunner context.
 
 \startJoylolCode
     ;; undefine any existing suiteRunner context
+    ( suiteRunner )
     thisNaming
-    ( suiteRunner ) extract
     undefine
 
     ;; define the suiteRunner context
@@ -369,8 +373,8 @@ We now create the suiteMonitor context.
 
 \startJoylolCode
     ;; undefine any existing suiteMonitor context
+    ( suiteMonitor )
     thisNaming
-    ( suiteMonitor ) extract
     undefine
 
     ;; define the suiteMonitor context
@@ -557,8 +561,8 @@ need to create the caseRunnerNS and caseMonitorNS naming scopes.
 
 \startJoylolCode
     ;; undefine any existing caseRunnerNS
+    ( caseRunnerNS )
     thisNaming
-    ( caseRunnerNS ) extract
     undefine
 
     ;; create the caseRunnerNS
@@ -571,8 +575,8 @@ need to create the caseRunnerNS and caseMonitorNS naming scopes.
 
 \startJoylolCode
     ;; undefine any existing caseMonitorNS
+    ( caseMonitorNS )
     thisNaming
-    ( caseMonitorNS ) extract
     undefine
 
     ;; create the caseMonitorNS
@@ -591,8 +595,8 @@ naming scope and finally the name of the new context.
 
 \startJoylolCode
     ;; undefine any existing caseRunner context
+    ( caseRunner )
     thisNaming
-    ( caseRunner ) extract
     undefine
 
     ;; define the caseRunner context
@@ -629,8 +633,8 @@ word directly on the caseMonitor's process stack. Once the
 
 \startJoylolCode
     ;; undefine any existing caseMonitor context
+    ( caseMonitor )
     thisNaming
-    ( caseMonitor ) extract
     undefine
 
     ;; define the caseMonitor context

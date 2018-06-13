@@ -679,22 +679,6 @@ Boolean reportExceptionImpl(
 \subsection[title=Support]
 
 \startCCode
-#define popListInto(aCtx, aList, aJObjVar)                \
-  JObj* aJObjVar = NULL;                                  \
-  if (isPair(aList)) {                                    \
-    aJObjVar = asCar(aList);                              \
-    aList    = asCdr(aList);                              \
-  }                                                       \
-  if (aCtx->tracingOn) {                                  \
-    JoyLoLInterp *jInterp = aCtx->jInterp;                \
-    StringBufferObj *aStrBuf = newStringBuffer(aCtx);     \
-    strBufPrintf(aStrBuf, "%s.%s = ", #aList, #aJObjVar); \
-    printLoL(aStrBuf, aJObjVar);                          \
-    strBufPrintf(aStrBuf, "\n");                          \
-    jInterp->writeStdOut(jInterp, getCString(aStrBuf));   \
-    strBufClose(aStrBuf);                                 \
-  }
-
 static void defineAP(ContextObj* aCtx) {
   assert(aCtx);
   popCtxDataIntoImpl(aCtx,    naming);
@@ -1029,27 +1013,29 @@ static void thisNamingAP(ContextObj* aCtx) {
 static void undefineAP(ContextObj* aCtx) {
   assert(aCtx);
   
-  popCtxDataIntoImpl(aCtx, name);
   popCtxDataIntoImpl(aCtx, namingScope);
+  popCtxDataIntoImpl(aCtx, nameList);
   
-  if (!isSymbol(name)) {
-    pushNullCtxDataImpl(aCtx);
-    pushOnTopCtxDataImpl(aCtx, namingScope);
-    pushOnTopCtxDataImpl(aCtx, name);
-    raiseException(aCtx,
-      "undefine requires a symbol as top");
-    return;
-  }
+  popListInto(aCtx, nameList, name);
   
   if (!isDictionary(namingScope)) {
     pushNullCtxDataImpl(aCtx);
     pushOnTopCtxDataImpl(aCtx, namingScope);
     pushOnTopCtxDataImpl(aCtx, name);
     raiseException(aCtx,
-      "undelete requires a dictionary as second");
+      "undelete requires a dictionary as top");
     return;
   }
-  
+
+  if (!isSymbol(name)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, namingScope);
+    pushOnTopCtxDataImpl(aCtx, name);
+    raiseException(aCtx,
+      "undefine requires a list quoted symbol as second");
+    return;
+  }
+    
   deleteSymbol(((DictObj*)namingScope), asSymbol(name));
   }
 \stopCCode
