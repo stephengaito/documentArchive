@@ -3,6 +3,21 @@
 \section[title=JoyLoL words]
 
 \startCCode
+static void isNilAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (!top)
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\startCCode
 static void isPairAP(ContextObj* aCtx) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
@@ -48,6 +63,8 @@ Boolean registerPairWords(
   JoyLoLInterp *jInterp,
   JClass       *theCoAlg
 ) {
+  extendJoyLoLInRoot(jInterp, "isNil",  "", isNilAP, "");
+  extendJoyLoLInRoot(jInterp, "isList", "", isPairAP, "");
   extendJoyLoLInRoot(jInterp, "isPair", "", isPairAP, "");
   extendJoyLoLInRoot(jInterp, "isAtom", "", isAtomAP, "");
   

@@ -3,6 +3,10 @@
 \section[title=Words]
 
 \startCCode
+static  mpz_t zero;
+\stopCCode
+
+\startCCode
 static void addAP(ContextObj* aCtx) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
@@ -204,6 +208,100 @@ static void multiplyAP(ContextObj* aCtx) {
 \stoptyping
 
 \startCCode
+static void quotientAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  if (mpz_cmp(asNatural(top2), zero) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the denominator is not zero"
+    );
+    return;
+  }
+  JObj* product = newNatural(jInterp, NULL);
+  mpz_tdiv_q(asNatural(product), asNatural(top1), asNatural(top2));
+  pushCtxData(aCtx, product);
+}
+
+static void quotientReverseAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  if (mpz_cmp(asNatural(top1), zero) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the denominator is not zero"
+    );
+    return;
+  }
+  JObj* product = newNatural(jInterp, NULL);
+  mpz_tdiv_q(asNatural(product), asNatural(top2), asNatural(top1));
+  pushCtxData(aCtx, product);
+}
+
+static void remainderAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  if (mpz_cmp(asNatural(top2), zero) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the denominator is not zero"
+    );
+    return;
+  }
+  JObj* product = newNatural(jInterp, NULL);
+  mpz_tdiv_r(asNatural(product), asNatural(top1), asNatural(top2));
+  pushCtxData(aCtx, product);
+}
+
+static void remainderReverseAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  if (mpz_cmp(asNatural(top1), zero) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the denominator is not zero"
+    );
+    return;
+  }
+  JObj* product = newNatural(jInterp, NULL);
+  mpz_tdiv_r(asNatural(product), asNatural(top2), asNatural(top1));
+  pushCtxData(aCtx, product);
+}
+\stopCCode
+
+\startCCode
 static void equalNatAP(ContextObj* aCtx) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
@@ -249,8 +347,6 @@ static void equalNatAP(ContextObj* aCtx) {
 \stoptyping
 
 \startCCode
-static  mpz_t zero;
-
 static void isZeroAP(ContextObj* aCtx) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
@@ -349,13 +445,17 @@ Boolean registerNaturalWords(
   JClass       *theCoAlg
 ) {
   mpz_init(zero);
-  extendJoyLoLInRoot(jInterp, "isNatural", "", isNaturalAP,       "");
-  extendJoyLoLInRoot(jInterp, "+",         "", addAP,             "");
-  extendJoyLoLInRoot(jInterp, "-",         "", subtractAP,        "");
-  extendJoyLoLInRoot(jInterp, "-rev",      "", subtractReverseAP, "");
-  extendJoyLoLInRoot(jInterp, "*",         "", multiplyAP,        "");
-  extendJoyLoLInRoot(jInterp, "=nat",      "", equalNatAP,        "");
-  extendJoyLoLInRoot(jInterp, "isZero",    "", isZeroAP,          "");
+  extendJoyLoLInRoot(jInterp, "isNatural", "", isNaturalAP,        "");
+  extendJoyLoLInRoot(jInterp, "+",         "", addAP,              "");
+  extendJoyLoLInRoot(jInterp, "-",         "", subtractAP,         "");
+  extendJoyLoLInRoot(jInterp, "-rev",      "", subtractReverseAP,  "");
+  extendJoyLoLInRoot(jInterp, "*",         "", multiplyAP,         "");
+  extendJoyLoLInRoot(jInterp, "/",         "", quotientAP,         "");
+  extendJoyLoLInRoot(jInterp, "/rev",      "", quotientReverseAP,  "");
+  extendJoyLoLInRoot(jInterp, "%",         "", remainderAP,        "");
+  extendJoyLoLInRoot(jInterp, "%rev",      "", remainderReverseAP, "");
+  extendJoyLoLInRoot(jInterp, "=nat",      "", equalNatAP,         "");
+  extendJoyLoLInRoot(jInterp, "isZero",    "", isZeroAP,           "");
   
   return TRUE;
 }
