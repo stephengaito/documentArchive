@@ -5,8 +5,8 @@
 ;;clear
 ;;showStack
 
-showStackOn
-tracingOn
+;;showStackOn
+;;tracingOn
 ;; debugOn
 
 ;;showStackOff
@@ -26,10 +26,46 @@ tracingOn
   (
            ;; expects an unsorted list on top
     ()     ;; empty sorted stack
-    0      ;; current index
+    1      ;; current index
     mergeSortRecurse
   )        ;; process stack
   { true } ;; postcondition
+)
+globals
+define
+
+(
+  mergeSortRollUp
+  { true }
+  (
+    dup1D
+    ( isZero ) 
+    (
+      pop1D
+    )
+    (
+      (
+        2 %rev
+        isZero
+      )
+      (
+        swap12D
+        popList
+        popList
+        mergeSort2Lists
+        prepend
+        swap12D
+        2 /rev
+        mergeSortRollUp
+      )
+      (
+        ;; nothing more to do
+      )
+      ifte
+    )
+    ifte
+  )
+  { true }
 )
 globals
 define
@@ -39,22 +75,24 @@ define
   { true }
   (
     swap13D ;; swap the unsorted list to the top
+    dup1D
     (
-      isNull
+      isNil
     )
     (
       pop
       mergeSortRollUpAll
     )
     (
-      popList ;; pop the first item off the unsorted list
-      swap14D ;; swap the unsorted list back into place
-      swap23D ;; swap the sorted stack into the second place
-      prepend ;; place the ?? on to the sorted stack
-      dup     ;; duplicate the index
-      swap23D ;; swap a copy of the index out of the way
+      popList    ;; pop the first item off the unsorted list
+      swap23D    ;; swap the unsorted list back into place
+      prepend    ;; place the ?? on to the sorted stack
+      rollDown3D ;; swap the sorted stack into the second place
+      dup1D      ;; duplicate the index
+      swap23D    ;; swap a copy of the index out of the way
       mergeSortRollUp
-      swap12D ;; swap the index back into place
+      swap12D    ;; swap the index back into place
+      1 + 
       mergeSortRecurse
     )
     ifte
@@ -63,6 +101,9 @@ define
 )
 globals
 define
+
+showStackOn
+tracingOn
 
 ((1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) mergeSort ) i
 
