@@ -315,6 +315,60 @@ static void exitJoylolAP(ContextObj *aCtx) {
 }
 \stopCCode
 
+\startCCode
+static void tracingPointAP(ContextObj *aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  DictObj *theDict = aCtx->dict;
+  assert(theDict);
+    
+  popCtxDataInto(aCtx, tracingLabel);
+  
+  if (!isSymbol(tracingLabel)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, tracingLabel);
+    raiseException(aCtx,
+      "tracingPoint requires a symbol as top"
+    );
+    return;
+  }
+  
+  Symbol *theLabel = asSymbol(tracingLabel);
+
+  CtxTracingLabel *curLabel  = aCtx->tracingLabels;
+  CtxTracingLabel *lastLabel = NULL;
+
+  while (curLabel) {
+    if (strcmp(curLabel->name, theLabel) == 0 ) break;
+    lastLabel = curLabel;
+    curLabel  = curLabel->next;
+  }
+
+  if (!curLabel) {
+    curLabel = calloc(1, sizeof(CtxTracingLabel));
+    assert(curLabel);
+    curLabel->name  = strdup(theLabel);
+    curLabel->count = 0;
+    curLabel->next  = NULL;
+    if (lastLabel) {
+      lastLabel->next = curLabel;
+    } else {
+      aCtx->tracingLabels = curLabel;
+    }
+  }
+
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  strBufPrintf(aStrBuf, "tracingPoint: %zu <<%s>> %s %s\n",
+    curLabel->count, curLabel->name, aCtx->name, theDict->name
+  );
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  
+  curLabel->count++;
+}
+\stopCCode
+
 \setCHeaderStream{private}
 \startCHeader
 extern void initContextsAPSupport(JoyLoLInterp *jInterp);
@@ -346,5 +400,6 @@ void initContextsAPSupport(JoyLoLInterp *jInterp) {
   extendJoyLoLInRoot(jInterp, "whatIsThisD",        "", whatIsThisDAP,        "");
   extendJoyLoLInRoot(jInterp, "whatIsThisP",        "", whatIsThisPAP,        "");
   extendJoyLoLInRoot(jInterp, "exitJoylol",         "", exitJoylolAP,         "");
+  extendJoyLoLInRoot(jInterp, "tracingPoint",       "", tracingPointAP,       "");
 }
 \stopCCode

@@ -15,25 +15,32 @@
 \setCHeaderStream{public}
 
 \startCHeader
+typedef struct context_tracing_label {
+  Symbol                       *name;
+  size_t                        count;
+  struct context_tracing_label *next;
+} CtxTracingLabel;
+
 typedef struct context_object_struct ContextObj;
 typedef struct context_object_struct {
-  JObj      super;
-  JoyLoLInterp *jInterp;
-  Symbol       *name;
-  ContextObj   *parent;
-  JObj         *data;
-  JObj         *command;
-  JObj         *process;
-  JObj         *messages;
-  JObj         *listeners;
-  DictObj      *dict;
-  Boolean       exceptionRaised;
-  Boolean       showSpecifications;
-  Boolean       showStack;
-  size_t        showDepth;
-  Boolean       tracingOn;
-  Boolean       checkingOn;
-  Boolean       verbose;
+  JObj             super;
+  JoyLoLInterp    *jInterp;
+  Symbol          *name;
+  ContextObj      *parent;
+  JObj            *data;
+  JObj            *command;
+  JObj            *process;
+  JObj            *messages;
+  JObj            *listeners;
+  DictObj         *dict;
+  Boolean          exceptionRaised;
+  Boolean          showSpecifications;
+  Boolean          showStack;
+  size_t           showDepth;
+  Boolean          tracingOn;
+  CtxTracingLabel *tracingLabels;
+  Boolean          checkingOn;
+  Boolean          verbose;
 } ContextObj;
 
 \stopCHeader
@@ -107,6 +114,7 @@ ContextObj* newContextImpl(
   }
   context->showDepth          = 5;
   context->tracingOn          = FALSE;
+  context->tracingLabels      = NULL;
   context->checkingOn         = FALSE;
   context->verbose            = FALSE;
   context->exceptionRaised    = FALSE;
