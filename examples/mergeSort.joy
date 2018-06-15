@@ -49,6 +49,7 @@ define
         isZero
       )
       (
+        "test" tracingPoint
         swap12D
         popList
         popList
