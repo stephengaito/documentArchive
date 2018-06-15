@@ -30,6 +30,7 @@ typedef struct context_object_struct {
   Boolean       exceptionRaised;
   Boolean       showSpecifications;
   Boolean       showStack;
+  size_t        showDepth;
   Boolean       tracingOn;
   Boolean       checkingOn;
   Boolean       verbose;
@@ -104,6 +105,7 @@ ContextObj* newContextImpl(
     context->showSpecifications = TRUE;
     context->showStack          = TRUE;
   }
+  context->showDepth          = 5;
   context->tracingOn          = FALSE;
   context->checkingOn         = FALSE;
   context->verbose            = FALSE;

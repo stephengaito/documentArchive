@@ -576,8 +576,26 @@ JObj* popCtxDataImpl(
 \stopCCode
 
 \startCHeader
-#define showCtxData(aCtx, aStrBuf)  \
-  assert(aCtx);                     \
-  printLoL(aStrBuf, aCtx->data);    \
+#define showCtxStack(aCtx, aStack, stackLabel, aStrBuf)       \
+  {                                                           \
+    size_t index = 1;                                         \
+    JObj* curStack = aStack;                                  \
+    strBufPrintf(aStrBuf, "----\n");                          \
+    while(isPair(curStack)) {                                 \
+      if (aCtx->showDepth < index) break;                     \
+      strBufPrintf(aStrBuf, "%s[%zu]: ", stackLabel, index);  \
+      printLoL(aStrBuf, asCar(curStack));                     \
+      strBufPrintf(aStrBuf, "\n");                            \
+      curStack = asCdr(curStack);                             \
+      index++;                                                \
+    }                                                         \
+    strBufPrintf(aStrBuf, "%s[*]: ", stackLabel);             \
+    printLoL(aStrBuf, curStack);                              \
+    strBufPrintf(aStrBuf, "\n");                              \
+  }
+
+#define showCtxData(aCtx, aStrBuf)            \
+  assert(aCtx);                               \
+  showCtxStack(aCtx, aCtx->data, "d", aStrBuf)
 \stopCHeader
 

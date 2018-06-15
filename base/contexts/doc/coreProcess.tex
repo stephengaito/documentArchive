@@ -462,8 +462,8 @@ JObj* popCtxProcessImpl(
 \stopCCode
 
 \startCHeader
-#define showCtxProcess(aCtx, aStrBuf) \
-  assert(aCtx);                       \
-  printLoL(aStrBuf, aCtx->process);   \
+#define showCtxProcess(aCtx, aStrBuf)             \
+  assert(aCtx);                                   \
+  showCtxStack(aCtx, aCtx->process, "p", aStrBuf)
 \stopCHeader
 

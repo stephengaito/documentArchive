@@ -6,29 +6,22 @@
 static void traceAction(
   ContextObj *aCtx,
   Symbol     *action,
-  JObj       *aLoL,
-  JObj       *command
+  JObj       *aLoL
 ) {
   assert(aCtx);
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
-  DEBUG(jInterp, "traceAction: %p [%s] %p %p\n",
-    aCtx, action, aLoL, command);
+  DEBUG(jInterp, "traceAction: %p [%s] %p\n",
+    aCtx, action, aLoL);
   if (aLoL && jInterp->debug) {
     assert(asType(aLoL));
     DEBUG(jInterp, "traceAction(lol): %p %p\n",
       aLoL, asType(aLoL));
   }
-  if (command && jInterp->debug) {
-    assert(asType(command));
-    DEBUG(jInterp, "traceAction(command): %p %p\n",
-      command, asType(command));
-  }
 
   StringBufferObj *aStrBuf = newStringBuffer(aCtx);
   strBufPrintf(aStrBuf, "%s: ", action);
   printLoL(aStrBuf, aLoL);
-  printLoL(aStrBuf, command);
   strBufPrintf(aStrBuf, "\n");
   jInterp->writeStdOut(jInterp, getCString(aStrBuf));
   strBufClose(aStrBuf);
@@ -87,7 +80,10 @@ void evalCommandInContextImpl(
     if (aCtx->tracingOn) {
       StringBufferObj *aStrBuf = newStringBuffer(aCtx);
       strBufPrintf(aStrBuf,
-        "\n ctx: %s(%s)\n",
+        "\n----------------------------------------------------\n"
+      );
+      strBufPrintf(aStrBuf,
+        "ctx: %s(%s)\n",
         aCtx->name, theDict->name
       );
       jInterp->writeStdOut(jInterp, getCString(aStrBuf));
@@ -113,7 +109,7 @@ void evalCommandInContextImpl(
         //  of either the old or new contexts)
         //
         if (aCtx->tracingOn) 
-          traceAction(aCtx, "calling(ctx)", command, NULL);
+          traceAction(aCtx, "calling(c-ctx)", command);
         aCtx = (asCtxCFunc(command))(aCtx);
         assert(aCtx);
         //
@@ -124,7 +120,7 @@ void evalCommandInContextImpl(
         // (this ONLY makes changes to the data and process stacks)
         //
         if (aCtx->tracingOn) 
-          traceAction(aCtx, "calling", command, NULL);
+          traceAction(aCtx, "calling(c)", command);
         (asCFunc(command))(aCtx);
         //
       }
@@ -133,13 +129,13 @@ void evalCommandInContextImpl(
       // this is an assertion ...
       //   ... so assert it 
       //
+      if (aCtx->tracingOn) 
+        traceAction(aCtx, "asserting", command);
+      //
       if (!evalAssertionInContextImpl(aCtx, (AssertionObj*)command)) {
         //
         // this assertion failed... 
         //   ... so report it
-        //
-        if (aCtx->tracingOn) 
-          traceAction(aCtx, "asserting", command, NULL);
         //
         pushNullCtxDataImpl(aCtx);
         pushOnTopCtxDataImpl(aCtx, command);
@@ -153,7 +149,7 @@ void evalCommandInContextImpl(
       //  ...  push it onto the top of the data stack
       //
       if (aCtx->tracingOn)
-        traceAction(aCtx, "adding(nonSym)", command, NULL);
+        traceAction(aCtx, "adding(nonSym)", command);
       pushCtxDataImpl(aCtx, command);
       //
     } else {
@@ -171,7 +167,7 @@ void evalCommandInContextImpl(
         // infinite loop)
         //
         if (aCtx->tracingOn)
-          traceAction(aCtx, "adding(noValue)", command, NULL);
+          traceAction(aCtx, "adding(noValue)", command);
         pushCtxDataImpl(aCtx, command);
         //
       } else if (isPair(assoc->value)) {
@@ -179,8 +175,10 @@ void evalCommandInContextImpl(
         // if the association is a LoL.. push this LoL onto the top of the
         // process stack
         //
-        if (aCtx->tracingOn)
-          traceAction(aCtx, "evaluating", assoc->value, command);
+        if (aCtx->tracingOn) {
+          traceAction(aCtx, "calling(joylol)", command);
+          traceAction(aCtx, "evaluating", assoc->value);
+        }
         prependListCtxProcess(aCtx,
           copyLoL(jInterp, assoc->value));
         //
@@ -194,7 +192,7 @@ void evalCommandInContextImpl(
           // this is a CTX CFunction
           //
           if (aCtx->tracingOn) 
-            traceAction(aCtx, "calling(ctx)", command, NULL);
+            traceAction(aCtx, "calling(c-ctx)", command);
           aCtx = (asCtxCFunc(assoc->value))(aCtx);
           assert(aCtx);
           //
@@ -204,7 +202,7 @@ void evalCommandInContextImpl(
           // this is a normal CFunction
           //
           if (aCtx->tracingOn)
-            traceAction(aCtx, "calling", command, NULL);
+            traceAction(aCtx, "calling(c)", command);
           (asCFunc(assoc->value))(aCtx);
           //
         }
@@ -213,8 +211,10 @@ void evalCommandInContextImpl(
         // if the association is NOT a PairAtom or Function...
         // ... push this new ATOM onto the top of the process stack
         //
-        if (aCtx->tracingOn)
-          traceAction(aCtx, "evaluating", assoc->value, command);
+        if (aCtx->tracingOn) {
+          traceAction(aCtx, "calling(joylol)", command);
+          traceAction(aCtx, "evaluating", assoc->value);
+        }
         pushCtxProcessImpl(aCtx, assoc->value);
         //
       }
@@ -222,12 +222,8 @@ void evalCommandInContextImpl(
     if (aCtx->tracingOn) {
       DEBUG(jInterp, "evalCommandInContext -> tracing%s\n", "");
       StringBufferObj *aStrBuf = newStringBuffer(aCtx);
-      strBufPrintf(aStrBuf, "d>>");
-      printLoL(aStrBuf, aCtx->data);
-      strBufPrintf(aStrBuf, "\n");
-      strBufPrintf(aStrBuf, "p>>");
-      printLoL(aStrBuf, aCtx->process);
-      strBufPrintf(aStrBuf, "\n");
+      showCtxData(aCtx, aStrBuf);
+      showCtxProcess(aCtx, aStrBuf);
       jInterp->writeStdOut(jInterp, getCString(aStrBuf));
       strBufClose(aStrBuf);
       DEBUG(jInterp, "evalCommandInContext <- tracing%s\n", "");
@@ -355,7 +351,7 @@ Boolean evalAssertionInContextImpl(
     if (metaCtx->tracingOn)
       traceAction(aCtx,
         "\n-------------------------\nevalAssertion(test)",
-        assertionTest, NULL
+        assertionTest
       );
     prependListCtxProcess(metaCtx, assertionTest);
     popCtxProcessIntoImpl(metaCtx, aCommand);

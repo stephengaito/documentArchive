@@ -427,11 +427,13 @@ void printLoLImpl(
     assert(asType(aLoL)->tag == asTag(aLoL));
     assert(asType(aLoL)->printFunc);
 
+    if (isPair(aLoL)) strBufPrintf(aStrBuf, "( ");
     Boolean result =
       (asType(aLoL)->printFunc)
         (aStrBuf, aLoL, timeToLive);
+    if (isPair(aLoL)) strBufPrintf(aStrBuf, ") ");
     assert(result);
-  }
+  } else strBufPrintf(aStrBuf, "( ) ");
 
   DEBUG(aStrBuf->jInterp,
     "printLoL(done) %p %p %zu\n", aStrBuf, aLoL, timeToLive
