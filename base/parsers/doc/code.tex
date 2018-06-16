@@ -435,7 +435,7 @@ JObj* parseOneSymbolImpl(
   StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   printLoLTTL(aStrBuf, aLoL, 10);
   AssertStrEquals(getCString(aStrBuf),
-    "is ( a ( more ( complex ( list ( ) ) ) ) ) ");
+    "( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ");
   strBufClose(aStrBuf);
 
   aLoL = parseOneSymbol(aText);
@@ -564,7 +564,7 @@ paths} in our parsing code.
   StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   printLoLTTL(aStrBuf, aLoL, 30);
   AssertStrEquals(getCString(aStrBuf),
-    "this ; is ; a test with some semi-colons and ; again ; 123 ; 456 ; 789 12 ; 34 and ; one ; more ; time ");
+    "( this ; is ; a test with some semi-colons and ; again ; 123 ; 456 ; 789 12 ; 34 and ; one ; more ; time ) ");
   strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
@@ -581,7 +581,7 @@ paths} in our parsing code.
   AssertPtrNotNull(aLoL);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   printLoLTTL(aStrBuf, aLoL, 10);
-  AssertStrEquals(getCString(aStrBuf), "this is a simple list ");
+  AssertStrEquals(getCString(aStrBuf), "( this is a simple list ) ");
   strBufClose(aStrBuf);
 
   JObj* lolCopy = copyLoL(jInterp, aLoL);
@@ -604,7 +604,7 @@ paths} in our parsing code.
   StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   printLoLTTL(aStrBuf, aLoL, 20);
   AssertStrEquals(getCString(aStrBuf),
-    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ");
+    "( this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ) ");
   strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
@@ -622,7 +622,7 @@ paths} in our parsing code.
   StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   printLoLTTL(aStrBuf, aLoL, 20);
   AssertStrEquals(getCString(aStrBuf),
-    "this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ");
+    "( this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ) ");
   strBufClose(aStrBuf);
   
   JObj* lolCopy = copyLoL(jInterp, aLoL);
@@ -644,7 +644,7 @@ paths} in our parsing code.
   StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   printLoLTTL(aStrBuf, aLoL, 10);
   AssertStrEquals(getCString(aStrBuf),
-    "this is a different ( ( ( ) ( ) ( ) ) ( ( ( ) ) ) ) list ");
+    "( this is a different ( ( ( ) ( ) ( ) ) ( ( ( ) ) ) ) list ) ");
   strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase

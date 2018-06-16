@@ -233,7 +233,7 @@ JObj* concatListsImpl(
   AssertPtrNotNull(result);
   AssertIntTrue(isPair(result));
   printLoL(aStrBuf, result);
-  AssertStrEquals(getCString(aStrBuf), "( ) ");
+  AssertStrEquals(getCString(aStrBuf), "( ( ) ) ");
   strBufClose(aStrBuf);
   
   JObj *trueBool  = newBoolean(jInterp, TRUE);
@@ -244,7 +244,7 @@ JObj* concatListsImpl(
   AssertIntTrue(isTrue(asCar(result)));
   AssertPtrNull(asCdr(result));
   printLoL(aStrBuf, result);
-  AssertStrEquals(getCString(aStrBuf), "true ");
+  AssertStrEquals(getCString(aStrBuf), "( true ) ");
   strBufClose(aStrBuf);
   
   JObj *falseBool = newBoolean(jInterp, FALSE);
@@ -256,14 +256,14 @@ JObj* concatListsImpl(
   AssertPtrNotNull(asCdr(result));
   AssertIntTrue(isFalse(asCdr(result)));
   printLoL(aStrBuf, result);
-  AssertStrEquals(getCString(aStrBuf), "true false ");
+  AssertStrEquals(getCString(aStrBuf), "( true false ) ");
   strBufClose(aStrBuf);
   
   JObj* firstList = result;
   result = concatLists(jInterp, result, NULL);
   AssertPtrEquals(firstList, result);
   printLoL(aStrBuf, result);
-  AssertStrEquals(getCString(aStrBuf), "true false ");
+  AssertStrEquals(getCString(aStrBuf), "( true false ) ");
   strBufClose(aStrBuf);
   
   result = concatLists(jInterp, firstList, trueBool);
@@ -275,7 +275,7 @@ JObj* concatListsImpl(
   AssertIntTrue(isPair(asCdr(result)));
   AssertIntTrue(isFalse(asCar(asCdr(result))));
   printLoL(aStrBuf, result);
-  AssertStrEquals(getCString(aStrBuf), "true false true ");
+  AssertStrEquals(getCString(aStrBuf), "( true false true ) ");
   strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
@@ -536,7 +536,7 @@ Boolean printPairsCoAlg(
   AssertPtrNotNull(aNewPair);
   StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
   printLoL(aStrBuf, aNewPair);
-  AssertStrEquals(getCString(aStrBuf), "( ( ) ) ( ) ");
+  AssertStrEquals(getCString(aStrBuf), "( ( ( ) ) ( ) ) ");
   strBufClose(aStrBuf);
 \stopCTest
 \stopTestCase
