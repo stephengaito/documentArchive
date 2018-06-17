@@ -35,6 +35,18 @@ globals
 define
 
 (
+  mergeSort2Lists
+  { true }
+  (
+    ;; here be dragons!
+  )
+  { true }
+)
+globals
+define
+
+
+(
   mergeSortRollUp
   { true }
   (
@@ -49,12 +61,15 @@ define
         isZero
       )
       (
-        "test" tracingPoint
+        "msruStart" tracingPoint
+        popList
         swap12D
         popList
-        popList
+        swap12D
+        pop1D
         mergeSort2Lists
         prepend
+        "msruEnd" tracingPoint
         swap12D
         2 /rev
         mergeSortRollUp
