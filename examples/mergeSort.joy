@@ -21,26 +21,73 @@
 ;; Now we look at the mergeSort algorithm
 
 (
-  mergeSort
-  { true } ;; precondition
-  (
-           ;; expects an unsorted list on top
-    ()     ;; empty sorted stack
-    1      ;; current index
-    mergeSortRecurse
-  )        ;; process stack
-  { true } ;; postcondition
-)
-globals
-define
-
-(
   mergeSort2Lists
   { true }
+  ;; top is a sorted list
+  ;; second is a sorted list
+  ;; third is the currently merged sorted list
   (
-    ;; here be dragons!
+    "ms2lStart" tracingPoint
+    ( isNil )
+    (
+      pop1D
+      ( isNil )
+      (
+        pop1D
+        ;; return sorted list
+      )
+      (
+        append
+        ;; return sorted list
+      )
+      ifte
+    )
+    (
+      swap12D
+      ( isNil )
+      (
+        pop1D
+        append
+        ;; return sorted list
+      )
+      (
+        swap12D
+        popList
+        rollDown3D
+        swap34D
+        popList
+        swap23D
+        swap34D
+        (
+          <nat
+        )
+        (
+          ;; the first item is smaller than the second
+          swap23D
+          append
+          swap34D
+          rollUp3D
+          prepend
+          swap23D
+          swap12D
+        )
+        (
+          ;; the second item is smaller than the first
+          rollUp3D
+          append
+          rollUp3D
+          prepend
+          swap23D
+        )
+        ifte
+        mergeSort2Lists
+      )
+      ifte
+    )
+    ifte
   )
   { true }
+  ;; top is the sorted list formed by merging the initial two lists
 )
 globals
 define
@@ -49,25 +96,37 @@ define
 (
   mergeSortRollUp
   { true }
+  ;; top is an binary description of the powers of two structure 
+  ;;  of the stack of sorted lists
+  ;; second is a stack of sorted lists
+  ;; 
   (
-    dup1D
     ( isZero ) 
     (
-      pop1D
+      pop1D ;; remove the binary description
     )
     (
       (
+        "msruTest" tracingPoint
+        dup1D
         2 %rev
         isZero
+        swap12D
+        pop1D
       )
       (
         "msruStart" tracingPoint
-        popList
         swap12D
         popList
         swap12D
-        pop1D
+        popList
+        swap12D
+        rollUp3D
+        "rollSomeThing" tracingPoint
+        ()
+        rollUp3D
         mergeSort2Lists
+        wrap
         prepend
         "msruEnd" tracingPoint
         swap12D
@@ -75,13 +134,14 @@ define
         mergeSortRollUp
       )
       (
-        ;; nothing more to do
+        pop1D
       )
       ifte
     )
     ifte
   )
   { true }
+  ;; top is a shorter stack of sorted lists
 )
 globals
 define
@@ -91,18 +151,18 @@ define
   { true }
   (
     swap13D ;; swap the unsorted list to the top
-    dup1D
     (
       isNil
     )
     (
-      pop
       mergeSortRollUpAll
+      "stop" tracingPoint
     )
     (
       popList    ;; pop the first item off the unsorted list
       swap23D    ;; swap the unsorted list back into place
-      prepend    ;; place the ?? on to the sorted stack
+      wrap       ;; wrap the item popped off the unsorted list
+      pushList   ;; place the ?? on to the sorted stack
       rollDown3D ;; swap the sorted stack into the second place
       dup1D      ;; duplicate the index
       swap23D    ;; swap a copy of the index out of the way
@@ -118,9 +178,27 @@ define
 globals
 define
 
+(
+  mergeSort
+  { true } ;; precondition
+  ;; top is an unsorted list
+  (
+           ;; expects an unsorted list on top
+    ()     ;; empty sorted stack
+    1      ;; current index
+    mergeSortRecurse
+  )        ;; process stack
+  { true } ;; postcondition
+  ;; top is a sorted version of the initial list
+)
+globals
+define
+
 showStackOn
 tracingOn
 
-((1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16) mergeSort ) i
+;; ( ( 4 5) (2 3) mergeSort2Lists ) i
+
+(( 3 7 4 10 8 15 9 2 5 6 12 1 20 11 18 16 17 14 13 19 ) mergeSort ) i
 
 
