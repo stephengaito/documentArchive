@@ -8,6 +8,16 @@
 
 \startCCode
 
+static void pushListAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, aList);
+  top = newPair(aCtx->jInterp, top, NULL);
+  aList = concatLists(aCtx->jInterp, top, aList);
+  pushCtxData(aCtx, aList);
+}
+
 static void popListAP(ContextObj* aCtx) {
   assert(aCtx);
   assert(aCtx->jInterp);
@@ -1052,6 +1062,7 @@ static void undefineAP(ContextObj* aCtx) {
 
 \startCCode
 void initContextsAPControl(JoyLoLInterp *jInterp) {
+  extendJoyLoLInRoot(jInterp, "pushList",       "", pushListAP,       "");
   extendJoyLoLInRoot(jInterp, "popList",        "", popListAP,        "");
   extendJoyLoLInRoot(jInterp, "wrap",           "", wrapAP,           "");
   extendJoyLoLInRoot(jInterp, "prepend",        "", prependAP,        "");

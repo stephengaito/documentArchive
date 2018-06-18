@@ -254,6 +254,18 @@ static void swap24DAP(ContextObj* aCtx) {
 }
 \stopCCode
 
+\startCCode
+static void swap34DAP(ContextObj* aCtx) {
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  popCtxDataIntoImpl(aCtx, third);
+  popCtxDataIntoImpl(aCtx, fourth);
+  pushCtxDataImpl(aCtx, third);
+  pushCtxDataImpl(aCtx, fourth);
+  pushCtxDataImpl(aCtx, second);
+  pushCtxDataImpl(aCtx, top);
+}
+\stopCCode
 
 \subsection[title=Registering operators]
 
@@ -303,6 +315,7 @@ Boolean initContextAOOperators(
   //
   extendJoyLoLInRoot(jInterp, "swap14D",   "", swap14DAP,   "");
   extendJoyLoLInRoot(jInterp, "swap24D",   "", swap24DAP,   "");
+  extendJoyLoLInRoot(jInterp, "swap34D",   "", swap34DAP,   "");
 
   return TRUE;
 }

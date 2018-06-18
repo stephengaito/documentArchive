@@ -13,6 +13,7 @@ static void isNilAP(ContextObj* aCtx) {
     result = newBoolean(jInterp, TRUE);
   else
     result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, top);
   pushCtxData(aCtx, result);
 }
 \stopCCode
@@ -28,6 +29,7 @@ static void isPairAP(ContextObj* aCtx) {
     result = newBoolean(jInterp, TRUE);
   else
     result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, top);
   pushCtxData(aCtx, result);
 }
 \stopCCode
@@ -43,6 +45,7 @@ static void isAtomAP(ContextObj* aCtx) {
     result = newBoolean(jInterp, TRUE);
   else
     result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, top);
   pushCtxData(aCtx, result);
 }
 \stopCCode

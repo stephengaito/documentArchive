@@ -202,6 +202,8 @@ JObj* concatListsImpl(
     secondList = newPair(jInterp, secondList, NULL);
   }
 
+  if (!asCar(result)) return secondList;
+  
   // find end of firstList/result
   JObj* lolList = result;
   while(asCdr(lolList) && isPair(asCdr(lolList))) {
