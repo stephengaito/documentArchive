@@ -27,7 +27,6 @@
   ;; second is a sorted list
   ;; third is the currently merged sorted list
   (
-    "ms2lStart" tracingPoint
     ( isNil )
     (
       pop1D
@@ -92,14 +91,12 @@
 globals
 define
 
-
 (
   mergeSortRollUp
   { true }
   ;; top is an binary description of the powers of two structure 
   ;;  of the stack of sorted lists
   ;; second is a stack of sorted lists
-  ;; 
   (
     ( isZero ) 
     (
@@ -107,7 +104,6 @@ define
     )
     (
       (
-        "msruTest" tracingPoint
         dup1D
         2 %rev
         isZero
@@ -115,20 +111,17 @@ define
         pop1D
       )
       (
-        "msruStart" tracingPoint
         swap12D
         popList
         swap12D
         popList
         swap12D
         rollUp3D
-        "rollSomeThing" tracingPoint
         ()
         rollUp3D
         mergeSort2Lists
         wrap
         prepend
-        "msruEnd" tracingPoint
         swap12D
         2 /rev
         mergeSortRollUp
@@ -147,6 +140,37 @@ globals
 define
 
 (
+  mergeSortRollUpAll
+  { true }
+  ;; a non-empty stack of sorted lists
+  (
+    popList
+    swap12D
+    ( isNil )
+    (
+      ;; we are done
+      pop1D
+      wrap
+    )
+    (
+      popList
+      swap23D
+      ()
+      swap13D
+      mergeSort2Lists
+      wrap
+      prepend
+      mergeSortRollUpAll
+    )
+    ifte
+  )
+  { true }
+  ;; a shorter stack of sorted lists
+)
+globals
+define
+
+(
   mergeSortRecurse
   { true }
   (
@@ -155,8 +179,11 @@ define
       isNil
     )
     (
+      pop1D ;; remove the now empty unsorted list
+      pop2D ;; remove the now redundant count
       mergeSortRollUpAll
-      "stop" tracingPoint
+      popList
+      pop2D
     )
     (
       popList    ;; pop the first item off the unsorted list
