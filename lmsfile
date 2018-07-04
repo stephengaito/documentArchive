@@ -9,6 +9,7 @@ contextDoc.targets{
     'introduction.tex',
     'theory.tex',
     'baseTypes.tex',
+    'factorial.tex',
     'mergeSort.tex',
     'quickSort.tex',
     'heapSort.tex',
