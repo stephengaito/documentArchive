@@ -101,4 +101,46 @@ typedef struct dictNode_object_struct {
 } DictNodeObj;
 \stoptyping
 
+\subsection[title=Mappae Mundi]
+
+Our foundation of mathematics is best understood as an, alas, fairly 
+complex multi-induction of a Categorical natural transformation between a 
+pair of functors. While we do not require Category theory for this 
+induction, using ideas from Category theory helps us navigate through this 
+complexity. In effect Category theory provides one (of many) mappa mundi. 
+
+The ideas required to navigate through this multi-induction, comes from 
+Bart Jacob's pair of books \cite{jacobs1999categoricalLogicTypeTheory} and 
+\cite{jacobs2017coalgebras} combined with Harel, Kozen and Tiuryn's 
+\cite{harelKozenTiuryn2000dynamicLogic} as well as Demri, Goranko and 
+Lange's \cite{demriGorankoLange2016temporalLogics}. 
+
+Coalgebras, bisimulations, modal logic, invariants and liftings of both 
+relations and predicates, permeate everything we do, 
+\cite{jacobs2017coalgebras}. In particular Modal logics via the predicate 
+lifting approach using the natural transformation between a pair of 
+functors, see Definition 6.5.1 \cite{jacobs2017coalgebras}\footnote{See 
+also \cite{kupkePattinson2011coalgModalLogics} discussion of the same 
+ideas.}, is particularly important. However \emph{the} modal logic that we 
+are after is Dynamic Logic, see sections 5.2 and 11.3 
+\cite{harelKozenTiuryn2000dynamicLogic}. This \quote{modal logic} actually 
+requires the lifting of \emph{both} predicates and relations. However, the 
+critically important thing is that the \emph{syntax} of the Dynamic 
+(modal) logic is interpreted in the \emph{semantics} of the coalgebra of 
+lists of lists. 
+
+The critical complication comes from our need to \quote{prove} that the 
+natural transformation between the pair of functors, which is a 
+\emph{computation}, actually computes what we say it computes. To do this 
+we will make use of the tools found in 
+\cite{demriGorankoLange2016temporalLogics} culminating in the 
+\quote{Satisfiability-Checking Game for ${L}_\mu$} found in section 
+15.4.1. Central to this is the use of the least and greatest fixed point 
+operators, $\mu$ and $\nu$, in a $\mu$-modal logic variant of Dynamic 
+Logic. We will use \quote{Lawvere's mating rule} definition of $\forall$ 
+and $\exists$ as described in Jacob's Lemma 4.1.8 
+\cite{jacobs1999categoricalLogicTypeTheory}. However, since we are 
+defining a concatenative computational language, instead of fibering over 
+\emph{sets} of variables we fiber over lists. The fibers are then all the 
+possible \quote{valuations} of a given list. 
 
