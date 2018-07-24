@@ -124,10 +124,7 @@ also \cite{kupkePattinson2011coalgModalLogics} discussion of the same
 ideas.}, is particularly important. However \emph{the} modal logic that we 
 are after is Dynamic Logic, see sections 5.2 and 11.3 
 \cite{harelKozenTiuryn2000dynamicLogic}. This \quote{modal logic} actually 
-requires the lifting of \emph{both} predicates and relations. However, the 
-critically important thing is that the \emph{syntax} of the Dynamic 
-(modal) logic is interpreted in the \emph{semantics} of the coalgebra of 
-lists of lists. 
+requires the lifting of \emph{both} predicates and relations.
 
 The critical complication comes from our need to \quote{prove} that the 
 natural transformation between the pair of functors, which is a 
@@ -140,7 +137,77 @@ operators, $\mu$ and $\nu$, in a $\mu$-modal logic variant of Dynamic
 Logic. We will use \quote{Lawvere's mating rule} definition of $\forall$ 
 and $\exists$ as described in Jacob's Lemma 4.1.8 
 \cite{jacobs1999categoricalLogicTypeTheory}. However, since we are 
-defining a concatenative computational language, instead of fibering over 
-\emph{sets} of variables we fiber over lists. The fibers are then all the 
-possible \quote{valuations} of a given list. 
+defining a concatenative computational language, instead of forming fibres 
+over \emph{sets} of variables we fibre over lists. The fibres are then all 
+the possible \quote{valuations} of a given list. 
 
+In all of this, the critically important thing is that the \emph{syntax} 
+of the Dynamic (modal) logic is interpreted in the \emph{semantics} of the 
+coalgebra of lists of lists. In the literature\footnote{See for example, 
+\cite{jacobs2017coalgebras} section 6.5 and 
+\cite{kupkePattinson2011coalgModalLogics}.}, the \quote{predicate lifting} 
+approach, using a natural transformation between a pair of functors, while 
+syntactically more concrete, is seen as slightly more arbitrary in that 
+there are potentially more choices of syntactical functors. While strictly 
+not necessary, we will follow the more concrete syntactical 
+\quote{predicate lifting} approach to make it easier for mere mortals, 
+such as ourselves, to follow the construction. Part of this construction 
+will however emphasize how each particular syntactical structure \emph{is 
+written} in a more formal list of lists format. 
+
+In all cases, the functors we construct, are computable functions written 
+in the \joylolZero\ language which is the chosen syntax. We 
+\quote{implement} this \joylolZero\ language in two ways. Firstly the 
+natural transformation \emph{is} the implementation (interpreter) of the 
+syntax, \joylolZero, in the semantics of list of lists. However, to 
+provide a portable interpreter of the \joylolZero\ language, we annotate 
+the natural transformation with small chuncks of ANSI-C code, which when 
+collectively compiled using an ANSI-C compiler, provide an executable 
+which can interpret any \joylolZero\ code on any modern computer. In 
+particular, this means that \joylolZero\ interprets itself. 
+
+As well as annotating the natural transformation with ANSI-C code, an 
+integral part of the \joylolZero\ code which implements the natural 
+transformation, is a running Hoare logic description of the pre and post 
+conditions of each computational step. In order to keep the complexity of 
+this construction to a minimum, we keep the initial \joylolZero\ 
+interpreter (the natural transformation) as simple as possible. However, 
+this means that the \joylolZero\ interpreter is not able to make even 
+obvious inferences. Once \joylolZero\ has been accepted as correct, 
+future, more sophisticated, versions of \joylol\ can be built based upon 
+\joylolZero. In particular, these more sophisticated versions of \joylol\ 
+can be given greater inferential power with which to make the proofs of 
+computational correctness simpler. 
+
+From a high-level, classical, Categorical point of view, the construction 
+of the \joylolZero\ interpreter has six \quote{component} 
+parts\footnote{See, for example, Definition 6.5.1 
+\cite{jacobs2017coalgebras}}: 
+
+\startitemize[n]
+
+\item A functor, $F : \lol\ \rightarrow \lol$, which \quote{defines} the 
+Coalgebra of Lists of Lists. This coalgebra of Lists of Lists, \emph{is} 
+the semantics of the \joylolZero\ computational language. 
+
+\item The terminal $F$-Coalgebra $(\text{F}, c:\text{F} \rightarrow 
+F(\text{F})$. We assert that this terminal coalgebra actually exists. 
+
+\item A functor, $L : \lol\ \rightarrow \lol$, which \quote{defines} the 
+Algebra of the $\mu$-modal Dynamic Logic which we call \joylolZero. This 
+algebra \emph{is} the syntax of the \joylolZero\ computational language. 
+
+\item The initial $L$-Algebra $(\text{L}, \gamma:L(\text{L}) \rightarrow 
+\text{L})$. 
+
+\item A functor, $P = 2^{(-)} : \lol^{\text{op}} \rightarrow \lol$, which 
+is the contravariant \quote{powerset} functor. 
+
+\item A natural transformation, $\delta : LP \Rightarrow PF$, which is the 
+\emph{interpreter} of the \joylolZero\ computational language. 
+
+\stopitemize
+
+\TODO{describe the structure of our Dynamic Logic}
+
+\TODO{describe the fibration we will use}
