@@ -179,10 +179,18 @@ future, more sophisticated, versions of \joylol\ can be built based upon
 can be given greater inferential power with which to make the proofs of 
 computational correctness simpler. 
 
-From a high-level, classical, Categorical point of view, the construction 
-of the \joylolZero\ interpreter has six \quote{component} 
-parts\footnote{See, for example, Definition 6.5.1 
-\cite{jacobs2017coalgebras}}: 
+For the rest of this subsection we sketch, using a high-level, classical, 
+Categorical point of view, the construction of the \joylolZero\ 
+interpreter. Being mappae mundi, each of the classical parts of this 
+sketch are merely suggestive of the actual construction we will need. 
+However, in each case, these mappae mundi provide useful points of 
+reference with which to orient ourselves as we build our actual 
+construction. To help keep the parallels to mind we will keep the 
+\quote{names} of each \quote{component} part we sketch here, in the final 
+construction below. 
+
+We begin by taking six \quote{component} parts from Definition 6.5.1 of 
+\cite{jacobs2017coalgebras}: 
 
 \startitemize[n]
 
@@ -208,6 +216,38 @@ is the contravariant \quote{powerset} functor.
 
 \stopitemize
 
-\TODO{describe the structure of our Dynamic Logic}
+\ \par
 
-\TODO{describe the fibration we will use}
+Following Chapter 2 of \cite{jacobs1999categoricalLogicTypeTheory}, we can 
+view \joylolZero\ as essentially a \quote{simple type theory} with the 
+single basic type, \lol. Contexts are important. For us a context is 
+actually a (data) stack description, see 
+\cite{diggins2008simpleTypeInference}. This means that the \quote{rules} 
+of context (stack) manipulation will be slightly different for our case. 
+
+\TODO{describe the classifying category Definition 2.1.1 
+\cite{jacobs1999categoricalLogicTypeTheory}... is essentially \joylolZero\ 
+\quote{programs}. The arrows are the process stack while the objects are 
+the data stack.} 
+
+\TODO{explore the $\lambda 1$ and $\lambda 1_\times$-calculi described in 
+section 2.3 \cite{jacobs1999categoricalLogicTypeTheory}. Comment on the 
+fact that propositions as types are \joylolZero\ programs. Where do the 
+type formers fit in to our work?} 
+
+\TODO{In the terminology of \cite{jacobs1999categoricalLogicTypeTheory}, 
+the $\mu$-modal Dynamic Logic is really the \emph{simultaneous} addition 
+of a Simple Type Theory (the program part) and a First-order predicate 
+logic (the predicate part) at the same time. See Chapters 2 and 4 
+\cite{jacobs1999categoricalLogicTypeTheory}. In particular see sections 
+4.2.4 through 4.2.7 of \cite{jacobs1999categoricalLogicTypeTheory}. We 
+will retain Jabob's structured contexts by having a stack description as 
+well as a separate collection of predicate in every context.} 
+
+We will also be interested in the functorial semantics described in 
+section 2.2 of \cite{jacobs1999categoricalLogicTypeTheory}. Since we are 
+building a fixed point of the functorial semantics operator ...
+
+\TODO{describe the structure of our Dynamic Logic sections 5.1, 5.2, 11.1, 
+11.2, and 11.3 in \cite{harelKozenTiuryn2000dynamicLogic}} 
+
