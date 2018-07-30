@@ -198,8 +198,8 @@ We begin by taking six \quote{component} parts from Definition 6.5.1 of
 Coalgebra of Lists of Lists. This coalgebra of Lists of Lists, \emph{is} 
 the semantics of the \joylolZero\ computational language. 
 
-\item The terminal $F$-Coalgebra $(\text{F}, c:\text{F} \rightarrow 
-F(\text{F})$. We assert that this terminal coalgebra actually exists. 
+\item The terminal $F$-Coalgebra $(\lol, c:\lol \rightarrow F(\lol)$. We 
+assert that this terminal coalgebra actually exists. 
 
 \item A functor, $L : \lol\ \rightarrow \lol$, which \quote{defines} the 
 Algebra of the $\mu$-modal Dynamic Logic which we call \joylolZero. This 
@@ -250,4 +250,22 @@ building a fixed point of the functorial semantics operator ...
 
 \TODO{describe the structure of our Dynamic Logic sections 5.1, 5.2, 11.1, 
 11.2, and 11.3 in \cite{harelKozenTiuryn2000dynamicLogic}} 
+
+\subsection[title=Semantic Functor]
+
+We begin by building the Semantic Functor, $F$, together with its 
+associated $F$-Coalgebra map, $c : \lol \rightarrow F(\lol)$. 
+\classical{Using the notation from Section 2.2.2 in 
+\cite{jacobs2017coalgebras} on \quote{Binary $A$-Trees}, our $F$ functor 
+will be essentially $F : \lol \rightarrow \lol \times \lol$}. 
+
+\subsection[title=Syntaxtic Functor]
+
+We now proceed by building the Syntaxtic Functor, $L$, together with its 
+associated $L$-Algebra map, $\gamma : L(\text{L}) \rightarrow \text{L}$. 
+
+\TODO{While at the same time we will build the natural transformation, 
+$\delta : LP \Rightarrow PF$.} 
+
+\TODO{We need to build the injection from $\text{L} \rightarrow \lol$.} 
 
