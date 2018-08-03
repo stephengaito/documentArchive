@@ -251,6 +251,29 @@ building a fixed point of the functorial semantics operator ...
 \TODO{describe the structure of our Dynamic Logic sections 5.1, 5.2, 11.1, 
 11.2, and 11.3 in \cite{harelKozenTiuryn2000dynamicLogic}} 
 
+What is a set? Computationally there are many ways to \emph{implement} a 
+\quote{set}. The easiest is to simply list all of the elements, 
+\emph{once} for each element. For \emph{data} it is easy to ensure a given 
+element is contained in the list exactly once. While we will show that it 
+is possible to \emph{sort} a \emph{process}, and hence remove duplicates, 
+it is equally easy to realize that one can only remove all duplicates in 
+the infinitely sorted limit. Any particular \emph{finite} sorted 
+approximation to the infinite sort, may always have multiple copies of any 
+given element. This suggests that \quote{mulit-sets} or \quote{bags} are 
+more natural \emph{computataional} equivalent to the \emph{axiomatic} 
+concept of \quote{set}. \TODO{Find references for multi-sets.}
+
+What then is the \emph{computational} equivalent of the \quote{power-set}. 
+It should be the \quote{power-multi-set}. \TODO{While the collection of 
+all sub-multi-sets of a given multi-set can include arbitrary 
+multiplicities, we \emph{should} define a \emph{sub}-multi-set to only 
+have multiplicities \emph{less than or equal to} the multiplicities of the 
+parent multi-set. We can then define a characteristic function to 
+choose/reject a given multi-set element. Then the power-multi-set is the 
+collection of all of these characteristic functions.} 
+
+\TODO{discuss functions based upon interpreted code OR lists.} 
+
 The complexity of the foundations of any building prefigure the building 
 itself. However the foundations only make sense if one reflects on what 
 the building \emph{will be} rather than what the foundations are. It is no 
