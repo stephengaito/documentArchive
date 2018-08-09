@@ -319,6 +319,86 @@ the non-well-founded/process/co-algebraic is all pervasive. }
 
 \subsection[title=Barr's theorem]
 
+\startformula \startMPcode
+
+  string nLabel[][];
+  string aLabel[][][][];
+  string aPos[][][][];
+  picture npLabel[][];
+  pair w[][];
+  path aLine;
+  pair aBegin;
+  pair aEnd;
+  
+  nLabel[1][1] := "X_0";
+  nLabel[1][2] := "X_1";
+  nLabel[1][3] := "\cdots";
+  nLabel[1][4] := "X_n";
+  nLabel[1][5] := "X_{n+1}";
+  nLabel[1][6] := "\cdots";
+  
+  nLabel[2][1] := "Y_0";
+  nLabel[2][2] := "Y_1";
+  nLabel[2][3] := "\cdots";
+  nLabel[2][4] := "Y_n";
+  nLabel[2][5] := "Y_{n+1}";
+  nLabel[2][6] := "\cdots";
+  
+  aLabel[1][1][1][2] := "j_0";     %aPos[1][1][1][2] := "top";
+  aLabel[1][2][1][3] := "";
+  aLabel[1][3][1][4] := "";
+  aLabel[1][4][1][5] := "j_n";     %aPos[1][4][1][5] := "top";
+  aLabel[1][5][1][6] := "";
+  aLabel[1][1][2][1] := "k_0";     %aPos[1][1][2][1] := "lft";
+  aLabel[1][2][2][2] := "k_1";     %aPos[1][2][2][2] := "rt";
+  aLabel[1][4][2][4] := "k_n";     %aPos[1][4][2][4] := "lft";
+  aLabel[1][5][2][5] := "k_{n+1}"; %aPos[1][5][2][5] := "rt";
+  aLabel[2][2][2][1] := "t_1";     %aPos[2][2][2][1] := "top";
+  aLabel[2][3][2][2] := "";
+  aLabel[2][4][2][3] := "";
+  aLabel[2][5][2][4] := "t_{n+1}"; %aPos[2][5][2][4] := "top";
+  aLabel[2][6][2][5] := "";
+
+  for i = 1 upto 2 : 
+    for j = 1 upto 6 :
+      w[i][j] = (j*2.5*cm, i*(-2.5)*cm);
+      npLabel[i][j] := thelabel("$"&nLabel[i][j]&"$", w[i][j]);
+      draw npLabel[i][j];
+    endfor;
+  endfor;
+  
+  for i = 1 upto 2 :
+    for j = 1 upto 6 :
+      for k = 1 upto 2 :
+        for l = 1 upto 6 :
+          if not unknown(aLabel[i][j][k][l]) :
+            aLine  := w[i][j] .. w[k][l];
+            aBegin := aLine intersectionpoint npLabel[i][j] enlarged 0.15cm ;
+            aEnd   := aLine intersectionpoint npLabel[k][l] enlarged 0.15cm ;
+            draw image ( drawarrow aBegin .. aEnd ) ;
+            if 0 < length(aLabel[i][j][k][l]) :
+              label("$"&aLabel[i][j][k][l]&"$", 0.5[ aBegin, aEnd ] );
+            fi;
+          fi;
+        endfor;
+      endfor;
+    endfor;
+  endfor;
+
+% TODO: walk through each row/column and compute the maximum of the sum of 
+% half the above/left node label's bounding box PLUS the height/width of 
+% the arrow labels between the row/columns PLUS half the below/right node 
+% label's bounding box ... this provides the MINIMAL row/column separation 
+% for a given row/column. So the constraint will then be on the w[i][j] - 
+% w[k][l] must be greater than the corresponding row/column separation. 
+
+% to express greater than constraints with equations... simply add a 
+% whatever variable which must be positive... 
+
+% PROBLEM: expressing label positions using variables is NOT possible.... 
+
+\stopMPcode \stopformula
+
 \subsection[title=Identity and Bisimulation]
 
 \subsection[title=Lawvere's Theorem]
