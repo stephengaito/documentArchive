@@ -317,9 +317,98 @@ the non-well-founded/process/co-algebraic is all pervasive. }
 
 \section[title=Some Mathematics]
 
+\subsection[title=A tale of two foundations]
+
+In this document, we are \emph{explicitly} re-founding mathematics using a 
+\emph{computational} as opposed to a \emph{logical} tool-set. To a 
+classically trained mathematician, these computational foundations will be 
+strange at first. The complexity of the foundations of any building 
+prefigure the building itself. However any foundations only make sense if 
+one reflects on what the building \emph{will be} rather than what the 
+foundations are. It is no different in mathematics. 
+
+To help overcome the initial strangeness of these computational 
+foundations, we will provide a running commentary using (as yet) classical 
+mathematical terminology. Once we have the new foundations secure we can 
+translate all of classical mathematics into the new tools. However, until 
+the foundations are secure, we need to carefully distinguish between 
+\MMundi{extra-foundational commentary} using classical mathematics, 
+typically, classical Category theory, and the actual re-founded 
+foundations. We will do this by placing these \MMundi{extra-foundational 
+comments} in the colour \color[blue]{blue} and in the {\sans Sans-Serif 
+font}. 
+
+\startMMundi From the beginning of the next subsection, all 
+extra-foundational comments will be carefully delineated from the 
+re-foundations themselves. \stopMMundi 
+
+\subsection[title=What \emph{can} a \quote{wee beastie} know and do?]
+
+Intuitionistic Mathematics, as initiated by Brouwer, has identified the 
+concept of the \quote{Idealized Mathematician}. Since this document is 
+focused upon the \emph{Mathematics} of the \quote{Reality} which a wee 
+beastie can know, for this document, we will identify any wee beastie with 
+this Idealized Mathematician.
+
+Unlike Kant, this idealization makes \emph{no} assumptions about the 
+structure of time or space. One consequence of our analysis of what a wee 
+beastie can know, is space-time itself. 
+
+Following Hilbert, we will assume a number of undefined terms which will 
+be defined by their use in our theory. 
+
+\def\widget{\quote{widget}}
+\def\widgets{\quote{widgets}}
+
+We assume any wee beastie exists in a \quote{collection} of \widgets. With 
+these \widgets, a wee beastie can: 
+
+\startitemize[n]
+
+\item create a new \widget\ by \quote{\type{cons}}ing any two existing 
+\widgets\ together. 
+
+\item create a new \widget\ by \quote{\type{car}}ing an existing \widget. 
+
+\item create a new \widget\ by \quote{\type{cdr}}ing an existing \widget. 
+
+\item create a new \quote{\type{nil}} \widget.
+
+\item determine if an existing \widget\ is \quote{\type{nil}}.
+
+\stopitemize
+
+\noindent This is \emph{all} that any wee beastie, or (Idealized) 
+Mathematician can know or do.
+
+\startMMundi From a classical point of view, the first four things that a 
+wee beastie can \emph{do}, define a \emph{endo-functor} from the Category 
+of Sets to itself\footnote{See, for example, \cite{jacobs2017coalgebras}}. 
+The initial (final) Algebra (Co-Algebra) associated to this endo-functor 
+is the collection of well-founded (non-well-founded) Lists (or more 
+correctly Lists of Lists). Notice our \emph{explicit} use of John 
+McCarthy's notation for the programming language LISP, 
+\cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. \stopMMundi 
+
+We have used the word \widget\ in the above to emphasize, with Hilbert, 
+that our undefined terms could represent anything which behaves in the 
+prescribed way. Having made this point, we will, in the rest of this 
+document, actually refer to these \widgets\ by the more suggestive 
+terminology of \quote{Lists of Lists} or \lol s. 
+
+\startMMundi Assuming a wee beastie has $\omega$-computational power, then 
+clearly any \lol\ the wee beastie might \emph{create} must be 
+well-founded. However, given any \emph{existing} \lol, a wee beastie can 
+not know if it is well-founded or not. Moreover, with the capabilities 
+listed above, a wee beastie can not \emph{know}, apriori, if two \lol s 
+are \emph{equal}. The best a wee beastie can know, is that a pair of \lol 
+s have \quote{passed} all of the same collection of \quote{tests}. This is 
+the concept of Bisimulation, see Chapter 3 of \cite{jacobs2017coalgebras}. 
+\stopMMundi 
+
 \subsection[title=Barr's theorem]
 
-\startformula \startMPcode{commDiag}  
+\startformula \startMPcode{commDiag}
   setupCommDiags ; 
   
   addObject(1,1, "X_0");
