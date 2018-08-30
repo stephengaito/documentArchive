@@ -387,12 +387,26 @@ Mathematician can know or do.
 \stopDefinition
 
 \startMMundi From a classical point of view, the first four things that a 
-wee beastie can \emph{do}, define a \emph{endo-functor} from the Category 
-of Sets to itself\footnote{See, for example, \cite{jacobs2017coalgebras}}. 
-The initial (final) Algebra (Co-Algebra) associated to this endo-functor 
-is the collection of well-founded (non-well-founded) Lists (or more 
-correctly Lists of Lists). Notice our \emph{explicit} use of John 
-McCarthy's notation for the programming language LISP, 
+wee beastie can do, defines the following \emph{endo-functor} from the 
+Category of Sets to itself\footnote{See, for example, 
+\cite{jacobs2017coalgebras}}: 
+
+\placeformula[+]\startformula
+  F(X) = 1 + X \times X
+\stopformula
+
+\noindent The initial and final algebras are defined by the 
+respective isomorphisms: 
+
+\placesubformula\startformula\startalign
+  \NC F(\lol) \NC \longrightarrow \lol    \NR[eq:a][a]
+  \NC \lol    \NC \longrightarrow F(\lol) \NR[eq:b][b]
+\stopalign\stopformula
+
+\noindent These initial (final) algebra (co-algebra) are the collection of 
+well-founded (non-well-founded) Lists (or more correctly Lists of Lists). 
+Notice our \emph{explicit} use of John McCarthy's notation for the 
+programming language LISP, 
 \cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. \stopMMundi 
 
 We have used the word \widget\ in the above to emphasize, with Hilbert, 
@@ -418,7 +432,7 @@ pair of \lol s have \quote{passed} all of the same collection of
 
 \startMMundi
 
-\startformula \startMPcode{commDiag}
+\placeformula[+]\startformula \startMPcode{commDiag}
   setupCommDiags ; 
   
   addObject(1,1, "X_0");
