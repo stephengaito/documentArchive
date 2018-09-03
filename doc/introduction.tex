@@ -484,20 +484,42 @@ Two \lols\ are \emph{Bisimilar} if they pass the same collection of tests.
 
 \stopDefinition
 
-Finally, linking the above three definitions together we make the 
-following assertion about any wee beastis and its environment of \lols: 
-
-\startAssertion
-
-\stopAssertion
-
 \startMMundi This concept of Bisimulation has been identified by a number 
 of Mathematicians and Computer Scientists. From the theory of 
 non-well-founded sets, see \cite{aczel1988nonWellFoundedSets}. From the 
 theory of co-algebras, see Chapter 3 of \cite{jacobs2017coalgebras}. 
 \stopMMundi 
 
+Finally, linking the above three definitions together we make the 
+following assertion about any wee beastie and its environment of \lols: 
 
+\begingroup\startAssertion
+
+\startitemize[n]
+
+\item \quote{\type{car}} of the \quote{\type{nil}} \lol\ is bisimular to 
+\quote{\type{nil}}. 
+
+\item \quote{\type{cdr}} of the \quote{\type{nil}} \lol\ is bisimular to 
+\quote{\type{nil}}. 
+
+\item \quote{\type{car}} of the \quote{\type{cons}} of two \lols\ is 
+bisimular to the first \lol. 
+
+\item \quote{\type{cdr}} of the \quote{\type{cons}} of two \lols\ is 
+bisimular to the second \lol. 
+
+\item \quote{\type{cons}} of the pair of \lols\ obtained by 
+\quote{\type{car}} and \quote{\type{cdr}} of the same \lol, is bisimular 
+to the original \lol. 
+
+\stopAssertion\endgroup
+
+As a result of these assertions, the only \quote{meaningful} tests are 
+those which consist of collections of \quote{\type{car}}s and 
+\quote{\type{cdr}}s. Assertions 3 and 4 imply that any 
+\quote{\type{cons}}s can be undone by appropriate use of 
+\quote{\type{car}}s and \quote{\type{cdr}}s. 
 
 \subsection[title=Barr's theorem]
 
