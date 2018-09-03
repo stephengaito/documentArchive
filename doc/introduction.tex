@@ -343,7 +343,7 @@ will also contain the word \emph{Classical}. From the beginning of the
 next subsection, all \emph{extra-foundational comments} will be carefully 
 delineated from the re-foundations themselves. \stopMMundi 
 
-\subsection[title=What \emph{can} a \quote{wee beastie} know and do?]
+\subsection[title=What \emph{can} a \quote{wee beastie} do?]
 
 Intuitionistic Mathematics, as initiated by Brouwer, has identified the 
 concept of the \quote{Idealized Mathematician}. Since this document is 
@@ -378,16 +378,14 @@ Lists} (\lols). With these \lols, a wee beastie can:
 
 \item create a new \quote{\type{nil}} \lol.
 
-\item determine if an existing \lol\ is \quote{\type{nil}}.
-
 \stopitemize
 
 \noindent This is \emph{all} that any wee beastie, or (Idealized) 
-Mathematician can know or do.
+Mathematician can do to \lols\ in its environment.
 
 \stopDefinition
 
-\startMMundi From a classical point of view, the first four things that a 
+\startMMundi From a classical point of view, these four things that a 
 wee beastie can do, defines the following \emph{endo-functor} from the 
 Category of Sets to itself\footnote{See, for example, 
 \cite{jacobs2017coalgebras}}: 
@@ -400,27 +398,82 @@ Category of Sets to itself\footnote{See, for example,
 respective isomorphisms: 
 
 \placesubformula\startformula\startalign
-  \NC F(\lol) \NC \longRightIsoArrow \lol    \NR[eq:a][a]
-  \NC \lol    \NC \longRightIsoArrow F(\lol) \NR[eq:b][b]
+  \NC F(\wflol) \NC \longRightIsoArrow \wflol  \NR[eq:a][a]
+  \NC \lol      \NC \longRightIsoArrow F(\lol) \NR[eq:b][b]
 \stopalign\stopformula
 
-\noindent These initial (final) algebra (co-algebra) are the collection of 
-well-founded (non-well-founded) Lists (or more correctly Lists of Lists). 
+\noindent The initial algebra, \wflol, above, is the collection of 
+\emph{well-founded} Lists of Lists. The final co-algebra, \lol, above, is 
+the collection of \emph{non-well-founded} Lists of Lists. 
+
+For a given ordinal, $\lambda$, the concept of 
+\quote{$\lambda$-computational power}, is critical to our theory. Once we 
+have progressed far enough to be able to define the ordinals, \emph{will} 
+define $\lambda$-computation as the computing \quote{power} associated 
+with a wee beastie whose computational \quote{traces} are at most 
+$\lambda$ in length. 
+
+Assuming a wee beastie has $\omega$-computational power, then clearly any 
+\lol\ the wee beastie might \emph{create} must be well-founded. However, 
+given any already \emph{existing} \lol, a wee beastie can not know if it 
+is well-founded or not. Hence, for our work, the collection of 
+\emph{non-well-founded} \lols\ is the \emph{primary} collection. The 
+sub-collection of \emph{well-founded} \lols, is important but secondary. 
+
 Notice our \emph{explicit} use of John McCarthy's notation for the 
 programming language LISP, 
 \cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. \stopMMundi 
 
-\startMMundi Assuming a wee beastie has $\omega$-computational power, then 
-clearly any \lol\ the wee beastie might \emph{create} must be 
-well-founded. However, given any already \emph{existing} \lol, a wee 
-beastie can not know if it is well-founded or not. \stopMMundi
+\subsection[title=What \emph{can} a \quote{wee beastie} know?]
+
+\startDefinition
+
+Again, we assume that any wee beastie exists in a 
+\quote{collection} of \lols. With these \lols, a wee beastie 
+can preform (\emph{compute}) the following tests:
+
+\startitemize[n]
+
+\item the test which always succeeds,
+
+\item the test which always fails,
+
+\item the test which succeeds if an existing \lol\ is 
+\quote{\type{nil}},
+
+\item the test which succeeds if two other tests both succeed.
+
+\item the test which succeeds if one or more of two other tests succeeds. 
+
+\item the test which succeeds if another test fails.
+
+\item the test which succeeds if another test succeeds after 
+\quote{\type{cons}}ing a pair of existing \lols.
+
+\item the test which succeeds if another test succeeds after 
+\quote{\type{car}}ing an existing \lol.
+
+\item the test which succeeds if another test succeeds after 
+\quote{\type{cdr}}ing an existing \lol.
+
+\item the test which succeeds if another tests succeeds after 
+creating a new \quote{\type{nil}} \lol.
+
+\stopitemize
+
+If any of the above tests does \emph{not} succeed, then that 
+test fails. This is \emph{all} that any wee beastie can know 
+by testing \lols\ in its environment.
+
+\stopDefinition
 
 \subsection[title=Identity and Bisimulation]
 
-When are two \quote{widgets} or \lol's the \emph{same} \quote{widget} or 
-\lol? Given the capabilities listed above, no wee beastie can know 
-\emph{identity}. The best a wee beastie can do is to compare a pair of 
-\lol's using the same collection of \emph{tests}. 
+When can a wee beastie know that two \lols\ the \emph{same} \lol? Given 
+the capabilities listed above, a wee beastie can never know if two \lols\ 
+are \emph{identical}, the \emph{same} or \emph{equal}. The best a wee 
+beastie can do is to compare a pair of \lol's using the same collection of 
+\emph{tests}. 
 
 \startMMundi Moreover, with the capabilities listed above, a wee beastie 
 can not \emph{know}, a priori, if two \lol s are \emph{equal}. The best a 
