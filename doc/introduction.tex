@@ -356,11 +356,12 @@ structure of time or space. One consequence of our analysis of what a wee
 beastie can know, is space-time itself. 
 
 Following Hilbert, we will assume a number of undefined terms which will 
-be defined by their use in our theory. In the following definition, we 
-\emph{could} use the word \quote{widget} to emphasize, with Hilbert, that 
-our undefined terms can represent anything which behaves in the prescribed 
-way. Having made this point, we will actually use the undefinded but 
-slightly more suggestive terminology of \quote{Lists of Lists} or \lols. 
+be defined by their use in our theory. In the following definition, using 
+well known practice from Computer Science, we \emph{could} use the word 
+\quote{widget} to emphasize, with Hilbert, that our undefined terms can 
+represent anything which behaves in the prescribed way. Having made this 
+point, we will actually use the undefinded but slightly more suggestive 
+terminology of \quote{Lists of Lists} or \lols. 
 
 \startDefinition
 
@@ -385,7 +386,7 @@ Mathematician can do to \lols\ in its environment.
 
 \stopDefinition
 
-\startMMundi From a classical point of view, these four things that a 
+\startMMundi From a classical point of view, the four things that a 
 wee beastie can do, defines the following \emph{endo-functor} from the 
 Category of Sets to itself\footnote{See, for example, 
 \cite{jacobs2017coalgebras}}: 
@@ -414,11 +415,12 @@ with a wee beastie whose computational \quote{traces} are at most
 $\lambda$ in length. 
 
 Assuming a wee beastie has $\omega$-computational power, then clearly any 
-\lol\ the wee beastie might \emph{create} must be well-founded. However, 
-given any already \emph{existing} \lol, a wee beastie can not know if it 
-is well-founded or not. Hence, for our work, the collection of 
-\emph{non-well-founded} \lols\ is the \emph{primary} collection. The 
-sub-collection of \emph{well-founded} \lols, is important but secondary. 
+\lol\ the wee beastie might \emph{create}, from scratch, must be 
+well-founded. However, given any already \emph{existing} \lol, a wee 
+beastie can not know if it is well-founded or not. Hence, for our work, 
+the collection of \emph{non-well-founded} \lols\ is the \emph{primary} 
+collection. The sub-collection of \emph{well-founded} \lols, is important 
+but secondary. 
 
 Notice our \emph{explicit} use of John McCarthy's notation for the 
 programming language LISP, 
@@ -441,22 +443,23 @@ can preform (\emph{compute}) the following tests:
 \item the test which succeeds if an existing \lol\ is 
 \quote{\type{nil}},
 
-\item the test which succeeds if two other tests both succeed.
+\item the test which succeeds if given pair of other tests both succeed.
 
-\item the test which succeeds if one or more of two other tests succeeds. 
+\item the test which succeeds if one or more of a given pair of other 
+tests succeeds. 
 
-\item the test which succeeds if another test fails.
+\item the test which succeeds if a given other test fails.
 
-\item the test which succeeds if another test succeeds after 
+\item the test which succeeds if a given other test succeeds after 
 \quote{\type{cons}}ing a pair of existing \lols.
 
-\item the test which succeeds if another test succeeds after 
+\item the test which succeeds if a given other test succeeds after 
 \quote{\type{car}}ing an existing \lol.
 
-\item the test which succeeds if another test succeeds after 
+\item the test which succeeds if a given other test succeeds after 
 \quote{\type{cdr}}ing an existing \lol.
 
-\item the test which succeeds if another tests succeeds after 
+\item the test which succeeds if a given other tests succeeds after 
 creating a new \quote{\type{nil}} \lol.
 
 \stopitemize
@@ -475,11 +478,26 @@ are \emph{identical}, the \emph{same} or \emph{equal}. The best a wee
 beastie can do is to compare a pair of \lol's using the same collection of 
 \emph{tests}. 
 
-\startMMundi Moreover, with the capabilities listed above, a wee beastie 
-can not \emph{know}, a priori, if two \lol s are \emph{equal}. The best a 
-wee beastie can know, is that a pair of \lol s have \quote{passed} all of 
-the same collection of \quote{tests}. This is the concept of Bisimulation, 
-see Chapter 3 of \cite{jacobs2017coalgebras}. \stopMMundi 
+\startDefinition
+
+Two \lols\ are \emph{Bisimilar} if they pass the same collection of tests.
+
+\stopDefinition
+
+Finally, linking the above three definitions together we make the 
+following assertion about any wee beastis and its environment of \lols: 
+
+\startAssertion
+
+\stopAssertion
+
+\startMMundi This concept of Bisimulation has been identified by a number 
+of Mathematicians and Computer Scientists. From the theory of 
+non-well-founded sets, see \cite{aczel1988nonWellFoundedSets}. From the 
+theory of co-algebras, see Chapter 3 of \cite{jacobs2017coalgebras}. 
+\stopMMundi 
+
+
 
 \subsection[title=Barr's theorem]
 
