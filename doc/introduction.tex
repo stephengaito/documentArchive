@@ -356,28 +356,29 @@ structure of time or space. One consequence of our analysis of what a wee
 beastie can know, is space-time itself. 
 
 Following Hilbert, we will assume a number of undefined terms which will 
-be defined by their use in our theory. 
-
-\def\widget{\quote{widget}}
-\def\widgets{\quote{widgets}}
+be defined by their use in our theory. In the following definition, we 
+\emph{could} use the word \quote{widget} to emphasize, with Hilbert, that 
+our undefined terms can represent anything which behaves in the prescribed 
+way. Having made this point, we will actually use the undefinded but 
+slightly more suggestive terminology of \quote{Lists of Lists} or \lols. 
 
 \startDefinition
 
-We assume any wee beastie exists in a \quote{collection} of \widgets. With 
-these \widgets, a wee beastie can: 
+We assume any wee beastie exists in a \quote{collection} of \quote{List of 
+Lists} (\lols). With these \lols, a wee beastie can: 
 
 \startitemize[n]
 
-\item create a new \widget\ by \quote{\type{cons}}ing any two existing 
-\widgets\ together. 
+\item create a new \lol\ by \quote{\type{cons}}ing any two existing 
+\lols\ together. 
 
-\item create a new \widget\ by \quote{\type{car}}ing an existing \widget. 
+\item create a new \lol\ by \quote{\type{car}}ing an existing \lol. 
 
-\item create a new \widget\ by \quote{\type{cdr}}ing an existing \widget. 
+\item create a new \lol\ by \quote{\type{cdr}}ing an existing \lol. 
 
-\item create a new \quote{\type{nil}} \widget.
+\item create a new \quote{\type{nil}} \lol.
 
-\item determine if an existing \widget\ is \quote{\type{nil}}.
+\item determine if an existing \lol\ is \quote{\type{nil}}.
 
 \stopitemize
 
@@ -409,24 +410,23 @@ Notice our \emph{explicit} use of John McCarthy's notation for the
 programming language LISP, 
 \cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. \stopMMundi 
 
-We have used the word \widget\ in the above to emphasize, with Hilbert, 
-that our undefined terms could represent anything which behaves in the 
-prescribed way. Having made this point, we will, in the rest of this 
-document, actually refer to these \widgets\ by the more suggestive 
-terminology of \quote{Lists of Lists} or \lol s. 
-
-\subsection[title=Identity and Bisimulation]
-
 \startMMundi Assuming a wee beastie has $\omega$-computational power, then 
 clearly any \lol\ the wee beastie might \emph{create} must be 
 well-founded. However, given any already \emph{existing} \lol, a wee 
-beastie can not know if it is well-founded or not. Moreover, with the 
-capabilities listed above, a wee beastie can not \emph{know}, a priori, if 
-two \lol s are \emph{equal}. The best a wee beastie can know, is that a 
-pair of \lol s have \quote{passed} all of the same collection of 
-\quote{tests}. This is the concept of Bisimulation, see Chapter 3 of 
-\cite{jacobs2017coalgebras}. \stopMMundi 
+beastie can not know if it is well-founded or not. \stopMMundi
 
+\subsection[title=Identity and Bisimulation]
+
+When are two \quote{widgets} or \lol's the \emph{same} \quote{widget} or 
+\lol? Given the capabilities listed above, no wee beastie can know 
+\emph{identity}. The best a wee beastie can do is to compare a pair of 
+\lol's using the same collection of \emph{tests}. 
+
+\startMMundi Moreover, with the capabilities listed above, a wee beastie 
+can not \emph{know}, a priori, if two \lol s are \emph{equal}. The best a 
+wee beastie can know, is that a pair of \lol s have \quote{passed} all of 
+the same collection of \quote{tests}. This is the concept of Bisimulation, 
+see Chapter 3 of \cite{jacobs2017coalgebras}. \stopMMundi 
 
 \subsection[title=Barr's theorem]
 
