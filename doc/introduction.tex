@@ -71,7 +71,7 @@ there have been a wide range of Philosophical theories of the
 Mathematical theory of Reality is not to prove any of these Philosophical 
 theories (in)correct. Instead our objective, and really the only one 
 available \emph{Mathematically}, is to explore what a finite computational 
-device, \quote{\emph{a wee beastie}}, can learn about Reality. 
+device, \emph{\quote{a wee beastie}}, can learn about Reality. 
 
 \subsection[title=Hume's problem]
 
@@ -88,8 +88,11 @@ feed daily\footnote{See chapter VI, \quote{On Induction}, in Russell's
 \quote{The Problems of Philosophy}, \cite{russell1912problemsOfPhilosophy} 
 near page 98}. However, for any \emph{finite} being, there will always be 
 events, some highly critical events, which are outside of that being's 
-ability to know about and hence predict. Understanding these limits of 
-being finite, is the true import of Hume's Problem. 
+ability to know about and hence predict. This is emphatically the 
+\emph{\quote{wee}} in my understanding of a \emph{\quote{wee beastie}}. 
+For any finte being, there is always a more capable being, we might just 
+not yet found these more capable beings. Understanding the limits of being 
+finite, is the true import of Hume's Problem. 
 
 It is equally naive to assert that a finite being can not interact with 
 their environment. I \emph{can} communicate with you over both distance 
@@ -121,14 +124,15 @@ Master would refuse to use mere words. To slightly mix philosophies,
 tradition, God is not to be directly \emph{named}. Words differentiate 
 \quote{things}, and Zen's \quote{existence-in-entirety}, the Tao and God 
 are beyond all human limits to differentiate, identify or understand. We, 
-as limited beings, can only experience. This is similar to Cantor's 
+as limited beings, can only \emph{experience}. This is similar to Cantor's 
 expressed understanding of his Absolute Infinite Magnitudes, again, see 
 Cantor's letter to Dedekind dated 1899, 
 \cite{vanHeijenoort1967fregeToGodel}.}. That quarrelsome \quote{thing}, 
-\emph{I}, is only an illusion. The hardest thing any \quote{one} can do is 
-to ignore the \emph{I} in order to \quote{see} the \emph{is}. The 
-dissolution of this \emph{I} is un-important in the context of the 
-\emph{is}. In our work, this point of view will be indispensable. 
+\emph{\quote{I}}, is only an illusion. The hardest thing any \quote{one} 
+can do is to ignore the \emph{\quote{I}} in order to \quote{see} the 
+\emph{\quote{is}}. The dissolution of this \emph{\quote{I}} is 
+un-important in the context of the \emph{\quote{is}}. In our work, this 
+point of view will be indispensable. 
 
 However, for most of \quote{us}, such a view point is very hard to hold. 
 We all play a \quote{me}-\quote{environment} game with existence. This 
@@ -405,17 +409,17 @@ respective isomorphisms:
 
 \noindent The initial algebra, \wflol, above, is the collection of 
 \emph{well-founded} Lists of Lists. The final co-algebra, \lol, above, is 
-the collection of \emph{non-well-founded} Lists of Lists. 
+the collection of (potentially) \emph{non-well-founded} Lists of Lists. 
 
 For a given ordinal, $\lambda$, the concept of 
 \quote{$\lambda$-computational power}, is critical to our theory. Once we 
-have progressed far enough to be able to define the ordinals, \emph{will} 
+have progressed far enough to be able to define the ordinals, we will 
 define $\lambda$-computation as the computing \quote{power} associated 
 with a wee beastie whose computational \quote{traces} are at most 
 $\lambda$ in length. 
 
 Assuming a wee beastie has $\omega$-computational power, then clearly any 
-\lol\ the wee beastie might \emph{create}, from scratch, must be 
+\lol\ a wee beastie might \emph{create}, from scratch, must be 
 well-founded. However, given any already \emph{existing} \lol, a wee 
 beastie can not know if it is well-founded or not. Hence, for our work, 
 the collection of \emph{non-well-founded} \lols\ is the \emph{primary} 
@@ -434,6 +438,12 @@ Again, we assume that any wee beastie exists in a
 \quote{collection} of \lols. With these \lols, a wee beastie 
 can preform (\emph{compute}) the following tests:
 
+%\setupitemize[2]
+
+\startitemize[n]
+
+\item Atomic Tests
+
 \startitemize[n]
 
 \item the test which always succeeds,
@@ -443,6 +453,12 @@ can preform (\emph{compute}) the following tests:
 \item the test which succeeds if an existing \lol\ is 
 \quote{\type{nil}},
 
+\stopitemize
+
+\item Static Test Combinators
+
+\startitemize[n]
+
 \item the test which succeeds if given pair of other tests both succeed.
 
 \item the test which succeeds if one or more of a given pair of other 
@@ -450,11 +466,18 @@ tests succeeds.
 
 \item the test which succeeds if a given other test fails.
 
+\stopitemize
+
+\item Dynamic Test Combinators
+
+\startitemize[n]
+
 \item the test which succeeds if a given other test succeeds after 
 \quote{\type{cons}}ing a pair of existing \lols.
 
 \item the test which succeeds if a given other test succeeds after 
 \quote{\type{car}}ing an existing \lol.
+
 
 \item the test which succeeds if a given other test succeeds after 
 \quote{\type{cdr}}ing an existing \lol.
@@ -464,11 +487,52 @@ creating a new \quote{\type{nil}} \lol.
 
 \stopitemize
 
-If any of the above tests does \emph{not} succeed, then that 
-test fails. This is \emph{all} that any wee beastie can know 
-by testing \lols\ in its environment.
+\stopitemize
+
+If any of the above tests does \emph{not} succeed, then that test fails. 
+This is \emph{all} that any wee beastie (or Idealized Mathematician) can 
+know by testing \lols\ in its environment. 
 
 \stopDefinition
+
+\TODO{We have defined the necessary modal operators, do we need to define 
+the corresponding possible modal operators?} 
+
+\startMMundi
+
+The atomic tests provide the \emph{only} \quote{direct} tests that a wee 
+beastie can perform. All other tests are formed via various test 
+combinators from these three atomic tests. Only the third atomic test 
+increases the wee beastie's knowledge of its environment. Neither of the 
+first two atomic tests reference the \quote{state} of the wee beastie's 
+environment. 
+
+The three static test combinators correspond to the core of classical 
+(static) propositional logic. Note that we do \emph{not} assume the 
+classical \quote{principle of the excluded middle}, hence we must define 
+both the \quote{logical} \quote{conjunction} (\quote{and}) as well as the 
+\quote{logical} \quote{disjunction} (\quote{or}) operators. It will turn 
+out that while the principle of the excluded middle \emph{is} valid for 
+any well-founded \lol\ or finitely defined collection of non-well-founded 
+\lols, it is \emph{not} valid for \quote{asymptotically} defined 
+non-well-founded \lols. 
+
+Classical logic, including propositional, first or higher order, concerns 
+itself with \quote{properties} of a single \emph{fixed} \quote{unchanging} 
+\quote{world}. Since there is no change, there is no corresponding sense 
+of \quote{time}. Wee beasties, such as ourselves, experience a 
+\quote{world} of constant change. While we will not (yet) explicitly 
+define time, as wee beasties, we are naturally interested in what will 
+happen to our world if we change it. The dynamic test combinators capture 
+how given tests will change if a wee beastie changes its environment by 
+first performing one of its possible actions on its environment. 
+
+The complete collection of tests forms a \quote{temporal} or 
+\quote{dynamic} modal logic similar to those discussed in 
+\cite{demriGorankoLange2016temporalLogics} and 
+\cite{harelKozenTiuryn2000dynamicLogic} respectively. 
+
+\stopMMundi 
 
 \subsection[title=Identity and Bisimulation]
 
