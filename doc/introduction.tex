@@ -500,12 +500,12 @@ the corresponding possible modal operators?}
 
 \startMMundi
 
-The atomic tests provide the \emph{only} \quote{direct} tests that a wee 
-beastie can perform. All other tests are formed via various test 
-combinators from these three atomic tests. Only the third atomic test 
-increases the wee beastie's knowledge of its environment. Neither of the 
-first two atomic tests reference the \quote{state} of the wee beastie's 
-environment. 
+The atomic tests provide the \emph{only} tests that a wee beastie can 
+perform \emph{\quote{directly}} on its environment. All other tests are 
+formed via various test combinators from these three atomic tests. Of 
+these three atomic tests, only the third atomic test increases the wee 
+beastie's knowledge of its environment. Neither of the first two atomic 
+tests reference the \quote{state} of the wee beastie's environment. 
 
 The three static test combinators correspond to the core of classical 
 (static) propositional logic. Note that we do \emph{not} assume the 
@@ -513,9 +513,9 @@ classical \quote{principle of the excluded middle}, hence we must define
 both the \quote{logical} \quote{conjunction} (\quote{and}) as well as the 
 \quote{logical} \quote{disjunction} (\quote{or}) operators. It will turn 
 out that while the principle of the excluded middle \emph{is} valid for 
-any well-founded \lol\ or finitely defined collection of non-well-founded 
-\lols, it is \emph{not} valid for \quote{asymptotically} defined 
-non-well-founded \lols. 
+any finitely defined collection of (non-)well-founded \lols, it need 
+\emph{not} valid for \quote{asymptotically} defined collection 
+(non-)well-founded \lols. 
 
 Classical logic, including propositional, first or higher order, concerns 
 itself with \quote{properties} of a single \emph{fixed} \quote{unchanging} 
@@ -531,6 +531,8 @@ The complete collection of tests forms a \quote{temporal} or
 \quote{dynamic} modal logic similar to those discussed in 
 \cite{demriGorankoLange2016temporalLogics} and 
 \cite{harelKozenTiuryn2000dynamicLogic} respectively. 
+
+\TODO{discuss Kirpke semantics/frames/worlds}
 
 \stopMMundi 
 
