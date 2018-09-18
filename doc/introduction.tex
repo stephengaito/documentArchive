@@ -387,7 +387,8 @@ Lists} (\lols). With these \lols, a wee beastie can:
 \stopitemize
 
 \noindent This is \emph{all} that any wee beastie, or (Idealized) 
-Mathematician can do to \lols\ in its environment.
+Mathematician can do to \lols\ in its environment\footnote{In Volume II, 
+we will add one more thing that a \emph{transfinite} wee beastie can do.}. 
 
 \stopDefinition
 
@@ -400,7 +401,7 @@ Category of Sets to itself\footnote{See, for example,
   F(X) = 1 + X \times X
 \stopformula
 
-\noindent The initial and final algebras are defined by the 
+\noindent The initial algebra and final coalgebra are defined by the 
 respective isomorphisms: 
 
 \placesubformula\startformula\startalign
@@ -413,11 +414,11 @@ respective isomorphisms:
 the collection of (potentially) \emph{non-well-founded} Lists of Lists. 
 
 For a given ordinal, $\lambda$, the concept of 
-\quote{$\lambda$-computational power}, is critical to our theory. Once we 
-have progressed far enough to be able to define the ordinals, we will 
-define $\lambda$-computation as the computing \quote{power} associated 
-with a wee beastie whose computational \quote{traces} are at most 
-$\lambda$ in length. 
+\quote{$\lambda$-computational power}, is critical to our theory. In the 
+next volume, once we have progressed far enough to be able to define the 
+ordinals, we will define $\lambda$-computation as the computing 
+\quote{power} associated with a wee beastie whose computational 
+\quote{traces} are at most $\lambda$ in length. 
 
 Assuming a wee beastie has $\omega$-computational power, then clearly any 
 \lol\ a wee beastie might \emph{create}, from scratch, must be 
@@ -430,6 +431,85 @@ but secondary.
 Notice our \emph{explicit} use of John McCarthy's notation for the 
 programming language LISP, 
 \cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. \stopMMundi 
+
+\startMMundi
+
+To help us navigate through our relatively complex \quote{story}, it will 
+be useful to introduce our cast of thousands: 
+
+\startitemize[n]
+
+\item \bold{The category of \wflol s}: most important for our work will be 
+the \emph{category} of Lists of Lists, \catWFLoL. The \emph{objects} of 
+\catWFLoL\ will be the collection of \wflols. The \emph{morphisms} of 
+\catWFLoL\ will be any \emph{finite sequence} of the list operators, 
+\type{cons}, \type{car}, \type{cdr} and \type{nil}. Composition of 
+morphisms in \catWFLoL, is simple concatenation of finite sequences of list 
+operators. 
+
+\item \bold{The category of \lol s}: most important for our work will be 
+the \emph{category} of Lists of Lists, \catLoL. The \emph{objects} of 
+\catLoL\ will be the collection of \lols. The \emph{morphisms} of 
+\catLoL\ will be any \emph{finite sequence} of the list operators, 
+\type{cons}, \type{car}, \type{cdr} and \type{nil}. Composition of 
+morphisms in \catLoL, is simple concatenation of finite sequences of list 
+operators. 
+
+\item \bold{The \wflol\ functor}: $\funcWFLoL : \catWFLoL \rightarrow \catWFLoL$ 
+defined by 
+
+\placeformula[+]\startformula
+  \funcWFLoL(X) = 1 + X \times X
+\stopformula
+
+\noindent For $X \in \catWFLoL$. Note that \funcWFLoL\ is an endo-functor of 
+the category \catWFLoL. 
+
+\item \bold{The \lol\ functor}: $\funcLoL : \catLoL \rightarrow \catLoL$ 
+defined by 
+
+\placeformula[+]\startformula
+  \funcLoL(X) = 1 + X \times X
+\stopformula
+
+\noindent For $X \in \catLoL$. Note that \funcLoL\ is an endo-functor of 
+the category \catLoL. 
+
+\item \bold{Algebras of \funcLoL}: Given any 
+
+\item \bold{CoAlgebras of \funcLoL}:
+
+\item \bold{\lol functor as a monad}:
+
+\item \bold{\lol functor as a comonad}:
+
+\item \bold{Eilenberg-Moore category of \funcLoL\ as a monad}:
+
+\item \bold{Eilenberg-Moore category of \funcLoL\ as a comonad}:
+
+\item \bold{Kleisli category of \funcLoL\ as a monad}: provides the natural 
+category in which to discuss the process traces, and (eventually) space-time.
+
+\item \bold{Kleisli category of \funcLoL\ as a comonad}: ?
+
+\item \bold{Multi-sets}: We implement \quote{sets} using \lols\ using a 
+\quote{mulit-set}. Basically a multi-set is a list of elements which might 
+have multiple \quote{copies} of any given element. For 
+\quote{sets}/\quote{multi-sets} in \wflol\ we \emph{could} sort the list 
+and remove any duplicates. However, while it is possible to sort (in the 
+limit) non-well-founded objects in \lol and/or non-well-founded lists of 
+objects, any finite computational approximation will by necessity be a 
+multi-set. Hence we generally deal with mulit-sets instead of sets. 
+
+\item \bold{Multi-powerset}: Generalizing powersets we get 
+multi-powersets. 
+
+\item \bold{GSOS laws}: see \cite{jacobs2017coalgebras} definition 5.5.6 on 
+page 323. 
+
+\stopitemize
+
+\stopMMundi
 
 \subsection[title=What \emph{can} a \quote{wee beastie} know?]
 
