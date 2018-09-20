@@ -347,6 +347,108 @@ will also contain the word \emph{Classical}. From the beginning of the
 next subsection, all \emph{extra-foundational comments} will be carefully 
 delineated from the re-foundations themselves. \stopMMundi 
 
+\subsection[title=What \emph{does} a Mathematician do?]
+
+\startMMundi
+
+With a \emph{computational} foundation for Mathematics, from the point of 
+view of Computer Science, the task of Mathematics, is to provide various 
+specialized \emph{rigorous programming languages}. Each of these 
+programming languages provides users, engineers, scientists and other 
+mathematicians, languages in which complicated computations are easier to 
+understand and perform. The languages of Group theory, Lie Algebras, 
+Differential Topology, Number theory, and Algebraic Geometry, are just a 
+scattered collection of examples. 
+
+Any given programming language consists of a pair of a \emph{syntax} and a 
+corresponding \emph{semantics}. The syntax defines which finite texts 
+represent valid static descriptions of the dynamic unfolding of various 
+computations. The corresponding semantics provides a compositional 
+interpretation of the meaning of any given syntactic text. In the theory 
+of Computer Science, the connection between a given syntax and a given 
+semantic model, is a collection of \emph{GSOS} laws. From a categorical 
+point of view, any collection of GSOS laws is represented by a 
+distributivity law, a natural transformation, between a pair of 
+endo-functors. The initial algebra of one of these endo-functors 
+represents the syntax of the programming language. The final coalgebra of 
+the other endo-functor represents the semantics. The natural 
+transformation itself, is effectively an \emph{interpreter} for the 
+programming language. 
+
+The importance of this description is that there can be many syntaxes 
+representing the various mathematical languages, areas or disciplines. At 
+the moment, within the logical foundation of mathematics, the semantics of 
+mathematics is generally agreed to be set theory augmented with 
+first-order logic. That is, it is generally assumed that any mathematical 
+discipline can be transcribed or interpreted in the language of 
+first-order set theory, which in turn provides a \quote{rigorous} meaning 
+to statements in the original discipline. 
+
+For a computational foundation of Mathematics, we seek a semantics in 
+which various syntaxes can be easily interpreted via GSOS laws. While 
+there may be many categorically equivalent semantics, including, for 
+example, some form of first-order set theory, we will, in this document, 
+base our semantics on Lists of Lists. We will show that these Lists of 
+Lists are effectively a fixed point of the \quote{semantic interpretation 
+functor}.
+
+A critical criteria which the Lists of Lists semantics satisfies which 
+almost any form of first-order set theory will not satisfy, is a 
+combination of textual and conceptual simplicity. Like any axiomatic 
+theory, the basic axioms must be assumed \quote{true}, or in our 
+compuational case \quote{computationally correct}. Our Lists of Lists 
+semantics will rely on a very small collection of computations which are, 
+for Lists of Lists, both textually simple and \quote{obviously 
+computationally correct}. 
+
+In this computational interpretation, what is a proof? Classically we have 
+a distinction between \emph{constructive} and \emph{(non-constructive) 
+existence} proofs. Constructive proofs are, by and large, essentially 
+computations. Indeed in one of the most common formalisms of constructive 
+logic, Per Martin-L\"of's type theory, there is a formal theory of how to 
+extract computational programs from the constructive type theoretic proof. 
+
+We will argue that all non-constructive existence proofs correspond to 
+searches. The proof by contradiction is essentially a proof that a given 
+search algorithm will complete, we just do not know how or when. Nor can 
+we provide a closed form solution, all we can provide is a specification 
+of what a given solution, once found, will satisfy. 
+
+Given that vanishingly few existing computer programs are proven 
+completely correct, how do we know that a given program text computes what 
+is purports to compute? At a high level, we use Hoare's system of pre and 
+post conditions and show that the given program text, if started in an 
+environment satisfying its preconditions will, if it halts, leave its 
+environment in a condition which satisfies its postconditions. Since any 
+semantic interpretation of a programming language is \emph{compositional}, 
+we can recursively apply Hoare's pre and post conditions to each sub-text 
+of a given program until we ultimately reach \emph{atomic} statements 
+which are declared to satisfy particular pre and post conditions. This is 
+not dissimilar to how we currently structure a fully formal proof in set 
+theory. 
+
+In mathematics based upon either (classical) logic or computation, we need 
+a logic. Unfortunately our existing first-order logic does not \quote{deal 
+with} the underlying dynamics of computation. Equally importantly, 
+existing (classical) logic is deemed to \emph{be} the \quote{structure} of 
+\quote{human} thought (and argumentation). The logic we will use to 
+establish the computational correctness of a given program text, will be 
+$\mu$-modal logic interpreted on an underlying Interpreted Transistion 
+System. This logic is inherently designed to deal with the dynamics of 
+computation. More importantly, the $\mu$-modal logic we will define, will 
+be intimately related to the structure of our semantic interpretation of 
+computation. Once we define our semantic interpretation, the $\mu$-modal 
+logic is given. 
+
+So in this computational interpretation, what do typical mathematicians 
+do? Some search for new algorithms to solve new problems. Some worry about 
+finding the most conceptually elegant (efficient) algorithm to program 
+the proof of a given theorem. Others worry about the expressivity of the 
+language they use in a given discipline. Yet others worry about the 
+semantic interpretation of the particular language they use. 
+
+\stopMMundi
+
 \subsection[title=What \emph{can} a \quote{wee beastie} do?]
 
 Intuitionistic Mathematics, as initiated by Brouwer, has identified the 
