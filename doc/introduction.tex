@@ -357,7 +357,7 @@ specialized \emph{rigorous programming languages}. Each of these
 programming languages provides users, engineers, scientists and other 
 mathematicians, languages in which complicated computations are easier to 
 understand and perform. The languages of Group theory, Lie Algebras, 
-Differential Topology, Number theory, and Algebraic Geometry, are just a 
+Differential Topology, Number theory, and Algebraic Geometry, are just one 
 scattered collection of examples. 
 
 Any given programming language consists of a pair of a \emph{syntax} and a 
@@ -376,13 +376,14 @@ transformation itself, is effectively an \emph{interpreter} for the
 programming language. 
 
 The importance of this description is that there can be many syntaxes 
-representing the various mathematical languages, areas or disciplines. At 
-the moment, within the logical foundation of mathematics, the semantics of 
-mathematics is generally agreed to be set theory augmented with 
-first-order logic. That is, it is generally assumed that any mathematical 
-discipline can be transcribed or interpreted in the language of 
-first-order set theory, which in turn provides a \quote{rigorous} meaning 
-to statements in the original discipline. 
+representing the various mathematical languages, areas or disciplines. 
+Equally, there could be many different semantics into which a given syntax 
+is interpreted. At the moment, within the logical foundation of 
+mathematics, the semantics of mathematics is generally agreed to be set 
+theory augmented with first-order logic. That is, it is generally assumed 
+that any mathematical discipline can be transcribed or interpreted in the 
+language of first-order set theory, which in turn provides a 
+\quote{rigorous} meaning to statements in the original discipline. 
 
 For a computational foundation of Mathematics, we seek a semantics in 
 which various syntaxes can be easily interpreted via GSOS laws. While 
@@ -431,21 +432,32 @@ In mathematics based upon either (classical) logic or computation, we need
 a logic. Unfortunately our existing first-order logic does not \quote{deal 
 with} the underlying dynamics of computation. Equally importantly, 
 existing (classical) logic is deemed to \emph{be} the \quote{structure} of 
-\quote{human} thought (and argumentation). The logic we will use to 
-establish the computational correctness of a given program text, will be 
-$\mu$-modal logic interpreted on an underlying Interpreted Transistion 
-System. This logic is inherently designed to deal with the dynamics of 
+\quote{human} thought (and argumentation). That is first-order logic is 
+essentially \emph{extra-mathematical} as it pre-figures mathematical 
+discourse.
+
+The logic we will use to establish the computational correctness of a 
+given program text, will be $\mu$-modal logic interpreted on an underlying 
+Interpreted Transistion System associated with the chosen semantic model. 
+This logic is inherently designed to deal with the dynamics of 
 computation. More importantly, the $\mu$-modal logic we will define, will 
 be intimately related to the structure of our semantic interpretation of 
 computation. Once we define our semantic interpretation, the $\mu$-modal 
-logic is given. 
+logic is given. Even more importantly there are well defined algorithms 
+based upon the theory of two person parity games which can \emph{compute} 
+the satisfiability of the collection of pre and post conditions asserted 
+about any particular program text purporting to itself compute a 
+mathematical result. 
 
 So in this computational interpretation, what do typical mathematicians 
 do? Some search for new algorithms to solve new problems. Some worry about 
-finding the most conceptually elegant (efficient) algorithm to program 
-the proof of a given theorem. Others worry about the expressivity of the 
+finding the most conceptually elegant (efficient) algorithm to program the 
+proof of a given theorem. Others worry about the expressivity of the 
 language they use in a given discipline. Yet others worry about the 
-semantic interpretation of the particular language they use. 
+semantic interpretation of the particular language they use. In all of 
+these cases the annotation of any given algorithm with a satisfiable 
+collection of $\mu$-modal pre and post conditions is required for any 
+completely rigorous mathematical result. 
 
 \stopMMundi
 
