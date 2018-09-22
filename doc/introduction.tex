@@ -343,9 +343,10 @@ foundations.
 \startMMundi As this paragraph shows, we will distinguish any 
 \emph{extra-foundational comments} by placing them between 
 \color[darkgray]{grey} angled over and under bars. The angled over bar 
-will also contain the word \emph{Classical}. From the beginning of the 
-next subsection, all \emph{extra-foundational comments} will be carefully 
-delineated from the re-foundations themselves. \stopMMundi 
+will also contain the words \emph{\color[darkgray]{Classical commentary}}. 
+From the beginning of the next subsection, all \emph{extra-foundational 
+comments} will be carefully delineated from the re-foundations themselves. 
+\stopMMundi 
 
 \subsection[title=What \emph{does} a Mathematician do?]
 
@@ -406,8 +407,8 @@ In this computational interpretation, what is a proof? Classically we have
 a distinction between \emph{constructive} and \emph{(non-constructive) 
 existence} proofs. Constructive proofs are, by and large, essentially 
 computations. Indeed in one of the most common formalisms of constructive 
-logic, Per Martin-L\"of's type theory, there is a formal theory of how to 
-extract computational programs from the constructive type theoretic proof. 
+logic, Per Martin-L\"of's type theory, there is a theory of how to extract 
+computational programs from the constructive type theoretic proof. 
 
 We will argue that all non-constructive existence proofs correspond to 
 searches. The proof by contradiction is essentially a proof that a given 
@@ -417,7 +418,7 @@ of what a given solution, once found, will satisfy.
 
 Given that vanishingly few existing computer programs are proven 
 completely correct, how do we know that a given program text computes what 
-is purports to compute? At a high level, we use Hoare's system of pre and 
+it purports to compute? At a high level, we use Hoare's system of pre and 
 post conditions and show that the given program text, if started in an 
 environment satisfying its preconditions will, if it halts, leave its 
 environment in a condition which satisfies its postconditions. Since any 
@@ -437,8 +438,8 @@ essentially \emph{extra-mathematical} as it pre-figures mathematical
 discourse.
 
 The logic we will use to establish the computational correctness of a 
-given program text, will be $\mu$-modal logic interpreted on an underlying 
-Interpreted Transistion System associated with the chosen semantic model. 
+given program text, will be the $\mu$-modal logic of an underlying 
+Interpreted Transition System associated with the chosen semantic model. 
 This logic is inherently designed to deal with the dynamics of 
 computation. More importantly, the $\mu$-modal logic we will define, will 
 be intimately related to the structure of our semantic interpretation of 
