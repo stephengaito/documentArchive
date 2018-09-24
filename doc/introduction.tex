@@ -462,90 +462,7 @@ completely rigorous mathematical result.
 
 \stopMMundi
 
-\subsection[title=What \emph{can} a \quote{wee beastie} do?]
-
-Intuitionistic Mathematics, as initiated by Brouwer, has identified the 
-concept of the \quote{Idealized Mathematician}. Since this document is 
-focused upon the \emph{Mathematics} of the \quote{Reality} which a wee 
-beastie can know, for this document, we will identify any wee beastie with 
-this Idealized Mathematician, and conversely, any Idealized Mathematician, 
-with this wee beastie. 
-
-Unlike Kant, this idealization makes \emph{no} assumptions about the 
-structure of time or space. One consequence of our analysis of what a wee 
-beastie can know, is space-time itself. 
-
-Following Hilbert, we will assume a number of undefined terms which will 
-be defined by their use in our theory. In the following definition, using 
-well known practice from Computer Science, we \emph{could} use the word 
-\quote{widget} to emphasize, with Hilbert, that our undefined terms can 
-represent anything which behaves in the prescribed way. Having made this 
-point, we will actually use the undefinded but slightly more suggestive 
-terminology of \quote{Lists of Lists} or \lols. 
-
-\startDefinition
-
-We assume any wee beastie exists in a \quote{collection} of \quote{List of 
-Lists} (\lols). With these \lols, a wee beastie can: 
-
-\startitemize[n]
-
-\item create a new \lol\ by \quote{\type{cons}}ing any two existing 
-\lols\ together. 
-
-\item create a new \lol\ by \quote{\type{car}}ing an existing \lol. 
-
-\item create a new \lol\ by \quote{\type{cdr}}ing an existing \lol. 
-
-\item create a new \quote{\type{nil}} \lol.
-
-\stopitemize
-
-\noindent This is \emph{all} that any wee beastie, or (Idealized) 
-Mathematician can do to \lols\ in its environment\footnote{In Volume II, 
-we will add one more thing that a \emph{transfinite} wee beastie can do.}. 
-
-\stopDefinition
-
-\startMMundi From a classical point of view, the four things that a 
-wee beastie can do, defines the following \emph{endo-functor} from the 
-Category of Sets to itself\footnote{See, for example, 
-\cite{jacobs2017coalgebras}}: 
-
-\placeformula[+]\startformula
-  F(X) = 1 + X \times X
-\stopformula
-
-\noindent The initial algebra and final coalgebra are defined by the 
-respective isomorphisms: 
-
-\placesubformula\startformula\startalign
-  \NC F(\wflol) \NC \longRightIsoArrow \wflol  \NR[eq:a][a]
-  \NC \lol      \NC \longRightIsoArrow F(\lol) \NR[eq:b][b]
-\stopalign\stopformula
-
-\noindent The initial algebra, \wflol, above, is the collection of 
-\emph{well-founded} Lists of Lists. The final co-algebra, \lol, above, is 
-the collection of (potentially) \emph{non-well-founded} Lists of Lists. 
-
-For a given ordinal, $\lambda$, the concept of 
-\quote{$\lambda$-computational power}, is critical to our theory. In the 
-next volume, once we have progressed far enough to be able to define the 
-ordinals, we will define $\lambda$-computation as the computing 
-\quote{power} associated with a wee beastie whose computational 
-\quote{traces} are at most $\lambda$ in length. 
-
-Assuming a wee beastie has $\omega$-computational power, then clearly any 
-\lol\ a wee beastie might \emph{create}, from scratch, must be 
-well-founded. However, given any already \emph{existing} \lol, a wee 
-beastie can not know if it is well-founded or not. Hence, for our work, 
-the collection of \emph{non-well-founded} \lols\ is the \emph{primary} 
-collection. The sub-collection of \emph{well-founded} \lols, is important 
-but secondary. 
-
-Notice our \emph{explicit} use of John McCarthy's notation for the 
-programming language LISP, 
-\cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. \stopMMundi 
+\subsection[title=Cast of thousands]
 
 \startMMundi
 
@@ -633,6 +550,183 @@ page 323.
 
 \stopMMundi
 
+\subsection[title=What \emph{can} a \quote{wee beastie} do?]
+
+Intuitionistic Mathematics, as initiated by Brouwer, has identified the 
+concept of the \quote{Idealized Mathematician}. Since this document is 
+focused upon the \emph{Mathematics} of the \quote{Reality} which a wee 
+beastie can know, for this document, we will identify any wee beastie with 
+this Idealized Mathematician, and conversely, any Idealized Mathematician, 
+with this wee beastie. 
+
+Unlike Kant, this idealization makes \emph{no} assumptions about the 
+structure of time or space. One consequence of our analysis of what a wee 
+beastie can know, is space-time itself. 
+
+Following Hilbert, we will assume a number of undefined terms which will 
+be defined by their use in our theory. In the following definition, using 
+well known practice from Computer Science, we \emph{could} use the word 
+\quote{widget} to emphasize, with Hilbert, that our undefined terms can 
+represent anything which behaves in the prescribed way. Having made this 
+point, we will actually use the undefinded but slightly more suggestive 
+terminology of \quote{Lists of Lists} or \lols. 
+
+\startDefinition
+
+We assume any wee beastie exists in a \quote{collection} of \quote{List of 
+Lists} (\lols). With these \lols, a wee beastie can: 
+
+\startitemize[n]
+
+\item Atomic actions
+
+\startitemize[n]
+
+\item create a new \quote{\type{nil}} \lol.
+
+\item create a new \lol\ by \quote{\type{cons}}ing any two existing 
+\lols\ together. 
+
+\item create a new \lol\ by \quote{\type{car}}ing an existing \lol. 
+
+\item create a new \lol\ by \quote{\type{cdr}}ing an existing \lol. 
+
+\stopitemize
+
+\item Static Action Combinators
+
+\startitemize[n]
+
+\item the action which 
+
+\stopitemize
+
+\stopitemize
+
+\noindent This is \emph{all} that any wee beastie, or (Idealized) 
+Mathematician can do to \lols\ in its environment\footnote{In Volume II, 
+we will add one more thing that a \emph{transfinite} wee beastie can do.}. 
+
+\stopDefinition
+
+\startMMundi From a classical point of view, the four things that a wee 
+beastie can do, defines a pair of syntax, $\Sigma : \Set \rightarrow 
+\Set$, and behaviour, $B : \Set \rightarrow \Set$, \emph{endo-functors} 
+from the Category of Sets, \Set, to itself together with a collection of 
+GSOS rules\footnote{See, for example, 
+\cite{turiPlotkin1997operationalSemantics}, \cite{klin2011bialgebrasSOS}, 
+and \cite{jacobs2017coalgebras}.}. 
+
+The syntax functor: 
+
+\placeformula[+]\startformula\startalign
+  \NC \Sigma : \NC \Set \rightarrow \Set           \NR
+  \NC \Sigma : \NC \bold{1} + X \times X \mapsto X \NR
+\stopalign\stopformula
+
+\noindent is defined by
+
+\placeformula[+]\startformula\startalign
+  \NC \Sigma(\star) \NC = \type{nil}        \NR
+  \NC \Sigma(x, y)  \NC = \type{cons}(x, y) \NR
+\stopalign\stopformula
+
+\noindent Let \catWFLoL, denote the sub-category of \Set\ of 
+\emph{finite}, $\omega$-computationally\footnote{For a given ordinal, 
+$\lambda$, the concept of \quote{$\lambda$-computational power}, is 
+critical to our theory. In the next volume, once we have progressed far 
+enough to be able to define the ordinals, we will define 
+$\lambda$-computation as the computing \quote{power} associated with a wee 
+beastie whose computational \quote{traces} are at most $\lambda$ in 
+length. } well-founded, binary trees, and maps between them. Then, 
+
+\placesubformula\startformula\startalign
+  \NC \Sigma : \catWFLoL \NC \rightarrow \catWFLoL        \NR
+  \NC \Sigma(\catWFLoL)  \NC \longRightIsoArrow \catWFLoL \NR
+\stopalign\stopformula
+
+\noindent is an isomorphism making \catWFLoL\ an \emph{initial algebra}, 
+that is an initial object in the category of $\Sigma$-algebras, 
+$\bold{Alg}(\Sigma)$.
+
+On \quote{paper}, any particular $\omega$-computationally well-founded 
+binary tree can be denoted by either a balanced collection of left and 
+right round brackets, \quote{(} and \quote{)} or a collection of the 
+functions \type{cons} and \type{nil}\footnote{The function \type{nil}, 
+being nullary, may be written with or without left, right pairs of round 
+brackets.}. For example: 
+
+\placeformula[+]\startformula\starttyping
+((() ()) ())
+\stoptyping\stopformula
+
+\noindent or alternatively 
+
+\placeformula[+]\startformula\starttyping
+cons(cons(nil, nil), nil)
+\stoptyping\stopformula
+
+\noindent both denote the binary tree:
+
+\placeformula[+]\startformula\startMPcode{commDiag}
+  setupCommDiags ;
+  
+  addObject(1,4, "\type{cons}") ;
+  addObject(2,2, "\type{cons}") ;
+  addObject(3,1, "\type{nil}") ;
+  addObject(3,3, "\type{nil}") ;
+  addObject(2,5, "\type{nil}") ;
+  
+  drawObjects(1cm, 1cm) ;
+  
+  addArrow(1,4, 2,2, "-", 0)()()("", 0.5, );
+  addArrow(1,4, 2,5, "-", 0)()()("", 0.5, );
+  addArrow(2,2, 3,1, "-", 0)()()("", 0.5, );
+  addArrow(2,2, 3,3, "-", 0)()()("", 0.5, );
+
+\stopMPcode\stopformula
+
+\noindent We will explicitly provide parsers for both notations below. 
+
+Similarly, the behaviour functor: 
+
+\placeformula[+]\startformula\startalign
+  \NC B : \NC \Set \rightarrow \Set           \NR
+  \NC B : \NC X \mapsto \bold{1} + X \times X \NR
+\stopalign\stopformula
+
+\noindent is defined by
+
+\placeformula[+]\startformula\startalign
+  \NC B(\type{nil}) \NC = \star                          \NR
+  \NC B(\type{x})   \NC = (\type{car}(x), \type{cdr}(x)) \NR
+\stopalign\stopformula
+
+\noindent Let \catLoL, denote the sub-category of \Set\ of 
+\emph{potentially} \emph{countably infinite}, $\omega$-computationally 
+\emph{non-well-founded}, binary trees and maps between them. Then, 
+
+\placesubformula\startformula\startalign
+  \NC \Sigma : \catLoL \NC \rightarrow \catLoL                \NR
+  \NC \catLoL          \NC \longRightIsoArrow \Sigma(\catLoL) \NR
+\stopalign\stopformula
+
+\noindent is an isomorphism making \catLoL\ a \emph{final algebra}, 
+that is an final object in the category of $\Sigma$-coalgebras, 
+$\bold{CoAlg}(\Sigma)$.
+
+Assuming a wee beastie has $\omega$-computational power, then clearly any 
+\lol\ a wee beastie might \emph{create}, from scratch, must be 
+well-founded. However, given any already \emph{existing} \lol, a wee 
+beastie can not know if it is well-founded or not. Hence, for our work, 
+the collection of \emph{non-well-founded} \lols\ is the \emph{primary} 
+collection. The sub-collection of \emph{well-founded} \lols, is important 
+but secondary. 
+
+Notice our \emph{explicit} use of John McCarthy's notation for the 
+programming language LISP, 
+\cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. \stopMMundi 
+
 \subsection[title=What \emph{can} a \quote{wee beastie} know?]
 
 \startDefinition
@@ -640,8 +734,6 @@ page 323.
 Again, we assume that any wee beastie exists in a 
 \quote{collection} of \lols. With these \lols, a wee beastie 
 can preform (\emph{compute}) the following tests:
-
-%\setupitemize[2]
 
 \startitemize[n]
 
