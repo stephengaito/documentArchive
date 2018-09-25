@@ -571,7 +571,7 @@ represent anything which behaves in the prescribed way. Having made this
 point, we will actually use the undefinded but slightly more suggestive 
 terminology of \quote{Lists of Lists} or \lols. 
 
-\startDefinition
+\startDefinition[beastieActions]
 
 We assume any wee beastie exists in a \quote{collection} of \quote{List of 
 Lists} (\lols). With these \lols, a wee beastie can: 
@@ -593,61 +593,271 @@ Lists} (\lols). With these \lols, a wee beastie can:
 
 \stopitemize
 
-\item Static Action Combinators
+\item Action Combinators
 
 \startitemize[n]
 
-\item the action which 
+\item The action which \quote{performs} a pair of actions one followed by 
+the other. If $a$ and $b$ are two actions, then the \quote{composition} 
+action is explicitly denoted as \quote{\explicitCompose{a}{b}} or more 
+simply as \quote{\compose{a}{b}}. 
+
+\item The action which \quote{performs} one or other of a pair of actions. 
+There is, however, \emph{no pre-determined} reason for the choice. If $a$ 
+and $b$ are two actions, then the \quote{(non-determinitsic) choice} 
+action is denoted \quote{\ndChoice{a}{b}}.
+
+
+\item The action which performs an action multiple times before 
+\quote{completing}. However, the number of repetitions is \emph{not 
+pre-determined}. If $a$ is an action, then we denote the 
+\quote{(non-deterministic) repetition} action as \quote{\repets{a}}. 
+
+\item The action which \quote{completes} if a given test\footnote{Tests 
+are defined in \in{Definition}[beastieTests].} succeeds. If $t$ is a test 
+then we denote the \quote{test} action by \quote{\test{t}}. 
 
 \stopitemize
 
 \stopitemize
 
 \noindent This is \emph{all} that any wee beastie, or (Idealized) 
-Mathematician can do to \lols\ in its environment\footnote{In Volume II, 
-we will add one more thing that a \emph{transfinite} wee beastie can do.}. 
+Mathematician can \emph{do} to \lols\ in its environment\footnote{In 
+Volume II, we will add one more thing that a \emph{transfinite} wee 
+beastie can do.}. 
 
 \stopDefinition
 
-\startMMundi From a classical point of view, the four things that a wee 
-beastie can do, defines a pair of syntax, $\Sigma : \Set \rightarrow 
-\Set$, and behaviour, $B : \Set \rightarrow \Set$, \emph{endo-functors} 
-from the Category of Sets, \Set, to itself together with a collection of 
-GSOS rules\footnote{See, for example, 
-\cite{turiPlotkin1997operationalSemantics}, \cite{klin2011bialgebrasSOS}, 
-and \cite{jacobs2017coalgebras}.}. 
+\startMMundi
 
-The syntax functor: 
+The atomic actions provide the \emph{only} actions that a wee beastie can 
+perform \emph{\quote{directly}} on its environment. All other actions are 
+formed via various action combinators from these four atomic actions and, 
+via the \quote{test} action, any of the tests defined below. 
+
+The pair of definitions, \in[beastieActions] and \in[beastieTests], are 
+essentially Dynamic Logic with the addition of the least, $\mu$, and 
+greatest, $\nu$, fixed point operators taken from $\mu$-modal logic. See 
+\cite{harelKozenTiuryn2000dynamicLogic} and 
+\cite{demriGorankoLange2016temporalLogics} respectively for a more 
+in-depth discussion. 
+
+Notice our \emph{explicit} use of John McCarthy's notation for the 
+programming language LISP,
+\cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. 
+
+Since the definitions \in[beastieActions], \in[beastieTests], and 
+\in[beastieIdentity] are co-dependent, we postpone any further commentary 
+until Subsection \in[beastieReality]. 
+
+\stopMMundi
+
+\subsection[title=What \emph{can} a \quote{wee beastie} know?]
+
+\startDefinition[beastieTests]
+
+Again, we assume that any wee beastie exists in a 
+\quote{collection} of \lols. With these \lols, a wee beastie 
+can preform (\emph{compute}) the following tests:
+
+\startitemize[n]
+
+\item Atomic Tests
+
+\startitemize[n]
+
+\item The test which always succeeds, denoted \quote{\true} or 
+\quote{\top}. 
+
+\item The test which always fails, denoted \quote{\false} or 
+\quote{\bottom}. 
+
+\item The test which succeeds if an existing \lol\ is 
+\quote{\type{nil}}, denoted \quote{\isNil}.
+
+\stopitemize
+
+\item Static Test Combinators
+
+\startitemize[n]
+
+\item The test which succeeds if given pair of other tests both succeed. 
+If $s$ and $t$ are two tests, then the \quote{conjunction} test is denoted 
+\quote{$s \land t$}.
+
+\item The test which succeeds if one or more of a given pair of other 
+tests succeeds. If $s$ and $t$ are two tests, the \quote{disjunction} test 
+is denoted \quote{$s \lor t$}.
+
+\item The test which succeeds if a given other test fails. If $t$ is a 
+test, then the \quote{negation} test is denoted \quote{$\lnot\; t$}. 
+
+\stopitemize
+
+\item Dynamic Test Combinators
+
+\startitemize[n]
+
+\item The test which succeeds if a given other test succeeds after all 
+possible computations of a given action. If $t$ is a test and $a$ is an 
+action, then the \quote{necessity} test is denoted \quote{$[a]t$}. 
+
+\item The test which succeeds if a given other test succeeds after at 
+least one possible computation of a given action. If $t$ is a test and $a$ 
+is an action, then the \quote{possibility} test is denoted 
+\quote{$\langle a\rangle t$}. 
+
+\item The test which succeeds if \TODO{complete the description of the 
+$\mu$ operator}.
+
+\item The test which succeeds if \TODO{complete the description of the 
+$\nu$ operator}. 
+
+\stopitemize
+
+\stopitemize
+
+If any of the above tests does \emph{not} succeed, then that test fails. 
+This is \emph{all} that any wee beastie (or Idealized Mathematician) can 
+know by testing \lols\ in its environment. 
+
+\stopDefinition
+
+\startMMundi
+
+The atomic tests provide the \emph{only} tests that a wee beastie can 
+perform \emph{\quote{directly}} on its environment. All other tests are 
+formed via various test combinators from these three atomic tests, and, 
+via the \quote{necessity} and \quote{posibility} tests, any actions 
+defined above. Of these three atomic tests, only the third atomic test 
+increases the wee beastie's knowledge of its environment. Neither of the 
+first two atomic tests reference the \quote{state} of the wee beastie's 
+environment. 
+
+The three static test combinators correspond to the core of classical 
+(static) propositional logic. Note that we do \emph{not} assume the 
+classical \quote{principle of the excluded middle}, hence we must define 
+both the \quote{logical} \quote{conjunction} (\quote{and}) as well as the 
+\quote{logical} \quote{disjunction} (\quote{or}) operators. It will turn 
+out that while the principle of the excluded middle \emph{is} valid for 
+any finitely defined collection of (non-)well-founded \lols, it need 
+\emph{not} be valid for \quote{asymptotically} defined collection 
+(non-)well-founded \lols. 
+
+Classical logic, including propositional, first or higher order, concerns 
+itself with \quote{properties} of a single \emph{fixed} \quote{unchanging} 
+\quote{world}. Since there is no change, there is no corresponding sense 
+of \quote{time}. Wee beasties, such as ourselves, experience a 
+\quote{world} of constant change. While we will not (yet) explicitly 
+define time, as wee beasties, we are naturally interested in what will 
+happen to our world if we change it. The dynamic test combinators capture 
+how given tests will change if a wee beastie changes its environment by 
+first performing one of its possible actions on its environment. 
+
+As mentioned above the pair of definitions, \in[beastieActions] and 
+\in[beastieTests], are essentially Dynamic Logic, 
+\cite{harelKozenTiuryn2000dynamicLogic}, augmented with the $\mu$ and 
+$\nu$ operators taken from $\mu$-modal logic, 
+\cite{demriGorankoLange2016temporalLogics}. 
+
+\stopMMundi 
+
+\subsection[title=Identity and Bisimulation]
+
+When can a wee beastie know that two \lols, in its environment, are the 
+\emph{same} \lol? Given the capabilities listed above, a wee beastie can 
+never know if two \lols\ are \emph{identical}, the \emph{same} or 
+\emph{equal}. The best a wee beastie can do is to compare a pair of \lol's 
+using the same collection of \emph{tests}. 
+
+\startDefinition[beastieIdentity]
+
+Two \lols\ are \emph{Bisimilar} if they pass the same collection of tests.
+
+\stopDefinition
+
+\startMMundi This concept of Bisimulation has been identified by a number 
+of Mathematicians and Computer Scientists. From the theory of 
+non-well-founded sets, see \cite{aczel1988nonWellFoundedSets}. From the 
+theory of co-algebras, see Chapter 3 of \cite{jacobs2017coalgebras}. 
+\stopMMundi 
+
+Finally, linking the above three definitions together we make the 
+following assertion about any wee beastie and its environment of \lols: 
+
+\begingroup\startAssertion
+
+\startitemize[n]
+
+\item \quote{\type{car}} of the \quote{\type{nil}} \lol\ is bisimular to 
+\quote{\type{nil}}. \TODO{Is this correct?}
+
+\item \quote{\type{cdr}} of the \quote{\type{nil}} \lol\ is bisimular to 
+\quote{\type{nil}}. \TODO{Is this correct?}
+
+\item \quote{\type{car}} of the \quote{\type{cons}} of two \lols\ is 
+bisimular to the first \lol. 
+
+\item \quote{\type{cdr}} of the \quote{\type{cons}} of two \lols\ is 
+bisimular to the second \lol. 
+
+\item \quote{\type{cons}} of the pair of \lols\ obtained by 
+\quote{\type{car}} and \quote{\type{cdr}} of the same \lol, is bisimular 
+to the original \lol. 
+
+\stopAssertion\endgroup
+
+As a result of these assertions, the only \quote{meaningful} tests are 
+those which consist of collections of \quote{\type{car}}s and 
+\quote{\type{cdr}}s. Assertions 3 and 4 imply that any 
+\quote{\type{cons}}s can be undone by appropriate use of 
+\quote{\type{car}}s and \quote{\type{cdr}}s. \TODO{Is this a meaningful 
+observation?} 
+
+\subsection[title=A Beastie's environment, reference=beastieReality]
+
+\startMMundi
+
+From a classical point of view, the atomic actions that a wee beastie can 
+perform on its environment, defines a \quote{List of Lists} or 
+\quote{Trees} \emph{endo-functor}, $T : \Set \rightarrow \Set$, from the 
+Category of sets, \Set, to itself:
+
+\placeformula[+]\startformula
+  T : \Set \rightarrow \Set
+\stopformula
+
+\noindent This functor is defined by:
+
+\placeformula[+]\startformula\startalign[n=3]
+  \NC T : \NC X \mapsto \bold{1} + X \times X \NC \quad \text{(on objects)}   \NR
+  \NC T : \NC f \mapsto \bold{1} + f \times f \NC \quad \text{(on morphisms)} \NR
+\stopalign\stopformula
+
+\noindent Let \wflol, denote the set of \emph{finite}, 
+$\omega$-computationally\footnote{For a given ordinal, $\lambda$, the 
+concept of \quote{$\lambda$-computational power}, is critical to our 
+theory. In the next volume, once we have progressed far enough to be able 
+to define the ordinals, we will define $\lambda$-computation as the 
+computing \quote{power} associated with a wee beastie whose computational 
+\quote{traces} are at most $\lambda$ in length. } well-founded, binary 
+trees. Then there is an isomorphism:
+
+\placesubformula\startformula
+  \alpha : T(\wflol) \longRightIsoArrow \wflol
+\stopformula
+
+\noindent Recalling that $T(\wflol) = \bold{1} + \wflol \times \wflol$, 
+then this isomorphism is defined by: 
 
 \placeformula[+]\startformula\startalign
-  \NC \Sigma : \NC \Set \rightarrow \Set           \NR
-  \NC \Sigma : \NC \bold{1} + X \times X \mapsto X \NR
+  \NC \alpha(\star) \NC = \type{nil}        \NR
+  \NC \alpha(x, y)  \NC = \type{cons}(x, y) \NR
 \stopalign\stopformula
 
-\noindent is defined by
-
-\placeformula[+]\startformula\startalign
-  \NC \Sigma(\star) \NC = \type{nil}        \NR
-  \NC \Sigma(x, y)  \NC = \type{cons}(x, y) \NR
-\stopalign\stopformula
-
-\noindent Let \catWFLoL, denote the sub-category of \Set\ of 
-\emph{finite}, $\omega$-computationally\footnote{For a given ordinal, 
-$\lambda$, the concept of \quote{$\lambda$-computational power}, is 
-critical to our theory. In the next volume, once we have progressed far 
-enough to be able to define the ordinals, we will define 
-$\lambda$-computation as the computing \quote{power} associated with a wee 
-beastie whose computational \quote{traces} are at most $\lambda$ in 
-length. } well-founded, binary trees, and maps between them. Then, 
-
-\placesubformula\startformula\startalign
-  \NC \Sigma : \catWFLoL \NC \rightarrow \catWFLoL        \NR
-  \NC \Sigma(\catWFLoL)  \NC \longRightIsoArrow \catWFLoL \NR
-\stopalign\stopformula
-
-\noindent is an isomorphism making \catWFLoL\ an \emph{initial algebra}, 
-that is an initial object in the category of $\Sigma$-algebras, 
-$\bold{Alg}(\Sigma)$.
+\noindent This isomorphism makes \wflol\ an \emph{initial algebra}, 
+that is an initial object in the category of $T$-algebras, 
+$\bold{Alg}(T)$.
 
 On \quote{paper}, any particular $\omega$-computationally well-founded 
 binary tree can be denoted by either a balanced collection of left and 
@@ -688,6 +898,146 @@ cons(cons(nil, nil), nil)
 
 \noindent We will explicitly provide parsers for both notations below. 
 
+Let \lol, denote the set of \emph{potentially} \emph{countably infinite}, 
+$\omega$-computationally \emph{non-well-founded}, binary trees and maps 
+between them. Then, there is an isomorphism: 
+
+\placesubformula\startformula
+  \zeta : \lol \longRightIsoArrow T(\lol)
+\stopformula
+
+\noindent Recalling that $T(\lol) = \bold{1} + \lol \times \lol$, 
+then this isomorphism is defined by: 
+
+\placeformula[+]\startformula\startalign
+  \NC \zeta(\type{nil}) \NC = \star                          \NR
+  \NC \zeta(\type{x})   \NC = (\type{car}(x), \type{cdr}(x)) \NR
+\stopalign\stopformula
+
+\noindent This isomorphism makes \lol\ a \emph{final coalgebra}, that is a 
+final object in the category of $T$-coalgebras, $\bold{CoAlg}(T)$. 
+
+Assuming a wee beastie has $\omega$-computational power, then clearly any 
+\lol\ a wee beastie might \emph{create}, from scratch, must be 
+well-founded. However, given any already \emph{existing} \lol, a wee 
+beastie can not know if it is well-founded or not. Hence, for our work, 
+the collection of \emph{non-well-founded} \lols\ is the \emph{primary} 
+collection. The sub-collection of \emph{well-founded} \lols, is important 
+but secondary. 
+
+\stopMMundi 
+
+\subsection[title=Barr's ladder]
+
+\startMMundi
+
+Because of its importance for our work we explicitly work out Barr's 
+Theorem 3.2, \cite{barr1993terminalCoalgebrasWellFounded} and 
+\cite{barr1994terminalCoalgebrasCorrection}, for the \quote{Lists of 
+Lists} or \quote{Trees} endo-functor defined above. 
+
+\blank[1ex] We begin by noting that:\blank[1ex]
+
+\startitemize[n]
+
+\item $\emptySet$ is the empty set in \Set. It is also the initial 
+object of \Set\ (up to isomorphism). 
+
+\item $\bold{1}$ is the singleton set in \Set. It is the final object of 
+\Set\ (up to isomorphism). To be definite, we will use the $\bold{1} = \{ 
+\type{nil} \}$ which is the set whose only \emph{element} is the 
+\quote{\type{nil}}. 
+
+\item Since $\emptySet$ and $\bold{1}$ are, respectively, the initial and 
+final objects in \Set, we know that there is a unique morphism between 
+them: $k : \emptySet \rightarrow \bold{1}$. \TODO{does $k$ need to be 
+monic?} 
+
+\item The set, $T(\emptySet) = \{ \type{nil} \}$.
+
+\item The set, $T(\bold{1}) = \{ \type{nil}, (\type{nil}, \type{nil}) \}$. 
+
+\stopitemize
+
+\placeformula[+]\startformula \startMPcode{commDiag}
+  setupCommDiags ; 
+  
+  addObject(1,1, "\emptySet");
+  addObject(1,2, "T(\emptySet)");
+  addObject(1,3, "\cdots");
+  addObject(1,4, "T^n(\emptySet)");
+  addObject(1,5, "T^{n+1}(\emptySet)");
+  addObject(1,6, "\cdots");
+  
+  addObject(2,1, "\bold{1}");
+  addObject(2,2, "T(\bold{1})");
+  addObject(2,3, "\cdots");
+  addObject(2,4, "T^n(\bold{1})");
+  addObject(2,5, "T^{n+1}(\bold{1})");
+  addObject(2,6, "\cdots");
+
+  drawObjects(1.75cm, 2cm);
+
+  addArrow(1,1, 1,2, ">", 0)()()("j",          0.5, top);
+  addArrow(1,2, 1,3, ">", 0)()()("",           0.5, );
+  addArrow(1,3, 1,4, ">", 0)()()("",           0.5, );
+  addArrow(1,4, 1,5, ">", 0)()()("\vphantom\lgroup T^n(j)",     0.5, top);
+  addArrow(1,5, 1,6, ">", 0)()()("",           0.5, );
+  addArrow(1,1, 2,1, ">", 0)()()("k",          0.5, lft);
+  addArrow(1,2, 2,2, ">", 0)()()("T(k)",       0.5, rt);
+  addArrow(1,4, 2,4, ">", 0)()()("T^n(k)", 0.5, lft);
+  addArrow(1,5, 2,5, ">", 0)()()("T^{n+1}(k)", 0.5, rt);
+  addArrow(2,2, 2,1, ">", 0)()()("t",          0.5, bot);
+  addArrow(2,3, 2,2, ">", 0)()()("",           0.5, );
+  addArrow(2,4, 2,3, ">", 0)()()("",           0.5, );
+  addArrow(2,5, 2,4, ">", 0)()()("\vphantom\lgroup T^{n+1}(t)", 0.5, bot);
+  addArrow(2,6, 2,5, ">", 0)()()("",           0.5, );
+
+\stopMPcode \stopformula
+
+\stopMMundi
+
+\startMMundi
+
+Definitions \in[beastieActions] and \in[beastieTests] together define a 
+pair of syntax, $\Sigma : \Set \rightarrow \Set$, and behaviour, $B : \Set 
+\rightarrow \Set$, \emph{endo-functors} from the Category of Sets, \Set, 
+to itself together with a collection of GSOS rules\footnote{See, for 
+example, \cite{turiPlotkin1997operationalSemantics}, 
+\cite{klin2011bialgebrasSOS}, and \cite{jacobs2017coalgebras}.}. 
+
+The syntax functor: 
+
+\placeformula[+]\startformula\startalign
+  \NC \Sigma : \NC \Set \rightarrow \Set           \NR
+  \NC \Sigma : \NC \bold{1} + X \times X \mapsto X \NR
+\stopalign\stopformula
+
+\noindent is defined by
+
+\placeformula[+]\startformula\startalign
+  \NC \Sigma(\star) \NC = \type{nil}        \NR
+  \NC \Sigma(x, y)  \NC = \type{cons}(x, y) \NR
+\stopalign\stopformula
+
+\noindent Let \catWFLoL, denote the sub-category of \Set\ of 
+\emph{finite}, $\omega$-computationally\footnote{For a given ordinal, 
+$\lambda$, the concept of \quote{$\lambda$-computational power}, is 
+critical to our theory. In the next volume, once we have progressed far 
+enough to be able to define the ordinals, we will define 
+$\lambda$-computation as the computing \quote{power} associated with a wee 
+beastie whose computational \quote{traces} are at most $\lambda$ in 
+length. } well-founded, binary trees, and maps between them. Then, 
+
+\placesubformula\startformula\startalign
+  \NC \Sigma : \catWFLoL \NC \rightarrow \catWFLoL        \NR
+  \NC \Sigma(\catWFLoL)  \NC \longRightIsoArrow \catWFLoL \NR
+\stopalign\stopformula
+
+\noindent is an isomorphism making \catWFLoL\ an \emph{initial algebra}, 
+that is an initial object in the category of $\Sigma$-algebras, 
+$\bold{Alg}(\Sigma)$.
+
 Similarly, the behaviour functor: 
 
 \placeformula[+]\startformula\startalign
@@ -715,212 +1065,6 @@ Similarly, the behaviour functor:
 that is an final object in the category of $\Sigma$-coalgebras, 
 $\bold{CoAlg}(\Sigma)$.
 
-Assuming a wee beastie has $\omega$-computational power, then clearly any 
-\lol\ a wee beastie might \emph{create}, from scratch, must be 
-well-founded. However, given any already \emph{existing} \lol, a wee 
-beastie can not know if it is well-founded or not. Hence, for our work, 
-the collection of \emph{non-well-founded} \lols\ is the \emph{primary} 
-collection. The sub-collection of \emph{well-founded} \lols, is important 
-but secondary. 
-
-Notice our \emph{explicit} use of John McCarthy's notation for the 
-programming language LISP, 
-\cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. \stopMMundi 
-
-\subsection[title=What \emph{can} a \quote{wee beastie} know?]
-
-\startDefinition
-
-Again, we assume that any wee beastie exists in a 
-\quote{collection} of \lols. With these \lols, a wee beastie 
-can preform (\emph{compute}) the following tests:
-
-\startitemize[n]
-
-\item Atomic Tests
-
-\startitemize[n]
-
-\item the test which always succeeds,
-
-\item the test which always fails,
-
-\item the test which succeeds if an existing \lol\ is 
-\quote{\type{nil}},
-
-\stopitemize
-
-\item Static Test Combinators
-
-\startitemize[n]
-
-\item the test which succeeds if given pair of other tests both succeed.
-
-\item the test which succeeds if one or more of a given pair of other 
-tests succeeds. 
-
-\item the test which succeeds if a given other test fails.
-
-\stopitemize
-
-\item Dynamic Test Combinators
-
-\startitemize[n]
-
-\item the test which succeeds if a given other test succeeds after 
-\quote{\type{cons}}ing a pair of existing \lols.
-
-\item the test which succeeds if a given other test succeeds after 
-\quote{\type{car}}ing an existing \lol.
-
-
-\item the test which succeeds if a given other test succeeds after 
-\quote{\type{cdr}}ing an existing \lol.
-
-\item the test which succeeds if a given other tests succeeds after 
-creating a new \quote{\type{nil}} \lol.
-
-\stopitemize
-
-\stopitemize
-
-If any of the above tests does \emph{not} succeed, then that test fails. 
-This is \emph{all} that any wee beastie (or Idealized Mathematician) can 
-know by testing \lols\ in its environment. 
-
-\stopDefinition
-
-\TODO{We have defined the \quote{necessary} modal operators, do we need to 
-define the corresponding \quote{possible} modal operators?} 
-
-\startMMundi
-
-The atomic tests provide the \emph{only} tests that a wee beastie can 
-perform \emph{\quote{directly}} on its environment. All other tests are 
-formed via various test combinators from these three atomic tests. Of 
-these three atomic tests, only the third atomic test increases the wee 
-beastie's knowledge of its environment. Neither of the first two atomic 
-tests reference the \quote{state} of the wee beastie's environment. 
-
-The three static test combinators correspond to the core of classical 
-(static) propositional logic. Note that we do \emph{not} assume the 
-classical \quote{principle of the excluded middle}, hence we must define 
-both the \quote{logical} \quote{conjunction} (\quote{and}) as well as the 
-\quote{logical} \quote{disjunction} (\quote{or}) operators. It will turn 
-out that while the principle of the excluded middle \emph{is} valid for 
-any finitely defined collection of (non-)well-founded \lols, it need 
-\emph{not} valid for \quote{asymptotically} defined collection 
-(non-)well-founded \lols. 
-
-Classical logic, including propositional, first or higher order, concerns 
-itself with \quote{properties} of a single \emph{fixed} \quote{unchanging} 
-\quote{world}. Since there is no change, there is no corresponding sense 
-of \quote{time}. Wee beasties, such as ourselves, experience a 
-\quote{world} of constant change. While we will not (yet) explicitly 
-define time, as wee beasties, we are naturally interested in what will 
-happen to our world if we change it. The dynamic test combinators capture 
-how given tests will change if a wee beastie changes its environment by 
-first performing one of its possible actions on its environment. 
-
-The complete collection of tests forms a \quote{temporal} or 
-\quote{dynamic} modal logic similar to those discussed in 
-\cite{demriGorankoLange2016temporalLogics} and 
-\cite{harelKozenTiuryn2000dynamicLogic} respectively. 
-
-\TODO{discuss Kirpke semantics/frames/worlds}
-
-\stopMMundi 
-
-\subsection[title=Identity and Bisimulation]
-
-When can a wee beastie know that two \lols\ the \emph{same} \lol? Given 
-the capabilities listed above, a wee beastie can never know if two \lols\ 
-are \emph{identical}, the \emph{same} or \emph{equal}. The best a wee 
-beastie can do is to compare a pair of \lol's using the same collection of 
-\emph{tests}. 
-
-\startDefinition
-
-Two \lols\ are \emph{Bisimilar} if they pass the same collection of tests.
-
-\stopDefinition
-
-\startMMundi This concept of Bisimulation has been identified by a number 
-of Mathematicians and Computer Scientists. From the theory of 
-non-well-founded sets, see \cite{aczel1988nonWellFoundedSets}. From the 
-theory of co-algebras, see Chapter 3 of \cite{jacobs2017coalgebras}. 
-\stopMMundi 
-
-Finally, linking the above three definitions together we make the 
-following assertion about any wee beastie and its environment of \lols: 
-
-\begingroup\startAssertion
-
-\startitemize[n]
-
-\item \quote{\type{car}} of the \quote{\type{nil}} \lol\ is bisimular to 
-\quote{\type{nil}}. 
-
-\item \quote{\type{cdr}} of the \quote{\type{nil}} \lol\ is bisimular to 
-\quote{\type{nil}}. 
-
-\item \quote{\type{car}} of the \quote{\type{cons}} of two \lols\ is 
-bisimular to the first \lol. 
-
-\item \quote{\type{cdr}} of the \quote{\type{cons}} of two \lols\ is 
-bisimular to the second \lol. 
-
-\item \quote{\type{cons}} of the pair of \lols\ obtained by 
-\quote{\type{car}} and \quote{\type{cdr}} of the same \lol, is bisimular 
-to the original \lol. 
-
-\stopAssertion\endgroup
-
-As a result of these assertions, the only \quote{meaningful} tests are 
-those which consist of collections of \quote{\type{car}}s and 
-\quote{\type{cdr}}s. Assertions 3 and 4 imply that any 
-\quote{\type{cons}}s can be undone by appropriate use of 
-\quote{\type{car}}s and \quote{\type{cdr}}s. 
-
-\subsection[title=Barr's theorem]
-
-\startMMundi
-
-\placeformula[+]\startformula \startMPcode{commDiag}
-  setupCommDiags ; 
-  
-  addObject(1,1, "X_0");
-  addObject(1,2, "X_1");
-  addObject(1,3, "\cdots");
-  addObject(1,4, "X_n");
-  addObject(1,5, "X_{n+1}");
-  addObject(1,6, "\cdots");
-  
-  addObject(2,1, "Y_0");
-  addObject(2,2, "Y_1");
-  addObject(2,3, "\cdots");
-  addObject(2,4, "Y_n");
-  addObject(2,5, "Y_{n+1}");
-  addObject(2,6, "\cdots");
-
-  drawObjects(1.75cm, 2cm);
-
-  addArrow(1,1, 1,2, ">", 0)()()("j_0",     0.5, top);
-  addArrow(1,2, 1,3, ">", 0)()()("",        0.5, );
-  addArrow(1,3, 1,4, ">", 0)()()("",        0.5, );
-  addArrow(1,4, 1,5, ">", 0)()()("j_n",     0.5, top);
-  addArrow(1,5, 1,6, ">", 0)()()("",        0.5, );
-  addArrow(1,1, 2,1, ">", 0)()()("k_0",     0.5, lft);
-  addArrow(1,2, 2,2, ">", 0)()()("k_1",     0.5, rt);
-  addArrow(1,4, 2,4, ">", 0)()()("k_n",     0.5, lft);
-  addArrow(1,5, 2,5, ">", 0)()()("k_{n+1}", 0.5, rt);
-  addArrow(2,2, 2,1, ">", 0)()()("t_1",     0.5, bot);
-  addArrow(2,3, 2,2, ">", 0)()()("",        0.5, );
-  addArrow(2,4, 2,3, ">", 0)()()("",        0.5, );
-  addArrow(2,5, 2,4, ">", 0)()()("t_{n+1}", 0.5, bot);
-  addArrow(2,6, 2,5, ">", 0)()()("",        0.5, );
-
-\stopMPcode \stopformula
 
 \stopMMundi
 
