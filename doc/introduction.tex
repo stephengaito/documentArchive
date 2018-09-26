@@ -980,6 +980,41 @@ morphism $t: T(\bold{1}) \rightarrow \bold{1}$. Explicitly we have:
 \item Since there is a unique morphism between $\emptySet$ and $\bold{1}$, 
 we know that $k = t \circ T(k) \circ j$. 
 
+\item The above ensures that
+
+\startitemize[a]
+
+\item there exists unique embedding morphisms, 
+$\overstrike{j}_n : T^n(\emptySet) \rightarrow \wflol$. 
+
+\item there exists unique projection (or truncation) 
+morphisms $\overstrike{t}_n : \lol \rightarrow T^n(\bold{1}) = 
+T^{n+1}(\emptySet)$. 
+
+\item there exists a unique embedding morphism, 
+$\overstrike{j}_{\infinity} : \wflol \rightarrow \lol$. 
+
+\item there exists a unique projection (or trunction) morphism, 
+$\overstrike{t}_{\infinity} : \lol \rightarrow \wflol$. This projection 
+makes $\lol \overset{\overstrike{t}_{\infinity}}{\rightarrow} \wflol$ into 
+a fibration with \lol\ the total space and \wflol\ the base space. For a 
+complete discussion of our use of fibrations to build up logics, see 
+\cite{jacobs1999categoricalLogicTypeTheory}. \TODO{Is this s cloven split 
+firbration?} 
+
+The fibres in this fibration represent the sets of all completions of a 
+given finite tree. In the terms of Symbolic Dynamics, each fiber over a 
+given finite tree, is a cylinder. The collection of all cylinders forms a 
+basis for a topology for \lol. In fact this topology is given by the 
+metric, $d(y, y') = 2^{-n}$ for the largest $n$ for which 
+$\overstrike{t}_n(y) = \overstrike{t}_n(y')$ (see, for example, 
+\cite{barr1993terminalCoalgebrasWellFounded}). 
+
+\stopitemize
+
+\noindent As with anything in Category theory, all of the above are unique 
+\emph{up to isomorphisms}. 
+
 \item \TODO{What more needs to be stated?}
 
 \stopitemize
@@ -1004,13 +1039,19 @@ we know that $k = t \circ T(k) \circ j$.
   
   addObject(4,7, "\lol");
 
-  drawObjects(1.75cm, 2cm);
+  drawObjects(1.75cm, 1.8cm);
 
-  addArrow(2,1, 1,7, ">", 20)()()("\overline{j}",          0.2, );
-  addArrow(2,2, 1,7, ">", 20)()()("T(\overline{j})",       0.2, );
-  addArrow(2,4, 1,7, ">", 20)()()("T^n(\overline{j})",     0.2, );
-  addArrow(2,5, 1,7, ">", 20)()()("T^{n+1}(\overline{j})", 0.2, );
+  addArrow(2,1, 1,7, ">", 20)()()("\overstrike{j}_0",     0.2, );
+  addArrow(2,2, 1,7, ">", 20)()()("\overstrike{j}_1",     0.2, );
+  addArrow(2,4, 1,7, ">", 20)()()("\overstrike{j}_n",     0.2, );
+  addArrow(2,5, 1,7, ">", 20)()()("\overstrike{j}_{n+1}", 0.2, );
   
+  addArrow(3,1, 2,2, "=", 0)()()("",           0.5, );
+  addArrow(3,2, 2,3, "=", 0)()()("",           0.5, );
+  addArrow(3,3, 2,4, "=", 0)()()("",           0.5, );
+  addArrow(3,4, 2,5, "=", 0)()()("",           0.5, );
+  addArrow(3,5, 2,6, "=", 0)()()("",           0.5, );
+
   addArrow(2,1, 2,2, ">", 0)()()("j",          0.5, bot);
   addArrow(2,2, 2,3, ">", 0)()()("",           0.5, );
   addArrow(2,3, 2,4, ">", 0)()()("",           0.5, );
@@ -1018,34 +1059,29 @@ we know that $k = t \circ T(k) \circ j$.
   addArrow(2,4, 2,5, ">", 0)()()("T^n(j)",     0.5, bot);
   endgroup ; 
   addArrow(2,5, 2,6, ">", 0)()()("",           0.5, );
-  
-  addArrow(2,1, 3,1, ">", 0)()()("k",          0.5, lft);
-  addArrow(2,2, 3,2, ">", 0)()()("T(k)",       0.5, rt);
-  addArrow(2,4, 3,4, ">", 0)()()("T^n(k)", 0.5, lft);
-  addArrow(2,5, 3,5, ">", 0)()()("T^{n+1}(k)", 0.5, rt);
+
+  addArrow(2,1, 3,1, ">", 0)()()("k",          0.5, );
+  addArrow(2,2, 3,2, ">", 0)()()("T(k)",       0.5, );
+  addArrow(2,4, 3,4, ">", 0)()()("T^n(k)",     0.5, );
+  addArrow(2,5, 3,5, ">", 0)()()("T^{n+1}(k)", 0.5, );
 
   addArrow(3,2, 3,1, ">", 0)()()("t",          0.5, top);
   addArrow(3,3, 3,2, ">", 0)()()("",           0.5, );
   addArrow(3,4, 3,3, ">", 0)()()("",           0.5, );
   begingroup ;  interim labeloffset := 8bp ;
-  addArrow(3,5, 3,4, ">", 0)()()("T^{n+1}(t)", 0.4, top);
+  addArrow(3,5, 3,4, ">", 0)()()("T^{n+1}(t)", 0.2, top);
   endgroup ; 
   addArrow(3,6, 3,5, ">", 0)()()("",           0.5, );
 
-  addArrow(4,7, 3,1, ">", 20)()()("\underline{t}",          0.8, );
-  addArrow(4,7, 3,2, ">", 20)()()("T(\underline{t})",       0.8, );
-  addArrow(4,7, 3,4, ">", 20)()()("T^n(\underline{t})",     0.8, );
-  addArrow(4,7, 3,5, ">", 20)()()("T^{n+1}(\underline{t})", 0.8, );
+  addArrow(4,7, 3,1, ">", 20)()()("\overstrike{t}_0",     0.8, );
+  addArrow(4,7, 3,2, ">", 20)()()("\overstrike{t}_1",     0.8, );
+  addArrow(4,7, 3,4, ">", 20)()()("\overstrike{t}_n",     0.8, );
+  addArrow(4,7, 3,5, ">", 20)()()("\overstrike{t}_{n+1}", 0.8, );
   
-  addArrow(1,7, 4,7, ">", 0)()()("T^{\infinity}(k)", 0.5, lft);
+  addArrow(1,7, 4,7, ">", 10)()()("\overstrike{j}_{\infinity}", 0.5, rt);
+  addArrow(4,7, 1,7, ">", 10)()()("\overstrike{t}_{\infinity}", 0.5, lft);
 
 \stopMPcode \stopformula
-
-\noindent \TODO{The $T^n(\underline{t})$ morphisms DO NOT make sense!! 
-They are collectively \quote{trunctation} morphisms. However they are a 
-finite functor $T$ applied multiple times to the most truncated morphism 
-of them all $\underline{t}$. We have lost too much information before we 
-even being!} 
 
 \stopMMundi
 
