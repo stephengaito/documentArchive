@@ -944,56 +944,119 @@ Lists} or \quote{Trees} endo-functor defined above.
 object of \Set\ (up to isomorphism). 
 
 \item $\bold{1}$ is the singleton set in \Set. It is the final object of 
-\Set\ (up to isomorphism). To be definite, we will use the $\bold{1} = \{ 
-\type{nil} \}$ which is the set whose only \emph{element} is the 
+\Set\ (up to isomorphism). To be definite, we will use $\bold{1} = \{ 
+\type{nil} \}$ which is the set whose only \emph{element} is 
 \quote{\type{nil}}. 
 
 \item Since $\emptySet$ and $\bold{1}$ are, respectively, the initial and 
 final objects in \Set, we know that there is a unique morphism between 
-them: $k : \emptySet \rightarrow \bold{1}$. \TODO{does $k$ need to be 
-monic?} 
+them: $k : \emptySet \rightarrow \bold{1}$. Furthermore since there are 
+\emph{no} morphisms \emph{into} $\emptySet$, the morphism, $k$ is 
+trivially monic. Explicitly, as a mapping in \Set, the morphism $k$ has 
+the empty graph. 
 
-\item The set, $T(\emptySet) = \{ \type{nil} \}$.
+\item The set, $T(\emptySet) = \{ \type{nil} \} = \bold{1}$.
 
-\item The set, $T(\bold{1}) = \{ \type{nil}, (\type{nil}, \type{nil}) \}$. 
+\item The set, $T(\bold{1}) = \{ \type{nil}, (\type{nil}, \type{nil}) \} = 
+T^2(\emptySet)$. 
+
+\item Since $T(\emptySet) = \bold{1}$ and $\emptySet$ is the initial 
+object, we know that $k = j$. 
+
+\item Explicitly, $T(k) : T(\emptySet) \rightarrow T(\bold{1})$ is the 
+morphism $\bold{1} + k \times k$, hence $T(\type{nil}) = \type{nil}$ 
+
+\item Since $\bold{1}$ is the final object in \Set, there is a unique 
+morphism $t: T(\bold{1}) \rightarrow \bold{1}$. Explicitly we have:
+
+\startformula\startalign
+  \NC t(\type{nil})               \NC = \type{nil} \NR
+  \NC t((\type{nil}, \type{nil})) \NC = \type{nil} \NR
+\stopalign\stopformula
+
+\noindent Hence $t \circ T(k)$ is the identity of $T(\emptySet) = 
+\bold{1}$. In particular, $t \circ T(k)$ is surjective.
+
+\item Since there is a unique morphism between $\emptySet$ and $\bold{1}$, 
+we know that $k = t \circ T(k) \circ j$. 
+
+\item \TODO{What more needs to be stated?}
 
 \stopitemize
-
-\placeformula[+]\startformula \startMPcode{commDiag}
+%\setupformula[location=left]
+\placeformula[left]\startformula \startMPcode{commDiag}
   setupCommDiags ; 
   
-  addObject(1,1, "\emptySet");
-  addObject(1,2, "T(\emptySet)");
-  addObject(1,3, "\cdots");
-  addObject(1,4, "T^n(\emptySet)");
-  addObject(1,5, "T^{n+1}(\emptySet)");
-  addObject(1,6, "\cdots");
-  
-  addObject(2,1, "\bold{1}");
-  addObject(2,2, "T(\bold{1})");
+  addObject(1,7, "\wflol");
+  addObject(2,1, "\emptySet");
+  addObject(2,2, "T(\emptySet)");
   addObject(2,3, "\cdots");
-  addObject(2,4, "T^n(\bold{1})");
-  addObject(2,5, "T^{n+1}(\bold{1})");
+  addObject(2,4, "T^n(\emptySet)");
+  addObject(2,5, "T^{n+1}(\emptySet)");
   addObject(2,6, "\cdots");
+  
+  addObject(3,1, "\bold{1}");
+  addObject(3,2, "T(\bold{1})");
+  addObject(3,3, "\cdots");
+  addObject(3,4, "T^n(\bold{1})");
+  addObject(3,5, "T^{n+1}(\bold{1})");
+  addObject(3,6, "\cdots");
+  
+  addObject(4,7, "\lol");
 
   drawObjects(1.75cm, 2cm);
 
-  addArrow(1,1, 1,2, ">", 0)()()("j",          0.5, top);
-  addArrow(1,2, 1,3, ">", 0)()()("",           0.5, );
-  addArrow(1,3, 1,4, ">", 0)()()("",           0.5, );
-  addArrow(1,4, 1,5, ">", 0)()()("\vphantom\lgroup T^n(j)",     0.5, top);
-  addArrow(1,5, 1,6, ">", 0)()()("",           0.5, );
-  addArrow(1,1, 2,1, ">", 0)()()("k",          0.5, lft);
-  addArrow(1,2, 2,2, ">", 0)()()("T(k)",       0.5, rt);
-  addArrow(1,4, 2,4, ">", 0)()()("T^n(k)", 0.5, lft);
-  addArrow(1,5, 2,5, ">", 0)()()("T^{n+1}(k)", 0.5, rt);
-  addArrow(2,2, 2,1, ">", 0)()()("t",          0.5, bot);
-  addArrow(2,3, 2,2, ">", 0)()()("",           0.5, );
-  addArrow(2,4, 2,3, ">", 0)()()("",           0.5, );
-  addArrow(2,5, 2,4, ">", 0)()()("\vphantom\lgroup T^{n+1}(t)", 0.5, bot);
-  addArrow(2,6, 2,5, ">", 0)()()("",           0.5, );
+  addArrow(2,1, 1,7, ">", 20)()()("\overline{j}",          0.2, );
+  addArrow(2,2, 1,7, ">", 20)()()("T(\overline{j})",       0.2, );
+  addArrow(2,4, 1,7, ">", 20)()()("T^n(\overline{j})",     0.2, );
+  addArrow(2,5, 1,7, ">", 20)()()("T^{n+1}(\overline{j})", 0.2, );
+  
+  addArrow(2,1, 2,2, ">", 0)()()("j",          0.5, bot);
+  addArrow(2,2, 2,3, ">", 0)()()("",           0.5, );
+  addArrow(2,3, 2,4, ">", 0)()()("",           0.5, );
+  begingroup ;  interim labeloffset := 8bp ;
+  addArrow(2,4, 2,5, ">", 0)()()("T^n(j)",     0.5, bot);
+  endgroup ; 
+  addArrow(2,5, 2,6, ">", 0)()()("",           0.5, );
+  
+  addArrow(2,1, 3,1, ">", 0)()()("k",          0.5, lft);
+  addArrow(2,2, 3,2, ">", 0)()()("T(k)",       0.5, rt);
+  addArrow(2,4, 3,4, ">", 0)()()("T^n(k)", 0.5, lft);
+  addArrow(2,5, 3,5, ">", 0)()()("T^{n+1}(k)", 0.5, rt);
+
+  addArrow(3,2, 3,1, ">", 0)()()("t",          0.5, top);
+  addArrow(3,3, 3,2, ">", 0)()()("",           0.5, );
+  addArrow(3,4, 3,3, ">", 0)()()("",           0.5, );
+  begingroup ;  interim labeloffset := 8bp ;
+  addArrow(3,5, 3,4, ">", 0)()()("T^{n+1}(t)", 0.4, top);
+  endgroup ; 
+  addArrow(3,6, 3,5, ">", 0)()()("",           0.5, );
+
+  addArrow(4,7, 3,1, ">", 20)()()("\underline{t}",          0.8, );
+  addArrow(4,7, 3,2, ">", 20)()()("T(\underline{t})",       0.8, );
+  addArrow(4,7, 3,4, ">", 20)()()("T^n(\underline{t})",     0.8, );
+  addArrow(4,7, 3,5, ">", 20)()()("T^{n+1}(\underline{t})", 0.8, );
+  
+  addArrow(1,7, 4,7, ">", 0)()()("T^{\infinity}(k)", 0.5, lft);
 
 \stopMPcode \stopformula
+
+\noindent \TODO{The $T^n(\underline{t})$ morphisms DO NOT make sense!! 
+They are collectively \quote{trunctation} morphisms. However they are a 
+finite functor $T$ applied multiple times to the most truncated morphism 
+of them all $\underline{t}$. We have lost too much information before we 
+even being!} 
+
+\stopMMundi
+
+\startMMundi
+
+\TODO{We want to show that the \emph{category}, \catWFLoL, is a topos and 
+that the corresponding category, \catLoL, is a \emph{co}-topos. For 
+\catWFLoL, the objects are finite trees, and the morphisms are 
+\joylolZero\ \emph{computations} (traces). For \catLoL, the objects are 
+finte \quote{cylinders} on the underlying set, \lol. The morphisms are 
+again \joylolZero\ \emph{computations} (traces).} 
 
 \stopMMundi
 
