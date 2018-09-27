@@ -887,7 +887,7 @@ cons(cons(nil, nil), nil)
   addObject(3,3, "\type{nil}") ;
   addObject(2,5, "\type{nil}") ;
   
-  drawObjects(1cm, 1cm) ;
+  drawRegularObjects(1cm, 1cm) ;
   
   addArrow(1,4, 2,2, "-", 0)()()("", 0.5, );
   addArrow(1,4, 2,5, "-", 0)()()("", 0.5, );
@@ -1039,7 +1039,12 @@ $\overstrike{t}_n(y) = \overstrike{t}_n(y')$ (see, for example,
   
   addObject(4,7, "\lol");
 
-  drawObjects(1.75cm, 1.8cm);
+  initColWidths(1.5cm);
+  initRowHeights(1.75cm);
+  colWidths[1] := 2cm;
+  colWidths[4] := 2.5cm;
+  colWidths[6] := 1cm;
+  drawObjects;
 
   addArrow(2,1, 1,7, ">", 20)()()("\overstrike{j}_0",     0.2, );
   addArrow(2,2, 1,7, ">", 20)()()("\overstrike{j}_1",     0.2, );
@@ -1055,9 +1060,9 @@ $\overstrike{t}_n(y) = \overstrike{t}_n(y')$ (see, for example,
   addArrow(2,1, 2,2, ">", 0)()()("j",          0.5, bot);
   addArrow(2,2, 2,3, ">", 0)()()("",           0.5, );
   addArrow(2,3, 2,4, ">", 0)()()("",           0.5, );
-  begingroup ;  interim labeloffset := 8bp ;
+  %begingroup ;  interim labeloffset := 8bp ;
   addArrow(2,4, 2,5, ">", 0)()()("T^n(j)",     0.5, bot);
-  endgroup ; 
+  %endgroup ; 
   addArrow(2,5, 2,6, ">", 0)()()("",           0.5, );
 
   addArrow(2,1, 3,1, ">", 0)()()("k",          0.5, );
@@ -1068,9 +1073,9 @@ $\overstrike{t}_n(y) = \overstrike{t}_n(y')$ (see, for example,
   addArrow(3,2, 3,1, ">", 0)()()("t",          0.5, top);
   addArrow(3,3, 3,2, ">", 0)()()("",           0.5, );
   addArrow(3,4, 3,3, ">", 0)()()("",           0.5, );
-  begingroup ;  interim labeloffset := 8bp ;
-  addArrow(3,5, 3,4, ">", 0)()()("T^{n+1}(t)", 0.2, top);
-  endgroup ; 
+  %begingroup ;  interim labeloffset := 8bp ;
+  addArrow(3,5, 3,4, ">", 0)()()("T^{n+1}(t)", 0.5, top);
+  %endgroup ; 
   addArrow(3,6, 3,5, ">", 0)()()("",           0.5, );
 
   addArrow(4,7, 3,1, ">", 20)()()("\overstrike{t}_0",     0.8, );
