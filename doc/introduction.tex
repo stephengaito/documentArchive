@@ -584,12 +584,14 @@ Lists} (\lols). With these \lols, a wee beastie can:
 
 \item create a new \quote{\type{nil}} \lol.
 
-\item create a new \lol\ by \quote{\type{cons}}ing any two existing 
-\lols\ together. 
+\item create a new \quote{top} \lol\ by removing the \quote{top} two 
+\lols\ and \quote{\type{cons}}ing them together.
 
-\item create a new \lol\ by \quote{\type{car}}ing an existing \lol. 
+\item create a new \quote{top} \lol\ by removing the \quote{top} \lol\ and 
+\quote{\type{car}}ing it. 
 
-\item create a new \lol\ by \quote{\type{cdr}}ing an existing \lol. 
+\item create a new \quote{top} \lol\ by removing the \quote{top} \lol\ and 
+\quote{\type{cdr}}ing it. 
 
 \stopitemize
 
@@ -672,7 +674,7 @@ can preform (\emph{compute}) the following tests:
 \item The test which always fails, denoted \quote{\false} or 
 \quote{\bottom}. 
 
-\item The test which succeeds if an existing \lol\ is 
+\item The test which succeeds if the \quote{top} \lol\ is 
 \quote{\type{nil}}, denoted \quote{\isNil}.
 
 \stopitemize
