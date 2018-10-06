@@ -574,7 +574,8 @@ terminology of \quote{Lists of Lists} or \lols.
 \startDefinition[beastieActions]
 
 We assume any wee beastie exists in a \quote{collection} of \quote{List of 
-Lists} (\lols). With these \lols, a wee beastie can: 
+Lists} (\lols) represented itself as a \lol. With these \lols, a wee 
+beastie can: 
 
 \startitemize[n]
 
@@ -582,16 +583,16 @@ Lists} (\lols). With these \lols, a wee beastie can:
 
 \startitemize[n]
 
-\item create a new \quote{\type{nil}} \lol.
+\item create a new \quote{top} \quote{\type{nil}} \lol.
 
 \item create a new \quote{top} \lol\ by removing the \quote{top} two 
 \lols\ and \quote{\type{cons}}ing them together.
 
-\item create a new \quote{top} \lol\ by removing the \quote{top} \lol\ and 
-\quote{\type{car}}ing it. 
+\item create two new \quote{top} \lols\ by removing the \quote{top} 
+\lol\ and replacing it with both the \quote{\type{car}} and 
+\quote{\type{cdr}} of the original \lol. 
 
-\item create a new \quote{top} \lol\ by removing the \quote{top} \lol\ and 
-\quote{\type{cdr}}ing it. 
+\item \quote{\type{swap}} the \quote{order} of the \quote{top} two \lols. 
 
 \stopitemize
 
