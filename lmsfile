@@ -7,6 +7,8 @@ contextDoc.targets{
   docFiles = {
     'preface.tex',
     'introduction.tex',
+    'introPhilosophy.tex',
+    'introMathematics.tex',
     'computation.tex',
     'formal.tex',
   },
