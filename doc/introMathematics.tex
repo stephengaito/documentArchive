@@ -233,8 +233,10 @@ page 323.
 
 \subsection[title=A wee beastie's reality]
 
-Over the next three definitions, below, we will explore what a wee beastie 
-can do, know, and identify. These three definitions are of necessity, 
+Over the next four definitions, \in[beastieBeing], \in[beastieActions], 
+\in[beastieTests], \in[beastieIdentity], below, we will explore what a wee 
+beastie \emph{is}, can \emph{do}, can \emph{know}, and can 
+\emph{identify}. These three definitions are of necessity, 
 inter-referential. They are essentially different facets of the same 
 combined definition of what a wee beastie's reality is. 
 
@@ -250,12 +252,43 @@ structure of time or space. One consequence of our analysis of what a wee
 beastie can know, is space-time itself. 
 
 Following Hilbert, we will assume a number of undefined terms which will 
-be defined by their use in our theory. In the following definition, using 
+be defined by their use in our theory. In the following definitions, using 
 well known practice from Computer Science, we \emph{could} use the word 
 \quote{widget} to emphasize, with Hilbert, that our undefined terms can 
 represent anything which behaves in the prescribed way. Having made this 
 point, we will actually use the undefined but slightly more suggestive 
 terminology of \quote{Lists of Lists} or \lols. 
+
+\startDefinition[beastieBeing]
+
+Any wee beastie \emph{is} a \quote{triple} of \lols, called the 
+\quote{data} \quote{stack}, the \quote{process} \quote{stack} and the 
+\quote{definition} \lol, respectively. 
+
+At each \quote{computational instant}, the wee beastie takes the 
+\quote{top} \lol\ off of the \quote{process} \quote{stack} and 
+\quote{interprets} it by either: 
+
+\startitemize[n] 
+
+\item \bold{Reserved word}: If the \quote{top} \lol\ is a \quote{reserved} 
+\quote{word}, as defined in any of the four definitions, 
+\in[beastieBeing], \in[beastieActions], \in[beastieTests], or 
+\in[beastieIdentity], then the beastie makes the described changes to the 
+\quote{data} and \quote{process} \quote{stacks}. 
+
+\item \bold{Known word}: If the \quote{top} \lol\ is a \quote{known} 
+\quote{word}, then the wee beastie \quote{\type{push}}es the 
+\quote{definition} of the known word onto the \quote{top} of the 
+\quote{data} \quote{stack} and the \quote{\type{interpret}} \quote{word} 
+onto the \quote{top} of the \quote{process} \quote{stack}. 
+
+\item \bold{Otherwise}: The wee beastie \quote{\type{push}}es the \lol\ 
+onto the \quote{top} of the \quote{data} \quote{stack}. 
+
+\stopitemize 
+
+\stopDefinition 
 
 These \lols\ are important. For \emph{our} wee beasties, every thing is a 
 \lol. Since we are considering the \emph{computational} basis of 
@@ -267,25 +300,39 @@ purposes, these states \emph{will be} \lols.
 At the same time these \lols\ will also capture the \quote{textual} 
 description of any given program. While we could use any programming 
 language, we will base our \emph{computational} foundations on the 
-language \type{joylol} which is in turn loosely based upon Manfred von 
-Thun's \emph{concatenative} language, \type{joy}\footnote{To better 
-understand Manfred von Thun's programming language, \type{joy}, see 
+language \joylol\ which is in turn loosely based upon Manfred von 
+Thun's \emph{concatenative} stack based language, \type{joy}\footnote{To 
+better understand Manfred von Thun's programming language, \type{joy}, see 
 \cite{vonThun1994overview} for an overview of the language and 
 \cite{vonThun1994mathematicalFoundations} for an overview of the 
 mathematical foundations of the language. The \quote{original} 
-\emph{concatenative} language was \type{Forth}. See 
-\cite{brodie1987StartingForth} and \cite{brodie2004thinkingForth} for an 
-introduction to \type{Forth}.}. While most programming languages are 
-applicative and make extensive use of variables, we will use the 
-semantically simpler concatenative language. In classical terms the 
-category of computations of an applicative functional languages, such as 
-\type{Haskell}, corresponds to a Topos, and that of a concatenative 
-functional languages, such as \type{joylol} or \type{joy} assumes no more 
-structure than that of a Category. Not surprisingly, we will, eventually, 
-show that the compuational power of \type{joylol} is equivalent to that of 
-any other programming language. In classical terms this means that the 
-Category of \type{joylol}'s computations is actually has the structure of 
-a Topos (or more correctly a Topos-CoTopos pair). 
+\emph{concatenative} stack based programming language was \type{Forth}. 
+See \cite{brodie1987StartingForth} and \cite{brodie2004thinkingForth} for 
+introductions to \type{Forth}.}. While most programming languages are 
+applicative and make extensive use of variables, we will use a 
+semantically simpler concatenative stack based language. 
+
+\startMMundi In classical terms the category of computations of an 
+applicative functional language, such as \type{Haskell}, corresponds to a 
+Topos, and that of a concatenative stack based functional language, such 
+as \joylol\ or \type{joy}, assumes no more structure than that of a 
+Category. Not surprisingly, we will, eventually, show that the 
+computational power of \joylol\ is equivalent to that of any other 
+programming language. In classical terms this means that the Category of 
+\joylol's computations actually has the structure of a Topos (or 
+more correctly a Topos-CoTopos pair). \stopMMundi 
+
+In fact to make \joylol\ semantically even simpler, we explicitly expose 
+the stack of process \quote{continuations}\footnote{For a good, early, 
+introduction to the use of continuations to capture the semantics of 
+programming languages, see chapter 5 of 
+\cite{gordon1979denotationalDescriptionProgLangs}.}. This means that the 
+\quote{instantaneous} \quote{state} of any \joylol\ computation, is 
+captured by a pair of \lols\ interpreted as the \quote{data stack} and 
+\quote{process stack} respectively. 
+
+The \joylol\ interpreter then in each computational \quote{instance}, 
+takes one \lol\ off the top of the \quote{process stack} 
 
 \subsection[title=What \emph{can} a \quote{wee beastie} do?]
 
@@ -300,69 +347,97 @@ beastie can:
 
 \startitemize[n]
 
-\item Atomic actions
+\item \bold{Atomic actions}
 
 \startitemize[n]
 
-\item Constructive actions
+\item \bold{Constructive actions}
 
 \startitemize[n]
 
-\item create a new \quote{top} \quote{\type{nil}} \lol.
+\item \bold{\quote{\type{nil}} action}: create a new \quote{top} 
+\quote{\type{nil}} \lol. 
 
-\item create a new \quote{top} \lol\ by removing the \quote{top} two 
-\lols\ and \quote{\type{cons}}ing them together.
+\item \bold{\quote{\type{cons}} action}: create a new \quote{top} \lol\ by 
+removing the \quote{top} two \lols\ and \quote{\type{cons}}ing them 
+together. 
 
 \stopitemize
 
-\item Destructive actions
+\item \bold{Destructive actions}
 
 \startitemize[n]
 
-\item delete the \quote{top} \lol\ by \quote{\type{pop}}ing it off the 
-stack. 
+\item \bold{\quote{\type{pop}} action}: delete the \quote{top} \lol\ by 
+\quote{\type{pop}}ing it off the stack. 
 
-\item create two new \quote{top} \lols\ by removing the \quote{top} 
-\lol\ and replacing it with both the \quote{\type{car}} and 
-\quote{\type{cdr}} of the original \lol. 
+\item \bold{\quote{\type{carCdr}} action}: create two new \quote{top} 
+\lols\ by removing the \quote{top} \lol\ and replacing it with both the 
+\quote{\type{car}} and \quote{\type{cdr}} of the original \lol. 
 
 \stopitemize
 
-\item Stack manipulation
+\item \bold{Data Stack manipulation}
 
 \startitemize[n]
 
-\item \quote{\type{dup}}licate the \quote{top} \lol.
+\item \bold{\quote{\type{dup}} action}: \quote{\type{dup}}licate the 
+\quote{top} \lol. 
 
-\item \quote{\type{swap}} the \quote{order} of the \quote{top} two \lols. 
+\item \bold{\quote{\type{swap}} action}: \quote{\type{swap}} the 
+\quote{order} of the \quote{top} two \lols. 
 
 \stopitemize
 
-\stopitemize
-
-\item Action Combinators
+\item \bold{Process Stack manipulation}
 
 \startitemize[n]
 
-\item The action which \quote{performs} a pair of actions one followed by 
-the other. If $a$ and $b$ are two actions, then the \quote{composition} 
-action is explicitly denoted as \quote{\explicitCompose{a}{b}} or more 
-simply as \quote{\compose{a}{b}}. 
+\item \bold{\quote{\type{interpret}} action}:
 
-\item The action which \quote{performs} one or other of a pair of actions. 
-There is, however, \emph{no pre-determined} reason for the choice. If $a$ 
-and $b$ are two actions, then the \quote{(non-determinitsic) choice} 
-action is denoted \quote{\ndChoice{a}{b}}.
+\item \bold{\quote{\type{choice}} action}:
 
+\item \bold{\quote{\type{repeat}} action}: 
 
-\item The action which performs an action multiple times before 
-\quote{completing}. However, the number of repetitions is \emph{not 
-pre-determined}. If $a$ is an action, then we denote the 
-\quote{(non-deterministic) repetition} action as \quote{\repets{a}}. 
+\item \bold{\quote{\type{test}} action}:
 
-\item The action which \quote{completes} if a given test\footnote{Tests 
-are defined in \in{Definition}[beastieTests].} succeeds. If $t$ is a test 
-then we denote the \quote{test} action by \quote{\test{t}}. 
+\stopitemize
+
+\item \bold{Definition list manipulation}
+
+\startitemize[n]
+
+\item \bold{\quote{\type{define}} action}: 
+
+\stopitemize
+
+\stopitemize
+
+\item \bold{Action Combinators}
+
+\startitemize[n]
+
+\item \bold{composition}: the action which \quote{performs} a pair of 
+actions one followed by the other. If $a$ and $b$ are two actions, then 
+the \quote{composition} action is explicitly denoted as 
+\quote{\explicitCompose{a}{b}} or more simply as \quote{\compose{a}{b}}. 
+
+\item \bold{non-deterministic choice}: The action which \quote{performs} 
+one or other of a pair of actions. There is, however, \emph{no 
+pre-determined} reason for the choice. If $a$ and $b$ are two actions, 
+then the \quote{(non-determinitsic) choice} action is denoted 
+\quote{\ndChoice{a}{b}}. 
+
+\item \bold{non-deterministic repeat}: The action which performs an action 
+multiple times before \quote{completing}. However, the number of 
+repetitions is \emph{not pre-determined}. If $a$ is an action, then we 
+denote the \quote{(non-deterministic) repetition} action as 
+\quote{\repets{a}}. 
+
+\item \bold{test}: The action which \quote{completes} if a given 
+test\footnote{Tests are defined in \in{Definition}[beastieTests].} 
+succeeds. If $t$ is a test then we denote the \quote{test} action by 
+\quote{\test{t}}. 
 
 \stopitemize
 
