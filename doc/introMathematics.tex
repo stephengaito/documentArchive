@@ -233,8 +233,8 @@ page 323.
 
 \subsection[title=A wee beastie's reality]
 
-Over the next three definitions we will explore what a wee beastie can do, 
-know, and identify. These three definitions are of necessity, 
+Over the next three definitions, below, we will explore what a wee beastie 
+can do, know, and identify. These three definitions are of necessity, 
 inter-referential. They are essentially different facets of the same 
 combined definition of what a wee beastie's reality is. 
 
@@ -254,15 +254,38 @@ be defined by their use in our theory. In the following definition, using
 well known practice from Computer Science, we \emph{could} use the word 
 \quote{widget} to emphasize, with Hilbert, that our undefined terms can 
 represent anything which behaves in the prescribed way. Having made this 
-point, we will actually use the undefinded but slightly more suggestive 
+point, we will actually use the undefined but slightly more suggestive 
 terminology of \quote{Lists of Lists} or \lols. 
 
 These \lols\ are important. For \emph{our} wee beasties, every thing is a 
 \lol. Since we are considering the \emph{computational} basis of 
 \quote{Reality}, we will assume that any wee beastie is a computational 
-entity. At any one instant of \quote{time}, this wee beastie (its 
+entity. At any one instant of \quote{time}, this wee beastie (or its 
 associated computation) will be in a particular \quote{state}. For our 
-purposes, these states \emph{will be} \lols. 
+purposes, these states \emph{will be} \lols.
+
+At the same time these \lols\ will also capture the \quote{textual} 
+description of any given program. While we could use any programming 
+language, we will base our \emph{computational} foundations on the 
+language \type{joylol} which is in turn loosely based upon Manfred von 
+Thun's \emph{concatenative} language, \type{joy}\footnote{To better 
+understand Manfred von Thun's programming language, \type{joy}, see 
+\cite{vonThun1994overview} for an overview of the language and 
+\cite{vonThun1994mathematicalFoundations} for an overview of the 
+mathematical foundations of the language. The \quote{original} 
+\emph{concatenative} language was \type{Forth}. See 
+\cite{brodie1987StartingForth} and \cite{brodie2004thinkingForth} for an 
+introduction to \type{Forth}.}. While most programming languages are 
+applicative and make extensive use of variables, we will use the 
+semantically simpler concatenative language. In classical terms the 
+category of computations of an applicative functional languages, such as 
+\type{Haskell}, corresponds to a Topos, and that of a concatenative 
+functional languages, such as \type{joylol} or \type{joy} assumes no more 
+structure than that of a Category. Not surprisingly, we will, eventually, 
+show that the compuational power of \type{joylol} is equivalent to that of 
+any other programming language. In classical terms this means that the 
+Category of \type{joylol}'s computations is actually has the structure of 
+a Topos (or more correctly a Topos-CoTopos pair). 
 
 \subsection[title=What \emph{can} a \quote{wee beastie} do?]
 
@@ -281,16 +304,39 @@ beastie can:
 
 \startitemize[n]
 
+\item Constructive actions
+
+\startitemize[n]
+
 \item create a new \quote{top} \quote{\type{nil}} \lol.
 
 \item create a new \quote{top} \lol\ by removing the \quote{top} two 
 \lols\ and \quote{\type{cons}}ing them together.
 
+\stopitemize
+
+\item Destructive actions
+
+\startitemize[n]
+
+\item delete the \quote{top} \lol\ by \quote{\type{pop}}ing it off the 
+stack. 
+
 \item create two new \quote{top} \lols\ by removing the \quote{top} 
 \lol\ and replacing it with both the \quote{\type{car}} and 
 \quote{\type{cdr}} of the original \lol. 
 
+\stopitemize
+
+\item Stack manipulation
+
+\startitemize[n]
+
+\item \quote{\type{dup}}licate the \quote{top} \lol.
+
 \item \quote{\type{swap}} the \quote{order} of the \quote{top} two \lols. 
+
+\stopitemize
 
 \stopitemize
 
