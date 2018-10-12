@@ -2,10 +2,6 @@
 
 \chapter[title=Of Wee Beasties and Idealized Mathematicians]
 
-In this chapter we will explore what a wee beastie, and indeed, what an 
-Idealized Mathematician, is, can do, can know, and can identify of its 
-\quote{Reality}. 
-
 In this chapter, over the next four definitions, \in[beastieBeing], 
 \in[beastieActions], \in[beastieTests], \in[beastieIdentity], below, we 
 will explore what a wee beastie \emph{is}, can \emph{do}, can \emph{know}, 
@@ -421,3 +417,94 @@ those which consist of collections of \quote{\type{car}}s and
 \quote{\type{cons}}s can be undone by appropriate use of 
 \quote{\type{car}}s and \quote{\type{cdr}}s. \TODO{Is this a meaningful 
 observation?} 
+
+\startChapterAppendices
+
+\chapterAppendix[title={Texts: transcribing Lists of Lists}]
+
+To be useful, any \joylol\ program needs to be written down in a format 
+which can be stored over time and transmitted through space. The 
+traditional way to do this is to transcribe a \joylol\ program to and from 
+a \quote{string of characters}. This chapter appendix specifies how this 
+is done. 
+
+While it might seem strange to worry about texts and transcription of 
+textual artefacts in a \emph{mathematical} document, any \emph{formal} 
+foundation of mathematics does start by listing the collection of allowed 
+symbols, see for example \cite{kleene2009introMetaMathematics}. In 
+particular, we \emph{could} develop the whole of mathematics using just 
+two symbols: \quote{(}, and \quote{)}. However, to be kind to \quote{bears 
+of very little brain} (like myself), we will use, at least initially, a 
+richer collection of symbols. In line with the typical practice of 
+Computer Science, we parse tree structures of symbols from texts as 
+sequences of characters. This enables the collection of meaningful symbols 
+to expand as needed for a particular discussion. 
+
+\subChapterAppendix[title=Characters, reference=characterSpec]
+
+A character is a fundamental representation of a glyph of one or other 
+human language. \quote{Printed} characters are currently used by humans, 
+to communicate ideas between themselves. For our purposes, a character is 
+an indivisible entity. The collection of sets have an associated order 
+relationship. So we know when a given character is ordered before, 
+equal-to, or ordered after another given character. 
+
+In current computational systems, characters are usually implemented using 
+the Unicode consortium's \quote{UTF-8} specifications. 
+
+Characters are often sub-divided into specific \quote{useful} 
+sub-collections. For our purposes, we will subdivide our character set 
+into \quote{white space}, \quote{structural} and \quote{all other} 
+characters. 
+
+\subChapterAppendix[title=Symbols, reference=symbolSpec]
+
+A symbol is a sequence of characters which does not include any 
+white-space or structural characters. Symbols can be lexicographically 
+ordered using the order of the characters. 
+
+\subChapterAppendix[title=Texts, reference=textSpec]
+
+A text is a list or sequence of characters.
+
+\subChapterAppendix[title=Parsing, reference=parsingSpec]
+
+Parsing is the process of extracting a \quote{parse tree} of symbols from 
+a text. 
+
+\chapterAppendix[title=Containers]
+
+In our specification of Wee Beasties we assumed a number of specifications 
+of the containers, Lists, Stacks and Dictionaries. This chapter appendix 
+provides the full specifications for each of these concepts. 
+
+\subChapterAppendix[title=Lists, reference=listSpec]
+
+A list is a container which contains a sequence of \lols.
+
+\subChapterAppendix[title=Stacks, reference=stackSpec]
+
+A stack is a container which only allows access via the push and pop 
+methods. A typical implementation would be using a list. If a dictionary 
+is known to be well-founded, then it is easy to specify that the 
+dictionary has exactly one instance of any key, value pair. If a 
+dictionary is potentially non-well-founded, it is impossible to implement 
+this uniqueness constraint. This means that the concept of 
+\quote{dictionary} has both well-founded, dictionary, as well as a 
+non-well-founded, multi-dictioanry, variants. 
+
+\subChapterAppendix[title=Dictionaries, reference=dictionarySpec]
+
+A dictionary is a container which implements a key to value mapping. It 
+allows you to find a value given its key, or to add a key, value pair. 
+Similar to a dictionary, if a set is known to be well-founded, then it is 
+easy to specify that the set has exactly one instance of any element. 
+However, if a set is potentially non-well-founded, it is impossible to 
+implement this uniqueness constraint. This means that the concept of 
+\quote{set} has both well-founded, set, as well as a non-well-founded, 
+multi-set, variants. Similarly, we have well-founded powersets as well as 
+potentially non-well-founded multi-powersets respectively. 
+
+\subChapterAppendix[title={Sets and Power Sets}, reference=setSpec]
+
+\stopChapterAppendices

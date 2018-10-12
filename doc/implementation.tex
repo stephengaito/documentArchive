@@ -1,0 +1,22 @@
+% A ConTeXt document [master document: hilbertsProgram.tex]
+
+\chapter[title=A simple \joylol\ implementation]
+\startAppendicesBar
+
+In this appendix, we provide a full, but very simple, 
+\emph{implementation} of \joylol\ in \joylol\ itself\footnote{There is a 
+very long tradition of writing computer languages in themselves, see for 
+example the original implementation of Lisp in Lisp, 
+\cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}.}. We will provide 
+full proofs of this implementation's correctness. 
+
+To keep this implementation simple, we use very simple container 
+implementations which are unlikely to be performant for large scale use. 
+Our companion document, \cite{gaito2017joyLoLImplementation}, provides a 
+slighly more performant implementation using the ANSI-C programming 
+language wrapped in \Lua\ and loadable into \luaTeX\ (and hence into 
+\ConTeXt). It is this implementation, loaded into \ConTeXt, which has been 
+used to formally check the correctness of all assertions in \emph{this} 
+document. 
+
+\stopAppendicesBar
