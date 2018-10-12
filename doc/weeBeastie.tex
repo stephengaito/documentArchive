@@ -420,6 +420,12 @@ observation?}
 
 \startChapterAppendices
 
+The following Appendices to this chapter provide detailed specifications 
+of aspects of a wee beastie's environment which, while required by the 
+definitions above, are of a more technical nature. Example 
+\emph{implementations} of these specifications can be found in the 
+main Appendix \in[implementation] to this book.
+
 \chapterAppendix[title={Texts: transcribing Lists of Lists}]
 
 To be useful, any \joylol\ program needs to be written down in a format 
@@ -445,23 +451,138 @@ to expand as needed for a particular discussion.
 A character is a fundamental representation of a glyph of one or other 
 human language. \quote{Printed} characters are currently used by humans, 
 to communicate ideas between themselves. For our purposes, a character is 
-an indivisible entity. The collection of sets have an associated order 
-relationship. So we know when a given character is ordered before, 
-equal-to, or ordered after another given character. 
+an indivisible entity. The collection of characters has an associated 
+order relationship. So we know when a given character is ordered before, 
+equal to, or ordered after another given character. 
 
 In current computational systems, characters are usually implemented using 
-the Unicode consortium's \quote{UTF-8} specifications. 
+the Unicode consortium's \quote{UTF-8} specifications. All we will assume 
+in this document, is that the characters, which are explicitly 
+\quote{named} below, have the \quote{standard} ASCII ordering. The 
+\joylol\ code in this document will only ever use ASCII characters. 
+However since the ASCII characters are explicitl the initial sub-set of 
+the UTF-8 characters, this presents no particular problems for future 
+work. 
 
 Characters are often sub-divided into specific \quote{useful} 
 sub-collections. For our purposes, we will subdivide our character set 
-into \quote{white space}, \quote{structural} and \quote{all other} 
+into \quote{white space}, \quote{structural} and \quote{symbol} 
 characters. 
+
+\startDefinition
+
+The white space characters consist of the ASCII characters less than or 
+equal to the \quote{~} (space) character. Formally, \type{isWhiteSpace?} is 
+defined to be: 
+
+\starttyping
+{ dataStack top isCharacter? }
+( \space lessThanEqual )
+{ dataStack top isBoolean? }
+\stoptyping
+
+\TODO{How do I show that the \emph{same} character is still on top of the 
+data stack. The current assertions are \emph{active}. Stating that we have 
+the \quote{same} character is a rather more \emph{passive} statement. 
+Should I use a stack description language similar to that used by 
+\cite{diggins2008simpleTypeInference}?} 
+
+The structural characters consist of the ASCII characters, \quote{(}, 
+\quote{)}, \quote{\{}, \quote{\}}, \quote{"}, \quote{'}, and 
+\quote{\textbackslash}. Formally, \type{isStructuralCharacter?} is defined 
+to be: 
+
+\starttyping
+{ dataStack top isCharacter? }
+(
+  ( "(" isEqualCharacter? )
+  ( ")" isEqualCharacter? )
+  ( "{" isEqualCharacter? )
+  ( "}" isEqualCharacter? )
+  ( '"' isEqualCharacter? )
+  ( "'" isEqualCharacter? )
+  ( "\" isEqualCharacter? )
+  or
+)
+{ dataStack top isBoolean? }
+
+\stoptyping
+
+The symbol characters consist of all non-white space and non-structural 
+characters. Formally, \type{isSymbolCharacter?} is defined to be: 
+
+\starttyping
+{ dataStack top isCharacter? }
+(
+  ( isWhiteSpace? not)
+  ( isStructuralCharacter? not)
+  and
+)
+{ dataStack top isBoolean? }
+\stoptyping
+
+\stopDefinition
 
 \subChapterAppendix[title=Symbols, reference=symbolSpec]
 
-A symbol is a sequence of characters which does not include any 
-white-space or structural characters. Symbols can be lexicographically 
-ordered using the order of the characters. 
+\TODO{\type{explodeSymbol}, \type{createSymbol}, and \type{isSymbol?} are 
+all core methods.... how and where is this shown? } 
+
+\startDefinition 
+
+A symbol is an object which can be created from, or exploded to, a 
+sequence of characters.
+
+
+Structural symbols, when exploded, consist of a single structural 
+character. Formally we define \type{isStructuralSymbol} to be:
+
+\starttyping
+{ dataStack top isSymbol? }
+(
+  ( explodeSymbol listLength 1 numbersEqual )
+  ( explodeSymbol isStructuralCharacter? isListOf? )
+  and
+)
+{ dataStack top isBoolean? }
+\stoptyping
+
+Non-structural or atomic symbols, when exploded, consist of a sequence of 
+arbitrary fixed length, which does not include any white-space or 
+structural characters. Formally we define \type{isAtomicSymbol}  to be:
+
+\starttyping
+{ dataStack top isSymbol? }
+(
+  ( 
+    explodeSymbol
+    ( isWhiteSpace? isStructuralCharacter?  or not )
+    isListOf?
+  )
+)
+{ dataStack top isBoolean? }
+\stoptyping
+
+
+Symbols are ordered corresponding to the lexicographical ordering of their 
+exploded character sequences. Formally we define \type{symbolIsLessThan?} 
+to be: 
+
+\starttyping
+{
+  (dataStack top isSymbol?)
+  (dataStack top2 isSymbol?)
+  and
+}
+( explodeString explodeString isCharacterLessThan? isListOf?
+)
+{ isBoolean? }
+\stoptyping
+
+\TODO{The above \joylol\ code is critically missing the required swaps and 
+duplicates!!! Do the other comparison cases!} 
+
+\stopDefinition
 
 \subChapterAppendix[title=Texts, reference=textSpec]
 
@@ -474,9 +595,12 @@ a text.
 
 \chapterAppendix[title=Containers]
 
-In our specification of Wee Beasties we assumed a number of specifications 
+In our specification of wee beasties we assumed a number of specifications 
 of the containers, Lists, Stacks and Dictionaries. This chapter appendix 
-provides the full specifications for each of these concepts. 
+provides the full specifications for each of these concepts. In Computer 
+Science, a container is a structure which contains other structures. 
+Usually, but not always, all of the contained structures are of the same 
+(super) type. 
 
 \subChapterAppendix[title=Lists, reference=listSpec]
 
@@ -491,7 +615,7 @@ dictionary has exactly one instance of any key, value pair. If a
 dictionary is potentially non-well-founded, it is impossible to implement 
 this uniqueness constraint. This means that the concept of 
 \quote{dictionary} has both well-founded, dictionary, as well as a 
-non-well-founded, multi-dictioanry, variants. 
+non-well-founded, multi-dictionary, variants. 
 
 \subChapterAppendix[title=Dictionaries, reference=dictionarySpec]
 

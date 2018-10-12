@@ -12,6 +12,7 @@ contextDoc.targets{
     'weeBeastie.tex',
     'computation.tex',
     'formal.tex',
+    'implementation.tex'
   },
   docDir    = 'doc',
 }
