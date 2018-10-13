@@ -457,12 +457,12 @@ equal to, or ordered after another given character.
 
 In current computational systems, characters are usually implemented using 
 the Unicode consortium's \quote{UTF-8} specifications. All we will assume 
-in this document, is that the characters, which are explicitly 
-\quote{named} below, have the \quote{standard} ASCII ordering. The 
-\joylol\ code in this document will only ever use ASCII characters. 
-However since the ASCII characters are explicitl the initial sub-set of 
-the UTF-8 characters, this presents no particular problems for future 
-work. 
+in this document, is that the few characters we actually need, and which 
+are explicitly \quote{named} below, have the \quote{standard} ASCII 
+ordering. The \joylol\ code in this document will only ever use ASCII 
+characters. However since the ASCII characters are explicitly the initial 
+sub-set of the UTF-8 characters, this presents no particular problems for 
+future work. 
 
 Characters are often sub-divided into specific \quote{useful} 
 sub-collections. For our purposes, we will subdivide our character set 
@@ -472,8 +472,8 @@ characters.
 \startDefinition
 
 The white space characters consist of the ASCII characters less than or 
-equal to the \quote{~} (space) character. Formally, \type{isWhiteSpace?} is 
-defined to be: 
+equal to the \quote{~} (space) character. Formally, 
+\defineSymb{\type{isWhiteSpace?}} is defined to be: 
 
 \starttyping
 { dataStack top isCharacter? }
@@ -489,8 +489,8 @@ Should I use a stack description language similar to that used by
 
 The structural characters consist of the ASCII characters, \quote{(}, 
 \quote{)}, \quote{\{}, \quote{\}}, \quote{"}, \quote{'}, and 
-\quote{\textbackslash}. Formally, \type{isStructuralCharacter?} is defined 
-to be: 
+\quote{\textbackslash}. Formally, 
+\defineSymb{\type{isStructuralCharacter?}} is defined to be: 
 
 \starttyping
 { dataStack top isCharacter? }
@@ -509,7 +509,8 @@ to be:
 \stoptyping
 
 The symbol characters consist of all non-white space and non-structural 
-characters. Formally, \type{isSymbolCharacter?} is defined to be: 
+characters. Formally, \defineSymb{\type{isSymbolCharacter?}} is defined to 
+be: 
 
 \starttyping
 { dataStack top isCharacter? }
@@ -549,7 +550,8 @@ be:
 
 Non-structural or atomic symbols, when exploded, consist of a sequence of 
 arbitrary fixed length, which does not include any white-space or 
-structural characters. Formally we define \type{isAtomicSymbol}  to be:
+structural characters. Formally we define 
+\defineSymb{\type{isAtomicSymbol}} to be: 
 
 \starttyping
 { dataStack top isSymbol? }
@@ -565,8 +567,8 @@ structural characters. Formally we define \type{isAtomicSymbol}  to be:
 
 
 Symbols are ordered corresponding to the lexicographical ordering of their 
-exploded character sequences. Formally we define \type{symbolIsLessThan?} 
-to be: 
+exploded character sequences. Formally we define 
+\defineSymb{\type{symbolIsLessThan?}} to be: 
 
 \starttyping
 {
