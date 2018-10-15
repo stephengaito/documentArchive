@@ -236,9 +236,8 @@ page 323.
 
 
 \startformula\startMPcode
-
-
-
+input hatching.mp;
+picture dots; dots := dashpattern(on 0.1mm off 1mm);
 draw (0cm,-8cm) -- (12cm,-8cm) -- (12cm,9cm) -- (0cm,9cm) -- cycle;
 
 % JoyLoL
@@ -253,9 +252,17 @@ draw (0.1cm,0cm) -- (6cm, 0cm) -- (6cm, -4cm) -- (0.1cm, -4cm) -- cycle
   withcolor lightgray;
 
 % ANSI-C implementation
-draw (0.1cm,-4cm) -- (11.9cm, -4cm) -- (11.9cm, -7.9cm) -- (0.1cm, -7.9cm) -- cycle
+path ansic; ansic := (0.1cm,-4cm) -- (6cm, -4cm) --
+     (6cm,0cm) -- (11.9cm, 0cm) -- (11.9cm, -7.9cm) -- (0.1cm, -7.9cm) -- cycle;
+draw ansic
   withpen pencircle scaled 1mm
   withcolor lightgray;
+
+draw image (
+  hatchfill ansic
+    %withcolor (45,2mm,-.5bp)
+    withcolor (-45,2mm,-.5bp);
+) dashed dots withcolor darkgray;
 
 % CoAlgs
 
@@ -281,7 +288,16 @@ label("CONS-Pairs", (3cm,-3.5cm));
 label("Memory Management", (6cm,-6cm));
 label("ANSI-C Implementation", (6cm,-7.5cm));
 
-label("JoyLoL-0", origin) rotated 90 shifted (0.5cm,-2cm) ;
+label("JoyLoL-0", origin) rotated 90 shifted (0.5cm,-2cm);
+label("Natural numbers", origin) rotated 90 shifted (1.5cm, 0cm);
+label("Symbols", origin) rotated 90 shifted (2.5cm, 0cm);
+label("...", origin) rotated 90 shifted (3.5cm, 0cm);
+
+label("Natural numbers", origin) rotated 90 shifted (7.5cm, 0cm);
+label("Symbols", origin) rotated 90 shifted (8.5cm, 0cm);
+label("...", origin) rotated 90 shifted (9.5cm, 0cm);
+label("OS interfaces", origin) rotated 90 shifted (10.5cm, 0cm);
+
 \stopMPcode\stopformula
 
 \subsection[title=A Beastie's environment, reference=beastieReality]
