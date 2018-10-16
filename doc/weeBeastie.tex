@@ -134,9 +134,21 @@ beastie can:
 \item \bold{\quote{\type{nil}} action}: create a new \quote{top} 
 \quote{\type{nil}} \lol. 
 
+\starttyping
+{ }
+( nil )
+{ dataStack top isNil }
+\stoptyping
+
 \item \bold{\quote{\type{cons}} action}: create a new \quote{top} \lol\ by 
 removing the \quote{top} two \lols\ and \quote{\type{cons}}ing them 
 together. 
+
+\starttyping
+{ x y }
+( cons )
+{ (x y) }
+\stoptyping
 
 \stopitemize
 
@@ -147,9 +159,21 @@ together.
 \item \bold{\quote{\type{pop}} action}: delete the \quote{top} \lol\ by 
 \quote{\type{pop}}ing it off the stack. 
 
+\starttyping
+{ x }
+( pop )
+{ }
+\stoptyping
+
 \item \bold{\quote{\type{carCdr}} action}: create two new \quote{top} 
 \lols\ by removing the \quote{top} \lol\ and replacing it with both the 
 \quote{\type{car}} and \quote{\type{cdr}} of the original \lol. 
+
+\starttyping
+{ (x y) }
+( carCdr )
+{ x y }
+\stoptyping
 
 \stopitemize
 
@@ -160,8 +184,20 @@ together.
 \item \bold{\quote{\type{dup}} action}: \quote{\type{dup}}licate the 
 \quote{top} \lol. 
 
+\starttyping
+{ x }
+( dup )
+{ x x }
+\stoptyping
+
 \item \bold{\quote{\type{swap}} action}: \quote{\type{swap}} the 
 \quote{order} of the \quote{top} two \lols. 
+
+\starttyping
+{ x y }
+( swap )
+{ y x }
+\stoptyping
 
 \stopitemize
 
@@ -410,6 +446,36 @@ bisimular to the second \lol.
 to the original \lol. 
 
 \stopAssertion\endgroup
+
+\section[title=Rigour]
+
+\TODO{How do we program the verification engine? For (Basic) Dynamic Logic 
+we build the minimal/maximal filtration (see 
+\cite{demriGorankoLange2016temporalLogics} section 5.5.1 page 124; see 
+also \cite{harelKozenTiuryn2000dynamicLogic} section 5.4 page 171 (for 
+PDL) and section 11.4 page 297 (for first-order))(is this essentially a 
+tableau?). I suspect we play the two person games on this underlying 
+filtration to prove satisfiablity of $\mu$-modal logics, see 
+\cite{demriGorankoLange2016temporalLogics} section 15.4 page 682 AND 
+preceeding sections. How does the above inter-relate with 
+\cite{harelKozenTiuryn2000dynamicLogic} deductive logic? Are these simply 
+moves in the construction of the filtration? Do we extend this deductive 
+logic to allow for bisimularity assertions? (See below)} 
+
+\TODO{What is the structure of the pre and post conditions? We do NOT want 
+to use meta-variables, so we use deBruijn indexing. However we may have 
+complex repeated expressions, how do we identify these? Do we 
+\quote{assign} them to \quote{(meta)-variables} or do we define them as 
+\quote{symbols}? Use of meta-variables would allow \quote{pattern 
+matching} (similar to Haskell), however this would require a unification 
+engine adding to the base \joylol's complexity. I suspect meta-variables 
+should be left for some future \joylol\ extension.} 
+
+\TODO{How do we deal with identity inside a condition and between pre and 
+post conditions? Clearly we have no identity, but we can assert 
+bisimularity. Bisimularity \emph{between} pre and post conditions requires 
+the ability to \quote{reference} both data/process/definition \lols\ in 
+both pre/post \quote{states}.} 
 
 As a result of these assertions, the only \quote{meaningful} tests are 
 those which consist of collections of \quote{\type{car}}s and 
