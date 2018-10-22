@@ -10,6 +10,7 @@ contextDoc.targets{
     'introPhilosophy.tex',
     'introMathematics.tex',
     'introComputers.tex',
+    'introEngineering.tex',
     'weeBeastie.tex',
     'computation.tex',
     'formal.tex',
