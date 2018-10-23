@@ -6,15 +6,17 @@ contextDoc.targets{
   mainDoc  = 'hilbertsProgram.tex',
   docFiles = {
     'preface.tex',
-    'introduction.tex',
-    'introPhilosophy.tex',
-    'introMathematics.tex',
-    'introComputers.tex',
-    'introEngineering.tex',
+    'introduction/introduction.tex',
+    'introduction/goals.tex',
+    'introduction/philosophy.tex',
+    'introduction/mathematics.tex',
+    'introduction/computers.tex',
+    'introduction/engineering.tex',
+    'introduction/strategy.tex',
     'weeBeastie.tex',
     'computation.tex',
     'formal.tex',
-    'implementation.tex'
+    'implementation/implementation.tex'
   },
   docDir    = 'doc',
 }
