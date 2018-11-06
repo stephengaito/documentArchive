@@ -1,25 +1,24 @@
 % A ConTeXt document
 
-\environment options
-\usemodule[t-diSimp]
-\usemodule[t-joylol-coalg]
 
-\startJoyLoLCoAlg[title=Booleans][booleans]
+\startcomponent booleans
 
-\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
-src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
-(Stephen Gaito)}, year=2017] 
+\product joyLoL
 
-\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
+\environment joyLoLConTeXtEnv
 
-\component overview
+%\startJoyLoLCoAlg[title=Booleans][booleans]
 
-\component code
+\component base/booleans/overview
 
-\component words
+\component base/booleans/code
 
-\component lua
+\component base/booleans/words
 
-\component conclusion
+\component base/booleans/lua
 
-\stopJoyLoLCoAlg
+%\component base/booleans/conclusion
+
+%\stopJoyLoLCoAlg
+
+\stopcomponent

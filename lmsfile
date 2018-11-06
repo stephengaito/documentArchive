@@ -55,6 +55,34 @@ function createReleaseFile()
   os.remove(filesIOName)
 end
 
+function createBuildDirSymbolicLink(docTexFilePath)
+  docTexFilePath = docTexFilePath:gsub('^\./','')
+  symTexFilePath = docTexFilePath:gsub('doc/', '')
+  
+  local sep, pStr = package.config:sub(1, 1), ""
+  local pathPrefix = pStr .. '..' .. sep
+  pStr = pStr .. 'buildDir' .. sep
+  path = symTexFilePath:gsub('[^'..sep..']+$', '')
+  for dir in path:gmatch("[^" .. sep .. "]+") do
+    pStr = pStr .. dir .. sep
+    pathPrefix = pathPrefix .. '..' .. sep
+    lfs.mkdir(pStr)
+  end
+  lfs.link(pathPrefix..docTexFilePath, 'buildDir/'..symTexFilePath, true)
+end
+
+function prepareMasterDocument()
+    print(lfs.currentdir())
+    local texFileList = io.popen('find -name "*.tex"')
+    for docTexFilePath in texFileList:lines('*l') do 
+      if not docTexFilePath:find('releases') and
+         not docTexFilePath:find('buildDir') and
+         not docTexFilePath:find('bin')      then
+        createBuildDirSymbolicLink(docTexFilePath)
+      end
+    end
+end
+
 if clearScreen then os.execute('reset') end
 
 cmd = 'lms'
@@ -62,6 +90,14 @@ if 0 < #arg then
   arguments = table.concat(arg, ' ')
   if arguments == 'release' then
     createReleaseFile()
+    os.exit(0)
+  elseif arguments == 'doc' then
+    prepareMasterDocument()
+    -- context document
+    print('\nContexting document\n')
+    os.exit(0)
+  elseif arguments == 'bib' then
+    print('\nGathering bibliography entries\n')
     os.exit(0)
   end
   cmd = 'lms -c '..arguments
