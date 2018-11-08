@@ -1,29 +1,29 @@
 % A ConTeXt document
 
-\environment options
 \usemodule[t-diSimp]
-\usemodule[t-joylol-coalg]
+
+\startcomponent texts
+
+\product joyLoL
+
+\diSimpEnvironment joyLoLConTeXtEnv
 
 \startJoyLoLCoAlg[title=Texts][texts]
 
-\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
-src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
-(Stephen Gaito)}, year=2017] 
+\diSimpComponent overview
 
-\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
+\diSimpComponent strings
 
-\component overview
+\diSimpComponent files
 
-\component strings
+\diSimpComponent lua
 
-\component files
+\diSimpComponent words
 
-\component lua
+\diSimpComponent code
 
-\component words
-
-\component code
-
-\component conclusion
+\diSimpComponent conclusion
 
 \stopJoyLoLCoAlg
+
+\stopcomponent

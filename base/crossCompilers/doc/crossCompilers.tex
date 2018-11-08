@@ -1,31 +1,31 @@
 % A ConTeXt document
 
-\environment options
 \usemodule[t-diSimp]
-\usemodule[t-joylol-coalg]
+
+\startcomponent crossCompilers
+
+\product joyLoL
+
+\diSimpEnvironment joyLoLConTeXtEnv
 
 \startJoyLoLCoAlg[title=Cross compilers][crossCompilers]
 
-\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
-src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
-(Stephen Gaito)}, year=2017] 
+\diSimpComponent overview
 
-\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
+\diSimpComponent code
 
-\component overview
+\diSimpComponent ansic
 
-\component code
+\diSimpComponent ansicLua
 
-\component ansic
+\diSimpComponent pureLua
 
-\component ansicLua
+\diSimpComponent words
 
-\component pureLua
+\diSimpComponent lua
 
-\component words
-
-\component lua
-
-\component conclusion
+\diSimpComponent conclusion
 
 \stopJoyLoLCoAlg
+
+\stopcomponent

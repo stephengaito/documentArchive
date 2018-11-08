@@ -91,7 +91,7 @@ if 0 < #arg then
   if arguments == 'release' then
     createReleaseFile()
     os.exit(0)
-  elseif arguments == 'doc' then
+  elseif arguments == 'docMaster' then
     prepareMasterDocument()
     -- context document
     print('\nContexting document\n')

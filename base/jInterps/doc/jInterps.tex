@@ -1,33 +1,33 @@
 % A ConTeXt document
 
-\environment options
 \usemodule[t-diSimp]
-\usemodule[t-joylol-coalg]
+
+\startcomponent jInterps
+
+\product joyLoL
+
+\diSimpEnvironment joyLoLConTeXtEnv
 
 \startJoyLoLCoAlg[title=JoyLoL interpreter][jInterps]
 
-\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
-src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
-(Stephen Gaito)}, year=2017] 
+\diSimpComponent overview
 
-\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
+\diSimpComponent objects
 
-\component overview
+\diSimpComponent interpreter
 
-\component objects
+%\diSimpComponent printer
 
-\component interpreter
+\diSimpComponent words
 
-%\component printer
+\diSimpComponent luaInterface % should be BEFORE luaInit
 
-\component words
+\diSimpComponent luaInit
 
-\component luaInterface % should be BEFORE luaInit
+\diSimpComponent luaScript
 
-\component luaInit
-
-\component luaScript
-
-\component conclusion
+\diSimpComponent conclusion
 
 \stopJoyLoLCoAlg
+
+\stopcomponent
