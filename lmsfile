@@ -1,5 +1,7 @@
 -- A Lua Make System file
 
+lfs = require 'lfs'
+
 testProbe = directorySeparator..'test'
 -- dirsToIgnore = '|archive|tmp|installDir|tex|bin|'
 dirsToIgnore = '|archive|tmp|installDir|bin|'
@@ -55,32 +57,29 @@ function createReleaseFile()
   os.remove(filesIOName)
 end
 
-function createBuildDirSymbolicLink(docTexFilePath)
-  docTexFilePath = docTexFilePath:gsub('^\./','')
-  symTexFilePath = docTexFilePath:gsub('doc/', '')
-  
-  local sep, pStr = package.config:sub(1, 1), ""
-  local pathPrefix = pStr .. '..' .. sep
-  pStr = pStr .. 'buildDir' .. sep
-  path = symTexFilePath:gsub('[^'..sep..']+$', '')
-  for dir in path:gmatch("[^" .. sep .. "]+") do
-    pStr = pStr .. dir .. sep
-    pathPrefix = pathPrefix .. '..' .. sep
-    lfs.mkdir(pStr)
-  end
-  lfs.link(pathPrefix..docTexFilePath, 'buildDir/'..symTexFilePath, true)
-end
+require 'lms.contextDoc'
 
 function prepareMasterDocument()
-    print(lfs.currentdir())
-    local texFileList = io.popen('find -name "*.tex"')
-    for docTexFilePath in texFileList:lines('*l') do 
-      if not docTexFilePath:find('releases') and
-         not docTexFilePath:find('buildDir') and
-         not docTexFilePath:find('bin')      then
-        createBuildDirSymbolicLink(docTexFilePath)
+  local docFiles = { }
+  local texFileList = io.popen('find -name "*.tex"')
+  for docTexFilePath in texFileList:lines('*l') do 
+    if not docTexFilePath:find('releases') and
+        not docTexFilePath:find('buildDir') and
+        not docTexFilePath:find('bin')      and
+        not docTexFilePath:find('baseCoAlgebras') then
+      if docTexFilePath:match('^%.%/doc%/') then
+        docTexFilePath = docTexFilePath:gsub('^%.%/doc%/','')
+      else
+        docTexFilePath = '.'..docTexFilePath
       end
+      table.insert(docFiles, docTexFilePath)
     end
+  end
+  contextDoc.targets{
+    mainDoc  = 'joyLoL.tex',
+    docFiles = docFiles,
+    docDir   = 'doc'
+  }
 end
 
 if clearScreen then os.execute('reset') end
@@ -91,19 +90,32 @@ if 0 < #arg then
   if arguments == 'release' then
     createReleaseFile()
     os.exit(0)
-  elseif arguments == 'docMaster' then
+  elseif arguments:find('master') then
+    runCmdIn('lms -c refreshBaseCoAlgebras', 'base')
+    runCmdIn('lms -c refreshExtensionCoAlgebras', 'extensions')
+    print('\nContexting master document\n')
     prepareMasterDocument()
-    -- context document
-    print('\nContexting document\n')
+    mustHaveTarget('doc')
+    runTarget('doc')
     os.exit(0)
+  elseif arguments:find('base') or
+         arguments:find('extensions') or
+         arguments:find('core') then
+    local docDir = arg[2]
+    print('\nContexting '..docDir..' document\n')
+    runCmdIn('lms -c '..arguments, docDir)
+    os.exit(0)
+  elseif arguments:find('module') then
+    print('\nContexting module document\n')
+    runCmdIn('lms -c doc', 'module')
+    os.exit(0)    
   elseif arguments == 'bib' then
     print('\nGathering bibliography entries\n')
     os.exit(0)
+  else 
+    cmd = 'lms -c '..arguments
   end
-  cmd = 'lms -c '..arguments
 end
-
-lfs = require 'lfs'
 
 subDirs = {
   'module',
@@ -112,17 +124,8 @@ subDirs = {
   'core'
 }
 
-curDir = lfs.currentdir()
 for i, subDir in ipairs(subDirs) do
-  print('\n========================================================')
-  print('working in ['..subDir..']')
-  print('running    ['..cmd..']')
-  lfs.chdir(subDir)
-  if not os.execute(cmd) then
-    print('FAILED to run: ['..cmd..']')
-    os.exit(-1)
-  end
-  lfs.chdir(curDir)
+  runCmdIn(cmd, subDir)
 end
 print('\n========================================================')
 print('completed running ['..cmd..']')

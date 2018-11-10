@@ -1,6 +1,11 @@
 % A ConTeXt document
 
 \usemodule[t-disimp]
+
+\startDiSimpComponent coreContext
+
+\diSimpEnvironment joyLoLConTeXtEnv
+
 \usemodule[t-literate-progs]
 \usemodule[t-contests]
 \usemodule[t-joylol]
@@ -8,20 +13,16 @@
 
 \startJoyLoLCoAlg[title=The core JoyLoL embedded in ConTeXt][core/context]
 
-\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
-src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
-(Stephen Gaito)}, year=2017] 
+\diSimpComponent overview
 
-\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
+\diSimpComponent luaMain
 
-\component overview
+\diSimpComponent luaInterface
 
-\component luaMain
+\diSimpComponent preamble
 
-\component luaInterface
-
-\component preamble
-
-\component conclusion
+\diSimpComponent conclusion
 
 \stopJoyLoLCoAlg
+
+\stopDiSimpComponent

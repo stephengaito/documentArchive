@@ -1,17 +1,20 @@
 % A ConTeXt document
 
 \usemodule[t-disimp]
+
+\startDiSimpComponent coreContextOptions
+
+\diSimpEnvironment joyLoLConTeXtEnv
+
 \usemodule[t-literate-progs]
 \usemodule[t-contests]
 
-\startproduct
-\startdocument[title=JoyLoL  \ConTeXt\ module]
+\chapter[title=JoyLoL \ConTeXt\ module]
 
-\component overview
+\diSimpComponent overview
 
-\component preamble
+\diSimpComponent preamble
 
-\component conclusion
+\diSimpComponent conclusion
 
-\stopdocument
-\stopproduct
+\stopDiSimpComponent

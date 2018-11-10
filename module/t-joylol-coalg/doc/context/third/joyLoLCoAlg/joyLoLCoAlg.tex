@@ -1,39 +1,30 @@
 % A ConTeXt document
 
 \usemodule[t-diSimp]
+
+\startDiSimpComponent joyLoLCoAlg
+
 \usemodule[t-literate-progs]
 \usemodule[t-contests]
-\usemodule[t-joylol]
-\usemodule[t-joylol-coalg]
 
-\startproduct
-\startdocument[title=JoyLoL  CoAlgebraic Extensions \ConTeXt\ module]
+\diSimpEnvironment joyLoLConTeXtEnv
 
-\component overview
+%\part[title={\ConTeXt\}]
 
-\component codeManipulation
+%\chapter[title={JoyLoL CoAlgebraic Extensions \ConTeXt\ module}]
 
-\component joylol
+\diSimpComponent overview
 
-\component joylolTests
+\diSimpComponent codeManipulation
 
-\component rules
+\diSimpComponent joylol
 
-\component fragments
+\diSimpComponent joylolTests
 
-\component words
+\diSimpComponent rules
 
-\startbackmatter
+\diSimpComponent fragments
 
-  \component preamble
+\diSimpComponent words
 
-  \component conclusion
-  
-  \startchapter[title=Bibliography]
-    \placelistofpublications
-  \stopchapter
-  
-\stopbackmatter
-
-\stopdocument
-\stopproduct
+\stopDiSimpComponent

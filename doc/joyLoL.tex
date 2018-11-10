@@ -2,9 +2,11 @@
 
 \usemodule[t-diSimp]
 
-\startcomponent joyLoL
+\startDiSimpComponent joyLoL
 
 \diSimpEnvironment joyLoLConTeXtEnv
+
+\part[title=Introduction]
 
 \diSimpComponent overview
 
@@ -14,10 +16,18 @@
 
 \diSimpComponent ../base/doc/base
 
+\diSimpComponent ../extensions/doc/extensions
+
+\diSimpComponent ../core/doc/core
+
+\part[title=ConTeXt]
+
+\diSimpComponent ../module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joyLoLCoAlg
+
 \startbackmatter
   \startchapter[title=Bibliography]
     \placelistofpublications
   \stopchapter
 \stopbackmatter
 
-\stopcomponent
+\stopDiSimpComponent
