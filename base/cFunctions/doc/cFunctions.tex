@@ -4,9 +4,11 @@
 
 \startDiSimpComponent cFunctions
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=C-Functions][cFunctions]
+\chapter[title=C-Functions]
+
+\declareJoyLoLCoAlg[cFunctions]
 
 \diSimpComponent overview
 
@@ -18,6 +20,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

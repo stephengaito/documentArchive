@@ -4,9 +4,11 @@
 
 \startDiSimpComponent dictionaries
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=Dictionaries][dictionaries]
+\chapter[title=Dictionaries]
+
+\declareJoyLoLCoAlg[dictionaries]
 
 \diSimpComponent overview
 
@@ -18,6 +20,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

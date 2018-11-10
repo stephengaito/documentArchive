@@ -4,9 +4,11 @@
 
 \startDiSimpComponent joylolTests
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=JoylolTests][joylolTests]
+\chapter[title=JoylolTests]
+
+\declareJoyLoLCoAlg[joylolTests]
 
 \diSimpComponent overview
 
@@ -18,6 +20,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

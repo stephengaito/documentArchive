@@ -4,9 +4,11 @@
 
 \startDiSimpComponent coreLua
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=The core JoyLoL based on Lua][core/lua]
+\chapter[title=The core JoyLoL based on Lua]
+
+\declareJoyLoLCoAlg[core/lua]
 
 \diSimpComponent overview
 
@@ -20,6 +22,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

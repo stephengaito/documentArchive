@@ -4,9 +4,11 @@
 
 \startDiSimpComponent texts
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=Texts][texts]
+\chapter[title=Texts]
+
+\declareJoyLoLCoAlg[texts]
 
 \diSimpComponent overview
 
@@ -22,6 +24,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

@@ -4,9 +4,11 @@
 
 \startDiSimpComponent crossCompilers
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=Cross compilers][crossCompilers]
+\chapter[title=Cross compilers]
+
+\declareJoyLoLCoAlg[crossCompilers]
 
 \diSimpComponent overview
 
@@ -24,6 +26,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

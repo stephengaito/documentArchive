@@ -4,14 +4,16 @@
 
 \startDiSimpComponent coreContext
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
 \usemodule[t-literate-progs]
 \usemodule[t-contests]
 \usemodule[t-joylol]
 \usemodule[t-joylol-coalg]
 
-\startJoyLoLCoAlg[title=The core JoyLoL embedded in ConTeXt][core/context]
+\chapter[title=The core JoyLoL embedded in ConTeXt]
+
+\declareJoyLoLCoAlg[core/context]
 
 \diSimpComponent overview
 
@@ -24,5 +26,7 @@
 \diSimpComponent conclusion
 
 \stopJoyLoLCoAlg
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

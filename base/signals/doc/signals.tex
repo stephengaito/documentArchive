@@ -4,9 +4,11 @@
 
 \startDiSimpComponent signals
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=Internal Signals][signals]
+\chapter[title=Internal Signals]
+
+\declareJoyLoLCoAlg[signals]
 
 \diSimpComponent overview
 
@@ -18,6 +20,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

@@ -4,9 +4,11 @@
 
 \startDiSimpComponent jInterps
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=JoyLoL interpreter][jInterps]
+\chapter[title=JoyLoL interpreter]
+
+\declareJoyLoLCoAlg[jInterps]
 
 \diSimpComponent overview
 
@@ -26,6 +28,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

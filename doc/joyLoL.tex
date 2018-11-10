@@ -4,15 +4,9 @@
 
 \startDiSimpComponent joyLoL
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\part[title=Introduction]
-
-\diSimpComponent overview
-
-\diSimpComponent joyLoLSyntax
-
-\diSimpComponent whileRecSyntax
+\diSimpComponent introduction
 
 \diSimpComponent ../base/doc/base
 
@@ -20,14 +14,8 @@
 
 \diSimpComponent ../core/doc/core
 
-\part[title=ConTeXt]
-
 \diSimpComponent ../module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joyLoLCoAlg
 
-\startbackmatter
-  \startchapter[title=Bibliography]
-    \placelistofpublications
-  \stopchapter
-\stopbackmatter
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

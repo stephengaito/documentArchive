@@ -4,9 +4,11 @@
 
 \startDiSimpComponent coreTextadept
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=The core JoyLoL embedded in Textadept][core/textadept]
+\chapter[title=The core JoyLoL embedded in Textadept]
+
+\declareJoyLoLCoAlg[core/textadept]
 
 \diSimpComponent overview
 
@@ -24,6 +26,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

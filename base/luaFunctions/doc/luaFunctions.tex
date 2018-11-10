@@ -4,9 +4,11 @@
 
 \startDiSimpComponent luaFunctions
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=Lua-Functions][luaFunctions]
+\chapter[title=Lua-Functions]
+
+\declareJoyLoLCoAlg[luaFunctions]
 
 \diSimpComponent overview
 
@@ -18,6 +20,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

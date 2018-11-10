@@ -4,9 +4,11 @@
 
 \startDiSimpComponent stringBuffers
 
-\diSimpEnvironment joyLoLConTeXtEnv
+\diSimpEnvironment joyLoLConTeXtStartEnv
 
-\startJoyLoLCoAlg[title=String buffers][stringBuffers]
+\chapter[title=String buffers]
+
+\declareJoyLoLCoAlg[stringBuffers]
 
 \diSimpComponent overview
 
@@ -18,6 +20,6 @@
 
 \diSimpComponent conclusion
 
-\stopJoyLoLCoAlg
+\diSimpEnvironment joyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

@@ -57,10 +57,8 @@ The second argument also determines the name of any JoyLoL, ANSI-C, or
 Lua source file artefacts produced by this literate code documentation. 
 
 \startMkIVCode
-\def\declareJoyLoLCoAlg[#1][#2]{
-  \startcomponent[#2]
-  \startchapter[#1]
-  \directlua{thirddata.joylolCoAlgs.newCoAlg('#2')}
+\def\declareJoyLoLCoAlg[#1]{
+  \directlua{thirddata.joylolCoAlgs.newCoAlg('#1')}
 }
 
 \let\startJoyLoLCoAlg=\declareJoyLoLCoAlg
