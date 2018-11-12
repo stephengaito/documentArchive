@@ -108,6 +108,10 @@ if 0 < #arg then
   end
 end
 
+-- now that we are finished the document generation phases...
+-- we need to push 'utils' into the list of subDirs
+
+table.insert(subDirs, 'utils')
 
 -- now walk through sorted subDirectories
 -- running the lms command on each one
