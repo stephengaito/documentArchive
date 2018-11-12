@@ -111,9 +111,7 @@ end
 -- running the lms command on each one
 
 for i, subDir in ipairs(subDirs) do
-  if not subDir == 'doc' then
-    runCmdIn(cmd, subDir)
-  end
+  runCmdIn(cmd, subDir)
 end
 
 os.exit(0)

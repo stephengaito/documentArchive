@@ -49,17 +49,8 @@ if 0 < #arg then
   end
 end
 
-curDir = lfs.currentdir()
 for i, subDir in ipairs(subDirs) do
-  print('\n========================================================')
-  print('working in ['..subDir..']')
-  print('running    ['..cmd..']')
-  lfs.chdir(subDir)
-  if not os.execute(cmd) then
-    print('FAILED to run: ['..cmd..']')
-    os.exit(-1)
-  end
-  lfs.chdir(curDir)
+  runCmdIn(cmd, subDir)
 end
 
 os.exit(0)

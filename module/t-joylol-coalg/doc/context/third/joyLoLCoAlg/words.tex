@@ -59,11 +59,11 @@ local function endWord()
   
   local numCodeVersions = 0
   for implType, implBody in pairs(codeVersions) do
-    joylol.crossCompilers.addImplementation(
-      implType,
-      wordName,
-      implBody
-    )
+--    joylol.crossCompilers.addImplementation(
+--      implType,
+--      wordName,
+--      implBody
+--    )
     numCodeVersions = numCodeVersions + 1
   end
   if numCodeVersions < 1 then
