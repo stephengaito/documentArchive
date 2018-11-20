@@ -33,6 +33,7 @@ function prepareExamplesDocument()
     docFiles = docFiles,
     docDir   = 'doc'
   }
+  
 end
 
 cmd = 'lms'
