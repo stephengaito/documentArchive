@@ -99,6 +99,7 @@ if 0 < #arg then
     runTarget('doc')
     os.exit(0)
   elseif arguments:find('base') or
+         arguments:find('examples') or
          arguments:find('extensions') or
          arguments:find('core') then
     local docDir = arg[2]

@@ -1,0 +1,10 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'hashTables.tex',
+  docFiles = {
+  },
+  docDir    = 'doc',
+}

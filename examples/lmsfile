@@ -1,0 +1,56 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+if clearScreen then os.execute('reset') end
+
+subDirs = {
+  'lists',
+  'sets',
+  'hashTables',
+  'avlTrees'
+}
+
+require 'lms.contextDoc'
+
+function prepareExamplesDocument()
+  local docFiles = { }
+  local texFileList = io.popen('find -name "*.tex"')
+  for docTexFilePath in texFileList:lines('*l') do 
+    if not docTexFilePath:find('releases')  and
+        not docTexFilePath:find('buildDir') and
+        not docTexFilePath:find('bin')      then
+      if docTexFilePath:match('^%.%/doc%/') then
+        docTexFilePath = docTexFilePath:gsub('^%.%/doc%/','')
+      else
+        docTexFilePath = '.'..docTexFilePath
+      end
+      table.insert(docFiles, docTexFilePath)
+    end
+  end
+  contextDoc.targets{
+    mainDoc  = 'examples.tex',
+    docFiles = docFiles,
+    docDir   = 'doc'
+  }
+end
+
+cmd = 'lms'
+if 0 < #arg then
+  arguments = table.concat(arg, ' ')
+  if arguments:find('examples') then
+    print('\nContexting examples document')
+    prepareExamplesDocument()
+    mustHaveTarget('doc')
+    runTarget('doc')
+    os.exit(0)
+  else
+    cmd = 'lms -c '..arguments
+  end
+end
+
+for i, subDir in ipairs(subDirs) do
+  runCmdIn(cmd, subDir)
+end
+
+os.exit(0)
