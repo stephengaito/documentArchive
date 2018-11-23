@@ -61,7 +61,7 @@ require 'lms.contextDoc'
 
 function prepareMasterDocument()
   local docFiles = { }
-  local texFileList = io.popen('find -name "*.tex"')
+  local texFileList = io.popen('find -iregex ".*\\.tex\\|.*Bib\\.lua"')
   for docTexFilePath in texFileList:lines('*l') do 
     if not docTexFilePath:find('releases') and
         not docTexFilePath:find('buildDir') and
@@ -82,6 +82,27 @@ function prepareMasterDocument()
   }
 end
 
+function prepareIntroductionDocument()
+  local docFiles = { }
+  local texFileList = io.popen('find doc -iregex ".*\\.tex\\|.*Bib\\.lua"')
+  for docTexFilePath in texFileList:lines('*l') do 
+    if not docTexFilePath:find('releases') and
+        not docTexFilePath:find('buildDir') and
+        not docTexFilePath:find('bin')      and
+        not docTexFilePath:find('baseCoAlgebras') then
+      docTexFilePath = docTexFilePath:gsub('^doc%/','')
+      table.insert(docFiles, docTexFilePath)
+    end
+  end
+  contextDoc.targets{
+    mainDoc  = 'joyLoLIntroOnly.tex',
+    docFiles = docFiles,
+    docDir   = 'doc'
+  }
+  pp = require 'pl.pretty'
+  pp.dump(docFiles)
+end
+
 if clearScreen then os.execute('reset') end
 
 cmd = 'lms'
@@ -90,29 +111,42 @@ if 0 < #arg then
   if arguments == 'release' then
     createReleaseFile()
     os.exit(0)
-  elseif arguments:find('master') then
-    runCmdIn('lms -c refreshBaseCoAlgebras', 'base')
-    runCmdIn('lms -c refreshExtensionCoAlgebras', 'extensions')
-    print('\nContexting master document\n')
-    prepareMasterDocument()
-    mustHaveTarget('doc')
-    runTarget('doc')
-    os.exit(0)
-  elseif arguments:find('base') or
-         arguments:find('examples') or
-         arguments:find('extensions') or
-         arguments:find('core') then
-    local docDir = arg[2]
-    print('\nContexting '..docDir..' document\n')
-    runCmdIn('lms -c '..arguments, docDir)
-    os.exit(0)
-  elseif arguments:find('module') then
-    print('\nContexting module document\n')
-    runCmdIn('lms -c doc', 'module')
-    os.exit(0)    
-  elseif arguments == 'bib' then
-    print('\nGathering bibliography entries\n')
-    os.exit(0)
+  elseif arguments:find('doc') then
+    if arguments:find('master') then
+      runCmdIn('lms -c refreshBaseCoAlgebras', 'base')
+      runCmdIn('lms -c refreshExtensionCoAlgebras', 'extensions')
+      print('\nContexting master document\n')
+      prepareMasterDocument()
+      mustHaveTarget('doc')
+      showTarget('doc')
+      runTarget('doc')
+      os.exit(0)
+    elseif arguments:find('intro') then
+      print('\nContexting introduction document\n')
+      prepareIntroductionDocument()
+      mustHaveTarget('doc')
+      runTarget('doc')
+      os.exit(0)
+    elseif arguments:find('base') or
+          arguments:find('examples') or
+          arguments:find('extensions') or
+          arguments:find('core') then
+      local docDir = arg[2]
+      print('\nContexting '..docDir..' document\n')
+      runCmdIn('lms -c '..arguments, docDir)
+      os.exit(0)
+    elseif arguments:find('module') then
+      print('\nContexting module document\n')
+      runCmdIn('lms -c doc', 'module')
+      os.exit(0)
+    end
+  elseif arguments:find('bib') then
+    if arguments:find('master') or
+      arguments:find('intro') then
+      print('\nGathering bibliography entries for introduction\n')
+      runCmdIn('diSimp bib', 'doc')
+      os.exit(0)
+    end
   else 
     cmd = 'lms -c '..arguments
   end
