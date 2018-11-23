@@ -4,9 +4,10 @@
 
 In \cite{gaito2018hilbertsProgramRevisitedBaseCase} we modelled the 
 \emph{simple} model of computation which we call \joylol. However there 
-are no commercial implementations of this \joylol\ model of computation. 
-In this chapter we define a model of an idealized \emph{commercial} CPU 
-upon which we can rigorously implement pure \joylol. 
+are no implementations of this \joylol\ model of computation in a 
+commercially available CPU. In this chapter we define a model of an 
+idealized \emph{commercially} available CPU upon which we can rigorously 
+implement pure \joylol. 
 
 In both our models of computation, pure \joylol\ and an idealized 
 commercial CPU, the important distinction is the underlying memory models. 
@@ -38,4 +39,46 @@ compared to $\omega$. While we could consider an idealized $\omega$ bit
 CPU, no such \emph{implementable} CPU exists. Our goal here is to model a 
 \emph{realizable} CPU upon which \joylol\ might be able to run 
 efficiently. 
+
+\section[title=Model details]
+
+\startitemize[n]
+
+\item Storage
+
+\startitemize[n]
+
+\item uint64, uint32, uint16, uint8
+
+\item int64, int32, int16, int8
+
+\item byte, utf8Char, char
+
+\item at the moment we do \emph{not} model floats or doubles
+
+\item we also do \emph{not} explicitly model pointers. (Should we?)
+
+\item arrays
+
+\item structures
+
+\stopitemize
+
+\item Actions
+
+\startitemize[n]
+
+\item array indexing
+
+\item addition, subtraction, mutiplication, division
+
+\item and, or, xor, ...
+
+\item assignments
+
+\item functions
+
+\stopitemize
+
+\stopitemize
 
