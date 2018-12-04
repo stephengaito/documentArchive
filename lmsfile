@@ -1,0 +1,168 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+testProbe = directorySeparator..'test'
+-- dirsToIgnore = '|archive|tmp|installDir|tex|bin|'
+dirsToIgnore = '|archive|tmp|installDir|bin|'
+
+function findReleaseFiles(dir, filesIO)
+  local dirList = { }
+  for anEntry in lfs.dir(dir) do
+    table.insert(dirList, anEntry)
+  end
+  table.sort(dirList)
+  for i, anEntry in ipairs(dirList) do
+    if  not anEntry:find('^%.')
+    and not dirsToIgnore:find(anEntry, 1, true)
+    then
+      fullPath = makePath{dir, anEntry}
+      if lfs.attributes(fullPath, 'mode') == 'directory' then
+        findReleaseFiles(fullPath, filesIO)
+      else
+        if string.find(fullPath, '%.tex$')
+        or string.find(fullPath, '%.mkiv$')
+        or string.find(fullPath, '%.lua$')
+        or string.find(fullPath, '%.c$')
+        or string.find(fullPath, '%.h$')
+        or string.find(fullPath, '%.joy$')
+        or string.find(fullPath, testProbe)
+        or string.find(fullPath, 'lmsfile$')
+        then
+          filesIO:write(fullPath..'\n')
+        end
+      end
+    end
+  end
+end
+
+function createReleaseFile()
+  lfs.mkdir('releases')
+
+  local gitHead = io.open('.git/refs/heads/master')
+  local shortHash = gitHead:read(7)
+  gitHead:close()
+  local releaseName = makePath{
+    'releases',
+    'release-'..os.date('%F')..'-'..shortHash..'.tar.gz'
+  }
+
+  local filesIOName = os.tmpname()
+  local filesIO = io.open(filesIOName, 'w')
+  findReleaseFiles('.', filesIO)
+  filesIO:close()
+
+  os.execute('tar czvf '..releaseName..' -T '..filesIOName)
+
+  os.remove(filesIOName)
+end
+
+require 'lms.contextDoc'
+
+function prepareMasterDocument()
+  local docFiles = { }
+  local texFileList = io.popen('find -iregex ".*\\.tex\\|.*Bib\\.lua"')
+  for docTexFilePath in texFileList:lines('*l') do 
+    if not docTexFilePath:find('releases') and
+        not docTexFilePath:find('buildDir') and
+        not docTexFilePath:find('bin')      and
+        not docTexFilePath:find('baseCoAlgebras') then
+      if docTexFilePath:match('^%.%/doc%/') then
+        docTexFilePath = docTexFilePath:gsub('^%.%/doc%/','')
+      else
+        docTexFilePath = '.'..docTexFilePath
+      end
+      table.insert(docFiles, docTexFilePath)
+    end
+  end
+  contextDoc.targets{
+    mainDoc  = 'joyLoL.tex',
+    docFiles = docFiles,
+    docDir   = 'doc'
+  }
+end
+
+function prepareIntroductionDocument()
+  local docFiles = { }
+  local texFileList = io.popen('find doc -iregex ".*\\.tex\\|.*Bib\\.lua"')
+  for docTexFilePath in texFileList:lines('*l') do 
+    if not docTexFilePath:find('releases') and
+        not docTexFilePath:find('buildDir') and
+        not docTexFilePath:find('bin')      and
+        not docTexFilePath:find('baseCoAlgebras') then
+      docTexFilePath = docTexFilePath:gsub('^doc%/','')
+      table.insert(docFiles, docTexFilePath)
+    end
+  end
+  contextDoc.targets{
+    mainDoc  = 'joyLoLIntroOnly.tex',
+    docFiles = docFiles,
+    docDir   = 'doc'
+  }
+  pp = require 'pl.pretty'
+  pp.dump(docFiles)
+end
+
+if clearScreen then os.execute('reset') end
+
+cmd = 'lms'
+if 0 < #arg then
+  arguments = table.concat(arg, ' ')
+  if arguments == 'release' then
+    createReleaseFile()
+    os.exit(0)
+  elseif arguments:find('doc') then
+    if arguments:find('master') then
+      runCmdIn('lms -c refreshBaseCoAlgebras', 'base')
+      runCmdIn('lms -c refreshExtensionCoAlgebras', 'extensions')
+      print('\nContexting master document\n')
+      prepareMasterDocument()
+      mustHaveTarget('doc')
+      showTarget('doc')
+      runTarget('doc')
+      os.exit(0)
+    elseif arguments:find('intro') then
+      print('\nContexting introduction document\n')
+      prepareIntroductionDocument()
+      mustHaveTarget('doc')
+      runTarget('doc')
+      os.exit(0)
+    elseif arguments:find('base') or
+          arguments:find('examples') or
+          arguments:find('extensions') or
+          arguments:find('core') then
+      local docDir = arg[2]
+      print('\nContexting '..docDir..' document\n')
+      runCmdIn('lms -c '..arguments, docDir)
+      os.exit(0)
+    elseif arguments:find('module') then
+      print('\nContexting module document\n')
+      runCmdIn('lms -c doc', 'module')
+      os.exit(0)
+    end
+  elseif arguments:find('bib') then
+    if arguments:find('master') or
+      arguments:find('intro') then
+      print('\nGathering bibliography entries for introduction\n')
+      runCmdIn('diSimp bib', 'doc')
+      os.exit(0)
+    end
+  else 
+    cmd = 'lms -c '..arguments
+  end
+end
+
+subDirs = {
+  'module',
+  'base',
+  'extensions',
+  'core'
+}
+
+for i, subDir in ipairs(subDirs) do
+  runCmdIn(cmd, subDir)
+end
+print('\n========================================================')
+print('completed running ['..cmd..']')
+
+os.exit(0)
