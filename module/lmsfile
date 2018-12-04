@@ -1,0 +1,29 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'joyLoLCoAlg.tex',
+  docFiles = {
+    'overview.tex',
+    'codeManipulation.tex',
+    'joylol.tex',
+    'joylolTests.tex',
+    'rules.tex',
+    'fragments.tex',
+    'words.tex',
+    'preamble.tex',
+    'conclusion.tex',
+  },
+  docDir    = 't-joylol-coalg/doc/context/third/joyLoLCoAlg',
+}
+
+require 'lms.contextMod'
+
+contextMod.targets(lpTargets, {
+  moduleFiles = {
+    't-joylol-coalg.mkiv',
+    't-joylol-coalg.lua',
+  },
+  moduleDir = 't-joylol-coalg/tex/context/third/joyLoLCoAlg',
+})

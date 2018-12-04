@@ -7,9 +7,9 @@ require 'lms.contextDoc'
 cmd = 'lms'
 if 0 < #arg then
   arguments = table.concat(arg, ' ')
-  if arguments:find('base') then
-    print('\nContexting base document')
-    contextDoc.multiDocument('base.tex')
+  if arguments:find('memory') then
+    print('\nContexting memory document')
+    contextDoc.multiDocument('memory.tex')
     mustHaveTarget('doc')
     runTarget('doc')
     os.exit(0)

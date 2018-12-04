@@ -1,0 +1,57 @@
+% A ConTeXt document [master document: booleans.tex]
+
+\section[title=Lua functions]
+
+\diSimpComponent gitVersion-c
+
+\startCCode
+static int lua_booleans_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  if (aKey) {
+    getGitVersionInto(gitVersionKeyValues, aKey, aValue);
+    lua_pushstring(lstate, aValue);
+  } else {
+    lua_pushstring(lstate, "no valid key provided");
+  }
+  return 1;
+}
+
+static const struct luaL_Reg lua_booleans [] = {
+  {"gitVersion", lua_booleans_getGitVersion},
+  {NULL, NULL}
+};
+
+int luaopen_joylol_booleans (lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  registerBooleans(jInterp);
+  luaL_newlib(lstate, lua_booleans);
+  return 1;
+}
+\stopCCode
+
+In some instances, such as the typical \type{CTest} program 
+\type{allCTests}, this Lua module (which can be \type{require}d as a 
+shared library) is actually statically linked into the executable. In 
+these cases we need the ability to mimic the standard Lua \type{require} 
+process. The following \type{requireStaticallyLinkedBooleans} does just 
+this. 
+
+\startCHeader
+Boolean requireStaticallyLinkedBooleans(
+  lua_State *lstate
+);
+\stopCHeader
+
+\startCCode
+Boolean requireStaticallyLinkedBooleans(
+  lua_State *lstate
+) {
+  lua_getglobal(lstate, "package");
+  lua_getfield(lstate, -1, "loaded");
+  luaopen_joylol_booleans(lstate);
+  lua_setfield(lstate, -2, "joylol.booleans");
+  lua_setfield(lstate, -2, "loaded");
+  lua_pop(lstate, 1);
+  return TRUE;
+}
+\stopCCode

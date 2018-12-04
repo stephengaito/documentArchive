@@ -1,0 +1,19 @@
+% A ConTeXt document [master document: joyLoL.tex ]
+
+\chapter[title=Compiler/Interpreter]
+
+\section[title=Overview]
+
+The \joylol\ compiler/interpreter is a fairly standard multi-component 
+compiler. However instead of compiling to machine code, it actually 
+transpiles core functions to ANSI-C and interprets non-core functions by 
+calling the core functions in an appropriately \joylol\ determined order. 
+
+In particular the fairly standard \quote{front-end} is composed by a 
+lexer, parser pair. Both the lexer and parser will use a push down 
+automata composed by a \joylol\ Parsing Expression Grammar, jPeg. Using a 
+push down automata means that, technically, the lexer is powerful enough 
+to directly parse \joylol\ code. We use a standard lexer, parser pair to 
+allow the lexer and parser's grammars to be kept simpler, both to 
+understand as well as to be more performant. 
+

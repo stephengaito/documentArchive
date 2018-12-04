@@ -1,0 +1,22 @@
+% A ConTeXt document [master document: joyLoL.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent compiler
+
+\usebtxdataset[compilerBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\part[title=Compiler CoAlgebras]
+
+\diSimpComponent overview
+
+\diSimpComponent ../jPeg/doc/jPeg
+
+\diSimpComponent ../lexer/doc/lexer
+
+\diSimpComponent ../parser/doc/parser
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

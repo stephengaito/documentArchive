@@ -1,0 +1,42 @@
+% A ConTeXt document [master document: joylolCoAlg.tex]
+
+\chapter[title=Conclusion]
+
+\addDocumentDirectory%
+  {t-joylol-coalg/doc/context/third/joyLoLCoAlg}
+
+\createMkIVCodeFile%
+  {default}%
+  {t-joylol-coalg.mkiv}%
+  {A ConTeXt MkIV module}
+
+\createLuaCodeFile%
+  {default}%
+  {t-joylol-coalg.lua}%
+  {-- A Lua file}
+
+\createLuaTemplateFile%
+  {default}%
+  {t-joylol-coalg-templates.lua}%
+  {-- A Lua template file}
+
+\addMainDocument{joyLoLCoAlg.tex}
+\addSubDocument{overview.tex}
+\addSubDocument{codeManipulation.tex}
+\addSubDocument{joylol.tex}
+\addSubDocument{joylolTests.tex}
+\addSubDocument{rules.tex}
+\addSubDocument{fragments.tex}
+\addSubDocument{words.tex}
+\addSubDocument{preamble.tex}
+\addSubDocument{conclusion.tex}
+\addConTeXtModuleDirectory%
+  {t-joylol-coalg/tex/context/third/joyLoLCoAlg}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+  

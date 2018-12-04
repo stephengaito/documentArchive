@@ -1,3 +1,9 @@
+*Bib.lua
+*gitVersion*
+buildDir
+*.pdf
+*.tuc
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
