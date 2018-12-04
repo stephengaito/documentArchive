@@ -1,0 +1,302 @@
+% A ConTeXt document [master document: joyLoL.tex ]
+
+\startcomponent overview
+
+\startchapter[title=Overview]
+
+\startsection[title=Introduction]
+
+We will provide full formal descriptions of six distinctly different 
+programming languages, JoyLoL, WhileLoL, WhileRecLoL, EagerLambdaLoL, 
+LazyLambdaLoL and LogicLoL. The languages WhileLoL and WhileRecLoL will be 
+in the same overall class of languages as most standard imperative 
+programming languages such as, Lua, C, Pascal, Algol, Java, Python, PHP, 
+Ruby, etc. Most programmers will recognize WhileRecLoL as a close, but 
+simplified, cousin to the languages they are currently using. The 
+languages EagerLambaLoL and LazyLambdaLoL represent the class of eager and 
+lazy functional languages such as ML and Haskell respectively. The 
+LogicLoL language represents the class of logic programming lanaguages 
+such as Prolog. 
+
+The JoyLoL language, is in a new class of \quote{concatenative} languages 
+originally explored by Manfred von Thun\footnote{For example, see 
+\cite[vonThun1994overview], \cite[vonThun1994mathematicalFoundations] or 
+\cite[vonThun1994rational] all of which can be found in 
+\cite[vonThun2011archive] or \cite[vonThun2005website].}. The primary 
+importance of JoyLoL is that it \emph{is} a fixed point of the formal 
+semantics operator. As a fixed point of the semantics operator, JoyLoL 
+provides a foundation for both computation and more importantly 
+Mathematics\footnote{While we assert that JoyLoL provides a 
+\emph{computational} foundation for Mathematics, proving this assertion 
+will be the work of many (future) papers. We will not even attempt a proof 
+in this document.}. 
+
+Across all of these languages the constant similarity is the \quote{LoL} 
+or List of Lists. In each language the \emph{only} expressions are Lists 
+of Lists. Depending upon the language, these lists of lists are 
+potentially infinite expressions, which will, however, always have a 
+finite description at any particular point in a computation. 
+
+As developed over the past 50 years, the formal semantics operator has 
+three parts: 
+
+\startitemize[n, packed]
+
+\item Denotational Semantics (roughly equivalent to Tarski's model 
+semantics) 
+
+\item Operational Semantics (roughly equivalent to Gentzen's natural 
+deduction) 
+
+\item Axiomatic Semantics (roughly equivalent to Type theory) 
+
+\stopitemize
+
+Good introductions to these three types of formal semantics 
+can be found in \cite[winskel1993formalSemanticsProgrammingLanguages] and 
+\cite[gunter1992semainticProgrammingLanguages]. (TODO see 
+\cite[aptVanEmden1980logicProgramming] and 
+\cite[billaud1990semanticsOfPrologWithCut] for early reports of Prolog's 
+semantics) 
+
+The collection of Lists of Lists \emph{is} an \quotation{infinitely} 
+\quotation{complex} \quotation{structure}. In its complete incarnation, it 
+is strictly \emph{more} complex than the whole of any formal \emph{set} 
+theory such as ZFC\footnote{In this paper we will only consider the 
+component which corresponds to classical, $\omega$-computation.}. This is, 
+for finite beings, such as mere mortal mathematicians, a large and complex 
+\quote{world} to explore. It is a world in which it is very easy to get 
+lost. While we assert that JoyLoL provides a computational foundation for 
+Mathematics, to help us \quote{mere mortal mathematicians} orient 
+ourselves, we will often make reference to classical mathematical 
+concepts. It is important to realize that these classical mathematical 
+concepts are simply aids to our mathematical intuition, and not formal 
+statements. 
+
+The most important classical intuition is that of Algebra and CoAlgebra, 
+or equivalently, for a Computer Scientist, that of Data and Process. Both 
+classical Mathematics and Computational theory have, by and large, 
+explicitly limited themselves to the well-founded and terminating, largely 
+to avoid Poincar\'{e}'s \quote{Vicious Circles}. We will see that the 
+non-well-founded, non-terminating processes, Cantor's \quote{Absolute 
+Infinite}, have a surprisingly easily understood structure, essentially 
+dual to classical set theory. However, the \emph{computational} theory of 
+these non-terminating processes, has a profound impact on Mathematics. By 
+ignoring this computational theory, we, as mathematicians, make simple 
+problems, hard. 
+
+\emph{Intuitively}, \emph{a} List of Lists, is a potentially infinite 
+structure which records a potentially infinite \emph{structured} 
+collection of observations of a potentially non-terminating process of 
+processes. As \emph{finite} mathematicians, we can only ever manipulate 
+finite structures, \emph{finite records of observations} of a potentially 
+infinte process. One such record of observations might be denoted by, for 
+example: 
+
+\startcenteraligned
+\starttyping
+(() ( ( )))
+\stoptyping
+\stopcenteraligned
+
+\noindentation This is of course the denotation of Lists in John 
+McCarthy's Lisp, see 
+\cite[mcCarthyAbrahamsEdwardsHartLevin1965lispManual]. 
+
+Where classically, formal semantics concentrated on \emph{one} denotation, 
+to provide a \emph{formal} description of these potentially 
+non-terminating process, it is critical that we carefully distinguish 
+\emph{two} distinct denotations: the classical \emph{algebraic} denotation 
+(corresponding to a least fixed point of the semantics operator) and the 
+non-classical \emph{coAlgebraic} denotation (corresponding to a greatest 
+fixed point of the semantics operator). While for data, the data itself is 
+its own denotation, for a potentially non-terminating process, \emph{an 
+answer} (a data object) is insufficient to \emph{denote} that process. 
+Instead the appropriate denotation of a non-terminating process is its 
+trace of observations (or any finite record of this trace which is 
+\quote{sufficient} for current purposes). Similarly, while the 
+\quote{big-step} operational semantics might suffice for a data object or 
+a terminating process, the \quote{one-step} operational semantics is the 
+only definition of operational semantics appropriate for a potentially 
+non-terminating process. Finally, to provide an Axiomatic semantics, with 
+out recourse to classical first order set theory, we will make essential 
+use of finite descriptions of the traces of potentially non-terminating 
+processes. 
+
+Philosophically, it is important to know when two \quote{things} are the 
+\quote{same}. For an algebraic list of lists, two lists are equal if there 
+is a \emph{finite}, structurally inductive, comparison of the two objects. 
+This is the familiar concept of recursive equality. For sets this is 
+\emph{extensive} equality. For a coAlgebraic list of lists, two 
+potentially non-terminating processes are equal if they respond in the 
+same way to any collection of \quote{observations}. This is the concept, 
+from Theoretical Computer Science and CoAlgebraic Category theory, of 
+\quote{bisimulation}. 
+
+\stopsection 
+
+\startsection[title=How certain can certainty be?]
+
+We intend to show that JoyLoL provides a foundation for Mathematics. Any 
+foundation for Mathematics, must be \quote{certain}, but what exactly 
+does \quote{certainty} mean and how \quote{certain} can a finite 
+computational artefact be? 
+
+(TODO: there are two aspects here: (1) implementation vs idea 
+(logical-formalism vs intuitionism) and (2) current mathematical certainty 
+expressed \emph{using} logical-formalism vs other possible approaches) 
+
+sCurrently, certainty in mathematics, is generally identified with the 
+\emph{computation} of the \quote{Logical} \quote{Truth} of a 
+\quote{formal} assertion, which represents \emph{a logical 
+implementation}, of an intuitive understanding, of an idea which we want 
+to show is \emph{\bf \quote{certain}}. 
+
+Notice that, as with any \emph{human} language, there are many different 
+possible ways to express the \quote{same} intuitive thought. 
+
+Notice as well that there are multiple different levels of granularity 
+with which to express and \quote{prove} a given statement to a 
+\quote{sufficient} \quote{level} of detail. While most current 
+mathematical \quote{proofs} are conducted in an informal but rigorous 
+style, the generally acknowledged highest standard of proof is a natural 
+deduction proof expressed using first, second or higher order logical 
+notation. (TODO wrong words!) At the moment, the translation of a 
+high-level mathematical argument into a \quote{completely rigorous} but 
+impossibly detailed logical argument is very tedious and difficult, 
+largely because the highly detailed, n-th order logical notation, is very 
+far from the original intuitive idea to be proved. 
+
+There are many discussions of the Logical-Formalist \quote{schools} of the 
+foundations of Mathematics, \cite[giaquinto2002searchCertainty], 
+\cite[shapiro2000thinkingMathematics] and 
+\cite[hatcher1982logicalFoundationsMath] each provide interesting accounts of 
+the strengths and weaknesses of these approaches. Equally important in any 
+of these expositions, are the accounts of the Intuitionist critique of the 
+logical-formalist approach. 
+
+For a (software) Business Analyst or Systems Architect, the key words from 
+the above discussion are, \quote{computation}, \quote{implementation}, 
+\quote{specification}, and \quote{algorithm}. For the Business Analyst, 
+every specification is always just one of many possible 
+\emph{implementations} of the business problem to be solved. Each 
+different possible phrasing of the specification carries different 
+\quote{non-functional} (or extra-specificational) implications for the way 
+a given business problem is \quote{solved}. Equally, for the Systems 
+Architect, each proposed software implementation satisfying a given 
+specification, has different non-functional implications in terms of, for 
+example, speed, memory usage, and programmer or maintenance effort. The 
+critical point here is \quotation{\emph{an} implementation is just that 
+\emph{an} implementation}, one of many possible solutions to a problem. 
+Each of which provides different capabilities or penalties. As any 
+Business Analyst or Systems Architect knows, business problems can only 
+ever be solved by \emph{an} implementation, but to keep business 
+flexibility in a highly dynamical environment, it should be as easy as 
+possible to \emph{change} implementations as and when those implementations 
+begin to limit the business growth. Implementations are critical to a 
+business, \emph{but} implementations come and go, the goal is always to 
+solve the business problem. 
+
+For our purposes, the classical Logical-Formalist approach using, for 
+example, set theory expressed in a first order logic formalism, or type 
+theory\footnote{See for example, 
+\cite[awodeyCoquandVoevodsky2013homotopyTypeTheory].}, ....
+
+Instead of computing logical truth that a given structure exists, using 
+Gentzen's natural deduction (algorithm), compute the structure itself. 
+However, if we \emph{compute} a structure, how do we know that we have 
+computed the structure we specified? 
+
+TODO: We want to discuss deduction vs induction in the generation of 
+knowledge. Mathematics is (almost) pure deduction. However any human 
+subject \quote{to be done} must include aspects of scientific/engineering 
+induction. That is the verification of any \emph{deductive} mathematical 
+proof, requires some computational system to behave \quote{correctly}. How 
+do we know that any particular verificational computation of a given proof 
+is correct? 
+
+\emph{Deductively} we can be certain a given computation is, \emph{in 
+theory}, correct. However conducting the \emph{actual} computation entails 
+dependence on \emph{inductively} determined \emph{models} of 
+\quote{reality} which may or may not apply in a given time or place.
+
+Arthur C. Clarke's \quote{Nine Billion Names of God}, or Anthony S. 
+Haines' \quote{And on gloomy Sunday...}, in two different ways, suggest 
+how potentially extremely rare events, the coincidence of naming all the 
+names of God, or a \quote{research agency} outside our existence, could 
+both have profound \emph{global} impacts on any given \quote{computation}. 
+The point here is not that either of these stories are \quote{true} 
+(though they \emph{could be}), but rather that potentially rare events 
+might break any given model of physically realized computation. There will 
+never be any way a \emph{finite} being can mitigate against these rare 
+events. Given the rarity of these example events in that they will only 
+occur \emph{once} in a given existence, it is not, on the whole, rational, 
+to worry about rare events such as these. So, a \emph{finite} being, can 
+\emph{never} be 100\% \emph{certain} of any computation, but we can be 
+fairly certain, or rather, for all rational purposes, a computation can be 
+considered to be \emph{certain enough}. 
+
+We can \quote{draw the line} between deductive certainty and inductively 
+good enough models at various levels in the \quote{computational 
+hierarchy}. We could take the quite considerable effort to deductively 
+verify the whole computational infrastructure (compilers, operating 
+system, peripherals, CPU, memory, transistor states, etc.) down to the 
+Quantum-mechanical level. Or, we could simply assume a good-enough model 
+of computation of a computational language and then deductively verify any 
+given program in that language. However, no mater where we draw this line 
+between deductive certainty and inductively good enough models, a line 
+must be chosen. The result of any particular computation will only ever be 
+\quote{good enough}. 
+
+As with any security issue, we have a risk / benefit analysis to conduct. 
+We then have to make difficult choices as to how to minimize the costs of 
+the risks, maximize the value of the benefits, while simultaneously 
+minimizing the costs of the effort all required to get the chosen 
+low-level of risks and high-level of benefits. 
+
+For current Mathematical practice, an individual mathematician 
+\quote{verifying} a proof, is likely to be \emph{highly} error prone. 
+However it is assumed that over all interested mathematicians, any 
+mistakes in a given proof \emph{will be found}. To help reduce the 
+difficulty of understanding (i.e. verifying) any given proof statement, 
+mathematicians spend a lot of effort identifying independently useful 
+lemmas from which to build simpler proof statements to a wide range of 
+similar mathematical problems. 
+
+Similarly our collective confidence in a given proof of correctness of a 
+given program, will come from running the verification on multiple 
+\emph{independently different} platforms (the equivalent of multiple 
+mathematicians). Our collective confidence will also be increased if the 
+program is structured out of a \quote{library} of simpler and 
+independently useful \quote{parts}, each of which are verified and more 
+importantly regularly used on a wide range of range of platforms and in a 
+wide range of problems. 
+
+See \cite[mackenzie2001mechanizingProof] and \cite[lakatos1976proofsRefutations]
+TODO: provide references to relevant royal society conference
+
+Bootstrap and circularity
+
+Provide box diagram of working parts
+
+white/black box testing.... formal model testing (finite automata 
+corresponding to any finite operational structure) alasthe use of pre/post 
+conditions is insufficient to provide any meaningful input to a model 
+tester as the \quote{real} complexity of a given operational transition is 
+in the parts not checked in the pre/post-condition HOWEVER, the parts not 
+checked SHOULD NOT effect the transition. So I guess this might be tested. 
+NO unfortunately any computation by case analysis will break this ability. 
+Since the cases will be hidden to the external specifications.... white vs 
+black box... 
+
+\stopsection
+
+\startsection[title=Judgements]
+
+TODO: cover judgements as base case coAlgebraic \quote{sets}.
+
+\stopsection
+
+\stopchapter
+
+\stopcomponent

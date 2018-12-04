@@ -113,8 +113,8 @@ if 0 < #arg then
     os.exit(0)
   elseif arguments:find('doc') then
     if arguments:find('master') then
-      runCmdIn('lms -c refreshBaseCoAlgebras', 'base')
-      runCmdIn('lms -c refreshExtensionCoAlgebras', 'extensions')
+      --runCmdIn('lms -c refreshBaseCoAlgebras', 'base')
+      --runCmdIn('lms -c refreshExtensionCoAlgebras', 'extensions')
       print('\nContexting master document\n')
       prepareMasterDocument()
       mustHaveTarget('doc')
