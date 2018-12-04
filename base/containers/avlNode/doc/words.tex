@@ -1,416 +1,661 @@
 % A ConTeXt document [master document: booleans.tex]
 
-\section[title=Words]
+\section[title=JoyLoL Words]
 
-\startJoyLoLWord[true]
-\startRule[true]
-\preDataStack
-  (
-    dataStack
-  )
-\postDataStack
-  (
-    TRUE
-    dataStack
-  )
-\stopRule
+\startJoyLoLCode
+// Some example JoyLoL code
+//
+// (Taken from 
+//   ExpositionGit/tools/conTeXt/joylol-c/base/dictNodes/buildDir/dictNodes.c
+// ) 
 
-\startImplementation[ansic]
-  (
-    (pushData true)
-  )
-\stopImplementation
+/*
+ * This is a test
+ * 
+ * This is another line
+ */
 
-\stopJoyLoLWord
+CoAlgebra AVLNode
 
-\startJoyLoLWord[false]
-\startRule[false]
-\preDataStack
-  (
-    dataStack
-  )
-\postDataStack
-  (
-    false
-    dataStack
-  )
-\stopRule
+  Invariant
+  
+  EndInvariant
 
-\startImplementation[ansic]
-  (
-    (pushData false)
-  )
-\stopImplementation
+  Lexer
+  
+  EndLexer
 
-\stopJoyLoLWord
+  Parser
 
-\startJoyLoLWord[isTrue]
-\startRule[isTrue-true]
-\preDataStack
-  (
-    true
-    dataStack
-  )
-\postDataStack
-  (
-    true
-    dataStack
-  )
-\stopRule
+  EndParser
 
-\startRule[isTrue-else]
-\preDataStack
-  (
-    (top)
-    dataStack
-  )
-\postDataStack
-  (
-    false
-    dataStack
-  )
-\stopRule
+  Structure
+    super    : Object,
+    symbol   : Symbol,
+    preObs   : Object,
+    value    : Object,
+    postObs  : Object,
+    left     : DictNode,
+    right    : DictNode,
+    previous : DictNode,
+    next     : DictNode,
+    height   : SizeNum,
+    balance  : LongNum
+  EndStructure
 
-\startImplementation[ansic]
-  (
-    (popData aBool)
-    (doIfte aBool
-      (pushData true)
-      (pushData false)
-    )
-  )
-\stopImplementation
+  Method findSymbolRecurse
 
-\stopJoyLoLWord
+    PreDataStack
+      aDict     : Dictionary,
+      anAVLNode : DictNode,
+      aSymbol   : Symbol
+    EndPreDataStack
 
-\startJoyLoLWord[ifFalse]
+    PreCondition
+      this is a test
+    EndPreCondition
 
-\startRule[ifFalse-false]
-\preDataStack
-  (
-    false
-    dataStack
-  )
-\postDataStack
-  (
-    true
-    dataStack
-  )
-\stopRule
+    RMCode
+      if (!anAVLNode) return NULL;
+      int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
+      if (aStrCmp < 0) {
+        // aSymbol < anAVLNode->symbol // search the LEFT subtree
+        return findSymbolRecurse(aDict, anAVLNode->left, aSymbol);
+      } else if (0 < aStrCmp) {
+        // aSymbol > anAVLNode->symbol // search the RIGHT subtree
+        return findSymbolRecurse(aDict, anAVLNode->right, aSymbol);
+      } else {
+        // aSymbol == anAVLNode->symbol // return this association pair
+        return anAVLNode;
+      }
+      return NULL;    
+    EndRMCode
 
-\startRule[ifFalse-else]
-\preDataStack
-  (
-    (top)
-    dataStack
-  )
-\postDataStack
-  (
-    false
-    dataStack
-  )
-\stopRule
+    PostDataStack
+      anAVLNode : DictNode
+    EndPostDataStack
 
-\startImplementation[ansic]
-  (
-    (popData aBool)
-    (doIfte aBool
-      (pushData false)
-      (pushData true)
-    )
-  )
-\stopImplementation
+    PostCondition
+      this is a test
+    EndPostCondition
 
-\stopJoyLoLWord
+  EndMethod
+  
+DictNodeObj* findLUBSymbolRecurseImpl(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
+) {
+  assert(aDict);
+  if (!anAVLNode) return aDict->firstSymbol;
 
-\startJoyLoLWord[not]
-\startRule[not-true]
-\preDataStack
-  (
-    false
-    dataStack
-  )
-\postDataStack
-  (
-    true
-    dataStack
-  )
-\stopRule
+  DEBUG(aDict->jInterp,
+        "findLUBSymbol %p {%s}[%s] %p %p\n",
+        anAVLNode, anAVLNode->symbol, aSymbol,
+        anAVLNode->left, anAVLNode->right);
 
-\startRule[not-false]
-\preDataStack
-  (
-    true
-    dataStack
-  )
-\postDataStack
-  (
-    false
-    dataStack
-  )
-\stopRule
-
-\startImplementation[ansic]
-  (
-    (popData aBool)
-    (doIfte aBool
-      (pushData false)
-      (pushData true)
-    )
-  )
-\stopImplementation
-\stopJoyLoLWord
-
-\startJoyLoLWord[or]
-\startRule[or-true1]
-\preDataStack
-  (
-    true
-    (top2)
-    dataStack
-  )
-\postDataStack
-  (
-    true
-    dataStack
-  )
-\stopRule
-
-\startRule[or-true2]
-\preDataStack
-  (
-    false
-    true
-    dataStack
-  )
-\postDataStack
-  (
-    true
-    dataStack
-  )
-\stopRule
-
-\startRule[or-false]
-\preDataStack
-  (
-    false
-    false
-    dataStack
-  )
-\postDataStack
-  (
-    false
-    dataStack
-  )
-\stopRule
-
-\startImplementation[ansic]
-  (
-    (popData aBool1)
-    (popData aBool2)
-    (doIfte aBool1
-      (pushData true)
-      (doIfte aBool2
-        (pushData true)
-        (pushData false)
-      )
-    )
-  )
-\stopImplementation
-
-\stopJoyLoLWord
-
-\startJoyLoLWord[and]
-
-\startRule[and-true]
-\preDataStack
-  (
-    true
-    true
-    dataStack
-  )
-\postDataStack
-  (
-    true
-    dataStack
-  )
-\stopRule
-
-\startRule[and-false1]
-\preDataStack
-  (
-    false
-    (top2)
-    dataStack
-  )
-\postDataStack
-  (
-    false
-    dataStack
-  )
-\stopRule
-
-\startRule[and-false2]
-\preDataStack
-  (
-    true
-    false
-    dataStack
-  )
-\postDataStack
-  (
-    false
-    dataStack
-  )
-\stopRule
-
-\startImplementation[ansic]
-  (
-    (popData aBool1)
-    (popData aBool2)
-    (doIfte aBool1
-      (doIfte aBool2
-        (pushData true)
-        (pushData false)
-      )
-      (pushData false)
-    )
-  )
-\stopImplementation
-
-\stopJoyLoLWord
-
-\startJoyLoLWord[isBoolean]
-
-\startRule[isBoolean-true]
-\preDataStack
-  (
-    (top aType)
-    dataStack
-  )
-\preProcessStack
-  (
-    processStack
-  )
-\preCondition
-  dup isTrue or isFalse  << WRONG!
-\postDataStack
-  (
-    (TRUE Boolean)
-    dataStack
-  )
-\postProcessStack
-  (
-    processStack
-  )
-\stopRule
-
-\startRule[isBoolean-false]
-\preDataStack
-  (
-    (top aType)
-    dataStack
-  )
-\preProcessStack
-  (
-    processStack
-  )
-\preCondition
-  (top isBoolean not)
-\postDataStack
-  (
-    (FALSE Boolean)
-    dataStack
-  )
-\postProcessStack
-  (
-    processStack
-  )
-\stopRule
-
-\startCCode
-static void isBooleanAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  JObj* result = NULL;
-  if (isBoolean(top))
-    result = newBoolean(jInterp, TRUE);
-  else
-    result = newBoolean(jInterp, FALSE);
-  pushCtxData(aCtx, result);
-}
-\stopCCode
-\stopJoyLoLWord
-
-\startJoyLoLWord[isTrue]
-\startCCode
-static void isTrueAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  JObj* result = NULL;
-  if (isTrue(top)) {
-    result = newBoolean(jInterp, TRUE);
+  int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
+  DEBUG(aDict->jInterp, "findLUBSymbol cmp: %d\n", aStrCmp);
+  if (aStrCmp < 0) {
+    // aSymbol < anAVLNode->symbol
+    // the current anAVLNode->symbol is an upper bound
+    // search the LEFT subtree for a smaller upper bound
+    if (anAVLNode->left) {
+      DictNodeObj* aNode = findLUBSymbolRecurse(aDict, anAVLNode->left, aSymbol);
+      if (!aNode) {
+        // there is nothing in the LEFT subtree which is an upper bound
+        // so return this node.
+        return anAVLNode;
+      }
+      // we have found a smaller upper bound... so return it
+      return aNode;
+    }
+    // there is nothing less than this node so return this node
+    return anAVLNode;
+    //
+  } else if (0 < aStrCmp) {
+    // anAVLNode->symbol < symbol
+    // the current anAVLNode->symbol is a lower bound
+    // search the RIGHT subtree for any upper bounds
+    if (anAVLNode->right) {
+      return findLUBSymbolRecurse(aDict, anAVLNode->right, aSymbol);
+    }
+    // there is nothing greater than this node so return NULL to signal failure
+    return NULL;
+    //
   } else {
-    result = newBoolean(jInterp, FALSE);
+    // aSymbol == anAVLNode->symbol
+    // the current anAVLNode->symbol is the lowest possible upper bound
+    // return it
+    return anAVLNode;
+    //
   }
-  pushCtxData(aCtx, result);
+  return aDict->firstSymbol;
 }
-\stopCCode
-\stopJoyLoLWord
 
-\startJoyLoLWord[isFalse]
-
-\startCCode
-static void isFalseAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
+DictNodeObj* insertSymbolRecurseImpl(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
   assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  JObj* result = NULL;
-  if (isTrue(top)) {
-    result = newBoolean(jInterp, FALSE);
+ 
+  if (!anAVLNode) return newDictNode(jInterp, aSymbol);
+
+  StringBufferObj *aStrBuf =
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
+
+  DEBUG(jInterp, "\ninsertSymbolRecurse %p <%s>[%s] %ld:%zu\n",
+        anAVLNode, anAVLNode->symbol, aSymbol,
+        anAVLNode->balance, anAVLNode->height);
+
+  DEBUG(jInterp, "insertSymbolRecurse strncmp %d\n",
+        strcmp(aSymbol, anAVLNode->symbol));
+
+  int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
+  if (aStrCmp < 0) {
+    // aSymbol < anAVLNode->symbol // insert in LEFT subtree
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, ">-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+            anAVLNode, aSymbol, anAVLNode->balance,
+            anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+            getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    DictNodeObj* leftResult =
+      insertSymbolRecurse(aDict, anAVLNode->left, aSymbol);
+    assert(leftResult);
+    if (!anAVLNode->left) {
+      // we have inserted a new node ...
+      // ... insert this new node into the doubly linked list
+      //
+      DictNodeObj* oldPrevious           = anAVLNode->previous;
+      assert(aDict->firstSymbol);
+      if (oldPrevious) oldPrevious->next = leftResult;
+      else aDict->firstSymbol            = leftResult;
+      leftResult->next                   = anAVLNode;
+      leftResult->previous               = oldPrevious;
+      anAVLNode->previous                = leftResult;
+      //
+    }
+    anAVLNode->left = leftResult;
+    reCalculateAVLNodeHeightBalance(anAVLNode);
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, "<-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    //
+    if (2 < anAVLNode->balance) {
+      assert(anAVLNode->left);
+      if (strcmp(aSymbol, anAVLNode->left->symbol) < 0) {
+        anAVLNode = rotateLeftLeft(aDict, anAVLNode);
+      } else {
+        anAVLNode = rotateLeftRight(aDict, anAVLNode);
+      }
+    }
+  } else if (0 < aStrCmp) {
+    // aSymbol > anAVLNode->symbol // insert in RIGHT subtree
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, ">-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    DictNodeObj* rightResult =
+      insertSymbolRecurse(aDict, anAVLNode->right, aSymbol);
+    if (!anAVLNode->right) {
+      // we have inserted a new node ...
+      // ... insert this new node into the doubly linked list
+      //
+      DictNodeObj* oldNext           = anAVLNode->next;
+      if (oldNext) oldNext->previous = rightResult;
+      rightResult->previous          = anAVLNode;
+      rightResult->next              = oldNext;
+      anAVLNode->next                = rightResult;
+      //
+    }
+    anAVLNode->right = rightResult;
+    reCalculateAVLNodeHeightBalance(anAVLNode);
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, "<-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    //
+    if (anAVLNode->balance < -2) {
+      assert(anAVLNode->right);
+      if (strcmp(aSymbol, anAVLNode->right->symbol) > 0) {
+        anAVLNode = rotateRightRight(aDict, anAVLNode);
+      } else {
+        anAVLNode = rotateRightLeft(aDict, anAVLNode);
+      }
+    }
   } else {
-    result = newBoolean(jInterp, TRUE);
+    // aSymbol == anAVLNode->symbol // nothing to do...
+    DEBUG(jInterp,"symols equal <%s>[%s]\n",
+          anAVLNode->symbol, aSymbol);
   }
-  pushCtxData(aCtx, result);
+
+  reCalculateAVLNodeHeightBalance(anAVLNode);
+  return anAVLNode;
 }
-\stopCCode
-\stopJoyLoLWord
+DictNodeObj* deleteSymbolRecurseImpl(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+ 
+  if (!anAVLNode) return NULL;
 
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerBooleanWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
+  StringBufferObj *aStrBuf =
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
 
-\startCCode
-Boolean registerBooleanWords(
+  DEBUG(jInterp, "\ndeleteSymbol %p <%s>[%s] %ld:%zu\n",
+        anAVLNode, anAVLNode->symbol, aSymbol,
+        anAVLNode->balance, anAVLNode->height);
+
+  DEBUG(jInterp, "deleteSymbol strncmp %d\n",
+        strcmp(aSymbol, anAVLNode->symbol));
+
+  int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
+  if (aStrCmp < 0) {
+    // aSymbol < anAVLNode->symbol // delete from LEFT subtree
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, ">-delete LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+            anAVLNode, aSymbol, anAVLNode->balance,
+            anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+            getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+
+    anAVLNode->left =
+      deleteSymbolRecurse(aDict, anAVLNode->left, aSymbol);
+    reCalculateAVLNodeHeightBalance(anAVLNode);
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, "<-delete LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    //
+    if (anAVLNode->balance < -2) {
+      if (
+        anAVLNode->right &&
+        strcmp(aSymbol, anAVLNode->right->symbol) < 0
+      ) {
+        anAVLNode = rotateRightRight(aDict, anAVLNode);
+      } else {
+        anAVLNode = rotateRightLeft(aDict, anAVLNode);
+      }
+    }
+  } else if (0 < aStrCmp) {
+    // aSymbol > anAVLNode->symbol // delete in RIGHT subtree
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, ">-delete RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+   anAVLNode->right =
+      deleteSymbolRecurse(aDict, anAVLNode->right, aSymbol);
+    reCalculateAVLNodeHeightBalance(anAVLNode);
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, "<-delete RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    //
+    if (2 < anAVLNode->balance) {
+      if (
+        anAVLNode->left &&
+        strcmp(aSymbol, anAVLNode->left->symbol) > 0
+      ) {
+        anAVLNode = rotateLeftLeft(aDict, anAVLNode);
+      } else {
+        anAVLNode = rotateLeftRight(aDict, anAVLNode);
+      }
+    }
+  } else {
+    //
+    // aSymbol == anAVLNode->symbol
+    //
+    DEBUG(jInterp,"symols equal <%s>[%s]\n",
+          anAVLNode->symbol, aSymbol);
+    if (anAVLNode->right) {
+      //
+      // we need to find the next node greater than this one (gtNode)
+      // copy it(gtNode) to this node
+      // and then delete it(gtNode) from right branch of this node
+      //
+      // SINCE we are copying nodes, the doubly linked list is still
+      // correct... except that it has a duplicate entry...
+      // so long as we have a right node... this duplication propogates
+      // to the right...
+      //
+      DictNodeObj *gtNode = anAVLNode->right;
+      while ( gtNode->left ) {
+        gtNode = gtNode->left;
+      }
+      copyDictNodeFromTo(jInterp, gtNode, anAVLNode);
+      anAVLNode->right =
+        deleteSymbolRecurse(aDict, anAVLNode->right, anAVLNode->symbol);
+      reCalculateAVLNodeHeightBalance(anAVLNode);
+      //
+      if (jInterp->debug) {
+        printDicInto(aStrBuf, anAVLNode, 10);
+        DEBUG(jInterp, "<-delete RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+            anAVLNode, aSymbol, anAVLNode->balance,
+            anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+            getCString(aStrBuf));
+        strBufClose(aStrBuf);
+      }
+      //
+      if (2 < anAVLNode->balance) {
+        if (
+          anAVLNode->left &&
+          strcmp(aSymbol, anAVLNode->left->symbol) > 0
+          ) {
+          anAVLNode = rotateLeftLeft(aDict, anAVLNode);
+        } else {
+          anAVLNode = rotateLeftRight(aDict, anAVLNode);
+        }
+      }
+    } else {
+      //
+      // this node will become unlinked from the AVL tree
+      // SO unlink this node from the doubly linked list
+      // as well...
+      //
+      DictNodeObj* oldPrevious           = anAVLNode->previous;
+      if (oldPrevious) oldPrevious->next = anAVLNode->next;
+      else aDict->firstSymbol            = anAVLNode->next;
+      if (anAVLNode->next) {
+        anAVLNode->next->previous        = oldPrevious;
+      }
+      //
+      // unlink this node..
+      //
+      anAVLNode->next     = NULL;
+      anAVLNode->previous = NULL;
+      //
+      return anAVLNode->left;
+    }
+  }
+
+  reCalculateAVLNodeHeightBalance(anAVLNode);
+  return anAVLNode;
+}
+
+DictNodeObj* rotateLeft(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+ 
+  StringBufferObj *aStrBuf =
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, ">-rotateLeft %p %ld:%zu=%zu %s\n",
+          anAVLNode, anAVLNode->balance, anAVLNode->height,
+          deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  assert(anAVLNode->right);
+
+  DictNodeObj* newRoot = anAVLNode->right;
+  anAVLNode->right = newRoot->left;
+  newRoot->left    = anAVLNode;
+
+  reCalculateAVLNodeHeightBalance(anAVLNode);
+  reCalculateAVLNodeHeightBalance(newRoot);
+
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "<o-rotateLeft %p %ld:%zu=%zu %s\n",
+          anAVLNode, anAVLNode->balance, anAVLNode->height,
+          deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+    printDicInto(aStrBuf, newRoot, 10);
+    DEBUG(jInterp, "<n-rotateLeft %p %ld:%zu=%zu %s\n",
+          newRoot, newRoot->balance, newRoot->height,
+          deepCalculateAVLNodeHeight(newRoot),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
+  assert(newRoot->height == deepCalculateAVLNodeHeight(newRoot));
+  return newRoot;
+}
+
+DictNodeObj* rotateRight(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+ 
+  StringBufferObj *aStrBuf =
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, ">-rotateRight %p %ld:%zu=%zu %s\n",
+          anAVLNode, anAVLNode->balance, anAVLNode->height,
+          deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  assert(anAVLNode->left);
+
+  DictNodeObj* newRoot = anAVLNode->left;
+  anAVLNode->left = newRoot->right;
+  newRoot->right  = anAVLNode;
+
+  reCalculateAVLNodeHeightBalance(anAVLNode);
+  reCalculateAVLNodeHeightBalance(newRoot);
+
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "<o-rotateRight %p %ld:%zu=%zu %s\n",
+          anAVLNode, anAVLNode->balance, anAVLNode->height,
+          deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+    printDicInto(aStrBuf, newRoot, 10);
+    DEBUG(jInterp, "<n-rotateRight %p %ld:%zu=%zu %s\n",
+          newRoot, newRoot->balance, newRoot->height,
+          deepCalculateAVLNodeHeight(newRoot),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
+  assert(newRoot->height == deepCalculateAVLNodeHeight(newRoot));
+  return newRoot;
+}
+DictNodeObj* rotateLeftLeft(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+ 
+  if (jInterp->debug) {
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "LL %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  return rotateRight(aDict, anAVLNode);
+}
+
+DictNodeObj* rotateLeftRight(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+ 
+  StringBufferObj *aStrBuf =
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "0-LR %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  anAVLNode->left = rotateLeft(aDict, anAVLNode->left);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "1-LR %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  return rotateRight(aDict, anAVLNode);
+}
+DictNodeObj* rotateRightLeft(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+ 
+  StringBufferObj *aStrBuf =
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "0-RL %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  anAVLNode->right = rotateRight(aDict, anAVLNode->right);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "1-RL %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  return rotateLeft(aDict, anAVLNode);
+}
+
+DictNodeObj* rotateRightRight(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+ 
+  if (jInterp->debug) {
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "RR %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  return rotateLeft(aDict, anAVLNode);
+}
+
+void reCalculateAVLNodeHeightBalance(DictNodeObj* anAVLNode) {
+  if (!anAVLNode) return;
+
+  if (!anAVLNode->left && !anAVLNode->right) {
+    anAVLNode->height  = 1;
+    anAVLNode->balance = 0;
+  } else if (!anAVLNode->left) {
+    anAVLNode->height  =  1 + anAVLNode->right->height;
+    anAVLNode->balance = -1 - anAVLNode->right->height;
+  } else if (!anAVLNode->right) {
+    anAVLNode->height  = 1 + anAVLNode->left->height;
+    anAVLNode->balance = 1 + anAVLNode->left->height;
+  } else if (anAVLNode->left->height < anAVLNode->right->height) {
+    anAVLNode->height  = 1 + anAVLNode->right->height;
+    anAVLNode->balance = anAVLNode->left->height - anAVLNode->right->height;
+  } else {
+    anAVLNode->height  = 1 + anAVLNode->left->height;
+    anAVLNode->balance = anAVLNode->left->height - anAVLNode->right->height;
+  }
+}
+
+size_t deepCalculateAVLNodeHeight(DictNodeObj* anAVLNode) {
+  if (!anAVLNode) return 0;
+
+  size_t leftHeight = 1 + deepCalculateAVLNodeHeight(anAVLNode->left);
+  size_t rightHeight = 1 + deepCalculateAVLNodeHeight(anAVLNode->right);
+
+  if (leftHeight > rightHeight) return leftHeight;
+  return rightHeight;
+}
+
+Boolean checkAVLNode(
   JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
+  DictNodeObj  *anAVLNode
 ) {
   assert(jInterp);
-  ContextObj *rootCtx = jInterp->rootCtx;
-  assert(rootCtx);
-  DictObj *dict = rootCtx->dict;
-  assert(dict);
-  
-  DictNodeObj* true  = getSymbolEntry(dict, "true");
-  true->value = newBoolean(jInterp, TRUE);
+ 
+  if (!anAVLNode) return TRUE;
+  if (jInterp->debug) {
+    StringBufferObj *aStrBuf =
+      newStringBuffer(jInterp->rootCtx);
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "checkAVLNode %p %ld:%zu=%zu %s\n",
+          anAVLNode, anAVLNode->balance, anAVLNode->height,
+          deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
 
-  DictNodeObj* false = getSymbolEntry(dict, "false");
-  false->value = newBoolean(jInterp, FALSE);
+  if (anAVLNode->left) {
+      DEBUG(jInterp, "car>-checkAVLNode %p\n", anAVLNode);
+      checkAVLNode(jInterp, anAVLNode->left);
+      assert(0 < strcmp(anAVLNode->symbol,
+                      anAVLNode->left->symbol));
+    DEBUG(jInterp, "car<-checkAVLNode %p\n", anAVLNode);
+  }
 
-  extendJoyLoLInRoot(jInterp, "isBoolean", "", isBooleanAP, "");
-  extendJoyLoLInRoot(jInterp, "isTrue",    "", isTrueAP,    "");
-  extendJoyLoLInRoot(jInterp, "isFalse",   "", isFalseAP,   "");
+  if (anAVLNode->right) {
+    DEBUG(jInterp, "cdr>-checkAVLNode %p\n", anAVLNode);
+    checkAVLNode(jInterp, anAVLNode->right);
+    assert(strcmp(anAVLNode->symbol,
+                  anAVLNode->right->symbol) < 0);
+    DEBUG(jInterp, "cdr<-checkAVLNode %p\n", anAVLNode);
+  }
+
+  assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
 
   return TRUE;
 }
-\stopCCode
+
+EndCoAlgebra
+\stopJoyLoLCode
