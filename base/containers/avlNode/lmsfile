@@ -5,10 +5,10 @@ require 'lms.litProgs'
 lpTargets = litProgs.targets{
   mainDoc  = 'avlNode.tex',
   docFiles = {
-    'overview.tex',
+    'avlNodeOverview.tex',
     'code.tex',
     'lua.tex',
-    'words.tex',
+    'avlNodeWords.tex',
     'conclusion.tex',
   },
   docDir    = 'doc',
