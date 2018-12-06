@@ -14,7 +14,7 @@ An LPeg grammar for our lexer is:
 local lpeg = require 'lpeg';
 local P, S, V = lpeg.P, lpeg.S, lpeg.V;
 
-local lexer = {
+local lexer = P {
   lexeme     = V"naturalNum" +
                V"identifier" +
                V"whiteSpace" ;
@@ -28,10 +28,87 @@ local lexer = {
 
 \TODO{Rework this to be UTF8 friendly.}
 
-Translated into \joylol\ we get:
+Following \cite{ierusalimschy2008lpegArticle} this can be translated into 
+\joylol\ as: 
 
 \starttyping
 
-some joylol
+; lexeme (right associative)
+(
+  (
+    naturalNum
+    identifier
+    whiteSpace
+  )
+  Choose
+)
+'lexeme'
+define
 
+; naturalNum
+(
+  (
+    hexNumber
+    decimalNum
+  )
+  Choose
+)
+'naturalNum'
+define
+
+; hexNumber
+(
+  '0'
+  Char
+  ('x' 'X')
+  CharSet
+  (
+    ('09' 'af' 'AF' ',')
+    CharSet
+  ) 
+  1
+  RepeatAtLeast
+)
+'hexNumber'
+define
+
+; decimalNum
+(
+  ('19')
+  CharSet
+  (
+    ('09')
+    CharSet
+  )
+  0
+  RepeatAtLeast
+)
+'hexNumber'
+define
+
+; identifier
+(
+  ('az' 'AZ' '_')
+  CharSet
+  (
+    ('09' 'az' 'AZ' '_')
+    CharSet
+  )
+  0
+  RepeatAtLeast
+)
+'identifier'
+define
+
+; whitespace
+(
+  (
+    ( ' ' '\t' '\n')
+    CharSet
+  )
+  0
+  RepeatAtLeast
+)
+'whiteSpace'
+define
 \stoptyping
