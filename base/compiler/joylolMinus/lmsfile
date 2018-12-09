@@ -1,0 +1,49 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'joylolMinus.tex',
+  docFiles = {
+    'joylolMinusOverview.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'jPeg',
+  },
+  cHeaderFiles = {
+    'joylol/joylolMinus.h',
+    'joylol/joylolMinus-private.h',
+  },
+  cCodeFiles = {
+    'joylolMinus.c',
+  },
+  joylolCodeFiles = {
+  },
+  coAlgLibs = {
+  },
+})
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/joylolMinus.h',
+    'joylol/joylolMinus-private.h',
+  },
+  cCodeFiles = {
+    'joylolMinus.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
+})
