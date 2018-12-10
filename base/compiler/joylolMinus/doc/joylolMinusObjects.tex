@@ -1,0 +1,89 @@
+% A ConTeXt document [master document: joyLoLMinus.tex ]
+
+\section[title=Objects]
+
+\setCHeaderStream{public}
+\startCHeader
+
+#define JObjTag       0
+#define PairTag       1
+#define ContextTag    2
+#define CFunctionTag  3
+\stopCHeader
+
+\startCHeader
+typedef struct jObject_struct {
+  size_t tag;
+} JObj;
+
+JObj *newJObject(void);
+\stopCHeader
+
+\startCCode
+JObj *newJObject(void) {
+  JObj *newObj = (JObj*)calloc(1, sizeof(JObj));
+  newObj->tag = JObjTag;
+  return newObj;
+}
+\stopCCode
+
+\startCHeader
+typedef struct pair_struct {
+  size_t tag;
+  JObj  *car;
+  JObj  *cdr;
+} Pair;
+
+Pair *newPair(JObj* car, JObj *cdr);
+\stopCHeader
+
+\startCCode
+Pair *newPair(JObj *car, JObj *cdr) {
+  Pair *newObj = (Pair*)calloc(1, sizeof(Pair));
+  newObj->tag = PairTag;
+  newObj->car = car;
+  newObj->cdr = cdr;
+  return newObj;
+}
+\stopCCode
+
+\startCHeader
+typedef struct context_struct {
+  size_t tag;
+  JObj  *data;
+  JObj  *process;
+} Context;
+
+Context *newContext(JObj* data, JObj *process);
+\stopCHeader
+
+\startCCode
+Context *newContext(JObj *data, JObj *process) {
+  Context *newObj = (Context*)calloc(1, sizeof(Context));
+  newObj->tag     = ContextTag;
+  newObj->data    = data;
+  newObj->process = process;
+  return newObj;
+}
+\stopCCode
+
+\startCHeader
+typedef Context* (CFuncImp)(Context*);
+
+typedef struct cFunction_struct {
+  size_t    tag;
+  CFuncImp *func;
+} CFunction;
+
+CFunction *newCFunction(CFuncImp* func);
+\stopCHeader
+
+\startCCode
+CFunction *newCFunction(CFuncImp *func) {
+  CFunction *newObj = (CFunction*)calloc(1, sizeof(CFunction));
+  newObj->tag  = CFunctionTag;
+  newObj->func = func;
+  return newObj;
+}
+\stopCCode
+
