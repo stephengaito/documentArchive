@@ -13,6 +13,23 @@ int main(int argc, char *argv[]){
     printf("interpreting: [%s]\n", argv[i]);
     interpretFile(argv[i]);
   }
+  printf("testing symbolTable\n");
+  
+  SymbolTable *symTab = newSymbolTable();
+  
+  printf("SymbolTable before:\n");
+  printTableToFile(symTab, stdout, "  symTabBefore");
+
+  insertSymbol(symTab, "third");
+  insertSymbol(symTab, "aTest");
+  insertSymbol(symTab, "first");
+  insertSymbol(symTab, "second");
+  insertSymbol(symTab, "second");
+  deleteSymbol(symTab, "aTest");
+  deleteSymbol(symTab, "third");
+  
+  printf("SymbolTable after:\n");
+  printTableToFile(symTab, stdout, "   symTabAfter");
   printf("done!\n");
 }
 \stopCCode

@@ -20,6 +20,11 @@ SymbolTable *newSymbolTable(void);
 SymbolEntry *findSymbol(  SymbolTable *aTable, const char* aSymbol);
 void         insertSymbol(SymbolTable *aTable, const char* aSymbol);
 void         deleteSymbol(SymbolTable *aTable, const char* aSymbol);
+void         printTableToFile(
+                SymbolTable *aTable,
+                FILE *aFile,
+                const char* indent
+             );
 \stopCHeader
 
 \startCCode
@@ -41,7 +46,7 @@ size_t findSymbolIndex(SymbolTable *aTable,  const char* aSymbol) {
   while(1) {
     assert(0 <= firstIndex);
     assert(firstIndex <= lastIndex);
-    assert(lastIndex < aTable->maxSymbols);
+    assert(lastIndex  <= aTable->maxSymbols);
     
     if (firstIndex == lastIndex) {
       return firstIndex;
@@ -115,6 +120,19 @@ void insertSymbol(SymbolTable *aTable, const char* aSymbol) {
   assert(symbolIndex <= aTable->numSymbols);
   assert(symbolIndex <= aTable->maxSymbols);
   
+  printf(
+    "insertSymbol: %zd %zd %zd\n",
+    symbolIndex,
+    aTable->numSymbols,
+    aTable->maxSymbols
+  );
+  printf("insertSymbol: [%s]\n", aSymbol);
+  if (symbolIndex < aTable->numSymbols) {
+    printf("insertSymbol: [%s]\n", aTable->symbols[symbolIndex].symbol);
+  } else {
+    printf("insertSymbol: no symbols\n");
+  }
+  
   if (symbolIndex == aTable->numSymbols) {
     if (aTable->maxSymbols <= aTable->numSymbols) increaseMaxSymbols(aTable);
     aTable->symbols[aTable->numSymbols].symbol = strdup(aSymbol);
@@ -124,9 +142,9 @@ void insertSymbol(SymbolTable *aTable, const char* aSymbol) {
   }
   
   int cmp = strcmp(aTable->symbols[symbolIndex].symbol, aSymbol);
-  assert(cmp <= 0);
+  assert(0 <= cmp);
   if (cmp == 0) return; // symbol has already been inserted
-  if (cmp <  0) { // aSymbol is less than the current index.. so make space
+  if (cmp != 0) { // aSymbol is less than the current index.. so make space
     if (aTable->maxSymbols <= aTable->numSymbols) increaseMaxSymbols(aTable);
     SymbolEntry *newSymbol = aTable->symbols + aTable->numSymbols;
     SymbolEntry *curSymbol = newSymbol - 1;
@@ -165,6 +183,12 @@ void deleteSymbol(SymbolTable *aTable, const char* aSymbol) {
   aTable->symbols[aTable->numSymbols].symbol = NULL;
   aTable->numSymbols--;
   assert(0 <= aTable->numSymbols);
+}
+
+void printTableToFile(SymbolTable *aTable, FILE *aFile, const char* indent) {
+  for( size_t i = 0; i < aTable->numSymbols; i++) {
+    fprintf(aFile, "%s[%zd] = [%s]\n", indent, i, aTable->symbols[i].symbol);
+  }
 }
 \stopCCode
 
