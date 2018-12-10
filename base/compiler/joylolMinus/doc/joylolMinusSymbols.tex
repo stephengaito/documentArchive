@@ -1,0 +1,170 @@
+% A ConTeXt document [master document: joyLoLMinus.tex ]
+
+\section[title=Symbols]
+
+\setCHeaderStream{public}
+\startCHeader
+typedef struct symbolEntry_struct {
+  char *symbol;
+} SymbolEntry;
+
+typedef struct symbolTable_struct {
+  SymbolEntry *symbols;
+  size_t      numSymbols;
+  size_t      maxSymbols;
+} SymbolTable;
+
+#define SymbolTable_GrowthSize 10
+
+SymbolTable *newSymbolTable(void);
+SymbolEntry *findSymbol(  SymbolTable *aTable, const char* aSymbol);
+void         insertSymbol(SymbolTable *aTable, const char* aSymbol);
+void         deleteSymbol(SymbolTable *aTable, const char* aSymbol);
+\stopCHeader
+
+\startCCode
+SymbolTable *newSymbolTable(void) {
+  SymbolTable *newTable = (SymbolTable*)calloc(1, sizeof(SymbolTable));
+  assert(newTable);
+  newTable->symbols    = NULL;
+  newTable->numSymbols = 0;
+  newTable->maxSymbols = 0;
+  return newTable;
+}
+
+size_t findSymbolIndex(SymbolTable *aTable,  const char* aSymbol) {
+  assert(aTable);
+  
+  size_t firstIndex = 0;
+  size_t lastIndex  = aTable->numSymbols;
+  
+  while(1) {
+    assert(0 <= firstIndex);
+    assert(firstIndex <= lastIndex);
+    assert(lastIndex < aTable->maxSymbols);
+    
+    if (firstIndex == lastIndex) {
+      return firstIndex;
+    } else if (firstIndex + 1 == lastIndex) {
+      int cmp = strcmp(aTable->symbols[firstIndex].symbol, aSymbol);
+      if (0 <= cmp) {
+        return firstIndex;
+      } else {
+        return lastIndex;
+      }
+    } else {
+      size_t probeIndex = (firstIndex + lastIndex) >> 1; // divide by two
+      assert(firstIndex <= probeIndex);
+      assert(probeIndex <= lastIndex);
+      int cmp = strcmp(aTable->symbols[probeIndex].symbol, aSymbol);
+      if (cmp == 0) {
+        return probeIndex;
+      } else if (cmp < 0) {
+        firstIndex = probeIndex;
+      } else {
+        lastIndex = probeIndex;
+      }
+    }
+  }  
+}
+
+SymbolEntry *findSymbol(SymbolTable *aTable, const char* aSymbol) {  
+  assert(aTable);
+  
+  size_t symbolIndex = findSymbolIndex(aTable, aSymbol);
+  assert(0 <= symbolIndex);
+  assert(symbolIndex <= aTable->numSymbols);
+  assert(symbolIndex <= aTable->maxSymbols);
+    
+  if (symbolIndex == aTable->numSymbols) return NULL;
+  
+  int cmp = strcmp(aTable->symbols[symbolIndex].symbol, aSymbol);
+  
+  if (cmp != 0) return NULL;
+  
+  return aTable->symbols + symbolIndex;
+}
+
+void increaseMaxSymbols(SymbolTable *aTable) {
+  assert(aTable);
+  SymbolEntry *oldSymbols = aTable->symbols;
+  size_t newMaxSymbols    = aTable->maxSymbols + SymbolTable_GrowthSize;
+  SymbolEntry *newSymbols =
+    (SymbolEntry*)calloc(newMaxSymbols, sizeof(SymbolEntry));
+  assert(newSymbols);
+  if (oldSymbols) {
+    memcpy(
+      newSymbols,
+      oldSymbols,
+      ((aTable->maxSymbols) * sizeof(SymbolEntry))
+    );
+    free(oldSymbols);
+    oldSymbols = NULL;
+  }
+  aTable->symbols    = newSymbols;
+  aTable->maxSymbols = newMaxSymbols;
+  assert(aTable->symbols);
+  assert(aTable->numSymbols <= aTable->maxSymbols);
+}
+
+void insertSymbol(SymbolTable *aTable, const char* aSymbol) {
+  assert(aTable);
+  
+  size_t symbolIndex = findSymbolIndex(aTable, aSymbol);
+  assert(0 <= symbolIndex);
+  assert(symbolIndex <= aTable->numSymbols);
+  assert(symbolIndex <= aTable->maxSymbols);
+  
+  if (symbolIndex == aTable->numSymbols) {
+    if (aTable->maxSymbols <= aTable->numSymbols) increaseMaxSymbols(aTable);
+    aTable->symbols[aTable->numSymbols].symbol = strdup(aSymbol);
+    aTable->numSymbols++;
+    assert(aTable->numSymbols <= aTable->maxSymbols);
+    return;
+  }
+  
+  int cmp = strcmp(aTable->symbols[symbolIndex].symbol, aSymbol);
+  assert(cmp <= 0);
+  if (cmp == 0) return; // symbol has already been inserted
+  if (cmp <  0) { // aSymbol is less than the current index.. so make space
+    if (aTable->maxSymbols <= aTable->numSymbols) increaseMaxSymbols(aTable);
+    SymbolEntry *newSymbol = aTable->symbols + aTable->numSymbols;
+    SymbolEntry *curSymbol = newSymbol - 1;
+    SymbolEntry *insSymbol = aTable->symbols + symbolIndex;
+    for (; insSymbol < newSymbol ; ) {
+      newSymbol->symbol = curSymbol->symbol;
+      newSymbol--;
+      curSymbol--;
+    }
+  }
+  aTable->symbols[symbolIndex].symbol = strdup(aSymbol);
+  aTable->numSymbols++;
+  assert(aTable->numSymbols <= aTable->maxSymbols);
+}
+
+void deleteSymbol(SymbolTable *aTable, const char* aSymbol) {
+  assert(aTable);
+  
+  size_t symbolIndex = findSymbolIndex(aTable, aSymbol);
+  assert(0 <= symbolIndex);
+  assert(symbolIndex <= aTable->numSymbols);
+  assert(symbolIndex <= aTable->maxSymbols);
+
+  if (symbolIndex == aTable->numSymbols) return; // nothing to delete
+  
+  int cmp = strcmp(aTable->symbols[symbolIndex].symbol, aSymbol);
+  if (cmp != 0) return; // nothing to delete
+  SymbolEntry *newSymbol = aTable->symbols + symbolIndex;
+  SymbolEntry *curSymbol = newSymbol + 1;
+  SymbolEntry *lastSymbol = aTable->symbols + aTable->numSymbols;
+  for (; curSymbol < lastSymbol ; ) {
+    newSymbol->symbol = curSymbol->symbol;
+    newSymbol++;
+    curSymbol++;
+  }
+  aTable->symbols[aTable->numSymbols].symbol = NULL;
+  aTable->numSymbols--;
+  assert(0 <= aTable->numSymbols);
+}
+\stopCCode
+
