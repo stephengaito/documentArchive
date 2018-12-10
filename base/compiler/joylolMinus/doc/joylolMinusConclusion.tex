@@ -1,0 +1,54 @@
+% A ConTeXt document [master document: joyLoLMinus.tex ]
+
+
+\section[title=Conclusion]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOLMINUS}
+\createCHeaderFile%
+  {public}
+  {joylol/joylolMinus.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOLMINUS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/joylolMinus-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {joylolMinus.c}%
+  {}
+
+\addCCodeProgram{joylolMinus})
+  
+\addMainDocument{joylolMinus.tex}
+\addSubDocument{joylolMinusOverview.tex} 
+%\addSubDocument{code.tex}
+%\addSubDocument{lua.tex}
+%\addSubDocument{words.tex}
+\addSubDocument{joylolMinusMain.tex}
+\addSubDocument{joylolMinusConclusion.tex} 
+
+\addCCodeTargets{default}
+
+%\addCTestTargets{default}
+
+%\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

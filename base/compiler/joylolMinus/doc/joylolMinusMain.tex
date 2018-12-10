@@ -1,0 +1,19 @@
+% A ConTeXt document [master document: joyLoLMinus.tex ]
+
+
+\section[title=ANSI-C Main]
+
+\startCCode
+void interpretFile(const char* aFilePath) {
+}
+
+int main(int argc, char *argv[]){
+  printf("joylolMinus\n");
+
+  for(int i = 1; i < argc; i++) {
+    printf("interpreting: [%s]\n", argv[i]);
+    interpretFile(argv[i]);
+  }
+  printf("done!\n");
+}
+\stopCCode

@@ -6,15 +6,17 @@ lpTargets = litProgs.targets{
   mainDoc  = 'joylolMinus.tex',
   docFiles = {
     'joylolMinusOverview.tex',
+    'joylolMinusMain.tex',
+    'joylolMinusConclusion.tex',
   },
   docDir    = 'doc',
 }
 
-require 'lms.joyLoL'
+require 'lms.c'
 
-joylol.targets(lpTargets, {
-  coAlgs = {
-    'jPeg',
+c.targets(lpTargets, {
+  programs = {
+    'joylolMinus',
   },
   cHeaderFiles = {
     'joylol/joylolMinus.h',
@@ -22,28 +24,5 @@ joylol.targets(lpTargets, {
   },
   cCodeFiles = {
     'joylolMinus.c',
-  },
-  joylolCodeFiles = {
-  },
-  coAlgLibs = {
-  },
-})
-
-require 'lms.cTests'
-
-cTests.targets(lpTargets, {
-  testExecs = {
-    'allCTests',
-  },
-  cHeaderFiles = {
-    'joylol/joylolMinus.h',
-    'joylol/joylolMinus-private.h',
-  },
-  cCodeFiles = {
-    'joylolMinus.c',
-  },
-  testLibDirs = {
-  },
-  testLibs = {
   },
 })
