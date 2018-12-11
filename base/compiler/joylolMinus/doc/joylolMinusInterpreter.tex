@@ -1,0 +1,189 @@
+% A ConTeXt document [master document: joyLoLMinus.tex ]
+
+\section[title=Symbols]
+
+\setCHeaderStream{public}
+\startCHeader
+
+\stopCHeader
+
+\startCCode
+void evalCommandInContextImpl(
+  ContextObj *aCtx,
+  JObj       *command
+) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  //assert(command);
+  
+  DEBUG(jInterp, "evalCommandInContext > %p [%s] %p\n",
+    aCtx, aCtx->name, command);
+  //
+  // push this command onto the top of the process stack
+  //
+  pushCtxProcessImpl(aCtx, command);
+  //
+  while(aCtx->process) {
+    //
+    // ensure we have the most recent dictionary
+    //
+    DictObj *theDict = aCtx->dict;
+    assert(theDict);
+    
+    if (aCtx->tracingOn) {
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      strBufPrintf(aStrBuf,
+        "\n----------------------------------------------------\n"
+      );
+      strBufPrintf(aStrBuf,
+        "ctx: %s(%s)\n",
+        aCtx->name, theDict->name
+      );
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    //
+    // pop the next command off the process stack
+    //
+    command = popCtxProcessImpl(aCtx);
+    aCtx->command = command;
+    //assert(command);
+    //
+   if (isCFunction(command)) {
+      //
+      // if the command is a function.. call the function
+      //
+      if (isCtxCFunction(command)) {
+        assert(asCtxCFunc(command));
+        //
+        // this is a CTX CFunction
+        // (we allow it to change the current context
+        //  in addition to any changes of the data and process stacks
+        //  of either the old or new contexts)
+        //
+        if (aCtx->tracingOn) 
+          traceAction(aCtx, "calling(c-ctx)", command);
+        aCtx = (asCtxCFunc(command))(aCtx);
+        assert(aCtx);
+        //
+      } else {
+        assert(asCFunc(command));
+        //
+        // this is a normal CFunction
+        // (this ONLY makes changes to the data and process stacks)
+        //
+        if (aCtx->tracingOn) 
+          traceAction(aCtx, "calling(c)", command);
+        (asCFunc(command))(aCtx);
+        //
+      }
+    } else if (isAssertion(command)) {
+      //
+      // this is an assertion ...
+      //   ... so assert it 
+      //
+      if (aCtx->tracingOn) 
+        traceAction(aCtx, "asserting", command);
+      //
+      if (!evalAssertionInContextImpl(aCtx, (AssertionObj*)command)) {
+        //
+        // this assertion failed... 
+        //   ... so report it
+        //
+        pushNullCtxDataImpl(aCtx);
+        pushOnTopCtxDataImpl(aCtx, command);
+        raiseException(aCtx,
+          "assertion failed"
+        );
+      }
+    } else if (!isSymbol(command)) {
+      //
+      // if the command is not a Symbol ...
+      //  ...  push it onto the top of the data stack
+      //
+      if (aCtx->tracingOn)
+        traceAction(aCtx, "adding(nonSym)", command);
+      pushCtxDataImpl(aCtx, command);
+      //
+   } else {
+      //
+      // if the command is a symbol ...
+      //  ... look up the symbol's association in the dictionary
+      //
+      DictNodeObj* assoc = getSymbolEntry(theDict, asSymbol(command));
+      assert(assoc);
+      //
+      if (!assoc->value) {
+        //
+        // if the association is empty.. push this symbol onto the top
+        // of the data stack (re-evaluating this symbol would lead to an
+        // infinite loop)
+        //
+        if (aCtx->tracingOn)
+          traceAction(aCtx, "adding(noValue)", command);
+        pushCtxDataImpl(aCtx, command);
+        //
+      } else if (isPair(assoc->value)) {
+        //
+        // if the association is a LoL.. push this LoL onto the top of the
+        // process stack
+        //
+        if (aCtx->tracingOn) {
+          traceAction(aCtx, "calling(joylol)", command);
+          traceAction(aCtx, "evaluating", assoc->value);
+        }
+        prependListCtxProcess(aCtx,
+          copyLoL(jInterp, assoc->value));
+        //
+      } else if (isCFunction(assoc->value)) {
+        //
+        // if the association is a function.. call the function
+        //
+        if (isCtxCFunction(assoc->value)) {
+          assert(asCtxCFunc(assoc->value));
+          //
+          // this is a CTX CFunction
+          //
+          if (aCtx->tracingOn) 
+            traceAction(aCtx, "calling(c-ctx)", command);
+          aCtx = (asCtxCFunc(assoc->value))(aCtx);
+          assert(aCtx);
+          //
+        } else {
+          assert(asCFunc(assoc->value));
+          //
+          // this is a normal CFunction
+          //
+          if (aCtx->tracingOn)
+            traceAction(aCtx, "calling(c)", command);
+          (asCFunc(assoc->value))(aCtx);
+          //
+        }
+      } else {
+        //
+        // if the association is NOT a PairAtom or Function...
+        // ... push this new ATOM onto the top of the process stack
+        //
+        if (aCtx->tracingOn) {
+          traceAction(aCtx, "calling(joylol)", command);
+          traceAction(aCtx, "evaluating", assoc->value);
+        }
+        pushCtxProcessImpl(aCtx, assoc->value);
+        //
+      }
+    }
+    if (aCtx->tracingOn) {
+      DEBUG(jInterp, "evalCommandInContext -> tracing%s\n", "");
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      showCtxData(aCtx, aStrBuf);
+      showCtxProcess(aCtx, aStrBuf);
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
+      DEBUG(jInterp, "evalCommandInContext <- tracing%s\n", "");
+    }
+  } // aCtx->process is empty
+  DEBUG(jInterp, "evalCommandInContext < %p %p\n", aCtx, command);
+}
+
+\stopCCode

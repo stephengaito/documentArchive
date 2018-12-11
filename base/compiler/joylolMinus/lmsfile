@@ -6,8 +6,9 @@ lpTargets = litProgs.targets{
   mainDoc  = 'joylolMinus.tex',
   docFiles = {
     'joylolMinusOverview.tex',
-    'joylolMinusSymbols.tex',
     'joylolMinusObjects.tex',
+    'joylolMinusSymbols.tex',
+    'joylolMinusInterpreter.tex',
     'joylolMinusMain.tex',
     'joylolMinusConclusion.tex',
   },
