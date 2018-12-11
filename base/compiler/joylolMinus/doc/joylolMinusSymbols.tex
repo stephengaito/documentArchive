@@ -5,52 +5,75 @@
 \setCHeaderStream{public}
 \startCHeader
 typedef struct symbolEntry_struct {
-  char *symbol;
-  JObj *jObj;
+  Symbol *symbol;
+  JObj   *jObj;
 } SymbolEntry;
 
 typedef struct symbolTable_struct {
+  size_t       tag;
   SymbolEntry *symbols;
-  size_t      numSymbols;
-  size_t      maxSymbols;
-} SymbolTable;
+  size_t       numSymbols;
+  size_t       maxSymbols;
+  Symbol      *name;
+} SymbolTableObj;
 
 #define SymbolTable_GrowthSize 10
 
-SymbolTable *newSymbolTable(void);
-SymbolEntry *findSymbol(  SymbolTable *aTable, const char* aSymbol);
-void         insertSymbol(SymbolTable *aTable, const char* aSymbol, JObj *anObj);
-void         deleteSymbol(SymbolTable *aTable, const char* aSymbol);
-void         printTableToFile(
-                SymbolTable *aTable,
-                FILE *aFile,
-                const char* indent
-             );
+SymbolTableObj *newSymbolTable(Symbol *name);
 
-void        registerCFunction(
-              SymbolTable *aTable,
-              const char *symbol,
-              CFuncImp* func
-            );
+JObj *findSymbol(
+  SymbolTableObj *aTable,
+  Symbol         *aSymbol
+);
 
-void        registerCtxCFunction(
-              SymbolTable *aTable,
-              const char *symbol,
-              CtxCFuncImp* func
-            );
+void insertSymbol(
+  SymbolTableObj *aTable,
+  Symbol         *aSymbol,
+  JObj *anObj
+);
+
+void deleteSymbol(
+  SymbolTableObj *aTable,
+  Symbol         *aSymbol
+);
+void printTableToFile(
+  SymbolTableObj *aTable,
+  FILE           *aFile,
+  Symbol         *indent
+);
+
+void registerCFunction(
+  SymbolTableObj *aTable,
+  Symbol         *symbol,
+  CFunction      *func
+);
+
+void registerCtxCFunction(
+  SymbolTableObj *aTable,
+  Symbol         *symbol,
+  CtxCFunction   *func
+);
+
+void symbolTablePrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+
+#define isSymbolTableObj(anObj) \
+  ((anObj) && ((((JObj*)(anObj))->tag) == JObjTag))
+#define asSymbolTableObj(anObj) ((SymbolTableObj*)(anObj))
 \stopCHeader
 
 \startCCode
-SymbolTable *newSymbolTable(void) {
-  SymbolTable *newTable = (SymbolTable*)calloc(1, sizeof(SymbolTable));
+SymbolTableObj *newSymbolTable(Symbol *name) {
+  SymbolTableObj *newTable =
+    (SymbolTableObj*)calloc(1, sizeof(SymbolTableObj));
   assert(newTable);
   newTable->symbols    = NULL;
   newTable->numSymbols = 0;
   newTable->maxSymbols = 0;
+  newTable->name       = strdup(name);
   return newTable;
 }
 
-size_t findSymbolIndex(SymbolTable *aTable,  const char* aSymbol) {
+size_t findSymbolIndex(SymbolTableObj *aTable,  Symbol *aSymbol) {
   assert(aTable);
   assert(aSymbol);
   
@@ -87,7 +110,7 @@ size_t findSymbolIndex(SymbolTable *aTable,  const char* aSymbol) {
   }  
 }
 
-SymbolEntry *findSymbol(SymbolTable *aTable, const char* aSymbol) {  
+JObj *findSymbol(SymbolTableObj *aTable, Symbol *aSymbol) {  
   assert(aTable);
   assert(aSymbol);
   
@@ -102,10 +125,10 @@ SymbolEntry *findSymbol(SymbolTable *aTable, const char* aSymbol) {
   
   if (cmp != 0) return NULL;
   
-  return aTable->symbols + symbolIndex;
+  return aTable->symbols[symbolIndex].jObj;
 }
 
-void increaseMaxSymbols(SymbolTable *aTable) {
+void increaseMaxSymbols(SymbolTableObj *aTable) {
   assert(aTable);
   SymbolEntry *oldSymbols = aTable->symbols;
   size_t newMaxSymbols    = aTable->maxSymbols + SymbolTable_GrowthSize;
@@ -127,7 +150,7 @@ void increaseMaxSymbols(SymbolTable *aTable) {
   assert(aTable->numSymbols <= aTable->maxSymbols);
 }
 
-void insertSymbol(SymbolTable *aTable, const char *aSymbol, JObj *anObj) {
+void insertSymbol(SymbolTableObj *aTable, Symbol *aSymbol, JObj *anObj) {
   assert(aTable);
   assert(aSymbol);
   
@@ -184,7 +207,7 @@ void insertSymbol(SymbolTable *aTable, const char *aSymbol, JObj *anObj) {
   assert(aTable->numSymbols <= aTable->maxSymbols);
 }
 
-void deleteSymbol(SymbolTable *aTable, const char* aSymbol) {
+void deleteSymbol(SymbolTableObj *aTable, Symbol *aSymbol) {
   assert(aTable);
   assert(aSymbol);
   
@@ -211,10 +234,17 @@ void deleteSymbol(SymbolTable *aTable, const char* aSymbol) {
   assert(0 <= aTable->numSymbols);
 }
 
-void printTableToFile(SymbolTable *aTable, FILE *aFile, const char* indent) {
+void symbolTablePrinter(
+  JObj   *anObj,
+  Symbol *indent,
+  size_t  timeToLive
+) {
+  assert(isSymbolTableObj(anObj));
+  
+  SymbolTableObj *aTable = asSymbolTableObj(anObj);
+  
   for( size_t i = 0; i < aTable->numSymbols; i++) {
-    fprintf(
-      aFile,
+    printf(
       "%s[%zd] = [%s]\n",
       indent,
       i,
@@ -222,28 +252,36 @@ void printTableToFile(SymbolTable *aTable, FILE *aFile, const char* indent) {
     );
     printJObj(
       aTable->symbols[i].jObj,
-      aFile,
-      indent
+      indent,
+      timeToLive
     );
   }
 }
 
-void registerCFunction(SymbolTable *aTable, const char *symbol, CFuncImp* func) {
+void registerCFunction(
+  SymbolTableObj *aTable,
+  Symbol         *symbol,
+  CFunction      *func
+) {
   assert(aTable);
   assert(symbol);
   assert(func);
   
-  CFunction *newObj = newCFunction(func);
-  insertSymbol(aTable, symbol, (JObj*)newObj);
+  CFunctionObj *newObj = newCFunction(func);
+  insertSymbol(aTable, symbol, asJObj(newObj));
 }
 
-void registerCtxCFunction(SymbolTable *aTable, const char *symbol, CtxCFuncImp* func) {
+void registerCtxCFunction(
+  SymbolTableObj *aTable,
+  Symbol         *symbol,
+  CtxCFunction   *func
+) {
   assert(aTable);
   assert(symbol);
   assert(func);
   
-  CtxCFunction *newObj = newCtxCFunction(func);
-  insertSymbol(aTable, symbol, (JObj*)newObj);
+  CtxCFunctionObj *newObj = newCtxCFunction(func);
+  insertSymbol(aTable, symbol, asJObj(newObj));
 }
 
 \stopCCode

@@ -1,0 +1,447 @@
+% A ConTeXt document [master document: joyLoLMinus.tex ]
+
+\section[title=Symbols]
+
+\setCHeaderStream{public}
+\startCHeader
+void clearCtxData(
+  ContextObj *aCtx
+);
+
+void pushCtxData(
+  ContextObj *aCtx,
+  JObj       *lolToPush
+);
+
+void pushOnTopCtxData(
+  ContextObj *aCtx,
+  JObj       *lolToPush
+);
+
+void pushNullCtxData(
+  ContextObj* aCtx
+);
+
+void pushBooleanCtxData(
+  ContextObj *aCtx,
+  Boolean     aBool
+);
+
+void pushUIntegerCtxData(
+  ContextObj *aCtx,
+  UInteger   aUInt
+);
+
+void pushSymbolCtxData(
+  ContextObj* aCtx,
+  Symbol* aSymbol
+);
+
+//void pushParsedArrayOfStringsCtxData(
+//  ContextObj* aCtx,
+//  Symbol* someStrings[]
+//);
+
+//void pushParsedStringCtxData(
+//  ContextObj* aCtx,
+//  Symbol* aString
+//);
+
+//void pushParsedTextCtxData(
+//  ContextObj* aCtx,
+//  TextObj* aText
+//);
+
+void prependListCtxData(
+  ContextObj* aCtx,
+  JObj* lolToPrepend
+);
+
+JObj* peekCtxData(
+  ContextObj* aCtx
+);
+
+JObj* popCtxData(
+  ContextObj* aCtx
+);
+
+void clearCtxProcess(
+  ContextObj *aCtx
+);
+
+void pushCtxProcess(
+  ContextObj* aCtx,
+  JObj* lolToPush
+);
+
+void pushNullCtxProcess(
+  ContextObj* aCtx
+);
+
+void pushBooleanCtxProcess(
+  ContextObj *aCtx,
+  Boolean     aBool
+);
+
+void pushUIntegerCtxProcess(
+  ContextObj *aCtx,
+  UInteger    aUInt
+);
+
+void pushSymbolCtxProcess(
+  ContextObj* aCtx,
+  Symbol* aSymbol
+);
+
+//void pushParsedArrayOfStringsCtxProcess(
+//  ContextObj* aCtx,
+//  Symbol* someStrings[]
+//);
+
+//void pushParsedStringCtxProcess(
+//  ContextObj* aCtx,
+//  Symbol* aString
+//);
+
+//void pushParsedTextCtxProcess(
+//  ContextObj* aCtx,
+//  TextObj* aText
+//);
+
+void prependListCtxProcess(
+  ContextObj* aCtx,
+  JObj* lolToPrepend
+);
+
+JObj* peekCtxProcess(
+  ContextObj* aCtx
+);
+
+JObj* popCtxProcess(
+  ContextObj* aCtx
+);
+
+void showCtxStack(
+  ContextObj *aCtx,
+  JObj *aStack, 
+  Symbol *stackLabel
+);
+
+void showCtxData(ContextObj *aCtx);
+
+void showCtxProcess(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void clearCtxData(
+  ContextObj *aCtx
+) {
+  assert(isContextObj(aCtx));
+  aCtx->data = NULL;
+}
+
+void pushCtxData(
+  ContextObj *aCtx,
+  JObj       *lolToPush
+) {
+  assert(isContextObj(aCtx));
+  aCtx->data =
+    asJObj(newPair(lolToPush, aCtx->data));
+}
+
+void pushOnTopCtxData(
+  ContextObj *aCtx,
+  JObj       *lolToPush
+) {
+  assert(isContextObj(aCtx));
+  asCar(aCtx->data) =
+    asJObj(newPair(lolToPush, asCar(aCtx->data)));
+}
+
+void pushNullCtxData(
+  ContextObj* aCtx
+) {
+  assert(isContextObj(aCtx));
+  aCtx->data = 
+    asJObj(newPair(NULL, aCtx->data));
+}
+
+void pushBooleanCtxData(
+  ContextObj *aCtx,
+  Boolean     aBool
+) {
+  pushUIntegerCtxData(aCtx, aBool);
+}
+
+void pushUIntegerCtxData(
+  ContextObj *aCtx,
+  UInteger    aUInt
+) {
+  assert(isContextObj(aCtx));
+
+  UIntegerObj* aUInteger = newUInteger(aUInt);
+  aCtx->data =
+    asJObj(newPair(asJObj(aUInteger), aCtx->data));
+}
+
+void pushSymbolCtxData(
+  ContextObj* aCtx,
+  Symbol* aSymbol
+) {
+  assert(isContextObj(aCtx));
+  if (!aSymbol) return;
+
+  SymbolObj *symObj = newSymbol(aSymbol);
+  aCtx->data =
+    asJObj(newPair(asJObj(symObj), aCtx->data));
+}
+
+//void pushParsedArrayOfStringsCtxData(
+//  ContextObj* aCtx,
+//  Symbol* someStrings[]
+//) {
+//  assert(isContextObj(aCtx));
+//  if (!someStrings) return;
+//  TextObj* aText =
+//    createTextFromArrayOfStrings(aCtx->jInterp, someStrings);
+//  pushParsedTextCtxData(aCtx, aText);
+//  freeText(aText);
+//}
+
+//void pushParsedArrayOfStringsCtxData(
+//  ContextObj* aCtx,
+//  Symbol* someStrings[]
+//) {
+//  assert(isContextObj(aCtx));
+//  if (!someStrings) return;
+//  TextObj* aText =
+//    createTextFromArrayOfStrings(aCtx->jInterp, someStrings);
+//  pushParsedTextCtxData(aCtx, aText);
+//  freeText(aText);
+//}
+
+//void pushParsedStringCtxData(
+//  ContextObj* aCtx,
+//  Symbol* aString
+//) {
+//  assert(isContextObj(aCtx));
+//  if (!aString) return;
+//  TextObj* aText =
+//    createTextFromString(aCtx->jInterp, aString);
+//  pushParsedTextCtxData(aCtx, aText);
+//  freeText(aText);
+//}
+
+//void pushParsedTextCtxData(
+//  ContextObj* aCtx,
+//  TextObj* aText
+//) {
+//  assert(isContextObj(aCtx));
+//  if (!aText) return;
+//  assert(aCtx->jInterp);
+//  JObj* aLoL = parseAllSymbols(aText);
+//  if (!aLoL) return;
+//  aCtx->data = newPair(aCtx->jInterp, aLoL, aCtx->data);
+//}
+
+void prependListCtxData(
+  ContextObj* aCtx,
+  JObj* lolToPrepend
+) {
+  assert(isContextObj(aCtx));
+  if (!lolToPrepend) return;
+
+  aCtx->data =
+    concatLists(lolToPrepend, aCtx->data);
+}
+
+JObj* peekCtxData(
+  ContextObj* aCtx
+) {
+  assert(isContextObj(aCtx));
+  if (!aCtx->data) return NULL;
+
+  DEBUG(aCtx, "peekCtxData: %p %s\n",
+    aCtx->data, getJObjName(aCtx->data)
+  );
+  assert(isPairObj(aCtx->data));
+ 
+  JObj* peekedLoL = asCar(aCtx->data);
+  return peekedLoL;
+}
+
+JObj* popCtxData(
+  ContextObj* aCtx
+) {
+  assert(isContextObj(aCtx));
+  if (!aCtx->data) return NULL;
+
+  DEBUG(aCtx, "popCtxData: %p %s\n",
+    aCtx->data, getJObjName(aCtx->data)
+  );
+  assert(isPairObj(aCtx->data));
+ 
+  JObj* poppedLoL = asCar(aCtx->data);
+  aCtx->data      = asCdr(aCtx->data);
+  return poppedLoL;
+}
+
+void clearCtxProcess(
+  ContextObj *aCtx
+) {
+  assert(isContextObj(aCtx));
+  aCtx->process = NULL;
+}
+
+void pushCtxProcess(
+  ContextObj* aCtx,
+  JObj* lolToPush
+) {
+  assert(isContextObj(aCtx));
+  aCtx->process =
+    asJObj(newPair(lolToPush, aCtx->process));
+}
+
+void pushNullCtxProcess(
+  ContextObj* aCtx
+) {
+  assert(isContextObj(aCtx));
+  aCtx->process =
+    asJObj(newPair(NULL, aCtx->process));
+}
+
+void pushBooleanCtxProcess(
+  ContextObj *aCtx,
+  Boolean     aBool
+) {
+  pushUIntegerCtxProcess(aCtx, aBool);
+}
+
+void pushUIntegerCtxProcess(
+  ContextObj *aCtx,
+  UInteger   aUInt
+) {
+  assert(isContextObj(aCtx));
+
+  UIntegerObj *aUInteger = newUInteger(aUInt);
+  aCtx->process =
+    asJObj(newPair(asJObj(aUInteger), aCtx->process));
+}
+
+void pushSymbolCtxProcess(
+  ContextObj* aCtx,
+  Symbol* aSymbol
+) {
+  assert(isContextObj(aCtx));
+  if (!aSymbol) return;
+
+  SymbolObj *symObj = newSymbol(aSymbol);
+  aCtx->process =
+    asJObj(newPair(asJObj(symObj), aCtx->process));
+}
+
+//void pushParsedArrayOfStringsCtxProcess(
+//  ContextObj* aCtx,
+//  Symbol* someStrings[]
+//) {
+//  assert(isContextObj(aCtx));
+//  if (!someStrings) return;
+//  TextObj* aText =
+//    createTextFromArrayOfStrings(aCtx->jInterp, someStrings);
+//  pushParsedTextCtxProcess(aCtx, aText);
+//  freeText(aText);
+//}
+
+//void pushParsedStringCtxProcess(
+//  ContextObj* aCtx,
+//  Symbol* aString
+//) {
+//  assert(isContextObj(aCtx));
+//  if (!aString) return;
+//  TextObj* aText =
+//    createTextFromString(aCtx->jInterp, aString);
+//  pushParsedTextCtxProcess(aCtx, aText);
+//  freeText(aText);
+//}
+
+//void pushParsedTextCtxProcess(
+//  ContextObj* aCtx,
+//  TextObj* aText
+//) {
+//  assert(isContextObj(aCtx));
+//  if (!aText) return;
+//  JObj* aLoL = parseAllSymbols(aText);
+//  if (!aLoL) return;
+//  aCtx->process = newPair(aCtx->jInterp, aLoL, aCtx->process);
+//}
+
+void prependListCtxProcess(
+  ContextObj* aCtx,
+  JObj* lolToPrepend
+) {
+  assert(isContextObj(aCtx));
+  if (!lolToPrepend) return;
+
+  aCtx->process =
+    concatLists(lolToPrepend, aCtx->process);
+}
+
+JObj* peekCtxProcess(
+  ContextObj* aCtx
+) {
+  assert(isContextObj(aCtx));
+  if (!aCtx->process) return NULL;
+
+  DEBUG(aCtx, "peekCtxProcess: %p %s\n",
+    aCtx->process, getJObjName(aCtx->process)
+  );
+  assert(isPairObj(aCtx->process));
+ 
+  JObj* peekedLoL = asCar(aCtx->process);
+  return peekedLoL;
+}
+
+JObj* popCtxProcess(
+  ContextObj* aCtx
+) {
+  assert(isContextObj(aCtx));
+  if (!aCtx->process) return NULL;
+
+  DEBUG(aCtx, "popCtxProcess: %p %s\n",
+    aCtx->process, getJObjName(aCtx->process)
+  );
+  assert(isPairObj(aCtx->process));
+ 
+  JObj* poppedLoL = asCar(aCtx->process);
+  aCtx->process   = asCdr(aCtx->process);
+  return poppedLoL;
+}
+
+void showCtxStack(ContextObj *aCtx, JObj *aStack, Symbol *stackLabel) {
+  size_t index = 1;
+  JObj* curStack = aStack;
+  printf("----\n");
+  while(isPairObj(curStack)) {
+    if (aCtx->showDepth < index) break;
+    printf("%s[%zu]: ", stackLabel, index);
+    printJObj(asCar(curStack), "", 20);
+    printf("\n");
+    curStack = asCdr(curStack);
+    index++;
+  }
+  printf("%s[*]: ", stackLabel);
+  printJObj(curStack, "", 20);
+  printf("\n");
+}
+
+void showCtxData(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  showCtxStack(aCtx, aCtx->data, "d");
+}
+
+void showCtxProcess(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  showCtxStack(aCtx, aCtx->process, "p");
+}
+
+\stopCCode

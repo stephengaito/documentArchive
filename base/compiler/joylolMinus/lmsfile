@@ -8,6 +8,7 @@ lpTargets = litProgs.targets{
     'joylolMinusOverview.tex',
     'joylolMinusObjects.tex',
     'joylolMinusSymbols.tex',
+    'joylolMinusContext.tex',
     'joylolMinusInterpreter.tex',
     'joylolMinusMain.tex',
     'joylolMinusConclusion.tex',

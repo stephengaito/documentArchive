@@ -3,11 +3,11 @@
 \section[title=ANSI-C Main]
 
 \startCCode
-void interpretFile(const char* aFilePath) {
+void interpretFile(Symbol *aFilePath) {
 }
 
-void firstCFunction(Context *aCtx){};
-Context *secondCtxCFunction(Context *aCtx){ return aCtx; };
+void firstCFunction(ContextObj *aCtx){};
+ContextObj *secondCtxCFunction(ContextObj *aCtx){ return aCtx; };
 
 int main(int argc, char *argv[]){
   printf("joylolMinus\n");
@@ -18,14 +18,14 @@ int main(int argc, char *argv[]){
   }
   printf("testing symbolTable\n");
   
-  SymbolTable *symTab = newSymbolTable();
+  SymbolTableObj *symTab = newSymbolTable("testSymTbl");
   
   printf("SymbolTable before:\n");
-  printTableToFile(symTab, stdout, "  symTabBefore");
+  printJObj(asJObj(symTab), "  symTabBefore", 20);
 
-  Pair *thirdPair = newPair(NULL, NULL);  
+  PairObj *thirdPair = newPair(NULL, NULL);  
   insertSymbol(symTab, "third", asJObj(thirdPair));
-  Context *aTestCtx = newContext(NULL, NULL);
+  ContextObj *aTestCtx = newContext(NULL, NULL, "testCtx");
   insertSymbol(symTab, "aTest", asJObj(aTestCtx));
   registerCFunction(symTab, "first", firstCFunction);
   registerCtxCFunction(symTab, "second", secondCtxCFunction);
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
 //  deleteSymbol(symTab, "third");
   
   printf("SymbolTable after:\n");
-  printTableToFile(symTab, stdout, "   symTabAfter");
+  printJObj(asJObj(symTab), "   symTabAfter", 20);
   printf("done!\n");
 }
 \stopCCode
