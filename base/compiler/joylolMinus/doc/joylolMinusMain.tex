@@ -6,6 +6,9 @@
 void interpretFile(const char* aFilePath) {
 }
 
+void firstCFunction(Context *aCtx){};
+Context *secondCtxCFunction(Context *aCtx){ return aCtx; };
+
 int main(int argc, char *argv[]){
   printf("joylolMinus\n");
 
@@ -20,13 +23,15 @@ int main(int argc, char *argv[]){
   printf("SymbolTable before:\n");
   printTableToFile(symTab, stdout, "  symTabBefore");
 
-  insertSymbol(symTab, "third");
-  insertSymbol(symTab, "aTest");
-  insertSymbol(symTab, "first");
-  insertSymbol(symTab, "second");
-  insertSymbol(symTab, "second");
-  deleteSymbol(symTab, "aTest");
-  deleteSymbol(symTab, "third");
+  Pair *thirdPair = newPair(NULL, NULL);  
+  insertSymbol(symTab, "third", asJObj(thirdPair));
+  Context *aTestCtx = newContext(NULL, NULL);
+  insertSymbol(symTab, "aTest", asJObj(aTestCtx));
+  registerCFunction(symTab, "first", firstCFunction);
+  registerCtxCFunction(symTab, "second", secondCtxCFunction);
+  insertSymbol(symTab, "second", NULL);
+//  deleteSymbol(symTab, "aTest");
+//  deleteSymbol(symTab, "third");
   
   printf("SymbolTable after:\n");
   printTableToFile(symTab, stdout, "   symTabAfter");

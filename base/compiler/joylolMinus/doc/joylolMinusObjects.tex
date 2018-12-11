@@ -5,10 +5,25 @@
 \setCHeaderStream{public}
 \startCHeader
 
-#define JObjTag       0
-#define PairTag       1
-#define ContextTag    2
-#define CFunctionTag  3
+#define JObjTag         0
+#define PairTag         1
+#define ContextTag      2
+#define CFunctionTag    3
+#define CtxCFunctionTag 4
+#define LAST_JOBJ_TAG   5
+
+#define JObjName          "JObj"
+#define PairName          "Pair"
+#define ContextName       "Context"
+#define CFunctionName     "CFunction"
+#define CtxCFunctionName  "CtxCFunction"
+
+typedef struct jObjectTagName_struct {
+  size_t tag;
+  const char *name;
+} JObjTagName;
+
+extern JObjTagName jObjTagNameMap[];
 \stopCHeader
 
 \startCHeader
@@ -17,6 +32,11 @@ typedef struct jObject_struct {
 } JObj;
 
 JObj *newJObject(void);
+void printJObj(JObj *anObj, FILE *aFile, const char *indent);
+#define asJObj(anObj)  ((JObj*)(anObj))
+#define getJObjTag(anObj)  (((JObj*)(anObj))->tag)
+#define getJObjName(anObj) \
+  ((anObj) ? (jObjTagNameMap[getJObjTag(anObj)].name) : "null")
 \stopCHeader
 
 \startCCode
@@ -24,6 +44,32 @@ JObj *newJObject(void) {
   JObj *newObj = (JObj*)calloc(1, sizeof(JObj));
   newObj->tag = JObjTag;
   return newObj;
+}
+
+JObjTagName jObjTagNameMap[] = {
+  {JObjTag,         JObjName},
+  {PairTag,         PairName},
+  {ContextTag,      ContextName},
+  {CFunctionTag,    CFunctionName},
+  {CtxCFunctionTag, CtxCFunctionName},
+  {0,               NULL}
+};
+
+void printJObj(JObj *anObj, FILE *aFile, const char *indent) {
+  if (!anObj) {
+    fprintf(aFile, "%s<null>: null\n", indent);
+    return;
+  }
+  
+  assert(anObj->tag < LAST_JOBJ_TAG);
+  
+  fprintf(
+    aFile, 
+    "%s<%s>: %p\n",
+    indent,
+    getJObjName(anObj),
+    anObj
+  );
 }
 \stopCCode
 
@@ -35,6 +81,7 @@ typedef struct pair_struct {
 } Pair;
 
 Pair *newPair(JObj* car, JObj *cdr);
+#define asPair(anObj) ((Pair*)(anObj))
 \stopCHeader
 
 \startCCode
@@ -55,6 +102,7 @@ typedef struct context_struct {
 } Context;
 
 Context *newContext(JObj* data, JObj *process);
+#define asContext(anObj) ((Context*)(anObj))
 \stopCHeader
 
 \startCCode
@@ -68,7 +116,7 @@ Context *newContext(JObj *data, JObj *process) {
 \stopCCode
 
 \startCHeader
-typedef Context* (CFuncImp)(Context*);
+typedef void (CFuncImp)(Context*);
 
 typedef struct cFunction_struct {
   size_t    tag;
@@ -76,6 +124,7 @@ typedef struct cFunction_struct {
 } CFunction;
 
 CFunction *newCFunction(CFuncImp* func);
+#define asCFunction(anObj) ((CFunction*)(anObj))
 \stopCHeader
 
 \startCCode
@@ -87,3 +136,23 @@ CFunction *newCFunction(CFuncImp *func) {
 }
 \stopCCode
 
+\startCHeader
+typedef Context* (CtxCFuncImp)(Context*);
+
+typedef struct ctxCFunction_struct {
+  size_t       tag;
+  CtxCFuncImp *func;
+} CtxCFunction;
+
+CtxCFunction *newCtxCFunction(CtxCFuncImp* func);
+#define asCtxCFunction(anObj) ((CtxCFunction*)(anObj))
+\stopCHeader
+
+\startCCode
+CtxCFunction *newCtxCFunction(CtxCFuncImp *func) {
+  CtxCFunction *newObj = (CtxCFunction*)calloc(1, sizeof(CtxCFunction));
+  newObj->tag  = CtxCFunctionTag;
+  newObj->func = func;
+  return newObj;
+}
+\stopCCode
