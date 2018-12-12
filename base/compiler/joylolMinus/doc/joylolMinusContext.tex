@@ -261,7 +261,7 @@ JObj* peekCtxData(
   assert(isContextObj(aCtx));
   if (!aCtx->data) return NULL;
 
-  DEBUG(aCtx, "peekCtxData: %p %s\n",
+  DEBUG(DebugMask, "peekCtxData: %p %s\n",
     aCtx->data, getJObjName(aCtx->data)
   );
   assert(isPairObj(aCtx->data));
@@ -276,7 +276,7 @@ JObj* popCtxData(
   assert(isContextObj(aCtx));
   if (!aCtx->data) return NULL;
 
-  DEBUG(aCtx, "popCtxData: %p %s\n",
+  DEBUG(DebugMask, "popCtxData: %p %s\n",
     aCtx->data, getJObjName(aCtx->data)
   );
   assert(isPairObj(aCtx->data));
@@ -392,7 +392,7 @@ JObj* peekCtxProcess(
   assert(isContextObj(aCtx));
   if (!aCtx->process) return NULL;
 
-  DEBUG(aCtx, "peekCtxProcess: %p %s\n",
+  DEBUG(DebugMask, "peekCtxProcess: %p %s\n",
     aCtx->process, getJObjName(aCtx->process)
   );
   assert(isPairObj(aCtx->process));
@@ -407,7 +407,7 @@ JObj* popCtxProcess(
   assert(isContextObj(aCtx));
   if (!aCtx->process) return NULL;
 
-  DEBUG(aCtx, "popCtxProcess: %p %s\n",
+  DEBUG(DebugMask, "popCtxProcess: %p %s\n",
     aCtx->process, getJObjName(aCtx->process)
   );
   assert(isPairObj(aCtx->process));

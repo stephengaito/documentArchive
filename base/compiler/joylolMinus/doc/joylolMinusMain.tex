@@ -20,8 +20,10 @@ int main(int argc, char *argv[]){
   
   SymbolTableObj *symTab = newSymbolTable("testSymTbl");
   
+//  setDebuggingFlags(0xff);
+  
   printf("SymbolTable before:\n");
-  printJObj(asJObj(symTab), "  symTabBefore", 20);
+  printJObj(asJObj(symTab), "", 20);
 
   PairObj *thirdPair = newPair(NULL, NULL);  
   insertSymbol(symTab, "third", asJObj(thirdPair));
@@ -30,11 +32,11 @@ int main(int argc, char *argv[]){
   registerCFunction(symTab, "first", firstCFunction);
   registerCtxCFunction(symTab, "second", secondCtxCFunction);
   insertSymbol(symTab, "second", NULL);
-//  deleteSymbol(symTab, "aTest");
-//  deleteSymbol(symTab, "third");
+  deleteSymbol(symTab, "aTest");
+  deleteSymbol(symTab, "third");
   
   printf("SymbolTable after:\n");
-  printJObj(asJObj(symTab), "   symTabAfter", 20);
+  printJObj(asJObj(symTab), "", 20);
   printf("done!\n");
 }
 \stopCCode

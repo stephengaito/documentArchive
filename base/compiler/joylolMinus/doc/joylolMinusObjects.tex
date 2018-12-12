@@ -34,7 +34,7 @@ typedef void (PrintFunction)(
   Symbol *indent,
   size_t timeToLive
 );
-Symbol *appendSymbols(Symbol *sym1, Symbol *sym2);
+char *appendSymbols(Symbol *sym1, Symbol *sym2);
 
 typedef struct jObjectTagName_struct {
   size_t         tag;
@@ -46,27 +46,29 @@ extern JObjTagName jObjTagNameMap[];
 
 #ifndef NDEBUG
 #include <stdio.h>
-#define setDebugging(aCtx, aBool)  \
-  assert(aCtx);                    \
-  aCtx->debug = aBool
-#define getDebuggingInto(aCtx, aVar) \
-  assert(aCtx);                      \
-  Boolean aVar = aCtx->debug
-#define DEBUG(aCtx, format, ... )  \
-  assert(aCtx);                    \
-  if (aCtx->debug) {               \
-    printf(format, __VA_ARGS__ );  \
+extern size_t debugFlags;
+#define DebugMask   0xff
+#define setDebuggingFlags(someFlags)         \
+  debugFlags = someFlags
+#define getDebuggingFlagsInto(aVar)     \
+  size_t aVar = debugFlags
+#define DEBUG(debugMask, format, ... )  \
+  if (debugFlags & debugMask) {          \
+    printf(format, __VA_ARGS__ );       \
   }
 #else
-#define startDebugging(aCtx)
-#define stopDebuggging(aCtx)
-#define DEBUG(aCtx, format, ...)
+#define startDebuggingFlags(aCtx)
+#define stopDebugggingFlags(aCtx)
+#define DEBUG(debugMask, format, ...)
 #endif
 
 \stopCHeader
 
 \startCCode
-Symbol *appendSymbols(Symbol *sym1, Symbol *sym2) {
+
+size_t debugFlags = 0;
+
+char *appendSymbols(Symbol *sym1, Symbol *sym2) {
   char *newSym =
     (char*)calloc(
       strlen(sym1)+strlen(sym2)+1,
@@ -118,6 +120,7 @@ JObjTagName jObjTagNameMap[] = {
 };
 
 void printJObj(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "printJObj %p\n", anObj);
   if (!anObj) {
     printf("%s<null>: null\n", indent);
     return;
@@ -133,6 +136,7 @@ void printJObj(JObj *anObj, Symbol *indent, size_t timeToLive) {
 }
 
 void jObjPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "jObjPrinter %p\n", anObj);
   assert(isJObj(anObj));
   printf("%s[JObj]\n", indent);
 }
@@ -224,6 +228,7 @@ void pairPrinter(
   Symbol *indent,
   size_t  timeToLive
 ) {
+  DEBUG(DebugMask, "pairPrinter %p\n", anObj);
   assert(isPairObj(anObj));
   
   printf("%s( \n", indent);
@@ -260,6 +265,7 @@ SymbolObj *newSymbol(Symbol *aSymbol) {
 }
 
 void symbolPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "symbolPrinter %p\n", anObj);
   assert(isSymbolObj(anObj));
   printf("%s%s\n", indent, asSymbol(anObj));
 }
@@ -291,6 +297,7 @@ UIntegerObj *newUInteger(UInteger aUInt) {
 }
 
 void uIntegerPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "uIntegerPrinter %p\n", anObj);
   assert(isUIntegerObj(anObj));
   printf("%s%zu\n", indent, asUInteger(anObj));
 }
@@ -337,12 +344,14 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
 }
 
 void contextPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "contextPrinter %p\n", anObj);
   assert(isContextObj(anObj));
+  char *newIndent = appendSymbols(indent, "    ");
   printf("%s<context:%s>\n", indent, asCtxName(anObj));
-  printf("%s<data>\n", indent);
-  printJObj(asCtxData(anObj), indent, 20);
-  printf("%s<process>\n", indent);
-  printJObj(asCtxProcess(anObj), indent, 20);
+  printf("%s  <data>\n", indent);
+  printJObj(asCtxData(anObj), newIndent, 20);
+  printf("%s  <process>\n", indent);
+  printJObj(asCtxProcess(anObj), newIndent, 20);
 }
 \stopCCode
 
@@ -373,6 +382,7 @@ CFunctionObj *newCFunction(CFunction *func) {
 }
 
 void cFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "cFunctionPrinter %p\n", anObj);
   assert(isCFunctionObj(anObj));
   printf("%s<cFunc:%p>\n", indent, asCFunction(anObj));
 }
@@ -405,6 +415,7 @@ CtxCFunctionObj *newCtxCFunction(CtxCFunction *func) {
 }
 
 void ctxCFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "ctxCFunctionPrinter %p\n", anObj);
   assert(isCtxCFunctionObj(anObj));
   printf("%s<ctxCFunc:%p>\n", indent, asCtxCFunction(anObj));
 }

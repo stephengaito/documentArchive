@@ -57,7 +57,7 @@ void registerCtxCFunction(
 void symbolTablePrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
 
 #define isSymbolTableObj(anObj) \
-  ((anObj) && ((((JObj*)(anObj))->tag) == JObjTag))
+  ((anObj) && ((((JObj*)(anObj))->tag) == SymbolTableTag))
 #define asSymbolTableObj(anObj) ((SymbolTableObj*)(anObj))
 \stopCHeader
 
@@ -66,6 +66,7 @@ SymbolTableObj *newSymbolTable(Symbol *name) {
   SymbolTableObj *newTable =
     (SymbolTableObj*)calloc(1, sizeof(SymbolTableObj));
   assert(newTable);
+  newTable->tag        = SymbolTableTag;
   newTable->symbols    = NULL;
   newTable->numSymbols = 0;
   newTable->maxSymbols = 0;
@@ -159,22 +160,25 @@ void insertSymbol(SymbolTableObj *aTable, Symbol *aSymbol, JObj *anObj) {
   assert(symbolIndex <= aTable->numSymbols);
   assert(symbolIndex <= aTable->maxSymbols);
   
-  printf(
-    "insertSymbol: %zd %zd %zd\n",
+  DEBUG(DebugMask,
+    "insertSymbol: index: %zd  num: %zd max: %zd\n",
     symbolIndex,
     aTable->numSymbols,
     aTable->maxSymbols
   );
-  printf(
-    "insertSymbol: [%s]<%s>: %p\n",
+  DEBUG(DebugMask,
+    "insertSymbol: inserting: [%s]<%s>: %p\n",
     aSymbol,
     getJObjName(anObj),
     anObj
   );
   if (symbolIndex < aTable->numSymbols) {
-    printf("insertSymbol: [%s]\n", aTable->symbols[symbolIndex].symbol);
+    DEBUG(DebugMask,
+      "insertSymbol: found: [%s]\n",
+      aTable->symbols[symbolIndex].symbol
+    );
   } else {
-    printf("insertSymbol: no symbols\n");
+    DEBUG(DebugMask, "%s", "insertSymbol: found: no symbols\n");
   }
   
   if (symbolIndex == aTable->numSymbols) {
@@ -239,23 +243,26 @@ void symbolTablePrinter(
   Symbol *indent,
   size_t  timeToLive
 ) {
+  DEBUG(DebugMask, "symbolTablePrinter %p\n", anObj);
   assert(isSymbolTableObj(anObj));
   
   SymbolTableObj *aTable = asSymbolTableObj(anObj);
   
+  char* newIndent = appendSymbols(indent, "  ");
   for( size_t i = 0; i < aTable->numSymbols; i++) {
     printf(
-      "%s[%zd] = [%s]\n",
+      "%ssymTab[%zd] = [%s]\n",
       indent,
       i,
       aTable->symbols[i].symbol
     );
     printJObj(
       aTable->symbols[i].jObj,
-      indent,
+      newIndent,
       timeToLive
     );
   }
+  free(newIndent);
 }
 
 void registerCFunction(

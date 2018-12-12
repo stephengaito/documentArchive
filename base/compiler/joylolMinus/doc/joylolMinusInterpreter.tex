@@ -14,7 +14,7 @@ static void traceAction(
   JObj       *aLoL
 ) {
   assert(aCtx);
-  DEBUG(aCtx, "traceAction: %p [%s] %s %p\n",
+  DEBUG(DebugMask, "traceAction: %p [%s] %s %p\n",
     aCtx, action, getJObjName(aLoL), aLoL);
 
   printf("%s: ", action);
@@ -30,7 +30,7 @@ void evalCommandInContext(
 ) {
   assert(aCtx);
   
-  DEBUG(aCtx, "evalCommandInContext > %p [%s] %p\n",
+  DEBUG(DebugMask, "evalCommandInContext > %p [%s] %p\n",
     aCtx, aCtx->name, command);
   //
   // push this command onto the top of the process stack
@@ -175,13 +175,13 @@ void evalCommandInContext(
       }
     }
     if (aCtx->tracingOn) {
-      DEBUG(aCtx, "evalCommandInContext -> tracing%s\n", "");
+      DEBUG(DebugMask, "evalCommandInContext -> tracing%s\n", "");
       showCtxData(aCtx);
       showCtxProcess(aCtx);
-      DEBUG(aCtx, "evalCommandInContext <- tracing%s\n", "");
+      DEBUG(DebugMask, "evalCommandInContext <- tracing%s\n", "");
     }
   } // aCtx->process is empty
-  DEBUG(aCtx, "evalCommandInContext < %p %p\n", aCtx, command);
+  DEBUG(DebugMask, "evalCommandInContext < %p %p\n", aCtx, command);
 }
 
 \stopCCode
