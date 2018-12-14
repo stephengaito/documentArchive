@@ -213,6 +213,90 @@ done:
   End
 \stoptyping
 
+Finally we translate this into jPeg:
+
+\starttyping
+( 1 any ) 'operator' define
+
+(
+  (' ' '\t' '\n') 0 span
+) 'whiteSpace' define
+
+(
+  ( 'az' 'AZ') charSet
+  ( 'az' 'AZ' '09' '_') 0 span
+) 'identifier' define
+
+(
+  ( '09' ) 1 span
+) 'decimalNum' define
+
+(
+  '0' chars
+  ( 'xX' ) charSet
+  ( '09' 'af' 'AF' ',' ) 1 span
+) 'hexNumber' define
+
+(
+  ( hexNumber decimalNum ) choice
+) 'naturalNum' define
+
+// LONG QUOTE???
+
+(
+  "'" char
+  ( 
+    (
+      ( "'" '\r' '\n' '\f' ) coCharSet
+      ( '\\' chars 1 any )
+    ) choice
+  ) 0 repeatAtLeast
+  "'" char
+) 'singleQuote' define
+
+(
+  '"' char
+  ( 
+    (
+      ( '"' '\r' '\n' '\f' ) coCharSet
+      ( '\\' char 1 any )
+    ) choice
+  ) 0 repeatAtLeast
+  '"' char
+) 'doubleQuote' define
+
+(
+  ( singleQuote doubleQuote longQuote ) choice
+) 'string' define
+
+(
+  '//' chars
+  ( '\n' ) 0 coSpan
+  '\n' chars
+) 'singleComment' define
+
+(
+  '/*' chars
+  ( ( '*/' chars ) not ) 0 repeatAtLeast
+  '*/' chars
+) 'multiComment' define
+
+(
+  ( singleComment multiComment ) choice
+) 'comment' define
+
+(
+  (
+    naturalNum
+    identifier
+    comment
+    string
+    whiteSpace
+    operator
+  ) choice
+) 'lexeme' define
+\stoptyping
+
 \setCHeaderStream{public}
 \startCHeader
 
