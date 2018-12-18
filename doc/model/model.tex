@@ -82,3 +82,56 @@ efficiently.
 
 \stopitemize
 
+\section[title=Memory Model]
+
+In \joylol\ the memory model, we have unlimited memory but it is only 
+directly accessible at the tops of the data and process stacks. 
+
+In \joylolRM\ the memory model, we have unlimited memory which is again 
+only directly accessible at the tops of a small number of stacks which 
+include \joylol's data and process stacks. The non-data, non-process 
+stacks are referred to as registers or local variables.
+
+\section[title=Call patterns]
+
+In \joylol, \joylol\ words pass their parameters on the data or process 
+stack\footnote{Context changing words are allowed to return the new 
+context via a third \quote{return} parameter. However this special 
+parameter could be modelled as the top of the data stack.}. 
+
+In \joylolRM\ there are two possible call patterns, as a \joylol\ word, or 
+inline. When called as a \joylol\ word, parameters can only be passed on 
+the \joylol\ data and process stacks. When \quote{called inline}, the 
+implementation of all callee \joylol\ words are embedded inline into the 
+body of the implementation of the caller \joylol\ word. 
+
+\TODO{What about more traditional C-like call patterns? Can we interpret 
+them as implicitly pushing the arguments on to the data stack? \emph{Most} 
+words simply manipulate the top few items on the data stack, and return 
+\emph{one} result. This is essentially the standard C-like call pattern. 
+Lua allows multiple return values:}
+
+\starttyping
+x, y, z = aCall(a, b, c)
+\stoptyping
+
+\TODO{This leaves one case: how do we denote the \emph{infinite} change to 
+the data stack. Effectively this can only be the removal of the whole 
+stack, AKA clearData.} 
+
+\TODO{What about words that manipulate the process stack? I think most 
+such words actually always manipulate the data stack as well. How are 
+these represented in a C-like way? Since the process stack \emph{is} the 
+continuation structure of a method, the Lua multi-return is not 
+appropriate for the process changes. However the multi-return does suggest 
+a way forward: the multi-return is all about what will be done with the 
+results on the data stack. In process terms this (might) translate into 
+control structures. However a problem here is that the callee word has the 
+arbitrary ability to \emph{change} the contents of the process stack.. and 
+so what happens once the callee returns. This is difficult if we equate 
+the contents of the process stack as a control structure compiled 
+\emph{before} the callee word gets called. Is it this difficulty which 
+precludes some words being compiled? (see below)} 
+
+\TODO{When does a word get too complex to be compiled (inline)?}
+
