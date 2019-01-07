@@ -48,12 +48,12 @@ extern JObjTagName jObjTagNameMap[];
 #include <stdio.h>
 extern size_t debugFlags;
 #define DebugMask   0xff
-#define setDebuggingFlags(someFlags)         \
+#define setDebuggingFlags(someFlags)    \
   debugFlags = someFlags
 #define getDebuggingFlagsInto(aVar)     \
   size_t aVar = debugFlags
 #define DEBUG(debugMask, format, ... )  \
-  if (debugFlags & debugMask) {          \
+  if (debugFlags & debugMask) {         \
     printf(format, __VA_ARGS__ );       \
   }
 #else

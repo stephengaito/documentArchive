@@ -316,4 +316,42 @@ the result of its action.
 
 \stopitemize
 
+\section[title=Challenges]
+
+\subsection[title=Sublanguages]
+
+Since our \joylol\ language is actually best structured as a pair of 
+sublanguages, we need a way of \quote{switching} between these 
+sublanguages \emph{inside} a given \joylol\ text. Our overall strategy is 
+to construct the compiler as a sequence of co-routines, which each 
+consume, transform and the generate \quote{objects} along the sequence. To 
+deal with multiple sublanguages we need the ability to deal with a 
+\quote{sequence} of co-routines which does not have a \emph{linear} 
+topology. That is for some sections of the co-routine structure there will 
+be multiple paths. To deal with this we need multiplexer co-routine which 
+listens for a small collection of tokens and then chooses which 
+sub-sequence along which to send all subsequence tokens. Conversely we 
+need a reverse-multiplexer to fold tokens from multiple streams back into 
+one stream. The reverse-multiplexer will \quote{listen} on all of its 
+\quote{input} streams waiting for the next token\footnote{This 
+architecture seems to assume that we have an inherently sequential, 
+non-parallel, computational system with only one co-routine 
+\quote{running} at any one time.}. 
+
+A subsequent question now becomes, where do we locate the multiplexer and 
+reverse-multiplexer? For our purposes, locating the multiplexer depends 
+upon whether or not the sublanguages (as well as the multiplexer) can 
+share the \quote{lexer}\footnote{Note that, since the lexer will take care 
+of rather large structures such as quoted strings and comments, sharing 
+lexers \emph{means} that the sublanguages \emph{must} also share the 
+syntax of these \quote{large} structures.}. If they can all share the same 
+lexer then the multiplexer should be located between the single lexer and 
+the multiple parsers\footnote{Alternatively the composite parser includes 
+the multiplexer and sub-language parsers.}. 
+
+\subsection[title=Co-routines]
+
+Since co-routines will be an important way to structure complex 
+mathematical computational proofs, we need to ensure switching between 
+co-routines can be compiled into performant (ANSI-C) idioms. 
 
