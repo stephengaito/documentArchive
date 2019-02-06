@@ -355,3 +355,82 @@ Since co-routines will be an important way to structure complex
 mathematical computational proofs, we need to ensure switching between 
 co-routines can be compiled into performant (ANSI-C) idioms. 
 
+\section[title=Syntax/Semantics]
+
+\subsection[title=The JoyLoL Configuration Language]
+
+\bold{Syntax} 
+
+\starttyping
+configuration = systemConfig 
+  defaults^0 
+  clusters^0 
+  externals^0 
+  generation
+  end ("--" "system" systemName)^0
+systemConfig = "system" systemName
+systemName   = name
+
+defaults = "default" optionClause (";" optionClause)^0
+options  = "option" optionClause (";" optionClause)^0
+optionClause = optionTag optionMark^0 targetList^0
+optionTag    = classTag + systemTag + freeTag
+classTag     = "assertion" + "debug" + "optimize" + "trace"
+systemTag    = "collect"
+freeTag      = name
+optionMark   = "(" optionValue")"
+optionValue  = standardValue + classValue + freeValue
+standardValue = "yes" + "no" + "all"
+classValue    = "require" + "ensure" + "invariant" + "loop" + "check"
+freeValue     = fileName + directoryName + name
+
+clusters = "cluster" clusterClause (";" clusterClause)^0
+clusterClause = clusterTag^0 directoryName clusterProperties^0
+clusterTag    = clusterName ":"
+clusterName   = name
+clusterProperties = use^0
+  include^0
+  exclude^0
+  nameAdaptation^0
+  defaults^0
+  options^0
+  visibility^0
+use = "use" fileName
+include = "include" fileList
+exclude = "exclude" fileList
+fileList = fileName (";" fileName)^0
+fileName = name
+
+nameAdaptation = "adapt" clusterAdaptationList
+clusterAdaptationList = clusterAdaptation (";" clusterAdaptation)^0
+clusterAdaptation = clusterIgnore + clusterRenameClause
+clusterIgnore = clusterName ":" "ignore"
+clusterRenameClause = clusterName ":" "rename" classRenameList
+classRenameList = classRenamePair ("," classRenamePair)^0
+classRenamePair = className "as" className
+className = name
+
+externals = "external" languageContribution (";" languageContributions)^0
+languageContribution = language ":" fileList
+language = "JoyLoL" +
+  "C" + "C++" +
+  "Executable" + "SharedLibrary" + 
+  "Object" +
+  "Make" +
+  "ConTeXt" +
+  name
+
+generation = "generate" languageGeneration (";" languageGeneration)^0
+languageGeneration = language generateOption^0 ":" target
+generateOption = "(" generateOptionValue ")"
+generateOptionValue = "yes" + "no"
+target = directoryPath + fileName
+
+
+
+
+  
+\stoptyping
+
+\subsection[title=The JoyLoL Language]
+
