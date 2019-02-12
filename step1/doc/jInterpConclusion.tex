@@ -1,0 +1,65 @@
+% A ConTeXt document [master document: jInterp.tex ]
+
+
+\section[title=Conclusion]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JINTERP}
+\createCHeaderFile%
+  {public}
+  {joylol/jInterp.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JINTERP_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/jInterp-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jInterp.h"
+#include "joylol/jInterp-private.h"
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {jInterp.c}%
+  {}
+
+\addCCodeProgram{jInterp})
+  
+\addMainDocument{jInterp.tex}
+\addSubDocument{jInterpOverview.tex} 
+\addSubDocument{jInterpObjects.tex}
+\addSubDocument{jInterpSymbols.tex}
+\addSubDocument{jInterpContext.tex}
+\addSubDocument{jInterpJPeg.tex}
+\addSubDocument{jInterpInterpreter.tex}
+\addSubDocument{jInterpMain.tex}
+\addSubDocument{jInterpConclusion.tex} 
+
+\addCCodeTargets{default}
+
+\addCTestInclude{<joylol/jInterp.h>}
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addCTestTargets{default}
+
+%\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

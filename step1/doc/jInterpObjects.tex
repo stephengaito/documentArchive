@@ -1,0 +1,445 @@
+% A ConTeXt document [master document: joyLoLMinus.tex ]
+
+\section[title=Objects]
+
+\setCHeaderStream{public}
+\startCHeader
+#define JObjTag         0
+#define PairTag         1
+#define SymbolTag       2
+#define UIntegerTag     3
+#define ContextTag      4
+#define CFunctionTag    5
+#define CtxCFunctionTag 6
+#define SymbolTableTag  7
+#define LAST_JOBJ_TAG   8
+
+#define JObjName          "JObj"
+#define PairName          "Pair"
+#define SymbolName        "Symbol"
+#define UIntegerName      "UInteger"
+#define ContextName       "Context"
+#define CFunctionName     "CFunction"
+#define CtxCFunctionName  "CtxCFunction"
+#define SymbolTableName   "SymbolTable"
+
+typedef size_t Boolean;
+#define false 0
+#define true  1
+
+typedef const char Symbol;
+typedef struct jObject_struct JObj;
+typedef void (PrintFunction)(
+  JObj *aJObj,
+  Symbol *indent,
+  size_t timeToLive
+);
+char *appendSymbols(Symbol *sym1, Symbol *sym2);
+
+typedef struct jObjectTagName_struct {
+  size_t         tag;
+  Symbol        *name;
+  PrintFunction *printer;
+} JObjTagName;
+
+extern JObjTagName jObjTagNameMap[];
+
+#ifndef NDEBUG
+#include <stdio.h>
+extern size_t debugFlags;
+#define DebugMask   0xff
+#define setDebuggingFlags(someFlags)    \
+  debugFlags = someFlags
+#define getDebuggingFlagsInto(aVar)     \
+  size_t aVar = debugFlags
+#define DEBUG(debugMask, format, ... )  \
+  if (debugFlags & debugMask) {         \
+    printf(format, __VA_ARGS__ );       \
+  }
+#else
+#define startDebuggingFlags(aCtx)
+#define stopDebugggingFlags(aCtx)
+#define DEBUG(debugMask, format, ...)
+#endif
+
+\stopCHeader
+
+\startCCode
+
+size_t debugFlags = 0;
+
+char *appendSymbols(Symbol *sym1, Symbol *sym2) {
+  char *newSym =
+    (char*)calloc(
+      strlen(sym1)+strlen(sym2)+1,
+      sizeof(char)
+    );
+  assert(newSym);
+  strcpy(newSym, sym1);
+  strcat(newSym, sym2);
+  return newSym;
+}
+\stopCCode
+
+\subsection[title=JObjects]
+
+\startCHeader
+typedef struct jObject_struct {
+  size_t tag;
+} JObj;
+
+JObj *newJObject(void);
+void printJObj(JObj *anObj, Symbol *indent, size_t timeToLive);
+void jObjPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define isJObj(anObj) \
+  ((anObj) && ((((JObj*)(anObj))->tag) == JObjTag))
+#define asJObj(anObj)  ((JObj*)(anObj))
+#define getJObjTag(anObj)  (((JObj*)(anObj))->tag)
+#define getJObjName(anObj) \
+  ((anObj) ? (jObjTagNameMap[getJObjTag(anObj)].name) : "null")
+\stopCHeader
+
+\startCCode
+JObj *newJObject(void) {
+  JObj *newObj =
+    (JObj*)calloc(1, sizeof(JObj));
+  newObj->tag = JObjTag;
+  return newObj;
+}
+
+JObjTagName jObjTagNameMap[] = {
+  {JObjTag,         JObjName,         jObjPrinter},
+  {PairTag,         PairName,         pairPrinter},
+  {SymbolTag,       SymbolName,       symbolPrinter},
+  {UIntegerTag,     UIntegerName,     uIntegerPrinter},
+  {ContextTag,      ContextName,      contextPrinter},
+  {CFunctionTag,    CFunctionName,    cFunctionPrinter},
+  {CtxCFunctionTag, CtxCFunctionName, ctxCFunctionPrinter},
+  {SymbolTableTag,  SymbolTableName,  symbolTablePrinter},
+  {0,               NULL,             NULL}
+};
+
+void printJObj(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "printJObj %p\n", anObj);
+  if (!anObj) {
+    printf("%s<null>: null\n", indent);
+    return;
+  }
+  
+  assert(anObj->tag < LAST_JOBJ_TAG);
+  
+  jObjTagNameMap[getJObjTag(anObj)].printer(
+    anObj,
+    indent,
+    timeToLive
+  );
+}
+
+void jObjPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "jObjPrinter %p\n", anObj);
+  assert(isJObj(anObj));
+  printf("%s[JObj]\n", indent);
+}
+\stopCCode
+
+\subsection[title=Pairs]
+
+\startCHeader
+typedef struct pair_struct {
+  size_t tag;
+  JObj  *car;
+  JObj  *cdr;
+} PairObj;
+
+#define asPairObj(anObj) ((PairObj*)(anObj))
+#define isPairObj(anObj) ((anObj) && (((anObj)->tag) == PairTag))
+#define isAtomObj(anObj) ((anObj) && (((anObj)->tag) != PairTag))
+#define asCar(anObj)     (((PairObj*)(anObj))->car)
+#define asCdr(anObj)     (((PairObj*)(anObj))->cdr)
+\stopCHeader
+
+\startTestSuite[newPair]
+
+\startCHeader
+PairObj *newPair(JObj *car, JObj *cdr);
+\stopCHeader
+
+\startCCode
+PairObj *newPair(JObj *car, JObj *cdr) {
+  PairObj *newObj =
+    (PairObj*)calloc(1, sizeof(PairObj));
+  newObj->tag = PairTag;
+  newObj->car = car;
+  newObj->cdr = cdr;
+  return newObj;
+}
+\stopCCode
+
+\startTestCase[should create a new pair]
+
+\startCTest
+  JObj *lolA = asJObj(newPair(NULL, NULL));
+  JObj *lolB = asJObj(newPair(NULL, NULL));
+  JObj *lol  = asJObj(newPair(lolA, lolB));
+  AssertIntTrue(isPairObj(lol));
+  AssertIntEquals(getJObjTag(lol), PairTag);
+  AssertPtrEquals(asCar(lol), lolA);
+  AssertPtrEquals(asCdr(lol), lolB);  
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startCHeader
+JObj* concatLists(JObj *firstList, JObj *secondList);
+JObj* copyLoL(JObj* aLoL);
+void pairPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+\stopCHeader
+
+\startCCode
+JObj* concatLists(
+  JObj *firstList,
+  JObj *secondList
+) {
+  JObj *result = NULL;
+ 
+  if (isPairObj(firstList)) {
+    result = firstList;
+  } else {
+    result = asJObj(newPair(firstList, NULL));
+  }
+ 
+  if (!secondList) return result;
+  // ensure that the second list is a LIST
+  if (!isPairObj(secondList)) {
+    secondList = asJObj(newPair(secondList, NULL));
+  }
+
+  if (!asCar(result)) return secondList;
+ 
+  // find end of firstList/result
+  JObj* lolList = result;
+  while(isPairObj(asCdr(lolList))) {
+    lolList = asCdr(lolList);
+  }
+
+  // ensure that if firstList/result ends in a non-pair we make it a pair
+  if (asCdr(lolList) && !isPairObj(asCdr(lolList))) {
+    asCdr(lolList) = asJObj(newPair(asCdr(lolList), NULL));
+    assert(asCdr(lolList));
+    lolList = asCdr(lolList);
+  }
+
+  // place secondList at the end of firstList/result
+  assert(!asCdr(lolList));
+  asCdr(lolList) = secondList;
+ 
+  return result;
+}
+
+JObj* copyLoL(JObj* aLoL) {
+  if (!aLoL) return NULL;
+  if (isAtomObj(aLoL)) return aLoL;
+
+  return asJObj(newPair(
+    copyLoL(asCar(aLoL)),
+    copyLoL(asCdr(aLoL))
+  ));
+}
+
+void pairPrinter(
+  JObj   *anObj,
+  Symbol *indent,
+  size_t  timeToLive
+) {
+  DEBUG(DebugMask, "pairPrinter %p\n", anObj);
+  assert(isPairObj(anObj));
+  
+  printf("%s( \n", indent);
+  Symbol *newIndent = appendSymbols(indent, "  ");
+  printJObj(asCar(anObj), newIndent, timeToLive - 1);
+  free((char*)newIndent);
+  printf("%s)\n", indent);
+  printJObj(asCdr(anObj), indent, timeToLive - 1);
+}
+\stopCCode
+
+\subsection[title=Symbols]
+
+\startCHeader
+typedef struct symbol_struct {
+  size_t  tag;
+  Symbol *symbol;
+} SymbolObj;
+
+SymbolObj *newSymbol(Symbol *aSymbol);
+void symbolPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define isSymbolObj(anObj) ((anObj) && (((JObj*)(anObj))->tag == SymbolTag))
+#define asSymbolObj(anObj) ((SymbolObj*)(anObj))
+#define asSymbol(anObj)    (((SymbolObj*)(anObj))->symbol)
+\stopCHeader
+
+\startCCode
+SymbolObj *newSymbol(Symbol *aSymbol) {
+  SymbolObj *newObj =
+    (SymbolObj*)calloc(1, sizeof(SymbolObj));
+  newObj->tag    = SymbolTag;
+  newObj->symbol = strdup(aSymbol);
+  return newObj;
+}
+
+void symbolPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "symbolPrinter %p\n", anObj);
+  assert(isSymbolObj(anObj));
+  printf("%s%s\n", indent, asSymbol(anObj));
+}
+\stopCCode
+
+\subsection[title=Unsigned Integers]
+
+\startCHeader
+typedef size_t UInteger;
+typedef struct uInteger_struct {
+  size_t   tag;
+  UInteger theUInt;
+} UIntegerObj;
+
+UIntegerObj *newUInteger(UInteger aUInt);
+void uIntegerPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define isUIntegerObj(anObj) ((anObj) && (((JObj*)(anObj))->tag == UIntegerTag))
+#define asUIntegerObj(anObj) ((UIntegerObj*)(anObj))
+#define asUInteger(anObj)    (((UIntegerObj*)(anObj))->theUInt)
+\stopCHeader
+
+\startCCode
+UIntegerObj *newUInteger(UInteger aUInt) {
+  UIntegerObj *newObj =
+    (UIntegerObj*)calloc(1, sizeof(UIntegerObj));
+  newObj->tag     = UIntegerTag;
+  newObj->theUInt = aUInt;
+  return newObj;
+}
+
+void uIntegerPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "uIntegerPrinter %p\n", anObj);
+  assert(isUIntegerObj(anObj));
+  printf("%s%zu\n", indent, asUInteger(anObj));
+}
+\stopCCode
+
+\subsection[title=Contexts]
+
+\startCHeader
+typedef struct symbolTable_struct SymbolTableObj;
+
+typedef struct context_struct {
+  size_t          tag;
+  JObj           *data;
+  JObj           *process;
+  JObj           *command;
+  Symbol         *name;
+  SymbolTableObj *symbolTable;
+  Boolean         tracingOn;
+  Boolean         debug;
+  size_t          showDepth;
+} ContextObj;
+
+ContextObj *newContext(JObj* data, JObj *process, Symbol *name);
+void contextPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define isContextObj(anObj) ((anObj) && (((ContextObj*)(anObj))->tag == ContextTag))
+#define asContextObj(anObj) ((ContextObj*)(anObj))
+#define asCtxName(anObj) (((ContextObj*)(anObj))->name)
+#define asCtxData(anObj) (((ContextObj*)(anObj))->data)
+#define asCtxProcess(anObj) (((ContextObj*)(anObj))->process)
+\stopCHeader
+
+\startCCode
+ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
+  ContextObj *newObj =
+    (ContextObj*)calloc(1, sizeof(ContextObj));
+  newObj->tag       = ContextTag;
+  newObj->data      = data;
+  newObj->process   = process;
+  newObj->command   = NULL;
+  newObj->name      = strdup(name);
+  newObj->tracingOn = false;
+  newObj->debug     = false;
+  return newObj;
+}
+
+void contextPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "contextPrinter %p\n", anObj);
+  assert(isContextObj(anObj));
+  char *newIndent = appendSymbols(indent, "    ");
+  printf("%s<context:%s>\n", indent, asCtxName(anObj));
+  printf("%s  <data>\n", indent);
+  printJObj(asCtxData(anObj), newIndent, 20);
+  printf("%s  <process>\n", indent);
+  printJObj(asCtxProcess(anObj), newIndent, 20);
+}
+\stopCCode
+
+\subsection[title=C-Functions]
+
+\startCHeader
+typedef void (CFunction)(ContextObj*);
+
+typedef struct cFunction_struct {
+  size_t     tag;
+  CFunction *func;
+} CFunctionObj;
+
+CFunctionObj *newCFunction(CFunction* func);
+void cFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define isCFunctionObj(anObj) ((anObj) && ((((JObj*)(anObj))->tag) == CFunctionTag))
+#define asCFunctionObj(anObj) ((CFunctionObj*)(anObj))
+#define asCFunction(anObj) (((CFunctionObj*)(anObj))->func)
+\stopCHeader
+
+\startCCode
+CFunctionObj *newCFunction(CFunction *func) {
+  CFunctionObj *newObj = 
+    (CFunctionObj*)calloc(1, sizeof(CFunctionObj));
+  newObj->tag  = CFunctionTag;
+  newObj->func = func;
+  return newObj;
+}
+
+void cFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "cFunctionPrinter %p\n", anObj);
+  assert(isCFunctionObj(anObj));
+  printf("%s<cFunc:%p>\n", indent, asCFunction(anObj));
+}
+\stopCCode
+
+\subsection[title=Context changing C-Functions]
+
+\startCHeader
+typedef ContextObj* (CtxCFunction)(ContextObj*);
+
+typedef struct ctxCFunction_struct {
+  size_t        tag;
+  CtxCFunction *func;
+} CtxCFunctionObj;
+
+CtxCFunctionObj *newCtxCFunction(CtxCFunction* func);
+void ctxCFunctionPrinter(JObj *jObj, Symbol *indent, size_t timeToLive);
+#define isCtxCFunctionObj(anObj) ((anObj) && (((anObj)->tag) == CtxCFunctionTag))
+#define asCtxCFunctionObj(anObj) ((CtxCFunction*)(anObj))
+#define asCtxCFunction(anObj)    (((CtxCFunctionObj*)(anObj))->func)
+\stopCHeader
+
+\startCCode
+CtxCFunctionObj *newCtxCFunction(CtxCFunction *func) {
+  CtxCFunctionObj *newObj =
+    (CtxCFunctionObj*)calloc(1, sizeof(CtxCFunctionObj));
+  newObj->tag  = CtxCFunctionTag;
+  newObj->func = func;
+  return newObj;
+}
+
+void ctxCFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "ctxCFunctionPrinter %p\n", anObj);
+  assert(isCtxCFunctionObj(anObj));
+  printf("%s<ctxCFunc:%p>\n", indent, asCtxCFunction(anObj));
+}
+\stopCCode

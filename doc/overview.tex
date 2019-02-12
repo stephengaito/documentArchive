@@ -1,0 +1,105 @@
+% A ConTeXt document [master document: protoJoyLoL.tex ]
+
+\chapter[title=Introduction]
+
+\section[title=Overview]
+
+The \joylol\ compiler is self-hosted, this means that it compiles itself. 
+Building a self-hosted compiler is a multi-step process. While all 
+\joylol\ compilers are, technically, transpilers to ANSI-C, the critically 
+important feature of any fully self-hosting \joylol\ compiler is that it 
+produces fully verified code. Since ANSI-C compilers are generally not 
+fully verified, we need to go through a number of steps to go from 
+\quote{hand written} and unverified code to a fully self-hosted and 
+verified \joylol\ compiler. 
+
+In the rest of this section we outline the steps we will use to produce 
+the first self-hosting \joylol\ compiler.
+
+We will create a fully verifying self-hosted \joylol\ compiler in the 
+following six steps: 
+
+\startitemize[n]
+
+\item \bold{Step 1:} Use ANSI-C to produce a command line, hand-coded, 
+unverified, \joylol\ interpreter. 
+
+\item \bold{Step 2:} Use the \joylol\ interpreter to produce an 
+interpreted jPeg parser. 
+
+\item \bold{Step 3:} Use the interpreted jPeg parser to produce \joylol\ 
+configuration file (JCF), and \joylolRM\ parsers. 
+
+\item \bold{Step 4:} Use the JCF and \joylolRM\ parsers to produce a 
+\emph{self-hosted} (unverified) \joylol\ compiler. 
+
+\item \bold{Step 5:} Use the unverified \joylol\ compiler to produce a 
+self-hosted, \emph{verified}, \joylol\ compiler. 
+
+\item \bold{Step 6:} Use the verified \joylol\ compiler to produce a 
+self-hosted, verified, \emph{optimized}, \joylol\ compiler. 
+
+\stopitemize
+
+\subsection[title=Step 0: The simplest interpreter]
+
+Early compilers (or probably more correctly assemblers) were, in modern 
+terms, a parser / template system coupled together in, usually, one-pass. 
+The parser would take a string of human understandable characters 
+conforming to a, preferably context free grammar (CFG), and parse the 
+sting into an abstract syntax tree (AST). This AST would be used to drive 
+the machine code based templates to produce an object which could be 
+executed on a particular computer\footnote{In fact early one-pass 
+compiler/assemblers probably did not bother to produce an AST. They would 
+simply emit some machine code dependent upon the particular grammar 
+element recognized at a particular point in the parse. However, while only 
+notional, they did effectively produce an intermediary AST. However, this 
+AST will help structure the complexity of \joylol's self-hosting 
+compiler.}. 
+
+The syntax of any modern computer language has a very complex context free 
+grammar (CFG). Ideally this CFG grammar should be either LL(1) or LR(1). 
+That is the parser proceeds from \bold{L}eft to right along the string, 
+and constructs either a \bold{L}eft or \bold{R}ight derivation (of the 
+AST) while only looking ahead by \bold{one} symbol. We will use a 
+composition of a number of independent Parsing Expression Grammars (PEGs) 
+together with a global LR(1) grammar for \emph{(infix) expressions}. 
+
+The complexity of the full \joylol\ grammar is such that we need a tool 
+which can take the description of the full grammar and automatically 
+produce a parser. The objective of step 0 is to provide a \joylol\ 
+interpreter which has enough functionality to build this parser. 
+
+This means that we need a \joylol\ interpreter which can:
+
+\startitemize[n]
+
+\item read a file into a sequence of characters
+
+\item parse a sequence of characters into an AST
+
+\item interpret this AST as joylol code
+
+\item produce a sequence of characters using a template system
+
+\item write a file from the produced sequence of characters
+
+\stopitemize
+
+The appeal of a PEG for our purposes, comes from the work of the LPeg 
+parser designers, \cite{ierusalimschy2008lpegArticle}, 
+\cite{medeirosIerusalimschy2008parsingMachinePEGs}, 
+\cite{mascarenhasMedeirosIerusalimschy2014CFGandPEG}, 
+\cite{maidlMascarenhasMedeirosIerusalimschy2016errorReportingPEGs}, and 
+\cite{medeirosMascarenhas2018syntaxErrorRecoveryPEGs}. Critically for us 
+is the fact that the LPeg's underlying \quote{parsing machine}, 
+\cite{ierusalimschy2008lpegArticle}, 
+\cite{medeirosIerusalimschy2008parsingMachinePEGs}, can be easily 
+implemented in \joylol\ code. 
+
+Our objective in step 0 is to hand-code, in ANSI-C, a \joylol\ interpreter 
+rich enough to interpret a jPeg based loosely upon the LPegLabel, 
+\cite{medeiros2019lpegLabel}. 
+
+\subsection[title=Step 1: ????]
+

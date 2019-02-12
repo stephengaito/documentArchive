@@ -1,0 +1,52 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'jInterp.tex',
+  docFiles = {
+    'jInterpOverview.tex',
+    'jInterpObjects.tex',
+    'jInterpSymbols.tex',
+    'jInterpContext.tex',
+    'jInterpJPeg.tex',
+    'jInterpInterpreter.tex',
+    'jInterpMain.tex',
+    'jInterpConclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/jInterp.h',
+    'joylol/jInterp-private.h',
+  },
+  cCodeFiles = {
+    'jInterp.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
+})
+
+require 'lms.c'
+
+c.targets(lpTargets, {
+  programs = {
+    'jInterp',
+  },
+  cHeaderFiles = {
+    'joylol/jInterp.h',
+    'joylol/jInterp-private.h',
+  },
+  cCodeFiles = {
+    'jInterp.c',
+  },
+})

@@ -1,3 +1,12 @@
+*.swp
+*.pdf
+*.tuc
+*.o
+*.c
+*.h
+*Bib.lua
+buildDir
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof

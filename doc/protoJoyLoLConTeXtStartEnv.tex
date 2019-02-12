@@ -1,0 +1,63 @@
+% A ConTeXt document [master document: protoJoyLoL.tex ]
+
+\startenvironment protoJoyLoLConTeXEnv
+
+\usemodule[t-diSimp]
+%\usemodule[t-joylol-opts]
+%\usemodule[t-joylol]
+%\usemodule[t-joylol-coalg]
+\usemodule[t-contests]
+\usemodule[t-commdiag]
+
+\setShortTitle{Bootstrapping \joylol}
+
+%\usebtxdataset[joyLoLBib.lua]
+\setupbtx[apa:cite][alternative=short]
+\setupbtxrendering[apa][sorttype=short, numbering=short]
+
+\placeTitlePage{Bootstrapping \joylol}%
+  {}%
+  {}
+
+%\setvariable{diSimp}{ISBN}{1234567890123}
+\placeCopyrightPage{PerceptiSys Ltd (Stephen Gaito)}{none assigned}
+
+%\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
+%src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
+%(Stephen Gaito)}, year=2017] 
+%
+%\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
+
+% TO USE joylol-options...
+%
+% Assert only ONE of the following macros
+%
+% use the following macro to load the 
+% MINIMAL Lua based version of JoyLoL
+%\joyLoLLoadLua
+% we use this when rebuilding a potentially 
+% broken ANSI-C based version of JoyLoL
+%
+% use the following macro to try to load the
+% MAXIMAL ANSI-C based version of JoyLoL
+%\joyLoLLoadAnsic
+% we use this when (re)building a more or
+% less correctly working ANSI-C based version
+% of JoyLoL....
+%
+% if neither of the above macros are asserted
+% the current standard default is to attempt 
+% to load the ANSI-C based version of JoyLoL
+% and if this fails to load the minimal Lua
+% based version of JoyLoL
+
+\startfrontmatter
+\component preface
+\startchapter[title=Contents]
+  \placecontent[criterium=all]
+\stopchapter
+\stopfrontmatter
+
+\startbodymatter
+
+\stopenvironment

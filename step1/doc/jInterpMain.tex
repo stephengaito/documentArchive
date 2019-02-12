@@ -1,0 +1,42 @@
+% A ConTeXt document [master document: joyLoLMinus.tex ]
+
+\section[title=ANSI-C Main]
+
+\startCCode
+void interpretFile(Symbol *aFilePath) {
+}
+
+void firstCFunction(ContextObj *aCtx){};
+ContextObj *secondCtxCFunction(ContextObj *aCtx){ return aCtx; };
+
+int main(int argc, char *argv[]){
+  printf("joylolMinus\n");
+
+  for(int i = 1; i < argc; i++) {
+    printf("interpreting: [%s]\n", argv[i]);
+    interpretFile(argv[i]);
+  }
+  printf("testing symbolTable\n");
+  
+  SymbolTableObj *symTab = newSymbolTable("testSymTbl");
+  
+//  setDebuggingFlags(0xff);
+  
+  printf("SymbolTable before:\n");
+  printJObj(asJObj(symTab), "", 20);
+
+  PairObj *thirdPair = newPair(NULL, NULL);  
+  insertSymbol(symTab, "third", asJObj(thirdPair));
+  ContextObj *aTestCtx = newContext(NULL, NULL, "testCtx");
+  insertSymbol(symTab, "aTest", asJObj(aTestCtx));
+  registerCFunction(symTab, "first", firstCFunction);
+  registerCtxCFunction(symTab, "second", secondCtxCFunction);
+  insertSymbol(symTab, "second", NULL);
+  deleteSymbol(symTab, "aTest");
+  deleteSymbol(symTab, "third");
+  
+  printf("SymbolTable after:\n");
+  printJObj(asJObj(symTab), "", 20);
+  printf("done!\n");
+}
+\stopCCode
