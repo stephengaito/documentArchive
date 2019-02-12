@@ -1,3 +1,4 @@
+*.swp
 *Bib.lua
 *gitVersion*
 buildDir
