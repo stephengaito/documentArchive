@@ -17,6 +17,22 @@
   {joylol/jInterp-private.h}
   {}
 
+\prependCCode{jInterpMain}
+\startCCode
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jInterp.h"
+#include "joylol/jInterp-private.h"
+\stopCCode
+
+\createCCodeFile%
+  {jInterpMain}%
+  {jInterp.c}%
+  {}
+
 \prependCCode{default}
 \startCCode
 #include <stdio.h>
@@ -30,7 +46,7 @@
 
 \createCCodeFile%
   {default}%
-  {jInterp.c}%
+  {jInterpLib.c}%
   {}
 
 \addCCodeProgram{jInterp})

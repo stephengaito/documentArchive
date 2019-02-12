@@ -29,6 +29,7 @@ cTests.targets(lpTargets, {
   },
   cCodeFiles = {
     'jInterp.c',
+    'jInterpLib.c',
   },
   testLibDirs = {
   },
@@ -48,5 +49,6 @@ c.targets(lpTargets, {
   },
   cCodeFiles = {
     'jInterp.c',
+    'jInterpLib.c',
   },
 })
