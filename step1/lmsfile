@@ -6,9 +6,9 @@ lpTargets = litProgs.targets{
   mainDoc  = 'jInterp.tex',
   docFiles = {
     'jInterpOverview.tex',
-    'jInterpObjects.tex',
-    'jInterpSymbols.tex',
-    'jInterpContext.tex',
+    'jObjs/jInterpObjects.tex',
+    'jObjs/jInterpSymbols.tex',
+    'jObjs/jInterpContext.tex',
     'jInterpJPeg.tex',
     'jInterpInterpreter.tex',
     'jInterpMain.tex',

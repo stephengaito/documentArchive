@@ -1,0 +1,51 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=JObjects]
+
+\startCHeader
+typedef struct jObject_struct {
+  size_t tag;
+} JObj;
+
+JObj *newJObject(void);
+void printJObj(JObj *anObj, Symbol *indent, size_t timeToLive);
+void jObjPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define isJObj(anObj) \
+  ((anObj) && ((((JObj*)(anObj))->tag) == JObjTag))
+#define asJObj(anObj)  ((JObj*)(anObj))
+#define getJObjTag(anObj)  (((JObj*)(anObj))->tag)
+#define getJObjName(anObj) \
+  ((anObj) ? (jObjTagNameMap[getJObjTag(anObj)].name) : "null")
+\stopCHeader
+
+\startCCode
+JObj *newJObject(void) {
+  JObj *newObj =
+    (JObj*)calloc(1, sizeof(JObj));
+  newObj->tag = JObjTag;
+  return newObj;
+}
+
+void printJObj(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "printJObj %p\n", anObj);
+  if (!anObj) {
+    printf("%s<null>: null\n", indent);
+    return;
+  }
+  
+  assert(anObj->tag < LAST_JOBJ_TAG);
+  
+  jObjTagNameMap[getJObjTag(anObj)].printer(
+    anObj,
+    indent,
+    timeToLive
+  );
+}
+
+void jObjPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "jObjPrinter %p\n", anObj);
+  assert(isJObj(anObj));
+  printf("%s[JObj]\n", indent);
+}
+\stopCCode
+
