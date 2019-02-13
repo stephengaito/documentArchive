@@ -2,10 +2,9 @@
 
 \subsection[title=Symbols]
 
+\startTestSuite[appendSymbols]
+
 \startCCode
-
-size_t debugFlags = 0;
-
 char *appendSymbols(Symbol *sym1, Symbol *sym2) {
   char *newSym =
     (char*)calloc(
@@ -19,17 +18,30 @@ char *appendSymbols(Symbol *sym1, Symbol *sym2) {
 }
 \stopCCode
 
+\startTestCase[should append two symbols]
+
+\startCTest
+  Symbol* newSymb = appendSymbols("prefix-", "-suffix");
+  AssertStrEquals(newSymb, "prefix--suffix");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
 \startCHeader
 typedef struct symbol_struct {
   size_t  tag;
   Symbol *symbol;
 } SymbolObj;
 
-SymbolObj *newSymbol(Symbol *aSymbol);
-void symbolPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
 #define isSymbolObj(anObj) ((anObj) && (((JObj*)(anObj))->tag == SymbolTag))
 #define asSymbolObj(anObj) ((SymbolObj*)(anObj))
 #define asSymbol(anObj)    (((SymbolObj*)(anObj))->symbol)
+\stopCHeader
+
+\startTestSuite[newSymbol]
+
+\startCHeader
+SymbolObj *newSymbol(Symbol *aSymbol);
 \stopCHeader
 
 \startCCode
@@ -40,10 +52,34 @@ SymbolObj *newSymbol(Symbol *aSymbol) {
   newObj->symbol = strdup(aSymbol);
   return newObj;
 }
+\stopCCode
 
+\startTestCase[should create a new symbol]
+
+\startCTest
+  SymbolObj* aSymb = newSymbol("This is a test");
+  AssertIntTrue(isSymbolObj(aSymb));
+  AssertIntEquals(getJObjTag(aSymb), SymbolTag);
+  AssertStrEquals(asSymbol(aSymb), "This is a test");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[symbolPrinter]
+
+\startCHeader
+void symbolPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+\stopCHeader
+
+\startCCode
 void symbolPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
   DEBUG(DebugMask, "symbolPrinter %p\n", anObj);
   assert(isSymbolObj(anObj));
   printf("%s%s\n", indent, asSymbol(anObj));
 }
 \stopCCode
+
+\startTestCase[should print a symbol]
+
+\skipTestCase
+\stopTestSuite

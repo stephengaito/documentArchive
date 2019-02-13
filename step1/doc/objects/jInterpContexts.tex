@@ -17,13 +17,18 @@ typedef struct context_struct {
   size_t          showDepth;
 } ContextObj;
 
-ContextObj *newContext(JObj* data, JObj *process, Symbol *name);
-void contextPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
 #define isContextObj(anObj) ((anObj) && (((ContextObj*)(anObj))->tag == ContextTag))
 #define asContextObj(anObj) ((ContextObj*)(anObj))
 #define asCtxName(anObj) (((ContextObj*)(anObj))->name)
 #define asCtxData(anObj) (((ContextObj*)(anObj))->data)
 #define asCtxProcess(anObj) (((ContextObj*)(anObj))->process)
+\stopCHeader
+
+
+\startTestSuite[newContext]
+
+\startCHeader
+ContextObj *newContext(JObj* data, JObj *process, Symbol *name);
 \stopCHeader
 
 \startCCode
@@ -39,7 +44,33 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   newObj->debug     = false;
   return newObj;
 }
+\stopCCode
 
+\startTestCase[should create a new context]
+
+\startCTest
+  JObj *data       = asJObj(newPair(NULL, NULL));
+  JObj *process    = asJObj(newPair(NULL, NULL));
+  ContextObj* aCtx = newContext(data, process, "TestCtx");
+  AssertIntTrue(isContextObj(aCtx));
+  AssertIntEquals(getJObjTag(aCtx), ContextTag);
+  AssertStrEquals(asCtxName(aCtx), "TestCtx");
+  AssertPtrEquals(asCtxData(aCtx), data);
+  AssertPtrEquals(asCtxProcess(aCtx), process);
+  AssertIntFalse(aCtx->tracingOn);
+  AssertIntFalse(aCtx->debug);
+  AssertPtrNull(aCtx->command);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[contextPrinter]
+
+\startCHeader
+void contextPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+\stopCHeader
+
+\startCCode
 void contextPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
   DEBUG(DebugMask, "contextPrinter %p\n", anObj);
   assert(isContextObj(anObj));
@@ -51,3 +82,7 @@ void contextPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
   printJObj(asCtxProcess(anObj), newIndent, 20);
 }
 \stopCCode
+
+\startTestCase[should print a context object]
+\skipTestCase
+\stopTestSuite

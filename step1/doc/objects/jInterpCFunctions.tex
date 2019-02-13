@@ -10,11 +10,15 @@ typedef struct cFunction_struct {
   CFunction *func;
 } CFunctionObj;
 
-CFunctionObj *newCFunction(CFunction* func);
-void cFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
 #define isCFunctionObj(anObj) ((anObj) && ((((JObj*)(anObj))->tag) == CFunctionTag))
 #define asCFunctionObj(anObj) ((CFunctionObj*)(anObj))
 #define asCFunction(anObj) (((CFunctionObj*)(anObj))->func)
+\stopCHeader
+
+\startTestSuite[newCFunction]
+
+\startCHeader
+CFunctionObj *newCFunction(CFunction* func);
 \stopCHeader
 
 \startCCode
@@ -25,13 +29,41 @@ CFunctionObj *newCFunction(CFunction *func) {
   newObj->func = func;
   return newObj;
 }
+\stopCCode
 
+\startTestCase[should create a new CFunction]
+
+\startCTest
+  void testCFunction(ContextObj* aCtx){
+    // do nothing
+  }
+
+  CFunctionObj* aCFunc = newCFunction(testCFunction);
+  AssertIntTrue(isCFunctionObj(aCFunc));
+  AssertIntEquals(getJObjTag(aCFunc), CFunctionTag);
+  AssertPtrEquals(asCFunction(aCFunc), testCFunction);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[cFunctionPrinter]
+
+\startCHeader
+void cFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+\stopCHeader
+
+\startCCode
 void cFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
   DEBUG(DebugMask, "cFunctionPrinter %p\n", anObj);
   assert(isCFunctionObj(anObj));
   printf("%s<cFunc:%p>\n", indent, asCFunction(anObj));
 }
 \stopCCode
+
+\startTestCase[should print a CFunction]
+
+\skipTestCase
+\stopTestSuite
 
 \subsection[title=Context changing C-Functions]
 
@@ -43,11 +75,15 @@ typedef struct ctxCFunction_struct {
   CtxCFunction *func;
 } CtxCFunctionObj;
 
-CtxCFunctionObj *newCtxCFunction(CtxCFunction* func);
-void ctxCFunctionPrinter(JObj *jObj, Symbol *indent, size_t timeToLive);
 #define isCtxCFunctionObj(anObj) ((anObj) && (((anObj)->tag) == CtxCFunctionTag))
 #define asCtxCFunctionObj(anObj) ((CtxCFunction*)(anObj))
 #define asCtxCFunction(anObj)    (((CtxCFunctionObj*)(anObj))->func)
+\stopCHeader
+
+\startTestSuite[newCtxCFunction]
+
+\startCHeader
+CtxCFunctionObj *newCtxCFunction(CtxCFunction* func);
 \stopCHeader
 
 \startCCode
@@ -58,10 +94,38 @@ CtxCFunctionObj *newCtxCFunction(CtxCFunction *func) {
   newObj->func = func;
   return newObj;
 }
+\stopCCode
 
+\startTestCase[should create a new CtxCFunction]
+
+\startCTest
+  ContextObj *testCtxCFunction(ContextObj* aCtx){
+    // do nothing but return aCtx
+    return aCtx;
+  }
+  
+  CtxCFunctionObj* aCtxCFunc = newCtxCFunction(testCtxCFunction);
+  AssertIntTrue(isCtxCFunctionObj(aCtxCFunc));
+  AssertIntEquals(getJObjTag(aCtxCFunc), CtxCFunctionTag);
+  AssertPtrEquals(asCtxCFunction(aCtxCFunc), testCtxCFunction);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[ctxCFunctionPrinter]
+
+\startCHeader
+void ctxCFunctionPrinter(JObj *jObj, Symbol *indent, size_t timeToLive);
+\stopCHeader
+
+\startCCode
 void ctxCFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
   DEBUG(DebugMask, "ctxCFunctionPrinter %p\n", anObj);
   assert(isCtxCFunctionObj(anObj));
   printf("%s<ctxCFunc:%p>\n", indent, asCtxCFunction(anObj));
 }
 \stopCCode
+
+\startTestCase[should print a ctxCFunction]
+\skipTestCase
+\stopTestSuite

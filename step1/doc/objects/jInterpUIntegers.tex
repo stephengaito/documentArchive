@@ -9,11 +9,15 @@ typedef struct uInteger_struct {
   UInteger theUInt;
 } UIntegerObj;
 
-UIntegerObj *newUInteger(UInteger aUInt);
-void uIntegerPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
 #define isUIntegerObj(anObj) ((anObj) && (((JObj*)(anObj))->tag == UIntegerTag))
 #define asUIntegerObj(anObj) ((UIntegerObj*)(anObj))
 #define asUInteger(anObj)    (((UIntegerObj*)(anObj))->theUInt)
+\stopCHeader
+
+\startTestSuite[newUInterger]
+
+\startCHeader
+UIntegerObj *newUInteger(UInteger aUInt);
 \stopCHeader
 
 \startCCode
@@ -24,10 +28,34 @@ UIntegerObj *newUInteger(UInteger aUInt) {
   newObj->theUInt = aUInt;
   return newObj;
 }
+\stopCCode
 
+\startTestCase[should create a new UInteger]
+
+\startCTest
+  UIntegerObj* aUInt = newUInteger(42);
+  AssertIntTrue(isUIntegerObj(aUInt));
+  AssertIntEquals(getJObjTag(aUInt), UIntegerTag);
+  AssertIntEquals(asUInteger(aUInt), 42);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[uIntergerPrinter]
+\startCHeader
+void uIntegerPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+\stopCHeader
+
+\startCCode
 void uIntegerPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
   DEBUG(DebugMask, "uIntegerPrinter %p\n", anObj);
   assert(isUIntegerObj(anObj));
   printf("%s%zu\n", indent, asUInteger(anObj));
 }
 \stopCCode
+
+\startTestCase[should print a UInteger]
+
+
+\skipTestCase
+\stopTestSuite

@@ -7,15 +7,18 @@ typedef struct jObject_struct {
   size_t tag;
 } JObj;
 
-JObj *newJObject(void);
-void printJObj(JObj *anObj, Symbol *indent, size_t timeToLive);
-void jObjPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
 #define isJObj(anObj) \
   ((anObj) && ((((JObj*)(anObj))->tag) == JObjTag))
 #define asJObj(anObj)  ((JObj*)(anObj))
 #define getJObjTag(anObj)  (((JObj*)(anObj))->tag)
 #define getJObjName(anObj) \
   ((anObj) ? (jObjTagNameMap[getJObjTag(anObj)].name) : "null")
+\stopCHeader
+
+\startTestSuite[newJObject]
+
+\startCHeader
+JObj *newJObject(void);
 \stopCHeader
 
 \startCCode
@@ -25,7 +28,25 @@ JObj *newJObject(void) {
   newObj->tag = JObjTag;
   return newObj;
 }
+\stopCCode
 
+\startTestCase[should create a new jObj]
+
+\startCTest
+  JObj *aJObj = newJObject();
+  AssertIntTrue(isJObj(aJObj));
+  AssertIntEquals(getJObjTag(aJObj), JObjTag);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[printJObj]
+
+\startCHeader
+void printJObj(JObj *anObj, Symbol *indent, size_t timeToLive);
+\stopCHeader
+
+\startCCode
 void printJObj(JObj *anObj, Symbol *indent, size_t timeToLive) {
   DEBUG(DebugMask, "printJObj %p\n", anObj);
   if (!anObj) {
@@ -41,7 +62,20 @@ void printJObj(JObj *anObj, Symbol *indent, size_t timeToLive) {
     timeToLive
   );
 }
+\stopCCode
 
+\startTestCase[should print null]
+
+\skipTestCase
+\stopTestSuite
+
+\startTestSuite[jObjPrinter]
+
+\startCHeader
+void jObjPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+\stopCHeader
+
+\startCCode
 void jObjPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
   DEBUG(DebugMask, "jObjPrinter %p\n", anObj);
   assert(isJObj(anObj));
@@ -49,3 +83,7 @@ void jObjPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
 }
 \stopCCode
 
+\startTestCase[should print a jObj]
+
+\skipTestCase
+\stopTestSuite
