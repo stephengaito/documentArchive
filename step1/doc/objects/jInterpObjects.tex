@@ -1,0 +1,92 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\section[title=Objects]
+
+\setCHeaderStream{public}
+\startCHeader
+typedef size_t Boolean;
+#define false 0
+#define true  1
+
+typedef const char Symbol;
+typedef struct jObject_struct JObj;
+typedef void (PrintFunction)(
+  JObj *aJObj,
+  Symbol *indent,
+  size_t timeToLive
+);
+char *appendSymbols(Symbol *sym1, Symbol *sym2);
+
+typedef struct jObjectTagName_struct {
+  size_t         tag;
+  Symbol        *name;
+  PrintFunction *printer;
+} JObjTagName;
+
+extern JObjTagName jObjTagNameMap[];
+
+#ifndef NDEBUG
+#include <stdio.h>
+extern size_t debugFlags;
+#define DebugMask   0xff
+#define setDebuggingFlags(someFlags)    \
+  debugFlags = someFlags
+#define getDebuggingFlagsInto(aVar)     \
+  size_t aVar = debugFlags
+#define DEBUG(debugMask, format, ... )  \
+  if (debugFlags & debugMask) {         \
+    printf(format, __VA_ARGS__ );       \
+  }
+#else
+#define startDebuggingFlags(aCtx)
+#define stopDebugggingFlags(aCtx)
+#define DEBUG(debugMask, format, ...)
+#endif
+\stopCHeader
+
+\startCHeader
+#define JObjTag         0
+#define PairTag         1
+#define SymbolTag       2
+#define UIntegerTag     3
+#define ContextTag      4
+#define CFunctionTag    5
+#define CtxCFunctionTag 6
+#define SymbolTableTag  7
+#define LAST_JOBJ_TAG   8
+
+#define JObjName          "JObj"
+#define PairName          "Pair"
+#define SymbolName        "Symbol"
+#define UIntegerName      "UInteger"
+#define ContextName       "Context"
+#define CFunctionName     "CFunction"
+#define CtxCFunctionName  "CtxCFunction"
+#define SymbolTableName   "SymbolTable"
+\stopCHeader
+
+\startCCode
+JObjTagName jObjTagNameMap[] = {
+  {JObjTag,         JObjName,         jObjPrinter},
+  {PairTag,         PairName,         pairPrinter},
+  {SymbolTag,       SymbolName,       symbolPrinter},
+  {UIntegerTag,     UIntegerName,     uIntegerPrinter},
+  {ContextTag,      ContextName,      contextPrinter},
+  {CFunctionTag,    CFunctionName,    cFunctionPrinter},
+  {CtxCFunctionTag, CtxCFunctionName, ctxCFunctionPrinter},
+  {SymbolTableTag,  SymbolTableName,  symbolTablePrinter},
+  {0,               NULL,             NULL}
+};
+\stopCCode
+
+\diSimpComponent jInterpJObjs
+
+\diSimpComponent jInterpPairs
+
+\diSimpComponent jInterpSymbols
+
+\diSimpComponent jInterpUIntegers
+
+\diSimpComponent jInterpContexts
+
+\diSimpComponent jInterpCFunctions

@@ -1,0 +1,49 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Symbols]
+
+\startCCode
+
+size_t debugFlags = 0;
+
+char *appendSymbols(Symbol *sym1, Symbol *sym2) {
+  char *newSym =
+    (char*)calloc(
+      strlen(sym1)+strlen(sym2)+1,
+      sizeof(char)
+    );
+  assert(newSym);
+  strcpy(newSym, sym1);
+  strcat(newSym, sym2);
+  return newSym;
+}
+\stopCCode
+
+\startCHeader
+typedef struct symbol_struct {
+  size_t  tag;
+  Symbol *symbol;
+} SymbolObj;
+
+SymbolObj *newSymbol(Symbol *aSymbol);
+void symbolPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define isSymbolObj(anObj) ((anObj) && (((JObj*)(anObj))->tag == SymbolTag))
+#define asSymbolObj(anObj) ((SymbolObj*)(anObj))
+#define asSymbol(anObj)    (((SymbolObj*)(anObj))->symbol)
+\stopCHeader
+
+\startCCode
+SymbolObj *newSymbol(Symbol *aSymbol) {
+  SymbolObj *newObj =
+    (SymbolObj*)calloc(1, sizeof(SymbolObj));
+  newObj->tag    = SymbolTag;
+  newObj->symbol = strdup(aSymbol);
+  return newObj;
+}
+
+void symbolPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "symbolPrinter %p\n", anObj);
+  assert(isSymbolObj(anObj));
+  printf("%s%s\n", indent, asSymbol(anObj));
+}
+\stopCCode

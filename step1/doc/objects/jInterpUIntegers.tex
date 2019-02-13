@@ -1,0 +1,33 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Unsigned Integers]
+
+\startCHeader
+typedef size_t UInteger;
+typedef struct uInteger_struct {
+  size_t   tag;
+  UInteger theUInt;
+} UIntegerObj;
+
+UIntegerObj *newUInteger(UInteger aUInt);
+void uIntegerPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define isUIntegerObj(anObj) ((anObj) && (((JObj*)(anObj))->tag == UIntegerTag))
+#define asUIntegerObj(anObj) ((UIntegerObj*)(anObj))
+#define asUInteger(anObj)    (((UIntegerObj*)(anObj))->theUInt)
+\stopCHeader
+
+\startCCode
+UIntegerObj *newUInteger(UInteger aUInt) {
+  UIntegerObj *newObj =
+    (UIntegerObj*)calloc(1, sizeof(UIntegerObj));
+  newObj->tag     = UIntegerTag;
+  newObj->theUInt = aUInt;
+  return newObj;
+}
+
+void uIntegerPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "uIntegerPrinter %p\n", anObj);
+  assert(isUIntegerObj(anObj));
+  printf("%s%zu\n", indent, asUInteger(anObj));
+}
+\stopCCode

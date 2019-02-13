@@ -1,0 +1,67 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=C-Functions]
+
+\startCHeader
+typedef void (CFunction)(ContextObj*);
+
+typedef struct cFunction_struct {
+  size_t     tag;
+  CFunction *func;
+} CFunctionObj;
+
+CFunctionObj *newCFunction(CFunction* func);
+void cFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define isCFunctionObj(anObj) ((anObj) && ((((JObj*)(anObj))->tag) == CFunctionTag))
+#define asCFunctionObj(anObj) ((CFunctionObj*)(anObj))
+#define asCFunction(anObj) (((CFunctionObj*)(anObj))->func)
+\stopCHeader
+
+\startCCode
+CFunctionObj *newCFunction(CFunction *func) {
+  CFunctionObj *newObj = 
+    (CFunctionObj*)calloc(1, sizeof(CFunctionObj));
+  newObj->tag  = CFunctionTag;
+  newObj->func = func;
+  return newObj;
+}
+
+void cFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "cFunctionPrinter %p\n", anObj);
+  assert(isCFunctionObj(anObj));
+  printf("%s<cFunc:%p>\n", indent, asCFunction(anObj));
+}
+\stopCCode
+
+\subsection[title=Context changing C-Functions]
+
+\startCHeader
+typedef ContextObj* (CtxCFunction)(ContextObj*);
+
+typedef struct ctxCFunction_struct {
+  size_t        tag;
+  CtxCFunction *func;
+} CtxCFunctionObj;
+
+CtxCFunctionObj *newCtxCFunction(CtxCFunction* func);
+void ctxCFunctionPrinter(JObj *jObj, Symbol *indent, size_t timeToLive);
+#define isCtxCFunctionObj(anObj) ((anObj) && (((anObj)->tag) == CtxCFunctionTag))
+#define asCtxCFunctionObj(anObj) ((CtxCFunction*)(anObj))
+#define asCtxCFunction(anObj)    (((CtxCFunctionObj*)(anObj))->func)
+\stopCHeader
+
+\startCCode
+CtxCFunctionObj *newCtxCFunction(CtxCFunction *func) {
+  CtxCFunctionObj *newObj =
+    (CtxCFunctionObj*)calloc(1, sizeof(CtxCFunctionObj));
+  newObj->tag  = CtxCFunctionTag;
+  newObj->func = func;
+  return newObj;
+}
+
+void ctxCFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  DEBUG(DebugMask, "ctxCFunctionPrinter %p\n", anObj);
+  assert(isCtxCFunctionObj(anObj));
+  printf("%s<ctxCFunc:%p>\n", indent, asCtxCFunction(anObj));
+}
+\stopCCode
