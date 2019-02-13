@@ -13,13 +13,17 @@ static void traceAction(
   Symbol     *action,
   JObj       *aLoL
 ) {
-  assert(aCtx);
-  DEBUG(DebugMask, "traceAction: %p [%s] %s %p\n",
+  assert(isContextObj(aCtx));
+  DEBUG(DebugMask, "traceAction: %p [%s] %s:%p\n",
     aCtx, action, getJObjName(aLoL), aLoL);
 
-  printf("%s: ", action);
-  printJObj(aLoL, "", 20);
-  printf("\n");
+  StringBufferObj *aStrBuf = newStringBuffer();
+  strBufPrintf(aStrBuf, "%s: ", action);
+  printJObj(aStrBuf, aLoL, "", 20);
+  strBufPrintf(aStrBuf, "\n");
+  printf("%s", getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  free(aStrBuf);
 }
 
 void evalCommandInContext(

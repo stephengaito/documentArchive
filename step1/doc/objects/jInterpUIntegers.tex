@@ -43,11 +43,21 @@ UIntegerObj *newUInteger(UInteger aUInt) {
 
 \startTestSuite[uIntergerPrinter]
 \startCHeader
-void uIntegerPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+void uIntegerPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
 \stopCHeader
 
 \startCCode
-void uIntegerPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+void uIntegerPrinter(
+  StringBufferObj *aStrBuf,
+  JObj           *anObj,
+  Symbol         *indent,
+  size_t          timeToLive
+) {
   DEBUG(DebugMask, "uIntegerPrinter %p\n", anObj);
   assert(isUIntegerObj(anObj));
   printf("%s%zu\n", indent, asUInteger(anObj));

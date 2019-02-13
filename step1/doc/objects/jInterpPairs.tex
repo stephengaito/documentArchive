@@ -227,24 +227,31 @@ JObj* copyLoL(JObj* aLoL) {
 \startTestSuite[pairPrinter]
 
 \startCHeader
-void pairPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+void pairPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t          timeToLive
+);
 \stopCHeader
 
 \startCCode
 void pairPrinter(
-  JObj   *anObj,
-  Symbol *indent,
-  size_t  timeToLive
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
 ) {
   DEBUG(DebugMask, "pairPrinter %p\n", anObj);
+  assert(isStringBufferObj(aStrBuf));
   assert(isPairObj(anObj));
   
-  printf("%s( \n", indent);
+  strBufPrintf(aStrBuf, "%s( \n", indent);
   Symbol *newIndent = appendSymbols(indent, "  ");
-  printJObj(asCar(anObj), newIndent, timeToLive - 1);
+  printJObj(aStrBuf, asCar(anObj), newIndent, timeToLive - 1);
   free((char*)newIndent);
-  printf("%s)\n", indent);
-  printJObj(asCdr(anObj), indent, timeToLive - 1);
+  strBufPrintf(aStrBuf, "%s)\n", indent);
+  printJObj(aStrBuf, asCdr(anObj), indent, timeToLive - 1);
 }
 \stopCCode
 

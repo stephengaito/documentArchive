@@ -10,10 +10,12 @@ typedef size_t Boolean;
 
 typedef const char Symbol;
 typedef struct jObject_struct JObj;
+typedef struct string_buffer_struct StringBufferObj;
 typedef void (PrintFunction)(
-  JObj *aJObj,
-  Symbol *indent,
-  size_t timeToLive
+  StringBufferObj *aStrBuf,
+  JObj            *aJObj,
+  Symbol          *indent,
+  size_t           timeToLive
 );
 char *appendSymbols(Symbol *sym1, Symbol *sym2);
 
@@ -53,16 +55,18 @@ size_t debugFlags = 0;
 #define PairTag         1
 #define SymbolTag       2
 #define UIntegerTag     3
-#define ContextTag      4
-#define CFunctionTag    5
-#define CtxCFunctionTag 6
-#define SymbolTableTag  7
-#define LAST_JOBJ_TAG   8
+#define StringBufferTag 4
+#define ContextTag      5
+#define CFunctionTag    6
+#define CtxCFunctionTag 7
+#define SymbolTableTag  8
+#define LAST_JOBJ_TAG   9
 
 #define JObjName          "JObj"
 #define PairName          "Pair"
 #define SymbolName        "Symbol"
 #define UIntegerName      "UInteger"
+#define StringBufferName  "StringBuffer"
 #define ContextName       "Context"
 #define CFunctionName     "CFunction"
 #define CtxCFunctionName  "CtxCFunction"
@@ -75,6 +79,7 @@ JObjTagName jObjTagNameMap[] = {
   {PairTag,         PairName,         pairPrinter},
   {SymbolTag,       SymbolName,       symbolPrinter},
   {UIntegerTag,     UIntegerName,     uIntegerPrinter},
+  {StringBufferTag, StringBufferName, stringBufferPrinter},
   {ContextTag,      ContextName,      contextPrinter},
   {CFunctionTag,    CFunctionName,    cFunctionPrinter},
   {CtxCFunctionTag, CtxCFunctionName, ctxCFunctionPrinter},
@@ -91,6 +96,10 @@ JObjTagName jObjTagNameMap[] = {
 
 \diSimpComponent jInterpUIntegers
 
+\diSimpComponent jInterpStringBuffers
+
 \diSimpComponent jInterpContexts
 
 \diSimpComponent jInterpCFunctions
+
+\diSimpComponent jInterpSymbolTables

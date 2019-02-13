@@ -19,6 +19,12 @@ typedef struct symbolTable_struct {
 
 #define SymbolTable_GrowthSize 10
 
+#define isSymbolTableObj(anObj) \
+  ((anObj) && ((((JObj*)(anObj))->tag) == SymbolTableTag))
+#define asSymbolTableObj(anObj) ((SymbolTableObj*)(anObj))
+\stopCHeader
+
+\startCHeader
 SymbolTableObj *newSymbolTable(Symbol *name);
 
 JObj *findSymbol(
@@ -53,12 +59,6 @@ void registerCtxCFunction(
   Symbol         *symbol,
   CtxCFunction   *func
 );
-
-void symbolTablePrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
-
-#define isSymbolTableObj(anObj) \
-  ((anObj) && ((((JObj*)(anObj))->tag) == SymbolTableTag))
-#define asSymbolTableObj(anObj) ((SymbolTableObj*)(anObj))
 \stopCHeader
 
 \startCCode
@@ -238,33 +238,6 @@ void deleteSymbol(SymbolTableObj *aTable, Symbol *aSymbol) {
   assert(0 <= aTable->numSymbols);
 }
 
-void symbolTablePrinter(
-  JObj   *anObj,
-  Symbol *indent,
-  size_t  timeToLive
-) {
-  DEBUG(DebugMask, "symbolTablePrinter %p\n", anObj);
-  assert(isSymbolTableObj(anObj));
-  
-  SymbolTableObj *aTable = asSymbolTableObj(anObj);
-  
-  char* newIndent = appendSymbols(indent, "  ");
-  for( size_t i = 0; i < aTable->numSymbols; i++) {
-    printf(
-      "%ssymTab[%zd] = [%s]\n",
-      indent,
-      i,
-      aTable->symbols[i].symbol
-    );
-    printJObj(
-      aTable->symbols[i].jObj,
-      newIndent,
-      timeToLive
-    );
-  }
-  free(newIndent);
-}
-
 void registerCFunction(
   SymbolTableObj *aTable,
   Symbol         *symbol,
@@ -290,6 +263,45 @@ void registerCtxCFunction(
   CtxCFunctionObj *newObj = newCtxCFunction(func);
   insertSymbol(aTable, symbol, asJObj(newObj));
 }
-
 \stopCCode
 
+\startCHeader
+void symbolTablePrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
+\stopCHeader
+
+\startCCode
+void symbolTablePrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
+  DEBUG(DebugMask, "symbolTablePrinter %p\n", anObj);
+  assert(isSymbolTableObj(anObj));
+  
+  SymbolTableObj *aTable = asSymbolTableObj(anObj);
+  
+  char* newIndent = appendSymbols(indent, "  ");
+  for( size_t i = 0; i < aTable->numSymbols; i++) {
+    strBufPrintf(
+      aStrBuf,
+      "%ssymTab[%zd] = [%s]\n",
+      indent,
+      i,
+      aTable->symbols[i].symbol
+    );
+    printJObj(
+      aStrBuf,
+      aTable->symbols[i].jObj,
+      newIndent,
+      timeToLive
+    );
+  }
+  free(newIndent);
+}
+\stopCCode

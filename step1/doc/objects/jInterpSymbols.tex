@@ -68,11 +68,21 @@ SymbolObj *newSymbol(Symbol *aSymbol) {
 \startTestSuite[symbolPrinter]
 
 \startCHeader
-void symbolPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+void symbolPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
 \stopCHeader
 
 \startCCode
-void symbolPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+void symbolPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
   DEBUG(DebugMask, "symbolPrinter %p\n", anObj);
   assert(isSymbolObj(anObj));
   printf("%s%s\n", indent, asSymbol(anObj));

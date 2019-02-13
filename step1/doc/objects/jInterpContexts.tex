@@ -28,7 +28,7 @@ typedef struct context_struct {
 \startTestSuite[newContext]
 
 \startCHeader
-ContextObj *newContext(JObj* data, JObj *process, Symbol *name);
+ContextObj *newContext(JObj *data, JObj *process, Symbol *name);
 \stopCHeader
 
 \startCCode
@@ -67,19 +67,29 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
 \startTestSuite[contextPrinter]
 
 \startCHeader
-void contextPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+void contextPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
 \stopCHeader
 
 \startCCode
-void contextPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+void contextPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
   DEBUG(DebugMask, "contextPrinter %p\n", anObj);
   assert(isContextObj(anObj));
   char *newIndent = appendSymbols(indent, "    ");
-  printf("%s<context:%s>\n", indent, asCtxName(anObj));
-  printf("%s  <data>\n", indent);
-  printJObj(asCtxData(anObj), newIndent, 20);
-  printf("%s  <process>\n", indent);
-  printJObj(asCtxProcess(anObj), newIndent, 20);
+  strBufPrintf(aStrBuf, "%s<context:%s>\n", indent, asCtxName(anObj));
+  strBufPrintf(aStrBuf, "%s  <data>\n", indent);
+  printJObj(aStrBuf, asCtxData(anObj), newIndent, 20);
+  strBufPrintf(aStrBuf, "%s  <process>\n", indent);
+  printJObj(aStrBuf, asCtxProcess(anObj), newIndent, 20);
 }
 \stopCCode
 

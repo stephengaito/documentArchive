@@ -49,11 +49,21 @@ CFunctionObj *newCFunction(CFunction *func) {
 \startTestSuite[cFunctionPrinter]
 
 \startCHeader
-void cFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive);
+void cFunctionPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
 \stopCHeader
 
 \startCCode
-void cFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+void cFunctionPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
   DEBUG(DebugMask, "cFunctionPrinter %p\n", anObj);
   assert(isCFunctionObj(anObj));
   printf("%s<cFunc:%p>\n", indent, asCFunction(anObj));
@@ -115,11 +125,21 @@ CtxCFunctionObj *newCtxCFunction(CtxCFunction *func) {
 \startTestSuite[ctxCFunctionPrinter]
 
 \startCHeader
-void ctxCFunctionPrinter(JObj *jObj, Symbol *indent, size_t timeToLive);
+void ctxCFunctionPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *jObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
 \stopCHeader
 
 \startCCode
-void ctxCFunctionPrinter(JObj *anObj, Symbol *indent, size_t timeToLive) {
+void ctxCFunctionPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
   DEBUG(DebugMask, "ctxCFunctionPrinter %p\n", anObj);
   assert(isCtxCFunctionObj(anObj));
   printf("%s<ctxCFunc:%p>\n", indent, asCtxCFunction(anObj));

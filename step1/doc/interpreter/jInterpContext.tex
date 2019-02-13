@@ -418,20 +418,24 @@ JObj* popCtxProcess(
 }
 
 void showCtxStack(ContextObj *aCtx, JObj *aStack, Symbol *stackLabel) {
+  StringBufferObj *aStrBuf = newStringBuffer();
   size_t index = 1;
   JObj* curStack = aStack;
   printf("----\n");
   while(isPairObj(curStack)) {
     if (aCtx->showDepth < index) break;
-    printf("%s[%zu]: ", stackLabel, index);
-    printJObj(asCar(curStack), "", 20);
-    printf("\n");
+    strBufPrintf(aStrBuf, "%s[%zu]: ", stackLabel, index);
+    printJObj(aStrBuf, asCar(curStack), "", 20);
+    strBufPrintf(aStrBuf,"\n");
     curStack = asCdr(curStack);
     index++;
   }
-  printf("%s[*]: ", stackLabel);
-  printJObj(curStack, "", 20);
-  printf("\n");
+  strBufPrintf(aStrBuf, "%s[*]: ", stackLabel);
+  printJObj(aStrBuf, curStack, "", 20);
+  strBufPrintf(aStrBuf, "\n");
+  printf("%s", getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  free(aStrBuf);
 }
 
 void showCtxData(ContextObj *aCtx) {
