@@ -65,43 +65,6 @@ void strBufReOpen(StringBufferObj* aStrBuf) {
 }
 \stopCCode
 
-\startTestCase[should create some new stringBuffers]
-
-\startCTest
-  AssertPtrNotNull(jInterp);
-
-  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
-  AssertPtrNotNull(aStrBuf);
-  AssertPtrNotNull(asType(aStrBuf));
-  AssertIntEquals(asTag(aStrBuf), StringBuffersTag);
-  AssertPtrNull(asMemFile(aStrBuf));
-  AssertPtrNull(asBuffer(aStrBuf));
-  AssertIntZero(asBufSize(aStrBuf));
-  AssertIntTrue(isStringBufferObj(aStrBuf));
-  AssertIntTrue(isAtom(aStrBuf));
-  AssertIntFalse(isPair(aStrBuf));
-  strBufClose(aStrBuf);
-  AssertPtrNull(asMemFile(aStrBuf));
-  AssertPtrNull(asBuffer(aStrBuf));
-  AssertStrEquals(getCString(aStrBuf), "");
-  AssertPtrNotNull(asBuffer(aStrBuf));
-  strBufClose(aStrBuf);
-  AssertPtrNull(asMemFile(aStrBuf));
-  AssertPtrNull(asBuffer(aStrBuf));
-  AssertIntZero(asBufSize(aStrBuf));
-  strBufPrintf(aStrBuf, "a test string");
-  AssertPtrNotNull(asMemFile(aStrBuf));
-  AssertStrEquals(getCString(aStrBuf), "a test string");
-  AssertPtrNotNull(asBuffer(aStrBuf));
-  AssertIntEquals(asBufSize(aStrBuf), 13);
-  strBufClose(aStrBuf); // need to release the FILE*
-\stopCTest
-\skipTestCase
-\stopTestSuite
-
-\startTestSuite[getCString and strBufGetAsSymbol]
-
-
 \startCHeader
 Symbol *getCString(StringBufferObj *aStrBuf);
 \stopCHeader
@@ -115,6 +78,34 @@ Symbol *getCString(StringBufferObj *aStrBuf) {
 }
 \stopCCode
 
+\startTestCase[should create some new stringBuffers]
+
+\startCTest
+  StringBufferObj* aStrBuf = newStringBuffer();
+  AssertIntTrue(isStringBufferObj(aStrBuf));
+  AssertPtrNull(asMemFile(aStrBuf));
+  AssertPtrNull(asBuffer(aStrBuf));
+  AssertIntZero(asBufSize(aStrBuf));
+  strBufClose(aStrBuf);
+  AssertPtrNull(asMemFile(aStrBuf));
+  AssertPtrNull(asBuffer(aStrBuf));
+  AssertIntZero(asBufSize(aStrBuf));
+  AssertStrEquals(getCString(aStrBuf), "");
+  AssertPtrNotNull(asBuffer(aStrBuf));
+  AssertIntZero(asBufSize(aStrBuf));
+  strBufClose(aStrBuf);
+  AssertPtrNull(asMemFile(aStrBuf));
+  AssertPtrNull(asBuffer(aStrBuf));
+  AssertIntZero(asBufSize(aStrBuf));
+  strBufPrintf(aStrBuf, "a test string");
+  AssertPtrNotNull(asMemFile(aStrBuf));
+  AssertStrEquals(getCString(aStrBuf), "a test string");
+  AssertPtrNotNull(asBuffer(aStrBuf));
+  AssertIntEquals(asBufSize(aStrBuf), 13);
+  strBufClose(aStrBuf); // need to release the FILE*
+  free(aStrBuf);
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[strBufPrintf]
@@ -146,11 +137,11 @@ Boolean strBufPrintf(
 
 \startTestCase[should printf to a sting buffer]
 \startCTest
-  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+  StringBufferObj* aStrBuf = newStringBuffer();
   strBufPrintf(aStrBuf, "a test [%s]", "an inner string");
   AssertStrEquals(getCString(aStrBuf), "a test [an inner string]");
 \stopCTest
-\skipTestCase
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[printing stringBuffers]
@@ -174,73 +165,42 @@ void stringBufferPrinter(
   assert(isStringBufferObj(aStrBuf));
   assert(isStringBufferObj(aLoL));
 
-  strBufPrintf(aStrBuf, "%s ", 
-    getCString(asStringBufferObj(aLoL)));
+  if (indent) {
+    strBufPrintf(aStrBuf, "%s<strBuf:%s>\n", 
+      indent,
+      getCString(asStringBufferObj(aLoL)));
+  } else {
+    strBufPrintf(aStrBuf, "%s ", 
+      getCString(asStringBufferObj(aLoL)));
+  }
 }
 \stopCCode
 
-\startCHeader
-void printLoLTTL(
-  StringBufferObj *aStrBuf,
-  JObj            *aLoL,
-  size_t           timeToLive
-);
-
-#define printLoL(aStrBuf, aLoL) printLoLTTL(aStrBuf, aLoL, 20)
-\stopCHeader
-
-\startCCode
-void printLoLTTL(
-  StringBufferObj *aStrBuf,
-  JObj            *aLoL,
-  size_t           timeToLive
-) {
-  assert(isStringBufferObj(aStrBuf));
-  DEBUG(DebugMask,
-    "printLoL(start) %p %s:%p %zu\n",
-    aStrBuf, getJObjName(aLoL), aLoL, timeToLive
-  );
-
-  if (aLoL) {
-    DEBUG(DebugMask,
-      "printLoL(call) %p %p %zu %s\n",
-      aStrBuf, aLoL, getJObjTag(aLoL), getJObjName(aLoL)
-    );
-    assert(hasValidJObjTag(aLoL));
-    assert(hasJObjPrinter(aLoL));
-
-    if (isPairObj(aLoL)) strBufPrintf(aStrBuf, "( ");
-    (getJObjPrinter(aLoL))
-      (aStrBuf, aLoL, "", timeToLive);
-    if (isPairObj(aLoL)) strBufPrintf(aStrBuf, ") ");
-  } else strBufPrintf(aStrBuf, "( ) ");
-
-  DEBUG(DebugMask,
-    "printLoL(done) %p %s:%p %zu\n",
-    aStrBuf, getJObjName(aLoL), aLoL, timeToLive
-  );
-}
-\stopCCode
 \startTestCase[should print stringBuffers]
 
 \startCTest
-  AssertPtrNotNull(jInterp);
-  AssertPtrNotNull(getStringBuffersClass(jInterp));
-
-  StringBufferObj* aTestStrBuf = newStringBuffer(jInterp->rootCtx);
-  AssertPtrNotNull(aTestStrBuf);
+  StringBufferObj* aTestStrBuf = newStringBuffer();
+  AssertIntTrue(isStringBufferObj(aTestStrBuf));
+  
   strBufPrintf(aTestStrBuf, "test string");
   
-  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
-  printStringBufferCoAlg(
-    aStrBuf, (JObj*)aTestStrBuf, 10);
+  StringBufferObj* aStrBuf = newStringBuffer();
+  AssertIntTrue(isStringBufferObj(aStrBuf));
+  
+  stringBufferPrinter(
+    aStrBuf, asJObj(aTestStrBuf), "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "<strBuf:test string>");
+  AssertStrMatches(getCString(aStrBuf), "\n");
+  
+  strBufReOpen(aStrBuf);
+  stringBufferPrinter(aStrBuf, asJObj(aTestStrBuf), NULL, 20);
   AssertStrEquals(getCString(aStrBuf), "test string ");
   
   strBufClose(aStrBuf);
-  printLoL(aStrBuf, (JObj*)aTestStrBuf);
-  AssertStrEquals(getCString(aStrBuf), "test string ");
-  strBufClose(aStrBuf);
   strBufClose(aTestStrBuf);
+  free(aStrBuf);
+  free(aTestStrBuf);
 \stopCTest
-\skipTestCase
+\stopTestCase
 \stopTestSuite
+

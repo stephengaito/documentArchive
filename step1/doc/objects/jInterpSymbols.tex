@@ -85,11 +85,31 @@ void symbolPrinter(
 ) {
   DEBUG(DebugMask, "symbolPrinter %p\n", anObj);
   assert(isSymbolObj(anObj));
-  printf("%s%s\n", indent, asSymbol(anObj));
+  if (indent) {
+    strBufPrintf(aStrBuf, "%s%s\n", indent, asSymbol(anObj));
+  } else {
+    strBufPrintf(aStrBuf, "%s ", asSymbol(anObj));
+  }
 }
 \stopCCode
 
 \startTestCase[should print a symbol]
 
-\skipTestCase
+\startCTest
+  SymbolObj *aSymb = newSymbol("This is a test");
+  StringBufferObj *aStrBuf = newStringBuffer();
+  symbolPrinter(aStrBuf, asJObj(aSymb), "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "This is a test");
+  AssertStrMatches(getCString(aStrBuf), "\n");
+  
+  strBufReOpen(aStrBuf);
+  symbolPrinter(aStrBuf, asJObj(aSymb), NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "This is a test ");
+  AssertStrDoesNotMatch(getCString(aStrBuf), "\n");
+  
+  strBufClose(aStrBuf);
+  free(aStrBuf);
+\stopCTest
+
+\stopTestCase
 \stopTestSuite

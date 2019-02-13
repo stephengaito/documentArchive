@@ -84,15 +84,50 @@ void contextPrinter(
 ) {
   DEBUG(DebugMask, "contextPrinter %p\n", anObj);
   assert(isContextObj(anObj));
-  char *newIndent = appendSymbols(indent, "    ");
-  strBufPrintf(aStrBuf, "%s<context:%s>\n", indent, asCtxName(anObj));
-  strBufPrintf(aStrBuf, "%s  <data>\n", indent);
-  printJObj(aStrBuf, asCtxData(anObj), newIndent, 20);
-  strBufPrintf(aStrBuf, "%s  <process>\n", indent);
-  printJObj(aStrBuf, asCtxProcess(anObj), newIndent, 20);
+  if (indent) {
+    char *newIndent = appendSymbols(indent, "    ");
+    strBufPrintf(aStrBuf, "%s<context:%s>\n", indent, asCtxName(anObj));
+    strBufPrintf(aStrBuf, "%s  <data>\n", indent);
+    printJObj(aStrBuf, asCtxData(anObj), newIndent, 20);
+    strBufPrintf(aStrBuf, "%s  <process>\n", indent);
+    printJObj(aStrBuf, asCtxProcess(anObj), newIndent, 20);
+    free(newIndent);
+  } else {
+    strBufPrintf(aStrBuf, "<context:%s ", asCtxName(anObj));
+    strBufPrintf(aStrBuf, "  <data: ");
+    printJObj(aStrBuf, asCtxData(anObj), NULL, 20);
+    strBufPrintf(aStrBuf, "> <process: ");
+    printJObj(aStrBuf, asCtxProcess(anObj), NULL, 20);
+    strBufPrintf(aStrBuf, "> >");
+  }
 }
 \stopCCode
 
 \startTestCase[should print a context object]
-\skipTestCase
+
+\startCTest
+  JObj *data       = asJObj(newPair(NULL, NULL));
+  JObj *process    = asJObj(newPair(NULL, NULL));
+  ContextObj* aCtx = newContext(data, process, "TestCtx");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  StringBufferObj *aStrBuf = newStringBuffer();
+  AssertIntTrue(isStringBufferObj(aStrBuf));
+  
+  contextPrinter(aStrBuf, asJObj(aCtx), "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "null");
+  AssertStrMatches(getCString(aStrBuf), "<context:TestCtx>")
+  AssertStrMatches(getCString(aStrBuf), "<data>")
+  AssertStrMatches(getCString(aStrBuf), "<process>")
+  AssertStrMatches(getCString(aStrBuf), "\n")
+
+  strBufReOpen(aStrBuf);
+  contextPrinter(aStrBuf, asJObj(aCtx), NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "<context:TestCtx   <data: (  )  > <process: (  )  > >");
+  AssertStrDoesNotMatch(getCString(aStrBuf), "\n");
+  
+  strBufClose(aStrBuf);
+  free(aStrBuf);
+\stopCTest
+\stopTestCase
 \stopTestSuite

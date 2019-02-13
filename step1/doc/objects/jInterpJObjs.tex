@@ -67,7 +67,11 @@ void printJObj(
 ) {
   DEBUG(DebugMask, "printJObj %p\n", anObj);
   if (!anObj) {
-    printf("%s<null>: null\n", indent);
+    if (indent) {
+      strBufPrintf(aStrBuf, "%s<null>: null\n", indent);
+    } else {
+      strBufPrintf(aStrBuf, "%s", " ");
+    }
     return;
   }
   
@@ -84,7 +88,18 @@ void printJObj(
 
 \startTestCase[should print null]
 
-\skipTestCase
+\startCTest
+  StringBufferObj *aStrBuf = newStringBuffer();
+  printJObj(aStrBuf, NULL, "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "<null>: null");
+  AssertStrMatches(getCString(aStrBuf), "\n");
+  
+  strBufReOpen(aStrBuf);
+  printJObj(aStrBuf, NULL, NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), " ");
+  AssertStrDoesNotMatch(getCString(aStrBuf), "\n");
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[jObjPrinter]
@@ -108,11 +123,29 @@ void jObjPrinter(
   DEBUG(DebugMask, "jObjPrinter %p\n", anObj);
   assert(isStringBufferObj(aStrBuf));
   assert(isJObj(anObj));
-  strBufPrintf(aStrBuf, "%s[JObj:%p]\n", indent, anObj);
+  if (indent) {
+    strBufPrintf(aStrBuf, "%s<JObj:%p>\n", indent, anObj);
+  } else {
+    strBufPrintf(aStrBuf, "<JObj:%p> ", anObj);
+  }
 }
 \stopCCode
 
 \startTestCase[should print a jObj]
 
-\skipTestCase
+\startCTest
+  StringBufferObj *aStrBuf = newStringBuffer();
+  JObj *aJObj = newJObject();
+  AssertIntTrue(isJObj(aJObj));
+  
+  jObjPrinter(aStrBuf, aJObj, "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "<JObj:");
+  AssertStrMatches(getCString(aStrBuf), "\n");
+
+  strBufReOpen(aStrBuf);
+  jObjPrinter(aStrBuf, aJObj, NULL, 20);
+  AssertStrMatches(getCString(aStrBuf), "<JObj:");
+  AssertStrDoesNotMatch(getCString(aStrBuf), "\n");
+\stopCTest
+\stopTestCase
 \stopTestSuite

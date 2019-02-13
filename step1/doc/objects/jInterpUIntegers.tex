@@ -60,12 +60,28 @@ void uIntegerPrinter(
 ) {
   DEBUG(DebugMask, "uIntegerPrinter %p\n", anObj);
   assert(isUIntegerObj(anObj));
-  printf("%s%zu\n", indent, asUInteger(anObj));
+  if (indent) {
+    strBufPrintf(aStrBuf, "%s%zu\n", indent, asUInteger(anObj));
+  } else {
+    strBufPrintf(aStrBuf, "%zu ", asUInteger(anObj));
+  }
 }
 \stopCCode
 
 \startTestCase[should print a UInteger]
 
-
-\skipTestCase
+\startCTest
+  UIntegerObj *aUInt = newUInteger(42);
+  AssertIntTrue(isUIntegerObj(aUInt));
+  
+  StringBufferObj *aStrBuf = newStringBuffer();
+  uIntegerPrinter(aStrBuf, asJObj(aUInt), "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "42");
+  AssertStrMatches(getCString(aStrBuf), "\n");
+  
+  strBufReOpen(aStrBuf);
+  uIntegerPrinter(aStrBuf, asJObj(aUInt), NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "42 ");
+\stopCTest
+\stopTestCase
 \stopTestSuite
