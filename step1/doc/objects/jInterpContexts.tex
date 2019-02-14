@@ -12,6 +12,8 @@ typedef struct context_struct {
   JObj           *command;
   Symbol         *name;
   SymbolTableObj *symbolTable;
+  Symbol         *text;
+  size_t          textSize;
   Boolean         tracingOn;
   Boolean         debug;
   size_t          showDepth;
@@ -40,6 +42,8 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   newObj->process   = process;
   newObj->command   = NULL;
   newObj->name      = strdup(name);
+  newObj->text      = NULL;
+  newObj->textSize  = 0;
   newObj->tracingOn = false;
   newObj->debug     = false;
   return newObj;

@@ -6,3 +6,11 @@
 \joylolMinus\ is the most minimal \joylol\ compiler/interpreter hand coded 
 in ANSI-C. 
 
+Its only purpose is to run jPeg \quote{programs}, hence we specialize the 
+overall \joylol\ structure, principally \quote{\type{context}}s}, to focus 
+upon making jPeg programs run reasonably performantly. Any \joylol\ 
+program which \quote{keeps} a given finite number of structures on top of 
+the data stack, can be \quote{assisted} by adding the same structures are 
+\quote{registers} of a modified \quote{\type{context}}. We do exactly this 
+for this most minimal \joylol. 
+
