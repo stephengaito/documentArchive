@@ -7,10 +7,20 @@
 in ANSI-C. 
 
 Its only purpose is to run jPeg \quote{programs}, hence we specialize the 
-overall \joylol\ structure, principally \quote{\type{context}}s}, to focus 
+overall \joylol\ structure, principally \quote{\type{context}s}, to focus 
 upon making jPeg programs run reasonably performantly. Any \joylol\ 
 program which \quote{keeps} a given finite number of structures on top of 
-the data stack, can be \quote{assisted} by adding the same structures are 
+the data stack, can be \quote{assisted} by adding the same structures as 
 \quote{registers} of a modified \quote{\type{context}}. We do exactly this 
 for this most minimal \joylol. 
+
+Why \joylol\ for the bootstrap steps? Why not just hand code something 
+that will run some sort of PEG? Ultimately our argument is that the 
+semantics of any computational program and mathematical argument, rests 
+upon the fact that \joylol\ is a fixed point of a semantic operator. As a 
+fixed point it provides its own semantic meaning. Hence to give meaning to 
+any computation or mathematical argument we \quote{simply} need to show 
+how that computation or mathematical argument can be translated into 
+\quote{raw} \joylol. Essentially, our bootstrapping jPeg programs will do 
+just that. 
 

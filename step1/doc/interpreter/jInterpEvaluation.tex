@@ -44,7 +44,7 @@ void evalCommandInContext(
     // ensure we have the most recent dictionary
     //
     SymbolTableObj *symbolTable = aCtx->symbolTable;
-    assert(symbolTable);
+    assert(isSymbolTableObj(symbolTable));
     
     if (aCtx->tracingOn) {
       printf(

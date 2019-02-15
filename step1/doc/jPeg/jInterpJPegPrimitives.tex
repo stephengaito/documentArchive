@@ -1,0 +1,54 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Primitives]
+
+We need to implement the following \joylol\ words:
+
+\startitemize[1]
+
+\item \bold{\type{Fail}}
+
+\item \bold{\type{Commit}}
+
+\item \bold{\type{Choose}}
+
+\item \bold{\type{RepeatAtLeast}}
+
+\item \bold{\type{RepeatAtMost}}
+
+\item \bold{\type{Char}}
+
+\item \bold{\type{CharSet}}
+
+\item \bold{\type{Any}}
+
+\stopitemize
+
+\TODO{We have not covered \quote{\bold{\type{not}}}, 
+\quote{\bold{\type{and}}}, CharSet difference, captures, or actions on 
+captures.} 
+
+As suggested in \cite{ierusalimschy2008lpegArticle} we might implement 
+captures using a \type{Capture} call with three distinct arguments: 
+
+\startitemize[n] 
+
+\item \type{begin n} where the actual capture begins $n$ characters before 
+the current character. This capture method should be called \emph{as soon 
+as} it is known that the current path will succeed. 
+
+\item \type{end} this marks the end of a capture 
+
+\item \type{full n} this is the same as a \type{begin n} immediately 
+followed by an \type{end}. 
+
+\stopitemize 
+
+For all of the above \joylol\ words, the data stack must include both the 
+current text structure (which must include a indication of the current 
+character) as well as the current collection of captures. 
+
+A compiler is a pipeline of co-routines. The parser might itself be a 
+pipeline of co-routines, one for the lexer, one for the ultimate parser, 
+but there could be numerous intermediary co-routines parsing more complex 
+syntactic structures. 
