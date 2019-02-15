@@ -285,7 +285,25 @@ JObj* popCtxData(
   aCtx->data      = asCdr(aCtx->data);
   return poppedLoL;
 }
+\stopCCode
 
+\startCHeader
+#define popCtxDataInto(aCtx, aVar)              \
+assert(isContextObj(aCtx));                     \
+JObj *aVar = popCtxData(aCtx);                  \
+if (aCtx->tracingOn) {                          \
+  StringBufferObj *aStrBuf = newStringBuffer(); \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);        \
+  printJObj(aStrBuf, asJObj(aVar), "", 20);     \
+  strBufPrintf(aStrBuf, "\n");                  \
+  printf("%s", getCString(aStrBuf));            \
+  strBufClose(aStrBuf);                         \
+  free(aStrBuf);                                \
+}
+
+\stopCHeader
+
+\startCCode
 void clearCtxProcess(
   ContextObj *aCtx
 ) {
@@ -416,7 +434,24 @@ JObj* popCtxProcess(
   aCtx->process   = asCdr(aCtx->process);
   return poppedLoL;
 }
+\stopCCode
 
+\startCHeader
+#define popCtxProcessInto(aCtx, aVar)           \
+assert(isContextObj(aCtx));                     \
+JObj *aVar = popCtxProcess(aCtx);               \
+if (aCtx->tracingOn) {                          \
+  StringBufferObj *aStrBuf = newStringBuffer(); \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);        \
+  printJObj(aStrBuf, asJObj(aVar), "", 20);     \
+  strBufPrintf(aStrBuf, "\n");                  \
+  printf("%s", getCString(aStrBuf));            \
+  strBufClose(aStrBuf);                         \
+  free(aStrBuf);                                \
+}
+\stopCHeader
+
+\startCCode
 void showCtxStack(ContextObj *aCtx, JObj *aStack, Symbol *stackLabel) {
   StringBufferObj *aStrBuf = newStringBuffer();
   size_t index = 1;

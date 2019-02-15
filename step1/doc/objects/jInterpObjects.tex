@@ -8,6 +8,11 @@ typedef size_t Boolean;
 #define false 0
 #define true  1
 
+#define isFalseObj(anObj)                                           \
+  (!(anObj) || (isUIntegerObj(anObj) && (asUInteger(anObj) == 0)))
+#define isTrueObj(anObj)                                            \
+  ((anObj) && (!isUIntegerObj(anObj) || (asUInteger(anObj) != 0)))
+
 typedef const char Symbol;
 typedef struct jObject_struct JObj;
 typedef struct string_buffer_struct StringBufferObj;

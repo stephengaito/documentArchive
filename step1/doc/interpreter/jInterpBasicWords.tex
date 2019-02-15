@@ -1,0 +1,776 @@
+% A ConTeXt document [master document: ../jInterp.tex]
+
+\subsection[title=Basic words]
+
+\subsubsection[title=Boolean words]
+\startCCode
+void isTrueWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, top);
+  if (isTrueObj(top)) {
+    pushBooleanCtxData(aCtx, true);
+  } else
+    pushBooleanCtxData(aCtx, false);
+}
+
+void isFalseWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, top);
+  if (isTrueObj(top)) {
+    pushBooleanCtxData(aCtx, false);
+  } else
+    pushBooleanCtxData(aCtx, true);
+}
+#define notWord ifFalseWord
+
+void orWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, first);
+  popCtxDataInto(aCtx, second);
+  
+  if (isTrueObj(first)) {
+    pushBooleanCtxData(aCtx, true);
+  } else if (isTrueObj(second)) {
+    pushBooleanCtxData(aCtx, true);
+  } else {
+    pushBooleanCtxData(aCtx, false);
+  }
+}
+
+void andWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, first);
+  popCtxDataInto(aCtx, second);
+  
+  if (isTrueObj(first) && isFalseObj(second)) {
+    pushBooleanCtxData(aCtx, true);
+  } else {
+    pushBooleanCtxData(aCtx, false);
+  }
+}
+
+void registerBooleanWords(ContextObj *aCtx) {
+  
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  
+  UIntegerObj *trueUInt  = newUInteger(true);
+  insertSymbol(symTab, "true", asJObj(trueUInt));
+
+  UIntegerObj *falseUInt = newUInteger(false);
+  insertSymbol(symTab, "false", asJObj(falseUInt));
+
+  registerCFunction(symTab, "isTrue",    isTrueWord);
+  registerCFunction(symTab, "isFalse",   isFalseWord);
+  registerCFunction(symTab, "not",       isFalseWord);
+  registerCFunction(symTab, "or",        orWord);
+  registerCFunction(symTab, "and",       andWord);
+}
+\stopCCode
+
+\subsubsection[title=Symbol table words]
+
+\startCCode
+void lookupWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+  popCtxDataInto(aCtx, name2lookup);
+
+  if (!isSymbolObj(name2lookup)) {
+    raiseExceptionMsg(aCtx,
+      "lookup requires a symbol as top");
+    return;
+  }
+
+  pushCtxData(aCtx, 
+    findSymbol(asCtxSymbols(aCtx), asSymbol(name2lookup))
+  );
+}
+
+void registerSymbolTableWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  registerCFunction(aCtx, "lookup", lookupWord);
+}
+\stopCCode
+
+\subsubsection[title=Output words]
+
+\startCCode
+static void doWrite(
+  ContextObj      *aCtx,
+  Boolean          newLine
+) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, aString);
+  if (!isSymbolObj(aString)) {
+    raiseExceptionMsg(aCtx,
+      "write expected a symbol as aString");
+    return;
+  }
+
+  strBufPrintf(aStrBuf, "%s" asSymbol(aString));
+  if (newLine) strBufPrintf(aStrBuf, "%s" "\n");
+}
+
+static void writeWord(ContextObj *aCtx) {
+  doWrite(aCtx, false);
+}
+
+static void writeNLWord(ContextObj *aCtx) {
+  doWrite(aCtx, true);
+}
+
+static void writeObjWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, lol);
+  popCtxDataInto(aCtx, depth);
+  
+  if (!isUIntegerObj(depth)) {
+    raiseExceptionMsg(aCtx,
+      "printLoL expected a UInteger as depth");
+    return;
+  }
+  size_t depthInt = asUInteger(depth);
+    
+  printJObj(asRenderBuffer(aCtx), lol, "", depthInt);
+}
+\stopCCode
+
+\startCCode
+void registerOutputWords(ContextObj *aCtx) {
+  registerCFunction(asCtxSymbols(aCtx), "writeStr", writeWord);
+  registerCFunction(asCtxSymbols(aCtx), "writeNL",  writeNLAP);
+  registerCFunction(asCtxSymbols(aCtx), "writeObj", writeObjWord);
+}
+
+\starttyping
+\subsubsection[title=UInterger words]
+
+\startCCode
+static  mpz_t zero;
+\stopCCode
+
+\startCCode
+static void addAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "addition requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  JObj* sum = newNatural(jInterp, NULL);
+  mpz_add(asNatural(sum), asNatural(top1), asNatural(top2));
+  pushCtxData(aCtx, sum);
+}
+\stopCCode
+
+\startWord[add]
+
+\preDataStack
+  (
+    top1 : natural
+    top2 : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  (
+    top1 + top2 : natural ??
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\startCCode
+static void subtractAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "subtraction requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  JObj* difference = newNatural(jInterp, NULL);
+  if (mpz_cmp(asNatural(top2), asNatural(top1)) < 0) {
+    mpz_sub(asNatural(difference), asNatural(top1), asNatural(top2));
+  }
+  pushCtxData(aCtx, difference);
+}
+\stopCCode
+
+\startWord[subtract]
+
+\preDataStack
+  (
+    top1 : natural
+    top2 : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  (top2 < top1) ->(
+    top1 - top2 : natural ??
+    dataStack
+  )
+  OR
+  (else) -> (
+    0 : natural
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\startCCode
+static void subtractReverseAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "(reverse) subtraction requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  JObj* difference = newNatural(jInterp, NULL);
+  if (mpz_cmp(asNatural(top1), asNatural(top2)) < 0) {
+    mpz_sub(asNatural(difference), asNatural(top2), asNatural(top1));
+  }
+  pushCtxData(aCtx, difference);
+}
+\stopCCode
+
+\startWord[subtractReverse]
+
+\preDataStack
+  (
+    top1 : natural
+    top2 : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  ( top1 < top2 ) -> (
+    top2 - top1 : natural ?
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\startCCode
+static void multiplyAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "multiplication requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  JObj* product = newNatural(jInterp, NULL);
+  mpz_mul(asNatural(product), asNatural(top1), asNatural(top2));
+  pushCtxData(aCtx, product);
+}
+\stopCCode
+
+\startWord[multiply]
+
+\preDataStack
+  (
+    top1 : natural
+    top2 : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  (
+    top1 * top2 : natural ?
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\startCCode
+static void quotientAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  if (mpz_cmp(asNatural(top2), zero) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the denominator is not zero"
+    );
+    return;
+  }
+  JObj* product = newNatural(jInterp, NULL);
+  mpz_tdiv_q(asNatural(product), asNatural(top1), asNatural(top2));
+  pushCtxData(aCtx, product);
+}
+
+static void quotientReverseAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  if (mpz_cmp(asNatural(top1), zero) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the denominator is not zero"
+    );
+    return;
+  }
+  JObj* product = newNatural(jInterp, NULL);
+  mpz_tdiv_q(asNatural(product), asNatural(top2), asNatural(top1));
+  pushCtxData(aCtx, product);
+}
+
+static void remainderAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  if (mpz_cmp(asNatural(top2), zero) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the denominator is not zero"
+    );
+    return;
+  }
+  JObj* product = newNatural(jInterp, NULL);
+  mpz_tdiv_r(asNatural(product), asNatural(top1), asNatural(top2));
+  pushCtxData(aCtx, product);
+}
+
+static void remainderReverseAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isNatural(top1) || !isNatural(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the top two stack elements are naturals"
+    );
+    return;
+  }
+  if (mpz_cmp(asNatural(top1), zero) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the denominator is not zero"
+    );
+    return;
+  }
+  JObj* product = newNatural(jInterp, NULL);
+  mpz_tdiv_r(asNatural(product), asNatural(top2), asNatural(top1));
+  pushCtxData(aCtx, product);
+}
+\stopCCode
+
+\startCCode
+static void lessThanNatAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  Boolean result = FALSE;
+  if (isNatural(top1) &&
+      isNatural(top2) &&
+      (mpz_cmp(asNatural(top1), asNatural(top2)) < 0)) result = TRUE;
+  DEBUG(jInterp, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, newBoolean(jInterp, result));
+}
+\stopCCode
+
+\startCCode
+static void lessThanEqualNatAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  Boolean result = FALSE;
+  if (isNatural(top1) &&
+      isNatural(top2) &&
+      (mpz_cmp(asNatural(top1), asNatural(top2)) <= 0)) result = TRUE;
+  DEBUG(jInterp, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, newBoolean(jInterp, result));
+}
+\stopCCode
+
+\startCCode
+static void greaterThanNatAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  Boolean result = FALSE;
+  if (isNatural(top1) &&
+      isNatural(top2) &&
+      (mpz_cmp(asNatural(top1), asNatural(top2)) > 0)) result = TRUE;
+  DEBUG(jInterp, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, newBoolean(jInterp, result));
+}
+\stopCCode
+
+\startCCode
+static void greaterThanEqualNatAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  Boolean result = FALSE;
+  if (isNatural(top1) &&
+      isNatural(top2) &&
+      (mpz_cmp(asNatural(top1), asNatural(top2)) >= 0)) result = TRUE;
+  DEBUG(jInterp, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, newBoolean(jInterp, result));
+}
+\stopCCode
+
+\startCCode
+static void equalNatAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  Boolean result = FALSE;
+  if (isNatural(top1) &&
+      isNatural(top2) &&
+      (mpz_cmp(asNatural(top1), asNatural(top2)) == 0)) result = TRUE;
+  DEBUG(jInterp, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, newBoolean(jInterp, result));
+}
+\stopCCode
+
+\startWord[equal]
+
+\preDataStack
+  (
+    top1 : natural
+    top2 : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreConditions
+
+\postDataStack
+  (
+    top1 == top2 : boolean
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostConditions
+
+\stopWord
+
+\startCCode
+static void isZeroAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  size_t result = FALSE;
+  if (isNatural(top) &&
+      (mpz_cmp(asNatural(top), zero) == 0)) result = TRUE;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, newBoolean(jInterp, result));
+}
+\stopCCode
+
+\startWord[isZero]
+
+\preDataStack
+  (
+    top : natural
+    dataStack
+  )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreConditions
+
+\postDataStack
+  (
+    top == 0 : Boolean
+    dataStack
+  )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostConditions
+
+\stopWord
+
+\startCCode
+static void isNaturalAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (isNatural(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerNaturalWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerNaturalWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  mpz_init(zero);
+  extendJoyLoLInRoot(jInterp, "isNatural", "", isNaturalAP,           "");
+  extendJoyLoLInRoot(jInterp, "+",         "", addAP,                 "");
+  extendJoyLoLInRoot(jInterp, "-",         "", subtractAP,            "");
+  extendJoyLoLInRoot(jInterp, "-rev",      "", subtractReverseAP,     "");
+  extendJoyLoLInRoot(jInterp, "*",         "", multiplyAP,            "");
+  extendJoyLoLInRoot(jInterp, "/",         "", quotientAP,            "");
+  extendJoyLoLInRoot(jInterp, "/rev",      "", quotientReverseAP,     "");
+  extendJoyLoLInRoot(jInterp, "%",         "", remainderAP,           "");
+  extendJoyLoLInRoot(jInterp, "%rev",      "", remainderReverseAP,    "");
+  extendJoyLoLInRoot(jInterp, "<nat",      "", lessThanNatAP,         "");
+  extendJoyLoLInRoot(jInterp, "<=nat",     "", lessThanEqualNatAP,    "");
+  extendJoyLoLInRoot(jInterp, ">nat",      "", greaterThanNatAP,      "");
+  extendJoyLoLInRoot(jInterp, ">=nat",     "", greaterThanEqualNatAP, "");
+  extendJoyLoLInRoot(jInterp, "=nat",      "", equalNatAP,            "");
+  extendJoyLoLInRoot(jInterp, "isZero",    "", isZeroAP,              "");
+  
+  return TRUE;
+}
+\stopCCode
+\stoptyping
+
+\subsubsection[title=List words]
+
+\starttyping
+\startCCode
+static void isNilAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (!top)
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\startCCode
+static void isPairAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (isPair(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\startCCode
+static void isAtomAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (isAtom(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\startTestSuite[initPairsCoAlgebra]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerPairWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerPairWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  extendJoyLoLInRoot(jInterp, "isNil",  "", isNilAP, "");
+  extendJoyLoLInRoot(jInterp, "isList", "", isPairAP, "");
+  extendJoyLoLInRoot(jInterp, "isPair", "", isPairAP, "");
+  extendJoyLoLInRoot(jInterp, "isAtom", "", isAtomAP, "");
+  
+  return TRUE;
+}
+\stopCCode
+\stopTestSuite
+
+\stoptyping
+
+\starttyping
+
+\section[title=Symbol words]
+
+\startCCode
+static void isSymbolAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (isSymbol(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\startCCode
+static void equalSymbolAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  size_t result = FALSE;
+  if (isSymbol(top1) && isSymbol(top2)) {
+    if (strcmp(asSymbol(top1), asSymbol(top2)) == 0) result = TRUE;
+  }
+  DEBUG(jInterp, "equalSymbol: %zu\n", result);
+  pushCtxData(aCtx, newBoolean(jInterp, result));
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerSymbolWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerSymbolWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  assert(jInterp);
+  ContextObj *rootCtx = jInterp->rootCtx;
+  assert(rootCtx);
+  DictObj *dict = rootCtx->dict;
+  assert(dict);
+  
+  DictNodeObj* newLine = getSymbolEntry(dict, "newLine");
+  newLine->value = newSymbolImpl(jInterp, "\n", "newLine", 0, TRUE);
+
+  extendJoyLoLInRoot(jInterp, "isSymbol", "", isSymbolAP,    "");
+  extendJoyLoLInRoot(jInterp, "=Sym",     "", equalSymbolAP, "");
+
+  return TRUE;
+}
+\stopCCode
+\stoptyping

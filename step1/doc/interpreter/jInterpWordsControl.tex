@@ -1,0 +1,1098 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Context control code]
+
+\subsection[title=Operators]
+
+\subsection[title=Combinators]
+
+\startCCode
+
+static void pushListAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, aList);
+  top = newPair(aCtx->jInterp, top, NULL);
+  aList = concatLists(aCtx->jInterp, top, aList);
+  pushCtxData(aCtx, aList);
+}
+
+static void popListAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  popCtxDataIntoImpl(aCtx, aList);
+  popListInto(aCtx, aList, top);
+  pushCtxData(aCtx, aList);
+  pushCtxData(aCtx, top);
+}
+
+static void wrapAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  popCtxDataIntoImpl(aCtx, top);
+  top = newPair(aCtx->jInterp, top, NULL);
+  pushCtxData(aCtx, top);
+}
+
+static void prependAP(ContextObj* aCtx) {
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  JObj* result = concatLists(aCtx->jInterp, top, second);
+  pushCtxDataImpl(aCtx, result);
+}
+\stopCCode
+
+\startCCode
+static void appendAP(ContextObj* aCtx) {
+  popCtxDataIntoImpl(aCtx, top);
+  popCtxDataIntoImpl(aCtx, second);
+  JObj* result = concatLists(aCtx->jInterp, second, top);
+  pushCtxDataImpl(aCtx, result);
+}
+\stopCCode
+
+\startCCode
+static void extractAP(ContextObj* aCtx) {
+  popCtxDataIntoImpl(aCtx, top);
+  prependListCtxData(aCtx, top);
+}
+\stopCCode
+
+\starttyping
+
+\startWord[extract]
+
+\preDataStack
+  (
+    top : list
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preConditions
+  (top isFinite)
+\stopPreStack
+
+\postDataStack
+  (
+    top (prepended)
+    dataStack
+  )
+\postProcessStack
+  (
+    processStack
+  )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
+\startCCode
+static void interpretAP(ContextObj* aCtx) {
+  popCtxDataIntoImpl(aCtx, top);
+  prependListCtxProcess(aCtx, top);
+}
+\stopCCode
+
+\starttyping
+
+\startWord[interpret]
+
+\preDataStack
+  (
+    top : list
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preConditions
+  (top isFinite)
+\stopPreStack
+
+\postDataStack
+  (
+    dataStack
+  )
+\postProcessStack
+  (
+    top (prepended)
+    processStack
+  )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
+\startJoyLoLWord[ifte]
+
+\startCCode
+static void ifteAP(ContextObj* aCtx) {
+  popCtxDataIntoImpl(aCtx, topElse);
+  popCtxDataIntoImpl(aCtx, topThen);
+  popCtxDataIntoImpl(aCtx, topIf);
+  pushCtxProcessImpl(aCtx, topElse); // save for later
+  pushCtxProcessImpl(aCtx, topThen); // save for later
+  pushSymbolCtxProcess(aCtx, "ifteCont");
+  prependListCtxProcess(aCtx, topIf); // execute the if condition
+}
+\stopCCode
+
+\startImplementation[ansic]
+  (
+    (popData topElse)
+    (popData topThen)
+    (popData topIf)
+    (pushProcess topElse)
+    (pushProcess topThen)
+    (pushSymbolProcess ifteCont)
+    (prependProcess topIf)
+  )
+\stopImplementation
+
+\startRule[ifte]
+\preDataStack
+  (
+    topElse : list
+    topThen : list
+    topIf   : list
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preConditions
+  (topIf isFinite)
+\postDataStack
+  (
+    dataStack
+  )
+\postProcessStack
+  (
+    topIf (prepended)
+    'ifteCont' : Symbol
+    topThen    : list
+    topElse    : list
+    processStack
+  )
+\postConditions
+\stopRule
+
+\stopJoyLoLWord
+
+\startJoyLoLWord[ifteCont]
+
+\startCCode
+static void ifteContAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataIntoImpl(aCtx, topIf);
+  popCtxProcessIntoImpl(aCtx, topThen);
+  popCtxProcessIntoImpl(aCtx, topElse);
+  if (isTrue(topIf)) {
+    prependListCtxProcess(aCtx, topThen);
+  } else {
+    prependListCtxProcess(aCtx, topElse);
+  }
+}
+\stopCCode
+
+\startImplementation[ansic]
+  (
+    (popData topIf)
+    (popProcess topThen)
+    (popProcess topElse)
+    (doIfte topIf 
+      (prependProcess topThen)
+      (prependProcess topElse)
+    )
+  )
+\stopImplementation
+
+\startRule[ifteCont-true]
+\preDataStack
+  (
+    topIf : Boolean
+    dataStack
+  )
+\preProcessStack
+  (
+    topThen : list
+    topElse : list
+    processStack
+  )
+\preConditions
+  (topThen isFinite)
+\postDataStack
+  (
+    dataStack
+  )
+\postProcessStack
+  (
+    topThen (prepended)
+    processStack
+  )
+\postConditions
+\stopRule
+
+\startRule[ifteCont-false]
+\preDataStack
+  (
+    topIf : Boolean
+    dataStack
+  )
+\preProcessStack
+  (
+    topThen : list
+    topElse : list
+    processStack
+  )
+\preConditions
+  (topElse isFinite)
+\postDataStack
+  (
+    dataStack
+  )
+\postProcessStack
+  (
+    topElse (prepended)
+    processStack
+  )
+\postConditions
+\stopRule
+
+\stopJoyLoLWord
+
+\startCCode
+static void forAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxProcessIntoImpl(aCtx, nextCommand);
+  if (symbolIs(jInterp, nextCommand, "forDone")) {
+    // this for loop is done
+    DEBUG(jInterp, "forAP DONE%s\n", "");
+  } else {
+    DEBUG(jInterp, "forAP continue%s\n", "");
+    pushSymbolCtxProcess(aCtx, "for");
+    prependListCtxProcess(aCtx, nextCommand);
+  }
+}
+\stopCCode
+
+\starttyping
+
+\startWord[for]
+\preDataStack
+  (
+    dataStack
+  )
+\preProcessStack
+  (
+    nextCommand : aType
+    processStack
+  )
+\preConditions
+  (nextCommand isFinite)  >> if nextCommand == 'forDone' ok
+                             if nextCommand isList then nextCommand isFinite
+                             else ok <<
+\stopPreStack
+
+\postDataStack
+  (
+    dataStack
+  )
+\postProcessStack
+  (nextCommand 'forDone' =symbol) -> (
+    processStack
+  )
+  OR
+  (else) -> (
+    nextCommand (prepended)
+    'for' : Symbol
+    processStack
+  )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
+\startCCode
+static void forDoneAP(ContextObj* aCtx) {
+  // ignore
+}
+\stopCCode
+
+\starttyping
+
+\startWord[forDone]
+
+\preDataStack
+  ( dataStack )
+\preProcessStack
+  ( processStack )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  ( dataStack )
+\postProcessStack
+  ( processStack )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
+\startCCode
+static void lispInterpretAP(ContextObj* aCtx) {
+  popCtxDataIntoImpl(aCtx, top);
+  if (!isPair(top)) {
+    raiseExceptionMsg(aCtx,
+      "listInterpret expected a pair as top");
+    return;
+  }
+  JObj* operationName = asCar(top);
+  JObj* operationBody = asCdr(top);
+  pushCtxProcessImpl(aCtx, operationName);
+  pushCtxProcessImpl(aCtx, operationBody);
+}
+\stopCCode
+
+\starttyping
+
+\startWord[lispInterpret]
+
+\preDataStack
+  (
+    (
+      operationName : list
+      operationBody
+    )
+    dataStack 
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preConditions
+\stopPreStack
+
+\postDataStack
+  ( dataStack )
+\postProcessStack
+  (
+    operationBody : list <<< PREPEND?
+    operationName : aType
+    processStack
+  )
+\postConditions
+\stopPostStack
+
+\stopWord
+
+\stoptyping
+
+\startCCode
+static void lispForAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxProcessIntoImpl(aCtx, nextCommand);
+  if (symbolIs(jInterp, nextCommand, "forDone")) {
+    // this lisp for loop is done
+    DEBUG(jInterp, "lispForAP DONE%s\n", "");
+  } else {
+    DEBUG(jInterp, "lispForAP continue%s\n", "");
+    if (!isPair(nextCommand)) {
+      raiseExceptionMsg(aCtx,
+        "listFor (continue) expected a pair as nextCommand");
+      return;
+    }
+    JObj* operationName = asCar(nextCommand);
+    JObj* operationBody = asCdr(nextCommand);
+    pushSymbolCtxProcess(aCtx, "lispFor");
+    pushCtxProcessImpl(aCtx, operationName);
+    pushCtxProcessImpl(aCtx, operationBody);
+  }
+}
+\stopCCode
+
+\startCCode
+static void doneAP(ContextObj* aCtx) {
+  assert(aCtx);
+  aCtx->process = NULL;
+}
+\stopCCode
+
+\startCCode
+static void clearContextAP(ContextObj* aCtx) {
+  assert(aCtx);
+  aCtx->data    = NULL;
+  aCtx->process = NULL;
+}
+\stopCCode
+
+\startCCode
+static void tryAP(ContextObj* aCtx) {
+  popCtxDataIntoImpl(aCtx, handlerExp);
+  popCtxDataIntoImpl(aCtx, tryExp);
+  pushCtxProcessImpl(aCtx, handlerExp);
+  pushSymbolCtxProcess(aCtx, "tryHandler");
+  prependListCtxProcess(aCtx, tryExp);
+}
+\stopCCode
+
+\startCCode
+static void raiseAP(ContextObj* aCtx) {
+  assert(aCtx);
+  aCtx->exceptionRaised = TRUE;
+  popCtxDataIntoImpl(aCtx, raiseExp);
+  pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
+  prependListCtxProcess(aCtx, raiseExp);
+}
+\stopCCode
+
+\startCCode
+static void raiseIfFalseAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataIntoImpl(aCtx, condition);
+  popCtxProcessIntoImpl(aCtx, raiseExp);
+  if (isFalse(condition)) {
+    pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
+    prependListCtxProcess(aCtx, raiseExp);
+  }
+}
+\stopCCode
+
+\startCCode
+static ContextObj *findFirstTryHandlerAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+
+  if (aCtx->process) {
+    popCtxProcessIntoImpl(aCtx, aCommand);
+    if (symbolIs(jInterp, aCommand, "tryHandler")) {
+      aCtx->exceptionRaised = FALSE;
+      popCtxProcessIntoImpl(aCtx, handlerExp);
+      prependListCtxProcess(aCtx, handlerExp);
+      return aCtx;
+    }
+    pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
+    return aCtx;
+  }
+
+  if (aCtx == jInterp->rootCtx) {
+    aCtx->exceptionRaised = TRUE;
+    return aCtx;
+  }
+  
+  ContextObj* parentCtx = aCtx->parent;
+  if (!parentCtx ) parentCtx = jInterp->rootCtx;
+  assert(parentCtx);
+  
+  popCtxDataIntoImpl(   aCtx,      oldContextTop );
+  pushCtxDataImpl(      parentCtx, oldContextTop );
+  
+  wrapAP(parentCtx);
+  
+  pushSymbolCtxProcess( parentCtx, "raise"       );
+
+  if (aCtx->tracingOn) {
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(aStrBuf,
+      "findFirstTryHandler(switchCtx)\n oldCtx: %s\n newCtx: %s\n",
+      aCtx->name, parentCtx->name
+    );
+    strBufPrintf(aStrBuf, "top = ");
+    printLoL(aStrBuf, oldContextTop);
+    strBufPrintf(aStrBuf, "\n");
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+
+  return parentCtx;
+}
+\stopCCode
+
+\startCCode
+static void tryHandlerAP(ContextObj* aCtx) {
+  popCtxProcessIntoImpl(aCtx, handlerExp);
+}
+\stopCCode
+
+\startCHeader
+typedef void (RaiseException)(
+  ContextObj *aCtx,
+  Symbol     *message
+);
+
+#define raiseException(aCtx, message)       \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->raiseExceptionFunc),                \
+    (getContextsClass(aCtx->jInterp)        \
+      ->raiseExceptionFunc(aCtx, message))  \
+  )
+
+#define raiseExceptionMsg(aCtx, message)    \
+  (                                         \
+    assert(aCtx),                           \
+    pushNullCtxData(aCtx),                  \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->raiseExceptionFunc),                \
+    (getContextsClass(aCtx->jInterp)        \
+      ->raiseExceptionFunc(aCtx, message))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void raiseExceptionImpl(
+  ContextObj *aCtx,
+  Symbol     *message
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void raiseExceptionImpl(
+  ContextObj *aCtx,
+  Symbol     *message
+) {
+  assert(aCtx);
+  JoyLoLInterp* jInterp = aCtx->jInterp;
+  assert(jInterp);
+  if (!message) message = "unknown";
+
+  Symbol *file = "unknown(command)";
+  size_t  line = 0;
+  if (isSymbol(aCtx->command)) {
+    file = asFile(aCtx->command);
+    line = asLine(aCtx->command);
+  }
+
+  DEBUG(jInterp, "raiseException %p [%s] (%s) <%s> %zu\n",
+    aCtx, aCtx->name, message, file, line
+  );
+
+  wrapAP(aCtx);
+  pushSymbolCtxData(aCtx, file);
+  prependAP(aCtx);
+  pushNaturalCtxData(aCtx, line);
+  prependAP(aCtx);
+  pushSymbolCtxData(aCtx, message);
+  prependAP(aCtx);
+  pushCtxData(aCtx, (JObj*)aCtx);
+  prependAP(aCtx);
+  wrapAP(aCtx);
+  pushSymbolCtxProcess(aCtx, "raise");
+  
+  if (aCtx->tracingOn) {
+    DEBUG(jInterp, "raiseException -> tracing%s\n", "");
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(aStrBuf, "d>>");
+    printLoL(aStrBuf, aCtx->data);
+    strBufPrintf(aStrBuf, "\n");
+    strBufPrintf(aStrBuf, "p>>");
+    printLoL(aStrBuf, aCtx->process);
+    strBufPrintf(aStrBuf, "\n");
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+    DEBUG(jInterp, "raiseException <- tracing%s\n", "");
+  }
+}
+\stopCCode
+
+\startCHeader
+typedef Boolean (ReportException)(
+  ContextObj* aCtx
+);
+
+#define reportException(aCtx)               \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->reportExceptionFunc),               \
+    (getContextsClass(aCtx->jInterp)        \
+      ->reportExceptionFunc(aCtx))          \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean reportExceptionImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean reportExceptionImpl(
+  ContextObj* aCtx
+) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  DEBUG(jInterp, "reportException %p [%s] %zu\n",
+    aCtx, aCtx->name, aCtx->exceptionRaised
+  );
+  if (!aCtx->exceptionRaised) return FALSE;
+
+  extractAP(aCtx);
+
+  popCtxDataIntoImpl(aCtx, expCtxObj);
+  ContextObj *expCtx = aCtx;
+  if (isContext(expCtxObj)) {
+    expCtx = (ContextObj*)expCtxObj;
+  }
+  assert(expCtx->dict);
+  
+  popCtxDataIntoImpl(aCtx, expMsg);
+  popCtxDataIntoImpl(aCtx, expLine);
+  popCtxDataIntoImpl(aCtx, expFile);
+  popCtxDataIntoImpl(aCtx, expStack);
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  strBufPrintf(aStrBuf, "\nUNHANDLED EXCEPTION:\n");
+  printLoL(aStrBuf, expMsg);
+  strBufPrintf(aStrBuf, "\n\n     in file: ");
+  if (isSymbol(expFile)) {
+    strBufPrintf(aStrBuf, "%s", asSymbol(expFile));
+  } else {
+    printLoL(aStrBuf, expFile);
+  }
+  strBufPrintf(aStrBuf,   "\n     on line: ");
+  printLoL(aStrBuf, expLine);
+  strBufPrintf(aStrBuf, "\n\n   wordStack: ");
+  printLoL(aStrBuf, expStack);
+  strBufPrintf(aStrBuf,   "\n     context: %s(%s)",
+    expCtx->name, expCtx->dict->name);
+  strBufPrintf(aStrBuf,   "\n   dataStack: ");
+  printLoL(aStrBuf, aCtx->data);
+  strBufPrintf(aStrBuf,   "\nprocessStack: ");
+  printLoL(aStrBuf, aCtx->process);
+  strBufPrintf(aStrBuf, "\n");
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  aCtx->exceptionRaised = FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\subsection[title=Support]
+
+\startCCode
+static void defineAP(ContextObj* aCtx) {
+  assert(aCtx);
+  popCtxDataIntoImpl(aCtx,    naming);
+  popCtxDataIntoImpl(aCtx,    wordDefinition);
+  
+  popListInto(aCtx, wordDefinition, name);
+  popListInto(aCtx, wordDefinition, preCondition);
+  popListInto(aCtx, wordDefinition, definition);
+  popListInto(aCtx, wordDefinition, postCondition);
+
+  if (!isDictionary(naming)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, name);
+    pushOnTopCtxDataImpl(aCtx, preCondition);
+    pushOnTopCtxDataImpl(aCtx, definition);
+    pushOnTopCtxDataImpl(aCtx, postCondition);
+    pushOnTopCtxDataImpl(aCtx, naming);
+    raiseException(aCtx,
+      "define requires a dictionary as top");
+    return;
+  }
+  if (!isSymbol(name)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, name);
+    pushOnTopCtxDataImpl(aCtx, preCondition);
+    pushOnTopCtxDataImpl(aCtx, definition);
+    pushOnTopCtxDataImpl(aCtx, postCondition);
+    pushOnTopCtxDataImpl(aCtx, naming);
+    raiseException(aCtx,
+      "define requires a symbol as wordDefinition top"
+    );
+    return;
+  }
+  if (!isAssertion(preCondition)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, name);
+    pushOnTopCtxDataImpl(aCtx, preCondition);
+    pushOnTopCtxDataImpl(aCtx, definition);
+    pushOnTopCtxDataImpl(aCtx, postCondition);
+    pushOnTopCtxDataImpl(aCtx, naming);
+    raiseException(aCtx,
+      "define requires an assertion as wordDefinition second");
+    return;
+  }
+  if (!isAssertion(postCondition)) {
+    printf("postCondition: %p %zu\n",
+      postCondition, (size_t)asTag(postCondition));
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, name);
+    pushOnTopCtxDataImpl(aCtx, preCondition);
+    pushOnTopCtxDataImpl(aCtx, definition);
+    pushOnTopCtxDataImpl(aCtx, postCondition);
+    pushOnTopCtxDataImpl(aCtx, naming);
+    raiseException(aCtx,
+      "define requires an assertion as wordDefinitoin fourth");
+    return;
+  }
+  defineJoyLoLIn(
+    aCtx->jInterp,
+    (DictObj*)naming,
+    asSymbol(name),
+    (AssertionObj*)preCondition,
+    definition,
+    (AssertionObj*)postCondition
+  );
+}
+\stopCCode
+
+\startCCode
+static void defineContextAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataIntoImpl(aCtx, contextName);
+  popCtxDataIntoImpl(aCtx, contextNamedIn);
+  popCtxDataIntoImpl(aCtx, contextNamingScope);
+  popCtxDataIntoImpl(aCtx, contextData);
+  popCtxDataIntoImpl(aCtx, contextProcess);
+  if (!isSymbol(contextName)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, contextProcess);
+    pushOnTopCtxDataImpl(aCtx, contextData);
+    pushOnTopCtxDataImpl(aCtx, contextNamingScope);
+    pushOnTopCtxDataImpl(aCtx, contextNamedIn);
+    pushOnTopCtxDataImpl(aCtx, contextName);
+    raiseException(aCtx,
+      "defineContext required a symbol as top");
+    return;
+  }
+  if (!isDictionary(contextNamedIn)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, contextProcess);
+    pushOnTopCtxDataImpl(aCtx, contextData);
+    pushOnTopCtxDataImpl(aCtx, contextNamingScope);
+    pushOnTopCtxDataImpl(aCtx, contextNamedIn);
+    pushOnTopCtxDataImpl(aCtx, contextName);
+    raiseException(aCtx,
+      "defineContext required a dictionary as second");
+    return;
+  }
+  if (!isDictionary(contextNamingScope)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, contextProcess);
+    pushOnTopCtxDataImpl(aCtx, contextData);
+    pushOnTopCtxDataImpl(aCtx, contextNamingScope);
+    pushOnTopCtxDataImpl(aCtx, contextNamedIn);
+    pushOnTopCtxDataImpl(aCtx, contextName);
+    raiseException(aCtx,
+      "defineContext required a dictionary as third");
+    return;
+  }
+  ContextObj* newCtx = newContext(
+    jInterp,
+    asSymbol(contextName),
+    aCtx,
+    (DictObj*)contextNamingScope,
+    contextData,
+    contextProcess
+  );
+  assert(newCtx);
+  defineContextIn(
+    jInterp,
+    (DictObj*)contextNamedIn,
+    asSymbol(contextName),
+    newCtx
+  );
+}
+\stopCCode
+
+\startCCode
+static void newContextAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+
+  popCtxDataIntoImpl(aCtx, contextName);
+  popCtxDataIntoImpl(aCtx, contextNamingScope);
+  popCtxDataIntoImpl(aCtx, contextData);
+  popCtxDataIntoImpl(aCtx, contextProcess);
+  if (!isSymbol(contextName)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, contextProcess);
+    pushOnTopCtxDataImpl(aCtx, contextData);
+    pushOnTopCtxDataImpl(aCtx, contextNamingScope);
+    pushOnTopCtxDataImpl(aCtx, contextName);
+    raiseException(aCtx,
+      "newContext requires a symbol as top");
+    return;
+  }
+  if (!isDictionary(contextNamingScope)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, contextProcess);
+    pushOnTopCtxDataImpl(aCtx, contextData);
+    pushOnTopCtxDataImpl(aCtx, contextNamingScope);
+    pushOnTopCtxDataImpl(aCtx, contextName);
+    raiseException(aCtx,
+      "newContext requires a dictionary as second");
+    return;
+  }
+  ContextObj* newCtx = newContext(
+    jInterp,
+    asSymbol(contextName),
+    aCtx,
+    (DictObj*)contextNamingScope,
+    contextData,
+    contextProcess
+  );
+  assert(newCtx);
+  pushCtxDataImpl(aCtx, (JObj*)newCtx);
+}
+\stopCCode
+
+\startCCode
+static void thisContextAP(ContextObj* aCtx) {
+  assert(aCtx);
+  DEBUG(aCtx->jInterp, "thisContextAP > %p\n", aCtx);
+  pushCtxDataImpl(aCtx, (JObj*)aCtx);
+  DEBUG(aCtx->jInterp, "thisContextAP < %p\n", aCtx);
+}
+\stopCCode
+
+\startCCode
+static ContextObj* switchCtxAP(ContextObj* aCtx) {
+  assert(aCtx);
+
+  popCtxDataIntoImpl(aCtx, newContext);
+  popCtxDataIntoImpl(aCtx, oldContextTop);
+  if (!isContext(newContext)) {
+    raiseExceptionMsg(aCtx,
+      "switchCtx required a context as top");
+    return aCtx;
+  }
+  
+  //
+  // switch to newContext
+  //
+  DEBUG(aCtx->jInterp, "switchCtxAP -> switching origCtx: %s\n",
+    aCtx->name);
+  ContextObj* newCtx = (ContextObj*)newContext;
+  assert(newCtx);
+
+  pushCtxDataImpl(newCtx, oldContextTop);
+  newCtx->tracingOn = aCtx->tracingOn;
+  DEBUG(aCtx->jInterp, "switchCtxAP <- switching newCtx: %s\n",
+            newCtx->name);
+  //
+  return newCtx;
+}
+\stopCCode
+
+\startCCode
+static void defineNamingAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataIntoImpl(aCtx, dictName);
+  popCtxDataIntoImpl(aCtx, dictNamedIn);
+  popCtxDataIntoImpl(aCtx, dictNamingScope);
+  if (!isSymbol(dictName)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, dictNamingScope);
+    pushOnTopCtxDataImpl(aCtx, dictNamedIn);
+    pushOnTopCtxDataImpl(aCtx, dictName);
+    raiseException(aCtx,
+      "defineNaming required a symbol as top");
+    return;
+  }
+  if (!isDictionary(dictNamedIn)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, dictNamingScope);
+    pushOnTopCtxDataImpl(aCtx, dictNamedIn);
+    pushOnTopCtxDataImpl(aCtx, dictName);
+    raiseException(aCtx,
+      "defineNaming requires a dictionary as second");
+    return;
+  }
+  if (!isDictionary(dictNamingScope)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, dictNamingScope);
+    pushOnTopCtxDataImpl(aCtx, dictNamedIn);
+    pushOnTopCtxDataImpl(aCtx, dictName);
+    raiseException(aCtx,
+      "defineNaming requires a dictionary as third");
+    return;
+  }
+  DictObj* newDict =
+    newDictionary(
+      jInterp,
+      asSymbol(dictName),
+      (DictObj*)dictNamingScope
+    );
+  assert(newDict);
+  defineNamingIn(
+    jInterp,
+    (DictObj*)dictNamedIn,
+    asSymbol(dictName),
+    newDict
+  );
+}
+\stopCCode
+
+\startCCode
+static void newNamingAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+
+  popCtxDataIntoImpl(aCtx, dictName);
+  popCtxDataIntoImpl(aCtx, dictNamingScope);
+  if (!isSymbol(dictName)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, dictNamingScope);
+    pushOnTopCtxDataImpl(aCtx, dictName);
+    raiseException(aCtx,
+      "defineNaming requires a symbol as top");
+    return;
+  }
+  if (!isDictionary(dictNamingScope)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, dictNamingScope);
+    pushOnTopCtxDataImpl(aCtx, dictName);
+    raiseException(aCtx,
+      "defineNaming requires a dictionary as second");
+    return;
+  }
+
+  DictObj* newDict =
+    newDictionary(
+      jInterp,
+      asSymbol(dictName),
+      (DictObj*)dictNamingScope
+    );
+  assert(newDict);
+  pushCtxDataImpl(aCtx, (JObj*)newDict);
+}
+\stopCCode
+
+\startCCode
+static void localizeNamingAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataIntoImpl(aCtx, localNaming);
+  if (!isSymbol(localNaming)){
+    raiseExceptionMsg(aCtx,
+      "localizeNaming requires a symbol as top");
+    return;
+  }
+  
+  DictObj* newDict = 
+    newDictionary(
+      jInterp,
+      asSymbol(localNaming),
+      aCtx->dict
+    );
+  assert(newDict);
+  aCtx->dict = newDict;
+}
+\stopCCode
+
+\startCCode
+static void thisNamingAP(ContextObj* aCtx) {
+  assert(aCtx);
+  pushCtxDataImpl(aCtx, (JObj*)(aCtx->dict));
+}
+\stopCCode
+
+\startCCode
+static void undefineAP(ContextObj* aCtx) {
+  assert(aCtx);
+  
+  popCtxDataIntoImpl(aCtx, namingScope);
+  popCtxDataIntoImpl(aCtx, nameList);
+  
+  popListInto(aCtx, nameList, name);
+  
+  if (!isDictionary(namingScope)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, namingScope);
+    pushOnTopCtxDataImpl(aCtx, name);
+    raiseException(aCtx,
+      "undelete requires a dictionary as top");
+    return;
+  }
+
+  if (!isSymbol(name)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, namingScope);
+    pushOnTopCtxDataImpl(aCtx, name);
+    raiseException(aCtx,
+      "undefine requires a list quoted symbol as second");
+    return;
+  }
+    
+  deleteSymbol(((DictObj*)namingScope), asSymbol(name));
+  }
+\stopCCode
+
+\startCCode
+void initContextsAPControl(JoyLoLInterp *jInterp) {
+  extendJoyLoLInRoot(jInterp, "pushList",       "", pushListAP,       "");
+  extendJoyLoLInRoot(jInterp, "popList",        "", popListAP,        "");
+  extendJoyLoLInRoot(jInterp, "wrap",           "", wrapAP,           "");
+  extendJoyLoLInRoot(jInterp, "prepend",        "", prependAP,        "");
+  extendJoyLoLInRoot(jInterp, "append",         "", appendAP,         "");
+  extendJoyLoLInRoot(jInterp, "extract",        "", extractAP,        "");
+  extendJoyLoLInRoot(jInterp, "i",              "", interpretAP,      "");
+  extendJoyLoLInRoot(jInterp, "interpret",      "", interpretAP,      "");
+  extendJoyLoLInRoot(jInterp, "ifte",           "", ifteAP,           "");
+  extendJoyLoLInRoot(jInterp, "ifteCont",       "", ifteContAP,       "");
+  extendJoyLoLInRoot(jInterp, "for",            "", forAP,            "");
+  extendJoyLoLInRoot(jInterp, "forDone",        "", forDoneAP,        "");
+  extendJoyLoLInRoot(jInterp, "lispInterpret",  "", lispInterpretAP,  "");
+  extendJoyLoLInRoot(jInterp, "lispFor",        "", lispForAP,        "");
+  extendJoyLoLInRoot(jInterp, "define",         "", defineAP,         "");
+  extendJoyLoLInRoot(jInterp, "defineContext",  "", defineContextAP,  "");
+  extendJoyLoLInRoot(jInterp, "newContext",     "", newContextAP,     "");
+  extendJoyLoLInRoot(jInterp, "thisContext",    "", thisContextAP,    "");
+  extendJoyLoLInRoot(jInterp, "defineNaming",   "", defineNamingAP,   "");
+  extendJoyLoLInRoot(jInterp, "newNaming",      "", newNamingAP,      "");
+  extendJoyLoLInRoot(jInterp, "localizeNaming", "", localizeNamingAP, "");
+  extendJoyLoLInRoot(jInterp, "thisNaming",     "", thisNamingAP,     "");
+  extendJoyLoLInRoot(jInterp, "undefine",       "", undefineAP,       "");
+  extendJoyLoLInRoot(jInterp, "done",           "", doneAP,           "");
+  extendJoyLoLInRoot(jInterp, "clear",          "", clearContextAP,   "");
+  extendJoyLoLInRoot(jInterp, "try",            "", tryAP,            "");
+  extendJoyLoLInRoot(jInterp, "raise",          "", raiseAP,          "");
+  extendJoyLoLInRoot(jInterp, "raiseIfFalse",   "", raiseIfFalseAP,   "");
+  extendJoyLoLInRoot(jInterp, "tryHandler",     "", tryHandlerAP,     "");
+  
+  extendCtxJoyLoLInRoot(jInterp, "findFirstTryHandler", "", findFirstTryHandlerAP, "");
+  extendCtxJoyLoLInRoot(jInterp, "switchCtx",           "", switchCtxAP,           "");
+}
+\stopCCode
