@@ -46,7 +46,7 @@ void andWord(ContextObj *aCtx) {
 }
 
 void registerBooleanWords(ContextObj *aCtx) {
-  
+  assert(isContextObj(aCtx));  
   SymbolTableObj *symTab = asCtxSymbols(aCtx);
   
   UIntegerObj *trueUInt  = newUInteger(true);
@@ -63,1185 +63,481 @@ void registerBooleanWords(ContextObj *aCtx) {
 }
 \stopCCode
 
-\starttyping
-% A ConTeXt document [master document: cFunctions.tex]
-
-\section[title=JoyLoL words]
+\subsubsection[title=Symbol table words]
 
 \startCCode
-static void isCFunctionAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  JObj* result = NULL;
-  if (isCFunction(top))
-    result = newBoolean(jInterp, TRUE);
-  else
-    result = newBoolean(jInterp, FALSE);
-  pushCtxData(aCtx, result);
-}
-\stopCCode
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerCFunctionWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerCFunctionWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoALg
-) {
-  assert(jInterp);
-  extendJoyLoLInRoot(jInterp, "isCFunction", "", isCFunctionAP, "");
-  
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: coAlgs.tex]
-
-\section[title=JoyLoL words]
-
-\startCCode
-static void isCoAlgebraAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  JObj* result = NULL;
-  if (isCoAlgebra(top))
-    result = newBoolean(jInterp, TRUE);
-  else
-    result = newBoolean(jInterp, FALSE);
-  pushCtxData(aCtx, result);
-}
-\stopCCode
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerCoAlgebraWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerCoAlgebraWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  assert(jInterp);
-  extendJoyLoLInRoot(jInterp, "isCoAlgebra", "", isCoAlgebraAP, "");
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: contexts.tex]
-
-\section[title=JoyLoL words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerContextWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerContextWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  initContextsAPControl(jInterp);
-  initContextAOOperators(jInterp);
-  initContextsAPSupport(jInterp);
-  
-  return TRUE;
-}
-\stopCCode
-
-% A ConTeXt document [master document: crossCompiler.tex]
-
-\section[title=Words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerCrossCompilerWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerCrossCompilerWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  assert(jInterp);
-  extendJoyLoLInRoot(jInterp, "addFragment", "", addFragmentAP, "");
-  
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: dictionaries.tex]
-
-\section[title=Words]
-
-\startCCode
-static void lookupAP(ContextObj* aCtx) {
-  assert(aCtx);
+void lookupWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
   popCtxDataInto(aCtx, name2lookup);
-  popCtxDataInto(aCtx, aDict);
 
-  if (!isSymbol(name2lookup)) {
+  if (!isSymbolObj(name2lookup)) {
     raiseExceptionMsg(aCtx,
       "lookup requires a symbol as top");
     return;
   }
 
-  if (!isDict(aDict)) {
-    raiseExceptionMsg(aCtx,
-      "lookup requires a dictionary as second");
-    return;
-  }
+  pushCtxData(aCtx, 
+    findSymbol(asCtxSymbols(aCtx), asSymbol(name2lookup))
+  );
+}
 
-  DictNodeObj* entry =
-    findSymbol((DictObj*)aDict, asSymbol(name2lookup));
-  JObj* entryValue = NULL;
-  if (entry) entryValue = entry->value;
-  
-  pushCtxData(aCtx, entryValue);
+void registerSymbolTableWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));  
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+
+  registerCFunction(symTab, "lookup", lookupWord);
 }
 \stopCCode
 
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerDictionaryWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerDictionaryWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  assert(jInterp);
-  extendJoyLoLInRoot(jInterp, "lookup", "", lookupAP, "");
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: dictNodes.tex]
-
-\section[title=JoyLoL words]
-
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerDictNodeWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerDictNodeWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: fragments.tex]
-
-\section[title=Words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerFragmentWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerFragmentWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  assert(jInterp);
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: implementations.tex]
-
-\section[title=Words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerImplementationWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerImplementationWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  assert(jInterp);
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: jInterps.tex]
-
-\section[title=JoyLoL words]
+\subsubsection[title=Output words]
 
 \startCCode
 static void doWrite(
   ContextObj      *aCtx,
-  StdOutputMethod *writeMethod,
   Boolean          newLine
 ) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  assert(writeMethod);
+  assert(isContextObj(aCtx));
   
   popCtxDataInto(aCtx, aString);
-  if (!isSymbol(aString)) {
+  if (!isSymbolObj(aString)) {
     raiseExceptionMsg(aCtx,
       "write expected a symbol as aString");
     return;
   }
 
-  (writeMethod)(jInterp, asSymbol(aString));
-  if (newLine) (writeMethod)(jInterp, "\n");
+  strBufPrintf(asRenderBuffer(aCtx), "%s", asSymbol(aString));
+  if (newLine) strBufPrintf(asRenderBuffer(aCtx), "%s" "\n");
 }
 
-static void writeOutAP(ContextObj *aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  
-  doWrite(aCtx, jInterp->writeStdOut, FALSE);
+static void writeWord(ContextObj *aCtx) {
+  doWrite(aCtx, false);
 }
 
-static void writeOutNLAP(ContextObj *aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  
-  doWrite(aCtx, jInterp->writeStdOut, TRUE);
+static void writeNLWord(ContextObj *aCtx) {
+  doWrite(aCtx, true);
 }
 
-static void writeErrAP(ContextObj *aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  
-  doWrite(aCtx, jInterp->writeStdErr, FALSE);
-}
-
-static void writeErrNLAP(ContextObj *aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  
-  doWrite(aCtx, jInterp->writeStdErr, TRUE);
-}
-\stopCCode
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerJInterpWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerJInterpWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  extendJoyLoLInRoot(jInterp, "writeOut",   "", writeOutAP,   "");
-  extendJoyLoLInRoot(jInterp, "writeOutNL", "", writeOutNLAP, "");
-  extendJoyLoLInRoot(jInterp, "writeErr",   "", writeErrAP,   "");
-  extendJoyLoLInRoot(jInterp, "writeErrNL", "", writeErrNLAP, "");
-  return TRUE;
-}
-\stopCCode% A ConTeXt document [master document: loaders.tex]
-
-\section[title=Words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerLoaderWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoALg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerLoaderWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: luaFunctions.tex]
-
-\section[title=JoyLoL words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerLuaFunctionWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerLuaFunctionWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: naturals.tex]
-
-\section[title=Words]
-
-\startCCode
-static  mpz_t zero;
-\stopCCode
-
-\startCCode
-static void addAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) {
-    raiseExceptionMsg(aCtx,
-      "addition requires that the top two stack elements are naturals"
-    );
-    return;
-  }
-  JObj* sum = newNatural(jInterp, NULL);
-  mpz_add(asNatural(sum), asNatural(top1), asNatural(top2));
-  pushCtxData(aCtx, sum);
-}
-\stopCCode
-
-\startWord[add]
-
-\preDataStack
-  (
-    top1 : natural
-    top2 : natural
-    dataStack
-  )
-\preProcessStack
-  ( processStack )
-\preConditions
-\stopPreStack
-
-\postDataStack
-  (
-    top1 + top2 : natural ??
-    dataStack
-  )
-\postProcessStack
-  ( processStack )
-\postConditions
-\stopPostStack
-
-\stopWord
-
-\startCCode
-static void subtractAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) {
-    raiseExceptionMsg(aCtx,
-      "subtraction requires that the top two stack elements are naturals"
-    );
-    return;
-  }
-  JObj* difference = newNatural(jInterp, NULL);
-  if (mpz_cmp(asNatural(top2), asNatural(top1)) < 0) {
-    mpz_sub(asNatural(difference), asNatural(top1), asNatural(top2));
-  }
-  pushCtxData(aCtx, difference);
-}
-\stopCCode
-
-\startWord[subtract]
-
-\preDataStack
-  (
-    top1 : natural
-    top2 : natural
-    dataStack
-  )
-\preProcessStack
-  ( processStack )
-\preConditions
-\stopPreStack
-
-\postDataStack
-  (top2 < top1) ->(
-    top1 - top2 : natural ??
-    dataStack
-  )
-  OR
-  (else) -> (
-    0 : natural
-    dataStack
-  )
-\postProcessStack
-  ( processStack )
-\postConditions
-\stopPostStack
-
-\stopWord
-
-\startCCode
-static void subtractReverseAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) {
-    raiseExceptionMsg(aCtx,
-      "(reverse) subtraction requires that the top two stack elements are naturals"
-    );
-    return;
-  }
-  JObj* difference = newNatural(jInterp, NULL);
-  if (mpz_cmp(asNatural(top1), asNatural(top2)) < 0) {
-    mpz_sub(asNatural(difference), asNatural(top2), asNatural(top1));
-  }
-  pushCtxData(aCtx, difference);
-}
-\stopCCode
-
-\startWord[subtractReverse]
-
-\preDataStack
-  (
-    top1 : natural
-    top2 : natural
-    dataStack
-  )
-\preProcessStack
-  ( processStack )
-\preConditions
-\stopPreStack
-
-\postDataStack
-  ( top1 < top2 ) -> (
-    top2 - top1 : natural ?
-    dataStack
-  )
-\postProcessStack
-  ( processStack )
-\postConditions
-\stopPostStack
-
-\stopWord
-
-\startCCode
-static void multiplyAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) {
-    raiseExceptionMsg(aCtx,
-      "multiplication requires that the top two stack elements are naturals"
-    );
-    return;
-  }
-  JObj* product = newNatural(jInterp, NULL);
-  mpz_mul(asNatural(product), asNatural(top1), asNatural(top2));
-  pushCtxData(aCtx, product);
-}
-\stopCCode
-
-\startWord[mulitply]
-
-\preDataStack
-  (
-    top1 : natural
-    top2 : natural
-    dataStack
-  )
-\preProcessStack
-  ( processStack )
-\preConditions
-\stopPreStack
-
-\postDataStack
-  (
-    top1 * top2 : natural ?
-    dataStack
-  )
-\postProcessStack
-  ( processStack )
-\postConditions
-\stopPostStack
-
-\stopWord
-
-\startCCode
-static void quotientAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) {
-    raiseExceptionMsg(aCtx,
-      "integer quotient requires that the top two stack elements are naturals"
-    );
-    return;
-  }
-  if (mpz_cmp(asNatural(top2), zero) == 0) {
-    raiseExceptionMsg(aCtx,
-      "integer quotient requires that the denominator is not zero"
-    );
-    return;
-  }
-  JObj* product = newNatural(jInterp, NULL);
-  mpz_tdiv_q(asNatural(product), asNatural(top1), asNatural(top2));
-  pushCtxData(aCtx, product);
-}
-
-static void quotientReverseAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) {
-    raiseExceptionMsg(aCtx,
-      "integer quotient requires that the top two stack elements are naturals"
-    );
-    return;
-  }
-  if (mpz_cmp(asNatural(top1), zero) == 0) {
-    raiseExceptionMsg(aCtx,
-      "integer quotient requires that the denominator is not zero"
-    );
-    return;
-  }
-  JObj* product = newNatural(jInterp, NULL);
-  mpz_tdiv_q(asNatural(product), asNatural(top2), asNatural(top1));
-  pushCtxData(aCtx, product);
-}
-
-static void remainderAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) {
-    raiseExceptionMsg(aCtx,
-      "integer remainder requires that the top two stack elements are naturals"
-    );
-    return;
-  }
-  if (mpz_cmp(asNatural(top2), zero) == 0) {
-    raiseExceptionMsg(aCtx,
-      "integer remainder requires that the denominator is not zero"
-    );
-    return;
-  }
-  JObj* product = newNatural(jInterp, NULL);
-  mpz_tdiv_r(asNatural(product), asNatural(top1), asNatural(top2));
-  pushCtxData(aCtx, product);
-}
-
-static void remainderReverseAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  if (!isNatural(top1) || !isNatural(top2)) {
-    raiseExceptionMsg(aCtx,
-      "integer remainder requires that the top two stack elements are naturals"
-    );
-    return;
-  }
-  if (mpz_cmp(asNatural(top1), zero) == 0) {
-    raiseExceptionMsg(aCtx,
-      "integer remainder requires that the denominator is not zero"
-    );
-    return;
-  }
-  JObj* product = newNatural(jInterp, NULL);
-  mpz_tdiv_r(asNatural(product), asNatural(top2), asNatural(top1));
-  pushCtxData(aCtx, product);
-}
-\stopCCode
-
-\startCCode
-static void lessThanNatAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  Boolean result = FALSE;
-  if (isNatural(top1) &&
-      isNatural(top2) &&
-      (mpz_cmp(asNatural(top1), asNatural(top2)) < 0)) result = TRUE;
-  DEBUG(jInterp, "equalNat: %zu\n", result);
-  pushCtxData(aCtx, top2);
-  pushCtxData(aCtx, top1);
-  pushCtxData(aCtx, newBoolean(jInterp, result));
-}
-\stopCCode
-
-\startCCode
-static void lessThanEqualNatAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  Boolean result = FALSE;
-  if (isNatural(top1) &&
-      isNatural(top2) &&
-      (mpz_cmp(asNatural(top1), asNatural(top2)) <= 0)) result = TRUE;
-  DEBUG(jInterp, "equalNat: %zu\n", result);
-  pushCtxData(aCtx, top2);
-  pushCtxData(aCtx, top1);
-  pushCtxData(aCtx, newBoolean(jInterp, result));
-}
-\stopCCode
-
-\startCCode
-static void greaterThanNatAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  Boolean result = FALSE;
-  if (isNatural(top1) &&
-      isNatural(top2) &&
-      (mpz_cmp(asNatural(top1), asNatural(top2)) > 0)) result = TRUE;
-  DEBUG(jInterp, "equalNat: %zu\n", result);
-  pushCtxData(aCtx, top2);
-  pushCtxData(aCtx, top1);
-  pushCtxData(aCtx, newBoolean(jInterp, result));
-}
-\stopCCode
-
-\startCCode
-static void greaterThanEqualNatAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  Boolean result = FALSE;
-  if (isNatural(top1) &&
-      isNatural(top2) &&
-      (mpz_cmp(asNatural(top1), asNatural(top2)) >= 0)) result = TRUE;
-  DEBUG(jInterp, "equalNat: %zu\n", result);
-  pushCtxData(aCtx, top2);
-  pushCtxData(aCtx, top1);
-  pushCtxData(aCtx, newBoolean(jInterp, result));
-}
-\stopCCode
-
-\startCCode
-static void equalNatAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top1);
-  popCtxDataInto(aCtx, top2);
-  Boolean result = FALSE;
-  if (isNatural(top1) &&
-      isNatural(top2) &&
-      (mpz_cmp(asNatural(top1), asNatural(top2)) == 0)) result = TRUE;
-  DEBUG(jInterp, "equalNat: %zu\n", result);
-  pushCtxData(aCtx, top2);
-  pushCtxData(aCtx, top1);
-  pushCtxData(aCtx, newBoolean(jInterp, result));
-}
-\stopCCode
-
-\startWord[equal]
-
-\preDataStack
-  (
-    top1 : natural
-    top2 : natural
-    dataStack
-  )
-\preProcessStack
-  ( processStack )
-\preConditions
-\stopPreConditions
-
-\postDataStack
-  (
-    top1 == top2 : boolean
-    dataStack
-  )
-\postProcessStack
-  ( processStack )
-\postConditions
-\stopPostConditions
-
-\stopWord
-
-\startCCode
-static void isZeroAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  size_t result = FALSE;
-  if (isNatural(top) &&
-      (mpz_cmp(asNatural(top), zero) == 0)) result = TRUE;
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, newBoolean(jInterp, result));
-}
-\stopCCode
-
-\startWord[isZero]
-
-\preDataStack
-  (
-    top : natural
-    dataStack
-  )
-\preProcessStack
-  ( processStack )
-\preConditions
-\stopPreConditions
-
-\postDataStack
-  (
-    top == 0 : Boolean
-    dataStack
-  )
-\postProcessStack
-  ( processStack )
-\postConditions
-\stopPostConditions
-
-\stopWord
-
-\startCCode
-static void isNaturalAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  JObj* result = NULL;
-  if (isNatural(top))
-    result = newBoolean(jInterp, TRUE);
-  else
-    result = newBoolean(jInterp, FALSE);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, result);
-}
-\stopCCode
-
-\startWord[isNatural]
-
-\preDataStack
-  (
-    top : aType
-    dataStack
-  )
-\preProcessStack
-  ( processStack )
-\preConditions
-\stopPreConditions
-
-\postDataStack
-  ( 
-    (top isNatural) : Boolean ????
-    dataStack
-  )
-\postProcessStack
-  ( processStack )
-\postConditions
-\stopPostConditions
-
-\stopWord
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerNaturalWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerNaturalWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  mpz_init(zero);
-  extendJoyLoLInRoot(jInterp, "isNatural", "", isNaturalAP,           "");
-  extendJoyLoLInRoot(jInterp, "+",         "", addAP,                 "");
-  extendJoyLoLInRoot(jInterp, "-",         "", subtractAP,            "");
-  extendJoyLoLInRoot(jInterp, "-rev",      "", subtractReverseAP,     "");
-  extendJoyLoLInRoot(jInterp, "*",         "", multiplyAP,            "");
-  extendJoyLoLInRoot(jInterp, "/",         "", quotientAP,            "");
-  extendJoyLoLInRoot(jInterp, "/rev",      "", quotientReverseAP,     "");
-  extendJoyLoLInRoot(jInterp, "%",         "", remainderAP,           "");
-  extendJoyLoLInRoot(jInterp, "%rev",      "", remainderReverseAP,    "");
-  extendJoyLoLInRoot(jInterp, "<nat",      "", lessThanNatAP,         "");
-  extendJoyLoLInRoot(jInterp, "<=nat",     "", lessThanEqualNatAP,    "");
-  extendJoyLoLInRoot(jInterp, ">nat",      "", greaterThanNatAP,      "");
-  extendJoyLoLInRoot(jInterp, ">=nat",     "", greaterThanEqualNatAP, "");
-  extendJoyLoLInRoot(jInterp, "=nat",      "", equalNatAP,            "");
-  extendJoyLoLInRoot(jInterp, "isZero",    "", isZeroAP,              "");
-  
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: pairs.tex]
-
-\section[title=JoyLoL words]
-
-\startCCode
-static void isNilAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  JObj* result = NULL;
-  if (!top)
-    result = newBoolean(jInterp, TRUE);
-  else
-    result = newBoolean(jInterp, FALSE);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, result);
-}
-\stopCCode
-
-\startCCode
-static void isPairAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  JObj* result = NULL;
-  if (isPair(top))
-    result = newBoolean(jInterp, TRUE);
-  else
-    result = newBoolean(jInterp, FALSE);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, result);
-}
-\stopCCode
-
-\startCCode
-static void isAtomAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  JObj* result = NULL;
-  if (isAtom(top))
-    result = newBoolean(jInterp, TRUE);
-  else
-    result = newBoolean(jInterp, FALSE);
-  pushCtxData(aCtx, top);
-  pushCtxData(aCtx, result);
-}
-\stopCCode
-
-\startTestSuite[initPairsCoAlgebra]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerPairWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerPairWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  extendJoyLoLInRoot(jInterp, "isNil",  "", isNilAP, "");
-  extendJoyLoLInRoot(jInterp, "isList", "", isPairAP, "");
-  extendJoyLoLInRoot(jInterp, "isPair", "", isPairAP, "");
-  extendJoyLoLInRoot(jInterp, "isAtom", "", isAtomAP, "");
-  
-  return TRUE;
-}
-\stopCCode
-
-\stopTestSuite
-% A ConTeXt document [master document: parsers.tex]
-
-\section[title=JoyLoL words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerParserWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerParserWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-){
-  return TRUE;
-}
-\stopCCode% A ConTeXt document [master document: rules.tex]
-
-\section[title=Words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerRuleWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerRuleWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  assert(jInterp);
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: signals.tex]
-
-\section[title=Words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerSignalWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerSignalWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  assert(jInterp);
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: stringBuffers.tex]
-
-\section[title=Words]
-
-\startCCode
-static void printLoLAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
+static void writeObjWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
   
   popCtxDataInto(aCtx, lol);
   popCtxDataInto(aCtx, depth);
   
-  if (!isNatural(depth)) {
+  if (!isUIntegerObj(depth)) {
     raiseExceptionMsg(aCtx,
-      "printLoL expected a natural as depth");
+      "printLoL expected a UInteger as depth");
     return;
   }
-  size_t depthInt = SIZE_MAX;
-  double depthDbl = asNaturalDbl(jInterp, depth);
-  if (depthDbl < ((double)depthInt)) {
-    depthInt = ((size_t)depthDbl);
-  }
-  
-  StringBufferObj* aStrBuf = newStringBufferImpl(aCtx);
-  
-  printLoLImpl(aStrBuf, lol, depthInt);
-  JObj* result =
-    newSymbol(jInterp, getCString(aStrBuf), "strBuf", 0);
-  pushCtxData(aCtx, result);
-  
-  strBufClose(aStrBuf);
-}
-\stopCCode
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerStringBufferWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
-
-\startCCode
-Boolean registerStringBufferWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  extendJoyLoLInRoot(jInterp, "printLoL", "", printLoLAP, "");
-  return TRUE;
-}
-\stopCCode
-% A ConTeXt document [master document: symbols.tex]
-
-\section[title=Words]
-
-\startCCode
-static void isSymbolAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
-  popCtxDataInto(aCtx, top);
-  JObj* result = NULL;
-  if (isSymbol(top))
-    result = newBoolean(jInterp, TRUE);
-  else
-    result = newBoolean(jInterp, FALSE);
-  pushCtxData(aCtx, result);
+  size_t depthInt = asUInteger(depth);
+    
+  printJObj(asRenderBuffer(aCtx), lol, "", depthInt);
 }
 \stopCCode
 
 \startCCode
-static void equalSymbolAP(ContextObj* aCtx) {
-  assert(aCtx);
-  JoyLoLInterp *jInterp = aCtx->jInterp;
-  assert(jInterp);
+void registerOutputWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  registerCFunction(asCtxSymbols(aCtx), "writeStr", writeWord);
+  registerCFunction(asCtxSymbols(aCtx), "writeNL",  writeNLWord);
+  registerCFunction(asCtxSymbols(aCtx), "writeObj", writeObjWord);
+}
+\stopCCode
+
+\subsubsection[title=UInterger words]
+
+\startCCode
+static void addWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
   popCtxDataInto(aCtx, top1);
   popCtxDataInto(aCtx, top2);
-  size_t result = FALSE;
-  if (isSymbol(top1) && isSymbol(top2)) {
-    if (strcmp(asSymbol(top1), asSymbol(top2)) == 0) result = TRUE;
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "addition requires that the top two stack elements are UIntegers"
+    );
+    return;
   }
-  DEBUG(jInterp, "equalSymbol: %zu\n", result);
-  pushCtxData(aCtx, newBoolean(jInterp, result));
+  UIntegerObj* sum = newUInteger(asUInteger(top1) + asUInteger(top2));
+  pushCtxData(aCtx, asJObj(sum));
 }
 \stopCCode
 
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerSymbolWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
+\startCCode
+static void subtractWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "subtraction requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  UInteger uIntDiff = 0;
+  if (asUInteger(top2) < asUInteger(top1)) {
+    uIntDiff = asUInteger(top1) - asUInteger(top2);
+  }
+  UIntegerObj* difference = newUInteger(uIntDiff);
+  pushCtxData(aCtx, asJObj(difference));
+}
+\stopCCode
 
 \startCCode
-Boolean registerSymbolWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  assert(jInterp);
-  ContextObj *rootCtx = jInterp->rootCtx;
-  assert(rootCtx);
-  DictObj *dict = rootCtx->dict;
-  assert(dict);
+static void subtractReverseWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "(reverse) subtraction requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  UInteger uIntDiff = 0;
+  if (asUInteger(top1) < asUInteger(top2)) {
+    uIntDiff = asUInteger(top2) - asUInteger(top1);
+  }
+  UIntegerObj* difference = newUInteger(uIntDiff);
+  pushCtxData(aCtx, asJObj(difference));
+}
+\stopCCode
+
+\startCCode
+static void multiplyWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
   
-  DictNodeObj* newLine = getSymbolEntry(dict, "newLine");
-  newLine->value = newSymbolImpl(jInterp, "\n", "newLine", 0, TRUE);
-
-  extendJoyLoLInRoot(jInterp, "isSymbol", "", isSymbolAP,    "");
-  extendJoyLoLInRoot(jInterp, "=Sym",     "", equalSymbolAP, "");
-
-  return TRUE;
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "multiplication requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  UIntegerObj* product = newUInteger(asUInteger(top1) * asUInteger(top2));
+  pushCtxData(aCtx, asJObj(product));
 }
 \stopCCode
-% A ConTeXt document [master document: templates.tex]
-
-\section[title=JoyLol words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerTemplateWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
 
 \startCCode
-Boolean registerTemplateWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-) {
-  return TRUE;
+static void quotientWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  if (asUInteger(top2) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the denominator is not zero"
+    );
+    return;
+  }
+  UIntegerObj* product = newUInteger(asUInteger(top1) % asUInteger(top2));
+  pushCtxData(aCtx, asJObj(product));
+}
+
+static void quotientReverseWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  if (asUInteger(top1) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the denominator is not zero"
+    );
+    return;
+  }
+  UIntegerObj* product = newUInteger(asUInteger(top2) % asUInteger(top1));
+  pushCtxData(aCtx, asJObj(product));
+}
+
+static void remainderWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  if (asUInteger(top2) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the denominator is not zero"
+    );
+    return;
+  }
+  UIntegerObj* product = newUInteger(asUInteger(top1) / asUInteger(top2));
+  pushCtxData(aCtx, asJObj(product));
+}
+
+static void remainderReverseWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  if (asUInteger(top1) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the denominator is not zero"
+    );
+    return;
+  }
+  UIntegerObj* product = newUInteger(asUInteger(top2) / asUInteger(top1));
+  pushCtxData(aCtx, asJObj(product));
 }
 \stopCCode
-% A ConTeXt document [master document: texts.tex]
-
-\section[title=JoyLoL words]
-
-\setCHeaderStream{private}
-\startCHeader
-extern Boolean registerTextWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-);
-\stopCHeader
-\setCHeaderStream{public}
 
 \startCCode
-Boolean registerTextWords(
-  JoyLoLInterp *jInterp,
-  JClass       *theCoAlg
-){
-  return TRUE;
+static void lessThanUIntWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  
+  UInteger result = false;
+  if (isUIntegerObj(top1) &&
+      isUIntegerObj(top2) &&
+      (asUInteger(top1) < asUInteger(top2))) result = true;
+  DEBUG(DebugMask, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
 }
 \stopCCode
 
-\stoptyping
+\startCCode
+static void lessThanEqualUIntWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  UInteger result = false;
+  if (isUIntegerObj(top1) &&
+      isUIntegerObj(top2) &&
+      (asUInteger(top1) <= asUInteger(top2))) result = true;
+  DEBUG(DebugMask, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void greaterThanUIntWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  UInteger result = false;
+  if (isUIntegerObj(top1) &&
+      isUIntegerObj(top2) &&
+      (asUInteger(top1) > asUInteger(top2))) result = true;
+  DEBUG(DebugMask, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void greaterThanEqualUIntWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  UInteger result = false;
+  if (isUIntegerObj(top1) &&
+      isUIntegerObj(top2) &&
+      (asUInteger(top1) >= asUInteger(top2))) result = true;
+  DEBUG(DebugMask, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void equalUIntWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  UInteger result = false;
+  if (isUIntegerObj(top1) &&
+      isUIntegerObj(top2) &&
+      (asUInteger(top1) == asUInteger(top2))) result = true;
+  DEBUG(DebugMask, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void isZeroWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  UInteger result = false;
+  if (isUIntegerObj(top) &&
+      (asUInteger(top) == 0)) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void isUIntegerWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  UInteger result = false;
+  if (isUIntegerObj(top)) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+void registerUIntegerWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  
+  registerCFunction(symTab, "isUInteger", isUIntegerWord);
+  registerCFunction(symTab, "+",          addWord);
+  registerCFunction(symTab, "-",          subtractWord);
+  registerCFunction(symTab, "-rev",       subtractReverseWord);
+  registerCFunction(symTab, "*",          multiplyWord);
+  registerCFunction(symTab, "/",          quotientWord);
+  registerCFunction(symTab, "/rev",       quotientReverseWord);
+  registerCFunction(symTab, "%",          remainderWord);
+  registerCFunction(symTab, "%rev",       remainderReverseWord);
+  registerCFunction(symTab, "<UInt",      lessThanUIntWord);
+  registerCFunction(symTab, "<=UInt",     lessThanEqualUIntWord);
+  registerCFunction(symTab, ">UInt",      greaterThanUIntWord);
+  registerCFunction(symTab, ">=UInt",     greaterThanEqualUIntWord);
+  registerCFunction(symTab, "=UInt",      equalUIntWord);
+  registerCFunction(symTab, "isZero",     isZeroWord);
+}
+\stopCCode
+
+\subsubsection[title=List words]
+
+\startCCode
+static void isNilWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  Boolean result = false;
+  if (!top) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void isPairWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  Boolean result = false;
+  if (isPairObj(top)) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void isAtomWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  Boolean result = false;
+  if (isAtomObj(top)) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+void registerListWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  
+  registerCFunction(symTab, "isNil",  isNilWord);
+  registerCFunction(symTab, "isList", isPairWord);
+  registerCFunction(symTab, "isPair", isPairWord);
+  registerCFunction(symTab, "isAtom", isAtomWord);
+}
+\stopCCode
+
+\section[title=Symbol words]
+
+\startCCode
+static void isSymbolWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  Boolean result = false;
+  if (isSymbolObj(top)) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void equalSymbolWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  Boolean result = false;
+  if (isSymbolObj(top1) && isSymbolObj(top2)) {
+    if (strcmp(asSymbol(top1), asSymbol(top2)) == 0) result = true;
+  }
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+void registerSymbolWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  SymbolObj *newLineObj = newSymbol("\n", "newLine", 0);
+  insertSymbol(asCtxSymbols(aCtx), "newLine", asJObj(newLineObj));
+
+  registerCFunction(asCtxSymbols(aCtx), "isSymbol", isSymbolWord);
+  registerCFunction(asCtxSymbols(aCtx), "=Sym",     equalSymbolWord);
+}
+\stopCCode
+
+\startCCode
+void registerBasicWords(ContextObj *aCtx) {
+  registerBooleanWords(aCtx);
+  registerSymbolTableWords(aCtx);
+  registerOutputWords(aCtx);
+  registerUIntegerWords(aCtx);
+  registerListWords(aCtx);
+  registerSymbolWords(aCtx);
+}
+\stopCCode

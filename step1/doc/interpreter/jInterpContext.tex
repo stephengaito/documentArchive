@@ -191,7 +191,7 @@ void pushSymbolCtxData(
   assert(isContextObj(aCtx));
   if (!aSymbol) return;
 
-  SymbolObj *symObj = newSymbol(aSymbol);
+  SymbolObj *symObj = newSymbol(aSymbol, NULL, 0);
   aCtx->data =
     asJObj(newPair(asJObj(symObj), aCtx->data));
 }
@@ -301,6 +301,18 @@ if (aCtx->tracingOn) {                          \
   free(aStrBuf);                                \
 }
 
+#define peekCtxDataInto(aCtx, aVar)             \
+assert(isContextObj(aCtx));                     \
+JObj *aVar = peekCtxData(aCtx);                 \
+if (aCtx->tracingOn) {                          \
+  StringBufferObj *aStrBuf = newStringBuffer(); \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);        \
+  printJObj(aStrBuf, asJObj(aVar), "", 20);     \
+  strBufPrintf(aStrBuf, "\n");                  \
+  printf("%s", getCString(aStrBuf));            \
+  strBufClose(aStrBuf);                         \
+  free(aStrBuf);                                \
+}
 \stopCHeader
 
 \startCCode
@@ -353,7 +365,7 @@ void pushSymbolCtxProcess(
   assert(isContextObj(aCtx));
   if (!aSymbol) return;
 
-  SymbolObj *symObj = newSymbol(aSymbol);
+  SymbolObj *symObj = newSymbol(aSymbol, NULL, 0);
   aCtx->process =
     asJObj(newPair(asJObj(symObj), aCtx->process));
 }
@@ -440,6 +452,19 @@ JObj* popCtxProcess(
 #define popCtxProcessInto(aCtx, aVar)           \
 assert(isContextObj(aCtx));                     \
 JObj *aVar = popCtxProcess(aCtx);               \
+if (aCtx->tracingOn) {                          \
+  StringBufferObj *aStrBuf = newStringBuffer(); \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);        \
+  printJObj(aStrBuf, asJObj(aVar), "", 20);     \
+  strBufPrintf(aStrBuf, "\n");                  \
+  printf("%s", getCString(aStrBuf));            \
+  strBufClose(aStrBuf);                         \
+  free(aStrBuf);                                \
+}
+
+#define peekCtxProcessInto(aCtx, aVar)          \
+assert(isContextObj(aCtx));                     \
+JObj *aVar = peekCtxProcess(aCtx);              \
 if (aCtx->tracingOn) {                          \
   StringBufferObj *aStrBuf = newStringBuffer(); \
   strBufPrintf(aStrBuf, "%s = ", #aVar);        \

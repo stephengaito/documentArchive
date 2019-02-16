@@ -61,6 +61,24 @@ PairObj *newPair(JObj *car, JObj *cdr) {
 \stopTestCase
 \stopTestSuite
 
+\startCHeader
+#define popListInto(aCtx, aList, aJObjVar)                \
+  JObj* aJObjVar = NULL;                                  \
+  if (isPairObj(aList)) {                                 \
+    aJObjVar = asCar(aList);                              \
+    aList    = asCdr(aList);                              \
+  }                                                       \
+  if (aCtx->tracingOn) {                                  \
+    StringBufferObj *aStrBuf = newStringBuffer();         \
+    strBufPrintf(aStrBuf, "%s.%s = ", #aList, #aJObjVar); \
+    printJObj(aStrBuf, aJObjVar, "", 20);                 \
+    strBufPrintf(aStrBuf, "\n");                          \
+    printf("%s", getCString(aStrBuf));                    \
+    strBufClose(aStrBuf);                                 \
+    free(aStrBuf);                                        \
+  }
+\stopCHeader
+
 \startTestSuite[concatLists]
 
 \startCHeader

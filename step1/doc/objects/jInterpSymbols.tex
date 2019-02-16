@@ -29,27 +29,37 @@ char *appendSymbols(Symbol *sym1, Symbol *sym2) {
 
 \startCHeader
 typedef struct symbol_struct {
-  size_t  tag;
-  Symbol *symbol;
+  size_t    tag;
+  Symbol   *symbol;
+  Symbol   *file;
+  UInteger  line;
 } SymbolObj;
 
 #define isSymbolObj(anObj) ((anObj) && (((JObj*)(anObj))->tag == SymbolTag))
 #define asSymbolObj(anObj) ((SymbolObj*)(anObj))
 #define asSymbol(anObj)    (((SymbolObj*)(anObj))->symbol)
+#define asFile(anObj)      (((SymbolObj*)(anObj))->file)
+#define asLine(anObj)      (((SymbolObj*)(anObj))->line)
+
+#define symbolIs(anObj, aSymbol)                \
+  (isSymbolObj(anObj) &&                        \
+    (strcmp(asSymbol(anObj), (aSymbol)) == 0))
 \stopCHeader
 
 \startTestSuite[newSymbol]
 
 \startCHeader
-SymbolObj *newSymbol(Symbol *aSymbol);
+SymbolObj *newSymbol(Symbol *aSymbol, Symbol *aFile, UInteger aLine);
 \stopCHeader
 
 \startCCode
-SymbolObj *newSymbol(Symbol *aSymbol) {
+SymbolObj *newSymbol(Symbol *aSymbol, Symbol *aFile, UInteger aLine) {
   SymbolObj *newObj =
     (SymbolObj*)calloc(1, sizeof(SymbolObj));
   newObj->tag    = SymbolTag;
   newObj->symbol = strdup(aSymbol);
+  newObj->file   = aFile;
+  newObj->line   = aLine;
   return newObj;
 }
 \stopCCode
@@ -57,10 +67,12 @@ SymbolObj *newSymbol(Symbol *aSymbol) {
 \startTestCase[should create a new symbol]
 
 \startCTest
-  SymbolObj* aSymb = newSymbol("This is a test");
+  SymbolObj* aSymb = newSymbol("This is a test", "testFile", 42);
   AssertIntTrue(isSymbolObj(aSymb));
   AssertIntEquals(getJObjTag(aSymb), SymbolTag);
   AssertStrEquals(asSymbol(aSymb), "This is a test");
+  AssertStrEquals(asFile(aSymb), "testFile");
+  AssertIntEquals(asLine(aSymb), 42);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -96,7 +108,7 @@ void symbolPrinter(
 \startTestCase[should print a symbol]
 
 \startCTest
-  SymbolObj *aSymb = newSymbol("This is a test");
+  SymbolObj *aSymb = newSymbol("This is a test", NULL, 0);
   StringBufferObj *aStrBuf = newStringBuffer();
   symbolPrinter(aStrBuf, asJObj(aSymb), "  ", 20);
   AssertStrMatches(getCString(aStrBuf), "This is a test");
