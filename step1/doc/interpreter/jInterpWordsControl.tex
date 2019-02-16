@@ -61,7 +61,7 @@ static void interpretWord(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void ifteWord(ContextObj* aCtx) {
+void ifteWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, topElse);
   popCtxDataInto(aCtx, topThen);
   popCtxDataInto(aCtx, topIf);
@@ -199,7 +199,7 @@ static void raiseIfFalseWord(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static ContextObj *findFirstTryHandlerWord(ContextObj* aCtx) {
+ContextObj *findFirstTryHandlerWord(ContextObj* aCtx) {
   assert(isContextObj(aCtx));
 
   if (aCtx->process) {
@@ -679,6 +679,12 @@ static void undefineWord(ContextObj* aCtx) {
   }
 \stopCCode
 
+\startTestSuite[registerControlWords]
+
+\startCHeader
+void registerControlWords(ContextObj *aCtx);
+\stopCHeader
+
 \startCCode
 void registerControlWords(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
@@ -718,3 +724,30 @@ void registerControlWords(ContextObj *aCtx) {
 //  extendCtxJoyLoLInRoot(jInterp, "switchCtx",           "", switchCtxWord,           "");
 }
 \stopCCode
+
+\startTestCase[should register control words]
+
+\startCHeader
+void ifteWord(ContextObj *aCtx);
+ContextObj *findFirstTryHandlerWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testRegisterControlWords");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  AssertIntTrue(isSymbolTableObj(symTab));
+  AssertPtrNull(findSymbol(symTab, "ifte"));
+  
+  registerControlWords(aCtx);
+  JObj *shouldBeIFTE = findSymbol(symTab, "ifte");
+  AssertIntTrue(isCFunctionObj(shouldBeIFTE));
+  AssertPtrEquals(asCFunction(shouldBeIFTE), ifteWord);
+  
+  JObj *shouldBeTryHandler = findSymbol(symTab, "findFirstTryHandler");
+  AssertIntTrue(isCtxCFunctionObj(shouldBeTryHandler));
+  AssertPtrEquals(asCtxCFunction(shouldBeTryHandler), findFirstTryHandlerWord);
+\stopCTest
+\stopTestCase
+\stopTestSuite

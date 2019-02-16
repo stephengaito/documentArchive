@@ -2,11 +2,6 @@
 
 \subsection[title=Evaluation]
 
-\setCHeaderStream{public}
-\startCHeader
-
-\stopCHeader
-
 \startCCode
 static void traceAction(
   ContextObj *aCtx,
@@ -25,7 +20,19 @@ static void traceAction(
   strBufClose(aStrBuf);
   free(aStrBuf);
 }
+\stopCCode
 
+
+\startTestSuite[evalCommandInContext]
+
+\startCHeader
+void evalCommandInContext(
+  ContextObj *aCtx,
+  JObj       *command
+);
+\stopCHeader
+
+\startCCode
 void evalCommandInContext(
   ContextObj *aCtx,
   JObj       *command
@@ -183,7 +190,79 @@ void evalCommandInContext(
       DEBUG(DebugMask, "evalCommandInContext <- tracing%s\n", "");
     }
   } // aCtx->process is empty
+  aCtx->command = NULL;
   DEBUG(DebugMask, "evalCommandInContext < %p %p\n", aCtx, command);
 }
-
 \stopCCode
+
+\startTestCase[should eval some commands]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testEvalCommandCtx");
+  AssertIntTrue(isContextObj(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  AssertPtrNull(asCtxCommand(aCtx));
+  
+  evalCommandInContext(aCtx, asJObj(newUInteger(42)));
+  AssertPtrNotNull(asCtxData(aCtx));
+  JObj *data = asCtxData(aCtx);
+  AssertIntTrue(isPairObj(data));
+  AssertIntTrue(isUIntegerObj(asCar(data)));
+  AssertIntEquals(asUInteger(asCar(data)), 42);
+  AssertPtrNull(asCtxProcess(aCtx));
+  AssertPtrNull(asCtxCommand(aCtx));
+
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  registerBasicWords(aCtx);
+  JObj *shouldBeTrue = findSymbol(symTab, "true");
+  AssertPtrNotNull(shouldBeTrue);
+  AssertIntTrue(isUIntegerObj(shouldBeTrue));
+  AssertIntEquals(asUInteger(shouldBeTrue), true);
+  evalCommandInContext(aCtx, asJObj(newSymbol("true", NULL, 0)));
+  AssertPtrNull(asCtxProcess(aCtx));
+  AssertPtrNull(asCtxCommand(aCtx));  
+
+  data = asCtxData(aCtx);
+  AssertIntTrue(isPairObj(data));
+  AssertIntTrue(isUIntegerObj(asCar(data)));
+  AssertIntEquals(asUInteger(asCar(data)), true);
+  AssertIntTrue(isPairObj(asCdr(data)));
+  AssertIntTrue(isUIntegerObj(asCar(asCdr(data))));
+  AssertIntEquals(asUInteger(asCar(asCdr(data))), 42);
+    
+  registerControlWords(aCtx);
+  AssertIntTrue(isCFunctionObj(findSymbol(symTab, "ifte")));
+  AssertIntTrue(isCFunctionObj(findSymbol(symTab, "ifteCont")));
+  AssertIntTrue(isCFunctionObj(findSymbol(symTab, "clear")));
+  
+  evalCommandInContext(aCtx, asJObj(newSymbol("clear", NULL, 0)));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  pushCtxData(aCtx, asJObj(newUInteger(true)));
+  pushCtxData(aCtx, asJObj(newUInteger(42)));
+  pushCtxData(aCtx, asJObj(newUInteger(43)));
+  evalCommandInContext(aCtx, asJObj(newSymbol("ifte", NULL, 0)));
+  data = asCtxData(aCtx);
+  AssertIntTrue(isPairObj(data));
+  AssertIntTrue(isUIntegerObj(asCar(data)));
+  AssertIntEquals(asUInteger(asCar(data)), 42);
+  
+  evalCommandInContext(aCtx, asJObj(newSymbol("clear", NULL, 0)));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  aCtx->tracingOn = true;
+  pushCtxData(aCtx, asJObj(newPair(asJObj(newUInteger(false)), NULL)));
+  pushCtxData(aCtx, asJObj(newUInteger(42)));
+  pushCtxData(aCtx, asJObj(newUInteger(43)));
+  evalCommandInContext(aCtx, asJObj(newSymbol("ifte", NULL, 0)));
+  data = asCtxData(aCtx);
+  AssertIntTrue(isPairObj(data));
+  AssertIntTrue(isUIntegerObj(asCar(data)));
+  AssertIntEquals(asUInteger(asCar(data)), 43);
+\stopCTest
+
+\stopTestCase
+\stopTestSuite

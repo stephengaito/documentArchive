@@ -506,7 +506,7 @@ static void isSymbolWord(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void equalSymbolWord(ContextObj* aCtx) {
+void equalSymbolWord(ContextObj* aCtx) {
   assert(isContextObj(aCtx));
 
   popCtxDataInto(aCtx, top1);
@@ -531,6 +531,12 @@ void registerSymbolWords(ContextObj *aCtx) {
 }
 \stopCCode
 
+\startTestSuite[registerBasicWords]
+
+\startCHeader
+void registerBasicWords(ContextObj *aCtx);
+\stopCHeader
+
 \startCCode
 void registerBasicWords(ContextObj *aCtx) {
   registerBooleanWords(aCtx);
@@ -541,3 +547,31 @@ void registerBasicWords(ContextObj *aCtx) {
   registerSymbolWords(aCtx);
 }
 \stopCCode
+
+\startTestCase[should register the basic words]
+
+\startCHeader
+void equalSymbolWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testRegisterBasicWords");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  AssertIntTrue(isSymbolTableObj(symTab));
+  AssertPtrNull(findSymbol(symTab, "true"));
+  registerBasicWords(aCtx);
+  JObj *shouldBeTrue = findSymbol(symTab, "true");
+  AssertPtrNotNull(shouldBeTrue);
+  AssertIntTrue(isUIntegerObj(shouldBeTrue));
+  AssertIntEquals(asUInteger(shouldBeTrue), true);
+  
+  JObj *shouldBeEqualSym = findSymbol(symTab, "=Sym");
+  AssertPtrNotNull(shouldBeEqualSym);
+  AssertIntTrue(isCFunctionObj(shouldBeEqualSym));
+  AssertPtrEquals(asCFunction(shouldBeEqualSym), equalSymbolWord);
+\stopCTest
+
+\stopTestCase
+\stopTestSuite

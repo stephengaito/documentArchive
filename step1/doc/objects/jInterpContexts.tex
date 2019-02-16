@@ -33,6 +33,7 @@ typedef struct context_struct {
 #define asCtxName(anObj) (((ContextObj*)(anObj))->name)
 #define asCtxData(anObj) (((ContextObj*)(anObj))->data)
 #define asCtxProcess(anObj) (((ContextObj*)(anObj))->process)
+#define asCtxCommand(anObj) (((ContextObj*)(anObj))->command)
 #define asCtxSymbols(anObj) (((ContextObj*)(anObj))->symbolTable)
 #define asParserText(anObj) (((ContextObj*)(anObj))->parserText)
 #define asParserTextSize(anObj) (((ContextObj*)(anObj))->parserTextSize)
@@ -65,6 +66,8 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   newObj->renderBuffer      = NULL;
   newObj->tracingOn         = false;
   newObj->debug             = false;
+  newObj->exceptionRaised   = false;
+  newObj->parent            = NULL;
   return newObj;
 }
 \stopCCode
@@ -87,7 +90,9 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   AssertPtrNull(asRenderBuffer(aCtx));
   AssertIntFalse(aCtx->tracingOn);
   AssertIntFalse(aCtx->debug);
-  AssertPtrNull(aCtx->command);
+  AssertPtrNull(asCtxCommand(aCtx));
+  AssertIntFalse(aCtx->exceptionRaised);
+  AssertPtrNull(aCtx->parent);
 \stopCTest
 \stopTestCase
 \stopTestSuite
