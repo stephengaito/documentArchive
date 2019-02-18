@@ -22,14 +22,26 @@ static void popListWord(ContextObj* aCtx) {
   pushCtxData(aCtx, aList);
   pushCtxData(aCtx, top);
 }
+\stopCCode
 
-static void wrapWord(ContextObj* aCtx) {
+\startCHeader
+void wrapWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void wrapWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   top = asJObj(newPair(top, NULL));
   pushCtxData(aCtx, top);
 }
+\stopCCode
 
-static void prependWord(ContextObj* aCtx) {
+\startCHeader
+void prependWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void prependWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   JObj* result = asJObj(concatLists(top, second));

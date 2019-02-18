@@ -98,9 +98,9 @@ void symbolPrinter(
   DEBUG(DebugMask, "symbolPrinter %p\n", anObj);
   assert(isSymbolObj(anObj));
   if (indent) {
-    strBufPrintf(aStrBuf, "%s%s\n", indent, asSymbol(anObj));
+    strBufPrintf(aStrBuf, "%s\"%s\"\n", indent, asSymbol(anObj));
   } else {
-    strBufPrintf(aStrBuf, "%s ", asSymbol(anObj));
+    strBufPrintf(aStrBuf, "\"%s\" ", asSymbol(anObj));
   }
 }
 \stopCCode
@@ -116,7 +116,7 @@ void symbolPrinter(
   
   strBufReOpen(aStrBuf);
   symbolPrinter(aStrBuf, asJObj(aSymb), NULL, 20);
-  AssertStrEquals(getCString(aStrBuf), "This is a test ");
+  AssertStrEquals(getCString(aStrBuf), "\"This is a test\" ");
   AssertStrDoesNotMatch(getCString(aStrBuf), "\n");
   
   strBufClose(aStrBuf);

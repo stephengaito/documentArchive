@@ -482,6 +482,65 @@ static void jPegCoSpanWord(ContextObj *aCtx) {
     jPegFailWord(aCtx);
   }
 }
+
+static void jPegRepeatWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  asParserIgnoreNextFailure(aCtx) = true;
+  
+  popCtxDataInto(aCtx, parser);
+  
+  pushSymbolCtxProcess(aCtx, "parseRepeat");
+  pushCtxProcess(aCtx, parser);
+  prependListCtxProcess(aCtx, copyLoL(parser));
+}
+
+static void jPegRepeatAtLeastWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  asParserIgnoreNextFailure(aCtx) = false;
+  
+  popCtxDataInto(aCtx, parser);
+  popCtxDataInto(aCtx, atLeast);
+  if (!isUIntegerObj(atLeast)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg charSet parser expected a UInteger as top");
+    return;
+  }
+  size_t atLeastRepeats = asUInteger(atLeast);
+  if (0 < atLeastRepeats) {
+    pushSymbolCtxProcess(aCtx, "parseRepeatAtLeast");
+    pushUIntegerCtxProcess(aCtx, atLeastRepeats - 1);
+  } else {
+    pushSymbolCtxProcess(aCtx, "parseRepeat");
+  }
+  pushCtxProcess(aCtx, parser);
+  prependListCtxProcess(aCtx, copyLoL(parser));
+}
+
+static void jPegRepeatAtMostWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  asParserIgnoreNextFailure(aCtx) = false;
+  
+  popCtxDataInto(aCtx, parser);
+  popCtxDataInto(aCtx, atMost);
+  if (!isUIntegerObj(atMost)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg charSet parser expected a UInteger as top");
+    return;
+  }
+  size_t atMostRepeats = asUInteger(atMost);
+  if (0 < atMostRepeats) {
+    asParserIgnoreNextFailure(aCtx) = true;
+    pushSymbolCtxProcess(aCtx, "parseRepeatAtMost");
+    pushUIntegerCtxProcess(aCtx, atMostRepeats - 1);
+    pushCtxProcess(aCtx, parser);
+  } else {
+    pushSymbolCtxProcess(aCtx, "parseFail");
+  }
+  prependListCtxProcess(aCtx, copyLoL(parser));
+}
 \stopCCode
 
 \startCHeader
@@ -494,16 +553,74 @@ void registerJPegWords(ContextObj *aCtx) {
   SymbolTableObj *symTab = asCtxSymbols(aCtx);
   assert(isSymbolTableObj(symTab));
   
-  registerCFunction(symTab, "pasreSymbol",    parseSymbolWord);
-  registerCFunction(symTab, "pasreFile",      parseFileWord);
-  registerCFunction(symTab, "parseChoice",    jPegChoiceWord);
-  registerCFunction(symTab, "parseCommit",    jPegCommitWord);
-  registerCFunction(symTab, "parseFail",      jPegFailWord);
-  registerCFunction(symTab, "parseAny",       jPegAnyWord);
-  registerCFunction(symTab, "parsePattern",   jPegPatternWord);
-  registerCFunction(symTab, "parseCharSet",   jPegCharSetWord);
-  registerCFunction(symTab, "parseCoCharSet", jPegCoCharSetWord);
-  registerCFunction(symTab, "parseSpan",      jPegSpanWord);
-  registerCFunction(symTab, "parseCoSpan",    jPegCoSpanWord);
+  registerCFunction(symTab, "parseSymbol",        parseSymbolWord);
+  registerCFunction(symTab, "parseFile",          parseFileWord);
+  registerCFunction(symTab, "parseChoice",        jPegChoiceWord);
+  registerCFunction(symTab, "parseCommit",        jPegCommitWord);
+  registerCFunction(symTab, "parseFail",          jPegFailWord);
+  registerCFunction(symTab, "parseAny",           jPegAnyWord);
+  registerCFunction(symTab, "parsePattern",       jPegPatternWord);
+  registerCFunction(symTab, "parseCharSet",       jPegCharSetWord);
+  registerCFunction(symTab, "parseCoCharSet",     jPegCoCharSetWord);
+  registerCFunction(symTab, "parseSpan",          jPegSpanWord);
+  registerCFunction(symTab, "parseCoSpan",        jPegCoSpanWord);
+  registerCFunction(symTab, "parseRepeat",        jPegRepeatWord);
+  registerCFunction(symTab, "parseRepeatAtLeast", jPegRepeatAtLeastWord);
+  registerCFunction(symTab, "parseRepeatAtMost",  jPegRepeatAtMostWord);
 }
 \stopCCode
+
+
+\startTestSuite[parser]
+
+\startTestCase[should ??]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  parseString(aCtx, "this is a test");
+
+  // build the following parser on the data stack...
+  // ( 
+  //   (
+  //     ((" " "\t" "\n") 0 parseSpan)
+  //     (("az" "AZ") 0 parseSpan)
+  //   ) parseChoice
+  // ) parseRepeat
+
+  aCtx->tracingOn = true;
+
+  pushSymbolCtxData(aCtx, "parseRepeat");
+  pushSymbolCtxData(aCtx, "parseChoice");
+  pushSymbolCtxData(aCtx, "parseSpan");
+  pushUIntegerCtxData(aCtx, 0);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "AZ");
+  pushSymbolCtxData(aCtx, "az");
+  prependWord(aCtx);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseSpan");
+  pushUIntegerCtxData(aCtx, 0);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "\n");
+  pushSymbolCtxData(aCtx, "\t");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, " ");
+  prependWord(aCtx);
+  prependWord(aCtx);
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  
+  // now evaluate it
+  evalCommandInContext(aCtx, asJObj(newSymbol("interpret", NULL, 0)));
+  AssertIntFalse(asParserFailed(aCtx));
+\stopCTest
+\stopTestCase
+\stopTestSuite

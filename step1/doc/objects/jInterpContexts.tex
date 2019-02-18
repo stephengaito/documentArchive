@@ -153,8 +153,11 @@ void parseString(ContextObj *aCtx, Symbol *aStringToParse) {
   
   if (aStrSize == 0) return;
   
-  asParserText(aCtx)     = aStringToParse;
-  asParserTextSize(aCtx) = aStrSize;
+  asParserText(aCtx)              = aStringToParse;
+  asParserTextSize(aCtx)          = aStrSize;
+  asParserTextPosition(aCtx)      = 0;
+  asParserIgnoreNextFailure(aCtx) = false;
+  asParserFailed(aCtx)            = false;
 }
 \stopCCode
 
