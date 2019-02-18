@@ -2,27 +2,66 @@
 
 \subsection[title=Primitives]
 
+\TODO{At the moment we do NOT deal correctly with UTF-8 characters.... 
+which we can and should.} 
+
 We need to implement the following \joylol\ words:
 
 \startitemize[1]
 
-\item \bold{\type{Fail}}
+\item \bold{\type{Fail}} successively takes items off the process stack 
+until it reaches a choice symbol. It then places the last list back on the 
+process stack. 
 
-\item \bold{\type{Commit}}
+\item \bold{\type{Commit}} takes no arguments, and ensures that the first 
+subsequent failure is ignored.
 
-\item \bold{\type{Choose}}
+\item \bold{\type{Choice}} takes a list of patterns and applies each in 
+turn until one succeeds. It does this by taking the top item off the list 
+and then placing, itself, the reduced list, and then prepends the top item 
+onto the process stack. 
 
-\item \bold{\type{RepeatAtLeast}}
+\item \bold{\type{Any}} takes one argument which is the number of 
+characters to match. All characters will match. 
 
-\item \bold{\type{RepeatAtMost}}
+\item \bold{\type{Pattern}} takes one argument which is the explicit 
+sequence of characters which should be matched. 
 
-\item \bold{\type{Char}}
+\item \bold{\type{CharSet}} Takes two arguments. The first argument should 
+be a list of symbols which together make up the set of characters which 
+can be matched once. The second argument is the number of characters which 
+\emph{must} match characters in the character set. 
 
-\item \bold{\type{CharSet}}
+\item \bold{\type{coCharSet}} Takes two arguments. The first argument 
+which like a \bold{\type{CharSet}}, should be a list of symbols which 
+together make up the set of characters which \emph{should not} be matched, 
+all characters which are \emph{not} in the character set \emph{will} be 
+matched. The second argument is the number of characters which \emph{must} 
+\emph{not} match characters in the character set.
 
-\item \bold{\type{Any}}
+\item \bold{\type{Span}} Takes two arguments. The top argument is the list 
+of symbols from which to form the character set. The second argument is 
+the minimum number of times that should be matched by this character set. 
+A \bold{\type{span}} matches as many consecutive characters that are in 
+the character set as possible. \bold{\type{Span}} will only fail if it can 
+not match at least the specified minimum number of characters. 
 
-\stopitemize
+\item \bold{\type{coSpan}} Like \bold{\type{Span}}, \bold{\type{coSpan}}, 
+takes two arguments. The top argument is a list of symbols from which to 
+form the character set. The second argument is the minimum number of times 
+that should be matched by characters which are \emph{not} in this 
+character set. A \bold{\type{coSpan}} matches as many consecutive 
+characters that are \emph{not} in the character set as possible. 
+\bold{\type{coSpan}} will only fail if it can not match at least the 
+specified minimum number of characters. 
+
+\item \bold{\type{RepeatAtLeast}} repeats the top pattern at least second 
+argument times. 
+
+\item \bold{\type{RepeatAtMost}} repeats the top pattern at most second 
+argument times. 
+
+\stopitemize 
 
 \TODO{We have not covered \quote{\bold{\type{not}}}, 
 \quote{\bold{\type{and}}}, CharSet difference, captures, or actions on 
@@ -52,3 +91,419 @@ A compiler is a pipeline of co-routines. The parser might itself be a
 pipeline of co-routines, one for the lexer, one for the ultimate parser, 
 but there could be numerous intermediary co-routines parsing more complex 
 syntactic structures. 
+
+\startCCode
+static void parseSymbolWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, top);
+  if (!isSymbolObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "parse symbol expected a symbol as top");
+    return;
+  }
+  parseString(aCtx, asSymbol(top));
+}
+
+static void parseFileWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, top);
+  if (!isSymbolObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "parse file expected a symbol as top");
+    return;
+  }
+  parseFile(aCtx, asSymbol(top));
+}
+
+static void jPegChoiceWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, top);
+  if (!isPairObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg choice parser expected a list as top");
+    return;
+  }
+  popListInto(aCtx, top, firstChoice);
+  pushSymbolCtxProcess(aCtx, "choice");
+  pushCtxProcess(aCtx, top);
+  prependListCtxProcess(aCtx, firstChoice);
+}
+
+static void jPegCommitWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  asParserIgnoreNextFailure(aCtx) = true;
+}
+
+static void jPegFailWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  if (asParserIgnoreNextFailure(aCtx)) {
+    asParserIgnoreNextFailure(aCtx) = false;
+    return;
+  }
+  
+  asParserFailed(aCtx) = true;
+  
+  JObj *lastCommand = NULL;
+  while(aCtx->process) {
+    popCtxProcessInto(aCtx, aCommand);
+    if (symbolIs(aCommand, "choice")) {
+      pushSymbolCtxProcess(aCtx, "choice");
+      pushCtxProcess(aCtx, lastCommand);
+      break;
+    }
+    lastCommand = aCommand;
+  }
+  
+  if (aCtx->process) {
+    asParserFailed(aCtx) = false;
+  }
+}
+
+static void jPegAnyWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, top);
+  if (!isUIntegerObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg any parser expected a UInteger as top");
+    return;
+  }
+  
+  size_t charsToMatch     = asUInteger(top);
+  size_t origTextPosition = asParserTextPosition(aCtx);
+  
+  // TODO: need to deal with UTF-8 multi-byte characters
+  
+  while (
+    (asParserTextSize(aCtx) <= asParserTextPosition(aCtx)) &&
+    (0 < charsToMatch)
+  ) {
+    asParserTextPosition(aCtx)++;
+    charsToMatch--;
+  }
+  
+  if (0 < charsToMatch) {
+    asParserTextPosition(aCtx) = origTextPosition;
+    jPegFailWord(aCtx);
+  }
+
+}
+
+static void jPegPatternWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, top);
+  if (!isSymbolObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg pattern parser expected a symbol as top");
+    return;
+  }
+  
+  Symbol *pattern         = asSymbol(top);
+  size_t patternSize      = strlen(pattern);
+  size_t charsMatched     = 0;
+  size_t origTextPosition = asParserTextPosition(aCtx);
+  Symbol *parserText      = asParserText(aCtx) + origTextPosition;
+
+  // TODO: need to deal with UTF-8 multi-byte characters
+
+  while(
+    (asParserTextSize(aCtx) <= asParserTextPosition(aCtx)) &&
+    (charsMatched < patternSize) &&
+    (parserText[charsMatched] == pattern[charsMatched])
+  ) {
+    asParserTextPosition(aCtx)++;
+    charsMatched++;
+  }
+  
+  if (charsMatched != patternSize)  {
+    asParserTextPosition(aCtx) = origTextPosition;
+    jPegFailWord(aCtx);
+  }
+}
+
+typedef struct parser_char_span {
+  char firstChar;
+  char lastChar;
+} ParserCharSpan;
+
+typedef struct parser_charSet_spans {
+  Symbol         *charSet;
+  size_t          charSetSize;
+  ParserCharSpan *spans;
+  size_t          numSpans;
+  size_t          maxSpans;
+} ParserCharSpans;
+
+static ParserCharSpans *collectJPegSpans(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  ParserCharSpans *collectedSpans = 
+    (ParserCharSpans*)calloc(1, sizeof(ParserCharSpans));
+  collectedSpans->charSet     = NULL;
+  collectedSpans->charSetSize = 0;
+  collectedSpans->spans       = NULL;
+  collectedSpans->numSpans    = 0;
+  collectedSpans->maxSpans    = 0;
+  
+  popCtxDataInto(aCtx, someSpans);
+  while (isPairObj(someSpans)) {
+    JObj *firstSpan = asCar(someSpans);
+    someSpans       = asCdr(someSpans);
+    if (!isSymbolObj(someSpans)) {
+      raiseExceptionMsg(aCtx,
+        "jPeg list of spans expected a symbol as next span");
+      return collectedSpans; 
+    }
+    Symbol *spanSymbol     = asSymbol(firstSpan);
+    size_t  spanSymbolSize = strlen(spanSymbol);
+    switch(spanSymbolSize) {
+      case 0 :
+        // ignore this span
+        break;
+      case 2 :
+        // create a new span item
+        //
+        if (collectedSpans->maxSpans <= collectedSpans->numSpans) {
+          // need to increase the number of spans...
+          ParserCharSpan *oldSpans = collectedSpans->spans;
+          size_t newMaxSpans       = collectedSpans->maxSpans + 10;
+          ParserCharSpan *newSpans =
+            (ParserCharSpan*)calloc(newMaxSpans, sizeof(ParserCharSpan));
+          assert(newSpans);
+          if (oldSpans) {
+            memcpy(
+              newSpans,
+              oldSpans,
+              ((collectedSpans->maxSpans) * sizeof(ParserCharSpan))
+            );
+            free(oldSpans);
+            oldSpans = NULL;
+          }
+          collectedSpans->spans    = newSpans;
+          collectedSpans->maxSpans = newMaxSpans;
+        }
+        ParserCharSpan *newSpan =
+          collectedSpans->spans + collectedSpans->numSpans;
+        if (spanSymbol[0] <= spanSymbol[1]) {
+          newSpan->firstChar = spanSymbol[0];
+          newSpan->lastChar  = spanSymbol[1];
+        } else {
+          newSpan->firstChar = spanSymbol[1];
+          newSpan->lastChar  = spanSymbol[0];
+        }
+        collectedSpans->numSpans++;
+        break;
+      default: {
+        // append this span to the charSet
+        //
+        Symbol *oldCharSet = collectedSpans->charSet;
+        collectedSpans->charSet =
+          appendSymbols(oldCharSet, spanSymbol);
+        free((char*)oldCharSet);
+      }
+    }
+  }
+  return collectedSpans;
+}
+
+static Boolean matchCharSetSpans(ContextObj *aCtx, ParserCharSpans *spans) {
+  assert(isContextObj(aCtx));
+  
+  if (!spans) return true;
+  
+  size_t numCurSpan  = spans->numSpans;
+  Symbol *curCharPtr = asParserText(aCtx) + asParserTextPosition(aCtx);
+  char curChar       = *curCharPtr;
+  
+  while (0 < numCurSpan) {
+    ParserCharSpan *aSpan = spans->spans + numCurSpan;
+    if ((aSpan->firstChar <= curChar) && (curChar <= aSpan->lastChar)) {
+      return true;
+    } 
+    numCurSpan--;
+  }
+  
+  size_t curCharSetChar = spans->charSetSize;
+  Symbol *charSet       = spans->charSet;
+  
+  while (0 < curCharSetChar) {
+    if (curChar == charSet[curCharSetChar]) {
+      return true;
+    }
+    curCharSetChar--;
+  }
+  
+  return false;
+}
+
+static void deleteJPegSpans(ParserCharSpans *someSpans) {
+  if (!someSpans) return;
+  if (someSpans->charSet) free((char*)someSpans->charSet);
+  if (someSpans->spans)   free(someSpans->spans);
+  free(someSpans);
+}
+
+static void jPegCharSetWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  ParserCharSpans *spans = collectJPegSpans(aCtx);
+  
+  popCtxDataInto(aCtx, top);
+  if (!isUIntegerObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg charSet parser expected a UInteger as top");
+    deleteJPegSpans(spans);
+    return;
+  }
+  
+  size_t charsToMatch     = asUInteger(top);
+  size_t origTextPosition = asParserTextPosition(aCtx);
+  
+  // TODO: need to deal with UTF-8 multi-byte characters
+  
+  while(
+    (asParserTextSize(aCtx) <= asParserTextPosition(aCtx)) &&
+    (0 < charsToMatch) &&
+    matchCharSetSpans(aCtx, spans)
+  ) {
+    asParserTextPosition(aCtx)++;
+    charsToMatch--;
+  }
+  
+  deleteJPegSpans(spans);
+
+  if (0 < charsToMatch) {
+    asParserTextPosition(aCtx) = origTextPosition;
+    jPegFailWord(aCtx);
+  }
+}
+
+static void jPegCoCharSetWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  ParserCharSpans *spans = collectJPegSpans(aCtx);
+  
+  popCtxDataInto(aCtx, top);
+  if (!isUIntegerObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg charSet parser expected a UInteger as top");
+    deleteJPegSpans(spans);
+    return;
+  }
+  
+  size_t charsToMatch     = asUInteger(top);
+  size_t origTextPosition = asParserTextPosition(aCtx);
+  
+  // TODO: need to deal with UTF-8 multi-byte characters
+  
+  while(
+    (asParserTextSize(aCtx) <= asParserTextPosition(aCtx)) &&
+    (0 < charsToMatch) &&
+    !matchCharSetSpans(aCtx, spans)
+  ) {
+    asParserTextPosition(aCtx)++;
+    charsToMatch--;
+  }
+  
+  deleteJPegSpans(spans);
+
+  if (0 < charsToMatch) {
+    asParserTextPosition(aCtx) = origTextPosition;
+    jPegFailWord(aCtx);
+  }
+}
+
+static void jPegSpanWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  ParserCharSpans *spans = collectJPegSpans(aCtx);
+  
+  popCtxDataInto(aCtx, top);
+  if (!isUIntegerObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg charSet parser expected a UInteger as top");
+    deleteJPegSpans(spans);
+    return;
+  }
+  
+  size_t minCharsToMatch  = asUInteger(top);
+  size_t charsMatched     = 0;
+  size_t origTextPosition = asParserTextPosition(aCtx);
+  
+  // TODO: need to deal with UTF-8 multi-byte characters
+  
+  while(
+    (asParserTextSize(aCtx) <= asParserTextPosition(aCtx)) &&
+    matchCharSetSpans(aCtx, spans)
+  ) {
+    asParserTextPosition(aCtx)++;
+    charsMatched++;
+  }
+  
+  deleteJPegSpans(spans);
+ 
+  if (charsMatched < minCharsToMatch) {
+    asParserTextPosition(aCtx) = origTextPosition;
+    jPegFailWord(aCtx);
+  }
+}
+
+static void jPegCoSpanWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  ParserCharSpans *spans = collectJPegSpans(aCtx);
+  
+  popCtxDataInto(aCtx, top);
+  if (!isUIntegerObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg charSet parser expected a UInteger as top");
+    deleteJPegSpans(spans);
+    return;
+  }
+  
+  size_t minCharsToMatch  = asUInteger(top);
+  size_t charsMatched     = 0;
+  size_t origTextPosition = asParserTextPosition(aCtx);
+  
+  // TODO: need to deal with UTF-8 multi-byte characters
+  
+  while(
+    (asParserTextSize(aCtx) <= asParserTextPosition(aCtx)) &&
+    !matchCharSetSpans(aCtx, spans)
+  ) {
+    asParserTextPosition(aCtx)++;
+    charsMatched++;
+  }
+
+  deleteJPegSpans(spans);
+
+  if (charsMatched < minCharsToMatch) {
+    asParserTextPosition(aCtx) = origTextPosition;
+    jPegFailWord(aCtx);
+  }
+}
+\stopCCode
+
+\startCHeader
+void registerJPegWords(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void registerJPegWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
+  
+  registerCFunction(symTab, "pasreSymbol",    parseSymbolWord);
+  registerCFunction(symTab, "pasreFile",      parseFileWord);
+  registerCFunction(symTab, "parseChoice",    jPegChoiceWord);
+  registerCFunction(symTab, "parseCommit",    jPegCommitWord);
+  registerCFunction(symTab, "parseFail",      jPegFailWord);
+  registerCFunction(symTab, "parseAny",       jPegAnyWord);
+  registerCFunction(symTab, "parsePattern",   jPegPatternWord);
+  registerCFunction(symTab, "parseCharSet",   jPegCharSetWord);
+  registerCFunction(symTab, "parseCoCharSet", jPegCoCharSetWord);
+  registerCFunction(symTab, "parseSpan",      jPegSpanWord);
+  registerCFunction(symTab, "parseCoSpan",    jPegCoSpanWord);
+}
+\stopCCode

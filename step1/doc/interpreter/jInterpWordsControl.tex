@@ -689,7 +689,8 @@ void registerControlWords(ContextObj *aCtx);
 void registerControlWords(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   SymbolTableObj *symTab = asCtxSymbols(aCtx);
-  
+  assert(isSymbolTableObj(symTab));
+ 
   registerCFunction(symTab, "pushList",       pushListWord);
   registerCFunction(symTab, "popList",        popListWord);
   registerCFunction(symTab, "wrap",           wrapWord);

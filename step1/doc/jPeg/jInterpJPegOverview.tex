@@ -95,7 +95,7 @@ lexeme:
     <naturalNum>
     Choice decimalNumber
       <hexNumber>
-      Char '0'
+      Pattern '0'
       CharSet 'xX'
       CharSet/Span {'09', 'af', 'AF', ','}
     nextDigit:
@@ -134,7 +134,7 @@ comment:
       CoCharSet/CoSpan '\n'
       Commit nextSingelCommentChar
     endSingleComment:
-      Char '\n'
+      Pattern '\n'
       Commit done
     multiComment:
       <multiComment>
@@ -151,7 +151,7 @@ string:
     <string>
     Choice doubleQuote
       <singleQuote>
-      Char "'"
+      Pattern "'"
     singleQuotedChar:
       Choice escapedChar
         <nonEscapedNonNewLineChar>
@@ -160,16 +160,16 @@ string:
       escapedChar:
         Choice closeSingleQuote
         <escapedChar>
-        Char '\\'
+        Pattern '\\'
         Any 1
         Commit singleQuotedChar
       closeSingleQuote:
-        Char "'"
+        Pattern "'"
       Commit doneString
     doubleQuote:
     Choice longQuote
       <doubleQuote>
-      Char '"'
+      Pattern '"'
     doubleQuotedChar:
       Choice escapedDoubleQuotedChar
         <nonEscapedNonNewLineChar>
@@ -178,22 +178,22 @@ string:
       escapedDoubleQuotedChar:
         Choice closeDoubleQuote
         <escapedChar>
-        Char '\\'
+        Pattern '\\'
         Any 1
         Commit doubleQuotedChar
       closeDoubleQuote:
-        Char '"'
+        Pattern '"'
       Commit doneString
     longQuote:
       <longQuote>
       TEST
-        Char '['
+        Pattern '['
         longQuoteEqualChars:
           Choice endLongQuoteEqualChars
-            Char '='
+            Pattern '='
             Commit longQuoteEqualChars
         endLongQuoteEqualChars
-        Char ']'
+        Pattern ']'
       ENDTEST
       COMPUTED PATTERN?!?!? (here be dragons!)
       Commit doneString
@@ -235,7 +235,7 @@ Finally we translate this into jPeg:
 ) 'decimalNum' define
 
 (
-  '0' chars
+  '0' pattern
   ( 'xX' ) charSet
   ( '09' 'af' 'AF' ',' ) 1 span
 ) 'hexNumber' define
@@ -247,25 +247,25 @@ Finally we translate this into jPeg:
 // LONG QUOTE???
 
 (
-  "'" char
+  "'" pattern
   ( 
     (
       ( "'" '\r' '\n' '\f' ) coCharSet
-      ( '\\' chars 1 any )
+      ( '\\' pattern 1 any )
     ) choice
   ) 0 repeatAtLeast
-  "'" char
+  "'" pattern
 ) 'singleQuote' define
 
 (
-  '"' char
+  '"' pattern
   ( 
     (
       ( '"' '\r' '\n' '\f' ) coCharSet
-      ( '\\' char 1 any )
+      ( '\\' pattern 1 any )
     ) choice
   ) 0 repeatAtLeast
-  '"' char
+  '"' pattern
 ) 'doubleQuote' define
 
 (
@@ -273,15 +273,15 @@ Finally we translate this into jPeg:
 ) 'string' define
 
 (
-  '//' chars
+  '//' pattern
   ( '\n' ) 0 coSpan
-  '\n' chars
+  '\n' pattern
 ) 'singleComment' define
 
 (
-  '/*' chars
-  ( ( '*/' chars ) not ) 0 repeatAtLeast
-  '*/' chars
+  '/*' pattern
+  ( ( '*/' pattern ) not ) 0 repeatAtLeast
+  '*/' pattern
 ) 'multiComment' define
 
 (

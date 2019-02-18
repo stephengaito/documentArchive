@@ -17,8 +17,11 @@ typedef struct context_struct {
   JObj            *command;
   Symbol          *name;
   SymbolTableObj  *symbolTable;
+  Boolean          parserIgnoreNextFailure;
+  Boolean          parserFailed;
   Symbol          *parserText;
   size_t           parserTextSize;
+  size_t           parserTextPosition;
   SymbolTableObj  *parserSymbolTable;
   StringBufferObj *renderBuffer;
   Boolean          tracingOn;
@@ -35,8 +38,12 @@ typedef struct context_struct {
 #define asCtxProcess(anObj) (((ContextObj*)(anObj))->process)
 #define asCtxCommand(anObj) (((ContextObj*)(anObj))->command)
 #define asCtxSymbols(anObj) (((ContextObj*)(anObj))->symbolTable)
+#define asParserIgnoreNextFailure(anObj) \
+  (((ContextObj*)(anObj))->parserIgnoreNextFailure)
+#define asParserFailed(anObj) (((ContextObj*)(anObj))->parserFailed)
 #define asParserText(anObj) (((ContextObj*)(anObj))->parserText)
 #define asParserTextSize(anObj) (((ContextObj*)(anObj))->parserTextSize)
+#define asParserTextPosition(anObj) (((ContextObj*)(anObj))->parserTextPosition)
 #define asParserSymbols(anObj) (((ContextObj*)(anObj))->parserSymbolTable)
 #define asRenderBuffer(anObj) (((ContextObj*)(anObj))->renderBuffer)
 \stopCHeader
@@ -51,23 +58,28 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name);
 ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   ContextObj *newObj =
     (ContextObj*)calloc(1, sizeof(ContextObj));
-  newObj->tag               = ContextTag;
-  newObj->data              = data;
-  newObj->process           = process;
-  newObj->command           = NULL;
-  newObj->name              = strdup(name);
-  Symbol *tableName         = appendSymbols(name, "Symbols");
+  newObj->tag                = ContextTag;
+  newObj->data               = data;
+  newObj->process            = process;
+  newObj->command            = NULL;
+  newObj->name               = strdup(name);
+  Symbol *tableName          = appendSymbols(name, "Symbols");
+  
   assert(tableName);
-  newObj->symbolTable       = newSymbolTable(tableName);
+  newObj->symbolTable        = newSymbolTable(tableName);
   free((char*)tableName);
-  newObj->parserText        = NULL;
-  newObj->parserTextSize    = 0;
-  newObj->parserSymbolTable = NULL;
-  newObj->renderBuffer      = NULL;
-  newObj->tracingOn         = false;
-  newObj->debug             = false;
-  newObj->exceptionRaised   = false;
-  newObj->parent            = NULL;
+  
+  newObj->parserIgnoreNextFailure = false;
+  newObj->parserFailed            = false;
+  newObj->parserText              = NULL;
+  newObj->parserTextSize          = 0;
+  newObj->parserTextPosition      = 0;
+  newObj->parserSymbolTable       = NULL;
+  newObj->renderBuffer            = NULL;
+  newObj->tracingOn               = false;
+  newObj->debug                   = false;
+  newObj->exceptionRaised         = false;
+  newObj->parent                  = NULL;
   return newObj;
 }
 \stopCCode
@@ -84,8 +96,10 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   AssertPtrEquals(asCtxData(aCtx), data);
   AssertPtrEquals(asCtxProcess(aCtx), process);
   AssertIntTrue(isSymbolTableObj(asCtxSymbols(aCtx)));
+  AssertIntFalse(asParserFailed(aCtx));
   AssertPtrNull(asParserText(aCtx));
   AssertIntZero(asParserTextSize(aCtx));
+  AssertIntZero(asParserTextPosition(aCtx));
   AssertPtrNull(asParserSymbols(aCtx));
   AssertPtrNull(asRenderBuffer(aCtx));
   AssertIntFalse(aCtx->tracingOn);
@@ -120,6 +134,42 @@ void initializeParser(ContextObj *aCtx, Symbol *parserName) {
   initializeParser(aCtx, "testParser");
   AssertIntTrue(isSymbolTableObj(asParserSymbols(aCtx)));
   AssertStrEquals(asSymbolTableName(asParserSymbols(aCtx)), "testParser");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+
+\startTestSuite[parseString]
+
+\startCHeader
+void parseString(ContextObj *aCtx, Symbol *aStringToParse);
+\stopCHeader
+
+\startCCode
+void parseString(ContextObj *aCtx, Symbol *aStringToParse) {
+  assert(isContextObj(aCtx));
+  
+  size_t aStrSize = strlen(aStringToParse);
+  
+  if (aStrSize == 0) return;
+  
+  asParserText(aCtx)     = aStringToParse;
+  asParserTextSize(aCtx) = aStrSize;
+}
+\stopCCode
+
+\startTestCase[should load a string into parser text]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParseString");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  AssertPtrNull(asParserText(aCtx));
+  AssertIntZero(asParserTextSize(aCtx));
+  parseString(aCtx, "This is a test");
+  AssertPtrNotNull(asParserText(aCtx));
+  AssertIntEquals(asParserTextSize(aCtx), 14);
+  AssertStrMatches(asParserText(aCtx), "This is a test");
 \stopCTest
 \stopTestCase
 \stopTestSuite

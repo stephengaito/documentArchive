@@ -253,7 +253,6 @@ void evalCommandInContext(
   AssertPtrNull(asCtxData(aCtx));
   AssertPtrNull(asCtxProcess(aCtx));
   
-  aCtx->tracingOn = true;
   pushCtxData(aCtx, asJObj(newPair(asJObj(newUInteger(false)), NULL)));
   pushCtxData(aCtx, asJObj(newUInteger(42)));
   pushCtxData(aCtx, asJObj(newUInteger(43)));
