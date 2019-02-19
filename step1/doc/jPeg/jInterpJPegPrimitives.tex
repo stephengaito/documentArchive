@@ -726,6 +726,7 @@ void registerJPegWords(ContextObj *aCtx) {
   pushUIntegerCtxData(aCtx, 4);
   swap12DWord(aCtx);
   jPegCharSetWord(aCtx);
+  AssertIntEquals(asParserTextPosition(aCtx), 4);
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
   
@@ -734,6 +735,7 @@ void registerJPegWords(ContextObj *aCtx) {
   pushUIntegerCtxData(aCtx, 5);
   swap12DWord(aCtx);
   jPegCharSetWord(aCtx);
+  AssertIntEquals(asParserTextPosition(aCtx), 0);
   AssertIntTrue(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
   
@@ -744,6 +746,7 @@ void registerJPegWords(ContextObj *aCtx) {
   pushUIntegerCtxData(aCtx, 3);
   swap12DWord(aCtx);
   jPegCoCharSetWord(aCtx);
+  AssertIntEquals(asParserTextPosition(aCtx), 3);
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
 
@@ -752,9 +755,49 @@ void registerJPegWords(ContextObj *aCtx) {
   pushUIntegerCtxData(aCtx, 4);
   swap12DWord(aCtx);
   jPegCoCharSetWord(aCtx);
+  AssertIntEquals(asParserTextPosition(aCtx), 0);
   AssertIntTrue(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
 
+  parseString(aCtx, "aaa-10");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asCtxExceptionRaised(aCtx));
+  dup1DWord(aCtx);
+  pushUIntegerCtxData(aCtx, 2);
+  swap12DWord(aCtx);
+  jPegSpanWord(aCtx);
+  AssertIntEquals(asParserTextPosition(aCtx), 4);
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asCtxExceptionRaised(aCtx));
+  
+  resetParserTextPosition(aCtx);
+  dup1DWord(aCtx);
+  pushUIntegerCtxData(aCtx, 5);
+  swap12DWord(aCtx);
+  jPegSpanWord(aCtx);
+  AssertIntEquals(asParserTextPosition(aCtx), 0);
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntFalse(asCtxExceptionRaised(aCtx));
+  
+  parseString(aCtx, "$%^-10");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asCtxExceptionRaised(aCtx));
+  dup1DWord(aCtx);
+  pushUIntegerCtxData(aCtx, 2);
+  swap12DWord(aCtx);
+  jPegCoSpanWord(aCtx);
+  AssertIntEquals(asParserTextPosition(aCtx), 3);
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asCtxExceptionRaised(aCtx));
+
+  resetParserTextPosition(aCtx);
+  dup1DWord(aCtx);
+  pushUIntegerCtxData(aCtx, 4);
+  swap12DWord(aCtx);
+  jPegCoSpanWord(aCtx);
+  AssertIntEquals(asParserTextPosition(aCtx), 0);
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntFalse(asCtxExceptionRaised(aCtx));
 \stopCTest
 \stopTestCase
 
