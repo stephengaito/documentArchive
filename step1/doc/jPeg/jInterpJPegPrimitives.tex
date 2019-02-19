@@ -113,17 +113,46 @@ static void parseFileWord(ContextObj *aCtx) {
   parseFile(aCtx, asSymbol(top));
 }
 
-static void jPegChoiceWord(ContextObj *aCtx) {
+static void jPegChoiceContinueWord(ContextObj *aCtx) {
   popCtxDataInto(aCtx, top);
+  
+  // if top is the empty list we are done...
+  if (!top) return;
+
+  // if we have failed...
+  // but are instructed to ignore the next failure... 
+  // we FAIL the whole choise... BUT... we are done...
+  if (asParserFailed(aCtx) && asParserIgnoreNextFailure(aCtx)) {
+    asParserIgnoreNextFailure(aCtx) = false;
+  }
+  
+  // if we have not failed... we are also done...
+  if (!asParserFailed(aCtx)) {
+    asParserFailed(aCtx) = false;
+    return;
+  }
+  
   if (!isPairObj(top)) {
     raiseExceptionMsg(aCtx,
       "jPeg choice parser expected a list as top");
     return;
   }
   popListInto(aCtx, top, firstChoice);
-  pushSymbolCtxProcess(aCtx, "choice");
+  pushSymbolCtxProcess(aCtx, "parseChoiceCont");
   pushCtxProcess(aCtx, top);
   prependListCtxProcess(aCtx, firstChoice);
+  
+  if (aCtx->process) {
+    asParserFailed(aCtx) = false;
+  }
+
+}
+
+static void jPegChoiceWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  asParserFailed(aCtx) = true;
+  jPegChoiceContinueWord(aCtx);
 }
 
 static void jPegCommitWord(ContextObj *aCtx) {
@@ -135,26 +164,17 @@ static void jPegCommitWord(ContextObj *aCtx) {
 static void jPegFailWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
 
-  if (asParserIgnoreNextFailure(aCtx)) {
-    asParserIgnoreNextFailure(aCtx) = false;
-    return;
-  }
-  
   asParserFailed(aCtx) = true;
   
   JObj *lastCommand = NULL;
   while(aCtx->process) {
     popCtxProcessInto(aCtx, aCommand);
-    if (symbolIs(aCommand, "choice")) {
-      pushSymbolCtxProcess(aCtx, "choice");
+    if (symbolIs(aCommand, "parseChoiceCont")) {
+      pushSymbolCtxProcess(aCtx, "parseChoiceCont");
       pushCtxProcess(aCtx, lastCommand);
-      break;
+      return;
     }
     lastCommand = aCommand;
-  }
-  
-  if (aCtx->process) {
-    asParserFailed(aCtx) = false;
   }
 }
 \stopCCode
@@ -605,6 +625,7 @@ void registerJPegWords(ContextObj *aCtx) {
   registerCFunction(symTab, "parseSymbol",        parseSymbolWord);
   registerCFunction(symTab, "parseFile",          parseFileWord);
   registerCFunction(symTab, "parseChoice",        jPegChoiceWord);
+  registerCFunction(symTab, "parseChoiceCont",    jPegChoiceContinueWord);
   registerCFunction(symTab, "parseCommit",        jPegCommitWord);
   registerCFunction(symTab, "parseFail",          jPegFailWord);
   registerCFunction(symTab, "parseAny",           jPegAnyWord);
@@ -798,6 +819,78 @@ void registerJPegWords(ContextObj *aCtx) {
   AssertIntEquals(asParserTextPosition(aCtx), 0);
   AssertIntTrue(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
+\stopCTest
+\stopTestCase
+
+\startTestCase[choice/fail/commit tests]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+
+  // (
+  //   ( fail 1 any 1 any)
+  //   ( 1 any commit fail 1 any 1 any)
+  //   ( 1 any)
+  // ) choice
+
+  pushSymbolCtxData(aCtx, "parseChoice");
+  
+  pushSymbolCtxData(aCtx, "parseAny");
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "parseAny");
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseAny");
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseFail");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseCommit");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseAny");
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  
+  prependWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "parseAny");
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseAny");
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseFail");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+//  showCtxData(aCtx);
+\stopCTest
+\stopTestCase
+
+\startTestCase[repeating parsers]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
 \stopCTest
 \stopTestCase
 
