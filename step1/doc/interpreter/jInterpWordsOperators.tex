@@ -14,27 +14,31 @@ will use slightly more mnemonic names.
 \subsection[title=Unary operators]
 
 \startCCode
-static void pop1DAP(ContextObj* aCtx) {
+static void pop1DWord(ContextObj* aCtx) {
   popCtxData(aCtx);
 }
 \stopCCode
 
 \startCCode
-static void pop1PAP(ContextObj* aCtx) {
+static void pop1PWord(ContextObj* aCtx) {
   popCtxProcess(aCtx);
 }
 \stopCCode
 
 
+\startCHeader
+void dup1DWord(ContextObj* aCtx);
+\stopCHeader
+
 \startCCode
-static void dup1DAP(ContextObj* aCtx) {
+void dup1DWord(ContextObj* aCtx) {
   peekCtxDataInto(aCtx, top);
   pushCtxData(aCtx, copyLoL(top));
 }
 \stopCCode
 
 \startCCode
-static void dup1PAP(ContextObj* aCtx) {
+static void dup1PWord(ContextObj* aCtx) {
   peekCtxProcessInto(aCtx, top);
   pushCtxProcess(aCtx, copyLoL(top));
 }
@@ -42,8 +46,12 @@ static void dup1PAP(ContextObj* aCtx) {
 
 \subsection[title=Binary operators]
 
+\startCHeader
+void swap12DWord(ContextObj* aCtx);
+\stopCHeader
+
 \startCCode
-static void swap12DAP(ContextObj* aCtx) {
+void swap12DWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   pushCtxData(aCtx, top);
@@ -52,7 +60,7 @@ static void swap12DAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void swap12PAP(ContextObj* aCtx) {
+static void swap12PWord(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   popCtxProcessInto(aCtx, second);
   pushCtxProcess(aCtx, top);
@@ -61,7 +69,7 @@ static void swap12PAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void pop2DAP(ContextObj* aCtx) {
+static void pop2DWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxData(aCtx);
   pushCtxData(aCtx, top);
@@ -69,7 +77,7 @@ static void pop2DAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void pop2PAP(ContextObj* aCtx) {
+static void pop2PWord(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   popCtxProcess(aCtx);
   pushCtxProcess(aCtx, top);
@@ -77,21 +85,21 @@ static void pop2PAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void pop12DAP(ContextObj* aCtx) {
+static void pop12DWord(ContextObj* aCtx) {
   popCtxData(aCtx);
   popCtxData(aCtx);
 }
 \stopCCode
 
 \startCCode
-static void pop12PAP(ContextObj* aCtx) {
+static void pop12PWord(ContextObj* aCtx) {
   popCtxProcess(aCtx);
   popCtxProcess(aCtx);
 }
 \stopCCode
 
 \startCCode
-static void dup2DAP(ContextObj* aCtx) {
+static void dup2DWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   pushCtxData(aCtx, second);
@@ -101,7 +109,7 @@ static void dup2DAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void dup2PAP(ContextObj* aCtx) {
+static void dup2PWord(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   popCtxProcessInto(aCtx, second);
   pushCtxProcess(aCtx, second);
@@ -113,7 +121,7 @@ static void dup2PAP(ContextObj* aCtx) {
 \subsection[title=Ternary operators]
 
 \startCCode
-static void swap13DAP(ContextObj* aCtx) {
+static void swap13DWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   popCtxDataInto(aCtx, third);
@@ -124,7 +132,7 @@ static void swap13DAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void swap13PAP(ContextObj* aCtx) {
+static void swap13PWord(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   popCtxProcessInto(aCtx, second);
   popCtxProcessInto(aCtx, third);
@@ -135,7 +143,7 @@ static void swap13PAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void swap23DAP(ContextObj* aCtx) {
+static void swap23DWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   popCtxDataInto(aCtx, third);
@@ -146,7 +154,7 @@ static void swap23DAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void swap23PAP(ContextObj* aCtx) {
+static void swap23PWord(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   popCtxProcessInto(aCtx, second);
   popCtxProcessInto(aCtx, third);
@@ -157,7 +165,7 @@ static void swap23PAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void rollUp3DAP(ContextObj* aCtx) {
+static void rollUp3DWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   popCtxDataInto(aCtx, third);
@@ -168,7 +176,7 @@ static void rollUp3DAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void rollUp3PAP(ContextObj* aCtx) {
+static void rollUp3PWord(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   popCtxProcessInto(aCtx, second);
   popCtxProcessInto(aCtx, third);
@@ -179,7 +187,7 @@ static void rollUp3PAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void rollDown3DAP(ContextObj* aCtx) {
+static void rollDown3DWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   popCtxDataInto(aCtx, third);
@@ -190,7 +198,7 @@ static void rollDown3DAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void rollDown3PAP(ContextObj* aCtx) {
+static void rollDown3PWord(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   popCtxProcessInto(aCtx, second);
   popCtxProcessInto(aCtx, third);
@@ -201,7 +209,7 @@ static void rollDown3PAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void choiceDAP(ContextObj* aCtx) {
+static void choiceDWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   popCtxDataInto(aCtx, third);
@@ -214,7 +222,7 @@ static void choiceDAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void choicePAP(ContextObj* aCtx) {
+static void choicePWord(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, top);
   popCtxProcessInto(aCtx, second);
   popCtxProcessInto(aCtx, third);
@@ -229,7 +237,7 @@ static void choicePAP(ContextObj* aCtx) {
 \subsection[title=Quaternary operators]
 
 \startCCode
-static void swap14DAP(ContextObj* aCtx) {
+static void swap14DWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   popCtxDataInto(aCtx, third);
@@ -242,7 +250,7 @@ static void swap14DAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void swap24DAP(ContextObj* aCtx) {
+static void swap24DWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   popCtxDataInto(aCtx, third);
@@ -255,7 +263,7 @@ static void swap24DAP(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
-static void swap34DAP(ContextObj* aCtx) {
+static void swap34DWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   popCtxDataInto(aCtx, third);
@@ -275,39 +283,39 @@ void initContextAOOperators(ContextObj *aCtx) {
   SymbolTableObj *symTab = asCtxSymbols(aCtx);
   
   // unary operators
-  registerCFunction(symTab, "pop1D", pop1DAP);
-  registerCFunction(symTab, "pop1P", pop1PAP);
-  registerCFunction(symTab, "dup1D", dup1DAP);
-  registerCFunction(symTab, "dup1P", dup1PAP);
+  registerCFunction(symTab, "pop1D", pop1DWord);
+  registerCFunction(symTab, "pop1P", pop1PWord);
+  registerCFunction(symTab, "dup1D", dup1DWord);
+  registerCFunction(symTab, "dup1P", dup1PWord);
   //
   // binary operators
   //
-  registerCFunction(symTab, "swap12D", swap12DAP);
-  registerCFunction(symTab, "swap12P", swap12PAP);
-  registerCFunction(symTab, "pop2D",   pop2DAP);
-  registerCFunction(symTab, "pop2P",   pop2PAP);
-  registerCFunction(symTab, "pop12D",  pop12DAP);
-  registerCFunction(symTab, "pop12P",  pop12PAP);
-  registerCFunction(symTab, "dup2D",   dup2DAP);
-  registerCFunction(symTab, "dup2P",   dup2PAP);
+  registerCFunction(symTab, "swap12D", swap12DWord);
+  registerCFunction(symTab, "swap12P", swap12PWord);
+  registerCFunction(symTab, "pop2D",   pop2DWord);
+  registerCFunction(symTab, "pop2P",   pop2PWord);
+  registerCFunction(symTab, "pop12D",  pop12DWord);
+  registerCFunction(symTab, "pop12P",  pop12PWord);
+  registerCFunction(symTab, "dup2D",   dup2DWord);
+  registerCFunction(symTab, "dup2P",   dup2PWord);
   //
   // ternary operators
   //
-  registerCFunction(symTab, "swap13D",    swap13DAP);
-  registerCFunction(symTab, "swap13P",    swap13PAP);
-  registerCFunction(symTab, "swap23D",    swap23DAP);
-  registerCFunction(symTab, "swap23P",    swap23PAP);
-  registerCFunction(symTab, "rollUp3D",   rollUp3DAP);
-  registerCFunction(symTab, "rollUp3P",   rollUp3PAP);
-  registerCFunction(symTab, "rollDown3D", rollDown3DAP);
-  registerCFunction(symTab, "rollDown3P", rollDown3PAP);
-  registerCFunction(symTab, "choiceD",    choiceDAP);
-  registerCFunction(symTab, "choiceP",    choicePAP);
+  registerCFunction(symTab, "swap13D",    swap13DWord);
+  registerCFunction(symTab, "swap13P",    swap13PWord);
+  registerCFunction(symTab, "swap23D",    swap23DWord);
+  registerCFunction(symTab, "swap23P",    swap23PWord);
+  registerCFunction(symTab, "rollUp3D",   rollUp3DWord);
+  registerCFunction(symTab, "rollUp3P",   rollUp3PWord);
+  registerCFunction(symTab, "rollDown3D", rollDown3DWord);
+  registerCFunction(symTab, "rollDown3P", rollDown3PWord);
+  registerCFunction(symTab, "choiceD",    choiceDWord);
+  registerCFunction(symTab, "choiceP",    choicePWord);
   //
   // quarternary operators
   //
-  registerCFunction(symTab, "swap14D", swap14DAP);
-  registerCFunction(symTab, "swap24D", swap24DAP);
-  registerCFunction(symTab, "swap34D", swap34DAP);
+  registerCFunction(symTab, "swap14D", swap14DWord);
+  registerCFunction(symTab, "swap24D", swap24DWord);
+  registerCFunction(symTab, "swap34D", swap34DWord);
 }
 \stopCCode

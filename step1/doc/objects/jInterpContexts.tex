@@ -44,8 +44,16 @@ typedef struct context_struct {
 #define asParserText(anObj) (((ContextObj*)(anObj))->parserText)
 #define asParserTextSize(anObj) (((ContextObj*)(anObj))->parserTextSize)
 #define asParserTextPosition(anObj) (((ContextObj*)(anObj))->parserTextPosition)
+#define resetParserTextPosition(anObj) \
+  asParserTextPosition(anObj) = 0
+#define getParserCurChar(anObj) \
+  (*((char*)(asParserText(anObj)+asParserTextPosition(anObj))))
+#define advanceParserTextPosition(anObj) asParserTextPosition(anObj)++
 #define asParserSymbols(anObj) (((ContextObj*)(anObj))->parserSymbolTable)
 #define asRenderBuffer(anObj) (((ContextObj*)(anObj))->renderBuffer)
+#define asCtxExceptionRaised(anObj) (((ContextObj*)(anObj))->exceptionRaised)
+#define resetCtxExceptionRaised(anObj) \
+  asCtxExceptionRaised(anObj) = 0
 \stopCHeader
 
 \startTestSuite[newContext]
@@ -78,6 +86,7 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   newObj->renderBuffer            = NULL;
   newObj->tracingOn               = false;
   newObj->debug                   = false;
+  newObj->showDepth               = 5;
   newObj->exceptionRaised         = false;
   newObj->parent                  = NULL;
   return newObj;

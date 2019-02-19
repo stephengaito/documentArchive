@@ -56,6 +56,9 @@ void printJObj(
   Symbol          *indent,
   size_t           timeToLive
 );
+
+void showJObjFull(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define showJObj(anObj) showJObjFull(anObj, "  ", 20)
 \stopCHeader
 
 \startCCode
@@ -83,6 +86,14 @@ void printJObj(
     indent,
     timeToLive
   );
+}
+
+void showJObjFull(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  StringBufferObj *aStrBuf = newStringBuffer();
+  printJObj(aStrBuf, anObj, indent, timeToLive);
+  printf("%s\n", getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  free(aStrBuf);
 }
 \stopCCode
 
