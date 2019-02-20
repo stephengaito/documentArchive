@@ -120,10 +120,12 @@ void jPegChoiceContinueWord(ContextObj *aCtx);
 
 \startCCode
 void jPegChoiceContinueWord(ContextObj *aCtx) {
-  popCtxDataInto(aCtx, top);
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, parserChoices);
   
   // if top is the empty list we are done...
-  if (!top) return;
+  if (!parserChoices) return;
 
   // if we have failed... but are committed... 
   // we FAIL the whole choice... BUT... we are done...
@@ -138,14 +140,14 @@ void jPegChoiceContinueWord(ContextObj *aCtx) {
     return;
   }
   
-  if (!isPairObj(top)) {
+  if (!isPairObj(parserChoices)) {
     raiseExceptionMsg(aCtx,
       "jPeg choice parser expected a list as top");
     return;
   }
-  popListInto(aCtx, top, firstChoice);
+  popListInto(aCtx, parserChoices, firstChoice);
   pushSymbolCtxProcess(aCtx, "parseChoiceCont");
-  pushCtxProcess(aCtx, top);
+  pushCtxProcess(aCtx, parserChoices);
   prependListCtxProcess(aCtx, firstChoice);
   
   if (aCtx->process) {
@@ -165,6 +167,145 @@ void jPegChoiceWord(ContextObj *aCtx) {
   
   asParserFailed(aCtx) = true;
   jPegChoiceContinueWord(aCtx);
+}
+\stopCCode
+
+The \bold{\type{parseRepeat}*} words are each optimized variants of 
+choice. As such they each need to deal with parsers being commited and or 
+failed. 
+
+\startCHeader
+void jPegRepeatWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegRepeatWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  popCtxDataInto(aCtx, parser);
+
+  // parser is never empty...
+  assert(parser);
+  
+  // we always ignore and reset committed-ness
+  asParserCommitted(aCtx) = false;
+
+  // if we have failed...
+  // we roll back the last repeat and then...
+  // we SUCCEED and are done...
+  if (asParserFailed(aCtx)) {
+    // the last checkpoint SHOULD have been
+    // stored on the process stack
+    return;
+  }
+  
+  // we have not failed... so we try another repeat...
+  pushSymbolCtxProcess(aCtx, "parseRepeat");
+  pushCtxProcess(aCtx, parser);
+  prependListCtxProcess(aCtx, copyLoL(parser));
+}
+\stopCCode
+
+\startCHeader
+void jPegRepeatAtLeastWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegRepeatAtLeastWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, parser);
+
+  popCtxDataInto(aCtx, atLeast);
+  if (!isUIntegerObj(atLeast)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg repeatAtLeast parser expected a UInteger as top");
+    return;
+  }
+  size_t atLeastRepeats = asUInteger(atLeast);
+  
+  // parser is never empty...
+  assert(parser);
+  
+  // we always ignore and reset committed-ness
+  asParserCommitted(aCtx) = false;
+
+  // if we have failed...
+  if (asParserFailed(aCtx)) {
+    //
+    // we roll back the last repeat...
+    // the last checkpoint SHOULD have been
+    // stored on the process stack
+    
+    // now we check to see if we have repeated enough times...
+    if (0 < atLeastRepeats) {
+      pushSymbolCtxProcess(aCtx, "parseFail");
+    }
+    
+    // now we return without starting another repeat
+    return;
+  }
+  
+  // we have succeeded.... so we setup the next repeat...
+  if (0 < atLeastRepeats) {
+    pushSymbolCtxProcess(aCtx, "parseRepeatAtLeast");
+    pushUIntegerCtxProcess(aCtx, atLeastRepeats - 1);
+  } else {
+    pushSymbolCtxProcess(aCtx, "parseRepeat");
+  }
+  pushCtxProcess(aCtx, parser);
+  prependListCtxProcess(aCtx, copyLoL(parser));
+}
+\stopCCode
+
+\startCHeader
+void jPegRepeatAtMostWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegRepeatAtMostWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, parser);
+
+  popCtxDataInto(aCtx, atMost);
+  if (!isUIntegerObj(atMost)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg repeatAtMost parser expected a UInteger as top");
+    return;
+  }
+  size_t atMostRepeats = asUInteger(atMost);
+
+  // parser is never empty...
+  assert(parser);
+  
+  // we always ignore and reset committed-ness
+  asParserCommitted(aCtx) = false;
+
+  // if we have failed...
+  if (asParserFailed(aCtx)) {
+    //
+    // we roll back the last repeat...
+    // the last checkpoint SHOULD have been
+    // stored on the process stack
+    
+    // now we check to see if we have repeated enough times...
+    if (0 == atMostRepeats) {
+      pushSymbolCtxProcess(aCtx, "parseFail");
+    }
+    
+    // now we return without starting another repeat
+    return;
+  }
+  
+  // we have succeeded.... so we setup the next repeat...
+  if (0 < atMostRepeats) {
+    pushSymbolCtxProcess(aCtx, "parseRepeatAtMost");
+    pushUIntegerCtxProcess(aCtx, atMostRepeats - 1);
+    pushCtxProcess(aCtx, parser);
+  } else {
+    pushSymbolCtxProcess(aCtx, "parseFail");
+  }
+  prependListCtxProcess(aCtx, copyLoL(parser));
 }
 \stopCCode
 
@@ -203,83 +344,6 @@ void jPegFailWord(ContextObj *aCtx) {
     }
     lastCommand = aCommand;
   }
-}
-\stopCCode
-
-\startCHeader
-void jPegRepeatWord(ContextObj *aCtx);
-\stopCHeader
-
-\startCCode
-void jPegRepeatWord(ContextObj *aCtx) {
-  assert(isContextObj(aCtx));
-  
-  asParserCommitted(aCtx) = true;
-  
-  popCtxDataInto(aCtx, parser);
-  
-  pushSymbolCtxProcess(aCtx, "parseRepeat");
-  pushCtxProcess(aCtx, parser);
-  prependListCtxProcess(aCtx, copyLoL(parser));
-}
-\stopCCode
-
-\startCHeader
-void jPegRepeatAtLeastWord(ContextObj *aCtx);
-\stopCHeader
-
-\startCCode
-void jPegRepeatAtLeastWord(ContextObj *aCtx) {
-  assert(isContextObj(aCtx));
-  
-  asParserCommitted(aCtx) = false;
-  
-  popCtxDataInto(aCtx, parser);
-  popCtxDataInto(aCtx, atLeast);
-  if (!isUIntegerObj(atLeast)) {
-    raiseExceptionMsg(aCtx,
-      "jPeg charSet parser expected a UInteger as top");
-    return;
-  }
-  size_t atLeastRepeats = asUInteger(atLeast);
-  if (0 < atLeastRepeats) {
-    pushSymbolCtxProcess(aCtx, "parseRepeatAtLeast");
-    pushUIntegerCtxProcess(aCtx, atLeastRepeats - 1);
-  } else {
-    pushSymbolCtxProcess(aCtx, "parseRepeat");
-  }
-  pushCtxProcess(aCtx, parser);
-  prependListCtxProcess(aCtx, copyLoL(parser));
-}
-\stopCCode
-
-\startCHeader
-void jPegRepeatAtMostWord(ContextObj *aCtx);
-\stopCHeader
-
-\startCCode
-void jPegRepeatAtMostWord(ContextObj *aCtx) {
-  assert(isContextObj(aCtx));
-  
-  asParserCommitted(aCtx) = false;
-  
-  popCtxDataInto(aCtx, parser);
-  popCtxDataInto(aCtx, atMost);
-  if (!isUIntegerObj(atMost)) {
-    raiseExceptionMsg(aCtx,
-      "jPeg charSet parser expected a UInteger as top");
-    return;
-  }
-  size_t atMostRepeats = asUInteger(atMost);
-  if (0 < atMostRepeats) {
-    asParserCommitted(aCtx) = true;
-    pushSymbolCtxProcess(aCtx, "parseRepeatAtMost");
-    pushUIntegerCtxProcess(aCtx, atMostRepeats - 1);
-    pushCtxProcess(aCtx, parser);
-  } else {
-    pushSymbolCtxProcess(aCtx, "parseFail");
-  }
-  prependListCtxProcess(aCtx, copyLoL(parser));
 }
 \stopCCode
 
@@ -970,6 +1034,21 @@ void registerJPegWords(ContextObj *aCtx) {
 \stopCTest
 \stopTestCase
 
+\startTestCase[repeating parsers]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  
+  
+\stopCTest
+\stopTestCase
+
 \startTestCase[a complex choice/fail/commit tests]
 
 \startCTest
@@ -1027,18 +1106,6 @@ void registerJPegWords(ContextObj *aCtx) {
   wrapWord(aCtx);
   prependWord(aCtx);
 //  showCtxData(aCtx);
-\stopCTest
-\stopTestCase
-
-\startTestCase[repeating parsers]
-
-\startCTest
-  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
-  AssertIntTrue(isContextObj(aCtx));
-  
-  registerBasicWords(aCtx);
-  registerControlWords(aCtx);
-  registerJPegWords(aCtx);
 \stopCTest
 \stopTestCase
 
