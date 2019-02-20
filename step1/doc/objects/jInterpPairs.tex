@@ -79,6 +79,45 @@ PairObj *newPair(JObj *car, JObj *cdr) {
   }
 \stopCHeader
 
+\startTestSuite[listLength]
+
+\startCHeader
+UInteger listLength(JObj *aList);
+\stopCHeader
+
+\startCCode
+UInteger listLength(JObj *aList) {
+  if (!aList) return 0;
+  
+  if (!isPairObj(aList)) return 1;
+  
+  UInteger numEntries = 0;
+  while(isPairObj(aList)) {
+    aList = asCdr(aList);
+    numEntries++;
+  }
+  return numEntries;
+}
+\stopCCode
+
+\startTestCase[should return the length of a list]
+
+\startCTest
+  AssertIntZero(listLength(NULL));
+  AssertIntEquals(listLength(asJObj(newUInteger(42))), 1);
+
+  JObj *aList =
+    asJObj(newPair(NULL, 
+      asJObj(newPair(NULL,
+        asJObj(newPair(NULL, NULL))
+      ))
+    ));
+  
+  AssertIntEquals(listLength(aList), 3);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
 \startTestSuite[concatLists]
 
 \startCHeader

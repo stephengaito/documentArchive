@@ -53,8 +53,16 @@ typedef struct symbol_struct {
 #define asLine(anObj)      (((SymbolObj*)(anObj))->line)
 
 #define symbolIs(anObj, aSymbol)                \
-  (isSymbolObj(anObj) &&                        \
+  (isSymbolObj(anObj) && (aSymbol) &&           \
     (strcmp(asSymbol(anObj), (aSymbol)) == 0))
+    
+#define symbolContains(anObj, aSymbol)    \
+  (isSymbolObj(anObj) && (aSymbol) &&     \
+    (strstr(asSymbol(anObj), (aSymbol))))
+    
+#define symbolStartsWith(anObj, aSymbol)                      \
+  (isSymbolObj(anObj) && (aSymbol) &&                         \
+    (strstr(asSymbol(anObj), (aSymbol)) == asSymbol(anObj)))
 \stopCHeader
 
 \startTestSuite[newSymbol]
