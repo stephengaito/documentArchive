@@ -847,6 +847,129 @@ void jPegFailWord(ContextObj *aCtx) {
 }
 \stopCCode
 
+\startTestCase[a simple fail with choice/repeat words]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushSymbolCtxData(aCtx, "parseAny");
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseAny");
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);  
+
+  // no choice or repeat words
+  //
+  {
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, noWordTest);
+  pushSymbolCtxProcess(aCtx, "someWord");
+  pushCtxProcess(aCtx, noWordTest);
+  prependListCtxProcess(aCtx, copyLoL(noWordTest));
+  asParserCommitted(aCtx) = false;
+  asParserFailed(aCtx) = false;
+  //
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 6);
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertIntFalse(asParserFailed(aCtx));
+  jPegFailWord(aCtx);
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNull(asCtxProcess(aCtx));
+  }
+  
+  // choice 
+  //
+  {
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, choiceTest);
+  pushSymbolCtxProcess(aCtx, "parseChoiceCont");
+  pushCtxProcess(aCtx, choiceTest);
+  prependListCtxProcess(aCtx, copyLoL(choiceTest));
+  asParserCommitted(aCtx) = false;
+  asParserFailed(aCtx) = false;
+  //
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 6);
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertIntFalse(asParserFailed(aCtx));
+  jPegFailWord(aCtx);
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 2);
+  
+  popCtxProcessInto(aCtx, parser);
+  popCtxProcessInto(aCtx, parserWord);
+  
+  AssertIntTrue(isSymbolObj(parserWord));
+  AssertStrEquals(asSymbol(parserWord), "parseChoiceCont");
+  
+  AssertIntTrue(isPairObj(parser));
+  AssertIntEquals(listLength(parser), 4);
+  AssertIntTrue(isSymbolObj(asCar(asCdr(parser))));
+  AssertStrEquals(asSymbol(asCar(asCdr(parser))), "parseAny");
+  }
+
+  // repeat words
+  //
+  {
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, repeatTest);
+  pushSymbolCtxProcess(aCtx, "parseRepeatAtLeast");
+  pushCtxProcess(aCtx, repeatTest);
+  prependListCtxProcess(aCtx, copyLoL(repeatTest));
+  asParserCommitted(aCtx) = false;
+  asParserFailed(aCtx) = false;
+  //
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 6);
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertIntFalse(asParserFailed(aCtx));
+  jPegFailWord(aCtx);
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 2);
+  
+  popCtxProcessInto(aCtx, parser);
+  popCtxProcessInto(aCtx, parserWord);
+  
+  AssertIntTrue(isSymbolObj(parserWord));
+  AssertStrEquals(asSymbol(parserWord), "parseRepeatAtLeast");
+  
+  AssertIntTrue(isPairObj(parser));
+  AssertIntEquals(listLength(parser), 4);
+  AssertIntTrue(isSymbolObj(asCar(asCdr(parser))));
+  AssertStrEquals(asSymbol(asCar(asCdr(parser))), "parseAny");
+  }
+
+//  showCtxData(aCtx);
+//  showCtxProcess(aCtx);
+
+\stopCTest
+\stopTestCase
+
 \startTestCase[a complex choice/fail/commit tests]
 
 \startCTest
@@ -863,8 +986,6 @@ void jPegFailWord(ContextObj *aCtx) {
   //   ( 1 any)
   // ) choice
 
-  pushSymbolCtxData(aCtx, "parseChoice");
-  
   pushSymbolCtxData(aCtx, "parseAny");
   pushUIntegerCtxData(aCtx, 1);
   prependWord(aCtx);
@@ -902,7 +1023,12 @@ void jPegFailWord(ContextObj *aCtx) {
   
   prependWord(aCtx);
   wrapWord(aCtx);
+  dup1DWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "parseChoice");
+  swap12DWord(aCtx);
   prependWord(aCtx);
+  
 //  showCtxData(aCtx);
 \stopCTest
 \stopTestCase
