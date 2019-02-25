@@ -197,7 +197,7 @@ void jPegCommitWord(ContextObj *aCtx) {
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[jPegChoiceWord and jPegChoiceContinueWord]
+\startTestSuite[jPegChoiceContinueWord]
 
 \startCHeader
 void jPegChoiceContinueWord(ContextObj *aCtx);
@@ -510,6 +510,161 @@ The \bold{\type{parseRepeat}*} words are each optimized variants of
 choice. As such they each need to deal with parsers being commited and or 
 failed. 
 
+\startTestSuite[jPegRepeatContinueWord]
+
+\startCHeader
+void jPegRepeatContinueWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegRepeatContinueWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxProcessInto(aCtx, parser);
+  popCtxProcessInto(aCtx, textBackTrackPointObj);
+  
+  // we always ignore and reset committed-ness
+  asParserCommitted(aCtx) = false;
+
+  // if we have failed...
+  // we roll back the last repeat and then...
+  // we SUCCEED and are done...
+  if (asParserFailed(aCtx)) {
+  
+    if (!isUIntegerObj(textBackTrackPointObj)) {
+      raiseExceptionMsg(aCtx,
+        "jPeg repeat parser expected a UInteger as text back-track point");
+      return;
+    }
+    size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
+    asParserTextPosition(aCtx) = textBackTrackPoint;
+    
+    asParserFailed(aCtx) = false;
+    
+    return;
+  }
+  
+  // we have not failed... so we try another repeat...
+  
+  // if the parser is empty... there is nothing to do...
+  if (!parser) return;
+
+  pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
+  pushCtxProcess(aCtx, parser);
+  pushSymbolCtxProcess(aCtx, "parseRepeatCont");
+  prependListCtxProcess(aCtx, copyLoL(parser));
+}
+\stopCCode
+
+\CTestsSuiteSetup\
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushUIntegerCtxData(aCtx, 43);
+  pushUIntegerCtxData(aCtx, 42);
+  prependWord(aCtx);
+\stopCTest
+
+\startTestCase[should restore last back-track point and succeed when last 
+repeat failed] 
+
+\startCTest
+  pushUIntegerCtxProcess(aCtx, 24);
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, parser);
+  pushCtxProcess(aCtx, parser);
+  
+  asParserTextPosition(aCtx) = 0;
+  asParserCommitted(aCtx)    = true;
+  asParserFailed(aCtx)       = true;
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 2);
+  AssertIntEquals(asParserTextPosition(aCtx), 0);
+  AssertIntTrue(asParserCommitted(aCtx));
+  AssertIntTrue(asParserFailed(aCtx));
+  
+  jPegRepeatContinueWord(aCtx);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should setup repetition on process stack when last repeat 
+succeeded] 
+
+\startCTest
+  pushUIntegerCtxProcess(aCtx, 0);
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, parser);
+  pushCtxProcess(aCtx, parser);
+  
+  asParserTextPosition(aCtx) = 24;
+  asParserCommitted(aCtx)    = true;
+  asParserFailed(aCtx)       = false;
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 2);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
+  AssertIntTrue(asParserCommitted(aCtx));
+  AssertIntFalse(asParserFailed(aCtx));
+  
+  jPegRepeatContinueWord(aCtx);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 5);
+    
+  popCtxProcessInto(aCtx, top42);
+  popCtxProcessInto(aCtx, top43);
+  popCtxProcessInto(aCtx, repeatWord);
+  popCtxProcessInto(aCtx, repeatParser);
+  popCtxProcessInto(aCtx, backTrackPoint);
+  
+  AssertIntTrue(isSymbolObj(repeatWord));
+  AssertStrEquals(asSymbol(repeatWord), "parseRepeatCont");
+  
+  AssertIntTrue(isPairObj(repeatParser));
+  AssertIntTrue(isUIntegerObj(asCar(repeatParser)));
+  AssertIntEquals(asUInteger(asCar(repeatParser)), 42);
+  
+  AssertIntTrue(isPairObj(asCdr(repeatParser)));
+  AssertIntTrue(isUIntegerObj(asCar(asCdr(repeatParser))));
+  AssertIntEquals(asUInteger(asCar(asCdr(repeatParser))), 43);
+  
+  AssertPtrNull(asCdr(asCdr(repeatParser)));
+  
+  AssertIntTrue(isUIntegerObj(top42));
+  AssertIntEquals(asUInteger(top42), 42);  
+
+  AssertIntTrue(isUIntegerObj(top43));
+  AssertIntEquals(asUInteger(top43), 43);
+  
+  AssertIntTrue(isUIntegerObj(backTrackPoint));
+  AssertIntEquals(asUInteger(backTrackPoint), 24);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
 \startTestSuite[jPegRepeatWord]
 
 \startCHeader
@@ -519,34 +674,20 @@ void jPegRepeatWord(ContextObj *aCtx);
 \startCCode
 void jPegRepeatWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
+  
   popCtxDataInto(aCtx, parser);
-
-  // we always ignore and reset committed-ness
+  if (!parser) return; 
+  
   asParserCommitted(aCtx) = false;
-
-  // if the parser is empty... there is nothing to do...
-  if (!parser) return;
-  
-  // if we have failed...
-  // we roll back the last repeat and then...
-  // we SUCCEED and are done...
-  if (asParserFailed(aCtx)) {
-    // the last checkpoint SHOULD have been
-    // stored on the process stack
-    
-    asParserFailed(aCtx) = false;
-    
-    return;
-  }
-  
-  // we have not failed... so we try another repeat...
-  pushSymbolCtxProcess(aCtx, "parseRepeat");
+  asParserFailed(aCtx)    = false;
+  pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
   pushCtxProcess(aCtx, parser);
-  prependListCtxProcess(aCtx, copyLoL(parser));
+  jPegRepeatContinueWord(aCtx);
 }
 \stopCCode
 
-\startTestCase[test repeating parsers]
+\startTestCase[should setup repetition on process stack when last repeat 
+succeeded] 
 
 \startCTest
   ContextObj *aCtx = newContext(NULL, NULL, "testParser");
@@ -559,67 +700,57 @@ void jPegRepeatWord(ContextObj *aCtx) {
   pushUIntegerCtxData(aCtx, 43);
   pushUIntegerCtxData(aCtx, 42);
   prependWord(aCtx);
-
-  // failed
-  //
   dup1DWord(aCtx);
-  asParserCommitted(aCtx) = true;
-  asParserFailed(aCtx) = true;
-  //
+  
+  asParserTextPosition(aCtx) = 24;
+  asParserCommitted(aCtx)    = true;
+  asParserFailed(aCtx)       = false;
+  
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 2);
   AssertPtrNull(asCtxProcess(aCtx));
-  AssertIntTrue(asParserCommitted(aCtx));
-  AssertIntTrue(asParserFailed(aCtx));
-  jPegRepeatWord(aCtx);
-  AssertIntFalse(asParserCommitted(aCtx));
-  AssertIntFalse(asParserFailed(aCtx));
-  AssertPtrNotNull(asCtxData(aCtx));
-  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertPtrNull(asCtxProcess(aCtx));
-
-  // succeeded
-  //
-  dup1DWord(aCtx);
-  asParserCommitted(aCtx) = true;
-  asParserFailed(aCtx) = false;
-  //
-  AssertPtrNotNull(asCtxData(aCtx));
-  AssertIntEquals(listLength(asCtxData(aCtx)), 2);
-  AssertPtrNull(asCtxProcess(aCtx));
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
   AssertIntTrue(asParserCommitted(aCtx));
   AssertIntFalse(asParserFailed(aCtx));
+  
   jPegRepeatWord(aCtx);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
   AssertIntFalse(asParserCommitted(aCtx));
   AssertIntFalse(asParserFailed(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
   AssertPtrNotNull(asCtxProcess(aCtx));
-  AssertIntEquals(listLength(asCtxProcess(aCtx)), 4);
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 5);
     
   popCtxProcessInto(aCtx, top42);
   popCtxProcessInto(aCtx, top43);
-  popCtxProcessInto(aCtx, parser);
   popCtxProcessInto(aCtx, repeatWord);
+  popCtxProcessInto(aCtx, repeatParser);
+  popCtxProcessInto(aCtx, backTrackPoint);
   
   AssertIntTrue(isSymbolObj(repeatWord));
-  AssertStrEquals(asSymbol(repeatWord), "parseRepeat");
+  AssertStrEquals(asSymbol(repeatWord), "parseRepeatCont");
   
-  AssertIntTrue(isPairObj(parser));
-  AssertIntTrue(isUIntegerObj(asCar(parser)));
-  AssertIntEquals(asUInteger(asCar(parser)), 42);
+  AssertIntTrue(isPairObj(repeatParser));
+  AssertIntTrue(isUIntegerObj(asCar(repeatParser)));
+  AssertIntEquals(asUInteger(asCar(repeatParser)), 42);
   
-  AssertIntTrue(isPairObj(asCdr(parser)));
-  AssertIntTrue(isUIntegerObj(asCar(asCdr(parser))));
-  AssertIntEquals(asUInteger(asCar(asCdr(parser))), 43);
+  AssertIntTrue(isPairObj(asCdr(repeatParser)));
+  AssertIntTrue(isUIntegerObj(asCar(asCdr(repeatParser))));
+  AssertIntEquals(asUInteger(asCar(asCdr(repeatParser))), 43);
   
-  AssertPtrNull(asCdr(asCdr(parser)));
+  AssertPtrNull(asCdr(asCdr(repeatParser)));
   
   AssertIntTrue(isUIntegerObj(top42));
   AssertIntEquals(asUInteger(top42), 42);  
 
   AssertIntTrue(isUIntegerObj(top43));
-  AssertIntEquals(asUInteger(top43), 43);  
+  AssertIntEquals(asUInteger(top43), 43);
+  
+  AssertIntTrue(isUIntegerObj(backTrackPoint));
+  AssertIntEquals(asUInteger(backTrackPoint), 24);
 \stopCTest
 \stopTestCase
 \stopTestSuite
