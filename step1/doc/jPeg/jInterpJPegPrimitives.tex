@@ -755,19 +755,23 @@ succeeded]
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[jPegRepeatAtLeastWord]
+\startTestSuite[jPegRepeatAtLeastContinueWord]
 
 \startCHeader
-void jPegRepeatAtLeastWord(ContextObj *aCtx);
+void jPegRepeatAtLeastContinueWord(ContextObj *aCtx);
 \stopCHeader
 
 \startCCode
-void jPegRepeatAtLeastWord(ContextObj *aCtx) {
+void jPegRepeatAtLeastContinueWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
-  popCtxDataInto(aCtx, parser);
-
-  popCtxDataInto(aCtx, atLeast);
+  popCtxProcessInto(aCtx, atLeast);
+  popCtxProcessInto(aCtx, parser);
+  popCtxProcessInto(aCtx, textBackTrackPointObj);
+    
+  // we always ignore and reset committed-ness
+  asParserCommitted(aCtx) = false;
+  
   if (!isUIntegerObj(atLeast)) {
     raiseExceptionMsg(aCtx,
       "jPeg repeatAtLeast parser expected a UInteger as top");
@@ -775,18 +779,17 @@ void jPegRepeatAtLeastWord(ContextObj *aCtx) {
   }
   size_t atLeastRepeats = asUInteger(atLeast);
   
-  // we always ignore and reset committed-ness
-  asParserCommitted(aCtx) = false;
-
-  // if the parser is empty... there is nothing to do
-  if (!parser) return;
-  
   // if we have failed...
   if (asParserFailed(aCtx)) {
     //
     // we roll back the last repeat...
-    // the last checkpoint SHOULD have been
-    // stored on the process stack
+    if (!isUIntegerObj(textBackTrackPointObj)) {
+      raiseExceptionMsg(aCtx,
+        "jPeg repeatAtLeast parser expected a UInteger as text back-track point");
+      return;
+    }
+    size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
+    asParserTextPosition(aCtx) = textBackTrackPoint;
     
     // now we check to see if we have repeated enough times...
     if (0 < atLeastRepeats) {
@@ -800,19 +803,23 @@ void jPegRepeatAtLeastWord(ContextObj *aCtx) {
   }
   
   // we have succeeded.... so we setup the next repeat...
-  if (0 < atLeastRepeats) {
-    pushSymbolCtxProcess(aCtx, "parseRepeatAtLeast");
-    pushUIntegerCtxProcess(aCtx, atLeastRepeats - 1);
-  } else {
-    pushSymbolCtxProcess(aCtx, "parseRepeat");
-  }
+  
+  // if the parser is empty... there is nothing to do
+  if (!parser) return;
+
+  pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
   pushCtxProcess(aCtx, parser);
+  if (0 < atLeastRepeats) {
+    pushUIntegerCtxProcess(aCtx, atLeastRepeats - 1);
+    pushSymbolCtxProcess(aCtx, "parseContinueRepeatAtLeast");
+  } else {
+    pushSymbolCtxProcess(aCtx, "parseContinueRepeat");
+  }
   prependListCtxProcess(aCtx, copyLoL(parser));
 }
 \stopCCode
 
-\startTestCase[test repeat at least parsers]
-
+\CTestsSuiteSetup\
 \startCTest
   ContextObj *aCtx = newContext(NULL, NULL, "testParser");
   AssertIntTrue(isContextObj(aCtx));
@@ -824,41 +831,62 @@ void jPegRepeatAtLeastWord(ContextObj *aCtx) {
   pushUIntegerCtxData(aCtx, 43);
   pushUIntegerCtxData(aCtx, 42);
   prependWord(aCtx);
+\stopCTest
 
-  // failed and 0 == atLeast
-  //
+\startTestCase[should succeed when last repeat failed and atLeast is 0]
+
+\startCTest
+  pushUIntegerCtxProcess(aCtx, 24);
   dup1DWord(aCtx);
-  pushUIntegerCtxData(aCtx, 0);
-  swap12DWord(aCtx);
-  asParserCommitted(aCtx) = true;
-  asParserFailed(aCtx) = true;
-  //
+  popCtxDataInto(aCtx, parser);
+  pushCtxProcess(aCtx, parser);
+  pushUIntegerCtxProcess(aCtx, 0);
+
+  asParserTextPosition(aCtx) = 0;
+  asParserCommitted(aCtx)    = true;
+  asParserFailed(aCtx)       = true;
+
   AssertPtrNotNull(asCtxData(aCtx));
-  AssertIntEquals(listLength(asCtxData(aCtx)), 3);
-  AssertPtrNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 3);
+  
   AssertIntTrue(asParserCommitted(aCtx));
   AssertIntTrue(asParserFailed(aCtx));
-  jPegRepeatAtLeastWord(aCtx);
+  
+  jPegRepeatAtLeastContinueWord(aCtx);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
   AssertIntFalse(asParserCommitted(aCtx));
   AssertIntFalse(asParserFailed(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
   AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
 
-  // failed and 0 < atLeast
-  //
+\startTestCase[should fail when last repeat failed and atLeast is not 0]
+\startCTest
+  pushUIntegerCtxProcess(aCtx, 24);
   dup1DWord(aCtx);
-  pushUIntegerCtxData(aCtx, 10);
-  swap12DWord(aCtx);
-  asParserCommitted(aCtx) = true;
-  asParserFailed(aCtx) = true;
-  //
+  popCtxDataInto(aCtx, parser);
+  pushCtxProcess(aCtx, parser);
+  pushUIntegerCtxProcess(aCtx, 10);
+  
+  asParserTextPosition(aCtx) = 0;
+  asParserCommitted(aCtx)    = true;
+  asParserFailed(aCtx)       = true;
+  
   AssertPtrNotNull(asCtxData(aCtx));
-  AssertIntEquals(listLength(asCtxData(aCtx)), 3);
-  AssertPtrNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 3);
+  
   AssertIntTrue(asParserCommitted(aCtx));
   AssertIntTrue(asParserFailed(aCtx));
-  jPegRepeatAtLeastWord(aCtx);
+  
+  jPegRepeatAtLeastContinueWord(aCtx);
+  
   AssertIntFalse(asParserCommitted(aCtx));
   AssertIntTrue(asParserFailed(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
@@ -867,106 +895,235 @@ void jPegRepeatAtLeastWord(ContextObj *aCtx) {
   AssertIntEquals(listLength(asCtxProcess(aCtx)), 1);
   AssertIntTrue(isSymbolObj(asCar(asCtxProcess(aCtx))));
   AssertStrEquals(asSymbol(asCar(asCtxProcess(aCtx))), "parseFail");
+\stopCTest
+\stopTestCase
 
-  // succeeded and 0 == atLeast
-  //
-  {
-  dup1DWord(aCtx);
-  pushUIntegerCtxData(aCtx, 0);
-  swap12DWord(aCtx);
-  asParserCommitted(aCtx) = true;
-  asParserFailed(aCtx) = false;
+\startTestCase[should repeat indefinitely when succeeded and atLeast is 0]
+\startCTest
   asCtxProcess(aCtx) = NULL;
-  //
-  AssertPtrNotNull(asCtxData(aCtx));
-  AssertIntEquals(listLength(asCtxData(aCtx)), 3);
-  AssertPtrNull(asCtxProcess(aCtx));
-  AssertIntTrue(asParserCommitted(aCtx));
-  AssertIntFalse(asParserFailed(aCtx));
-  jPegRepeatAtLeastWord(aCtx);
-  AssertIntFalse(asParserCommitted(aCtx));
-  AssertIntFalse(asParserFailed(aCtx));
+  
+  pushUIntegerCtxProcess(aCtx, 24);
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, parser);
+  pushCtxProcess(aCtx, parser);
+  pushUIntegerCtxProcess(aCtx, 0);
+  
+  asParserTextPosition(aCtx) = 0;
+  asParserCommitted(aCtx)    = true;
+  asParserFailed(aCtx)       = false;
+  
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
   AssertPtrNotNull(asCtxProcess(aCtx));
-  AssertIntEquals(listLength(asCtxProcess(aCtx)), 4);
-    
-  popCtxProcessInto(aCtx, top42);
-  popCtxProcessInto(aCtx, top43);
-  popCtxProcessInto(aCtx, parser);
-  popCtxProcessInto(aCtx, repeatWord);
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 3);
   
-  AssertIntTrue(isSymbolObj(repeatWord));
-  AssertStrEquals(asSymbol(repeatWord), "parseRepeat");
-  
-  AssertIntTrue(isPairObj(parser));
-  AssertIntTrue(isUIntegerObj(asCar(parser)));
-  AssertIntEquals(asUInteger(asCar(parser)), 42);
-  
-  AssertIntTrue(isPairObj(asCdr(parser)));
-  AssertIntTrue(isUIntegerObj(asCar(asCdr(parser))));
-  AssertIntEquals(asUInteger(asCar(asCdr(parser))), 43);
-  
-  AssertPtrNull(asCdr(asCdr(parser)));
-  
-  AssertIntTrue(isUIntegerObj(top42));
-  AssertIntEquals(asUInteger(top42), 42);  
-
-  AssertIntTrue(isUIntegerObj(top43));
-  AssertIntEquals(asUInteger(top43), 43);  
-  }
-  
-  // succeeded and 0 < atLeast
-  //
-  {
-  dup1DWord(aCtx);
-  pushUIntegerCtxData(aCtx, 10);
-  swap12DWord(aCtx);
-  asParserCommitted(aCtx) = true;
-  asParserFailed(aCtx) = false;
-  asCtxProcess(aCtx) = NULL;
-  //
-  AssertPtrNotNull(asCtxData(aCtx));
-  AssertIntEquals(listLength(asCtxData(aCtx)), 3);
-  AssertPtrNull(asCtxProcess(aCtx));
   AssertIntTrue(asParserCommitted(aCtx));
   AssertIntFalse(asParserFailed(aCtx));
-  jPegRepeatAtLeastWord(aCtx);
+  
+  jPegRepeatAtLeastContinueWord(aCtx);
+  
+  AssertIntZero(asParserTextPosition(aCtx));
   AssertIntFalse(asParserCommitted(aCtx));
   AssertIntFalse(asParserFailed(aCtx));
+  
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
   AssertPtrNotNull(asCtxProcess(aCtx));
   AssertIntEquals(listLength(asCtxProcess(aCtx)), 5);
-  
+    
   popCtxProcessInto(aCtx, top42);
   popCtxProcessInto(aCtx, top43);
-  popCtxProcessInto(aCtx, parser);
-  popCtxProcessInto(aCtx, atLeast);
   popCtxProcessInto(aCtx, repeatWord);
+  popCtxProcessInto(aCtx, repeatParser);
+  popCtxProcessInto(aCtx, backTrackPoint);
   
   AssertIntTrue(isSymbolObj(repeatWord));
-  AssertStrEquals(asSymbol(repeatWord), "parseRepeatAtLeast");
+  AssertStrEquals(asSymbol(repeatWord), "parseContinueRepeat");
   
-  AssertIntTrue(isUIntegerObj(atLeast));
-  AssertIntEquals(asUInteger(atLeast), 9);
+  AssertIntTrue(isPairObj(repeatParser));
+  AssertIntTrue(isUIntegerObj(asCar(repeatParser)));
+  AssertIntEquals(asUInteger(asCar(repeatParser)), 42);
   
-  AssertIntTrue(isPairObj(parser));
-  AssertIntTrue(isUIntegerObj(asCar(parser)));
-  AssertIntEquals(asUInteger(asCar(parser)), 42);
+  AssertIntTrue(isPairObj(asCdr(repeatParser)));
+  AssertIntTrue(isUIntegerObj(asCar(asCdr(repeatParser))));
+  AssertIntEquals(asUInteger(asCar(asCdr(repeatParser))), 43);
   
-  AssertIntTrue(isPairObj(asCdr(parser)));
-  AssertIntTrue(isUIntegerObj(asCar(asCdr(parser))));
-  AssertIntEquals(asUInteger(asCar(asCdr(parser))), 43);
-  
-  AssertPtrNull(asCdr(asCdr(parser)));
+  AssertPtrNull(asCdr(asCdr(repeatParser)));
   
   AssertIntTrue(isUIntegerObj(top42));
   AssertIntEquals(asUInteger(top42), 42);  
 
   AssertIntTrue(isUIntegerObj(top43));
-  AssertIntEquals(asUInteger(top43), 43);  
-  }
+  AssertIntEquals(asUInteger(top43), 43);
+  
+  AssertIntTrue(isUIntegerObj(backTrackPoint));
+  AssertIntEquals(asUInteger(backTrackPoint), 0);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should repeatAtLeast when succeeded and atLeast is not 0]
+\startCTest
+  asCtxProcess(aCtx) = NULL;
+  
+  pushUIntegerCtxProcess(aCtx, 24);
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, parser);
+  pushCtxProcess(aCtx, parser);
+  pushUIntegerCtxProcess(aCtx, 10);
+  
+  asParserTextPosition(aCtx) = 0;
+  asParserCommitted(aCtx)    = true;
+  asParserFailed(aCtx)       = false;
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 3);
+  
+  AssertIntTrue(asParserCommitted(aCtx));
+  AssertIntFalse(asParserFailed(aCtx));
+  
+  jPegRepeatAtLeastContinueWord(aCtx);
+  
+  AssertIntZero(asParserTextPosition(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertIntFalse(asParserFailed(aCtx));
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 6);
+  
+  popCtxProcessInto(aCtx, top42);
+  popCtxProcessInto(aCtx, top43);
+  popCtxProcessInto(aCtx, repeatWord);
+  popCtxProcessInto(aCtx, atLeast);
+  popCtxProcessInto(aCtx, repeatParser);
+  popCtxProcessInto(aCtx, backTrackPoint);
+  
+  AssertIntTrue(isSymbolObj(repeatWord));
+  AssertStrEquals(asSymbol(repeatWord), "parseContinueRepeatAtLeast");
+  
+  AssertIntTrue(isUIntegerObj(atLeast));
+  AssertIntEquals(asUInteger(atLeast), 9);
+  
+  AssertIntTrue(isPairObj(repeatParser));
+  AssertIntTrue(isUIntegerObj(asCar(repeatParser)));
+  AssertIntEquals(asUInteger(asCar(repeatParser)), 42);
+  
+  AssertIntTrue(isPairObj(asCdr(repeatParser)));
+  AssertIntTrue(isUIntegerObj(asCar(asCdr(repeatParser))));
+  AssertIntEquals(asUInteger(asCar(asCdr(repeatParser))), 43);
+  
+  AssertPtrNull(asCdr(asCdr(repeatParser)));
+  
+  AssertIntTrue(isUIntegerObj(top42));
+  AssertIntEquals(asUInteger(top42), 42);  
+
+  AssertIntTrue(isUIntegerObj(top43));
+  AssertIntEquals(asUInteger(top43), 43);
+  
+  AssertIntTrue(isUIntegerObj(backTrackPoint));
+  AssertIntZero(asUInteger(backTrackPoint));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[jPegRepeatAtLeastWord]
+
+\startCHeader
+void jPegRepeatAtLeastWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegRepeatAtLeastWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, parser);
+  popCtxDataInto(aCtx, atLeast);
+  
+  if (!parser) return;
+  
+  asParserCommitted(aCtx) = false;
+  asParserFailed(aCtx)    = false;
+  
+  pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
+  pushCtxProcess(aCtx, parser);
+  pushCtxProcess(aCtx, atLeast);
+  jPegRepeatAtLeastContinueWord(aCtx);
+}
+\stopCCode
+
+\startTestCase[should setup repeatAtLeast when succeeded and atLeast is not 0]
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushUIntegerCtxData(aCtx, 43);
+  pushUIntegerCtxData(aCtx, 42);
+  prependWord(aCtx);
+  
+  dup1DWord(aCtx);
+  pushUIntegerCtxData(aCtx, 10);
+  swap12DWord(aCtx);
+  
+  asParserTextPosition(aCtx) = 24;
+  asParserCommitted(aCtx)    = true;
+  asParserFailed(aCtx)       = false;
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 3);
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  AssertIntTrue(asParserCommitted(aCtx));
+  AssertIntFalse(asParserFailed(aCtx));
+  
+  jPegRepeatAtLeastWord(aCtx);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertIntFalse(asParserFailed(aCtx));
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 6);
+  
+  popCtxProcessInto(aCtx, top42);
+  popCtxProcessInto(aCtx, top43);
+  popCtxProcessInto(aCtx, repeatWord);
+  popCtxProcessInto(aCtx, atLeast);
+  popCtxProcessInto(aCtx, repeatParser);
+  popCtxProcessInto(aCtx, backTrackPoint);
+  
+  AssertIntTrue(isSymbolObj(repeatWord));
+  AssertStrEquals(asSymbol(repeatWord), "parseContinueRepeatAtLeast");
+  
+  AssertIntTrue(isUIntegerObj(atLeast));
+  AssertIntEquals(asUInteger(atLeast), 9);
+  
+  AssertIntTrue(isPairObj(repeatParser));
+  AssertIntTrue(isUIntegerObj(asCar(repeatParser)));
+  AssertIntEquals(asUInteger(asCar(repeatParser)), 42);
+  
+  AssertIntTrue(isPairObj(asCdr(repeatParser)));
+  AssertIntTrue(isUIntegerObj(asCar(asCdr(repeatParser))));
+  AssertIntEquals(asUInteger(asCar(asCdr(repeatParser))), 43);
+  
+  AssertPtrNull(asCdr(asCdr(repeatParser)));
+  
+  AssertIntTrue(isUIntegerObj(top42));
+  AssertIntEquals(asUInteger(top42), 42);  
+
+  AssertIntTrue(isUIntegerObj(top43));
+  AssertIntEquals(asUInteger(top43), 43);
+  
+  AssertIntTrue(isUIntegerObj(backTrackPoint));
+  AssertIntEquals(asUInteger(backTrackPoint), 24);
 \stopCTest
 \stopTestCase
 \stopTestSuite
