@@ -2404,17 +2404,16 @@ void registerJPegWords(ContextObj *aCtx) {
   //   ) parseChoice
   // ) parseRepeat
 
-  aCtx->tracingOn = true;
-
-  pushSymbolCtxData(aCtx, "parseRepeat");
-  pushSymbolCtxData(aCtx, "parseChoice");
   pushSymbolCtxData(aCtx, "parseSpan");
   pushUIntegerCtxData(aCtx, 0);
   prependWord(aCtx);
   pushSymbolCtxData(aCtx, "AZ");
   pushSymbolCtxData(aCtx, "az");
   prependWord(aCtx);
+  wrapWord(aCtx);
   prependWord(aCtx);
+  wrapWord(aCtx);
+  
   pushSymbolCtxData(aCtx, "parseSpan");
   pushUIntegerCtxData(aCtx, 0);
   prependWord(aCtx);
@@ -2423,16 +2422,36 @@ void registerJPegWords(ContextObj *aCtx) {
   prependWord(aCtx);
   pushSymbolCtxData(aCtx, " ");
   prependWord(aCtx);
-  prependWord(aCtx);
-  prependWord(aCtx);
   wrapWord(aCtx);
   prependWord(aCtx);
   wrapWord(aCtx);
+  
   prependWord(aCtx);
   
+  wrapWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseChoice");
+  swap12DWord(aCtx);
+  prependWord(aCtx);
+  
+  wrapWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseRepeat");
+  swap12DWord(aCtx);
+  prependWord(aCtx);
+  
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, parser);
+  prependListCtxProcess(aCtx, parser);
+  
+//  showCtxData(aCtx);
+//  showCtxProcess(aCtx);
+  
   // now evaluate it
-//  evalCommandInContext(aCtx, asJObj(newSymbol("interpret", NULL, 0)));
-  AssertIntFalse(asParserFailed(aCtx));
+  aCtx->showDepth = 20;
+  aCtx->debug     = 1;
+  aCtx->tracingOn = true;
+  evalCommandInContext(aCtx, NULL);
+  
+//  AssertIntFalse(asParserFailed(aCtx));
 \stopCTest
-\skipTestCase
+\stopTestCase
 \stopTestSuite
