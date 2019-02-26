@@ -292,9 +292,10 @@ void pairPrinter(
   Symbol          *indent,
   size_t           timeToLive
 ) {
-  DEBUG(DebugMask, "pairPrinter %p\n", anObj);
   assert(isStringBufferObj(aStrBuf));
   assert(isPairObj(anObj));
+  DEBUG(DebugMask, "pairPrinter %p [%p, %p]\n",
+    anObj, asCar(anObj), asCdr(anObj) );
   
   if (indent) {
     strBufPrintf(aStrBuf, "%s( \n", indent);

@@ -68,7 +68,9 @@ void printJObj(
   Symbol          *indent,
   size_t           timeToLive
 ) {
-  DEBUG(DebugMask, "printJObj %p\n", anObj);
+  DEBUG(DebugMask, "printJObj %p, %s\n",
+    anObj, getJObjName(anObj)
+  );
   if (!anObj) {
     if (indent) {
       strBufPrintf(aStrBuf, "%s<null>: null\n", indent);

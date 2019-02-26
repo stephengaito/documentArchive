@@ -691,6 +691,32 @@ static void undefineWord(ContextObj* aCtx) {
   }
 \stopCCode
 
+
+\startCHeader
+void breakPointWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void breakPointWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  asCtxBreakPoint(aCtx) = true;
+  if (aCtx->tracingOn) printf("breakPoint: breaking\n");
+}
+\stopCCode
+
+\startCHeader
+void breakPointOn(ContextObj *aCtx, Symbol *aSymbol);
+\stopCHeader
+
+\startCCode
+void breakPointOn(ContextObj *aCtx, Symbol *aSymbol) {
+  assert(isContextObj(aCtx));
+  if (!aSymbol) return;
+  deleteSymbol(asCtxSymbols(aCtx), aSymbol);
+  registerCFunction(asCtxSymbols(aCtx), aSymbol, breakPointWord);
+}
+\stopCCode
+
 \startTestSuite[registerControlWords]
 
 \startCHeader
@@ -732,6 +758,7 @@ void registerControlWords(ContextObj *aCtx) {
   registerCFunction(symTab, "raise",          raiseWord);
   registerCFunction(symTab, "raiseIfFalse",   raiseIfFalseWord);
   registerCFunction(symTab, "tryHandler",     tryHandlerWord);
+  registerCFunction(symTab, "breakPoint",     breakPointWord);
   
   registerCtxCFunction(symTab, "findFirstTryHandler", findFirstTryHandlerWord);
 //  extendCtxJoyLoLInRoot(jInterp, "switchCtx",           "", switchCtxWord,           "");

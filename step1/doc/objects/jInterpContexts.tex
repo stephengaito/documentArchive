@@ -26,6 +26,7 @@ typedef struct context_struct {
   StringBufferObj *renderBuffer;
   Boolean          tracingOn;
   Boolean          debug;
+  Boolean          breakPoint;
   size_t           showDepth;
   Boolean          exceptionRaised;
   ContextObj      *parent;
@@ -38,6 +39,7 @@ typedef struct context_struct {
 #define asCtxProcess(anObj) (((ContextObj*)(anObj))->process)
 #define asCtxCommand(anObj) (((ContextObj*)(anObj))->command)
 #define asCtxSymbols(anObj) (((ContextObj*)(anObj))->symbolTable)
+#define asCtxBreakPoint(anObj) (((ContextObj*)(anObj))->breakPoint)
 #define asParserCommitted(anObj) (((ContextObj*)(anObj))->parserCommitted)
 #define asParserFailed(anObj) (((ContextObj*)(anObj))->parserFailed)
 #define asParserText(anObj) (((ContextObj*)(anObj))->parserText)
@@ -85,6 +87,7 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   newObj->renderBuffer       = NULL;
   newObj->tracingOn          = false;
   newObj->debug              = false;
+  newObj->breakPoint         = false;
   newObj->showDepth          = 5;
   newObj->exceptionRaised    = false;
   newObj->parent             = NULL;
@@ -103,6 +106,7 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   AssertStrEquals(asCtxName(aCtx), "TestCtx");
   AssertPtrEquals(asCtxData(aCtx), data);
   AssertPtrEquals(asCtxProcess(aCtx), process);
+  AssertIntFalse(asCtxBreakPoint(aCtx));
   AssertIntTrue(isSymbolTableObj(asCtxSymbols(aCtx)));
   AssertIntFalse(asParserFailed(aCtx));
   AssertPtrNull(asParserText(aCtx));
@@ -350,7 +354,8 @@ void contextPrinter(
   Symbol          *indent,
   size_t           timeToLive
 ) {
-  DEBUG(DebugMask, "contextPrinter %p\n", anObj);
+  DEBUG(DebugMask, "contextPrinter %p\n",
+  anObj);
   assert(isContextObj(anObj));
   if (indent) {
     char *newIndent = appendSymbols(indent, "    ");

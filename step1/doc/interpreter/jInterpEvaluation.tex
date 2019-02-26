@@ -44,9 +44,9 @@ void evalCommandInContext(
   //
   // push this command onto the top of the process stack
   //
-  pushCtxProcess(aCtx, command);
+  if (command) pushCtxProcess(aCtx, command);
   //
-  while(aCtx->process) {
+  while(aCtx->process && !aCtx->breakPoint) {
     //
     // ensure we have the most recent dictionary
     //
@@ -189,8 +189,11 @@ void evalCommandInContext(
       showCtxProcess(aCtx);
       DEBUG(DebugMask, "evalCommandInContext <- tracing%s\n", "");
     }
-  } // aCtx->process is empty
-  aCtx->command = NULL;
+  } // aCtx->process is empty OR a breakPoint has been requested
+  if (aCtx->tracingOn && aCtx->process && aCtx->breakPoint) {
+    printf("evalCommandInContext stopped at breakPoint\n");
+  }
+  // aCtx->command = NULL;
   DEBUG(DebugMask, "evalCommandInContext < %p %p\n", aCtx, command);
 }
 \stopCCode
@@ -211,8 +214,10 @@ void evalCommandInContext(
   AssertIntTrue(isUIntegerObj(asCar(data)));
   AssertIntEquals(asUInteger(asCar(data)), 42);
   AssertPtrNull(asCtxProcess(aCtx));
-  AssertPtrNull(asCtxCommand(aCtx));
-
+  AssertPtrNotNull(asCtxCommand(aCtx));
+  AssertIntTrue(isUIntegerObj(asCtxCommand(aCtx)));
+  AssertIntEquals(asUInteger(asCtxCommand(aCtx)), 42);
+  
   SymbolTableObj *symTab = asCtxSymbols(aCtx);
   registerBasicWords(aCtx);
   JObj *shouldBeTrue = findSymbol(symTab, "true");
@@ -221,8 +226,10 @@ void evalCommandInContext(
   AssertIntEquals(asUInteger(shouldBeTrue), true);
   evalCommandInContext(aCtx, asJObj(newSymbol("true", NULL, 0)));
   AssertPtrNull(asCtxProcess(aCtx));
-  AssertPtrNull(asCtxCommand(aCtx));  
-
+  AssertPtrNotNull(asCtxCommand(aCtx));
+  AssertIntTrue(isUIntegerObj(asCtxCommand(aCtx)));
+  AssertIntEquals(asUInteger(asCtxCommand(aCtx)), 1);
+  
   data = asCtxData(aCtx);
   AssertIntTrue(isPairObj(data));
   AssertIntTrue(isUIntegerObj(asCar(data)));
