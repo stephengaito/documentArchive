@@ -318,7 +318,7 @@ static void lessThanUIntWord(ContextObj* aCtx) {
   if (isUIntegerObj(top1) &&
       isUIntegerObj(top2) &&
       (asUInteger(top1) < asUInteger(top2))) result = true;
-  DEBUG(DebugMask, "equalNat: %zu\n", result);
+  DEBUG(ContextDebug, "equalNat: %zu\n", result);
   pushCtxData(aCtx, top2);
   pushCtxData(aCtx, top1);
   pushCtxData(aCtx, asJObj(newUInteger(result)));
@@ -335,7 +335,7 @@ static void lessThanEqualUIntWord(ContextObj* aCtx) {
   if (isUIntegerObj(top1) &&
       isUIntegerObj(top2) &&
       (asUInteger(top1) <= asUInteger(top2))) result = true;
-  DEBUG(DebugMask, "equalNat: %zu\n", result);
+  DEBUG(ContextDebug, "equalNat: %zu\n", result);
   pushCtxData(aCtx, top2);
   pushCtxData(aCtx, top1);
   pushCtxData(aCtx, asJObj(newUInteger(result)));
@@ -352,7 +352,7 @@ static void greaterThanUIntWord(ContextObj* aCtx) {
   if (isUIntegerObj(top1) &&
       isUIntegerObj(top2) &&
       (asUInteger(top1) > asUInteger(top2))) result = true;
-  DEBUG(DebugMask, "equalNat: %zu\n", result);
+  DEBUG(ContextDebug, "equalNat: %zu\n", result);
   pushCtxData(aCtx, top2);
   pushCtxData(aCtx, top1);
   pushCtxData(aCtx, asJObj(newUInteger(result)));
@@ -369,7 +369,7 @@ static void greaterThanEqualUIntWord(ContextObj* aCtx) {
   if (isUIntegerObj(top1) &&
       isUIntegerObj(top2) &&
       (asUInteger(top1) >= asUInteger(top2))) result = true;
-  DEBUG(DebugMask, "equalNat: %zu\n", result);
+  DEBUG(ContextDebug, "equalNat: %zu\n", result);
   pushCtxData(aCtx, top2);
   pushCtxData(aCtx, top1);
   pushCtxData(aCtx, asJObj(newUInteger(result)));
@@ -386,7 +386,7 @@ static void equalUIntWord(ContextObj* aCtx) {
   if (isUIntegerObj(top1) &&
       isUIntegerObj(top2) &&
       (asUInteger(top1) == asUInteger(top2))) result = true;
-  DEBUG(DebugMask, "equalNat: %zu\n", result);
+  DEBUG(ContextDebug, "equalNat: %zu\n", result);
   pushCtxData(aCtx, top2);
   pushCtxData(aCtx, top1);
   pushCtxData(aCtx, asJObj(newUInteger(result)));

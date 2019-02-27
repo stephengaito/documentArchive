@@ -288,25 +288,25 @@ void insertSymbol(SymbolTableObj *aTable, Symbol *aSymbol, JObj *anObj) {
   assert(symbolIndex <= aTable->numSymbols);
   assert(symbolIndex <= aTable->maxSymbols);
   
-  DEBUG(DebugMask,
+  DEBUG(SymbolTableDebug,
     "insertSymbol: index: %zd  num: %zd max: %zd\n",
     symbolIndex,
     aTable->numSymbols,
     aTable->maxSymbols
   );
-  DEBUG(DebugMask,
+  DEBUG(SymbolTableDebug,
     "insertSymbol: inserting: [%s]<%s>: %p\n",
     aSymbol,
     getJObjName(anObj),
     anObj
   );
   if (symbolIndex < aTable->numSymbols) {
-    DEBUG(DebugMask,
+    DEBUG(SymbolTableDebug,
       "insertSymbol: found: [%s]\n",
       aTable->symbols[symbolIndex].symbol
     );
   } else {
-    DEBUG(DebugMask, "%s", "insertSymbol: found: no symbols\n");
+    DEBUG(SymbolTableDebug, "%s", "insertSymbol: found: no symbols\n");
   }
   
   if (symbolIndex == aTable->numSymbols) {
@@ -548,7 +548,7 @@ void symbolTablePrinter(
   Symbol          *indent,
   size_t           timeToLive
 ) {
-  DEBUG(DebugMask, "symbolTablePrinter %p\n", anObj);
+  DEBUG(PrintingDebug, "symbolTablePrinter %p\n", anObj);
   assert(isSymbolTableObj(anObj));
   
   SymbolTableObj *aTable = asSymbolTableObj(anObj);

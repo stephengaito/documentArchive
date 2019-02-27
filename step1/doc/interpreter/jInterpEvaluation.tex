@@ -9,7 +9,7 @@ static void traceAction(
   JObj       *aLoL
 ) {
   assert(isContextObj(aCtx));
-  DEBUG(DebugMask, "traceAction: %p [%s] %s:%p\n",
+  DEBUG(TraceDebug, "traceAction: %p [%s] %s:%p\n",
     aCtx, action, getJObjName(aLoL), aLoL);
 
   StringBufferObj *aStrBuf = newStringBuffer();
@@ -39,7 +39,7 @@ void evalCommandInContext(
 ) {
   assert(aCtx);
   
-  DEBUG(DebugMask, "evalCommandInContext > %p [%s] %p\n",
+  DEBUG(TraceDebug, "evalCommandInContext > %p [%s] %p\n",
     aCtx, aCtx->name, command);
   //
   // push this command onto the top of the process stack
@@ -184,17 +184,17 @@ void evalCommandInContext(
       }
     }
     if (aCtx->tracingOn) {
-      DEBUG(DebugMask, "evalCommandInContext -> tracing%s\n", "");
+      DEBUG(TraceDebug, "evalCommandInContext -> tracing%s\n", "");
       showCtxData(aCtx);
       showCtxProcess(aCtx);
-      DEBUG(DebugMask, "evalCommandInContext <- tracing%s\n", "");
+      DEBUG(TraceDebug, "evalCommandInContext <- tracing%s\n", "");
     }
   } // aCtx->process is empty OR a breakPoint has been requested
   if (aCtx->tracingOn && aCtx->process && aCtx->breakPoint) {
     printf("evalCommandInContext stopped at breakPoint\n");
   }
   // aCtx->command = NULL;
-  DEBUG(DebugMask, "evalCommandInContext < %p %p\n", aCtx, command);
+  DEBUG(TraceDebug, "evalCommandInContext < %p %p\n", aCtx, command);
 }
 \stopCCode
 

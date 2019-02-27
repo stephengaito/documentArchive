@@ -294,7 +294,7 @@ void pairPrinter(
 ) {
   assert(isStringBufferObj(aStrBuf));
   assert(isPairObj(anObj));
-  DEBUG(DebugMask, "pairPrinter %p [%p, %p]\n",
+  DEBUG(PrintingDebug, "pairPrinter %p [%p, %p]\n",
     anObj, asCar(anObj), asCdr(anObj) );
   
   if (indent) {

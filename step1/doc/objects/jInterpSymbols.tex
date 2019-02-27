@@ -115,7 +115,7 @@ void symbolPrinter(
   size_t           timeToLive
 ) {
   assert(isSymbolObj(anObj));
-  DEBUG(DebugMask, "symbolPrinter %p [%s]\n", anObj, asSymbol(anObj));
+  DEBUG(PrintingDebug, "symbolPrinter %p [%s]\n", anObj, asSymbol(anObj));
   if (indent) {
     strBufPrintf(aStrBuf, "%s\"%s\"\n", indent, asSymbol(anObj));
   } else {

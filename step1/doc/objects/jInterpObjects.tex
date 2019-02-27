@@ -45,11 +45,20 @@ extern size_t debugFlags;
   if (debugFlags & debugMask) {         \
     printf(format, __VA_ARGS__ );       \
   }
+#define shouldDebug(debugMask) \
+  (debugFlags & (debugMask))
 #else
 #define startDebuggingFlags(aCtx)
 #define stopDebugggingFlags(aCtx)
 #define DEBUG(debugMask, format, ...)
+#define shouldDebug   false
 #endif
+
+#define ParserDebug      0x02
+#define ContextDebug     0x04
+#define TraceDebug       0x08
+#define SymbolTableDebug 0x10
+#define PrintingDebug    0x20
 \stopCHeader
 
 \startCCode

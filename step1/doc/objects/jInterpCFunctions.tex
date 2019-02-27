@@ -64,7 +64,7 @@ void cFunctionPrinter(
   Symbol          *indent,
   size_t           timeToLive
 ) {
-  DEBUG(DebugMask, "cFunctionPrinter %p\n", anObj);
+  DEBUG(PrintingDebug, "cFunctionPrinter %p\n", anObj);
   assert(isCFunctionObj(anObj));
   strBufPrintf(aStrBuf, "%s<cFunc:%p>\n", indent, asCFunction(anObj));
 }
@@ -154,7 +154,7 @@ void ctxCFunctionPrinter(
   Symbol          *indent,
   size_t           timeToLive
 ) {
-  DEBUG(DebugMask, "ctxCFunctionPrinter %p\n", anObj);
+  DEBUG(PrintingDebug, "ctxCFunctionPrinter %p\n", anObj);
   assert(isCtxCFunctionObj(anObj));
   strBufPrintf(aStrBuf, "%s<ctxCFunc:%p>\n", indent, asCtxCFunction(anObj));
 }

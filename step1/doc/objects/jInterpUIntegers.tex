@@ -59,7 +59,7 @@ void uIntegerPrinter(
   size_t          timeToLive
 ) {
   assert(isUIntegerObj(anObj));
-  DEBUG(DebugMask, "uIntegerPrinter %p [%zu]\n", anObj, asUInteger(anObj));
+  DEBUG(PrintingDebug, "uIntegerPrinter %p [%zu]\n", anObj, asUInteger(anObj));
   if (indent) {
     strBufPrintf(aStrBuf, "%s%zu\n", indent, asUInteger(anObj));
   } else {

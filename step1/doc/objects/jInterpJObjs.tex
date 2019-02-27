@@ -68,7 +68,7 @@ void printJObj(
   Symbol          *indent,
   size_t           timeToLive
 ) {
-  DEBUG(DebugMask, "printJObj %p, %s\n",
+  DEBUG(PrintingDebug, "printJObj %p, %s\n",
     anObj, getJObjName(anObj)
   );
   if (!anObj) {
@@ -133,7 +133,7 @@ void jObjPrinter(
   Symbol          *indent,
   size_t           timeToLive
 ) {
-  DEBUG(DebugMask, "jObjPrinter %p\n", anObj);
+  DEBUG(PrintingDebug, "jObjPrinter %p\n", anObj);
   assert(isStringBufferObj(aStrBuf));
   assert(isJObj(anObj));
   if (indent) {

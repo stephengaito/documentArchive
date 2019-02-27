@@ -167,6 +167,8 @@ void jPegCommitWord(ContextObj *aCtx);
 \startCCode
 void jPegCommitWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
+
+  DEBUG(ParserDebug, "jPegCommitWord%s\n", "");
   
   asParserCommitted(aCtx) = true;
 }
@@ -210,19 +212,34 @@ void jPegChoiceContinueWord(ContextObj *aCtx) {
   popCtxProcessInto(aCtx, parserChoices);
   popCtxProcessInto(aCtx, textBackTrackPointObj);
   
-  // if we have not failed... we are done...
-  if (!asParserFailed(aCtx)) {
-    asParserCommitted(aCtx) = false;
-    asParserFailed(aCtx)    = false;
-    return;
-  }
-
   if (!isUIntegerObj(textBackTrackPointObj)) {
+    DEBUG(ParserDebug,
+      "jPegChoiceContinueWord: non-UInteger textBackTrackPoint%s\n", "")
     raiseExceptionMsg(aCtx,
       "jPeg choice parser expected a UInteger as text back-track point");
     return;
   }
   size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
+  
+  DEBUG(ParserDebug,
+    "jPegChoiceContinuationWord:%s\n", "");
+  DEBUG(ParserDebug,
+    "  failed: %zu committed: %zu numChoices: %zu\n",
+    asParserFailed(aCtx), asParserCommitted(aCtx),
+    listLength(parserChoices)
+  );
+  DEBUG(ParserDebug,
+    "  backTrack: %zu position: %zu\n",
+    textBackTrackPoint, asParserTextPosition(aCtx)
+  );
+  
+  // if we have not failed... we are done...
+  if (!asParserFailed(aCtx)) {
+    asParserCommitted(aCtx) = false;
+    asParserFailed(aCtx)    = false;
+    DEBUG(ParserDebug, "jPegChoiceContinuationWord: choice succeeded%s\n", "");
+    return;
+  }
 
   // if we have failed... but are committed... 
   // we FAIL the whole choice... BUT... we are done...
@@ -230,6 +247,7 @@ void jPegChoiceContinueWord(ContextObj *aCtx) {
     asParserCommitted(aCtx)    = false;
     asParserTextPosition(aCtx) = textBackTrackPoint;
     pushSymbolCtxProcess(aCtx, "parseFail");
+    DEBUG(ParserDebug, "jPegChoiceContinuationWord: choice failed and committed%s\n", "");
     return;
   }
 
@@ -239,21 +257,28 @@ void jPegChoiceContinueWord(ContextObj *aCtx) {
     asParserCommitted(aCtx)    = false;
     asParserTextPosition(aCtx) = textBackTrackPoint;
     pushSymbolCtxProcess(aCtx, "parseFail");
+    DEBUG(ParserDebug, "jPegChoiceContinuationWord: choice failed no choices left%s\n","");
     return;
   }
 
   if (!isPairObj(parserChoices)) {
+    DEBUG(ParserDebug,
+      "jPegChoiceContinueWord: non-pair parserChoices%s\n", "")
     raiseExceptionMsg(aCtx,
       "jPeg choice parser expected a list as parser choices");
     return;
   }
+
   popListInto(aCtx, parserChoices, firstChoice);
   pushCtxProcess(aCtx, textBackTrackPointObj);
   pushCtxProcess(aCtx, parserChoices);
   pushSymbolCtxProcess(aCtx, "parseChoiceCont");
   prependListCtxProcess(aCtx, firstChoice);
   
-  asParserFailed(aCtx) = false;
+  asParserCommitted(aCtx) = false;
+  asParserFailed(aCtx)    = false;
+  
+  DEBUG(ParserDebug, "jPegChoiceContinuationWord: trying next choice%s\n", "");
 }
 \stopCCode
 
@@ -262,6 +287,8 @@ cases.
 
 \CTestsSuiteSetup\
 \startCTest
+  //setDebuggingFlags(ParserDebug);
+  
   ContextObj *aCtx = newContext(NULL, NULL, "testParser");
   AssertIntTrue(isContextObj(aCtx));
   
@@ -284,9 +311,13 @@ when not failed]
 \startCTest
   // not failed
   //
+  pushUIntegerCtxProcess(aCtx, 24);
+  pushNullCtxProcess(aCtx);
+  
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertPtrNull(asCtxProcess(aCtx));
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 2);
   AssertIntFalse(asParserCommitted(aCtx));
   AssertIntFalse(asParserFailed(aCtx));
   
@@ -420,6 +451,8 @@ there are more choices]
   
   AssertIntTrue(isUIntegerObj(fourth));
   AssertIntEquals(asUInteger(fourth), 24);
+  
+  //setDebuggingFlags(0);
 \stopCTest
 \stopTestCase
 \stopTestSuite
@@ -434,7 +467,11 @@ void jPegChoiceWord(ContextObj *aCtx);
 void jPegChoiceWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   popCtxDataInto(aCtx, parserChoices);
+  DEBUG(ParserDebug, "jPegChoiceWord: numChoices %zu\n", 
+    listLength(parserChoices)
+  )
   if (!isPairObj(parserChoices)) {
+    DEBUG(ParserDebug, "jPegChoiceWord: non-pair parserChoices%s\n", "");
     raiseExceptionMsg(aCtx,
       "jPeg choice parser expected a list as parser choices");
     return;
@@ -522,37 +559,55 @@ void jPegRepeatContinueWord(ContextObj *aCtx) {
   
   popCtxProcessInto(aCtx, parser);
   popCtxProcessInto(aCtx, textBackTrackPointObj);
+  if (!isUIntegerObj(textBackTrackPointObj)) {
+    raiseExceptionMsg(aCtx,
+      "jPeg repeat parser expected a UInteger as text back-track point");
+    return;
+  }
+  size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
   
   // we always ignore and reset committed-ness
   asParserCommitted(aCtx) = false;
-
+  
+  DEBUG(ParserDebug,
+    "jPegRepeatContinuationWord:%s\n", "");
+  DEBUG(ParserDebug,
+    "  failed: %zu committed: %zu\n",
+    asParserFailed(aCtx), asParserCommitted(aCtx)
+  );
+  DEBUG(ParserDebug,
+    "  backTrack: %zu position: %zu\n",
+    textBackTrackPoint, asParserTextPosition(aCtx)
+  );
+  
   // if we have failed...
   // we roll back the last repeat and then...
   // we SUCCEED and are done...
   if (asParserFailed(aCtx)) {
   
-    if (!isUIntegerObj(textBackTrackPointObj)) {
-      raiseExceptionMsg(aCtx,
-        "jPeg repeat parser expected a UInteger as text back-track point");
-      return;
-    }
-    size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
     asParserTextPosition(aCtx) = textBackTrackPoint;
     
     asParserFailed(aCtx) = false;
-    
+  
+    DEBUG(ParserDebug,
+      "jPegRepeatContinueWord: last repeat failed... so we have succeeded%s\n", "");
     return;
   }
   
   // we have not failed... so we try another repeat...
   
   // if the parser is empty... there is nothing to do...
-  if (!parser) return;
+  if (!parser) {
+    DEBUG(ParserDebug, "jPegRepeatContinueWord: no parser%s\n", "");
+    return;
+  }
 
   pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
   pushCtxProcess(aCtx, parser);
   pushSymbolCtxProcess(aCtx, "parseRepeatCont");
   prependListCtxProcess(aCtx, copyLoL(parser));
+  
+  DEBUG(ParserDebug, "jPegRepeatContinuation: trying parser again%s\n", "");
 }
 \stopCCode
 
@@ -676,7 +731,11 @@ void jPegRepeatWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
   popCtxDataInto(aCtx, parser);
-  if (!parser) return; 
+  DEBUG(ParserDebug, "jPegRepeatWord%s\n","");
+  if (!parser) {
+    DEBUG(ParserDebug, "jPegRepeatWord: no parser%s\n","");
+    return;
+  }
   
   asParserCommitted(aCtx) = false;
   asParserFailed(aCtx)    = false;
@@ -768,33 +827,54 @@ void jPegRepeatAtLeastContinueWord(ContextObj *aCtx) {
   popCtxProcessInto(aCtx, atLeast);
   popCtxProcessInto(aCtx, parser);
   popCtxProcessInto(aCtx, textBackTrackPointObj);
-    
-  // we always ignore and reset committed-ness
-  asParserCommitted(aCtx) = false;
-  
+
   if (!isUIntegerObj(atLeast)) {
+    DEBUG(ParserDebug,
+      "jPegRepeatAtLeastContinueWord: at least not UInteger%s\n", "");
     raiseExceptionMsg(aCtx,
       "jPeg repeatAtLeast parser expected a UInteger as top");
     return;
   }
   size_t atLeastRepeats = asUInteger(atLeast);
-  
+
+  if (!isUIntegerObj(textBackTrackPointObj)) {
+    DEBUG(ParserDebug,
+      "jPegRepeatAtLeastContinueWord: text back track point not UInteger%s\n", "");
+    raiseExceptionMsg(aCtx,
+      "jPeg repeatAtLeast parser expected a UInteger as text back-track point");
+    return;
+  }
+  size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
+
+  // we always ignore and reset committed-ness
+  asParserCommitted(aCtx) = false;
+
+  DEBUG(ParserDebug,
+    "jPegRepeatAtLeastContinuationWord:%s\n", "");
+  DEBUG(ParserDebug,
+    "  failed: %zu committed: %zu repeatAtLeast: %zu\n",
+    asParserFailed(aCtx), asParserCommitted(aCtx),
+    atLeastRepeats
+  );
+  DEBUG(ParserDebug,
+    "  backTrack: %zu position: %zu\n",
+    textBackTrackPoint, asParserTextPosition(aCtx)
+  );
+    
   // if we have failed...
   if (asParserFailed(aCtx)) {
     //
     // we roll back the last repeat...
-    if (!isUIntegerObj(textBackTrackPointObj)) {
-      raiseExceptionMsg(aCtx,
-        "jPeg repeatAtLeast parser expected a UInteger as text back-track point");
-      return;
-    }
-    size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
     asParserTextPosition(aCtx) = textBackTrackPoint;
     
     // now we check to see if we have repeated enough times...
     if (0 < atLeastRepeats) {
+      DEBUG(ParserDebug,
+        "jPegRepeatAtLeastContinueWord: FAILED we have NOT repeated enough%s\n", "");
       pushSymbolCtxProcess(aCtx, "parseFail");
     } else {
+      DEBUG(ParserDebug,
+        "jPegRepeatAtLeastContinueWord: SUCCEEDED we HAVE repeated enough%s\n", "");
       asParserFailed(aCtx) = false;
     }
     
@@ -805,14 +885,24 @@ void jPegRepeatAtLeastContinueWord(ContextObj *aCtx) {
   // we have succeeded.... so we setup the next repeat...
   
   // if the parser is empty... there is nothing to do
-  if (!parser) return;
+  if (!parser) {
+    DEBUG(ParserDebug, "jPegRepeatAtLeastContineWord: no parser%s\n","");
+    return;
+  }
 
   pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
   pushCtxProcess(aCtx, parser);
   if (0 < atLeastRepeats) {
+    DEBUG(ParserDebug,
+      "jPegRepeatAtLeastContinueWord: repeat %zu more times\n",
+      atLeastRepeats - 1
+    )
     pushUIntegerCtxProcess(aCtx, atLeastRepeats - 1);
     pushSymbolCtxProcess(aCtx, "parseRepeatContAtLeast");
   } else {
+    DEBUG(ParserDebug,
+      "jPegRepeatAtLeastContinueWord: repeat indefinitely%s\n", ""
+    );
     pushSymbolCtxProcess(aCtx, "parseRepeatCont");
   }
   prependListCtxProcess(aCtx, copyLoL(parser));
@@ -1042,7 +1132,11 @@ void jPegRepeatAtLeastWord(ContextObj *aCtx) {
   popCtxDataInto(aCtx, parser);
   popCtxDataInto(aCtx, atLeast);
   
-  if (!parser) return;
+  DEBUG(ParserDebug, "jPegRepeatAtLeastWord%s\n", "");
+  if (!parser) {
+    DEBUG(ParserDebug, "jPegRepeatAtLeastWord: no parser%s\n","");
+    return;
+  }
   
   asParserCommitted(aCtx) = false;
   asParserFailed(aCtx)    = false;
@@ -1142,34 +1236,56 @@ void jPegRepeatAtMostContinueWord(ContextObj *aCtx) {
   popCtxProcessInto(aCtx, parser);
   popCtxProcessInto(aCtx, textBackTrackPointObj);
 
-  // we always ignore and reset committed-ness
-  asParserCommitted(aCtx) = false;
-
   if (!isUIntegerObj(atMost)) {
+    DEBUG(ParserDebug,
+      "jPegRepeatAtMostContinueWord: at most not a UInteger%s\n","");
     raiseExceptionMsg(aCtx,
       "jPeg repeatAtMost parser expected a UInteger as top");
     return;
   }
   size_t atMostRepeats = asUInteger(atMost);
 
+  if (!isUIntegerObj(textBackTrackPointObj)) {
+    DEBUG(ParserDebug,
+      "jPegRepeatAtMostContinueWord: text back tract point not a UInteger%s\n","");
+    raiseExceptionMsg(aCtx,
+      "jPeg repeatAtLeast parser expected a UInteger as text back-track point");
+    return;
+  }
+  size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
+
+  // we always ignore and reset committed-ness
+  asParserCommitted(aCtx) = false;
+
+  DEBUG(ParserDebug,
+    "jPegRepeatAtMostContinuationWord:%s\n", "");
+  DEBUG(ParserDebug,
+    "  failed: %zu committed: %zu repeatAtMost: %zu\n",
+    asParserFailed(aCtx), asParserCommitted(aCtx),
+    atMostRepeats
+  );
+  DEBUG(ParserDebug,
+    "  backTrack: %zu position: %zu\n",
+    textBackTrackPoint, asParserTextPosition(aCtx)
+  );
+  
   // if we have failed...
   if (asParserFailed(aCtx)) {
     //
     // we roll back the last repeat...
-    if (!isUIntegerObj(textBackTrackPointObj)) {
-      raiseExceptionMsg(aCtx,
-        "jPeg repeatAtLeast parser expected a UInteger as text back-track point");
-      return;
-    }
-    size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
+
     asParserTextPosition(aCtx) = textBackTrackPoint;
        
     // now we check to see if we have repeated enough times...
-     if (0 == atMostRepeats) {
-       pushSymbolCtxProcess(aCtx, "parseFail");
-     } else {
-      asParserFailed(aCtx) = false;
-     }
+    if (0 == atMostRepeats) {
+      DEBUG(ParserDebug,
+        "jPegRepeatAtMostContinueWord: FAILED we have repeated TOO many times%s\n","");
+      pushSymbolCtxProcess(aCtx, "parseFail");
+    } else {
+      DEBUG(ParserDebug,
+        "jPegRepeatAtMostContinueWord: SUCCEEDED no need to repeat again%s\n","");
+     asParserFailed(aCtx) = false;
+    }
     
     // now we return without starting another repeat
     return;
@@ -1178,11 +1294,18 @@ void jPegRepeatAtMostContinueWord(ContextObj *aCtx) {
   // we have succeeded.... so we setup the next repeat...
   
   // if the parser is empty... then we are done...
-  if (!parser) return;
+  if (!parser) { 
+    DEBUG(ParserDebug, "jPegRepeatAtMostConinueWord: no parser%s\n","");
+    return;
+  }
 
   if (0 < atMostRepeats) {
     // if we still have allowed repeats left then setup the next repeat
     //
+    DEBUG(ParserDebug,
+      "jPegRepeatAtMostContinueWord: we can repeat %zu more times\n",
+      atMostRepeats - 1 
+    );
     pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
     pushCtxProcess(aCtx, parser);
     pushUIntegerCtxProcess(aCtx, atMostRepeats - 1);
@@ -1191,6 +1314,8 @@ void jPegRepeatAtMostContinueWord(ContextObj *aCtx) {
   } else {
     // no repeats left... so fail..
     //
+    DEBUG(ParserDebug,
+      "jPegRepeatAtMostContinueWord: FAILED we have repeated too many times%s\n","");
     pushSymbolCtxProcess(aCtx, "parseFail");
   }
 }
@@ -1398,7 +1523,11 @@ void jPegRepeatAtMostWord(ContextObj *aCtx) {
   popCtxDataInto(aCtx, parser);
   popCtxDataInto(aCtx, atMost);
   
-  if (!parser) return;
+  DEBUG(ParserDebug, "jPegRepeatAtMostWord%s\n","");
+  if (!parser) {
+    DEBUG(ParserDebug, "jPegRepeatAtMostWord: no parser%s\n","");
+    return;
+  }
   
   asParserCommitted(aCtx) = false;
   asParserFailed(aCtx)    = false;
@@ -1495,7 +1624,7 @@ void jPegFailWord(ContextObj *aCtx);
 void jPegFailWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
-  DEBUG(DebugMask, "jPegFailWord%s\n", "");
+  DEBUG(ParserDebug, "jPegFailWord%s\n", "");
   
   asParserFailed(aCtx) = true;
   
@@ -1505,7 +1634,7 @@ void jPegFailWord(ContextObj *aCtx) {
       symbolIs(aCommand, "parseChoiceCont") ||
       symbolStartsWith(aCommand, "parseRepeatCont")
     ) {
-      DEBUG(DebugMask, "jPegFailWord found (%s)[%s]\n",
+      DEBUG(ParserDebug, "jPegFailWord found (%s)[%s]\n",
         getJObjName(aCommand),
         (isSymbolObj(aCommand) ? asSymbol(aCommand) : "?")
       )
@@ -1797,15 +1926,25 @@ void jPegAnyWord(ContextObj *aCtx);
 void jPegAnyWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
-  popCtxDataInto(aCtx, top);
-  if (!isUIntegerObj(top)) {
+  popCtxDataInto(aCtx, charsToMatchObj);
+  if (!isUIntegerObj(charsToMatchObj)) {
+    DEBUG(ParserDebug, "jPegAnyWord: chars to match no a UInteger%s\n", "");
     raiseExceptionMsg(aCtx,
-      "jPeg any parser expected a UInteger as top");
+      "jPeg any parser expected a UInteger as charsToMathc");
     return;
   }
   
-  size_t charsToMatch     = asUInteger(top);
+  size_t charsToMatch     = asUInteger(charsToMatchObj);
   size_t origTextPosition = asParserTextPosition(aCtx);
+  
+  DEBUG(ParserDebug,
+    "jPegAnyWord: parseString = [%s], textSize = %zu, charsToMatch = %zu\n",
+    asParserText(aCtx), asParserTextSize(aCtx), charsToMatch
+  )
+  DEBUG(ParserDebug,
+    "jPegAnyWord(before): charsToMatch = %zu, textPosition = %zu\n",
+    charsToMatch, asParserTextPosition(aCtx)
+  )
   
   // TODO: need to deal with UTF-8 multi-byte characters
   
@@ -1815,13 +1954,26 @@ void jPegAnyWord(ContextObj *aCtx) {
   ) {
     asParserTextPosition(aCtx)++;
     charsToMatch--;
-  }
-    
-  if (0 < charsToMatch) {
-    asParserTextPosition(aCtx) = origTextPosition;
-    jPegFailWord(aCtx);
+    DEBUG(ParserDebug,
+      "jPegAnyWord: charsToMatch = %zu, textPosition = %zu\n",
+      charsToMatch, asParserTextPosition(aCtx)
+    )
   }
 
+  DEBUG(ParserDebug,
+    "jPegAnyWord(after): charsToMatch = %zu, textPosition = %zu\n",
+    charsToMatch, asParserTextPosition(aCtx)
+  )
+
+  if (0 < charsToMatch) {
+    DEBUG(ParserDebug, 
+      "jPegAnyWord: did not match enough characters%s\n",""
+    );
+    asParserTextPosition(aCtx) = origTextPosition;
+    jPegFailWord(aCtx);
+  } else {
+    DEBUG(ParserDebug, "jPegAnyWord: matched enough characters%s\n","");
+  }
 }
 \stopCCode
 
@@ -1833,19 +1985,36 @@ void jPegPatternWord(ContextObj *aCtx);
 void jPegPatternWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
-  popCtxDataInto(aCtx, top);
-  if (!isSymbolObj(top)) {
+  popCtxDataInto(aCtx, patternObj);
+  if (!isSymbolObj(patternObj)) {
     raiseExceptionMsg(aCtx,
-      "jPeg pattern parser expected a symbol as top");
+      "jPeg pattern parser expected a symbol as pattern");
     return;
   }
   
-  Symbol *pattern         = asSymbol(top);
+  Symbol *pattern         = asSymbol(patternObj);
   size_t patternSize      = strlen(pattern);
   size_t charsMatched     = 0;
   size_t origTextPosition = asParserTextPosition(aCtx);
   Symbol *parserText      = asParserText(aCtx) + origTextPosition;
 
+  DEBUG(ParserDebug,
+    "jPegPatternWord: parseString = [%s], textSize = %zu\n",
+    asParserText(aCtx), asParserTextSize(aCtx)
+  )
+  DEBUG(ParserDebug,
+    "jPegPatternWord: pattern = [%s](%zu)\n",
+    pattern, patternSize
+  )
+  DEBUG(ParserDebug,
+    "jPegPatternWord: parser text = [%s](%zu)\n",
+    parserText, (asParserTextSize(aCtx) - asParserTextPosition(aCtx))
+  )
+  DEBUG(ParserDebug,
+    "jPegPatternWord(before): charsMatched = %zu, textPosition = %zu\n",
+    charsMatched, asParserTextPosition(aCtx)
+  )
+  
   // TODO: need to deal with UTF-8 multi-byte characters
 
   while(
@@ -1853,13 +2022,25 @@ void jPegPatternWord(ContextObj *aCtx) {
     (charsMatched < patternSize) &&
     (parserText[charsMatched] == pattern[charsMatched])
   ) {
+    DEBUG(ParserDebug, "jPegPatternWord: pattern: [%c] text [%c]\n",
+      pattern[charsMatched], parserText[charsMatched]
+    )
     asParserTextPosition(aCtx)++;
     charsMatched++;
+    DEBUG(ParserDebug,
+      "jPegPatternWord(before): charsMatched = %zu, textPosition = %zu\n",
+      charsMatched, asParserTextPosition(aCtx)
+  )
   }
   
   if (charsMatched != patternSize)  {
+    DEBUG(ParserDebug,
+      "jPegPatternWord: pattern did not match text%s\n",""
+    );
     asParserTextPosition(aCtx) = origTextPosition;
     jPegFailWord(aCtx);
+  } else {
+    DEBUG(ParserDebug, "jPegPatternWord: pattern matched text%s\n","");
   }
 }
 \stopCCode
@@ -1904,7 +2085,28 @@ typedef struct parser_charSet_spans {
   size_t          numSpans;
   size_t          maxSpans;
 } ParserCharSpans;
+\stopCHeader
 
+\startCHeader
+void showCharSetSpans(ParserCharSpans *spans);
+\stopCHeader
+
+\startCCode
+void showCharSetSpans(ParserCharSpans *spans){
+  printf("charSetSpan:\n");
+  printf("  charSet: [%s](%zu)\n", spans->charSet, spans->charSetSize);
+  for (size_t spanNum = 0; spanNum < spans->numSpans; spanNum++) {
+    printf("  span[%zu]: %c-%c\n",
+      spanNum,
+      spans->spans[spanNum].firstChar,
+      spans->spans[spanNum].lastChar
+    );
+  }
+  printf("  maxSpans: %zu\n", spans->maxSpans);
+}
+\stopCCode
+
+\startCHeader
 ParserCharSpans *collectJPegSpans(ContextObj *aCtx);
 \stopCHeader
 
@@ -1999,7 +2201,11 @@ Boolean matchCharSetSpans(ContextObj *aCtx, ParserCharSpans *spans) {
   
   while (0 < numCurSpan) {
     ParserCharSpan *aSpan = spans->spans + numCurSpan - 1;
+    DEBUG(ParserDebug, "matchCharSetSpans[%zu] [%c]-[%c] to match [%c]\n",
+      numCurSpan, aSpan->firstChar, aSpan->lastChar, curChar
+    )
     if ((aSpan->firstChar <= curChar) && (curChar <= aSpan->lastChar)) {
+      DEBUG(ParserDebug, "matchedSpan [%c]\n", curChar);
       return true;
     } 
     numCurSpan--;
@@ -2009,15 +2215,22 @@ Boolean matchCharSetSpans(ContextObj *aCtx, ParserCharSpans *spans) {
   Symbol *charSet       = spans->charSet;
   
   while (0 < curCharSetChar) {
-    if (curChar == charSet[curCharSetChar]) {
+    DEBUG(ParserDebug, "matchCharSet[%zu] [%c] to match [%c]\n",
+      curCharSetChar, charSet[curCharSetChar-1], curChar
+    )
+    if (curChar == charSet[curCharSetChar-1]) {
+      DEBUG(ParserDebug, "matchedCharSet [%c]\n", curChar);
       return true;
     }
     curCharSetChar--;
   }
   
+  DEBUG(ParserDebug, "did NOT match [%c]\n", curChar);
   return false;
 }
+\stopCCode
 
+\startCCode
 static void deleteJPegSpans(ParserCharSpans *someSpans) {
   if (!someSpans) return;
   if (someSpans->charSet) free((char*)someSpans->charSet);
@@ -2093,35 +2306,60 @@ void jPegCharSetWord(ContextObj *aCtx);
 void jPegCharSetWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
-  ParserCharSpans *spans = collectJPegSpans(aCtx);
-  
-  popCtxDataInto(aCtx, top);
-  if (!isUIntegerObj(top)) {
+  popCtxDataInto(aCtx, charsToMatch);
+  if (!isUIntegerObj(charsToMatch)) {
+    DEBUG(ParserDebug,
+      "jPegCharSetWord: chars to match not a UInteger%s\n","");
     raiseExceptionMsg(aCtx,
-      "jPeg charSet parser expected a UInteger as top");
-    deleteJPegSpans(spans);
+      "jPeg charSet parser expected a UInteger as charsToMatch");
     return;
   }
   
-  size_t charsToMatch     = asUInteger(top);
-  size_t origTextPosition = asParserTextPosition(aCtx);
+  ParserCharSpans *spans = collectJPegSpans(aCtx);
+    
+  size_t charsToMatchValue = asUInteger(charsToMatch);
+  size_t origTextPosition  = asParserTextPosition(aCtx);
+  
+  DEBUG(ParserDebug,
+    "jPegCharSetWord: parseString = [%s], textSize = %zu\n",
+    asParserText(aCtx), asParserTextSize(aCtx)
+  )
+  if (shouldDebug(ParserDebug)) showCharSetSpans(spans);
+  DEBUG(ParserDebug,
+    "jPegCharSetWord(before): charsToMatch = %zu, textPosition = %zu\n",
+    charsToMatchValue, asParserTextPosition(aCtx)
+  )
   
   // TODO: need to deal with UTF-8 multi-byte characters
   
   while(
     (asParserTextPosition(aCtx) <= asParserTextSize(aCtx)) &&
-    (0 < charsToMatch) &&
+    (0 < charsToMatchValue) &&
     matchCharSetSpans(aCtx, spans)
   ) {
     asParserTextPosition(aCtx)++;
-    charsToMatch--;
+    charsToMatchValue--;
+    DEBUG(ParserDebug,
+      "jPegCharSetWord: charsToMatch = %zu, textPosition = %zu\n",
+      charsToMatchValue, asParserTextPosition(aCtx)
+    )
   }
-  
+
+  DEBUG(ParserDebug,
+    "jPegCharSetWord(after): charsToMatch = %zu, textPosition = %zu\n",
+    charsToMatchValue, asParserTextPosition(aCtx)
+  )
+
   deleteJPegSpans(spans);
 
-  if (0 < charsToMatch) {
+  if (0 < charsToMatchValue) {
+    DEBUG(ParserDebug,
+      "jPegCharSetWord: matched too many characters%s\n","");
     asParserTextPosition(aCtx) = origTextPosition;
     jPegFailWord(aCtx);
+  } else {
+    DEBUG(ParserDebug,
+      "jPegCharSetWord: matched enough characters%s\n","");
   }
 }
 \stopCCode
@@ -2134,35 +2372,60 @@ void jPegCoCharSetWord(ContextObj *aCtx);
 void jPegCoCharSetWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
-  ParserCharSpans *spans = collectJPegSpans(aCtx);
-  
-  popCtxDataInto(aCtx, top);
-  if (!isUIntegerObj(top)) {
+  popCtxDataInto(aCtx, charsToMatch);
+  if (!isUIntegerObj(charsToMatch)) {
+    DEBUG(ParserDebug,
+      "jPegCoCharSetWord: chars to match not a UInteger%s\n","");
     raiseExceptionMsg(aCtx,
-      "jPeg charSet parser expected a UInteger as top");
-    deleteJPegSpans(spans);
+      "jPeg coCharSet parser expected a UInteger as charsToMatch");
     return;
   }
   
-  size_t charsToMatch     = asUInteger(top);
-  size_t origTextPosition = asParserTextPosition(aCtx);
+  ParserCharSpans *spans = collectJPegSpans(aCtx);
+  
+  size_t charsToMatchValue = asUInteger(charsToMatch);
+  size_t origTextPosition  = asParserTextPosition(aCtx);
+
+    DEBUG(ParserDebug,
+    "jPegCoCharSetWord: parseString = [%s], textSize = %zu\n",
+    asParserText(aCtx), asParserTextSize(aCtx)
+  )
+  if (shouldDebug(ParserDebug)) showCharSetSpans(spans);
+  DEBUG(ParserDebug,
+    "jPegCoCharSetWord(before): charsToMatch = %zu, textPosition = %zu\n",
+    charsToMatchValue, asParserTextPosition(aCtx)
+  )
   
   // TODO: need to deal with UTF-8 multi-byte characters
   
   while(
     (asParserTextPosition(aCtx) <= asParserTextSize(aCtx)) &&
-    (0 < charsToMatch) &&
+    (0 < charsToMatchValue) &&
     !matchCharSetSpans(aCtx, spans)
   ) {
     asParserTextPosition(aCtx)++;
-    charsToMatch--;
+    charsToMatchValue--;
+    DEBUG(ParserDebug,
+      "jPegCoCharSetWord: charsToMatch = %zu, textPosition = %zu\n",
+      charsToMatchValue, asParserTextPosition(aCtx)
+    )
   }
-  
+
+  DEBUG(ParserDebug,
+    "jPegCoCharSetWord(after): charsToMatch = %zu, textPosition = %zu\n",
+    charsToMatchValue, asParserTextPosition(aCtx)
+  )
+
   deleteJPegSpans(spans);
 
-  if (0 < charsToMatch) {
+  if (0 < charsToMatchValue) {
+    DEBUG(ParserDebug,
+      "jPegCoCharSetWord: matched too many characters%s\n","");
     asParserTextPosition(aCtx) = origTextPosition;
     jPegFailWord(aCtx);
+  } else {
+    DEBUG(ParserDebug,
+      "jPegCoCharSetWord: matched enough characters%s\n","");
   }
 }
 \stopCCode
@@ -2174,22 +2437,33 @@ void jPegSpanWord(ContextObj *aCtx);
 \startCCode
 void jPegSpanWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
-  
-  ParserCharSpans *spans = collectJPegSpans(aCtx);
-  
-  popCtxDataInto(aCtx, top);
-  if (!isUIntegerObj(top)) {
+
+  popCtxDataInto(aCtx, minCharsToMatch);
+  if (!isUIntegerObj(minCharsToMatch)) {
+    DEBUG(ParserDebug,
+      "jPegSpanWord: min chars to match not a UInteger%s\n","");
     raiseExceptionMsg(aCtx,
-      "jPeg charSet parser expected a UInteger as top");
-    deleteJPegSpans(spans);
+      "jPeg span parser expected a UInteger as minCharsToMatch");
     return;
   }
   
-  size_t minCharsToMatch  = asUInteger(top);
-  size_t charsMatched     = 0;
+  ParserCharSpans *spans = collectJPegSpans(aCtx);
+  
+  size_t minCharsToMatchValue = asUInteger(minCharsToMatch);
+  size_t charsMatched         = 0;
   size_t origTextPosition = asParserTextPosition(aCtx);
   
-  // TODO: need to deal with UTF-8 multi-byte characters
+  DEBUG(ParserDebug,
+    "jPegSpanWord: parseString = [%s], textSize = %zu, minCharsToMatch = %zu\n",
+    asParserText(aCtx), asParserTextSize(aCtx), minCharsToMatchValue
+  )
+  if (shouldDebug(ParserDebug)) showCharSetSpans(spans);
+  DEBUG(ParserDebug,
+    "jPegSpanWord(before): charsMatched = %zu, textPosition = %zu\n",
+    charsMatched, asParserTextPosition(aCtx)
+  )
+ 
+ // TODO: need to deal with UTF-8 multi-byte characters
   
   while(
     (asParserTextPosition(aCtx) <= asParserTextSize(aCtx)) &&
@@ -2197,13 +2471,27 @@ void jPegSpanWord(ContextObj *aCtx) {
   ) {
     asParserTextPosition(aCtx)++;
     charsMatched++;
+    DEBUG(ParserDebug,
+      "jPegSpanWord: charsMatched = %zu, textPosition = %zu\n",
+      charsMatched, asParserTextPosition(aCtx)
+    )
   }
-  
+
+  DEBUG(ParserDebug,
+    "jPegSpanWord(after): charsMatched = %zu, textPosition = %zu\n",
+    charsMatched, asParserTextPosition(aCtx)
+  )
+
   deleteJPegSpans(spans);
  
-  if (charsMatched < minCharsToMatch) {
+  if (charsMatched < minCharsToMatchValue) {
+    DEBUG(ParserDebug,
+      "jPegSpanWord: did not match enough characters%s\n","");
     asParserTextPosition(aCtx) = origTextPosition;
     jPegFailWord(aCtx);
+  } else {
+    DEBUG(ParserDebug,
+      "jPegSpanWord: matched enough characters%s\n","");
   }
 }
 \stopCCode
@@ -2216,20 +2504,31 @@ void jPegCoSpanWord(ContextObj *aCtx);
 void jPegCoSpanWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
-  ParserCharSpans *spans = collectJPegSpans(aCtx);
-  
-  popCtxDataInto(aCtx, top);
-  if (!isUIntegerObj(top)) {
+  popCtxDataInto(aCtx, minCharsToMatch);
+  if (!isUIntegerObj(minCharsToMatch)) {
+    DEBUG(ParserDebug,
+      "jPegCoSpanWord: min chars to match not a UInteger%s\n","");
     raiseExceptionMsg(aCtx,
-      "jPeg charSet parser expected a UInteger as top");
-    deleteJPegSpans(spans);
+      "jPeg charSet parser expected a UInteger as minCharsToMatch");
     return;
   }
   
-  size_t minCharsToMatch  = asUInteger(top);
-  size_t charsMatched     = 0;
-  size_t origTextPosition = asParserTextPosition(aCtx);
+  ParserCharSpans *spans = collectJPegSpans(aCtx);
   
+  size_t minCharsToMatchValue = asUInteger(minCharsToMatch);
+  size_t charsMatched         = 0;
+  size_t origTextPosition     = asParserTextPosition(aCtx);
+  
+  DEBUG(ParserDebug,
+    "jPegCoSpanWord: parseString = [%s], textSize = %zu, minCharsToMatch = %zu\n",
+    asParserText(aCtx), asParserTextSize(aCtx), minCharsToMatchValue
+  )
+  if (shouldDebug(ParserDebug)) showCharSetSpans(spans);
+  DEBUG(ParserDebug,
+    "jPegCoSpanWord(before): charsMatched = %zu, textPosition = %zu\n",
+    charsMatched, asParserTextPosition(aCtx)
+  )
+ 
   // TODO: need to deal with UTF-8 multi-byte characters
   
   while(
@@ -2238,13 +2537,27 @@ void jPegCoSpanWord(ContextObj *aCtx) {
   ) {
     asParserTextPosition(aCtx)++;
     charsMatched++;
+    DEBUG(ParserDebug,
+      "jPegCoSpanWord: charsMatched = %zu, textPosition = %zu\n",
+      charsMatched, asParserTextPosition(aCtx)
+    )
   }
+
+  DEBUG(ParserDebug,
+    "jPegCoSpanWord(after): charsMatched = %zu, textPosition = %zu\n",
+    charsMatched, asParserTextPosition(aCtx)
+  )
 
   deleteJPegSpans(spans);
 
-  if (charsMatched < minCharsToMatch) {
+  if (charsMatched < minCharsToMatchValue) {
+    DEBUG(ParserDebug,
+      "jPegCoSpanWord: did not match enough characters%s\n","");
     asParserTextPosition(aCtx) = origTextPosition;
     jPegFailWord(aCtx);
+  } else {
+    DEBUG(ParserDebug, 
+      "jPegCoSpanWord: matched enough characters%s\n","");
   }
 }
 \stopCCode
@@ -2266,14 +2579,15 @@ void jPegCoSpanWord(ContextObj *aCtx) {
   prependWord(aCtx);
   pushSymbolCtxData(aCtx, "space");
   prependWord(aCtx);
-
+  
   parseString(aCtx, "aaa-10");
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
   dup1DWord(aCtx);
   pushUIntegerCtxData(aCtx, 4);
-  swap12DWord(aCtx);
+  
   jPegCharSetWord(aCtx);
+  
   AssertIntEquals(asParserTextPosition(aCtx), 4);
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
@@ -2281,8 +2595,9 @@ void jPegCoSpanWord(ContextObj *aCtx) {
   resetParserTextPosition(aCtx);
   dup1DWord(aCtx);
   pushUIntegerCtxData(aCtx, 5);
-  swap12DWord(aCtx);
+  
   jPegCharSetWord(aCtx);
+  
   AssertIntEquals(asParserTextPosition(aCtx), 0);
   AssertIntTrue(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
@@ -2292,28 +2607,31 @@ void jPegCoSpanWord(ContextObj *aCtx) {
   AssertIntFalse(asCtxExceptionRaised(aCtx));
   dup1DWord(aCtx);
   pushUIntegerCtxData(aCtx, 3);
-  swap12DWord(aCtx);
+  
   jPegCoCharSetWord(aCtx);
+  
   AssertIntEquals(asParserTextPosition(aCtx), 3);
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
-
+  
   resetParserTextPosition(aCtx);
   dup1DWord(aCtx);
   pushUIntegerCtxData(aCtx, 4);
-  swap12DWord(aCtx);
+  
   jPegCoCharSetWord(aCtx);
+  
   AssertIntEquals(asParserTextPosition(aCtx), 0);
   AssertIntTrue(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
-
+  
   parseString(aCtx, "aaa-10");
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
   dup1DWord(aCtx);
   pushUIntegerCtxData(aCtx, 2);
-  swap12DWord(aCtx);
+  
   jPegSpanWord(aCtx);
+  
   AssertIntEquals(asParserTextPosition(aCtx), 4);
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
@@ -2321,8 +2639,9 @@ void jPegCoSpanWord(ContextObj *aCtx) {
   resetParserTextPosition(aCtx);
   dup1DWord(aCtx);
   pushUIntegerCtxData(aCtx, 5);
-  swap12DWord(aCtx);
+  
   jPegSpanWord(aCtx);
+  
   AssertIntEquals(asParserTextPosition(aCtx), 0);
   AssertIntTrue(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
@@ -2332,17 +2651,19 @@ void jPegCoSpanWord(ContextObj *aCtx) {
   AssertIntFalse(asCtxExceptionRaised(aCtx));
   dup1DWord(aCtx);
   pushUIntegerCtxData(aCtx, 2);
-  swap12DWord(aCtx);
+  
   jPegCoSpanWord(aCtx);
+  
   AssertIntEquals(asParserTextPosition(aCtx), 3);
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
-
+  
   resetParserTextPosition(aCtx);
   dup1DWord(aCtx);
   pushUIntegerCtxData(aCtx, 4);
-  swap12DWord(aCtx);
+  
   jPegCoSpanWord(aCtx);
+  
   AssertIntEquals(asParserTextPosition(aCtx), 0);
   AssertIntTrue(asParserFailed(aCtx));
   AssertIntFalse(asCtxExceptionRaised(aCtx));
@@ -2399,13 +2720,13 @@ void registerJPegWords(ContextObj *aCtx) {
   // build the following parser on the data stack...
   // ( 
   //   (
-  //     ((" " "\t" "\n") 0 parseSpan)
-  //     (("az" "AZ") 0 parseSpan)
+  //     ((" " "\t" "\n") 1 parseSpan)
+  //     (("az" "AZ") 1 parseSpan)
   //   ) parseChoice
   // ) parseRepeat
 
   pushSymbolCtxData(aCtx, "parseSpan");
-  pushUIntegerCtxData(aCtx, 0);
+  pushUIntegerCtxData(aCtx, 1);
   prependWord(aCtx);
   pushSymbolCtxData(aCtx, "AZ");
   pushSymbolCtxData(aCtx, "az");
@@ -2415,7 +2736,7 @@ void registerJPegWords(ContextObj *aCtx) {
   wrapWord(aCtx);
   
   pushSymbolCtxData(aCtx, "parseSpan");
-  pushUIntegerCtxData(aCtx, 0);
+  pushUIntegerCtxData(aCtx, 1);
   prependWord(aCtx);
   pushSymbolCtxData(aCtx, "\n");
   pushSymbolCtxData(aCtx, "\t");
@@ -2447,9 +2768,10 @@ void registerJPegWords(ContextObj *aCtx) {
   
   // now evaluate it
   aCtx->showDepth = 20;
-  aCtx->debug     = 1;
   aCtx->tracingOn = true;
+  setDebuggingFlags(ParserDebug);
   evalCommandInContext(aCtx, NULL);
+  setDebuggingFlags(0);
   
 //  AssertIntFalse(asParserFailed(aCtx));
 \stopCTest

@@ -106,9 +106,9 @@ static void forWord(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, nextCommand);
   if (symbolIs(nextCommand, "forDone")) {
     // this for loop is done
-    DEBUG(DebugMask, "forWord DONE%s\n", "");
+    DEBUG(TraceDebug, "forWord DONE%s\n", "");
   } else {
-    DEBUG(DebugMask, "forWord continue%s\n", "");
+    DEBUG(TraceDebug, "forWord continue%s\n", "");
     pushSymbolCtxProcess(aCtx, "for");
     prependListCtxProcess(aCtx, nextCommand);
   }
@@ -143,9 +143,9 @@ static void lispForWord(ContextObj* aCtx) {
   popCtxProcessInto(aCtx, nextCommand);
   if (symbolIs(nextCommand, "forDone")) {
     // this lisp for loop is done
-    DEBUG(DebugMask, "lispForAP DONE%s\n", "");
+    DEBUG(TraceDebug, "lispForAP DONE%s\n", "");
   } else {
-    DEBUG(DebugMask, "lispForAP continue%s\n", "");
+    DEBUG(TraceDebug, "lispForAP continue%s\n", "");
     if (!isPairObj(nextCommand)) {
       raiseExceptionMsg(aCtx,
         "listFor (continue) expected a pair as nextCommand");
@@ -295,7 +295,7 @@ void raiseExceptionImpl(
     line = asLine(aCtx->command);
   }
 
-  DEBUG(DebugMask, "raiseException %p [%s] (%s) <%s> %zu\n",
+  DEBUG(TraceDebug, "raiseException %p [%s] (%s) <%s> %zu\n",
     aCtx, aCtx->name, message, file, line
   );
 
@@ -312,7 +312,7 @@ void raiseExceptionImpl(
   pushSymbolCtxProcess(aCtx, "raise");
   
   if (aCtx->tracingOn) {
-    DEBUG(DebugMask, "raiseException -> tracing%s\n", "");
+    DEBUG(TraceDebug, "raiseException -> tracing%s\n", "");
     StringBufferObj *aStrBuf = newStringBuffer(aCtx);
     strBufPrintf(aStrBuf, "d>>");
     printJObj(aStrBuf, aCtx->data, "", 20);
@@ -323,7 +323,7 @@ void raiseExceptionImpl(
     printf("%s", getCString(aStrBuf));
     strBufClose(aStrBuf);
     free(aStrBuf);
-    DEBUG(DebugMask, "raiseException <- tracing%s\n", "");
+    DEBUG(TraceDebug, "raiseException <- tracing%s\n", "");
   }
 }
 \stopCCode
@@ -338,7 +338,7 @@ void reportException(
 ) {
   assert(isContextObj(aCtx));
 
-  DEBUG(DebugMask, "reportException %p [%s] %zu\n",
+  DEBUG(TraceDebug, "reportException %p [%s] %zu\n",
     aCtx, aCtx->name, aCtx->exceptionRaised
   );
   if (!aCtx->exceptionRaised) return;
