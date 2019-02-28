@@ -276,13 +276,15 @@ JObj* popCtxData(
   assert(isContextObj(aCtx));
   if (!aCtx->data) return NULL;
 
-  DEBUG(ContextDebug, "popCtxData: %p %s\n",
-    aCtx->data, getJObjName(aCtx->data)
-  );
   assert(isPairObj(aCtx->data));
  
   JObj* poppedLoL = asCar(aCtx->data);
   aCtx->data      = asCdr(aCtx->data);
+
+  DEBUG(ContextDebug, "popCtxData: %p %s\n",
+    poppedLoL, getJObjName(poppedLoL)
+  );
+
   return poppedLoL;
 }
 \stopCCode
