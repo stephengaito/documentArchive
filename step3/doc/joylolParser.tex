@@ -1,0 +1,18 @@
+% A ConTeXt document [master document: protoJoyLoL.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent joylolParser
+
+\usebtxdataset[joylolParserBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\chapter[title=\joylol\ parser]
+
+\diSimpComponent joylolParserOverview
+
+\diSimpComponent joylolParserConclusion
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent
