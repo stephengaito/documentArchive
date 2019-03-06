@@ -1,0 +1,408 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=S-expression Lisp like parser]
+
+Finally we translate this into jPeg:
+
+\starttyping
+( 1 any ) 'operator' define
+\stoptyping
+
+\startCCode
+void parseOperatorWord(ContextObj *aCtx) {
+  pushUIntegerCtxData(aCtx, 1);
+  jPegAnyWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  (' ' '\t' '\n') 0 span
+) 'whiteSpace' define
+\stoptyping
+
+\startCCode
+void parseWhiteSpaceWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, " ");
+  pushSymbolCtxData(aCtx, "\t");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "\n");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  pushUIntegerCtxData(aCtx, 0);
+  jPegSpanWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  ( 'az' 'AZ') 1 charSet
+  ( 'az' 'AZ' '09' '_') 0 span
+) 'identifier' define
+\stoptyping
+
+\startCCode
+void parseIdentifierWord(ContextObj *aCtx) {
+
+  pushSymbolCtxData(aCtx, "az");
+  pushSymbolCtxData(aCtx, "AZ");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseCharSet");
+  prependWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "az");
+  pushSymbolCtxData(aCtx, "AZ");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "09");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "_");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 0);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseSpan");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  interpretWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  ( '09' ) 1 span
+) 'decimalNum' define
+\stoptyping
+
+\startCCode
+void parseDecimalNumberWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "09");
+  wrapWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  jPegSpanWord(aCtx);  
+}
+\stopCCode
+
+\starttyping
+(
+  '0' pattern
+  ( 'x' 'X' ) 1 charSet
+  ( '09' 'af' 'AF' ',' ) 1 span
+) 'hexNumber' define
+\stoptyping
+
+\startCCode
+void parseHexadecimalNumber(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "0");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "x");
+  pushSymbolCtxData(aCtx, "X");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseCharSet");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "09");
+  pushSymbolCtxData(aCtx, "af");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "AF");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, ",");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseSpan");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  interpretWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  ( hexNumber decimalNum ) choice
+) 'naturalNum' define
+\stoptyping
+
+\startCCode
+void parseNaturalNumberWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "parseHexNumber");
+  pushSymbolCtxData(aCtx, "parseDecimalNum");
+  prependWord(aCtx);
+  jPegChoiceWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  "'" pattern
+  ( 
+    (
+      ( ( "'" '\r' '\n' '\f' '\\' ) 1 coSpan )
+      ( '\\' pattern 1 any )
+    ) choice
+  ) 0 repeatAtLeast
+  "'" pattern
+) 'singleQuote' define
+\stoptyping
+
+\startCCode
+void parseSingleQuoteWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "'");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "'");
+  pushSymbolCtxData(aCtx, "\r");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "\n");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "\f");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "\\");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseCoSpan")
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "\\");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseAny");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseChoice");
+  wrapWord(aCtx);
+  pushUIntegerCtxData(aCtx, 0);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseRepeatAtLeast");
+  prependWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "'");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  interpretWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  '"' pattern
+  ( 
+    (
+      ( '"' '\r' '\n' '\f' ) coCharSet
+      ( '\\' pattern 1 any )
+    ) choice
+  ) 0 repeatAtLeast
+  '"' pattern
+) 'doubleQuote' define
+\stoptyping
+
+\startCCode
+void parseDoubleQuoteWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "\"");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "\"");
+  pushSymbolCtxData(aCtx, "\r");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "\n");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "\f");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "\\");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseCoSpan")
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "\\");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseAny");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseChoice");
+  wrapWord(aCtx);
+  pushUIntegerCtxData(aCtx, 0);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseRepeatAtLeast");
+  prependWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "\"");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  interpretWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  ( singleQuote doubleQuote ) choice
+) 'string' define
+\stoptyping
+
+\startCCode
+void parseStringWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "parseSingleQuote");
+  pushSymbolCtxData(aCtx, "parseDoubleQuote");
+  prependWord(aCtx);
+  jPegChoiceWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  '//' pattern
+  ( '\n' ) 0 coSpan
+  '\n' pattern
+) 'singleComment' define
+\stoptyping
+
+\startCCode
+void parseSingleCommentWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "//");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "\n");
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 0);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseCoSpan");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "\n");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  interpretWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  '/*' pattern
+  ( '*/' coPattern ) 0 repeatAtLeast
+  '*/' pattern
+) 'multiComment' define
+\stoptyping
+
+\startCCode
+void parseMultiCommentWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "/*");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "*/");
+  pushSymbolCtxData(aCtx, "parseCoPattern");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 0);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseRepeatAtLeast");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "*/");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  interpretWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  ( singleComment multiComment ) choice
+) 'comment' define
+\stoptyping
+
+\startCCode
+void parseCommentWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "parseSingleComment");
+  pushSymbolCtxData(aCtx, "parseMultiComment");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  jPegChoiceWord(aCtx);
+}
+\stopCCode
+
+\starttyping
+(
+  (
+    naturalNum
+    identifier
+    comment
+    string
+    whiteSpace
+    operator
+  ) choice
+) 'sExpression' define
+\stoptyping
+
+\startCCode
+void parseSExpressionWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "parseNaturalNum");
+  pushSymbolCtxData(aCtx, "parseIdentifier");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseComment");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseString");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseWhiteSpace");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseOperator");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  jPegChoiceWord(aCtx);
+}
+\stopCCode
+
+\startCCode
+void registerSExpressionParser(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
+  
+  registerCFunction(symTab, "parseOperator",      parseOperatorWord);
+  registerCFunction(symTab, "parseWhiteSpace",    parseWhiteSpaceWord);
+  registerCFunction(symTab, "parseIdentifier",    parseIdentifierWord);
+  registerCFunction(symTab, "parseDecimalNum",    parseDecimalNumberWord);
+  registerCFunction(symTab, "parseHexNumber",     parseHexadecimalNumber);
+  registerCFunction(symTab, "parseNaturalNum",    parseNaturalNumberWord);
+  registerCFunction(symTab, "parseSingleQuote",   parseSingleQuoteWord);
+  registerCFunction(symTab, "parseDoubleQuote",   parseDoubleQuoteWord);
+  registerCFunction(symTab, "parseString",        parseStringWord);
+  registerCFunction(symTab, "parseSingleComment", parseSingleCommentWord);
+  registerCFunction(symTab, "parseMultiComment",  parseMultiCommentWord);
+  registerCFunction(symTab, "parseComment",       parseCommentWord);
+  registerCFunction(symTab, "parseSExp",          parseSExpressionWord);
+}
+\stopCCode
+

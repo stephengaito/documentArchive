@@ -28,6 +28,7 @@ lpTargets = litProgs.targets{
     'jPeg/jInterpJPegChoice.tex',
     'jPeg/jInterpJPegPattern.tex',
     'jPeg/jInterpJPegExamples.tex',
+    'jPeg/jInterpJPegLispParser.tex',
     'jInterpMain.tex',
     'jInterpConclusion.tex',
   },
