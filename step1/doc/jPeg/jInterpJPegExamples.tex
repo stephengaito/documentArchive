@@ -12,26 +12,30 @@ void registerJPegWords(ContextObj *aCtx) {
   SymbolTableObj *symTab = asCtxSymbols(aCtx);
   assert(isSymbolTableObj(symTab));
   
-  registerCFunction(symTab, "parseSymbol",            parseSymbolWord);
-  registerCFunction(symTab, "parseFile",              parseFileWord);
-  registerCFunction(symTab, "parseCaptureCont",       jPegCaptureContinueWord);
-  registerCFunction(symTab, "parseCapture",           jPegCaptureWord);
-  registerCFunction(symTab, "parseCommit",            jPegCommitWord);
-  registerCFunction(symTab, "parseChoiceCont",        jPegChoiceContinueWord);
-  registerCFunction(symTab, "parseChoice",            jPegChoiceWord);
-  registerCFunction(symTab, "parseRepeatCont",        jPegRepeatContinueWord);
-  registerCFunction(symTab, "parseRepeat",            jPegRepeatWord);
-  registerCFunction(symTab, "parseRepeatContAtLeast", jPegRepeatAtLeastContinueWord);
-  registerCFunction(symTab, "parseRepeatAtLeast",     jPegRepeatAtLeastWord);
-  registerCFunction(symTab, "parseRepeatContAtMost",  jPegRepeatAtMostContinueWord);
-  registerCFunction(symTab, "parseRepeatAtMost",      jPegRepeatAtMostWord);
-  registerCFunction(symTab, "parseFail",              jPegFailWord);
-  registerCFunction(symTab, "parseAny",               jPegAnyWord);
-  registerCFunction(symTab, "parsePattern",           jPegPatternWord);
-  registerCFunction(symTab, "parseCharSet",           jPegCharSetWord);
-  registerCFunction(symTab, "parseCoCharSet",         jPegCoCharSetWord);
-  registerCFunction(symTab, "parseSpan",              jPegSpanWord);
-  registerCFunction(symTab, "parseCoSpan",            jPegCoSpanWord);
+  registerCFunction(symTab, "parseSymbol",               parseSymbolWord);
+  registerCFunction(symTab, "parseFile",                 parseFileWord);
+  registerCFunction(symTab, "parseCaptureCont",          jPegCaptureContinueWord);
+  registerCFunction(symTab, "parseCapture",              jPegCaptureWord);
+  registerCFunction(symTab, "parseCommit",               jPegCommitWord);
+  registerCFunction(symTab, "parseBTPChoiceCont",        jPegChoiceContinueWord);
+  registerCFunction(symTab, "parseChoice",               jPegChoiceWord);
+  registerCFunction(symTab, "parseBTPRepeatCont",        jPegRepeatContinueWord);
+  registerCFunction(symTab, "parseRepeat",               jPegRepeatWord);
+  registerCFunction(symTab, "parseBTPRepeatAtLeastCont", jPegRepeatAtLeastContinueWord);
+  registerCFunction(symTab, "parseRepeatAtLeast",        jPegRepeatAtLeastWord);
+  registerCFunction(symTab, "parseBTPRepeatAtMostCont",  jPegRepeatAtMostContinueWord);
+  registerCFunction(symTab, "parseRepeatAtMost",         jPegRepeatAtMostWord);
+  registerCFunction(symTab, "parseFail",                 jPegFailWord);
+  registerCFunction(symTab, "parseBTPNotCont",           jPegNotContinueWord);
+  registerCFunction(symTab, "parseNot",                  jPegNotWord);
+  registerCFunction(symTab, "parseBTPLookAheadCont",     jPegLookAheadContinueWord);
+  registerCFunction(symTab, "parseLookAhead",            jPegLookAheadWord);
+  registerCFunction(symTab, "parseAny",                  jPegAnyWord);
+  registerCFunction(symTab, "parsePattern",              jPegPatternWord);
+  registerCFunction(symTab, "parseCharSet",              jPegCharSetWord);
+  registerCFunction(symTab, "parseCoCharSet",            jPegCoCharSetWord);
+  registerCFunction(symTab, "parseSpan",                 jPegSpanWord);
+  registerCFunction(symTab, "parseCoSpan",               jPegCoSpanWord);
 }
 \stopCCode
 
@@ -103,11 +107,11 @@ void registerJPegWords(ContextObj *aCtx) {
 //  showCtxProcess(aCtx);
   
   // now evaluate it
-  aCtx->showDepth = 20;
-  aCtx->tracingOn = true;
-  setDebuggingFlags(ParserDebug);
+//  aCtx->showDepth = 20;
+//  aCtx->tracingOn = true;
+//  setDebuggingFlags(ParserDebug);
   evalCommandInContext(aCtx, NULL);
-  setDebuggingFlags(0);
+//  setDebuggingFlags(0);
   
   showCtxCaptures(aCtx);
 //  AssertIntFalse(asParserFailed(aCtx));

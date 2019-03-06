@@ -158,7 +158,7 @@ void jPegChoiceContinueWord(ContextObj *aCtx) {
   popListInto(aCtx, parserChoices, firstChoice);
   pushCtxProcess(aCtx, textBackTrackPointObj);
   pushCtxProcess(aCtx, parserChoices);
-  pushSymbolCtxProcess(aCtx, "parseChoiceCont");
+  pushSymbolCtxProcess(aCtx, "parseBTPChoiceCont");
   prependListCtxProcess(aCtx, firstChoice);
   
   asParserCommitted(aCtx) = false;
@@ -323,7 +323,7 @@ there are more choices]
   AssertIntEquals(asUInteger(top), 42);    
 
   AssertIntTrue(isSymbolObj(second));
-  AssertStrEquals(asSymbol(second), "parseChoiceCont");
+  AssertStrEquals(asSymbol(second), "parseBTPChoiceCont");
   
   AssertIntTrue(isPairObj(third));
   AssertIntTrue(isUIntegerObj(asCar(third)));
@@ -411,7 +411,7 @@ void jPegChoiceWord(ContextObj *aCtx) {
   AssertIntEquals(asUInteger(top), 42);    
 
   AssertIntTrue(isSymbolObj(second));
-  AssertStrEquals(asSymbol(second), "parseChoiceCont");
+  AssertStrEquals(asSymbol(second), "parseBTPChoiceCont");
   
   AssertIntTrue(isPairObj(third));
   AssertIntTrue(isUIntegerObj(asCar(third)));
@@ -490,7 +490,7 @@ void jPegRepeatContinueWord(ContextObj *aCtx) {
 
   pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
   pushCtxProcess(aCtx, parser);
-  pushSymbolCtxProcess(aCtx, "parseRepeatCont");
+  pushSymbolCtxProcess(aCtx, "parseBTPRepeatCont");
   prependListCtxProcess(aCtx, copyLoL(parser));
   
   DEBUG(ParserDebug, "jPegRepeatContinuation: trying parser again%s\n", "");
@@ -582,7 +582,7 @@ succeeded]
   popCtxProcessInto(aCtx, backTrackPoint);
   
   AssertIntTrue(isSymbolObj(repeatWord));
-  AssertStrEquals(asSymbol(repeatWord), "parseRepeatCont");
+  AssertStrEquals(asSymbol(repeatWord), "parseBTPRepeatCont");
   
   AssertIntTrue(isPairObj(repeatParser));
   AssertIntTrue(isUIntegerObj(asCar(repeatParser)));
@@ -676,7 +676,7 @@ succeeded]
   popCtxProcessInto(aCtx, backTrackPoint);
   
   AssertIntTrue(isSymbolObj(repeatWord));
-  AssertStrEquals(asSymbol(repeatWord), "parseRepeatCont");
+  AssertStrEquals(asSymbol(repeatWord), "parseBTPRepeatCont");
   
   AssertIntTrue(isPairObj(repeatParser));
   AssertIntTrue(isUIntegerObj(asCar(repeatParser)));
@@ -784,12 +784,12 @@ void jPegRepeatAtLeastContinueWord(ContextObj *aCtx) {
       atLeastRepeats - 1
     )
     pushUIntegerCtxProcess(aCtx, atLeastRepeats - 1);
-    pushSymbolCtxProcess(aCtx, "parseRepeatContAtLeast");
+    pushSymbolCtxProcess(aCtx, "parseBTPRepeatAtLeastCont");
   } else {
     DEBUG(ParserDebug,
       "jPegRepeatAtLeastContinueWord: repeat indefinitely%s\n", ""
     );
-    pushSymbolCtxProcess(aCtx, "parseRepeatCont");
+    pushSymbolCtxProcess(aCtx, "parseBTPRepeatCont");
   }
   prependListCtxProcess(aCtx, copyLoL(parser));
 }
@@ -914,7 +914,7 @@ void jPegRepeatAtLeastContinueWord(ContextObj *aCtx) {
   popCtxProcessInto(aCtx, backTrackPoint);
   
   AssertIntTrue(isSymbolObj(repeatWord));
-  AssertStrEquals(asSymbol(repeatWord), "parseRepeatCont");
+  AssertStrEquals(asSymbol(repeatWord), "parseBTPRepeatCont");
   
   AssertIntTrue(isPairObj(repeatParser));
   AssertIntTrue(isUIntegerObj(asCar(repeatParser)));
@@ -978,7 +978,7 @@ void jPegRepeatAtLeastContinueWord(ContextObj *aCtx) {
   popCtxProcessInto(aCtx, backTrackPoint);
   
   AssertIntTrue(isSymbolObj(repeatWord));
-  AssertStrEquals(asSymbol(repeatWord), "parseRepeatContAtLeast");
+  AssertStrEquals(asSymbol(repeatWord), "parseBTPRepeatAtLeastCont");
   
   AssertIntTrue(isUIntegerObj(atLeast));
   AssertIntEquals(asUInteger(atLeast), 9);
@@ -1081,7 +1081,7 @@ void jPegRepeatAtLeastWord(ContextObj *aCtx) {
   popCtxProcessInto(aCtx, backTrackPoint);
   
   AssertIntTrue(isSymbolObj(repeatWord));
-  AssertStrEquals(asSymbol(repeatWord), "parseRepeatContAtLeast");
+  AssertStrEquals(asSymbol(repeatWord), "parseBTPRepeatAtLeastCont");
   
   AssertIntTrue(isUIntegerObj(atLeast));
   AssertIntEquals(asUInteger(atLeast), 9);
@@ -1195,7 +1195,7 @@ void jPegRepeatAtMostContinueWord(ContextObj *aCtx) {
     pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
     pushCtxProcess(aCtx, parser);
     pushUIntegerCtxProcess(aCtx, atMostRepeats - 1);
-    pushSymbolCtxProcess(aCtx, "parseRepeatContAtMost");
+    pushSymbolCtxProcess(aCtx, "parseBTPRepeatAtMostCont");
     prependListCtxProcess(aCtx, copyLoL(parser));
   } else {
     // no repeats left... so fail..
@@ -1330,7 +1330,7 @@ void jPegRepeatAtMostContinueWord(ContextObj *aCtx) {
   popCtxProcessInto(aCtx, backTrackPoint);
   
   AssertIntTrue(isSymbolObj(repeatWord));
-  AssertStrEquals(asSymbol(repeatWord), "parseRepeatContAtMost");
+  AssertStrEquals(asSymbol(repeatWord), "parseBTPRepeatAtMostCont");
   
   AssertIntTrue(isUIntegerObj(atMost));
   AssertIntEquals(asUInteger(atMost), 9);
@@ -1473,7 +1473,7 @@ void jPegRepeatAtMostWord(ContextObj *aCtx) {
   popCtxProcessInto(aCtx, backTrackPoint);
   
   AssertIntTrue(isSymbolObj(repeatWord));
-  AssertStrEquals(asSymbol(repeatWord), "parseRepeatContAtMost");
+  AssertStrEquals(asSymbol(repeatWord), "parseBTPRepeatAtMostCont");
   
   AssertIntTrue(isUIntegerObj(atMost));
   AssertIntEquals(asUInteger(atMost), 9);
@@ -1516,10 +1516,7 @@ void jPegFailWord(ContextObj *aCtx) {
   
   while(aCtx->process) {
     popCtxProcessInto(aCtx, aCommand);
-    if (
-      symbolIs(aCommand, "parseChoiceCont") ||
-      symbolStartsWith(aCommand, "parseRepeatCont")
-    ) {
+    if (symbolStartsWith(aCommand, "parseBTP")) {
       DEBUG(ParserDebug, "jPegFailWord found (%s)[%s]\n",
         getJObjName(aCommand),
         (isSymbolObj(aCommand) ? asSymbol(aCommand) : "?")
@@ -1581,12 +1578,12 @@ choice/repeat words]
 \stopCTest
 \stopTestCase
 
-\startTestCase[should stop at a parseChoiceCont word]
+\startTestCase[should stop at a parseBTP word]
 \startCTest  
   dup1DWord(aCtx);
   popCtxDataInto(aCtx, choiceTest);
   pushCtxProcess(aCtx, choiceTest);
-  pushSymbolCtxProcess(aCtx, "parseChoiceCont");
+  pushSymbolCtxProcess(aCtx, "parseBTPChoiceCont");
   prependListCtxProcess(aCtx, copyLoL(choiceTest));
   
   asParserCommitted(aCtx) = false;
@@ -1614,49 +1611,7 @@ choice/repeat words]
   popCtxProcessInto(aCtx, parser);
   
   AssertIntTrue(isSymbolObj(parserWord));
-  AssertStrEquals(asSymbol(parserWord), "parseChoiceCont");
-  
-  AssertIntTrue(isPairObj(parser));
-  AssertIntEquals(listLength(parser), 4);
-  AssertIntTrue(isSymbolObj(asCar(asCdr(parser))));
-  AssertStrEquals(asSymbol(asCar(asCdr(parser))), "parseAny");
-\stopCTest
-\stopTestCase
-
-\startTestCase[should stop at a parseRepeatCont word]
-\startCTest
-  dup1DWord(aCtx);
-  popCtxDataInto(aCtx, repeatTest);
-  pushCtxProcess(aCtx, repeatTest);
-  pushSymbolCtxProcess(aCtx, "parseRepeatContAtLeast");
-  prependListCtxProcess(aCtx, copyLoL(repeatTest));
-  
-  asParserCommitted(aCtx) = false;
-  asParserFailed(aCtx)    = false;
-  
-  AssertPtrNotNull(asCtxData(aCtx));
-  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertPtrNotNull(asCtxProcess(aCtx));
-  AssertIntEquals(listLength(asCtxProcess(aCtx)), 6);
-  
-  AssertIntFalse(asParserCommitted(aCtx));
-  AssertIntFalse(asParserFailed(aCtx));
-  
-  jPegFailWord(aCtx);
-  
-  AssertIntFalse(asParserCommitted(aCtx));
-  AssertIntTrue(asParserFailed(aCtx));
-  
-  AssertPtrNotNull(asCtxData(aCtx));
-  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertPtrNotNull(asCtxProcess(aCtx));
-  AssertIntEquals(listLength(asCtxProcess(aCtx)), 2);
-  
-  popCtxProcessInto(aCtx, parserWord);
-  popCtxProcessInto(aCtx, parser);
-  
-  AssertIntTrue(isSymbolObj(parserWord));
-  AssertStrEquals(asSymbol(parserWord), "parseRepeatContAtLeast");
+  AssertStrEquals(asSymbol(parserWord), "parseBTPChoiceCont");
   
   AssertIntTrue(isPairObj(parser));
   AssertIntEquals(listLength(parser), 4);
@@ -1720,7 +1675,7 @@ choice/repeat words]
   
   prependWord(aCtx);
   
-  breakPointOn(aCtx, "parseChoiceCont");
+  breakPointOn(aCtx, "parseBTPChoiceCont");
 
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
@@ -1796,6 +1751,426 @@ choice/repeat words]
   AssertIntTrue(asParserFailed(aCtx));
   AssertIntFalse(asParserCommitted(aCtx));
   AssertIntZero(asParserTextPosition(aCtx));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[jPegNotContinueWord]
+
+\startCHeader
+void jPegNotContinueWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegNotContinueWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxProcessInto(aCtx, textBackTrackPointObj);
+  if (!isUIntegerObj(textBackTrackPointObj)) {
+    DEBUG(ParserDebug,
+      "jPegNotContinueWord: text back tract point not a UInteger%s\n","");
+    raiseExceptionMsg(aCtx,
+      "jPeg not parser expected a UInteger as text back-track point");
+    return;
+  }
+  size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
+  
+  DEBUG(ParserDebug, "jPegNotContinueWord:%s\n", "");
+  DEBUG(ParserDebug,
+    "  failed: %zu committed: %zu\n",
+    asParserFailed(aCtx), asParserCommitted(aCtx)
+  );
+  DEBUG(ParserDebug,
+    "  backTrack: %zu position: %zu\n",
+    textBackTrackPoint, asParserTextPosition(aCtx)
+  );
+
+  // we always ignore and reset committed-ness
+  asParserCommitted(aCtx) = false;
+  
+  // the not parser never consumes any text...
+  asParserTextPosition(aCtx) = textBackTrackPoint;
+  
+  if (!(asParserFailed(aCtx))) {
+    jPegFailWord(aCtx);
+    return;
+  }
+
+  asParserFailed(aCtx) = false;
+}
+\stopCCode
+
+\CTestsSuiteSetup\
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushSymbolCtxData(aCtx, "parseAny");
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseAny");
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);  
+\stopCTest
+
+\startTestCase[should stop failure when pattern failed]
+\startCTest
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, parser);
+  prependListCtxProcess(aCtx, copyLoL(parser));
+  
+  pushUIntegerCtxProcess(aCtx, 24);
+  pushSymbolCtxProcess(aCtx, "parseBTPnotCont");
+  prependListCtxProcess(aCtx, copyLoL(parser));
+
+  asParserTextPosition(aCtx) = 0;
+  asParserFailed(aCtx)       = true;
+  asParserCommitted(aCtx)    = true;
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 10);
+  
+  jPegFailWord(aCtx);
+
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 6);
+  
+  popCtxProcessInto(aCtx, parseWord);
+  AssertIntTrue(isSymbolObj(parseWord));
+  AssertStrEquals(asSymbol(parseWord), "parseBTPnotCont");
+  
+  jPegNotContinueWord(aCtx);
+  
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 4);
+    
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
+  
+  AssertIntTrue(isPairObj(parser));
+  AssertIntEquals(listLength(parser), 4);
+  AssertIntTrue(isSymbolObj(asCar(asCdr(parser))));
+  AssertStrEquals(asSymbol(asCar(asCdr(parser))), "parseAny");
+\stopCTest
+\stopTestCase
+
+\startTestCase[should start failure when pattern succeeded]
+\startCTest
+  asCtxProcess(aCtx) = NULL;
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, parser);
+  prependListCtxProcess(aCtx, copyLoL(parser));
+  
+  pushUIntegerCtxProcess(aCtx, 24);
+
+  asParserTextPosition(aCtx) = 0;
+  asParserFailed(aCtx)       = false;
+  asParserCommitted(aCtx)    = true;
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 5);
+    
+  jPegNotContinueWord(aCtx);
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[jPegNotWord]
+
+\startCHeader
+void jPegNotWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegNotWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, parser);
+  
+  DEBUG(ParserDebug, "jPegNotWord%s\n", "");
+  
+  if (!parser) {
+    DEBUG(ParserDebug, "jPegNotWord: no parser%s\n", "");
+    return;
+  }
+
+  asParserCommitted(aCtx) = false;
+  asParserFailed(aCtx)    = false;
+  pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
+  pushSymbolCtxProcess(aCtx, "parseBTPNotCont");
+  prependListCtxProcess(aCtx, parser);
+}
+\stopCCode
+
+\startTestCase[should setup a not back-track-point]
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushUIntegerCtxData(aCtx, 42);
+  wrapWord(aCtx);
+  
+  asParserTextPosition(aCtx) = 24;
+  asParserFailed(aCtx)       = true;
+  asParserCommitted(aCtx)    = true;
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  jPegNotWord(aCtx);
+  
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 3);
+  
+  popCtxProcessInto(aCtx, uInt42);
+  popCtxProcessInto(aCtx, parseWord);
+  popCtxProcessInto(aCtx, backTrackPoint);
+  
+  AssertIntTrue(isSymbolObj(parseWord));
+  AssertStrEquals(asSymbol(parseWord), "parseBTPNotCont");
+  
+  AssertIntTrue(isUIntegerObj(backTrackPoint));
+  AssertIntEquals(asUInteger(backTrackPoint), 24);
+  
+  AssertIntTrue(isUIntegerObj(uInt42));
+  AssertIntEquals(asUInteger(uInt42), 42);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[jPegLookAheadContinueWord]
+
+\startCHeader
+void jPegLookAheadContinueWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegLookAheadContinueWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxProcessInto(aCtx, textBackTrackPointObj);
+  if (!isUIntegerObj(textBackTrackPointObj)) {
+    DEBUG(ParserDebug,
+      "jPegLookAheadContinueWord: text back tract point not a UInteger%s\n","");
+    raiseExceptionMsg(aCtx,
+      "jPeg lookAhead parser expected a UInteger as text back-track point");
+    return;
+  }
+  size_t textBackTrackPoint = asUInteger(textBackTrackPointObj);
+  
+  DEBUG(ParserDebug, "jPegLookAheadContinueWord:%s\n", "");
+  DEBUG(ParserDebug,
+    "  failed: %zu committed: %zu\n",
+    asParserFailed(aCtx), asParserCommitted(aCtx)
+  );
+  DEBUG(ParserDebug,
+    "  backTrack: %zu position: %zu\n",
+    textBackTrackPoint, asParserTextPosition(aCtx)
+  );
+
+  // we always ignore and reset committed-ness
+  asParserCommitted(aCtx) = false;
+  
+  // the lookAhead parser never consumes any text...
+  asParserTextPosition(aCtx) = textBackTrackPoint;
+  
+  if ((asParserFailed(aCtx))) {
+    jPegFailWord(aCtx);
+    return;
+  }
+
+  asParserFailed(aCtx) = false;
+}
+\stopCCode
+
+\CTestsSuiteSetup\
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushSymbolCtxData(aCtx, "parseAny");
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseAny");
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 1);
+  prependWord(aCtx);  
+\stopCTest
+
+\startTestCase[should continue failure when pattern failed]
+\startCTest
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, parser);
+  prependListCtxProcess(aCtx, copyLoL(parser));
+  
+  pushUIntegerCtxProcess(aCtx, 24);
+  pushSymbolCtxProcess(aCtx, "parseBTPLookAheadCont");
+  prependListCtxProcess(aCtx, copyLoL(parser));
+
+  asParserTextPosition(aCtx) = 0;
+  asParserFailed(aCtx)       = true;
+  asParserCommitted(aCtx)    = true;
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 10);
+  
+  jPegFailWord(aCtx);
+
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 6);
+  
+  popCtxProcessInto(aCtx, parseWord);
+  AssertIntTrue(isSymbolObj(parseWord));
+  AssertStrEquals(asSymbol(parseWord), "parseBTPLookAheadCont");
+  
+  jPegLookAheadContinueWord(aCtx);
+  
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNull(asCtxProcess(aCtx));
+    
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should reset text position when pattern succeeded]
+\startCTest
+  asCtxProcess(aCtx) = NULL;
+  dup1DWord(aCtx);
+  popCtxDataInto(aCtx, parser);
+  prependListCtxProcess(aCtx, copyLoL(parser));
+  
+  pushUIntegerCtxProcess(aCtx, 24);
+
+  asParserTextPosition(aCtx) = 0;
+  asParserFailed(aCtx)       = false;
+  asParserCommitted(aCtx)    = true;
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 5);
+    
+  jPegLookAheadContinueWord(aCtx);
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 4);
+    
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
+  
+  AssertIntTrue(isPairObj(parser));
+  AssertIntEquals(listLength(parser), 4);
+  AssertIntTrue(isSymbolObj(asCar(asCdr(parser))));
+  AssertStrEquals(asSymbol(asCar(asCdr(parser))), "parseAny");  
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[jPegNotWord]
+
+\startCHeader
+void jPegLookAheadWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegLookAheadWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, parser);
+  
+  DEBUG(ParserDebug, "jPegLookAheadWord%s\n", "");
+  
+  if (!parser) {
+    DEBUG(ParserDebug, "jPegLookAheadWord: no parser%s\n", "");
+    return;
+  }
+
+  asParserCommitted(aCtx) = false;
+  asParserFailed(aCtx)    = false;
+  pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
+  pushSymbolCtxProcess(aCtx, "parseBTPLookAheadCont");
+  prependListCtxProcess(aCtx, parser);
+}
+\stopCCode
+
+\startTestCase[should setup a lookAhead back-track-point]
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushUIntegerCtxData(aCtx, 42);
+  wrapWord(aCtx);
+  
+  asParserTextPosition(aCtx) = 24;
+  asParserFailed(aCtx)       = true;
+  asParserCommitted(aCtx)    = true;
+  
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertIntEquals(listLength(asCtxData(aCtx)), 1);
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  jPegLookAheadWord(aCtx);
+  
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNotNull(asCtxProcess(aCtx));
+  AssertIntEquals(listLength(asCtxProcess(aCtx)), 3);
+  
+  popCtxProcessInto(aCtx, uInt42);
+  popCtxProcessInto(aCtx, parseWord);
+  popCtxProcessInto(aCtx, backTrackPoint);
+  
+  AssertIntTrue(isSymbolObj(parseWord));
+  AssertStrEquals(asSymbol(parseWord), "parseBTPLookAheadCont");
+  
+  AssertIntTrue(isUIntegerObj(backTrackPoint));
+  AssertIntEquals(asUInteger(backTrackPoint), 24);
+  
+  AssertIntTrue(isUIntegerObj(uInt42));
+  AssertIntEquals(asUInteger(uInt42), 42);
 \stopCTest
 \stopTestCase
 \stopTestSuite

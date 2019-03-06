@@ -6,17 +6,26 @@
 
 \subsection[title=Combinators]
 
-\startCCode
+\startCHeader
+void pushListWord(ContextObj* aCtx);
+\stopCHeader
 
-static void pushListWord(ContextObj* aCtx) {
+\startCCode
+void pushListWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, aList);
   top = asJObj(newPair(top, NULL));
   aList = asJObj(concatLists(top, aList));
   pushCtxData(aCtx, aList);
 }
+\stopCCode
 
-static void popListWord(ContextObj* aCtx) {
+\startCHeader
+void popListWord(ContextObj* aCtx);
+\stopCHeader
+
+\startCCode
+void popListWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, aList);
   popListInto(aCtx, aList, top);
   pushCtxData(aCtx, aList);
@@ -49,8 +58,12 @@ void prependWord(ContextObj* aCtx) {
 }
 \stopCCode
 
+\startCHeader
+void appendWord(ContextObj* aCtx);
+\stopCHeader
+
 \startCCode
-static void appendWord(ContextObj* aCtx) {
+void appendWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   JObj* result = asJObj(concatLists(second, top));
@@ -58,15 +71,23 @@ static void appendWord(ContextObj* aCtx) {
 }
 \stopCCode
 
+\startCHeader
+void extractWord(ContextObj* aCtx);
+\stopCHeader
+
 \startCCode
-static void extractWord(ContextObj* aCtx) {
+void extractWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   prependListCtxData(aCtx, top);
 }
 \stopCCode
 
+\startCHeader
+void interpretWord(ContextObj* aCtx);
+\stopCHeader
+
 \startCCode
-static void interpretWord(ContextObj* aCtx) {
+void interpretWord(ContextObj* aCtx) {
   popCtxDataInto(aCtx, top);
   prependListCtxProcess(aCtx, top);
 }

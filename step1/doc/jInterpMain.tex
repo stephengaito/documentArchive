@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
   for(int i = 1; i < argc; i++) {
     printf("interpreting: [%s]\n", argv[i]);
     parseFile(rootCtx, argv[i]);
-    parseSExppressionWord(rootCtx);
+    parseSExpressionWord(rootCtx);
     interpretWord(rootCtx);
   }
 }

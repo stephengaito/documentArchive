@@ -172,7 +172,7 @@ void parseSingleQuoteWord(ContextObj *aCtx) {
   wrapWord(aCtx);
   pushUIntegerCtxData(aCtx, 1);
   prependWord(aCtx);
-  pushSymbolCtxData(aCtx, "parseCoSpan")
+  pushSymbolCtxData(aCtx, "parseCoSpan");
   prependWord(aCtx);
   wrapWord(aCtx);
   
@@ -232,7 +232,7 @@ void parseDoubleQuoteWord(ContextObj *aCtx) {
   wrapWord(aCtx);
   pushUIntegerCtxData(aCtx, 1);
   prependWord(aCtx);
-  pushSymbolCtxData(aCtx, "parseCoSpan")
+  pushSymbolCtxData(aCtx, "parseCoSpan");
   prependWord(aCtx);
   wrapWord(aCtx);
   
@@ -308,7 +308,7 @@ void parseSingleCommentWord(ContextObj *aCtx) {
 \starttyping
 (
   '/*' pattern
-  ( '*/' coPattern ) 0 repeatAtLeast
+  ( ( '*/' pattern ) not ) 0 repeatAtLeast
   '*/' pattern
 ) 'multiComment' define
 \stoptyping
@@ -320,7 +320,10 @@ void parseMultiCommentWord(ContextObj *aCtx) {
   prependWord(aCtx);
   
   pushSymbolCtxData(aCtx, "*/");
-  pushSymbolCtxData(aCtx, "parseCoPattern");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseNot");
   prependWord(aCtx);
   wrapWord(aCtx);
   prependWord(aCtx);
@@ -366,6 +369,10 @@ void parseCommentWord(ContextObj *aCtx) {
 ) 'sExpression' define
 \stoptyping
 
+\startCHeader
+void parseSExpressionWord(ContextObj *aCtx);
+\stopCHeader
+
 \startCCode
 void parseSExpressionWord(ContextObj *aCtx) {
   pushSymbolCtxData(aCtx, "parseNaturalNum");
@@ -383,6 +390,10 @@ void parseSExpressionWord(ContextObj *aCtx) {
   jPegChoiceWord(aCtx);
 }
 \stopCCode
+
+\startCHeader
+void registerSExpressionParser(ContextObj *aCtx);
+\stopCHeader
 
 \startCCode
 void registerSExpressionParser(ContextObj *aCtx) {
