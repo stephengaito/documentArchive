@@ -39,6 +39,7 @@ void wrapWord(ContextObj *aCtx);
 
 \startCCode
 void wrapWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "wrapWord%s\n", "");
   popCtxDataInto(aCtx, top);
   top = asJObj(newPair(top, NULL));
   pushCtxData(aCtx, top);
@@ -51,6 +52,7 @@ void prependWord(ContextObj *aCtx);
 
 \startCCode
 void prependWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "prependWord%s\n", "");
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   JObj* result = asJObj(concatLists(top, second));

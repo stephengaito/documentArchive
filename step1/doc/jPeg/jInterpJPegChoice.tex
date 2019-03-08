@@ -127,11 +127,13 @@ void jPegChoiceContinueWord(ContextObj *aCtx) {
     return;
   }
 
+  // we have failed so we backtrack the text position
+  asParserTextPosition(aCtx) = textBackTrackPoint;
+  
   // if we have failed... but are committed... 
   // we FAIL the whole choice... BUT... we are done...
   if (asParserFailed(aCtx) && asParserCommitted(aCtx)) {
     asParserCommitted(aCtx)    = false;
-    asParserTextPosition(aCtx) = textBackTrackPoint;
     pushSymbolCtxProcess(aCtx, "parseFail");
     DEBUG(ParserDebug, "jPegChoiceContinuationWord: choice failed and committed%s\n", "");
     return;
@@ -141,7 +143,6 @@ void jPegChoiceContinueWord(ContextObj *aCtx) {
   // BUT we have actually failed...
   if (!parserChoices) {    // (i.e. the empty list)
     asParserCommitted(aCtx)    = false;
-    asParserTextPosition(aCtx) = textBackTrackPoint;
     pushSymbolCtxProcess(aCtx, "parseFail");
     DEBUG(ParserDebug, "jPegChoiceContinuationWord: choice failed no choices left%s\n","");
     return;
@@ -1015,8 +1016,8 @@ void jPegRepeatAtLeastWord(ContextObj *aCtx);
 void jPegRepeatAtLeastWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
-  popCtxDataInto(aCtx, parser);
   popCtxDataInto(aCtx, atLeast);
+  popCtxDataInto(aCtx, parser);
   
   DEBUG(ParserDebug, "jPegRepeatAtLeastWord%s\n", "");
   if (!parser) {
@@ -1049,7 +1050,7 @@ void jPegRepeatAtLeastWord(ContextObj *aCtx) {
   
   dup1DWord(aCtx);
   pushUIntegerCtxData(aCtx, 10);
-  swap12DWord(aCtx);
+//  swap12DWord(aCtx);
   
   asParserTextPosition(aCtx) = 24;
   asParserCommitted(aCtx)    = true;
@@ -1406,8 +1407,8 @@ void jPegRepeatAtMostWord(ContextObj *aCtx);
 void jPegRepeatAtMostWord(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
-  popCtxDataInto(aCtx, parser);
   popCtxDataInto(aCtx, atMost);
+  popCtxDataInto(aCtx, parser);
   
   DEBUG(ParserDebug, "jPegRepeatAtMostWord%s\n","");
   if (!parser) {
@@ -1441,7 +1442,7 @@ void jPegRepeatAtMostWord(ContextObj *aCtx) {
   
   dup1DWord(aCtx);
   pushUIntegerCtxData(aCtx, 10);
-  swap12DWord(aCtx);
+//  swap12DWord(aCtx);
   
   asParserTextPosition(aCtx) = 0;
   asParserCommitted(aCtx)    = true;

@@ -35,7 +35,7 @@ void jPegAnyWord(ContextObj *aCtx) {
   // TODO: need to deal with UTF-8 multi-byte characters
   
   while (
-    (asParserTextPosition(aCtx) <= asParserTextSize(aCtx)) &&
+    (asParserTextPosition(aCtx) < asParserTextSize(aCtx)) &&
     (0 < charsToMatch)
   ) {
     asParserTextPosition(aCtx)++;
@@ -104,7 +104,7 @@ void jPegPatternWord(ContextObj *aCtx) {
   // TODO: need to deal with UTF-8 multi-byte characters
 
   while(
-    (asParserTextPosition(aCtx) <= asParserTextSize(aCtx)) &&
+    (asParserTextPosition(aCtx) < asParserTextSize(aCtx)) &&
     (charsMatched < patternSize) &&
     (parserText[charsMatched] == pattern[charsMatched])
   ) {
@@ -131,8 +131,7 @@ void jPegPatternWord(ContextObj *aCtx) {
 }
 \stopCCode
 
-\startTestCase[simple any and pattern parser tests]
-
+\CTestsSuiteSetup\
 \startCTest
   ContextObj *aCtx = newContext(NULL, NULL, "testParser");
   AssertIntTrue(isContextObj(aCtx));
@@ -140,7 +139,37 @@ void jPegPatternWord(ContextObj *aCtx) {
   registerBasicWords(aCtx);
   registerControlWords(aCtx);
   registerJPegWords(aCtx);
+\stopCTest
 
+\startTestCase[should fail if no text]
+\startCTest
+  parseString(aCtx, "");
+  AssertStrEquals(asParserText(aCtx), "");
+  
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  pushUIntegerCtxData(aCtx, 1);
+  
+  jPegAnyWord(aCtx);
+  
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  
+  asParserFailed(aCtx) = false;
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  pushSymbolCtxData(aCtx, "a");
+  
+  jPegPatternWord(aCtx);
+  
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+\stopCTest
+\stopTestCase
+
+\startTestCase[simple any and pattern parser tests]
+
+\startCTest
   parseString(aCtx, "aaabbb");
   AssertIntZero(asParserTextPosition(aCtx));
   pushUIntegerCtxData(aCtx, 5);
@@ -154,7 +183,6 @@ void jPegPatternWord(ContextObj *aCtx) {
 \stopCTest
 \stopTestCase
 \stopTestSuite
-
 
 \startTestSuite[collectJPegSpans and matchCharSetSpans]
 
@@ -419,7 +447,7 @@ void jPegCharSetWord(ContextObj *aCtx) {
   // TODO: need to deal with UTF-8 multi-byte characters
   
   while(
-    (asParserTextPosition(aCtx) <= asParserTextSize(aCtx)) &&
+    (asParserTextPosition(aCtx) < asParserTextSize(aCtx)) &&
     (0 < charsToMatchValue) &&
     matchCharSetSpans(aCtx, spans)
   ) {
@@ -440,7 +468,7 @@ void jPegCharSetWord(ContextObj *aCtx) {
 
   if (0 < charsToMatchValue) {
     DEBUG(ParserDebug,
-      "jPegCharSetWord: matched too many characters%s\n","");
+      "jPegCharSetWord: matched too few characters%s\n","");
     asParserTextPosition(aCtx) = origTextPosition;
     jPegFailWord(aCtx);
   } else {
@@ -485,7 +513,7 @@ void jPegCoCharSetWord(ContextObj *aCtx) {
   // TODO: need to deal with UTF-8 multi-byte characters
   
   while(
-    (asParserTextPosition(aCtx) <= asParserTextSize(aCtx)) &&
+    (asParserTextPosition(aCtx) < asParserTextSize(aCtx)) &&
     (0 < charsToMatchValue) &&
     !matchCharSetSpans(aCtx, spans)
   ) {
@@ -552,7 +580,7 @@ void jPegSpanWord(ContextObj *aCtx) {
  // TODO: need to deal with UTF-8 multi-byte characters
   
   while(
-    (asParserTextPosition(aCtx) <= asParserTextSize(aCtx)) &&
+    (asParserTextPosition(aCtx) < asParserTextSize(aCtx)) &&
     matchCharSetSpans(aCtx, spans)
   ) {
     asParserTextPosition(aCtx)++;
@@ -618,7 +646,7 @@ void jPegCoSpanWord(ContextObj *aCtx) {
   // TODO: need to deal with UTF-8 multi-byte characters
   
   while(
-    (asParserTextPosition(aCtx) <= asParserTextSize(aCtx)) &&
+    (asParserTextPosition(aCtx) < asParserTextSize(aCtx)) &&
     !matchCharSetSpans(aCtx, spans)
   ) {
     asParserTextPosition(aCtx)++;

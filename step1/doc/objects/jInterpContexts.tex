@@ -163,10 +163,9 @@ void parseString(ContextObj *aCtx, Symbol *aStringToParse);
 void parseString(ContextObj *aCtx, Symbol *aStringToParse) {
   assert(isContextObj(aCtx));
   
-  size_t aStrSize = strlen(aStringToParse);
-  
-  if (aStrSize == 0) return;
-  
+  size_t aStrSize = 0;
+  if (aStringToParse) aStrSize = strlen(aStringToParse);
+    
   asParserText(aCtx)         = aStringToParse;
   asParserTextSize(aCtx)     = aStrSize;
   asParserTextPosition(aCtx) = 0;
@@ -181,6 +180,15 @@ void parseString(ContextObj *aCtx, Symbol *aStringToParse) {
   ContextObj *aCtx = newContext(NULL, NULL, "testParseString");
   AssertIntTrue(isContextObj(aCtx));
   
+  AssertPtrNull(asParserText(aCtx));
+  AssertIntZero(asParserTextSize(aCtx));
+  parseString(aCtx, "");
+  AssertPtrNotNull(asParserText(aCtx));
+  AssertIntEquals(asParserTextSize(aCtx), 0);
+  AssertStrMatches(asParserText(aCtx), "");
+  
+  asParserText(aCtx)     = NULL;
+  asParserTextSize(aCtx) = 0;
   AssertPtrNull(asParserText(aCtx));
   AssertIntZero(asParserTextSize(aCtx));
   parseString(aCtx, "This is a test");
