@@ -7,7 +7,7 @@ Finally we translate this into jPeg:
 \startTestSuite[parseOperatorWord]
 
 \starttyping
-( 1 any ) 'operator' define
+( ( 1 any ) capture ) 'operator' define
 \stoptyping
 
 \startCHeader
@@ -16,8 +16,13 @@ void parseOperatorWord(ContextObj *aCtx);
 
 \startCCode
 void parseOperatorWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "parseCapture");
+  pushSymbolCtxData(aCtx, "parseAny");
   pushUIntegerCtxData(aCtx, 1);
-  jPegAnyWord(aCtx);
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  interpretWord(aCtx);
 }
 \stopCCode
 
@@ -41,6 +46,7 @@ void parseOperatorWord(ContextObj *aCtx) {
   AssertPtrNull(asCtxProcess(aCtx));
   
   parseOperatorWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
   
   AssertIntEquals(asParserTextPosition(aCtx), 0);
   AssertIntTrue(asParserFailed(aCtx));
@@ -55,6 +61,7 @@ void parseOperatorWord(ContextObj *aCtx) {
   AssertPtrNull(asCtxProcess(aCtx));
   
   parseOperatorWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
   
   AssertIntEquals(asParserTextPosition(aCtx), 0);
   AssertIntTrue(asParserFailed(aCtx));
@@ -73,6 +80,7 @@ void parseOperatorWord(ContextObj *aCtx) {
   AssertPtrNull(asCtxProcess(aCtx));
   
   parseOperatorWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
   
   AssertIntEquals(asParserTextPosition(aCtx), 1);
   AssertIntFalse(asParserFailed(aCtx));
@@ -159,8 +167,10 @@ void parseWhiteSpaceWord(ContextObj *aCtx) {
 
 \starttyping
 (
-  ( 'az' 'AZ') 1 charSet
-  ( 'az' 'AZ' '09' '_') 0 span
+  (
+    ( 'az' 'AZ') 1 charSet
+    ( 'az' 'AZ' '09' '_') 0 span
+  ) capture
 ) 'identifier' define
 \stoptyping
 
@@ -170,6 +180,9 @@ void parseIdentifierWord(ContextObj *aCtx);
 
 \startCCode
 void parseIdentifierWord(ContextObj *aCtx) {
+
+  pushSymbolCtxData(aCtx, "parseCapture");
+
   pushSymbolCtxData(aCtx, "parseSpan");
   pushUIntegerCtxData(aCtx, 0);
   pushSymbolCtxData(aCtx, "_");
@@ -193,6 +206,9 @@ void parseIdentifierWord(ContextObj *aCtx) {
   prependWord(aCtx);
   
   prependWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  
   interpretWord(aCtx);
 }
 \stopCCode
@@ -251,7 +267,9 @@ void parseIdentifierWord(ContextObj *aCtx) {
 
 \starttyping
 (
-  ( '09' ) 1 span
+  (
+    ( '09' ) 1 span
+  ) capture
 ) 'decimalNum' define
 \stoptyping
 
@@ -261,10 +279,20 @@ void parseDecimalNumberWord(ContextObj *aCtx);
 
 \startCCode
 void parseDecimalNumberWord(ContextObj *aCtx) {
+
+  pushSymbolCtxData(aCtx, "parseCapture");
+  
+  pushSymbolCtxData(aCtx, "parseSpan");
+  pushUIntegerCtxData(aCtx, 1);
   pushSymbolCtxData(aCtx, "09");
   wrapWord(aCtx);
-  pushUIntegerCtxData(aCtx, 1);
-  jPegSpanWord(aCtx);  
+  wrapWord(aCtx);
+  prependWord(aCtx); // ( '09') & 1
+  prependWord(aCtx); // span
+  wrapWord(aCtx);
+  prependWord(aCtx); // capture
+  
+  interpretWord(aCtx);
 }
 \stopCCode
 
@@ -288,6 +316,7 @@ void parseDecimalNumberWord(ContextObj *aCtx) {
   AssertPtrNull(asCtxProcess(aCtx));
   
   parseDecimalNumberWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
   
   AssertIntEquals(asParserTextPosition(aCtx), 0);
   AssertIntTrue(asParserFailed(aCtx));
@@ -306,6 +335,7 @@ void parseDecimalNumberWord(ContextObj *aCtx) {
   AssertPtrNull(asCtxProcess(aCtx));
   
   parseDecimalNumberWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
   
   AssertIntEquals(asParserTextPosition(aCtx), 5);
   AssertIntFalse(asParserFailed(aCtx));
@@ -320,9 +350,11 @@ void parseDecimalNumberWord(ContextObj *aCtx) {
 
 \starttyping
 (
-  '0' pattern
-  ( 'x' 'X' ) 1 charSet
-  ( '09' 'af' 'AF' ',' ) 1 span
+  (
+    '0' pattern
+    ( 'x' 'X' ) 1 charSet
+    ( '09' 'af' 'AF' ',' ) 1 span
+  ) capture
 ) 'hexNumber' define
 \stoptyping
 
@@ -333,34 +365,40 @@ void parseHexadecimalNumber(ContextObj *aCtx);
 \startCCode
 void parseHexadecimalNumber(ContextObj *aCtx) {
 
+  pushSymbolCtxData(aCtx, "parseCapture");
+
   pushSymbolCtxData(aCtx, "parseSpan");
   pushUIntegerCtxData(aCtx, 1);
   pushSymbolCtxData(aCtx, ",");
   pushSymbolCtxData(aCtx, "AF");
   pushSymbolCtxData(aCtx, "af");
   pushSymbolCtxData(aCtx, "09");
-  prependWord(aCtx);
-  prependWord(aCtx);
-  prependWord(aCtx);
+  prependWord(aCtx); // '09' & 'af'
+  prependWord(aCtx); // 'AF'
+  prependWord(aCtx); // ','
   wrapWord(aCtx);
-  prependWord(aCtx);
-  prependWord(aCtx);
+  prependWord(aCtx); // 1
+  prependWord(aCtx); // span
 
   pushSymbolCtxData(aCtx, "parseCharSet");
   pushUIntegerCtxData(aCtx, 1);
   pushSymbolCtxData(aCtx, "x");
   pushSymbolCtxData(aCtx, "X");
-  prependWord(aCtx);
+  prependWord(aCtx); // 'x' & 'X'
   wrapWord(aCtx);
-  prependWord(aCtx);
-  prependWord(aCtx);
+  prependWord(aCtx); // 1
+  prependWord(aCtx); // charSet
 
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, "0");
-  prependWord(aCtx);
+  prependWord(aCtx); // '0' & pattern
   
-  prependWord(aCtx);  
-  prependWord(aCtx);  
+  prependWord(aCtx); // pattern & charSet
+  prependWord(aCtx); // span
+  
+  wrapWord(aCtx);
+  prependWord(aCtx); // capture
+  
   interpretWord(aCtx);
 }
 \stopCCode
@@ -521,12 +559,14 @@ void parseNaturalNumberWord(ContextObj *aCtx) {
 \starttyping
 (
   "'" pattern
-  ( 
-    (
-      ( ( "'" '\r' '\n' '\f' '\\' ) 1 coSpan )
-      ( '\\' pattern 1 any )
-    ) choice
-  ) 0 repeatAtLeast
+  (
+    ( 
+      (
+        ( ( "'" '\r' '\n' '\f' '\\' ) 1 coSpan )
+        ( '\\' pattern 1 any )
+      ) choice
+    ) 0 repeatAtLeast
+  ) capture
   "'" pattern
 ) 'singleQuote' define
 \stoptyping
@@ -541,6 +581,7 @@ void parseSingleQuoteWord(ContextObj *aCtx) {
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, "'");
 
+  pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseRepeatAtLeast");
   pushUIntegerCtxData(aCtx, 0);
 
@@ -578,7 +619,9 @@ void parseSingleQuoteWord(ContextObj *aCtx) {
   
   prependWord(aCtx);  // 0
   prependWord(aCtx);  // repeat at least
-
+  wrapWord(aCtx);
+  prependWord(aCtx);  // capture
+  
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, "'");
   prependWord(aCtx);  // ' pattern
@@ -645,12 +688,14 @@ void parseSingleQuoteWord(ContextObj *aCtx) {
 \starttyping
 (
   '"' pattern
-  ( 
-    (
-      ( '"' '\r' '\n' '\f' ) 1 coSpan
-      ( '\\' pattern 1 any )
-    ) choice
-  ) 0 repeatAtLeast
+  (
+    ( 
+      (
+        ( '"' '\r' '\n' '\f' ) 1 coSpan
+        ( '\\' pattern 1 any )
+      ) choice
+    ) 0 repeatAtLeast
+  ) capture
   '"' pattern
 ) 'doubleQuote' define
 \stoptyping
@@ -665,6 +710,7 @@ void parseDoubleQuoteWord(ContextObj *aCtx) {
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, "\"");
 
+  pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseRepeatAtLeast");
   pushUIntegerCtxData(aCtx, 0);
 
@@ -702,7 +748,9 @@ void parseDoubleQuoteWord(ContextObj *aCtx) {
   
   prependWord(aCtx);  // 0
   prependWord(aCtx);  // repeat at least
-
+  wrapWord(aCtx);
+  prependWord(aCtx);  // capture
+  
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, "\"");
   prependWord(aCtx);  // ' pattern
@@ -1153,7 +1201,7 @@ void parseCommentWord(ContextObj *aCtx) {
       comment
       ( string     ) capture
       whiteSpace
-      ( operator   ) capture
+      operator
     ) choice
   ) 0 repeatAtLeast
 ) 'sExpression' define
@@ -1167,38 +1215,12 @@ void parseSExpressionWord(ContextObj *aCtx);
 void parseSExpressionWord(ContextObj *aCtx) {
 
   pushSymbolCtxData(aCtx, "parseChoice");
-  
-  pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseOperator");
-  wrapWord(aCtx);
-  wrapWord(aCtx);
-  prependWord(aCtx);
-  wrapWord(aCtx);
-  
   pushSymbolCtxData(aCtx, "parseWhiteSpace");
-  
-  pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseString");
-  wrapWord(aCtx);
-  wrapWord(aCtx);
-  prependWord(aCtx);
-  wrapWord(aCtx);
-  
   pushSymbolCtxData(aCtx, "parseComment");
-  
-  pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseIdentifier");
-  wrapWord(aCtx);
-  wrapWord(aCtx);
-  prependWord(aCtx);
-  wrapWord(aCtx);
-
-  pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseNaturalNum");
-  wrapWord(aCtx);
-  wrapWord(aCtx);
-  prependWord(aCtx);
-  wrapWord(aCtx);
   
   prependWord(aCtx); // natural num & identifier
   prependWord(aCtx); // comment
@@ -1233,7 +1255,7 @@ void parseSExpressionWord(ContextObj *aCtx) {
   parseSExpressionWord(aCtx);
   evalCommandInContext(aCtx, NULL);
   
-//  showParserCaptures(aCtx);
+  showParserCaptures(aCtx);
   
   AssertIntEquals(asParserTextPosition(aCtx), 42);
   AssertIntFalse(asParserFailed(aCtx));
@@ -1253,8 +1275,8 @@ void parseSExpressionWord(ContextObj *aCtx) {
   
   parseSExpressionWord(aCtx);
   evalCommandInContext(aCtx, NULL);
-  
-//  showParserCaptures(aCtx);
+
+  showParserCaptures(aCtx);
   
   AssertIntEquals(asParserTextPosition(aCtx), 46);
   AssertIntFalse(asParserFailed(aCtx));
