@@ -647,7 +647,7 @@ void parseSingleQuoteWord(ContextObj *aCtx) {
   '"' pattern
   ( 
     (
-      ( '"' '\r' '\n' '\f' ) coCharSet
+      ( '"' '\r' '\n' '\f' ) 1 coSpan
       ( '\\' pattern 1 any )
     ) choice
   ) 0 repeatAtLeast
@@ -850,6 +850,8 @@ void parseStringWord(ContextObj *aCtx) {
 \stopTestCase
 \stopTestSuite
 
+\startTestSuite[parseSingleCommentWord]
+
 \starttyping
 (
   '//' pattern
@@ -858,61 +860,203 @@ void parseStringWord(ContextObj *aCtx) {
 ) 'singleComment' define
 \stoptyping
 
+\startCHeader
+void parseSingleCommentWord(ContextObj *aCtx);
+\stopCHeader
+
 \startCCode
 void parseSingleCommentWord(ContextObj *aCtx) {
-  pushSymbolCtxData(aCtx, "//");
+
   pushSymbolCtxData(aCtx, "parsePattern");
-  prependWord(aCtx);
   pushSymbolCtxData(aCtx, "\n");
-  wrapWord(aCtx);
-  prependWord(aCtx);
-  pushUIntegerCtxData(aCtx, 0);
-  prependWord(aCtx);
+  
   pushSymbolCtxData(aCtx, "parseCoSpan");
-  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 0);
   pushSymbolCtxData(aCtx, "\n");
-  prependWord(aCtx);
-  pushSymbolCtxData(aCtx, "parsePattern");
-  prependWord(aCtx);
   wrapWord(aCtx);
+  wrapWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "parsePattern");
+  pushSymbolCtxData(aCtx, "//");
+  
+  prependWord(aCtx); // "//" pattern
+  
+  prependWord(aCtx); // ( "\n" )
+  prependWord(aCtx); // 0
+  prependWord(aCtx); // co-span
+  
+  prependWord(aCtx); // "\n"
+  prependWord(aCtx); // pattern
+  
   interpretWord(aCtx);
 }
 \stopCCode
+
+\CTestsSuiteSetup\
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  registerSExpressionParser(aCtx);
+\stopCTest
+
+\startTestCase[should fail if not a single line comment]
+\startCTest
+  parseString(aCtx, "12231aaaaa");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+
+  parseSingleCommentWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 0);
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should succeed if a single line comment]
+\startCTest
+  parseString(aCtx, "// a1234 \n test a test ");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseSingleCommentWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+
+  AssertIntEquals(asParserTextPosition(aCtx), 10);
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+
+//  parseString(aCtx, "// a1234 ");
+//  AssertIntFalse(asParserFailed(aCtx));
+//  AssertIntFalse(asParserCommitted(aCtx));
+//  AssertPtrNull(asCtxData(aCtx));
+//  AssertPtrNull(asCtxProcess(aCtx));
+  
+//  parseSingleCommentWord(aCtx);
+//  evalCommandInContext(aCtx, NULL);
+
+//  AssertIntEquals(asParserTextPosition(aCtx), 9);
+//  AssertIntFalse(asParserFailed(aCtx));
+//  AssertIntFalse(asParserCommitted(aCtx));
+//  AssertPtrNull(asCtxData(aCtx));
+//  AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[parseMultiCommentWord]
 
 \starttyping
 (
   '/*' pattern
-  ( ( '*/' pattern ) not ) 0 repeatAtLeast
+  ( ( '*/' pattern ) not 1 any ) 0 repeatAtLeast
   '*/' pattern
 ) 'multiComment' define
 \stoptyping
 
+\startCHeader
+void parseMultiCommentWord(ContextObj *aCtx);
+\stopCHeader
+
 \startCCode
 void parseMultiCommentWord(ContextObj *aCtx) {
-  pushSymbolCtxData(aCtx, "/*");
+
   pushSymbolCtxData(aCtx, "parsePattern");
-  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "*/");
   
-  pushSymbolCtxData(aCtx, "*/");
-  pushSymbolCtxData(aCtx, "parsePattern");
-  prependWord(aCtx);
-  wrapWord(aCtx);
-  pushSymbolCtxData(aCtx, "parseNot");
-  prependWord(aCtx);
-  wrapWord(aCtx);
-  prependWord(aCtx);
-  pushUIntegerCtxData(aCtx, 0);
-  prependWord(aCtx);
   pushSymbolCtxData(aCtx, "parseRepeatAtLeast");
-  prependWord(aCtx);
-  pushSymbolCtxData(aCtx, "*/");
-  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, 0);
+  
+  pushSymbolCtxData(aCtx, "parseAny");
+  pushUIntegerCtxData(aCtx, 1);
+  pushSymbolCtxData(aCtx, "parseNot");
   pushSymbolCtxData(aCtx, "parsePattern");
-  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "*/");
+  prependWord(aCtx); // */ pattern
+  wrapWord(aCtx);    // ( */ pattern )
+  prependWord(aCtx); // not
+  prependWord(aCtx); // 1
+  prependWord(aCtx); // any
   wrapWord(aCtx);
+  
+  pushSymbolCtxData(aCtx, "parsePattern");
+  pushSymbolCtxData(aCtx, "/*");
+
+  prependWord(aCtx); // '/*' pattern
+  prependWord(aCtx); // ( ( '*/' pattern) not )
+  prependWord(aCtx); // 0
+  prependWord(aCtx); // repeat-at-least
+  prependWord(aCtx); // '*/'
+  prependWord(aCtx); // pattern
+
   interpretWord(aCtx);
 }
 \stopCCode
+
+\CTestsSuiteSetup\
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  registerSExpressionParser(aCtx);
+\stopCTest
+
+\startTestCase[should fail if not a multi line comment]
+\startCTest
+  parseString(aCtx, "// 12231aaaaa");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+
+  parseMultiCommentWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 0);
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should succeed if a multi line comment]
+\startCTest
+  parseString(aCtx, "/* a1234 \n test a */ test ");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseMultiCommentWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 20);
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[parseCommentWord]
 
 \starttyping
 (
@@ -920,26 +1064,98 @@ void parseMultiCommentWord(ContextObj *aCtx) {
 ) 'comment' define
 \stoptyping
 
+\startCHeader
+void parseCommentWord(ContextObj *aCtx);
+\stopCHeader
+
 \startCCode
 void parseCommentWord(ContextObj *aCtx) {
-  pushSymbolCtxData(aCtx, "parseSingleComment");
   pushSymbolCtxData(aCtx, "parseMultiComment");
+  pushSymbolCtxData(aCtx, "parseSingleComment");
   prependWord(aCtx);
-  wrapWord(aCtx);
   jPegChoiceWord(aCtx);
 }
 \stopCCode
 
+\CTestsSuiteSetup\
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  registerSExpressionParser(aCtx);
+\stopCTest
+
+\startTestCase[should fail if not a comment]
+\startCTest
+  parseString(aCtx, "aaaaaaaa");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseCommentWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 0);
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should succeed if one or more comments]
+\startCTest
+  parseString(aCtx, "// this is \n a test ");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseCommentWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 12);
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseString(aCtx, "/* this is \n another  */ test");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseCommentWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 24);
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[parseSExpressionWord]
+
 \starttyping
 (
   (
-    naturalNum
-    identifier
-    comment
-    string
-    whiteSpace
-    operator
-  ) choice
+    (
+      naturalNum
+      identifier
+      comment
+      string
+      whiteSpace
+      operator
+    ) choice
+  ) 0 repeatAtLeast
 ) 'sExpression' define
 \stoptyping
 
@@ -949,21 +1165,70 @@ void parseSExpressionWord(ContextObj *aCtx);
 
 \startCCode
 void parseSExpressionWord(ContextObj *aCtx) {
-  pushSymbolCtxData(aCtx, "parseNaturalNum");
-  pushSymbolCtxData(aCtx, "parseIdentifier");
-  prependWord(aCtx);
-  pushSymbolCtxData(aCtx, "parseComment");
-  prependWord(aCtx);
-  pushSymbolCtxData(aCtx, "parseString");
-  prependWord(aCtx);
-  pushSymbolCtxData(aCtx, "parseWhiteSpace");
-  prependWord(aCtx);
+
+  pushSymbolCtxData(aCtx, "parseChoice");
   pushSymbolCtxData(aCtx, "parseOperator");
-  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "parseWhiteSpace");
+  pushSymbolCtxData(aCtx, "parseString");
+  pushSymbolCtxData(aCtx, "parseComment");
+  pushSymbolCtxData(aCtx, "parseIdentifier");
+  pushSymbolCtxData(aCtx, "parseNaturalNum");
+  prependWord(aCtx); // natural num & identifier
+  prependWord(aCtx); // comment
+  prependWord(aCtx); // string
+  prependWord(aCtx); // white space
+  prependWord(aCtx); // operator
   wrapWord(aCtx);
-  jPegChoiceWord(aCtx);
+  prependWord(aCtx); // choice
+
+  pushUIntegerCtxData(aCtx, 0);
+
+  jPegRepeatAtLeastWord(aCtx);
 }
 \stopCCode
+
+\startTestCase[should succeed if one or more sExpressions]
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  registerSExpressionParser(aCtx);
+  
+  parseString(aCtx, " 0xAF \"a test string\" // this is \n a test ");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseSExpressionWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 42);
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseString(aCtx, " 1234 'a string' /* this is \n another  */ test");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseSExpressionWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 46);
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
+\stopTestSuite
 
 \startCHeader
 void registerSExpressionParser(ContextObj *aCtx);
@@ -990,4 +1255,3 @@ void registerSExpressionParser(ContextObj *aCtx) {
   registerCFunction(symTab, "parseSExp",          parseSExpressionWord);
 }
 \stopCCode
-

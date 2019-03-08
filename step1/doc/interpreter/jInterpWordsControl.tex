@@ -12,6 +12,7 @@ void pushListWord(ContextObj* aCtx);
 
 \startCCode
 void pushListWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "pushListWord%s\n", "");
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, aList);
   top = asJObj(newPair(top, NULL));
@@ -26,6 +27,7 @@ void popListWord(ContextObj* aCtx);
 
 \startCCode
 void popListWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "popListWord%s\n", "");
   popCtxDataInto(aCtx, aList);
   popListInto(aCtx, aList, top);
   pushCtxData(aCtx, aList);
@@ -66,6 +68,7 @@ void appendWord(ContextObj* aCtx);
 
 \startCCode
 void appendWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "apendWord%s\n", "");
   popCtxDataInto(aCtx, top);
   popCtxDataInto(aCtx, second);
   JObj* result = asJObj(concatLists(second, top));
@@ -79,6 +82,7 @@ void extractWord(ContextObj* aCtx);
 
 \startCCode
 void extractWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "extractWord%s\n", "");
   popCtxDataInto(aCtx, top);
   prependListCtxData(aCtx, top);
 }
@@ -90,6 +94,7 @@ void interpretWord(ContextObj* aCtx);
 
 \startCCode
 void interpretWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "interpretWord%s\n", "");
   popCtxDataInto(aCtx, top);
   prependListCtxProcess(aCtx, top);
 }
@@ -97,6 +102,7 @@ void interpretWord(ContextObj* aCtx) {
 
 \startCCode
 void ifteWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "ifteWord%s\n", "");
   popCtxDataInto(aCtx, topElse);
   popCtxDataInto(aCtx, topThen);
   popCtxDataInto(aCtx, topIf);
@@ -109,6 +115,7 @@ void ifteWord(ContextObj* aCtx) {
 
 \startCCode
 static void ifteContWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "ifteContWord%s\n", "");
   assert(isContextObj(aCtx));
 
   popCtxDataInto(aCtx, topIf);
@@ -124,6 +131,7 @@ static void ifteContWord(ContextObj* aCtx) {
 
 \startCCode
 static void forWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "forWord%s\n", "");
   assert(isContextObj(aCtx));
 
   popCtxProcessInto(aCtx, nextCommand);
@@ -140,12 +148,14 @@ static void forWord(ContextObj* aCtx) {
 
 \startCCode
 static void forDoneWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "forDoneWord%s\n", "");
   // ignore
 }
 \stopCCode
 
 \startCCode
 static void lispInterpretWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "lispInterpretWord%s\n", "");
   popCtxDataInto(aCtx, top);
   if (!isPairObj(top)) {
     raiseExceptionMsg(aCtx,
@@ -161,6 +171,7 @@ static void lispInterpretWord(ContextObj* aCtx) {
 
 \startCCode
 static void lispForWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "lispForWord%s\n", "");
   assert(isContextObj(aCtx));
 
   popCtxProcessInto(aCtx, nextCommand);
@@ -185,6 +196,7 @@ static void lispForWord(ContextObj* aCtx) {
 
 \startCCode
 static void doneWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "doneWord%s\n", "");
   assert(isContextObj(aCtx));
   aCtx->process = NULL;
 }
@@ -192,6 +204,7 @@ static void doneWord(ContextObj* aCtx) {
 
 \startCCode
 static void clearContextWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "clearContextWord%s\n", "");
   assert(isContextObj(aCtx));
   aCtx->data    = NULL;
   aCtx->process = NULL;
@@ -202,6 +215,7 @@ static void clearContextWord(ContextObj* aCtx) {
 
 \startCCode
 static void tryWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "tryWord%s\n", "");
   popCtxDataInto(aCtx, handlerExp);
   popCtxDataInto(aCtx, tryExp);
   pushCtxProcess(aCtx, handlerExp);
@@ -212,6 +226,7 @@ static void tryWord(ContextObj* aCtx) {
 
 \startCCode
 static void raiseWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "raiseWord%s\n", "");
   assert(isContextObj(aCtx));
   aCtx->exceptionRaised = true;
   popCtxDataInto(aCtx, raiseExp);
@@ -222,6 +237,7 @@ static void raiseWord(ContextObj* aCtx) {
 
 \startCCode
 static void raiseIfFalseWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "raiseIfFalseWord%s\n", "");
   assert(isContextObj(aCtx));
 
   popCtxDataInto(aCtx, condition);
@@ -235,6 +251,7 @@ static void raiseIfFalseWord(ContextObj* aCtx) {
 
 \startCCode
 ContextObj *findFirstTryHandlerWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "findFirstTryHandlerWord%s\n", "");
   assert(isContextObj(aCtx));
 
   if (aCtx->process) {
@@ -284,6 +301,7 @@ ContextObj *findFirstTryHandlerWord(ContextObj* aCtx) {
 
 \startCCode
 static void tryHandlerWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "tryHandlerWord%s\n", "");
   popCtxProcessInto(aCtx, handlerExp);
 }
 \stopCCode
@@ -307,6 +325,7 @@ void raiseExceptionImpl(
   ContextObj *aCtx,
   Symbol     *message
 ) {
+  DEBUG(ParserDebug, "raiseExceptionImp%s\n", "");
   assert(isContextObj(aCtx));
 
   if (!message) message = "unknown";
@@ -359,6 +378,7 @@ extern void reportException(ContextObj* aCtx);
 void reportException(
   ContextObj* aCtx
 ) {
+  DEBUG(ParserDebug, "reportExceptionWord%s\n", "");
   assert(isContextObj(aCtx));
 
   DEBUG(TraceDebug, "reportException %p [%s] %zu\n",
@@ -407,6 +427,7 @@ void reportException(
 \subsection[title=Support]
 \startCCode
 static void defineWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "defineWord%s\n", "");
   assert(isContextObj(aCtx));  
   popCtxDataInto(aCtx, name);
   popCtxDataInto(aCtx, definition);
@@ -427,6 +448,7 @@ static void defineWord(ContextObj* aCtx) {
 \starttyping
 \startCCode
 static void defineContextWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "defineContextWord%s\n", "");
   assert(isContextObj(aCtx));
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
@@ -489,6 +511,7 @@ static void defineContextWord(ContextObj* aCtx) {
 
 \startCCode
 static void newContextWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "newContextWord%s\n", "");
   assert(isContextObj(aCtx));
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
@@ -532,6 +555,7 @@ static void newContextWord(ContextObj* aCtx) {
 
 \startCCode
 static void thisContextWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "thisContextWord%s\n", "");
   assert(isContextObj(aCtx));
   DEBUG(aCtx->jInterp, "thisContextAP > %p\n", aCtx);
   pushCtxDataImpl(aCtx, (JObj*)aCtx);
@@ -541,6 +565,7 @@ static void thisContextWord(ContextObj* aCtx) {
 
 \startCCode
 static ContextObj* switchCtxWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "switchCtxWord%s\n", "");
   assert(isContextObj(aCtx));
 
   popCtxDataIntoImpl(aCtx, newContext);
@@ -570,6 +595,7 @@ static ContextObj* switchCtxWord(ContextObj* aCtx) {
 
 \startCCode
 static void defineNamingWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "defineNamingWord%s\n", "");
   assert(isContextObj(aCtx));
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
@@ -622,6 +648,7 @@ static void defineNamingWord(ContextObj* aCtx) {
 
 \startCCode
 static void newNamingWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "newNamingWord%s\n", "");
   assert(isContextObj(aCtx));
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
@@ -658,6 +685,7 @@ static void newNamingWord(ContextObj* aCtx) {
 
 \startCCode
 static void localizeNamingWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "localizeNamingWord%s\n", "");
   assert(isContextObj(aCtx));
   JoyLoLInterp *jInterp = aCtx->jInterp;
   assert(jInterp);
@@ -682,6 +710,7 @@ static void localizeNamingWord(ContextObj* aCtx) {
 
 \startCCode
 static void thisNamingWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "thisNmingWord%s\n", "");
   assert(isContextObj(aCtx));
   pushCtxDataImpl(aCtx, (JObj*)(aCtx->dict));
 }
@@ -690,6 +719,7 @@ static void thisNamingWord(ContextObj* aCtx) {
 
 \startCCode
 static void undefineWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "undefineWord%s\n", "");
   assert(isContextObj(aCtx));
   
   popCtxDataInto(aCtx, nameList);
@@ -721,6 +751,7 @@ void breakPointWord(ContextObj *aCtx);
 
 \startCCode
 void breakPointWord(ContextObj *aCtx) {
+  DEBUG(ParserDebug, "breakPointWordWord%s\n", "");
   assert(isContextObj(aCtx));
   asCtxBreakPoint(aCtx) = true;
   if (aCtx->tracingOn) printf("breakPoint: breaking\n");
@@ -733,6 +764,7 @@ void breakPointOn(ContextObj *aCtx, Symbol *aSymbol);
 
 \startCCode
 void breakPointOn(ContextObj *aCtx, Symbol *aSymbol) {
+  DEBUG(ParserDebug, "breakPointOnWord: [%s]\n", aSymbol);
   assert(isContextObj(aCtx));
   if (!aSymbol) return;
   deleteSymbol(asCtxSymbols(aCtx), aSymbol);
