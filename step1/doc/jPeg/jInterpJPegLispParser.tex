@@ -1148,12 +1148,12 @@ void parseCommentWord(ContextObj *aCtx) {
 (
   (
     (
-      naturalNum
-      identifier
+      ( naturalNum ) capture
+      ( identifier ) capture
       comment
-      string
+      ( string     ) capture
       whiteSpace
-      operator
+      ( operator   ) capture
     ) choice
   ) 0 repeatAtLeast
 ) 'sExpression' define
@@ -1167,12 +1167,39 @@ void parseSExpressionWord(ContextObj *aCtx);
 void parseSExpressionWord(ContextObj *aCtx) {
 
   pushSymbolCtxData(aCtx, "parseChoice");
+  
+  pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseOperator");
+  wrapWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  
   pushSymbolCtxData(aCtx, "parseWhiteSpace");
+  
+  pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseString");
+  wrapWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  
   pushSymbolCtxData(aCtx, "parseComment");
+  
+  pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseIdentifier");
+  wrapWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  wrapWord(aCtx);
+
+  pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseNaturalNum");
+  wrapWord(aCtx);
+  wrapWord(aCtx);
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  
   prependWord(aCtx); // natural num & identifier
   prependWord(aCtx); // comment
   prependWord(aCtx); // string
@@ -1206,12 +1233,18 @@ void parseSExpressionWord(ContextObj *aCtx) {
   parseSExpressionWord(aCtx);
   evalCommandInContext(aCtx, NULL);
   
+//  showParserCaptures(aCtx);
+  
   AssertIntEquals(asParserTextPosition(aCtx), 42);
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNull(asCtxData(aCtx));
   AssertPtrNull(asCtxProcess(aCtx));
+  AssertPtrNotNull(asParserCaptures(aCtx));
+  AssertIntTrue(isPairObj(asParserCaptures(aCtx)));
+  AssertIntEquals(listLength(asCar(asParserCaptures(aCtx))), 4);
   
+  clearParserCaptures(aCtx);
   parseString(aCtx, " 1234 'a string' /* this is \n another  */ test");
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asParserCommitted(aCtx));
@@ -1221,11 +1254,16 @@ void parseSExpressionWord(ContextObj *aCtx) {
   parseSExpressionWord(aCtx);
   evalCommandInContext(aCtx, NULL);
   
+//  showParserCaptures(aCtx);
+  
   AssertIntEquals(asParserTextPosition(aCtx), 46);
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNull(asCtxData(aCtx));
   AssertPtrNull(asCtxProcess(aCtx));
+  AssertPtrNotNull(asParserCaptures(aCtx));
+  AssertIntTrue(isPairObj(asParserCaptures(aCtx)));
+  AssertIntEquals(listLength(asCar(asParserCaptures(aCtx))), 3);
 \stopCTest
 \stopTestCase
 \stopTestSuite
