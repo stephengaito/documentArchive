@@ -7,7 +7,7 @@ Finally we translate this into jPeg:
 \startTestSuite[parseOperatorWord]
 
 \starttyping
-( ( 1 any ) capture ) 'operator' define
+( ( 1 any ) capture append ) 'operator' define
 \stoptyping
 
 \startCHeader
@@ -170,7 +170,7 @@ void parseWhiteSpaceWord(ContextObj *aCtx) {
   (
     ( 'az' 'AZ') 1 charSet
     ( 'az' 'AZ' '09' '_') 0 span
-  ) capture
+  ) capture append
 ) 'identifier' define
 \stoptyping
 
@@ -269,17 +269,19 @@ void parseIdentifierWord(ContextObj *aCtx) {
 (
   (
     ( '09' ) 1 span
-  ) capture
+  ) capture decimal2UInt append
 ) 'decimalNum' define
 \stoptyping
 
 \startCHeader
 void parseDecimalNumberWord(ContextObj *aCtx);
+void convertDecimal2UIntWord(ContextObj *aCtx);
 \stopCHeader
 
 \startCCode
 void parseDecimalNumberWord(ContextObj *aCtx) {
 
+  pushSymbolCtxData(aCtx, "convertDecimal2UInt");
   pushSymbolCtxData(aCtx, "parseCapture");
   
   pushSymbolCtxData(aCtx, "parseSpan");
@@ -291,8 +293,13 @@ void parseDecimalNumberWord(ContextObj *aCtx) {
   prependWord(aCtx); // span
   wrapWord(aCtx);
   prependWord(aCtx); // capture
+  prependWord(aCtx); // decimal2Uint
   
   interpretWord(aCtx);
+}
+
+void convertDecimal2UIntWord(ContextObj *aCtx) {
+  
 }
 \stopCCode
 
@@ -354,12 +361,13 @@ void parseDecimalNumberWord(ContextObj *aCtx) {
     '0' pattern
     ( 'x' 'X' ) 1 charSet
     ( '09' 'af' 'AF' ',' ) 1 span
-  ) capture
+  ) capture hex2Uint append
 ) 'hexNumber' define
 \stoptyping
 
 \startCHeader
 void parseHexadecimalNumber(ContextObj *aCtx);
+void convertHexadecimal2UIntWord(ContextObj *aCtx);
 \stopCHeader
 
 \startCCode
@@ -400,6 +408,10 @@ void parseHexadecimalNumber(ContextObj *aCtx) {
   prependWord(aCtx); // capture
   
   interpretWord(aCtx);
+}
+
+void convertHexadecimal2UIntWord(ContextObj *aCtx) {
+  
 }
 \stopCCode
 
@@ -566,7 +578,7 @@ void parseNaturalNumberWord(ContextObj *aCtx) {
         ( '\\' pattern 1 any )
       ) choice
     ) 0 repeatAtLeast
-  ) capture
+  ) capture append
   "'" pattern
 ) 'singleQuote' define
 \stoptyping
@@ -695,7 +707,7 @@ void parseSingleQuoteWord(ContextObj *aCtx) {
         ( '\\' pattern 1 any )
       ) choice
     ) 0 repeatAtLeast
-  ) capture
+  ) capture append
   '"' pattern
 ) 'doubleQuote' define
 \stoptyping
@@ -1190,16 +1202,59 @@ void parseCommentWord(ContextObj *aCtx) {
 \stopTestCase
 \stopTestSuite
 
+\startTestSuite[parseListWord]
+
+\starttyping
+(
+  '(' pattern commit null
+  sExp
+  ')' pattern wrap append
+)
+\stoptyping
+
+\startCHeader
+void parseListWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void parseListWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  pushSymbolCtxData(aCtx, "append");
+  pushSymbolCtxData(aCtx, "wrap");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  pushSymbolCtxData(aCtx, ")");
+  pushSymbolCtxData(aCtx, "parseSExp");
+  pushSymbolCtxData(aCtx, "null");
+  pushSymbolCtxData(aCtx, "parseCommit");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  pushSymbolCtxData(aCtx, "(");
+  prependWord(aCtx); // '(' & pattern
+  prependWord(aCtx); // commit
+  prependWord(aCtx); // null
+  prependWord(aCtx); // sExp
+  prependWord(aCtx); // ')'
+  prependWord(aCtx); // pattern
+  prependWord(aCtx); // wrap
+  prependWord(aCtx); // append
+  
+  interpretWord(aCtx);
+}
+\stopCCode
+
+\stopTestSuite
+
 \startTestSuite[parseSExpressionWord]
 
 \starttyping
 (
   (
     (
-      ( naturalNum ) capture
-      ( identifier ) capture
+      naturalNum
+      identifier
+      string
+      list
       comment
-      ( string     ) capture
       whiteSpace
       operator
     ) choice
@@ -1300,18 +1355,21 @@ void registerSExpressionParser(ContextObj *aCtx) {
   SymbolTableObj *symTab = asCtxSymbols(aCtx);
   assert(isSymbolTableObj(symTab));
   
-  registerCFunction(symTab, "parseOperator",      parseOperatorWord);
-  registerCFunction(symTab, "parseWhiteSpace",    parseWhiteSpaceWord);
-  registerCFunction(symTab, "parseIdentifier",    parseIdentifierWord);
-  registerCFunction(symTab, "parseDecimalNum",    parseDecimalNumberWord);
-  registerCFunction(symTab, "parseHexNumber",     parseHexadecimalNumber);
-  registerCFunction(symTab, "parseNaturalNum",    parseNaturalNumberWord);
-  registerCFunction(symTab, "parseSingleQuote",   parseSingleQuoteWord);
-  registerCFunction(symTab, "parseDoubleQuote",   parseDoubleQuoteWord);
-  registerCFunction(symTab, "parseString",        parseStringWord);
-  registerCFunction(symTab, "parseSingleComment", parseSingleCommentWord);
-  registerCFunction(symTab, "parseMultiComment",  parseMultiCommentWord);
-  registerCFunction(symTab, "parseComment",       parseCommentWord);
-  registerCFunction(symTab, "parseSExp",          parseSExpressionWord);
+  registerCFunction(symTab, "parseOperator",       parseOperatorWord);
+  registerCFunction(symTab, "parseWhiteSpace",     parseWhiteSpaceWord);
+  registerCFunction(symTab, "parseIdentifier",     parseIdentifierWord);
+  registerCFunction(symTab, "parseDecimalNum",     parseDecimalNumberWord);
+  registerCFunction(symTab, "parseHexNumber",      parseHexadecimalNumber);
+  registerCFunction(symTab, "parseNaturalNum",     parseNaturalNumberWord);
+  registerCFunction(symTab, "parseSingleQuote",    parseSingleQuoteWord);
+  registerCFunction(symTab, "parseDoubleQuote",    parseDoubleQuoteWord);
+  registerCFunction(symTab, "parseString",         parseStringWord);
+  registerCFunction(symTab, "parseList",           parseListWord);
+  registerCFunction(symTab, "parseSingleComment",  parseSingleCommentWord);
+  registerCFunction(symTab, "parseMultiComment",   parseMultiCommentWord);
+  registerCFunction(symTab, "parseComment",        parseCommentWord);
+  registerCFunction(symTab, "parseSExp",           parseSExpressionWord);
+  registerCFunction(symTab, "convertDecimal2UInt", convertDecimal2UIntWord);
+  registerCFunction(symTab, "convertHex2UInt",     convertHexadecimal2UIntWord);
 }
 \stopCCode

@@ -84,20 +84,28 @@ void showParserCaptures(ContextObj *aCtx) {
 \stopCCode
 
 \startCHeader
-void appendSymbolParserCaptures(ContextObj *aCtx, Symbol *aSymbol);
+void appendParserCaptures(ContextObj *aCtx, JObj *anObj);
+//JObj *extractParserCaptures(ContextObj *aCtx);
+
+//#define extractParserCapturesInto(aCtx, aVar) 
 \stopCHeader
 
 \startCCode
-void appendSymbolParserCaptures(ContextObj *aCtx, Symbol *aSymbol) {
+void appendParserCaptures(ContextObj *aCtx, JObj *anObj) {
   assert(isContextObj(aCtx));
-  assert(aSymbol);
   
   popParserCapturesInto(aCtx, top);
   JObj *result =
-    asJObj(concatLists(top,
-      asJObj(newSymbol(aSymbol, "unknown", 0))));
+    asJObj(concatLists(top, anObj));
   pushParserCaptures(aCtx, result);
 }
+
+//JObj *extractParserCaptures(ContextObj *aCtx) {
+//  assert(isContextObj(aCtx));
+  
+//  popParserCapturesInto(aCtx, top);
+//  JObj *result = 
+//}
 \stopCCode
 
 \startCHeader
@@ -125,17 +133,18 @@ void jPegCaptureContinueWord(ContextObj *aCtx){
     
     if (captureStart <= captureEnd) {
       size_t symbolLen = captureEnd - captureStart;
-      char *newSymbol = calloc(symbolLen+1, sizeof(char));
+      char *aNewSymbol = calloc(symbolLen+1, sizeof(char));
       strncpy(
-        newSymbol,
+        aNewSymbol,
         asParserText(aCtx) + captureStart,
         symbolLen
       );
-      appendSymbolParserCaptures(aCtx, newSymbol);
       DEBUG(CaptureDebug,
         "jPegCaptureContinueWord: start %zu end %zu symbol [%s]\n",
-        captureStart, captureEnd, newSymbol
+        captureStart, captureEnd, aNewSymbol
       );
+      appendParserCaptures(aCtx,
+        asJObj(newSymbol(aNewSymbol, NULL, 0)));
     } else {
       DEBUG(CaptureDebug,
         "jPegCaptureContinueWord: capture end before capture start%s\n","");
