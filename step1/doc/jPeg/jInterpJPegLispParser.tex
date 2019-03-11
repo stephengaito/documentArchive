@@ -7,7 +7,7 @@ Finally we translate this into jPeg:
 \startTestSuite[parseOperatorWord]
 
 \starttyping
-( ( 1 any ) capture ) 'operator' define
+( ( 1 any ) capture append ) 'operator' define
 \stoptyping
 
 \startCHeader
@@ -16,11 +16,13 @@ void parseOperatorWord(ContextObj *aCtx);
 
 \startCCode
 void parseOperatorWord(ContextObj *aCtx) {
+  pushSymbolCtxData(aCtx, "append");
   pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseAny");
   pushUIntegerCtxData(aCtx, 1);
   prependWord(aCtx);
   wrapWord(aCtx);
+  prependWord(aCtx);
   prependWord(aCtx);
   interpretWord(aCtx);
 }
@@ -87,8 +89,9 @@ void parseOperatorWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isSymbolObj(asCar(asCtxData(aCtx))));
-  AssertStrEquals(asSymbol(asCar(asCtxData(aCtx))), "T");
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isSymbolObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertStrEquals(asSymbol(asCar(asCar(asCtxData(aCtx)))), "T");
   AssertPtrNull(asCtxProcess(aCtx));
 \stopCTest
 \stopTestCase
@@ -173,7 +176,7 @@ void parseWhiteSpaceWord(ContextObj *aCtx) {
   (
     ( 'az' 'AZ') 1 charSet
     ( 'az' 'AZ' '09' '_') 0 span
-  ) capture
+  ) capture append
 ) 'identifier' define
 \stoptyping
 
@@ -184,6 +187,7 @@ void parseIdentifierWord(ContextObj *aCtx);
 \startCCode
 void parseIdentifierWord(ContextObj *aCtx) {
 
+  pushSymbolCtxData(aCtx, "append");
   pushSymbolCtxData(aCtx, "parseCapture");
 
   pushSymbolCtxData(aCtx, "parseSpan");
@@ -210,6 +214,7 @@ void parseIdentifierWord(ContextObj *aCtx) {
   
   prependWord(aCtx);
   wrapWord(aCtx);
+  prependWord(aCtx);
   prependWord(aCtx);
   
   interpretWord(aCtx);
@@ -262,8 +267,9 @@ void parseIdentifierWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isSymbolObj(asCar(asCtxData(aCtx))));
-  AssertStrEquals(asSymbol(asCar(asCtxData(aCtx))), "a1234_test");
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isSymbolObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertStrEquals(asSymbol(asCar(asCar(asCtxData(aCtx)))), "a1234_test");
   AssertPtrNull(asCtxProcess(aCtx));
 \stopCTest
 \stopTestCase
@@ -275,7 +281,7 @@ void parseIdentifierWord(ContextObj *aCtx) {
 (
   (
     ( '09' ) 1 span
-  ) capture decimal2UInt
+  ) capture decimal2UInt append
 ) 'decimalNum' define
 \stoptyping
 
@@ -287,6 +293,7 @@ void convertDecimal2UIntWord(ContextObj *aCtx);
 \startCCode
 void parseDecimalNumberWord(ContextObj *aCtx) {
 
+  pushSymbolCtxData(aCtx, "append");
   pushSymbolCtxData(aCtx, "convertDecimal2UInt");
   pushSymbolCtxData(aCtx, "parseCapture");
   
@@ -300,6 +307,7 @@ void parseDecimalNumberWord(ContextObj *aCtx) {
   wrapWord(aCtx);
   prependWord(aCtx); // capture
   prependWord(aCtx); // decimal2Uint
+  prependWord(aCtx); // append
   
   interpretWord(aCtx);
 }
@@ -362,8 +370,9 @@ void convertDecimal2UIntWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isUIntegerObj(asCar(asCtxData(aCtx))));
-  AssertIntEquals(asUInteger(asCar(asCtxData(aCtx))), 1234);  
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isUIntegerObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertIntEquals(asUInteger(asCar(asCar(asCtxData(aCtx)))), 1234);  
   AssertPtrNull(asCtxProcess(aCtx));
 \stopCTest
 \stopTestCase
@@ -377,7 +386,7 @@ void convertDecimal2UIntWord(ContextObj *aCtx) {
     '0' pattern
     ( 'x' 'X' ) 1 charSet
     ( '09' 'af' 'AF' ',' ) 1 span
-  ) capture hex2UInt
+  ) capture hex2UInt append
 ) 'hexNumber' define
 \stoptyping
 
@@ -389,6 +398,7 @@ void convertHexadecimal2UIntWord(ContextObj *aCtx);
 \startCCode
 void parseHexadecimalNumber(ContextObj *aCtx) {
 
+  pushSymbolCtxData(aCtx, "append");
   pushSymbolCtxData(aCtx, "convertHex2UInt");
   pushSymbolCtxData(aCtx, "parseCapture");
 
@@ -424,6 +434,7 @@ void parseHexadecimalNumber(ContextObj *aCtx) {
   wrapWord(aCtx);
   prependWord(aCtx); // capture
   prependWord(aCtx); // hex2Uint
+  prependWord(aCtx); // append
   
   interpretWord(aCtx);
 }
@@ -486,8 +497,9 @@ void convertHexadecimal2UIntWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isUIntegerObj(asCar(asCtxData(aCtx))));
-  AssertIntEquals(asUInteger(asCar(asCtxData(aCtx))), 431);  
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isUIntegerObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertIntEquals(asUInteger(asCar(asCar(asCtxData(aCtx)))), 431);  
   AssertPtrNull(asCtxProcess(aCtx));
 \stopCTest
 \stopTestCase
@@ -560,8 +572,9 @@ void parseNaturalNumberWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isUIntegerObj(asCar(asCtxData(aCtx))));
-  AssertIntEquals(asUInteger(asCar(asCtxData(aCtx))), 431);  
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isUIntegerObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertIntEquals(asUInteger(asCar(asCar(asCtxData(aCtx)))), 431);  
   AssertPtrNull(asCtxProcess(aCtx));
   
   clearCtxData(aCtx);
@@ -579,8 +592,9 @@ void parseNaturalNumberWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isUIntegerObj(asCar(asCtxData(aCtx))));
-  AssertIntEquals(asUInteger(asCar(asCtxData(aCtx))), 0);
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isUIntegerObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertIntEquals(asUInteger(asCar(asCar(asCtxData(aCtx)))), 0);
   AssertPtrNull(asCtxProcess(aCtx));
   
   clearCtxData(aCtx);
@@ -598,8 +612,9 @@ void parseNaturalNumberWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isUIntegerObj(asCar(asCtxData(aCtx))));
-  AssertIntEquals(asUInteger(asCar(asCtxData(aCtx))), 1234);  
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isUIntegerObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertIntEquals(asUInteger(asCar(asCar(asCtxData(aCtx)))), 1234);  
   AssertPtrNull(asCtxProcess(aCtx));
 \stopCTest
 \stopTestCase
@@ -617,7 +632,7 @@ void parseNaturalNumberWord(ContextObj *aCtx) {
         ( '\\' pattern 1 any )
       ) choice
     ) 0 repeatAtLeast
-  ) capture
+  ) capture append
   "'" pattern
 ) 'singleQuote' define
 \stoptyping
@@ -632,6 +647,7 @@ void parseSingleQuoteWord(ContextObj *aCtx) {
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, "'");
 
+  pushSymbolCtxData(aCtx, "append");
   pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseRepeatAtLeast");
   pushUIntegerCtxData(aCtx, 0);
@@ -672,6 +688,7 @@ void parseSingleQuoteWord(ContextObj *aCtx) {
   prependWord(aCtx);  // repeat at least
   wrapWord(aCtx);
   prependWord(aCtx);  // capture
+  prependWord(aCtx);  // append
   
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, "'");
@@ -730,8 +747,9 @@ void parseSingleQuoteWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isSymbolObj(asCar(asCtxData(aCtx))));
-  AssertStrEquals(asSymbol(asCar(asCtxData(aCtx))), "a1234 \t test");
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isSymbolObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertStrEquals(asSymbol(asCar(asCar(asCtxData(aCtx)))), "a1234 \t test");
   AssertPtrNull(asCtxProcess(aCtx));
 \stopCTest
 \stopTestCase
@@ -749,7 +767,7 @@ void parseSingleQuoteWord(ContextObj *aCtx) {
         ( '\\' pattern 1 any )
       ) choice
     ) 0 repeatAtLeast
-  ) capture
+  ) capture append
   '"' pattern
 ) 'doubleQuote' define
 \stoptyping
@@ -764,6 +782,7 @@ void parseDoubleQuoteWord(ContextObj *aCtx) {
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, "\"");
 
+  pushSymbolCtxData(aCtx, "append");
   pushSymbolCtxData(aCtx, "parseCapture");
   pushSymbolCtxData(aCtx, "parseRepeatAtLeast");
   pushUIntegerCtxData(aCtx, 0);
@@ -804,6 +823,7 @@ void parseDoubleQuoteWord(ContextObj *aCtx) {
   prependWord(aCtx);  // repeat at least
   wrapWord(aCtx);
   prependWord(aCtx);  // capture
+  prependWord(aCtx);  // append
   
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, "\"");
@@ -862,8 +882,9 @@ void parseDoubleQuoteWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isSymbolObj(asCar(asCtxData(aCtx))));
-  AssertStrEquals(asSymbol(asCar(asCtxData(aCtx))), "a1234 \t test");
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isSymbolObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertStrEquals(asSymbol(asCar(asCar(asCtxData(aCtx)))), "a1234 \t test");
   AssertPtrNull(asCtxProcess(aCtx));
 \stopCTest
 \stopTestCase
@@ -936,8 +957,9 @@ void parseStringWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isSymbolObj(asCar(asCtxData(aCtx))));
-  AssertStrEquals(asSymbol(asCar(asCtxData(aCtx))), "this is");
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isSymbolObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertStrEquals(asSymbol(asCar(asCar(asCtxData(aCtx)))), "this is");
   AssertPtrNull(asCtxProcess(aCtx));
 
   clearCtxData(aCtx);
@@ -955,8 +977,9 @@ void parseStringWord(ContextObj *aCtx) {
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntEquals(listLength(asCtxData(aCtx)), 1);
-  AssertIntTrue(isSymbolObj(asCar(asCtxData(aCtx))));
-  AssertStrEquals(asSymbol(asCar(asCtxData(aCtx))), " this is ");
+  AssertIntTrue(isPairObj(asCar(asCtxData(aCtx))));
+  AssertIntTrue(isSymbolObj(asCar(asCar(asCtxData(aCtx)))));
+  AssertStrEquals(asSymbol(asCar(asCar(asCtxData(aCtx)))), " this is ");
   AssertPtrNull(asCtxProcess(aCtx));
 \stopCTest
 \stopTestCase
@@ -1362,15 +1385,30 @@ void parseSExpressionWord(ContextObj *aCtx) {
   parseSExpressionWord(aCtx);
   evalCommandInContext(aCtx, NULL);
   
-  showCtxData(aCtx);
-  showCtxProcess(aCtx);
-  
   AssertIntEquals(asParserTextPosition(aCtx), 42);
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntTrue(isPairObj(asCtxData(aCtx)));
-  AssertIntEquals(listLength(asCar(asCtxData(aCtx))), 4);
+  JObj *sExp = asCar(asCtxData(aCtx));
+  AssertIntEquals(listLength(sExp), 4);
+
+  popListInto(aCtx, sExp, afVar);
+  AssertIntTrue(isUIntegerObj(afVar));
+  AssertIntEquals(asUInteger(afVar), 175);
+  
+  popListInto(aCtx, sExp, strVar);
+  AssertIntTrue(isSymbolObj(strVar));
+  AssertStrEquals(asSymbol(strVar), "a test string");
+  
+  popListInto(aCtx, sExp, aVar);
+  AssertIntTrue(isSymbolObj(aVar));
+  AssertStrEquals(asSymbol(aVar), "a");
+  
+  popListInto(aCtx, sExp, testVar);
+  AssertIntTrue(isSymbolObj(testVar));
+  AssertStrEquals(asSymbol(testVar), "test");
+  
   AssertPtrNull(asCtxProcess(aCtx));
   
   clearCtxData(aCtx);
@@ -1383,15 +1421,26 @@ void parseSExpressionWord(ContextObj *aCtx) {
   parseSExpressionWord(aCtx);
   evalCommandInContext(aCtx, NULL);
 
-  showCtxData(aCtx);
-  showCtxProcess(aCtx);
-  
   AssertIntEquals(asParserTextPosition(aCtx), 46);
   AssertIntFalse(asParserFailed(aCtx));
   AssertIntFalse(asParserCommitted(aCtx));
   AssertPtrNotNull(asCtxData(aCtx));
   AssertIntTrue(isPairObj(asCtxData(aCtx)));
-  AssertIntEquals(listLength(asCar(asCtxData(aCtx))), 3);
+  sExp = asCar(asCtxData(aCtx));
+  AssertIntEquals(listLength(sExp), 3);
+  
+  popListInto(aCtx, sExp, a1234Var);
+  AssertIntTrue(isUIntegerObj(a1234Var));
+  AssertIntEquals(asUInteger(a1234Var), 1234);
+  
+  popListInto(aCtx, sExp, strVar2);
+  AssertIntTrue(isSymbolObj(strVar2));
+  AssertStrEquals(asSymbol(strVar2), "a string");
+  
+  popListInto(aCtx, sExp, testVar2);
+  AssertIntTrue(isSymbolObj(testVar2));
+  AssertStrEquals(asSymbol(testVar2), "test");
+  
   AssertPtrNull(asCtxProcess(aCtx));
 \stopCTest
 \stopTestCase
