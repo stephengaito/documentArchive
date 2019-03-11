@@ -20,10 +20,11 @@ typedef struct context_struct {
   Boolean          parserCommitted;
   Boolean          parserFailed;
   Symbol          *parserText;
+  Symbol          *parserTextName;
   size_t           parserTextSize;
   size_t           parserTextPosition;
   SymbolTableObj  *parserSymbolTable;
-  JObj            *parserCaptures;
+  JObj            *parserBTPs;
   StringBufferObj *renderBuffer;
   Boolean          tracingOn;
   Boolean          debug;
@@ -44,6 +45,7 @@ typedef struct context_struct {
 #define asParserCommitted(anObj) (((ContextObj*)(anObj))->parserCommitted)
 #define asParserFailed(anObj) (((ContextObj*)(anObj))->parserFailed)
 #define asParserText(anObj) (((ContextObj*)(anObj))->parserText)
+#define asParserTextName(anObj) (((ContextObj*)(anObj))->parserTextName)
 #define asParserTextSize(anObj) (((ContextObj*)(anObj))->parserTextSize)
 #define asParserTextPosition(anObj) (((ContextObj*)(anObj))->parserTextPosition)
 #define resetParserTextPosition(anObj) \
@@ -52,7 +54,7 @@ typedef struct context_struct {
   (*((char*)(asParserText(anObj)+asParserTextPosition(anObj))))
 #define advanceParserTextPosition(anObj) asParserTextPosition(anObj)++
 #define asParserSymbols(anObj) (((ContextObj*)(anObj))->parserSymbolTable)
-#define asParserCaptures(anObj) (((ContextObj*)(anObj))->parserCaptures)
+#define asParserBTPs(anObj) (((ContextObj*)(anObj))->parserBTPs)
 #define asRenderBuffer(anObj) (((ContextObj*)(anObj))->renderBuffer)
 #define asCtxExceptionRaised(anObj) (((ContextObj*)(anObj))->exceptionRaised)
 #define resetCtxExceptionRaised(anObj) \

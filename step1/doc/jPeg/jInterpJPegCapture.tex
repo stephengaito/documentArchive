@@ -3,112 +3,6 @@
 \subsection[title=Capture]
 
 \startCHeader
-void clearParserCaptures(ContextObj *aCtx);
-\stopCHeader
-
-\startCCode
-void clearParserCaptures(ContextObj *aCtx) {
-  assert(isContextObj(aCtx));
-  aCtx->parserCaptures = NULL;
-}
-\stopCCode
-
-\startCHeader
-void pushParserCaptures(ContextObj *aCtx, JObj *lolToPush);
-\stopCHeader
-
-\startCCode
-void pushParserCaptures(ContextObj *aCtx, JObj *lolToPush) {
-  assert(isContextObj(aCtx));
-  aCtx->parserCaptures =
-    asJObj(newPair(lolToPush, aCtx->parserCaptures));
-}
-\stopCCode
-
-\startCHeader
-void pushNullParserCaptures(ContextObj *aCtx);
-\stopCHeader
-
-\startCCode
-void pushNullParserCaptures(ContextObj *aCtx) {
-  assert(isContextObj(aCtx));
-  aCtx->parserCaptures = 
-    asJObj(newPair(NULL, aCtx->parserCaptures));
-}
-\stopCCode
-
-\startCHeader
-JObj *popParserCaptures(ContextObj *aCtx);
-
-#define popParserCapturesInto(aCtx, aVar)       \
-assert(isContextObj(aCtx));                     \
-JObj *aVar = popParserCaptures(aCtx);           \
-if (aCtx->tracingOn) {                          \
-  StringBufferObj *aStrBuf = newStringBuffer(); \
-  strBufPrintf(aStrBuf, "%s = ", #aVar);        \
-  printJObj(aStrBuf, asJObj(aVar), "", 20);     \
-  strBufPrintf(aStrBuf, "\n");                  \
-  printf("%s", getCString(aStrBuf));            \
-  strBufClose(aStrBuf);                         \
-  free(aStrBuf);                                \
-}
-\stopCHeader
-
-\startCCode
-JObj *popParserCaptures(ContextObj *aCtx) {
-  assert(isContextObj(aCtx));
-  
-  if (!aCtx->parserCaptures) return NULL;
-  
-  assert(isPairObj(aCtx->parserCaptures));
-  JObj *poppedLoL      = asCar(aCtx->parserCaptures);
-  aCtx->parserCaptures = asCdr(aCtx->parserCaptures);
-  
-  DEBUG(ParserDebug, "popParserCaptures: %p %s\n",
-    poppedLoL, getJObjName(poppedLoL)
-  );
-  
-  return poppedLoL;
-}
-\stopCCode
-
-\startCHeader
-void showParserCaptures(ContextObj *aCtx);
-\stopCHeader
-
-\startCCode
-void showParserCaptures(ContextObj *aCtx) {
-  assert(isContextObj(aCtx));
-  showCtxStack(aCtx, aCtx->parserCaptures, "captures");
-}
-\stopCCode
-
-\startCHeader
-void appendParserCaptures(ContextObj *aCtx, JObj *anObj);
-//JObj *extractParserCaptures(ContextObj *aCtx);
-
-//#define extractParserCapturesInto(aCtx, aVar) 
-\stopCHeader
-
-\startCCode
-void appendParserCaptures(ContextObj *aCtx, JObj *anObj) {
-  assert(isContextObj(aCtx));
-  
-  popParserCapturesInto(aCtx, top);
-  JObj *result =
-    asJObj(concatLists(top, anObj));
-  pushParserCaptures(aCtx, result);
-}
-
-//JObj *extractParserCaptures(ContextObj *aCtx) {
-//  assert(isContextObj(aCtx));
-  
-//  popParserCapturesInto(aCtx, top);
-//  JObj *result = 
-//}
-\stopCCode
-
-\startCHeader
 void jPegCaptureContinueWord(ContextObj *aCtx);
 \stopCHeader
 
@@ -143,8 +37,9 @@ void jPegCaptureContinueWord(ContextObj *aCtx){
         "jPegCaptureContinueWord: start %zu end %zu symbol [%s]\n",
         captureStart, captureEnd, aNewSymbol
       );
-      appendParserCaptures(aCtx,
-        asJObj(newSymbol(aNewSymbol, NULL, 0)));
+      pushCtxData(aCtx, asJObj(
+        newSymbol(aNewSymbol, asParserTextName(aCtx), captureStart)
+      ));
     } else {
       DEBUG(CaptureDebug,
         "jPegCaptureContinueWord: capture end before capture start%s\n","");
