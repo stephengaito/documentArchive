@@ -1281,8 +1281,9 @@ void parseCommentWord(ContextObj *aCtx) {
 
 \starttyping
 (
-  '(' pattern commit emptyList
-  sExp
+  '(' pattern emptyList
+  sExp commit
+  ( lookingForListClose ) labelFailures
   ')' pattern wrap append
 )
 \stoptyping

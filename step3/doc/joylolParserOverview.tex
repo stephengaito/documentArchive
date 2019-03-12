@@ -35,3 +35,301 @@ An example use...
 
 \stoptyping
 
+\section[title=Syntax/Semantics]
+
+For the initial version of the syntax for both the JoyLoL Configuratoion 
+Language, and the JoyLoL Language itself, we make essential use of 
+Bertrand Meyer's definition of the early version of Eiffel contained in 
+\cite{meyer1992eiffelTheLanguage}. We will however make extensive chages 
+to suit a new purpose. Eiffel's essentiall use of \quote{programming by 
+contract} is however very close to one of our twin purposes for JoyLoL. 
+
+We structure the various parsers using ideas from Meyer's 
+\cite{meyer1990theoryProgrammingLanguages}. 
+
+\subsection[title=The JoyLoL Configuration Language] 
+
+\bold{Syntax} 
+
+\starttyping
+configuration = systemConfig 
+  defaults^0 
+  clusters^0 
+  externals^0 
+  generation
+  end ("--" "system" systemName)^0
+systemConfig = "system" systemName
+systemName   = name
+
+defaults = "default" optionClause (";" optionClause)^0
+options  = "option" optionClause (";" optionClause)^0
+optionClause = optionTag optionMark^0 targetList^0
+optionTag    = classTag + systemTag + freeTag
+classTag     = "assertion" + "debug" + "optimize" + "trace"
+systemTag    = "collect"
+freeTag      = name
+optionMark   = "(" optionValue")"
+optionValue  = standardValue + classValue + freeValue
+standardValue = "yes" + "no" + "all"
+classValue    = "require" + "ensure" + "invariant" + "loop" + "check"
+freeValue     = fileName + directoryName + name
+
+clusters = "cluster" clusterClause (";" clusterClause)^0
+clusterClause = clusterTag^0 directoryName clusterProperties^0
+clusterTag    = clusterName ":"
+clusterName   = name
+clusterProperties = use^0
+  include^0
+  exclude^0
+  nameAdaptation^0
+  defaults^0
+  options^0
+  visibility^0
+use = "use" fileName
+include = "include" fileList
+exclude = "exclude" fileList
+fileList = fileName (";" fileName)^0
+fileName = name
+
+nameAdaptation = "adapt" clusterAdaptationList
+clusterAdaptationList = clusterAdaptation (";" clusterAdaptation)^0
+clusterAdaptation = clusterIgnore + clusterRenameClause
+clusterIgnore = clusterName ":" "ignore"
+clusterRenameClause = clusterName ":" "rename" classRenameList
+classRenameList = classRenamePair ("," classRenamePair)^0
+classRenamePair = className "as" className
+className = name
+
+visiblity = "visible" classVisibility (";" classVisibility )^0
+classVisiblity = className visibilityAdaptation
+visibilityAdaptation = externalClassRename^0
+  creationRestriction^0
+  exportRestriction^0
+  externalFeatureRename^0
+  "end"
+externalClassRename = "as" name
+creationRestriction = "creation" featureName ("," featureName)^0
+exportRestriction = "export" featureName ("," featureName)^0
+externalFeatureRename = "rename" featureRenameList
+featureRenameList = featureRenamePair ("," featureRenamePair)^0
+featureRenamePair = featureName "as" name
+featureName = name
+
+externals = "external" languageContribution (";" languageContributions)^0
+languageContribution = language ":" fileList
+language = "JoyLoL" +
+  "C" + "C++" +
+  "Executable" + "SharedLibrary" + 
+  "Object" +
+  "Make" +
+  "ConTeXt" +
+  name
+
+generation = "generate" languageGeneration (";" languageGeneration)^0
+languageGeneration = language generateOption^0 ":" target
+generateOption = "(" generateOptionValue ")"
+generateOptionValue = "yes" + "no"
+target = directoryPath + fileName
+
+name = identifier + manifestString
+\stoptyping
+
+Now for our syntax
+
+\starttyping
+configuration = systemConfig 
+  defaults^0 
+  clusters^0 
+  externals^0 
+  generation
+  "end" ("--" "system" systemName)^0
+\stoptyping
+
+\stattyping
+\startJPeg
+(
+  systemConfig
+  defaults 1 repeatAtMost
+  clusters 1 repeatAtMost
+  external 1 repeatAtMost
+  generation
+  "end" ( "--" "system" systemName ) 1 repeatAtMost
+) "configuration" define
+\stopJPeg
+\stoptyping
+
+\starttyping
+systemConfig = "system" systemName
+\stoptyping
+
+\starttyping
+\startJPeg
+( "system" systemName ) "systemConfig" define
+\stopJPeg
+\stoptyping
+
+\starttyping
+systemName   = name
+\stoptyping
+
+\starttyping
+\startJPeg
+( name ) "systemName" define
+\stopJPed
+\stoptyping
+
+\starttyping
+defaults = "default" optionClause (";" optionClause)^0
+options  = "option" optionClause (";" optionClause)^0
+optionClause = optionTag optionMark^0 targetList^0
+optionTag    = classTag + systemTag + freeTag
+classTag     = "assertion" + "debug" + "optimize" + "trace"
+systemTag    = "collect"
+freeTag      = name
+optionMark   = "(" optionValue")"
+optionValue  = standardValue + classValue + freeValue
+standardValue = "yes" + "no" + "all"
+classValue    = "require" + "ensure" + "invariant" + "loop" + "check"
+freeValue     = fileName + directoryName + name
+
+clusters = "cluster" clusterClause (";" clusterClause)^0
+clusterClause = clusterTag^0 directoryName clusterProperties^0
+clusterTag    = clusterName ":"
+clusterName   = name
+clusterProperties = use^0
+  include^0
+  exclude^0
+  nameAdaptation^0
+  defaults^0
+  options^0
+  visibility^0
+use = "use" fileName
+include = "include" fileList
+exclude = "exclude" fileList
+fileList = fileName (";" fileName)^0
+fileName = name
+
+nameAdaptation = "adapt" clusterAdaptationList
+clusterAdaptationList = clusterAdaptation (";" clusterAdaptation)^0
+clusterAdaptation = clusterIgnore + clusterRenameClause
+clusterIgnore = clusterName ":" "ignore"
+clusterRenameClause = clusterName ":" "rename" classRenameList
+classRenameList = classRenamePair ("," classRenamePair)^0
+classRenamePair = className "as" className
+className = name
+
+visiblity = "visible" classVisibility (";" classVisibility )^0
+classVisiblity = className visibilityAdaptation
+visibilityAdaptation = externalClassRename^0
+  creationRestriction^0
+  exportRestriction^0
+  externalFeatureRename^0
+  "end"
+externalClassRename = "as" name
+creationRestriction = "creation" featureName ("," featureName)^0
+exportRestriction = "export" featureName ("," featureName)^0
+externalFeatureRename = "rename" featureRenameList
+featureRenameList = featureRenamePair ("," featureRenamePair)^0
+featureRenamePair = featureName "as" name
+featureName = name
+
+externals = "external" languageContribution (";" languageContributions)^0
+languageContribution = language ":" fileList
+language = "JoyLoL" +
+  "C" + "C++" +
+  "Executable" + "SharedLibrary" + 
+  "Object" +
+  "Make" +
+  "ConTeXt" +
+  name
+
+generation = "generate" languageGeneration (";" languageGeneration)^0
+languageGeneration = language generateOption^0 ":" target
+generateOption = "(" generateOptionValue ")"
+generateOptionValue = "yes" + "no"
+target = directoryPath + fileName
+\stoptying
+
+\starttyping
+name = identifier + manifestString
+\stoptyping
+
+\starttyping
+\startJPeg
+(
+  ( "az" "AZ") 1 charSet
+  ( "az" "AZ" "09" "_") 0 span
+) "identifier" define
+
+(
+  "'" pattern
+  (
+    ( 
+      (
+        ( ( "'" '\r' '\n' '\f' '\\' ) 1 coSpan )
+        ( '\\' pattern 1 any )
+      ) choice
+    ) 0 repeatAtLeast
+  ) capture append
+  "'" pattern
+) 'singleQuote' define
+
+(
+  '"' pattern
+  (
+    ( 
+      (
+        ( '"' '\r' '\n' '\f' ) 1 coSpan
+        ( '\\' pattern 1 any )
+      ) choice
+    ) 0 repeatAtLeast
+  ) capture append
+  '"' pattern
+) 'doubleQuote' define
+
+(
+  ( singleQuote doubleQuote ) choice
+) 'manifestString' define
+
+(
+  ( identifier manifestString ) choice
+) 'name' define
+\stopJPeg
+\stoptyping
+
+\subsection[title=The JoyLoL Language]
+
+\starttyping
+
+classDeclaration = 
+  indexing^0
+  classHeader
+  formalGenerics^0
+  obsolete^0
+  inheritance^0
+  creators^0
+  features^0
+  invariants^0
+  "end" ( "--" "class" className)^0
+  
+indexing = "indexing" indexList
+indexList = indexClause (";" indexClause)^0
+indexClause = indexID^0 indexTerms
+indexID = identifier ":"
+indexTerms = indexValue ("," indexValue)^0
+indexValue = identifier + manifestConstant
+
+classHeader = headerMark^0 "class" className
+headerMark = "deferred" + "expanded"
+className = identifier
+
+formalGenerics = "[" formalGenericList "]"
+formalGenericList = formalGeneric ("," formalGeneric )^0
+formalGeneric     = formalGenericName constraint^0
+formalGenericName = identifier
+constraint = "->" classType
+classType = className actualGenerics^0
+actualGenerics = 
+
+\stoptyping
+
