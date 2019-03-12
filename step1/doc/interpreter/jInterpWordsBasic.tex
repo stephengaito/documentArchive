@@ -480,14 +480,23 @@ static void isAtomWord(ContextObj* aCtx) {
 \stopCCode
 
 \startCCode
+static void pushEmptyList(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  pushNullCtxData(aCtx);
+}
+\stopCCode
+
+\startCCode
 void registerListWords(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   SymbolTableObj *symTab = asCtxSymbols(aCtx);
-  
-  registerCFunction(symTab, "isNil",  isNilWord);
-  registerCFunction(symTab, "isList", isPairWord);
-  registerCFunction(symTab, "isPair", isPairWord);
-  registerCFunction(symTab, "isAtom", isAtomWord);
+
+  registerCFunction(symTab, "isNil",     isNilWord);
+  registerCFunction(symTab, "isList",    isPairWord);
+  registerCFunction(symTab, "isPair",    isPairWord);
+  registerCFunction(symTab, "isAtom",    isAtomWord);
+  registerCFunction(symTab, "emptyList", pushEmptyList);
 }
 \stopCCode
 

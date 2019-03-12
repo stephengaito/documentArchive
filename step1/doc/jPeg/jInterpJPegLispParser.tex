@@ -1281,7 +1281,7 @@ void parseCommentWord(ContextObj *aCtx) {
 
 \starttyping
 (
-  '(' pattern commit null
+  '(' pattern commit emptyList
   sExp
   ')' pattern wrap append
 )
@@ -1300,13 +1300,13 @@ void parseListWord(ContextObj *aCtx) {
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, ")");
   pushSymbolCtxData(aCtx, "parseSExp");
-  pushSymbolCtxData(aCtx, "null");
+  pushSymbolCtxData(aCtx, "emptyList");
   pushSymbolCtxData(aCtx, "parseCommit");
   pushSymbolCtxData(aCtx, "parsePattern");
   pushSymbolCtxData(aCtx, "(");
   prependWord(aCtx); // '(' & pattern
   prependWord(aCtx); // commit
-  prependWord(aCtx); // null
+  prependWord(aCtx); // emptyList
   prependWord(aCtx); // sExp
   prependWord(aCtx); // ')'
   prependWord(aCtx); // pattern
@@ -1317,6 +1317,156 @@ void parseListWord(ContextObj *aCtx) {
 }
 \stopCCode
 
+\CTestsSuiteSetup\
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  registerSExpressionParser(aCtx);
+\stopCTest
+
+\startTestCase[should fail if not a list]
+\startCTest
+  parseString(aCtx, "this is a non-list test");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseListWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 0);
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));  
+\stopCTest
+\stopTestCase
+
+\startTestCase[should succeed if a list]
+\startCTest
+  //                012345678901234 567890123
+  parseString(aCtx, "( // this is \n a test )");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseListWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+
+  showCtxData(aCtx);
+  showCtxProcess(aCtx);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 23);
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  clearCtxData(aCtx);
+  //                01234567890123456789012345678
+  parseString(aCtx, "( this is ( another ) test )");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseListWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  showCtxData(aCtx);
+  showCtxProcess(aCtx);
+
+  AssertIntEquals(asParserTextPosition(aCtx), 28);
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNotNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[parseListClosingWord]
+
+\starttyping
+(
+  ')' pattern commit fail
+)
+\stoptyping
+
+\startCHeader
+void parseListClosingWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void parseListClosingWord(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  pushSymbolCtxData(aCtx, "parseFail");
+  pushSymbolCtxData(aCtx, "parseCommit");
+  pushSymbolCtxData(aCtx, "parsePattern");
+  pushSymbolCtxData(aCtx, ")");
+  prependWord(aCtx); // ')' & pattern
+  prependWord(aCtx); // commit
+  prependWord(aCtx); // fail
+  
+  interpretWord(aCtx);
+}
+\stopCCode
+
+\CTestsSuiteSetup\
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  registerSExpressionParser(aCtx);
+\stopCTest
+
+\startTestCase[should not committed but failed if not a list closing]
+\startCTest
+  parseString(aCtx, "this is a non-list test");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseListClosingWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 0);
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));  
+\stopCTest
+\stopTestCase
+
+\startTestCase[should be committed and failed if a list closing]
+\startCTest
+  parseString(aCtx, ") test ");
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertIntFalse(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  parseListClosingWord(aCtx);
+  evalCommandInContext(aCtx, NULL);
+  
+  AssertIntEquals(asParserTextPosition(aCtx), 1);
+  AssertIntTrue(asParserFailed(aCtx));
+  AssertIntTrue(asParserCommitted(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+\stopCTest
+\stopTestCase
 \stopTestSuite
 
 \startTestSuite[parseSExpressionWord]
@@ -1329,6 +1479,7 @@ void parseListWord(ContextObj *aCtx) {
       identifier
       string
       list
+      listClose
       comment
       whiteSpace
       operator
@@ -1347,6 +1498,8 @@ void parseSExpressionWord(ContextObj *aCtx) {
   pushSymbolCtxData(aCtx, "parseChoice");
   pushSymbolCtxData(aCtx, "parseOperator");
   pushSymbolCtxData(aCtx, "parseWhiteSpace");
+  pushSymbolCtxData(aCtx, "parseList");
+  pushSymbolCtxData(aCtx, "parseListClose");
   pushSymbolCtxData(aCtx, "parseString");
   pushSymbolCtxData(aCtx, "parseComment");
   pushSymbolCtxData(aCtx, "parseIdentifier");
@@ -1355,6 +1508,8 @@ void parseSExpressionWord(ContextObj *aCtx) {
   prependWord(aCtx); // natural num & identifier
   prependWord(aCtx); // comment
   prependWord(aCtx); // string
+  prependWord(aCtx); // list close
+  prependWord(aCtx); // list
   prependWord(aCtx); // white space
   prependWord(aCtx); // operator
   wrapWord(aCtx);
@@ -1466,6 +1621,7 @@ void registerSExpressionParser(ContextObj *aCtx) {
   registerCFunction(symTab, "parseDoubleQuote",    parseDoubleQuoteWord);
   registerCFunction(symTab, "parseString",         parseStringWord);
   registerCFunction(symTab, "parseList",           parseListWord);
+  registerCFunction(symTab, "parseListClose",      parseListClosingWord);
   registerCFunction(symTab, "parseSingleComment",  parseSingleCommentWord);
   registerCFunction(symTab, "parseMultiComment",   parseMultiCommentWord);
   registerCFunction(symTab, "parseComment",        parseCommentWord);
