@@ -17,17 +17,19 @@ srcTypes system. This will ensure the \type{\createJoylolCodeFile} macro
 
 \startLuaCode
 build.srcTypes = build.srcTypes or { }
-build.srcTypes['JoylolCode'] = 'joylolCode'
+build.srcTypes['Joylol'] = 'joylol'
 \stopLuaCode
 
 \startMkIVCode
+\ctxloadluafile{t-joylol-bootstrap}
+
 \defineLitProgs
   [Joylol]
   [ option=lisp, numbering=line,
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
   
-\setLitProgsOriginMarker[JoylolCode][markJoylolCodeOrigin]
+\setLitProgsOriginMarker[Joylol][markJoylolOrigin]
 \stopMkIVCode
 
 \startLuaCode

@@ -4,32 +4,37 @@
 
 \addDocumentDirectory{doc}
 
-\CHeaderIncludeGuard{public}{JPEG}
+\createJoylolFile%
+  {default}
+  {jParser.joy}
+  {// A JoyLoL file}
+
+\CHeaderIncludeGuard{public}{JPARSER}
 \createCHeaderFile%
   {public}
-  {joylol/jIPeg.h}
+  {joylol/jParser.h}
   {}
 
-\CHeaderIncludeGuard{private}{JPEG_PRIVATE}
+\CHeaderIncludeGuard{private}{JPARSER_PRIVATE}
 \createCHeaderFile%
   {private}
-  {joylol/jPeg-private.h}
+  {joylol/jParser-private.h}
   {}
 
-\prependCCode{jPegMain}
+\prependCCode{jParserMain}
 \startCCode
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "joylol/jPeg.h"
-#include "joylol/jPeg-private.h"
+#include "joylol/jParser.h"
+#include "joylol/jParser-private.h"
 \stopCCode
 
 \createCCodeFile%
-  {jPegMain}%
-  {jPeg.c}%
+  {jParserMain}%
+  {jParser.c}%
   {}
 
 \prependCCode{default}
@@ -40,20 +45,20 @@
 #include <string.h>
 #include <assert.h>
 
-#include "joylol/jPeg.h"
-#include "joylol/jPeg-private.h"
+#include "joylol/jParser.h"
+#include "joylol/jParser-private.h"
 \stopCCode
 
 \createCCodeFile%
   {default}%
-  {jPegLib.c}%
+  {jParserLib.c}%
   {}
 
-\addCCodeProgram{jPeg})
+\addCCodeProgram{jParser})
   
-\addMainDocument{jPeg.tex}
-\addSubDocument{jPegOverview.tex} 
-\addSubDocument{jPegConclusion.tex} 
+\addMainDocument{joylolParser.tex}
+\addSubDocument{joylolParserOverview.tex} 
+\addSubDocument{joylolParserConclusion.tex} 
 
 \addCCodeTargets{default}
 
@@ -62,7 +67,7 @@
 \addCTestInclude{<stdlib.h>}
 \addCTestInclude{<string.h>}
 \addCTestInclude{<assert.h>}
-\addCTestInclude{<joylol/jPeg.h>}
+\addCTestInclude{<joylol/jParser.h>}
 \createCTestFile%
   {default}%
   {allCTests.c}%

@@ -1,0 +1,48 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'joylolParser.tex',
+  docFiles = {
+    'joylolParserOverview.tex',
+    'joylolParserConclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/jParser.h',
+    'joylol/jParser-private.h',
+  },
+  cCodeFiles = {
+    'jParser.c',
+    'jParserLib.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
+})
+
+require 'lms.c'
+
+c.targets(lpTargets, {
+  programs = {
+    'jParser',
+  },
+  cHeaderFiles = {
+    'joylol/jParser.h',
+    'joylol/jParser-private.h',
+  },
+  cCodeFiles = {
+    'jParser.c',
+    'jParserLib.c',
+  },
+})

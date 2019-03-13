@@ -54,7 +54,7 @@ interfaces.writestatus('joylolBootstrap', "loaded JoyLoL bootstrap")
 -- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 0
 
 build.srcTypes = build.srcTypes or { }
-build.srcTypes['JoylolCode'] = 'joylolCode'
+build.srcTypes['Joylol'] = 'joylol'
 
 -- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 0
 

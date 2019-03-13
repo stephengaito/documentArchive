@@ -137,129 +137,142 @@ name = identifier + manifestString
 Now for our syntax
 
 \startJoylol
+( pattern ) "P" define
 ( 1 repeatAtMost) "?" define
 ( 0 repeatAtLeast ) "*" define
 ( 1 repeatAtLeast ) "+" define
 ( 1 any ) "." define
-( 1 charSet ) "??" define
-( 0 span ) "???" define
-( 1 span ) "???" define
-( 1 coSpan ) "????" define
+//( 1 charSet ) "??" define
+//( 0 span ) "???" define
+//( 1 span ) "???" define
+//( 1 coSpan ) "????" define
 \stopJoylol
-
-\starttyping
-configuration = systemConfig 
-  defaults^0 
-  clusters^0 
-  externals^0 
-  generation
-  "end" ("--" "system" systemName)^0
-\stoptyping
 
 \startJoylol
 (
   systemConfig
-  defaults ?
-  clusters ?
-  external ?
+  ( defaults ) ?
+  ( clusters ) ?
+  ( external ) ?
   generation
-  "end" ( "--" "system" systemName ) ?
+  "end" ( "--" P "system" P systemName ) ?
 ) "configuration" define
-\stopJoylol
-
-\starttyping
-systemConfig = "system" systemName
-\stoptyping
-
-\startJoylol
-( "system" systemName ) "systemConfig" define
-\stopJoylol
-
-\starttyping
-systemName   = name
-\stoptyping
-
-\startJoylol
+( "system" P systemName ) "systemConfig" define
 ( name ) "systemName" define
-\stopJoylol
 
-\starttyping
-defaults = "default" optionClause (";" optionClause)^0
-options  = "option" optionClause (";" optionClause)^0
-optionClause = optionTag optionMark^0 targetList^0
-optionTag    = classTag + systemTag + freeTag
-classTag     = "assertion" + "debug" + "optimize" + "trace"
-systemTag    = "collect"
-freeTag      = name
-optionMark   = "(" optionValue")"
-optionValue  = standardValue + classValue + freeValue
-standardValue = "yes" + "no" + "all"
-classValue    = "require" + "ensure" + "invariant" + "loop" + "check"
-freeValue     = fileName + directoryName + name
+( "default" P ( optionClause ";" P ) + ) "defaults" define
+( "option"  P ( optionClause ";" P ) + ) "options" define
+( 
+  optionTag 
+  ( optionMark ) ? 
+  ( targetList ) ?
+) "optionClause" define
+( ( classTag systemTag freeTag ) choice ) "optionTag" define
+(
+  ( 
+    ( "assertion" P )
+    ( "debug" P )
+    ( "optimize" P )
+    ( "trace" P )
+  ) choice
+) "classTag" define
+( "collect" P ) "systemTag" define
+( name ) "freeTag" define
+( "(" P optionValue ")" P ) "optionMark" define
+( ( standardValue classValue freeValue ) choice ) "optionValue" define
+(
+  ( 
+    ( "yes" P )
+    ( "no" P )
+    ( "all" P )
+  ) choice
+) "standardValue" define
+(
+  ( 
+    ( "require" P )
+    ( "ensure" P )
+    ( "invariant" P )
+    ( "loop" P )
+    ( "check" P )
+  ) choice
+) "classValue" define
+( ( fileName directoryName name ) choice ) "freeValue" define
 
-clusters = "cluster" clusterClause (";" clusterClause)^0
-clusterClause = clusterTag^0 directoryName clusterProperties^0
-clusterTag    = clusterName ":"
-clusterName   = name
-clusterProperties = use^0
-  include^0
-  exclude^0
-  nameAdaptation^0
-  defaults^0
-  options^0
-  visibility^0
-use = "use" fileName
-include = "include" fileList
-exclude = "exclude" fileList
-fileList = fileName (";" fileName)^0
-fileName = name
+( "cluster" P ( clusterClause ";" P ) + ) "clusters" define
+( 
+  ( clusterTag ) ?
+  directoryName 
+  ( clusterProperties ) ?
+) "clusterClause" define
+( clusterName ":" P ) "clusterTag" define
+( name ) "clusterName" define
+(
+  ( use )?
+  ( include )?
+  ( exclude )?
+  ( nameAdaptation )?
+  ( defaults )?
+  ( options )?
+  ( visibility )?
+) "clusterProperties" define
+( "use" P fileName ) "use" define
+( "include" P fileList ) "include" define
+( "exclude" P fileList ) "exclude" define
+( ( fileName ";" P ) + ) "fileList" define
+( name ) "fileName" define
 
-nameAdaptation = "adapt" clusterAdaptationList
-clusterAdaptationList = clusterAdaptation (";" clusterAdaptation)^0
-clusterAdaptation = clusterIgnore + clusterRenameClause
-clusterIgnore = clusterName ":" "ignore"
-clusterRenameClause = clusterName ":" "rename" classRenameList
-classRenameList = classRenamePair ("," classRenamePair)^0
-classRenamePair = className "as" className
-className = name
+( "adapt" P clusterAdaptationList ) "nameAdaptation" define
+( ( clusterAdaptation ";" P ) + ) "clusterAdaptationList" define
+( ( clusterIgnore clusterRenameClause ) choice ) "clusterAdaptation" define
+( clusterName ":" P "ignore" P ) "clusterIgnore" define
+( clusterName ":" P "rename" P classRenameList ) "clusterRenameClause" define
+( ( classRenamePair "," P ) + ) "classRenameList" define
+( className "as" P className ) "classRenamePair" define
+( name ) "className" define
 
-visiblity = "visible" classVisibility (";" classVisibility )^0
-classVisiblity = className visibilityAdaptation
-visibilityAdaptation = externalClassRename^0
-  creationRestriction^0
-  exportRestriction^0
-  externalFeatureRename^0
-  "end"
-externalClassRename = "as" name
-creationRestriction = "creation" featureName ("," featureName)^0
-exportRestriction = "export" featureName ("," featureName)^0
-externalFeatureRename = "rename" featureRenameList
-featureRenameList = featureRenamePair ("," featureRenamePair)^0
-featureRenamePair = featureName "as" name
-featureName = name
+( "visible" P ( classVisibility ";" P ) + ) "visiblity" define
+( className visibilityAdaptation ) "classVisiblity" define
+(
+  externalClassRename ?
+  creationRestriction ?
+  exportRestriction ?
+  externalFeatureRename ?
+  "end" P 
+) "visibilityAdaptation" define
+( "as" P name ) "externalClassRename" define
+( "creation" P ( featureName "," P ) + ) "creationRestriction" define
+( "export" P ( featureName "," P ) + ) "exportRestriction" define
+( "rename" P ( featureRenamePair "," P ) + ) "externalFeatureRename" define
+( featureName "as" P name ) "featureRenamePair" define
+( name ) "featureName" define
 
-externals = "external" languageContribution (";" languageContributions)^0
-languageContribution = language ":" fileList
-language = "JoyLoL" +
-  "C" + "C++" +
-  "Executable" + "SharedLibrary" + 
-  "Object" +
-  "Make" +
-  "ConTeXt" +
-  name
+( "external" P ( languageContribution ";" P ) + ) "externals" define
+( language ":" P fileList ) "languageContribution" define
+(
+  (
+    ( "JoyLoL" P )
+    ( "C" P )
+    ( "C++" P )
+    ( "Executable" P )
+    ( "SharedLibrary" P )
+    ( "Object" P )
+    ( "Make" P )
+    ( "ConTeXt" P )
+    name
+  ) choice
+) "language" define
 
-generation = "generate" languageGeneration (";" languageGeneration)^0
-languageGeneration = language generateOption^0 ":" target
-generateOption = "(" generateOptionValue ")"
-generateOptionValue = "yes" + "no"
-target = directoryPath + fileName
-\stoptyping
+( "generate" P ( languageGeneration ";" P ) + ) "generation" define
+( language generateOption ? ":" P target ) "languageGeneration" define
+( "(" P generateOptionValue ")" P ) "generateOption" define
+(
+  (
+    ( "yes" P )
+    ( "no" P )
+  ) choice
+) "generateOptionValue" define
+( ( directoryPath fileName ) choice ) "target" define
 
-\starttyping
-name = identifier + manifestString
-\stoptyping
-
-\startJoylol
 (
   ( "az" "AZ") 1 charSet
   ( "az" "AZ" "09" "_") 0 span
