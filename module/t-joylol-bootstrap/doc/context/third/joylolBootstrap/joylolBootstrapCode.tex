@@ -1,0 +1,49 @@
+% A ConTeXt document [master document: protoJoyLoL.tex ]
+
+\section[title=JoyLoL bootstrap code] 
+
+QUESTION: How do we load a *.joy file? Where do we put this command?
+
+\subsection{JoyLoL code environment}
+
+\subsubsection{Examples}
+
+\subsubsection{Implementation}
+
+We begin by registering the \type{JoylolCode} code type with the build 
+srcTypes system. This will ensure the \type{\createJoylolCodeFile} macro 
+(and corresponding lua code) knows how to deal with files of 
+\type{JoylolCode}. 
+
+\startLuaCode
+build.srcTypes = build.srcTypes or { }
+build.srcTypes['JoylolCode'] = 'joylolCode'
+\stopLuaCode
+
+\startMkIVCode
+\defineLitProgs
+  [Joylol]
+  [ option=lisp, numbering=line,
+    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
+  ]
+  
+\setLitProgsOriginMarker[JoylolCode][markJoylolCodeOrigin]
+\stopMkIVCode
+
+\startLuaCode
+local function markJoylolOrigin()
+  local codeType       = setDefs(code, 'Joylol')
+  local codeStream     = setDefs(codeType, 'curCodeStream', 'default')
+  codeStream           = setDefs(codeType, codeStream)
+  return sFmt('// from file: %s after line: %s',
+    codeStream.fileName,
+    toStr(
+      mFloor(
+        codeStream.startLine/code.lineModulus
+      )*code.lineModulus
+    )
+  )
+end
+
+litProgs.markJoylolOrigin = markJoylolOrigin
+\stopLuaCode

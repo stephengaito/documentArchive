@@ -1,0 +1,24 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'joylolBootstrap.tex',
+  docFiles = {
+    'joylolBootstrapOverview.tex',
+    'joylolBootstrapCode.tex',
+    'joylolBootstrapPreamble.tex',
+    'joylolBootstrapConclusions.tex',
+  },
+  docDir    = 't-joylol-bootstrap/doc/context/third/joylolBootstrap',
+}
+
+require 'lms.contextMod'
+
+contextMod.targets(lpTargets, {
+  moduleFiles = {
+    't-joylol-bootstrap.mkiv',
+    't-joylol-bootstrap.lua',
+  },
+  moduleDir = 't-joylol-bootstrap/tex/context/third/joylolBootstrap',
+})

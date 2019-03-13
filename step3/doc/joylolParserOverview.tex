@@ -136,6 +136,17 @@ name = identifier + manifestString
 
 Now for our syntax
 
+\startJoylol
+( 1 repeatAtMost) "?" define
+( 0 repeatAtLeast ) "*" define
+( 1 repeatAtLeast ) "+" define
+( 1 any ) "." define
+( 1 charSet ) "??" define
+( 0 span ) "???" define
+( 1 span ) "???" define
+( 1 coSpan ) "????" define
+\stopJoylol
+
 \starttyping
 configuration = systemConfig 
   defaults^0 
@@ -145,38 +156,32 @@ configuration = systemConfig
   "end" ("--" "system" systemName)^0
 \stoptyping
 
-\stattyping
-\startJPeg
+\startJoylol
 (
   systemConfig
-  defaults 1 repeatAtMost
-  clusters 1 repeatAtMost
-  external 1 repeatAtMost
+  defaults ?
+  clusters ?
+  external ?
   generation
-  "end" ( "--" "system" systemName ) 1 repeatAtMost
+  "end" ( "--" "system" systemName ) ?
 ) "configuration" define
-\stopJPeg
-\stoptyping
+\stopJoylol
 
 \starttyping
 systemConfig = "system" systemName
 \stoptyping
 
-\starttyping
-\startJPeg
+\startJoylol
 ( "system" systemName ) "systemConfig" define
-\stopJPeg
-\stoptyping
+\stopJoylol
 
 \starttyping
 systemName   = name
 \stoptyping
 
-\starttyping
-\startJPeg
+\startJoylol
 ( name ) "systemName" define
-\stopJPed
-\stoptyping
+\stopJoylol
 
 \starttyping
 defaults = "default" optionClause (";" optionClause)^0
@@ -248,14 +253,13 @@ languageGeneration = language generateOption^0 ":" target
 generateOption = "(" generateOptionValue ")"
 generateOptionValue = "yes" + "no"
 target = directoryPath + fileName
-\stoptying
+\stoptyping
 
 \starttyping
 name = identifier + manifestString
 \stoptyping
 
-\starttyping
-\startJPeg
+\startJoylol
 (
   ( "az" "AZ") 1 charSet
   ( "az" "AZ" "09" "_") 0 span
@@ -294,8 +298,7 @@ name = identifier + manifestString
 (
   ( identifier manifestString ) choice
 ) 'name' define
-\stopJPeg
-\stoptyping
+\stopJoylol
 
 \subsection[title=The JoyLoL Language]
 

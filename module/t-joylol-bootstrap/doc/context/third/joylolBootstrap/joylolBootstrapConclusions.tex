@@ -1,0 +1,33 @@
+% A ConTeXt document [master document: protoJoyLoL.tex ]
+
+\section[title=Conclusion]
+
+\addDocumentDirectory%
+  {t-joylol-bootstrap/doc/context/third/joylolBootstrap}
+
+\createMkIVCodeFile%
+  {default}%
+  {t-joylol-bootstrap.mkiv}%
+  {A ConTeXt MkIV module}
+
+\createLuaCodeFile%
+  {default}%
+  {t-joylol-bootstrap.lua}%
+  {-- A Lua file}
+
+\addMainDocument{joylolBootstrap.tex}
+\addSubDocument{joylolBootstrapOverview.tex}
+\addSubDocument{joylolBootstrapCode.tex}
+\addSubDocument{joylolBootstrapPreamble.tex}
+\addSubDocument{joylolBootstrapConclusions.tex}
+
+\addConTeXtModuleDirectory%
+  {t-joylol-bootstrap/tex/context/third/joylolBootstrap}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+  
