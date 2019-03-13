@@ -313,6 +313,28 @@ Now for our syntax
 ) 'name' define
 \stopJoylol
 
+An example taken from \cite{meyer1992eiffelTheLanguage} Appendix D.
+
+\starttyping
+system browser root
+  EB(browsing)
+default
+  assertions(ensure); 
+  trace(no);
+  collect(yes);
+  debug(no);
+cluster
+  "$INSTALLATION/library/support";
+  "$INSTALLATION/library/parsing";
+  browsing: "~/current/browser";
+  default
+    assertion(all);
+  option
+    debug(yes): Layout, functions;
+  end -- browsing
+end -- system browser
+\stoptyping
+
 \subsection[title=The JoyLoL Language]
 
 \starttyping
