@@ -3,10 +3,10 @@
 require 'lms.litProgs'
 
 lpTargets = litProgs.targets{
-  mainDoc  = 'jPeg.tex',
+  mainDoc  = 'joylolParser.tex',
   docFiles = {
-    'jPegOverview.tex',
-    'jPegConclusion.tex',
+    'joylolParserOverview.tex',
+    'joylolParserConclusion.tex',
   },
   docDir    = 'doc',
 }
@@ -18,12 +18,12 @@ cTests.targets(lpTargets, {
     'allCTests',
   },
   cHeaderFiles = {
-    'joylol/jPeg.h',
-    'joylol/jPeg-private.h',
+    'joylol/jParser.h',
+    'joylol/jParser-private.h',
   },
   cCodeFiles = {
-    'jPeg.c',
-    'jPegLib.c',
+    'jParser.c',
+    'jParserLib.c',
   },
   testLibDirs = {
   },
@@ -35,14 +35,14 @@ require 'lms.c'
 
 c.targets(lpTargets, {
   programs = {
-    'jPeg',
+    'jParser',
   },
   cHeaderFiles = {
-    'joylol/jPeg.h',
-    'joylol/jPeg-private.h',
+    'joylol/jParser.h',
+    'joylol/jParser-private.h',
   },
   cCodeFiles = {
-    'jPeg.c',
-    'jPegLib.c',
+    'jParser.c',
+    'jParserLib.c',
   },
 })

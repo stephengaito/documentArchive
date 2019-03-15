@@ -17,26 +17,27 @@ In the rest of this section we outline the steps we will use to produce
 the first self-hosting \joylol\ compiler.
 
 We will create a fully verifying self-hosted \joylol\ compiler in the 
-following six steps: 
+following five steps: 
 
 \startitemize[n]
 
 \item \bold{Step 1:} Use ANSI-C to produce a command line, hand-coded, 
-unverified, \joylol\ interpreter. 
+unverified, \joylol\ interpreter complete with an interpreted \jPeg\ 
+parser. We use this \jPeg\ parser to implement a simple \joylol\ 
+s-expression parser, (\joylolSExp), so that the interpreter is capable of 
+loading \joylol\ code in \joylolSExp\ form. 
 
-\item \bold{Step 2:} Use the \joylol\ interpreter to produce an 
-interpreted jPeg parser. 
+\item \bold{Step 2:} Use the interpreted \jPeg\ parser to produce \joylol\ 
+configuration file (\joylolCF), and \joylolRM\ parsers written in \joylolSExp\ 
+code. 
 
-\item \bold{Step 3:} Use the interpreted jPeg parser to produce \joylol\ 
-configuration file (JCF), and \joylolRM\ parsers. 
+\item \bold{Step 3:} Use the \joylolCF\ and \joylolRM\ parsers to produce 
+a \emph{self-hosted} (unverified) \joylol\ compiler. 
 
-\item \bold{Step 4:} Use the JCF and \joylolRM\ parsers to produce a 
-\emph{self-hosted} (unverified) \joylol\ compiler. 
-
-\item \bold{Step 5:} Use the unverified \joylol\ compiler to produce a 
+\item \bold{Step 4:} Use the unverified \joylol\ compiler to produce a 
 self-hosted, \emph{verified}, \joylol\ compiler. 
 
-\item \bold{Step 6:} Use the verified \joylol\ compiler to produce a 
+\item \bold{Step 5:} Use the verified \joylol\ compiler to produce a 
 self-hosted, verified, \emph{optimized}, \joylol\ compiler. 
 
 \stopitemize
