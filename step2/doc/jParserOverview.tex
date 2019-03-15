@@ -1,48 +1,39 @@
-% A ConTeXt document [master document: jPeg.tex ]
+% A ConTeXt document [master document: jParser.tex ]
 
 \section[title=Overview]
 
-We build the jPeg parser based loosely on the LPeg, 
-\cite{ierusalimschy2008lpegArticle}, and PEG, 
-\cite{ford2004parsingExpressiongGrammars}, parsers. 
-
-\starttyping
-
-grammar     <- (nonterminal ’<-’ sp pattern)+
-pattern     <- alternative (’/’ sp alternative)*
-alternative <- ([!&]? sp suffix)+
-suffix      <- primary ([*+?] sp)*
-primary     <- ’(’ sp pattern ’)’ sp / ’.’ sp / literal /
-               charclass / nonterminal !’<-’
-literal     <- [’] (![’] .)* [’] sp
-charclass   <- ’[’ (!’]’ (. ’-’ . / .))* ’]’ sp
-nonterminal <- [a-zA-Z]+ sp
-sp          <- [ \t\n]*
-
-\stoptyping
-
-\starttyping
-
-
-
-\stoptyping
-
-
-An example use...
-
-\starttyping
-
-
-\stoptyping
-
-\section[title=Syntax/Semantics]
-
-For the initial version of the syntax for both the JoyLoL Configuratoion 
+For the initial version of the syntax for both the JoyLoL Configuration 
 Language, and the JoyLoL Language itself, we make essential use of 
 Bertrand Meyer's definition of the early version of Eiffel contained in 
-\cite{meyer1992eiffelTheLanguage}. We will however make extensive chages 
-to suit a new purpose. Eiffel's essentiall use of \quote{programming by 
+\cite{meyer1992eiffelTheLanguage}. We will however make extensive changes 
+to suit our new purposes. Eiffel's essential use of \quote{programming by 
 contract} is however very close to one of our twin purposes for JoyLoL. 
 
 We structure the various parsers using ideas from Meyer's 
 \cite{meyer1990theoryProgrammingLanguages}. 
+
+While the \joylolSExp\ based code of this chapter is required before the 
+contents of the next chapter can be \emph{compiled}, the \joylol\ code of 
+this chapter is a \quote{simple} \emph{simplification} of the code in the 
+next chapter. We do this \emph{because} we follow Meyer's advice on how to 
+structure programming langauges contained in his book, 
+\cite{meyer1990theoryProgrammingLanguages}. Meyer's advice is essentially 
+to let the \emph{abstract} syntax (and semantics) lead the concrete.
+
+For Meyer, Abstract Syntax (\cite{meyer1990theoryProgrammingLanguages}) is 
+essentially a simplified Abstract Data Type 
+(\cite{meyer1997objectOrientedSoftwareConstruction}) with only 
+\quote{simple} \quote{getters} and \quote{setters}. Similarly, for Meyer, 
+Abstract Data Types are the \emph{abstract} \emph{mathematical} 
+counterparts of Eiffel Classes 
+(\cite{meyer1997objectOrientedSoftwareConstruction}). Our thesis is that 
+\emph{mathematics} \emph{is} computational, so for us, there is only a 
+difference of \quote{degree} between an Abstract Data Type and a \joylol\ 
+CoAlgebra (the \joylol\ equivelant of Eiffel Classes). 
+
+Given this, the next chapter contains the \quote{full} \joylol\ CoAlgegras 
+from which this chapter's parsers are 
+simplifications\footnote{Essentially, to obtain the code in this chapter, 
+we simply delete everything from each CoAlgebra in the next chapter 
+\emph{except} the concrete syntax.}. 
+

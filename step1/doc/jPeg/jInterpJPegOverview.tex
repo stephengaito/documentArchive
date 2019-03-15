@@ -2,6 +2,23 @@
 
 \subsection[title=Overview]
 
+We build the jPeg parser based loosely on the LPeg, 
+\cite{ierusalimschy2008lpegArticle}, and PEG, 
+\cite{ford2004parsingExpressiongGrammars}, parsers. 
+
+\starttyping
+grammar     <- (nonterminal ’<-’ sp pattern)+
+pattern     <- alternative (’/’ sp alternative)*
+alternative <- ([!&]? sp suffix)+
+suffix      <- primary ([*+?] sp)*
+primary     <- ’(’ sp pattern ’)’ sp / ’.’ sp / literal /
+               charclass / nonterminal !’<-’
+literal     <- [’] (![’] .)* [’] sp
+charclass   <- ’[’ (!’]’ (. ’-’ . / .))* ’]’ sp
+nonterminal <- [a-zA-Z]+ sp
+sp          <- [ \t\n]*
+\stoptyping
+
 We need to implement the following \joylol\ words:
 
 \startitemize[1]
