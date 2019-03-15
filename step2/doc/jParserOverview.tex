@@ -1,0 +1,48 @@
+% A ConTeXt document [master document: jPeg.tex ]
+
+\section[title=Overview]
+
+We build the jPeg parser based loosely on the LPeg, 
+\cite{ierusalimschy2008lpegArticle}, and PEG, 
+\cite{ford2004parsingExpressiongGrammars}, parsers. 
+
+\starttyping
+
+grammar     <- (nonterminal ’<-’ sp pattern)+
+pattern     <- alternative (’/’ sp alternative)*
+alternative <- ([!&]? sp suffix)+
+suffix      <- primary ([*+?] sp)*
+primary     <- ’(’ sp pattern ’)’ sp / ’.’ sp / literal /
+               charclass / nonterminal !’<-’
+literal     <- [’] (![’] .)* [’] sp
+charclass   <- ’[’ (!’]’ (. ’-’ . / .))* ’]’ sp
+nonterminal <- [a-zA-Z]+ sp
+sp          <- [ \t\n]*
+
+\stoptyping
+
+\starttyping
+
+
+
+\stoptyping
+
+
+An example use...
+
+\starttyping
+
+
+\stoptyping
+
+\section[title=Syntax/Semantics]
+
+For the initial version of the syntax for both the JoyLoL Configuratoion 
+Language, and the JoyLoL Language itself, we make essential use of 
+Bertrand Meyer's definition of the early version of Eiffel contained in 
+\cite{meyer1992eiffelTheLanguage}. We will however make extensive chages 
+to suit a new purpose. Eiffel's essentiall use of \quote{programming by 
+contract} is however very close to one of our twin purposes for JoyLoL. 
+
+We structure the various parsers using ideas from Meyer's 
+\cite{meyer1990theoryProgrammingLanguages}. 
