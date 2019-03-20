@@ -16,6 +16,9 @@ A system is composed from clusters of CoAlgebras.
 \startJoylol
 CoAlgebra System
 
+creation
+  parseSystem ;
+
 feature -- Abstract Syntax
   systemName : Name;
   defaults   : Defaults; 
@@ -26,18 +29,120 @@ feature -- Abstract Syntax
 feature -- Concrete Syntax
   parseSystem(aCtx : Context) : System is
     beginSExp
-    end -- parseSystem ;
+      "system" P
+      ( parseName ) capture asName
+      ( parseDefaults ) capture asDefaults
+      ( parseClusters ) capture asClusters
+      ( parseExternals ) capture asExternals
+      ( parseGeneration ) capture asGeneration
+      "endSystem" P "--" P ( parseName ) capture isName
+    endSExp -- parseSystem ;
   
-end -- CoAlgebra System
-
+endCoAlgebra -- System
 
 CoAlgebra Defaults
 
+creation
+  parseDefaults ; 
+
 feature -- Abstract Syntax
+  optionTag  : OptionTag ;
+  optionMark : OptionMark ;
+  targetList : Targets ;
   
 feature -- Concrete Syntax
+  parseDefaults(aCtx : Context) : Defaults is
+    beginSExp
+      "default" P 
+      ( ( parseOptionClause ";" P ) + )
+    endSExp -- parseDefaults ;
 
-end -- CoAlgebra Defaults
+endCoAlgebra -- Defaults
+
+CoAlgebra OptionTag
+
+creation
+  parseOptionTag ;
+  
+feature -- Abstract Syntax
+
+feature -- Concrete Syntax
+  parseOptionTag(aCtx : Context ) : OptionTag is
+    beginSExp
+      
+    endSExp -- parseOptionTag
+
+endCoAlgebra -- OptionTag
+
+CoAlgebra StandardValue
+
+inherit
+  OptionTag ;
+
+creation
+  parseStandardValue ;
+  
+feature -- Abstract Syntax
+
+feature -- Concrete Syntax
+
+endCoAlgebra -- StandardValue
+
+CoAlgebra StandardValueYes
+
+inherit
+  StandardValue ; 
+
+creation
+  parseStandardValueYes ;
+  
+feature -- Abstract Syntax
+
+feature -- Concrete Syntax
+  parseStandardValueYes(aCtx : Context) : StandardValueYes is
+    beginSExp
+      "yes" P
+    endSExp -- parseStandardValueYes
+  
+endCoAlgebra -- StandardValueYes
+
+CoAlgebra StandardValueNo
+
+inherit
+  StandardValue ; 
+
+creation
+  parseStandardValueNo ;
+  
+feature -- Abstract Syntax
+
+feature -- Concrete Syntax
+  parseStandardValueNo(aCtx : Context) : StandardValueNo is
+    beginSExp
+      "no" P
+    endSExp -- parseStandardValueNo
+  
+endCoAlgebra -- StandardValueNo
+
+CoAlgebra StandardValueAll
+
+inherit
+  StandardValue ; 
+
+creation
+  parseStandardValueAll ;
+  
+feature -- Abstract Syntax
+
+feature -- Concrete Syntax
+  parseStandardValueAll(aCtx : Context) : StandardValueAll is
+    beginSExp
+      "all" P
+    endSExp -- parseStandardValueAll
+  
+endCoAlgebra -- StandardValueAll
+
+
 
 \stopJoylol
 
