@@ -1,0 +1,53 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'jCompiler.tex',
+  docFiles = {
+    'jCompilerOverview.tex',
+    'jcf/jCompilerJCF.tex',
+    'jcf/jCompilerJCFOverview.tex',
+    'jcoalg/jCompilerJCoAlg.tex',
+    'jsexp/jCompilerJSExp.tex',
+    'jrm/jCompilerJRM.tex',
+    'jCompilerConclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/jIPeg.h',
+    'joylol/jCompiler-private.h',
+  },
+  cCodeFiles = {
+    'jCompiler.c',
+    'jCompilerLib.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
+})
+
+require 'lms.c'
+
+c.targets(lpTargets, {
+  programs = {
+    'jCompiler',
+  },
+  cHeaderFiles = {
+    'joylol/jIPeg.h',
+    'joylol/jCompiler-private.h',
+  },
+  cCodeFiles = {
+    'jCompiler.c',
+    'jCompilerLib.c',
+  },
+})

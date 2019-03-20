@@ -49,3 +49,40 @@ end
 
 litProgs.markJoylolOrigin = markJoylolOrigin
 \stopLuaCode
+
+\subsection[title=Automatic generation of parsers]
+
+In this subsection we write the Lua/LPeg code required to extract the 
+concrete parsers from the \joylol\ CoAlgebra step 3 code.
+
+\startMkIVCode
+\def\extractConcreteParserFromTo#1#2{%
+  \directlua{%
+    thirddata.literateProgs.extractConcreteParserFromTo('#1', '#2')
+  }
+}
+\stopMkIVCode
+
+\startLuaCode
+local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
+  local codeType       = setDefs(code, 'Joylol')
+  fromCodeStreamName   = fromCodeStreamName or 'default'
+  toCodeStreamName     = toCodeStreamName   or 'parser'
+  local fromCodeStream = setDefs(codeType, fromCodeStreamName)
+  local toCodeStream   = setDefs(codeType, toCodeStreamName)
+  
+  --toCodeStream = fromCodeStream
+
+  texio.write_nl(">>>>>>>>>>EXTRACT>>>>>>>>>>")
+  texio.write_nl("from code stream: ["..fromCodeStreamName.."]")
+  texio.write_nl(lpPP(fromCodeStream))
+  texio.write_nl(">>>>>>>>>>EXTRACT<<<<<<<<<<")
+  texio.write_nl("to code stream: ["..toCodeStreamName.."]")
+  texio.write_nl(lpPP(toCodeStream))  
+  texio.write_nl("<<<<<<<<<<EXTRACT<<<<<<<<<<\n")
+end
+
+litProgs.extractConcreteParserFromTo = extractConcreteParserFromTo
+\stopLuaCode
+
+

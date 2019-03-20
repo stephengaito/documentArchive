@@ -73,3 +73,25 @@ local function markJoylolOrigin()
 end
 
 litProgs.markJoylolOrigin = markJoylolOrigin
+
+-- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 50
+
+local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
+  local codeType       = setDefs(code, 'Joylol')
+  fromCodeStreamName   = fromCodeStreamName or 'default'
+  toCodeStreamName     = toCodeStreamName   or 'parser'
+  local fromCodeStream = setDefs(codeType, fromCodeStreamName)
+  local toCodeStream   = setDefs(codeType, toCodeStreamName)
+ 
+  --toCodeStream = fromCodeStream
+
+  texio.write_nl(">>>>>>>>>>EXTRACT>>>>>>>>>>")
+  texio.write_nl("from code stream: ["..fromCodeStreamName.."]")
+  texio.write_nl(lpPP(fromCodeStream))
+  texio.write_nl(">>>>>>>>>>EXTRACT<<<<<<<<<<")
+  texio.write_nl("to code stream: ["..toCodeStreamName.."]")
+  texio.write_nl(lpPP(toCodeStream))
+  texio.write_nl("<<<<<<<<<<EXTRACT<<<<<<<<<<\n")
+end
+
+litProgs.extractConcreteParserFromTo = extractConcreteParserFromTo

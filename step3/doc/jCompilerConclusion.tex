@@ -1,35 +1,35 @@
-% A ConTeXt document [master document: jPeg.tex ]
+% A ConTeXt document [master document: jCompiler.tex ]
 
 \section[title=Conclusion]
 
 \addDocumentDirectory{doc}
 
-\CHeaderIncludeGuard{public}{JPEG}
+\CHeaderIncludeGuard{public}{JCOMPILER}
 \createCHeaderFile%
   {public}
-  {joylol/jIPeg.h}
+  {joylol/jCompiler.h}
   {}
 
-\CHeaderIncludeGuard{private}{JPEG_PRIVATE}
+\CHeaderIncludeGuard{private}{JCOMPILER_PRIVATE}
 \createCHeaderFile%
   {private}
-  {joylol/jPeg-private.h}
+  {joylol/jCompiler-private.h}
   {}
 
-\prependCCode{jPegMain}
+\prependCCode{jCompilerMain}
 \startCCode
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "joylol/jPeg.h"
-#include "joylol/jPeg-private.h"
+#include "joylol/jCompiler.h"
+#include "joylol/jCompiler-private.h"
 \stopCCode
 
 \createCCodeFile%
-  {jPegMain}%
-  {jPeg.c}%
+  {jCompilerMain}%
+  {jCompiler.c}%
   {}
 
 \prependCCode{default}
@@ -40,20 +40,25 @@
 #include <string.h>
 #include <assert.h>
 
-#include "joylol/jPeg.h"
-#include "joylol/jPeg-private.h"
+#include "joylol/jCompiler.h"
+#include "joylol/jCompiler-private.h"
 \stopCCode
 
 \createCCodeFile%
   {default}%
-  {jPegLib.c}%
+  {jCompilerLib.c}%
   {}
 
-\addCCodeProgram{jPeg})
+\addCCodeProgram{jCompiler})
   
-\addMainDocument{jPeg.tex}
-\addSubDocument{jPegOverview.tex} 
-\addSubDocument{jPegConclusion.tex} 
+\addMainDocument{jCompiler.tex}
+\addSubDocument{jCompilerOverview.tex}
+\addSubDocument{jcf/jCompilerJCF.tex}
+\addSubDocument{jcf/jCompilerJCFOverview.tex}
+\addSubDocument{jcoalg/jCompilerJCoAlg.tex}
+\addSubDocument{jsexp/jCompilerJSExp.tex}
+\addSubDocument{jrm/jCompilerJRM.tex}
+\addSubDocument{jCompilerConclusion.tex} 
 
 \addCCodeTargets{default}
 
@@ -62,13 +67,15 @@
 \addCTestInclude{<stdlib.h>}
 \addCTestInclude{<string.h>}
 \addCTestInclude{<assert.h>}
-\addCTestInclude{<joylol/jPeg.h>}
+\addCTestInclude{<joylol/jCompiler.h>}
 \createCTestFile%
   {default}%
   {allCTests.c}%
   {}
 
 \addCTestTargets{default}
+
+\extractConcreteParserFromTo{default}{concreteParser}
 
 %\addJoyLoLTargets{default}
 
