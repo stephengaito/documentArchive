@@ -139,21 +139,42 @@ local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
 
   local ws       = S('\r\n\f\t ')^1
   local id       = R('AZ', 'az') * (R('AZ', 'az', '09') + S('_-'))^0
-  local coAlg    = ( P('CoAlgebra') * ws * C(id) ) / extractCoAlg
-  local inherit  = ( P('inherit') * ws * C(id) * ws * P(';') ) / extractInherit
-  local syntax   = (
-    P('feature') * ws * P('--') * ws * P('Concrete') * ws * P('Syntax') * ws *
-    P('parse') * C(id) * ( 1 - P('beginSExp') )^1 *  P('beginSExp') *
+
+-- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 100
+
+  local coAlg =
+    ( P('CoAlgebra') * ws * C(id) ) / extractCoAlg
+
+-- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 100
+
+  local inherit  =
+    ( P('inherit') * ws * C(id) * ws * P(';') ) / extractInherit
+
+-- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
+
+  local concreteParser   = (
+    P('feature') * ws * P('--') * ws *
+    P('Concrete') * ws * P('Syntax') * ws *
+    P('parse') * C(id) *
+    ( 1 - P('beginSExp') )^1 *  P('beginSExp') *
     C( ( 1 - P('endSExp') )^1 ) * P('endSExp')
     ) / extractParser
 
-  local parts    = coAlg + inherit + syntax
+-- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
+
+  local parts    = coAlg + inherit + concreteParser
   local matchPat = Ct( P{ parts + 1 * lpeg.V(1) }^0 )
   lMatch(matchPat, tConcat(fromCodeStream, '\n\n'))
- 
-  tInsert(codeType[toCodeStreamName], "// automatically generated jPEG parser")
-  tInsert(codeType[toCodeStreamName], "// listed alphabetically by definition")
+
+-- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
+
+  tInsert(codeType[toCodeStreamName],
+    "// START of automatically generated jPEG parser")
+  tInsert(codeType[toCodeStreamName],
+  "// listed alphabetically by definition")
   buildParserStream(codeType[toCodeStreamName])
+  tInsert(codeType[toCodeStreamName],
+    "// END of automatically generated jPEG parser")
  
 --  texio.write_nl(">>>>>>>>>>EXTRACT>>>>>>>>>>")
 --  texio.write_nl("from code stream: ["..fromCodeStreamName.."]")

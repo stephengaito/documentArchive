@@ -127,21 +127,76 @@ local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
 
   local ws       = S('\r\n\f\t ')^1
   local id       = R('AZ', 'az') * (R('AZ', 'az', '09') + S('_-'))^0
-  local coAlg    = ( P('CoAlgebra') * ws * C(id) ) / extractCoAlg
-  local inherit  = ( P('inherit') * ws * C(id) * ws * P(';') ) / extractInherit
-  local syntax   = (
-    P('feature') * ws * P('--') * ws * P('Concrete') * ws * P('Syntax') * ws *
-    P('parse') * C(id) * ( 1 - P('beginSExp') )^1 *  P('beginSExp') *
+\stopLuaCode
+
+This is the most important section of the extract code. At this point we 
+define a crude LPeg parser which scans for three patterns.
+
+\startitemize[n]
+
+\item \bold{CoAlgebra} We look for the pattern: \type{CoAlgebra <id>}. 
+
+\startLuaCode
+  local coAlg =
+    ( P('CoAlgebra') * ws * C(id) ) / extractCoAlg
+\stopLuaCode
+
+\item \bold{Inheritance} We look for the pattern: \type{inherit <id> ;}. 
+Note that at the moment we can \emph{only} deal with single inheritance. 
+
+\startLuaCode
+  local inherit  =
+    ( P('inherit') * ws * C(id) * ws * P(';') ) / extractInherit
+\stopLuaCode
+
+\item \bold{(Concrete) Parser} In order to identify the concrete parser 
+code, we scan for a much more complex pattern. This pattern starts by 
+looking for \type{feature -- Concrete Syntax}. It then looks for the 
+pattern \type{parse} followed by an identifier with \emph{no} intervening 
+white space. Finally it captures all of the text between a \emph{single} 
+pair of \type{beginSExp} and \type{endSExp} words. 
+
+\startLuaCode
+  local concreteParser   = (
+    P('feature') * ws * P('--') * ws * 
+    P('Concrete') * ws * P('Syntax') * ws *
+    P('parse') * C(id) * 
+    ( 1 - P('beginSExp') )^1 *  P('beginSExp') *
     C( ( 1 - P('endSExp') )^1 ) * P('endSExp')
     ) / extractParser
+\stopLuaCode
 
-  local parts    = coAlg + inherit + syntax
+\stopitemize
+
+Note that each of the above sub-parsers, takes any captures and stores 
+them in our \type{coAlgTable} using the three functions 
+\type{extractCoAlg}, \type{extractInherit}, and \type{extractParser} 
+respectively. Each of these functions were defined above.
+
+We now put these three sub-parsers together in an ordered choice and wrap 
+this choice in the LPeg code required to scan a whole text multiple times. 
+The final line in the following code simply runs the LPeg parser over the 
+existing code in the \type{fromCodeStream}. All captured information is 
+stored in the \type{coAlgTable} Lua table. 
+
+\startLuaCode
+  local parts    = coAlg + inherit + concreteParser
   local matchPat = Ct( P{ parts + 1 * lpeg.V(1) }^0 )
   lMatch(matchPat, tConcat(fromCodeStream, '\n\n'))
-  
-  tInsert(codeType[toCodeStreamName], "// automatically generated jPEG parser")
-  tInsert(codeType[toCodeStreamName], "// listed alphabetically by definition")
+\stopLuaCode
+
+Having run the LPeg parser, we now need to add the extracted concrete 
+parsers after any existing \joylol\ code in the \type{toCodeStream} using 
+the lua function \type{buildParserStream} defined above.
+
+\startLuaCode
+  tInsert(codeType[toCodeStreamName], 
+    "// START of automatically generated jPEG parser")
+  tInsert(codeType[toCodeStreamName],
+    "// listed alphabetically by definition")
   buildParserStream(codeType[toCodeStreamName])
+  tInsert(codeType[toCodeStreamName], 
+    "// END of automatically generated jPEG parser")
   
 --  texio.write_nl(">>>>>>>>>>EXTRACT>>>>>>>>>>")
 --  texio.write_nl("from code stream: ["..fromCodeStreamName.."]")
