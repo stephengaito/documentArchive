@@ -4,6 +4,17 @@
 
 \addDocumentDirectory{doc}
 
+\createJoylolFile%
+  {default}
+  {jCompiler.joy}
+  {// A JoyLoL file}
+
+\extractConcreteParserFromTo{default}{concreteParser}
+\createJoylolFile%
+  {concreteParser}
+  {jParser.joy}
+  {// A JoyLoL file}
+
 \CHeaderIncludeGuard{public}{JCOMPILER}
 \createCHeaderFile%
   {public}
@@ -74,8 +85,6 @@
   {}
 
 \addCTestTargets{default}
-
-\extractConcreteParserFromTo{default}{concreteParser}
 
 %\addJoyLoLTargets{default}
 

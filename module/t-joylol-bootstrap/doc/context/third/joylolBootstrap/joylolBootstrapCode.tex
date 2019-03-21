@@ -64,22 +64,97 @@ concrete parsers from the \joylol\ CoAlgebra step 3 code.
 \stopMkIVCode
 
 \startLuaCode
+local P, R, S, V, C, Cc, Cg, Ct = 
+  lpeg.P, lpeg.R, lpeg.S, lpeg.V, lpeg.C, lpeg.Cc, lpeg.Cg, lpeg.Ct
+local lMatch = lpeg.match
+
+local currentCoAlg = "unknown"
+local coAlgTable   = {}
+
+local function extractCoAlg(aMatch)
+  currentCoAlg       = aMatch
+  coAlgTable[aMatch] = {}
+end
+
+local function extractInherit(aMatch)
+  coAlgTable[currentCoAlg] = coAlgTable[currentCoAlg] or {}
+  
+  coAlgTable[currentCoAlg]['parents'] = 
+    coAlgTable[currentCoAlg]['parents'] or {}
+  tInsert(coAlgTable[currentCoAlg]['parents'], aMatch)  
+  
+  coAlgTable[aMatch] = coAlgTable[aMatch] or { }
+  
+  coAlgTable[aMatch]['children'] = 
+    coAlgTable[aMatch]['children'] or {}
+  tInsert(coAlgTable[aMatch]['children'], currentCoAlg)
+end
+
+local function extractParser(anId, aParser)
+  coAlgTable[anId] = coAlgTable[anId] or {}
+  
+  coAlgTable[anId]['parser'] = aParser
+end
+
+local function buildParserStream(parserStream)
+  local coAlgNames = { }
+  for aCoAlg, aBody in pairs(coAlgTable) do
+    tInsert(coAlgNames, aCoAlg)
+    if aBody['children'] then
+      local choiceBody = {}
+      for i, aChild in ipairs(aBody['children']) do
+        tInsert(choiceBody, "parse"..aChild)
+      end
+      aBody['parser'] = "( "..tConcat(choiceBody, '\n').." ) choice"
+    end
+  end
+  
+  tSort(coAlgNames)
+  
+  for i, aCoAlg in ipairs(coAlgNames) do
+    local aBody   = coAlgTable[aCoAlg]
+    local aParser = "( "..aBody['parser'].." ) \"parse"..aCoAlg.."\" define"
+    tInsert(parserStream, aParser)
+  end
+end
+
 local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
   local codeType       = setDefs(code, 'Joylol')
   fromCodeStreamName   = fromCodeStreamName or 'default'
   toCodeStreamName     = toCodeStreamName   or 'parser'
   local fromCodeStream = setDefs(codeType, fromCodeStreamName)
   local toCodeStream   = setDefs(codeType, toCodeStreamName)
-  
-  --toCodeStream = fromCodeStream
 
-  texio.write_nl(">>>>>>>>>>EXTRACT>>>>>>>>>>")
-  texio.write_nl("from code stream: ["..fromCodeStreamName.."]")
-  texio.write_nl(lpPP(fromCodeStream))
-  texio.write_nl(">>>>>>>>>>EXTRACT<<<<<<<<<<")
-  texio.write_nl("to code stream: ["..toCodeStreamName.."]")
-  texio.write_nl(lpPP(toCodeStream))  
-  texio.write_nl("<<<<<<<<<<EXTRACT<<<<<<<<<<\n")
+  local ws       = S('\r\n\f\t ')^1
+  local id       = R('AZ', 'az') * (R('AZ', 'az', '09') + S('_-'))^0
+  local coAlg    = ( P('CoAlgebra') * ws * C(id) ) / extractCoAlg
+  local inherit  = ( P('inherit') * ws * C(id) * ws * P(';') ) / extractInherit
+  local syntax   = (
+    P('feature') * ws * P('--') * ws * P('Concrete') * ws * P('Syntax') * ws *
+    P('parse') * C(id) * ( 1 - P('beginSExp') )^1 *  P('beginSExp') *
+    C( ( 1 - P('endSExp') )^1 ) * P('endSExp')
+    ) / extractParser
+
+  local parts    = coAlg + inherit + syntax
+  local matchPat = Ct( P{ parts + 1 * lpeg.V(1) }^0 )
+  lMatch(matchPat, tConcat(fromCodeStream, '\n\n'))
+  
+  tInsert(codeType[toCodeStreamName], "// automatically generated jPEG parser")
+  tInsert(codeType[toCodeStreamName], "// listed alphabetically by definition")
+  buildParserStream(codeType[toCodeStreamName])
+  
+--  texio.write_nl(">>>>>>>>>>EXTRACT>>>>>>>>>>")
+--  texio.write_nl("from code stream: ["..fromCodeStreamName.."]")
+--  texio.write_nl(lpPP(fromCodeStream))
+--  texio.write_nl(">>>>>>>>>>EXTRACT<<<<<<<<<<")
+--  texio.write_nl("to code stream: [coAlgTable]")
+--  texio.write_nl(lpPP(coAlgTable))
+--  texio.write_nl(">>>>>>>>>>EXTRACT<<<<<<<<<<")
+--  texio.write_nl("to code stream: ["..toCodeStreamName.."]")
+--  texio.write_nl(lpPP(toCodeStream))  
+--  texio.write_nl("<<<<<<<<<<EXTRACT<<<<<<<<<<\n")
+--  texio.write_nl(lpPP(codeType))
+--  texio.write_nl("<<<<<<<<<<EXTRACT<<<<<<<<<<\n")
 end
 
 litProgs.extractConcreteParserFromTo = extractConcreteParserFromTo

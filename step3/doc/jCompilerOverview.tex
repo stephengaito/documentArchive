@@ -24,3 +24,18 @@ point of the \joylol\ semantic functor, \joylolZero, the \joylol\
 S-Expression language (\joylolSExp) is closer in structure to the fixed 
 point language, \joylolZero. 
 
+\setJoylolStream{concreteParser}
+\startJoylol
+( pattern ) "P" define
+( 1 repeatAtMost) "?" define
+( 0 repeatAtLeast ) "*" define
+( 1 repeatAtLeast ) "+" define
+( 1 any ) "." define
+//( 1 charSet ) "??" define
+//( 0 span ) "???" define
+//( 1 span ) "???" define
+//( 1 coSpan ) "????" define
+\stopJoylol
+\setJoylolStream{default}
+
+
