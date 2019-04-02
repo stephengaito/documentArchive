@@ -1,4 +1,5 @@
 ---
+title: "Bootstrapping the JoyLoL compiler"
 keywords: 
   - foundations
   - computational
