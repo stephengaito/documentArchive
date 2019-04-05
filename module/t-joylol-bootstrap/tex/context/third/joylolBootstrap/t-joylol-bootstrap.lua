@@ -25,7 +25,7 @@ if not modules then modules = { } end modules ['t-joylol-bootstrap'] = {
     comment   = "joylol bootstrap - lua",
     author    = "PerceptiSys Ltd (Stephen Gaito)",
     copyright = "PerceptiSys Ltd (Stephen Gaito)",
-    license   = "MIT License"
+    license   = "Apache License"
 }
 
 thirddata         = thirddata        or {}
@@ -207,3 +207,19 @@ local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
 end
 
 litProgs.extractConcreteParserFromTo = extractConcreteParserFromTo
+
+-- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapConclusions.tex after line: 0
+
+-- Copyright 2019 PerceptiSys Ltd (Stephen Gaito)
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--    http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing,
+-- software distributed under the License is distributed on an "AS
+-- IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+-- express or implied. See the License for the specific language
+-- governing permissions and limitations under the License. end

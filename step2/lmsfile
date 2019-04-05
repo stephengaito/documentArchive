@@ -3,10 +3,18 @@
 require 'lms.litProgs'
 
 lpTargets = litProgs.targets{
-  mainDoc  = 'joylolParser.tex',
+  mainDoc  = 'jParser.tex',
   docFiles = {
-    'joylolParserOverview.tex',
-    'joylolParserConclusion.tex',
+    'jParserOverview.tex',
+    'jcf/jParserJCF.tex',
+    'jcf/jParserJCFCode.tex',
+    'jcoalg/jParserJCoAlg.tex',
+    'jcoalg/jParserJCoAlgCode.tex',
+    'jsexp/jParserJSExp.tex',
+    'jsexp/jParserJSExpCode.tex',
+    'jrm/jParserJRM.tex',
+    'jrm/jParserJRMCode.tex',
+    'jParserConclusion.tex',
   },
   docDir    = 'doc',
 }

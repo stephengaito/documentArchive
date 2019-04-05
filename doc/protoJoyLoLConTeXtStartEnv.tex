@@ -9,7 +9,11 @@
 
 \setShortTitle{Bootstrapping \joylol}
 
-%\usebtxdataset[joyLoLBib.lua]
+%% The following \usebtxdataset should be defined in body of top level tex 
+%% file
+%%
+%%\usebtxdataset[joyLoLBib.lua] 
+%%
 \setupbtx[apa:cite][alternative=short]
 \setupbtxrendering[apa][sorttype=short, numbering=short]
 
@@ -18,13 +22,8 @@
   {}
 
 %\setvariable{diSimp}{ISBN}{1234567890123}
+\setvariable{diSimp}{VERSION}{Draft 0.1}
 \placeCopyrightPage{PerceptiSys Ltd (Stephen Gaito)}{none assigned}
-
-%\srcCopyrightCCBYSA[title={JoyLoL}, url=https://perceptisys.co.uk, 
-%src=https://github.com/stephengaito/joylol, author={Perceptisys Ltd 
-%(Stephen Gaito)}, year=2017] 
-%
-%\targetCopyrightMIT[author={PerceptiSys Ltd (Stephen Gaito)}, year=2017]
 
 % TO USE joylol-options...
 %

@@ -6,12 +6,16 @@
 \addDocumentDirectory{doc}
 
 \CHeaderIncludeGuard{public}{JINTERP}
+\prependCHeader{public}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \createCHeaderFile%
   {public}
   {joylol/jInterp.h}
   {}
 
 \CHeaderIncludeGuard{private}{JINTERP_PRIVATE}
+\prependCHeader{private}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \createCHeaderFile%
   {private}
   {joylol/jInterp-private.h}
@@ -27,6 +31,9 @@
 #include "joylol/jInterp.h"
 #include "joylol/jInterp-private.h"
 \stopCCode
+
+\prependCCode{jInterpMain}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
 
 \createCCodeFile%
   {jInterpMain}%
@@ -44,6 +51,9 @@
 #include "joylol/jInterp.h"
 #include "joylol/jInterp-private.h"
 \stopCCode
+
+\prependCCode{default}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
 
 \createCCodeFile%
   {default}%
@@ -88,6 +98,9 @@
 \addCTestInclude{<string.h>}
 \addCTestInclude{<assert.h>}
 \addCTestInclude{<joylol/jInterp.h>}
+
+\addCTestCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
 \createCTestFile%
   {default}%
   {allCTests.c}%
@@ -98,6 +111,9 @@
 %\addJoyLoLTargets{default}
 
 \compileLmsfile{default}
+
+\prependLmsfile{default}
+\placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
 
 \createLmsfileFile%
   {default}%

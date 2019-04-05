@@ -4,18 +4,25 @@
 
 \addDocumentDirectory{doc}
 
+\prependJoylol{default}
+\placeJoylolCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
 \createJoylolFile%
   {default}
   {jParser.joy}
   {// A JoyLoL file}
 
 \CHeaderIncludeGuard{public}{JPARSER}
+\prependCHeader{public}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \createCHeaderFile%
   {public}
   {joylol/jParser.h}
   {}
 
 \CHeaderIncludeGuard{private}{JPARSER_PRIVATE}
+\prependCHeader{private}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \createCHeaderFile%
   {private}
   {joylol/jParser-private.h}
@@ -31,6 +38,9 @@
 #include "joylol/jParser.h"
 #include "joylol/jParser-private.h"
 \stopCCode
+
+\prependCCode{jParserMain}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
 
 \createCCodeFile%
   {jParserMain}%
@@ -49,6 +59,9 @@
 #include "joylol/jParser-private.h"
 \stopCCode
 
+\prependCCode{default}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
 \createCCodeFile%
   {default}%
   {jParserLib.c}%
@@ -56,9 +69,17 @@
 
 \addCCodeProgram{jParser})
   
-\addMainDocument{joylolParser.tex}
-\addSubDocument{joylolParserOverview.tex} 
-\addSubDocument{joylolParserConclusion.tex} 
+\addMainDocument{jParser.tex}
+\addSubDocument{jParserOverview.tex} 
+\addSubDocument{jcf/jParserJCF.tex} 
+\addSubDocument{jcf/jParserJCFCode.tex} 
+\addSubDocument{jcoalg/jParserJCoAlg.tex} 
+\addSubDocument{jcoalg/jParserJCoAlgCode.tex} 
+\addSubDocument{jsexp/jParserJSExp.tex} 
+\addSubDocument{jsexp/jParserJSExpCode.tex} 
+\addSubDocument{jrm/jParserJRM.tex} 
+\addSubDocument{jrm/jParserJRMCode.tex} 
+\addSubDocument{jParserConclusion.tex} 
 
 \addCCodeTargets{default}
 
@@ -68,6 +89,9 @@
 \addCTestInclude{<string.h>}
 \addCTestInclude{<assert.h>}
 \addCTestInclude{<joylol/jParser.h>}
+
+\addCTestCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
 \createCTestFile%
   {default}%
   {allCTests.c}%
@@ -78,6 +102,9 @@
 %\addJoyLoLTargets{default}
 
 \compileLmsfile{default}
+
+\prependLmsfile{default}
+\placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
 
 \createLmsfileFile%
   {default}%

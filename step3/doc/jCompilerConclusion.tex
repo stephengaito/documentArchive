@@ -4,24 +4,33 @@
 
 \addDocumentDirectory{doc}
 
+\prependJoylol{default}
+\placeJoylolCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
 \createJoylolFile%
   {default}
   {jCompiler.joy}
   {// A JoyLoL file}
 
 \extractConcreteParserFromTo{default}{concreteParser}
+\prependJoylol{concreteParser}
+\placeJoylolCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \createJoylolFile%
   {concreteParser}
   {jParser.joy}
   {// A JoyLoL file}
 
 \CHeaderIncludeGuard{public}{JCOMPILER}
+\prependCHeader{public}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \createCHeaderFile%
   {public}
   {joylol/jCompiler.h}
   {}
 
 \CHeaderIncludeGuard{private}{JCOMPILER_PRIVATE}
+\prependCHeader{private}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \createCHeaderFile%
   {private}
   {joylol/jCompiler-private.h}
@@ -37,6 +46,9 @@
 #include "joylol/jCompiler.h"
 #include "joylol/jCompiler-private.h"
 \stopCCode
+
+\prependCCode{jCompilerMain}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
 
 \createCCodeFile%
   {jCompilerMain}%
@@ -54,6 +66,9 @@
 #include "joylol/jCompiler.h"
 #include "joylol/jCompiler-private.h"
 \stopCCode
+
+\prependCCode{default}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
 
 \createCCodeFile%
   {default}%
@@ -79,6 +94,9 @@
 \addCTestInclude{<string.h>}
 \addCTestInclude{<assert.h>}
 \addCTestInclude{<joylol/jCompiler.h>}
+
+\addCTestCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
 \createCTestFile%
   {default}%
   {allCTests.c}%
@@ -89,6 +107,9 @@
 %\addJoyLoLTargets{default}
 
 \compileLmsfile{default}
+
+\prependLmsfile{default}
+\placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
 
 \createLmsfileFile%
   {default}%
