@@ -3,9 +3,12 @@
 \startenvironment joyLoLConTeXEnv
 
 \usemodule[t-diSimp]
-\usemodule[t-joylol-opts]
-\usemodule[t-joylol]
-\usemodule[t-joylol-coalg]
+\usemodule[t-literate-progs]
+\usemodule[t-high-lisp]
+\usemodule[t-contests]
+%\usemodule[t-joylol-opts]
+%\usemodule[t-joylol]
+%\usemodule[t-joylol-coalg]
 \usemodule[t-commdiag]
 
 \setShortTitle{Implementing \joylol}
@@ -49,6 +52,20 @@
 % to load the ANSI-C based version of JoyLoL
 % and if this fails to load the minimal Lua
 % based version of JoyLoL
+
+% some hacks to allow us to bootstrap this work
+\def\declareJoyLoLCoAlg[#1]{}
+\def\startJoyLoLCoAlg[#1][#2]{}
+\def\stopJoyLoLCoAlg{}
+\def\startRule[#1]{}
+\def\stopRule{}
+
+\defineLitProgs
+  [JoylolCode]
+  [ option=lisp, numbering=line,
+    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
+  ]
+\setLitProgsOriginMarker[JoylolCode][markJoylolCodeOrigin]
 
 \startfrontmatter
 \component preface
