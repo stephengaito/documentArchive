@@ -3,36 +3,16 @@
 require 'lms.litProgs'
 
 lpTargets = litProgs.targets{
-  mainDoc  = 'jPeg.tex',
+  mainDoc  = 'parser.tex',
   docFiles = {
-    'overview.tex',
-    'code.tex',
-    'lua.tex',
-    'words.tex',
-    'conclusion.tex',
+    'parserOverview.tex',
+    'parserCode.tex',
+    'parserLua.tex',
+    'parserWords.tex',
+    'parserConclusion.tex',
   },
   docDir    = 'doc',
 }
-
-require 'lms.joyLoL'
-
-joylol.targets(lpTargets, {
-  coAlgs = {
-    'jPeg',
-  },
-  cHeaderFiles = {
-    'joylol/jPeg.h',
-    'joylol/jPeg-private.h',
-  },
-  cCodeFiles = {
-    'jPeg.c',
-  },
-  joylolCodeFiles = {
-  },
-  coAlgLibs = {
-    'jInterps',
-  },
-})
 
 require 'lms.cTests'
 
@@ -41,11 +21,11 @@ cTests.targets(lpTargets, {
     'allCTests',
   },
   cHeaderFiles = {
-    'joylol/jPeg.h',
-    'joylol/jPeg-private.h',
+    'joylol/parser.h',
+    'joylol/parser-private.h',
   },
   cCodeFiles = {
-    'jPeg.c',
+    'booleans.c',
   },
   testLibDirs = {
   },

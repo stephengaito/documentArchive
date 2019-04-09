@@ -1,13 +1,13 @@
-% A ConTeXt document [master document: parser.tex]
+% A ConTeXt document [master document: booleans.tex]
 
 \section[title=Conclusions]
 
 \addDocumentDirectory{doc}
 
-\CHeaderIncludeGuard{public}{JOYLOL_COALG_PARSER}
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_LEXER}
 \createCHeaderFile%
   {public}
-  {joylol/parser.h}
+  {joylol/lexer.h}
   {}
 
 \setCHeaderStream{private}
@@ -16,10 +16,10 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
 \stopCHeader
 \setCHeaderStream{public}
 
-\CHeaderIncludeGuard{private}{JOYLOL_COALG_PARSEr_PRIVATE}
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_LEXER_PRIVATE}
 \createCHeaderFile%
   {private}
-  {joylol/parser-private.h}
+  {joylol/lexer-private.h}
   {}
 
 \prependCCode{default}
@@ -80,12 +80,12 @@ extern size_t joylol_register_booleans(JoyLoLInterp *jInterp);
   {allCTests.c}%
   {}
 
-\addMainDocument{parser.tex}
-\addSubDocument{overview.tex} 
-\addSubDocument{code.tex}
-\addSubDocument{lua.tex}
-\addSubDocument{words.tex}
-\addSubDocument{conclusion.tex} 
+\addMainDocument{lexer.tex}
+\addSubDocument{lexerOverview.tex} 
+\addSubDocument{lexerCode.tex}
+\addSubDocument{lexerLua.tex}
+\addSubDocument{lexerWords.tex}
+\addSubDocument{lexerConclusion.tex} 
 
 \addCTestTargets{default}
 

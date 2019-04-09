@@ -54,11 +54,24 @@
 % based version of JoyLoL
 
 % some hacks to allow us to bootstrap this work
-\def\declareJoyLoLCoAlg[#1]{}
+\def\declareJoyLoLCoAlg[#1]{\bold{#1}}
 \def\startJoyLoLCoAlg[#1][#2]{}
 \def\stopJoyLoLCoAlg{}
-\def\startRule[#1]{}
+\def\startRule[#1]{\bold{#1}}
 \def\stopRule{}
+\def\dependsOn[#1]{}
+\def\startJoyLoLWord[#1]{\bold{#1}}
+\def\stopJoyLoLWord{}
+\def\preDataStack{}
+\def\postDataStack{}
+\def\preProcessStack{}
+\def\postProcessStack{}
+\def\preCondition{}
+\def\postCondition{}
+\def\startImplementation[#1]{\bold{#1}}
+\def\stopImplementation{}
+\def\addCTestJoyLoLCallbacks#1{}
+\def\addJoyLoLTargets#1{}
 
 \defineLitProgs
   [JoylolCode]

@@ -4,27 +4,11 @@ if clearScreen then os.execute('reset') end
 
 require 'lms.contextDoc'
 
-cmd = 'lms'
-if 0 < #arg then
-  arguments = table.concat(arg, ' ')
-  if arguments:find('containers') then
-    print('\nContexting containers document')
-    contextDoc.multiDocument('containers.tex')
-    mustHaveTarget('doc')
-    runTarget('doc')
-    os.exit(0)
-  else
-    cmd = 'lms -c '..arguments
-  end
-end
+contextDoc.targets{
+  subDirs         = 'doc',
+  mainDoc         = 'containers.tex',
+  docDir          = 'doc'
+}
 
--- now walk through sorted subDirectories
--- running the lms command on each one
+recurseTargets{}
 
-subDirs = collectSubDirectories('|doc|')
-
-for i, subDir in ipairs(subDirs) do
-  runCmdIn(cmd, subDir)
-end
-
-os.exit(0)
