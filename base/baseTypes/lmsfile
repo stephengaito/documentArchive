@@ -3,7 +3,6 @@
 require 'lms.contextDoc'
 
 contextDoc.targets{
-  subDirs         = 'doc',
   mainDoc         = 'baseTypes.tex',
   docDir          = 'doc'
 }

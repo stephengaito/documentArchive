@@ -4,13 +4,6 @@ require 'lms.litProgs'
 
 lpTargets = litProgs.targets{
   mainDoc  = 'jPeg.tex',
-  docFiles = {
-    'jPegOverview.tex',
-    'jPegCode.tex',
-    'jPegLua.tex',
-    'jPegWords.tex',
-    'jPegConclusion.tex',
-  },
   docDir    = 'doc',
 }
 

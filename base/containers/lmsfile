@@ -5,7 +5,6 @@ if clearScreen then os.execute('reset') end
 require 'lms.contextDoc'
 
 contextDoc.targets{
-  subDirs         = 'doc',
   mainDoc         = 'containers.tex',
   docDir          = 'doc'
 }
