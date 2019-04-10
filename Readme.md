@@ -1,5 +1,18 @@
 # Joy concatenative programming language based on Lists of Lists
 
+# WARNING
+
+This project is now only of historical interest. The luaMakeSystem code 
+required to build this project has changed, and so, "out of the box", it 
+will no longer compile and build.
+
+Instead use the more recent 
+[JoyLoL](https://github.com/stephengaito/joylol) project.
+
+This project has been kept to mine the existing ANSI-C code.
+
+# Old Readme...
+
 We provide an implementation in [Lua](https://www.lua.org/) and ANSI-C 
 of a form of [Manfred von Thun's Joy programming 
 language](http://www.latrobe.edu.au/humanities/research/research-projects/past-projects/joy-programming-language) 
