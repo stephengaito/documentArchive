@@ -1,0 +1,7 @@
+-- A Lua Make System file
+
+require 'lms.contextDoc'
+
+target{
+  target = 'pub'
+}
