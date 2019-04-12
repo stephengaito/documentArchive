@@ -16,6 +16,9 @@ lpTargets = litProgs.targets{
   docDir    = 'doc',
 }
 
+require 'lms.contextDoc'
+contextDoc.targets(lpTargets)
+
 require 'lms.cTests'
 
 cTests.targets(lpTargets, {

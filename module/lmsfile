@@ -27,6 +27,9 @@ lpTargets = litProgs.targets{
   docDir    = 't-joylol-bootstrap/doc/context/third/joylolBootstrap',
 }
 
+require 'lms.contextDoc'
+contextDoc.targets(lpTargets)
+
 require 'lms.contextMod'
 
 contextMod.targets(lpTargets, {

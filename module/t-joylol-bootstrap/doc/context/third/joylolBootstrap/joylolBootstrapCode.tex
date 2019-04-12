@@ -56,8 +56,8 @@ In this subsection we write the Lua/LPeg code required to extract the
 concrete parsers from the \joylol\ CoAlgebra step 3 code.
 
 \startMkIVCode
-\def\extractConcreteParserFromTo#1#2{%
-  \directlua{%
+\def\extractConcreteParserFromTo#1#2{
+  \directlua{
     thirddata.literateProgs.extractConcreteParserFromTo('#1', '#2')
   }
 }

@@ -10,18 +10,15 @@ testProbe = directorySeparator..'test'
 
 require 'lms.contextDoc'
 
-createNewDocTarget('master', 'MasterTargets')
+createNewDocTarget('book', 'BookTargets')
 contextDoc.targets{
-  globalTargetVar = 'MasterTargets',
+  globalTargetVar = 'BookTargets',
   mainDoc         = 'protoJoyLoL.tex',
   docDir          = 'doc'
 }
 
-createNewDocTarget('intro', 'IntroTargets')
 contextDoc.targets{
-  subDirs         = 'doc',
-  globalTargetVar = 'IntroTargets',
-  mainDoc         = 'protoJoyLoLIntroOnly.tex',
+  mainDoc         = 'protoJoyLoL.tex',
   docDir          = 'doc'
 }
 
