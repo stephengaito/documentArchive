@@ -9,7 +9,7 @@ require 'lms.contextDoc'
 createNewDocTarget('book', 'BookTargets')
 contextDoc.targets{
   globalTargetVar = 'BookTargets',
-  mainDoc         = 'joyLoLBook.tex',
+  mainDoc         = 'joyLoL.tex',
   docDir          = 'doc'
 }
 

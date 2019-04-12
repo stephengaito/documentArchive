@@ -55,7 +55,7 @@ which know how to compile JoyLoL CoAlgebraic extensions as shared
 libraries which can be loaded into a Lua implementation. 
 
 \startMkIVCode
-\def\addJoyLoLTargets#1{%
+\def\addJoyLoLTargets#1{
   \directlua{
     thirddata.joylolCoAlgs.addJoyLoLTargets('#1')
   }
@@ -131,7 +131,7 @@ coAlgs.addJoyLoLTargets = addJoyLoLTargets
 \stopLuaCode
 
 \startMkIVCode
-\def\addCTestJoyLoLCallbacks#1{%
+\def\addCTestJoyLoLCallbacks#1{
   \directlua{
     thirddata.joylolCoAlgs.addCTestJoyLoLCallbacks('#1')
   }
@@ -189,51 +189,51 @@ coAlgs.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
 \stopLuaCode
 
 \startMkIVCode
-\def\setJoylolVerboseOn{%
+\def\setJoylolVerboseOn{
   \directlua{thirddata.joylol.setVerbose(true)}
 }
 
-\def\setJoylolVerboseOff{%
+\def\setJoylolVerboseOff{
   \directlua{thirddata.joylol.setVerbose(false)}
 }
 
-\def\setJoylolDebuggingOn{%
+\def\setJoylolDebuggingOn{
   \directlua{thirddata.joylol.setDebugging(true)}
 }
 
-\def\setJoylolDebuggingOff{%
+\def\setJoylolDebuggingOff{
   \directlua{thirddata.joylol.setVDebugging(false)}
 }
 
-\def\setJoylolTracingOn{%
+\def\setJoylolTracingOn{
   \directlua{thirddata.joylol.setTracing(true)}
 }
 
-\def\setJoylolTracingOff{%
+\def\setJoylolTracingOff{
   \directlua{thirddata.joylol.setTracing(false)}
 }
 
-\def\setJoylolShowStackOn{%
+\def\setJoylolShowStackOn{
   \directlua{thirddata.joylol.setShowStack(true)}
 }
 
-\def\setJoylolShowStackOff{%
+\def\setJoylolShowStackOff{
   \directlua{thirddata.joylol.setShowStack(false)}
 }
 
-\def\setJoylolShowSpecificationsOn{%
+\def\setJoylolShowSpecificationsOn{
   \directlua{thirddata.joylol.setShowSpecifications(true)}
 }
 
-\def\setJoylolShowSpecificationsOff{%
+\def\setJoylolShowSpecificationsOff{
   \directlua{thirddata.joylol.setShowSpecifications(false)}
 }
 
-\def\setJoylolCheckingOn{%
+\def\setJoylolCheckingOn{
   \directlua{thirddata.joylol.setChecking(true)}
 }
 
-\def\setJoylolCheckingOff{%
+\def\setJoylolCheckingOff{
   \directlua{thirddata.joylol.setChecking(false)}
 }
 \stopMkIVCode

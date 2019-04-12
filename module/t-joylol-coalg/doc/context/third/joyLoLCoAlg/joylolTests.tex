@@ -25,76 +25,76 @@ as above.
 \setuptyping[JoylolTest][option=lisp]
 
 \let\oldStopJoylolTest=\stopJoylolTest
-\def\stopJoylolTest{%
+\def\stopJoylolTest{
   \oldStopJoylolTest%
   \directlua{thirddata.contests.addJoylolTest('_typing_')}
 }
 
-\def\showJoylolTest{%
+\def\showJoylolTest{
   \directlua{thirddata.contests.showJoylolTest()}
 }
 
-\def\setJoylolTestStage#1#2{%
-  \directlua{%
+\def\setJoylolTestStage#1#2{
+  \directlua{
     thirddata.contests.setJoylolTestStage('#1', '#2')
   }
 }
 
-\def\JoylolTestsMethodSetup{%
+\def\JoylolTestsMethodSetup{
   \setJoylolTestStage{Methods}{Setup}
 }
 
-\def\JoylolTestsMethodTeardown{%
+\def\JoylolTestsMethodTeardown{
   \setJoylolTestStage{Methods}{Teardown}
 }
 
-\def\JoylolTestsSetup{%
+\def\JoylolTestsSetup{
   \setJoylolTestStage{Global}{Setup}
 }
 
-\def\JoylolTestsTeardown{%
+\def\JoylolTestsTeardown{
   \setJoylolTestStage{Global}{Teardown}
 }
 
-\def\JoylolTestSuiteSetup{%
+\def\JoylolTestSuiteSetup{
   \setJoylolTestStage{TestSuite}{Setup}
 }
 
-\def\JoylolTestSuiteTeardown{%
+\def\JoylolTestSuiteTeardown{
   \setJoylolTestStage{TestSuite}{Teardown}
 }
 
-\def\setJoylolTestStream#1{%
+\def\setJoylolTestStream#1{
   \directlua{
     thirddata.contests.setJoylolTestStream('#1')
   }
 }
 
-\def\addJoylolTestInclude#1{%
+\def\addJoylolTestInclude#1{
   \directlua{
     thirddata.contests.addJoylolTestInclude('#1')
   }
 }
 
-\def\addJoylolTestLibDir#1{%
+\def\addJoylolTestLibDir#1{
   \directlua{
     thirddata.contests.addJoylolTestLibDir('#1')
   }
 }
 
-\def\addJoylolTestLib#1{%
+\def\addJoylolTestLib#1{
   \directlua{
     thirddata.contests.addJoylolTestLib('#1')
   }
 }
 
-\def\createJoylolTestFile#1#2#3{%
+\def\createJoylolTestFile#1#2#3{
   \directlua{
     thirddata.contests.createJoylolTestFile('#1', '#2', '#3')
   }
 }
 
-\def\addJoylolTestTargets#1{%
+\def\addJoylolTestTargets#1{
   \directlua{
     thirddata.contests.addJoylolTestTargets('#1')
   }
@@ -290,7 +290,7 @@ contests.testRunners.runCurJoylolTestCase = runCurJoylolTestCase
 \stopLuaCode
 
 \startMkIVCode
-\def\createJoylolTestFile#1#2#3{%
+\def\createJoylolTestFile#1#2#3{
   \directlua{
     thirddata.contests.createJoylolTestFile('#1', '#2', '#3')
   }
@@ -524,7 +524,7 @@ In this section we add the code required to produce Lua Make System files
 which know how to compile JoyLoL Tests. 
 
 \startMkIVCode
-\def\addJoyLoLTestTargets#1{%
+\def\addJoyLoLTestTargets#1{
   \directlua{
     thirddata.joylolCoAlgs.addJoylolTestTargets('#1')
   }
