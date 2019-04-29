@@ -4,10 +4,10 @@
 
 \addDocumentDirectory{doc}
 
-\prependJoylol{default}
+\prependJoylolCode{default}
 \placeJoylolCopyright{PerceptiSys Ltd (Stephen Gaito)}
 
-\createJoylolFile%
+\createJoylolCodeFile%
   {default}
   {jParser.joy}
   {// A JoyLoL file}
@@ -105,6 +105,14 @@
 
 \prependLmsfile{default}
 \placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\startLmsfile
+
+require 'lms.contextDoc'
+
+contextDoc.targets(lpTargets)
+
+\stopLmsfile
 
 \createLmsfileFile%
   {default}%

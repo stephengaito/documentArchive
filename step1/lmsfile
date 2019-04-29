@@ -1,43 +1,25 @@
 -- A Lua Make System file
 
+-- Copyright 2019 PerceptiSys Ltd (Stephen Gaito)
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--    http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing,
+-- software distributed under the License is distributed on an "AS
+-- IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+-- express or implied. See the License for the specific language
+-- governing permissions and limitations under the License. end
+
 require 'lms.litProgs'
 
 lpTargets = litProgs.targets{
   mainDoc  = 'jInterp.tex',
-  docFiles = {
-    'jInterpOverview.tex',
-    'objects/jInterpObjects.tex',
-    'objects/jInterpJObjs.tex',
-    'objects/jInterpPairs.tex',
-    'objects/jInterpSymbols.tex',
-    'objects/jInterpStringBuffers.tex',
-    'objects/jInterpUIntegers.tex',
-    'objects/jInterpContexts.tex',
-    'objects/jInterpCFunctions.tex',
-    'objects/jInterpSymbolTables.tex',
-    'interpreter/jInterpInterpreter.tex',
-    'interpreter/jInterpContext.tex',
-    'interpreter/jInterpWordsBasic.tex',
-    'interpreter/jInterpWordsControl.tex',
-    'interpreter/jInterpWordsOperators.tex',
-    'interpreter/jInterpEvaluation.tex',
-    'jPeg/jInterpJPeg.tex',
-    'jPeg/jInterpJPegOverview.tex',
-    'jPeg/jInterpJPegPrimitives.tex',
-    'jPeg/jInterpJPegCapture.tex',
-    'jPeg/jInterpJPegChoice.tex',
-    'jPeg/jInterpJPegPattern.tex',
-    'jPeg/jInterpJPegExamples.tex',
-    'jPeg/jInterpJPegLispParser.tex',
-    'jInterpMain.tex',
-    'jInterpConclusion.tex',
-  },
   docDir    = 'doc',
 }
-
-require 'lms.contextDoc'
-contextDoc.targets(lpTargets)
-
 
 require 'lms.cTests'
 
@@ -74,3 +56,7 @@ c.targets(lpTargets, {
     'jInterpLib.c',
   },
 })
+
+require 'lms.contextDoc'
+
+contextDoc.targets(lpTargets)

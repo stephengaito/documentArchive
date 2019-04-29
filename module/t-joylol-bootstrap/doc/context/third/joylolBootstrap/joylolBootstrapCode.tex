@@ -24,17 +24,17 @@ build.srcTypes['Joylol'] = 'joylol'
 \ctxloadluafile{t-joylol-bootstrap}
 
 \defineLitProgs
-  [Joylol]
+  [JoylolCode]
   [ option=lisp, numbering=line,
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
   
-\setLitProgsOriginMarker[Joylol][markJoylolOrigin]
+\setLitProgsOriginMarker[JoylolCode][markJoylolCodeOrigin]
 \stopMkIVCode
 
 \startLuaCode
-local function markJoylolOrigin()
-  local codeType       = setDefs(code, 'Joylol')
+local function markJoylolCodeOrigin()
+  local codeType       = setDefs(code, 'JoylolCode')
   local codeStream     = setDefs(codeType, 'curCodeStream', 'default')
   codeStream           = setDefs(codeType, codeStream)
   return sFmt('// from file: %s after line: %s',
@@ -47,7 +47,7 @@ local function markJoylolOrigin()
   )
 end
 
-litProgs.markJoylolOrigin = markJoylolOrigin
+litProgs.markJoylolCodeOrigin = markJoylolCodeOrigin
 \stopLuaCode
 
 \subsection[title=Automatic generation of parsers]

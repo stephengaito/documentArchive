@@ -18,17 +18,8 @@ require 'lms.litProgs'
 
 lpTargets = litProgs.targets{
   mainDoc  = 'joylolBootstrap.tex',
-  docFiles = {
-    'joylolBootstrapOverview.tex',
-    'joylolBootstrapCode.tex',
-    'joylolBootstrapPreamble.tex',
-    'joylolBootstrapConclusions.tex',
-  },
   docDir    = 't-joylol-bootstrap/doc/context/third/joylolBootstrap',
 }
-
-require 'lms.contextDoc'
-contextDoc.targets(lpTargets)
 
 require 'lms.contextMod'
 
@@ -39,3 +30,7 @@ contextMod.targets(lpTargets, {
   },
   moduleDir = 't-joylol-bootstrap/tex/context/third/joylolBootstrap',
 })
+
+require 'lms.contextDoc'
+
+contextDoc.targets(lpTargets)

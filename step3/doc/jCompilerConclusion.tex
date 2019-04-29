@@ -4,18 +4,17 @@
 
 \addDocumentDirectory{doc}
 
-\prependJoylol{default}
+\prependJoylolCode{default}
 \placeJoylolCopyright{PerceptiSys Ltd (Stephen Gaito)}
-
-\createJoylolFile%
+\createJoylolCodeFile%
   {default}
   {jCompiler.joy}
   {// A JoyLoL file}
 
 \extractConcreteParserFromTo{default}{concreteParser}
-\prependJoylol{concreteParser}
+\prependJoylolCode{concreteParser}
 \placeJoylolCopyright{PerceptiSys Ltd (Stephen Gaito)}
-\createJoylolFile%
+\createJoylolCodeFile%
   {concreteParser}
   {jParser.joy}
   {// A JoyLoL file}
@@ -110,6 +109,14 @@
 
 \prependLmsfile{default}
 \placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\startLmsfile
+
+require 'lms.contextDoc'
+
+contextDoc.targets(lpTargets)
+
+\stopLmsfile
 
 \createLmsfileFile%
   {default}%

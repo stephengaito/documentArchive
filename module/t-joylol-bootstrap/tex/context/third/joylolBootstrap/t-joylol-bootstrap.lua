@@ -1,6 +1,6 @@
 -- A Lua file
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapPreamble.tex after line: 50
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapPreamble.tex after line: 50
 
 -- Copyright 2019 PerceptiSys Ltd (Stephen Gaito)
 --
@@ -16,7 +16,7 @@
 -- express or implied. See the License for the specific language
 -- governing permissions and limitations under the License. end
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapPreamble.tex after line: 0
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapPreamble.tex after line: 0
 
 -- This is the lua code associated with t-joylol-bootstrap.mkiv
 
@@ -67,15 +67,15 @@ local lpPP    = litProgs.prettyPrint
 
 interfaces.writestatus('joylolBootstrap', "loaded JoyLoL bootstrap")
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 0
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 0
 
 build.srcTypes = build.srcTypes or { }
 build.srcTypes['Joylol'] = 'joylol'
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 0
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 0
 
-local function markJoylolOrigin()
-  local codeType       = setDefs(code, 'Joylol')
+local function markJoylolCodeOrigin()
+  local codeType       = setDefs(code, 'JoylolCode')
   local codeStream     = setDefs(codeType, 'curCodeStream', 'default')
   codeStream           = setDefs(codeType, codeStream)
   return sFmt('// from file: %s after line: %s',
@@ -88,9 +88,9 @@ local function markJoylolOrigin()
   )
 end
 
-litProgs.markJoylolOrigin = markJoylolOrigin
+litProgs.markJoylolCodeOrigin = markJoylolCodeOrigin
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 50
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 50
 
 local P, R, S, V, C, Cc, Cg, Ct =
   lpeg.P, lpeg.R, lpeg.S, lpeg.V, lpeg.C, lpeg.Cc, lpeg.Cg, lpeg.Ct
@@ -156,17 +156,17 @@ local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
   local ws       = S('\r\n\f\t ')^1
   local id       = R('AZ', 'az') * (R('AZ', 'az', '09') + S('_-'))^0
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 100
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 100
 
   local coAlg =
     ( P('CoAlgebra') * ws * C(id) ) / extractCoAlg
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 100
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 100
 
   local inherit  =
     ( P('inherit') * ws * C(id) * ws * P(';') ) / extractInherit
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
 
   local concreteParser   = (
     P('feature') * ws * P('--') * ws *
@@ -176,13 +176,13 @@ local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
     C( ( 1 - P('endSExp') )^1 ) * P('endSExp')
     ) / extractParser
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
 
   local parts    = coAlg + inherit + concreteParser
   local matchPat = Ct( P{ parts + 1 * lpeg.V(1) }^0 )
   lMatch(matchPat, tConcat(fromCodeStream, '\n\n'))
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
 
   tInsert(codeType[toCodeStreamName],
     "// START of automatically generated jPEG parser")
@@ -207,19 +207,3 @@ local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
 end
 
 litProgs.extractConcreteParserFromTo = extractConcreteParserFromTo
-
--- from file: /home/stg/ExpositionGit/tools/conTeXt/protoJoylol/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapConclusions.tex after line: 0
-
--- Copyright 2019 PerceptiSys Ltd (Stephen Gaito)
---
--- Licensed under the Apache License, Version 2.0 (the "License");
--- you may not use this file except in compliance with the License.
--- You may obtain a copy of the License at
---
---    http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing,
--- software distributed under the License is distributed on an "AS
--- IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
--- express or implied. See the License for the specific language
--- governing permissions and limitations under the License. end

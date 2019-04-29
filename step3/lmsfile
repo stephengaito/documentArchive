@@ -1,23 +1,25 @@
 -- A Lua Make System file
 
+-- Copyright 2019 PerceptiSys Ltd (Stephen Gaito)
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--    http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing,
+-- software distributed under the License is distributed on an "AS
+-- IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+-- express or implied. See the License for the specific language
+-- governing permissions and limitations under the License. end
+
 require 'lms.litProgs'
 
 lpTargets = litProgs.targets{
   mainDoc  = 'jCompiler.tex',
-  docFiles = {
-    'jCompilerOverview.tex',
-    'jcf/jCompilerJCF.tex',
-    'jcf/jCompilerJCFOverview.tex',
-    'jcoalg/jCompilerJCoAlg.tex',
-    'jsexp/jCompilerJSExp.tex',
-    'jrm/jCompilerJRM.tex',
-    'jCompilerConclusion.tex',
-  },
   docDir    = 'doc',
 }
-
-require 'lms.contextDoc'
-contextDoc.targets(lpTargets)
 
 require 'lms.cTests'
 
@@ -26,7 +28,7 @@ cTests.targets(lpTargets, {
     'allCTests',
   },
   cHeaderFiles = {
-    'joylol/jIPeg.h',
+    'joylol/jCompiler.h',
     'joylol/jCompiler-private.h',
   },
   cCodeFiles = {
@@ -46,7 +48,7 @@ c.targets(lpTargets, {
     'jCompiler',
   },
   cHeaderFiles = {
-    'joylol/jIPeg.h',
+    'joylol/jCompiler.h',
     'joylol/jCompiler-private.h',
   },
   cCodeFiles = {
@@ -54,3 +56,7 @@ c.targets(lpTargets, {
     'jCompilerLib.c',
   },
 })
+
+require 'lms.contextDoc'
+
+contextDoc.targets(lpTargets)
