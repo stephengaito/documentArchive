@@ -39,6 +39,8 @@
 
 \unprotect
 
+\ctxloadluafile{t-joylol-bootstrap-config}
+
 % from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 0
 
 \ctxloadluafile{t-joylol-bootstrap}
@@ -53,6 +55,13 @@
 
 % from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 50
 
+\def\loadCoAlgebraCollection#1{
+  \ctxloadluafile{t-literate-config}
+  \directlua{
+    thirddata.literateProgs.loadCoAlgebraCollection('#1')
+  }
+}
+
 \def\extractConcreteParserFromTo#1#2{
   \directlua{
     thirddata.literateProgs.extractConcreteParserFromTo('#1', '#2')
@@ -62,3 +71,4 @@
 % from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapPreamble.tex after line: 0
 
 \protect \endinput
+

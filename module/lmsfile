@@ -34,3 +34,4 @@ contextMod.targets(lpTargets, {
 require 'lms.contextDoc'
 
 contextDoc.targets(lpTargets)
+

@@ -92,6 +92,27 @@ litProgs.markJoylolCodeOrigin = markJoylolCodeOrigin
 
 -- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 50
 
+local function loadCoAlgebraCollection(aCollectionPath)
+
+  texio.write_nl(">>>>>>>>>>LOAD>>>>>>>>>>")
+  texio.write_nl("from CoAlgebra collection: ["..aCollectionPath.."]")
+  texio.write_nl(lpPP(os.env))
+--  texio.write_nl(lpPP(fromCodeStream))
+--  texio.write_nl(">>>>>>>>>>LOAD<<<<<<<<<<")
+--  texio.write_nl("to code stream: [coAlgTable]")
+--  texio.write_nl(lpPP(coAlgTable))
+--  texio.write_nl(">>>>>>>>>>LOAD<<<<<<<<<<")
+--  texio.write_nl("to code stream: ["..toCodeStreamName.."]")
+--  texio.write_nl(lpPP(toCodeStream))
+--  texio.write_nl("<<<<<<<<<<LOAD<<<<<<<<<<\n")
+--  texio.write_nl(lpPP(codeType))
+  texio.write_nl("<<<<<<<<<<LOAD<<<<<<<<<<\n")
+end
+
+litProgs.loadCoAlgebraCollection = loadCoAlgebraCollection
+
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 50
+
 local P, R, S, V, C, Cc, Cg, Ct =
   lpeg.P, lpeg.R, lpeg.S, lpeg.V, lpeg.C, lpeg.Cc, lpeg.Cg, lpeg.Ct
 local lMatch = lpeg.match
@@ -156,12 +177,12 @@ local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
   local ws       = S('\r\n\f\t ')^1
   local id       = R('AZ', 'az') * (R('AZ', 'az', '09') + S('_-'))^0
 
--- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 100
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
 
   local coAlg =
     ( P('CoAlgebra') * ws * C(id) ) / extractCoAlg
 
--- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 100
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
 
   local inherit  =
     ( P('inherit') * ws * C(id) * ws * P(';') ) / extractInherit
@@ -176,13 +197,13 @@ local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
     C( ( 1 - P('endSExp') )^1 ) * P('endSExp')
     ) / extractParser
 
--- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 200
 
   local parts    = coAlg + inherit + concreteParser
   local matchPat = Ct( P{ parts + 1 * lpeg.V(1) }^0 )
   lMatch(matchPat, tConcat(fromCodeStream, '\n\n'))
 
--- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 150
+-- from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 200
 
   tInsert(codeType[toCodeStreamName],
     "// START of automatically generated jPEG parser")
@@ -207,3 +228,4 @@ local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
 end
 
 litProgs.extractConcreteParserFromTo = extractConcreteParserFromTo
+

@@ -56,12 +56,40 @@ In this subsection we write the Lua/LPeg code required to extract the
 concrete parsers from the \joylol\ CoAlgebra step 3 code.
 
 \startMkIVCode
+\def\loadCoAlgebraCollection#1{
+  \ctxloadluafile{t-literate-config}
+  \directlua{
+    thirddata.literateProgs.loadCoAlgebraCollection('#1')
+  }
+}
+
 \def\extractConcreteParserFromTo#1#2{
   \directlua{
     thirddata.literateProgs.extractConcreteParserFromTo('#1', '#2')
   }
 }
 \stopMkIVCode
+
+\startLuaCode
+local function loadCoAlgebraCollection(aCollectionPath)
+
+  texio.write_nl(">>>>>>>>>>LOAD>>>>>>>>>>")
+  texio.write_nl("from CoAlgebra collection: ["..aCollectionPath.."]")
+  texio.write_nl(lpPP(os.env))
+--  texio.write_nl(lpPP(fromCodeStream))
+--  texio.write_nl(">>>>>>>>>>LOAD<<<<<<<<<<")
+--  texio.write_nl("to code stream: [coAlgTable]")
+--  texio.write_nl(lpPP(coAlgTable))
+--  texio.write_nl(">>>>>>>>>>LOAD<<<<<<<<<<")
+--  texio.write_nl("to code stream: ["..toCodeStreamName.."]")
+--  texio.write_nl(lpPP(toCodeStream))  
+--  texio.write_nl("<<<<<<<<<<LOAD<<<<<<<<<<\n")
+--  texio.write_nl(lpPP(codeType))
+  texio.write_nl("<<<<<<<<<<LOAD<<<<<<<<<<\n")
+end
+
+litProgs.loadCoAlgebraCollection = loadCoAlgebraCollection
+\stopLuaCode
 
 \startLuaCode
 local P, R, S, V, C, Cc, Cg, Ct = 
