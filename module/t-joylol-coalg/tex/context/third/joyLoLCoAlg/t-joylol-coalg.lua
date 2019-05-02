@@ -1,6 +1,6 @@
 -- A Lua file
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/preamble.tex after line: 50
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/preamble.tex after line: 50
 
 -- This is the lua code associated with t-joylol-coalg.mkiv
 
@@ -74,7 +74,7 @@ end
 
 interfaces.writestatus('joyLoLCoAlg', "loaded JoyLoL CoAlgs")
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 50
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 50
 
 --local function newCoAlg(coAlgName)
 --  local lCoAlg        = setDefs(theCoAlg, coAlgName)
@@ -99,14 +99,14 @@ end
 
 coAlgs.newCoAlg = newCoAlg
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 100
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 100
 
 local function createCoAlg()
 end
 
 coAlgs.createCoAlg = createCoAlg
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 150
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 150
 
 local function addDependency(dependencyName)
   build.coAlgDependencies = build.coAlgDependencies or {}
@@ -115,35 +115,35 @@ end
 
 coAlgs.addDependency = addDependency
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 200
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 200
 
 local function newStackActionIn(aWord)
 end
 
 coAlgs.newStackActionIn = newStackActionIn
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 200
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 200
 
 local function endStackActionIn()
 end
 
 coAlgs.endStackActionIn = endStackActionIn
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
 
 local function newStackActionOut(aWord)
 end
 
 coAlgs.newStackActionOut = newStackActionOut
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
 
 local function endStackActionOut()
 end
 
 coAlgs.endStackActionOut = endStackActionOut
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
 
 local function addPreDataStackDescription(arg1, arg2)
 end
@@ -155,7 +155,7 @@ end
 
 coAlgs.addPostDataStackDescription = addPostDataStackDescription
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 300
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 300
 
 local function addPreProcessStackDescription(arg1, arg2)
 end
@@ -167,12 +167,12 @@ end
 
 coAlgs.addPostProcessStackDescription = addPostProcessStackDescription
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 0
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 0
 
 build.srcTypes = build.srcTypes or { }
 build.srcTypes['JoylolCode'] = 'joylolCode'
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 0
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 0
 
 local function markJoylolCodeOrigin()
   local codeType       = setDefs(code, 'JoylolCode')
@@ -190,7 +190,7 @@ end
 
 litProgs.markJoylolCodeOrigin = markJoylolCodeOrigin
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 50
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 50
 
 local function addJoyLoLTargets(aCodeStream)
   litProgs.setCodeStream('Lmsfile', aCodeStream)
@@ -258,7 +258,7 @@ end
 
 coAlgs.addJoyLoLTargets = addJoyLoLTargets
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 100
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 100
 
 local function addCTestJoyLoLCallbacks(aCodeStream)
   local contests      = setDefs(thirddata, 'contests')
@@ -308,7 +308,7 @@ end
 
 coAlgs.addCTestJoyLoLCallbacks = addCTestJoyLoLCallbacks
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 200
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 200
 
 function showStack(aMessage)
   texio.write_nl('-----------------------------------------------')
@@ -328,7 +328,7 @@ end
 
 contests.showStack = showStack
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 100
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 100
 
 local function addJoylolTest(bufferName)
   local bufferContents = buffers.getcontent(bufferName):gsub("\13", "\n")
@@ -413,7 +413,7 @@ end
 
 contests.addJoylolTestLib = addJoylolTestLib
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 150
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 150
 
 local function buildJoylolChunk(joylolChunk, curSuite, curCase)
   if type(joylolChunk) == 'table' then
@@ -470,7 +470,7 @@ end
 
 contests.showJoylolTest = showJoylolTest
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 200
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 200
 
 local function runAJoylolTest(joylolTest, suite, case)
   case.passed = case.passed or true
@@ -516,7 +516,7 @@ end
 
 contests.testRunners.runCurJoylolTestCase = runCurJoylolTestCase
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 300
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 300
 
 local function createJoylolTestFile(
   aCodeStream, aFilePath, aFileHeader
@@ -737,7 +737,7 @@ end
 
 contests.createJoylolTestFile = createJoylolTestFile
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 500
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 500
 
 local function addJoylolTestTargets(aCodeStream)
   litProgs.setCodeStream('Lmsfile', aCodeStream)
@@ -797,7 +797,7 @@ end
 
 coAlgs.addJoylolTestTargets = addJoylolTestTargets
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/rules.tex after line: 0
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/rules.tex after line: 0
 
 local function startRule(ruleName)
   texio.write_nl("starting rule: ["..ruleName.."]")
@@ -843,7 +843,7 @@ end
 
 coAlgs.stopRule = stopRule
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 0
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 0
 
 local function newFragment(fragmentName)
   local curFragment = setDefs(theCoAlg, 'curFragment')
@@ -853,7 +853,7 @@ end
 
 coAlgs.newFragment = newFragment
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 0
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 0
 
 local function endFragment()
   local curFragment =
@@ -894,7 +894,7 @@ end
 
 coAlgs.endFragment = endFragment
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 50
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 50
 
 local function startFragment(fragmentType)
   local curFragment =
@@ -932,7 +932,7 @@ end
 
 coAlgs.stopFragment = stopFragment
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 0
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 0
 
 local function newWord(wordName)
   local curWord = setDefs(theCoAlg, 'curWord')
@@ -942,7 +942,7 @@ end
 
 coAlgs.newWord = newWord
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 0
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 0
 
 local function endWord()
   local curWord =
@@ -983,7 +983,7 @@ end
 
 coAlgs.endWord = endWord
 
--- from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 50
+-- from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 50
 
 local function startImplementation(implType)
   local curWord =
@@ -1020,3 +1020,4 @@ local function stopImplementation()
 end
 
 coAlgs.stopImplementation = stopImplementation
+

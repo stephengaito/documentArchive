@@ -1,6 +1,6 @@
 % A ConTeXt MkIV module
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/preamble.tex after line: 0
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/preamble.tex after line: 0
 
 %D \module
 %D   [     file=t-joylol-coalg,
@@ -44,7 +44,9 @@
 
 \unprotect
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 0
+\ctxloadluafile{t-joylol-coalg-config}
+
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 0
 
 \writestatus{loading}{ConTeXt User Module / JoyLoL CoAlgebra Extensions}
 
@@ -55,7 +57,7 @@
 
 \ctxloadluafile{t-joylol-coalg}
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 50
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 50
 
 \def\declareJoyLoLCoAlg[#1]{
   \directlua{thirddata.joylolCoAlgs.newCoAlg('#1')}
@@ -65,7 +67,7 @@
 
 \def\stopJoyLoLCoAlg{\relax}
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 100
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 100
 
 \def\stopJoyLoLCoAlg{
   \directlua{thirddata.joylolCoAlgs.createCoAlg()}
@@ -73,45 +75,45 @@
   \stopcomponent
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 100
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 100
 
 \unexpanded\def\srcCopyrightCCBYSA{}
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 150
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 150
 
 \unexpanded\def\targetCopyrightMIT{}
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 150
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 150
 
 \def\dependsOn[#1]{
   \directlua{thirddata.joylolCoAlgs.addDependency('#1')}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 200
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 200
 
 \def\startJoyLoLStackActionIn[#1]{
   \directlua{thirddata.joylolCoAlgs.newStackActionIn('#1')}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 200
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 200
 
 \def\stopJoyLoLStackActionIn{
   \directlua{thirddata.joyloCoAlgs.endStackActionIn()}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
 
 \def\startJoyLoLStackActionOut[#1]{
   \directlua{thirddata.joylolCoAlgs.newStackActionOut('#1')}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
 
 \def\stopJoyLoLStackActionOut{
   \directlua{thirddata.joylolCoAlgs.endStackActionOut()}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 250
 
 \def\preDataStack[#1][#2]{
   \directlua{thirddata.joylolCoAlgs.addPreDataStackDescription('#1', '#2')}
@@ -121,7 +123,7 @@
   \directlua{thirddata.joylolCoAlgs.addPostDataStackDescription('#1')}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 300
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/codeManipulation.tex after line: 300
 
 \def\preProcessStack[#1][#2]{
   \directlua{thirddata.joylolCoAlgs.addPreProcessStackDescription('#1', '#2')}
@@ -131,7 +133,7 @@
   \directlua{thirddata.joylolCoAlgs.addPostProcessStackDescription('#1')}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 0
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 0
 
 \defineLitProgs
   [JoylolCode]
@@ -141,170 +143,170 @@
  
 \setLitProgsOriginMarker[JoylolCode][markJoylolCodeOrigin]
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 50
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 50
 
-\def\addJoyLoLTargets#1{%
+\def\addJoyLoLTargets#1{
   \directlua{
     thirddata.joylolCoAlgs.addJoyLoLTargets('#1')
   }
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 100
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 100
 
-\def\addCTestJoyLoLCallbacks#1{%
+\def\addCTestJoyLoLCallbacks#1{
   \directlua{
     thirddata.joylolCoAlgs.addCTestJoyLoLCallbacks('#1')
   }
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 150
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylol.tex after line: 150
 
-\def\setJoylolVerboseOn{%
+\def\setJoylolVerboseOn{
   \directlua{thirddata.joylol.setVerbose(true)}
 }
 
-\def\setJoylolVerboseOff{%
+\def\setJoylolVerboseOff{
   \directlua{thirddata.joylol.setVerbose(false)}
 }
 
-\def\setJoylolDebuggingOn{%
+\def\setJoylolDebuggingOn{
   \directlua{thirddata.joylol.setDebugging(true)}
 }
 
-\def\setJoylolDebuggingOff{%
+\def\setJoylolDebuggingOff{
   \directlua{thirddata.joylol.setVDebugging(false)}
 }
 
-\def\setJoylolTracingOn{%
+\def\setJoylolTracingOn{
   \directlua{thirddata.joylol.setTracing(true)}
 }
 
-\def\setJoylolTracingOff{%
+\def\setJoylolTracingOff{
   \directlua{thirddata.joylol.setTracing(false)}
 }
 
-\def\setJoylolShowStackOn{%
+\def\setJoylolShowStackOn{
   \directlua{thirddata.joylol.setShowStack(true)}
 }
 
-\def\setJoylolShowStackOff{%
+\def\setJoylolShowStackOff{
   \directlua{thirddata.joylol.setShowStack(false)}
 }
 
-\def\setJoylolShowSpecificationsOn{%
+\def\setJoylolShowSpecificationsOn{
   \directlua{thirddata.joylol.setShowSpecifications(true)}
 }
 
-\def\setJoylolShowSpecificationsOff{%
+\def\setJoylolShowSpecificationsOff{
   \directlua{thirddata.joylol.setShowSpecifications(false)}
 }
 
-\def\setJoylolCheckingOn{%
+\def\setJoylolCheckingOn{
   \directlua{thirddata.joylol.setChecking(true)}
 }
 
-\def\setJoylolCheckingOff{%
+\def\setJoylolCheckingOff{
   \directlua{thirddata.joylol.setChecking(false)}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 0
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 0
 
 \definetyping[JoylolTest]
 \setuptyping[JoylolTest][option=lisp]
 
 \let\oldStopJoylolTest=\stopJoylolTest
-\def\stopJoylolTest{%
+\def\stopJoylolTest{
   \oldStopJoylolTest%
   \directlua{thirddata.contests.addJoylolTest('_typing_')}
 }
 
-\def\showJoylolTest{%
+\def\showJoylolTest{
   \directlua{thirddata.contests.showJoylolTest()}
 }
 
-\def\setJoylolTestStage#1#2{%
-  \directlua{%
+\def\setJoylolTestStage#1#2{
+  \directlua{
     thirddata.contests.setJoylolTestStage('#1', '#2')
   }
 }
 
-\def\JoylolTestsMethodSetup{%
+\def\JoylolTestsMethodSetup{
   \setJoylolTestStage{Methods}{Setup}
 }
 
-\def\JoylolTestsMethodTeardown{%
+\def\JoylolTestsMethodTeardown{
   \setJoylolTestStage{Methods}{Teardown}
 }
 
-\def\JoylolTestsSetup{%
+\def\JoylolTestsSetup{
   \setJoylolTestStage{Global}{Setup}
 }
 
-\def\JoylolTestsTeardown{%
+\def\JoylolTestsTeardown{
   \setJoylolTestStage{Global}{Teardown}
 }
 
-\def\JoylolTestSuiteSetup{%
+\def\JoylolTestSuiteSetup{
   \setJoylolTestStage{TestSuite}{Setup}
 }
 
-\def\JoylolTestSuiteTeardown{%
+\def\JoylolTestSuiteTeardown{
   \setJoylolTestStage{TestSuite}{Teardown}
 }
 
-\def\setJoylolTestStream#1{%
+\def\setJoylolTestStream#1{
   \directlua{
     thirddata.contests.setJoylolTestStream('#1')
   }
 }
 
-\def\addJoylolTestInclude#1{%
+\def\addJoylolTestInclude#1{
   \directlua{
     thirddata.contests.addJoylolTestInclude('#1')
   }
 }
 
-\def\addJoylolTestLibDir#1{%
+\def\addJoylolTestLibDir#1{
   \directlua{
     thirddata.contests.addJoylolTestLibDir('#1')
   }
 }
 
-\def\addJoylolTestLib#1{%
+\def\addJoylolTestLib#1{
   \directlua{
     thirddata.contests.addJoylolTestLib('#1')
   }
 }
 
-\def\createJoylolTestFile#1#2#3{%
+\def\createJoylolTestFile#1#2#3{
   \directlua{
     thirddata.contests.createJoylolTestFile('#1', '#2', '#3')
   }
 }
 
-\def\addJoylolTestTargets#1{%
+\def\addJoylolTestTargets#1{
   \directlua{
     thirddata.contests.addJoylolTestTargets('#1')
   }
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 250
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 250
 
-\def\createJoylolTestFile#1#2#3{%
+\def\createJoylolTestFile#1#2#3{
   \directlua{
     thirddata.contests.createJoylolTestFile('#1', '#2', '#3')
   }
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 500
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/joylolTests.tex after line: 500
 
-\def\addJoyLoLTestTargets#1{%
+\def\addJoyLoLTestTargets#1{
   \directlua{
     thirddata.joylolCoAlgs.addJoylolTestTargets('#1')
   }
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/rules.tex after line: 0
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/rules.tex after line: 0
 
 \let\stopRule\relax
 
@@ -319,19 +321,19 @@
     {\relax}{\stopRuleDone}\plusone%
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 0
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 0
 
 \def\startJoyLoLFragment[#1]{
   \directlua{thirddata.joylolCoAlgs.newFragment('#1')}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 0
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 0
 
 \def\stopJoyLoLFragment{
   \directlua{thirddata.joylolCoAlgs.endFragment()}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 50
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/fragments.tex after line: 50
 
 \let\stopFragment\relax
 
@@ -346,19 +348,19 @@
     {\relax}{\stopFragmentDone}\plusone%
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 0
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 0
 
 \def\startJoyLoLWord[#1]{
   \directlua{thirddata.joylolCoAlgs.newWord('#1')}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 0
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 0
 
 \def\stopJoyLoLWord{
   \directlua{thirddata.joylolCoAlgs.endWord()}
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 50
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/words.tex after line: 50
 
 \let\stopImplementation\relax
 
@@ -373,6 +375,7 @@
     {\relax}{\stopImplementationDone}\plusone%
 }
 
-% from file: /home/stg/ExpositionGit/tools/conTeXt/joylol/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/preamble.tex after line: 50
+% from file: ~/ExpositionGit/tools/conTeXt/joyLoL/module/t-joylol-coalg/doc/context/third/joyLoLCoAlg/preamble.tex after line: 50
 
 \protect \endinput
+
