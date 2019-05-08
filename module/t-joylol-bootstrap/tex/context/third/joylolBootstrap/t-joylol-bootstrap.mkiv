@@ -39,11 +39,10 @@
 
 \unprotect
 
+\ctxloadluafile{t-joylol-bootstrap}
 \ctxloadluafile{t-joylol-bootstrap-config}
 
 % from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 0
-
-\ctxloadluafile{t-joylol-bootstrap}
 
 \defineLitProgs
   [JoylolCode]
@@ -56,7 +55,6 @@
 % from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 50
 
 \def\loadCoAlgebraCollection#1{
-  \ctxloadluafile{t-literate-config}
   \directlua{
     thirddata.literateProgs.loadCoAlgebraCollection('#1')
   }

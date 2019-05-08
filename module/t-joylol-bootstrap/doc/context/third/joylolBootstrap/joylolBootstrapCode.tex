@@ -21,8 +21,6 @@ build.srcTypes['Joylol'] = 'joylol'
 \stopLuaCode
 
 \startMkIVCode
-\ctxloadluafile{t-joylol-bootstrap}
-
 \defineLitProgs
   [JoylolCode]
   [ option=lisp, numbering=line,
@@ -57,7 +55,6 @@ concrete parsers from the \joylol\ CoAlgebra step 3 code.
 
 \startMkIVCode
 \def\loadCoAlgebraCollection#1{
-  \ctxloadluafile{t-literate-config}
   \directlua{
     thirddata.literateProgs.loadCoAlgebraCollection('#1')
   }
@@ -71,11 +68,17 @@ concrete parsers from the \joylol\ CoAlgebra step 3 code.
 \stopMkIVCode
 
 \startLuaCode
+
 local function loadCoAlgebraCollection(aCollectionPath)
 
   texio.write_nl(">>>>>>>>>>LOAD>>>>>>>>>>")
   texio.write_nl("from CoAlgebra collection: ["..aCollectionPath.."]")
-  texio.write_nl(lpPP(os.env))
+  local newPath = replaceEnvironmentVarsInPath(aCollectionPath)
+  texio.write_nl("from CoAlgebra collection: ["..newPath.."]")
+  recursivelyFindFiles(newPath, '%.joy$', function(aPath)
+    texio.write_nl(aPath)
+  end)
+--  texio.write_nl(lpPP(os.env))
 --  texio.write_nl(lpPP(fromCodeStream))
 --  texio.write_nl(">>>>>>>>>>LOAD<<<<<<<<<<")
 --  texio.write_nl("to code stream: [coAlgTable]")
