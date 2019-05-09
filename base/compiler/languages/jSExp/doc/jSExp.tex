@@ -2,21 +2,21 @@
 
 \usemodule[t-diSimp]
 
-\startDiSimpComponent jcf
+\startDiSimpComponent jSExp
 
-\usebtxdataset[jcfBib.lua]
+\usebtxdataset[jSExpBib.lua]
 \diSimpEnvironment joyLoLConTeXtStartEnv
 
-\part[title=JoyLoL Configuration Language CoAlgebras]
+\part[title=JoyLoL S-Expression Language]
 
 \addDocumentDirectory{doc}
 
-\diSimpComponent jcfOverview
+\diSimpComponent jSExpOverview
 
-\diSimpComponent jcfCode
+\diSimpComponent jSExpCode
 
 %% Create the lms file
-\addMainDocument{jcf.tex}
+\addMainDocument{jSExp.tex}
 \compileLmsfile{default}
 \prependLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \startLmsfile

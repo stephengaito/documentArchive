@@ -17,9 +17,11 @@
 require 'lms.litProgs'
 
 lpTargets = litProgs.targets{
-  mainDoc  = 'jcf.tex',
+  mainDoc  = 'jRM.tex',
   docDir    = 'doc',
 }
 
 require 'lms.contextDoc'
 contextDoc.targets(lpTargets)
+recurseTargets{}
+

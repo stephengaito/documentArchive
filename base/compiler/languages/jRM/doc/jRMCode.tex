@@ -1,0 +1,29 @@
+% A ConTeXt document [master document: jRM.tex]
+
+\subsection[title=CoAlgebras]
+
+\startJoylolCode
+CoAlgebra RegisterMachineCode
+
+creation
+  parseRegisterMachineCode ;
+
+feature -- Abstract Syntax
+  instructions  : Instructions;
+  
+feature -- Concrete Syntax
+  parseRegisterMachineCode(aCtx : Context) : RegisterMachineCode is
+    beginSExp
+      "beginRM" P
+      ( parseInstructions ) capture asInstructions
+      "endRM" P 
+    endSExp -- parseCoAlgebra ;
+  
+endCoAlgebra -- CoAlgebra
+\stopJoylolCode
+\prependJoylolCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createJoylolCodeFile%
+  {default}
+  {registerMachineCode.joy}
+  {// A JoyLoL file}
+

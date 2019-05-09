@@ -1,0 +1,29 @@
+% A ConTeXt document [master document: jSExp.tex]
+
+\subsection[title=CoAlgebras]
+
+\startJoylolCode
+CoAlgebra SExpressionCode
+
+creation
+  parseSExpressionCode ;
+
+feature -- Abstract Syntax
+  sExpWords : SExpWords;
+  
+feature -- Concrete Syntax
+  parseSExpressionCode(aCtx : Context) : SExpressionCode is
+    beginSExp
+      "beginSExp" P
+      ( parseSExpWords ) capture asSExpWords
+      "endSExp" P 
+    endSExp -- parseCoAlgebra ;
+  
+endCoAlgebra -- CoAlgebra
+\stopJoylolCode
+\prependJoylolCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createJoylolCodeFile%
+  {default}
+  {sExpressionCode.joy}
+  {// A JoyLoL file}
+

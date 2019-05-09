@@ -1,0 +1,43 @@
+% A ConTeXt document [master document: jCoAlg.tex]
+
+\subsection[title=CoAlgebras]
+
+\startJoylolCode
+CoAlgebra CoAlgebra
+
+creation
+  parseCoAlgebra ;
+
+feature -- Abstract Syntax
+  coAlgebraName : Name;
+  indexing      : Indexing; 
+  header        : Header;
+  generics      : Generics;
+  obsolete      : Obsolete;
+  inheritance   : Inheritance;
+  creators      : Creators;
+  features      : Features;
+  invariants    : Invariants;
+  
+feature -- Concrete Syntax
+  parseCoAlgebra(aCtx : Context) : CoAlgebra is
+    beginSExp
+      "coAlgebra" P
+      ( parseIndexing )    capture asIndexing
+      ( parseHeader )      capture asHeader
+      ( parseGenerics )    capture asGenerics
+      ( parseObsolete )    capture asObsolete
+      ( parseInheritance ) capture asInheritance
+      ( parseCreators )    capture asCreators
+      ( parseFeatures )    capture asFeatures
+      "endCoAlgebra" P "--" P ( parseName ) capture isName
+    endSExp -- parseCoAlgebra ;
+  
+endCoAlgebra -- CoAlgebra
+\stopJoylolCode
+\prependJoylolCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createJoylolCodeFile%
+  {default}
+  {coAlgebras.joy}
+  {// A JoyLoL file}
+

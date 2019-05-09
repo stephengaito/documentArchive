@@ -2,33 +2,26 @@
 
 \usemodule[t-diSimp]
 
-\startDiSimpComponent languages
+\startDiSimpComponent jCF
 
-\usebtxdataset[langugesBib.lua]
+\usebtxdataset[jCFBib.lua]
 \diSimpEnvironment joyLoLConTeXtStartEnv
 
-\part[title=Language CoAlgebras]
+\part[title=JoyLoL Configuration Language CoAlgebras]
 
 \addDocumentDirectory{doc}
 
-\diSimpComponent languagesOverview
+\diSimpComponent jCFOverview
 
-\diSimpComponent ../jCF/doc/jCF
-
-\diSimpComponent ../jCoAlg/doc/jCoAlg
-
-\diSimpComponent ../jRM/doc/jRM
-
-\diSimpComponent ../jSExp/doc/jSExp
+\diSimpComponent jCFCode
 
 %% Create the lms file
-\addMainDocument{languages.tex}
+\addMainDocument{jCF.tex}
 \compileLmsfile{default}
 \prependLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \startLmsfile
 require 'lms.contextDoc'
 contextDoc.targets(lpTargets)
-recurseTargets{}
 \stopLmsfile
 \createLmsfileFile%
   {default}%
