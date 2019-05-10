@@ -8,7 +8,7 @@ authors:
   - Gaito, Stephen
 ---
 
-## Implementing the JoyLoL S-Expression subanguage
+## Implementing the JoyLoL S-Expression sublanguage
 
 In this document we implement the concrete CoAlgebras which define the 
 JoyLoL S-Expression sublanguage.
