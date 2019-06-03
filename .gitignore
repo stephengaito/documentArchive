@@ -1,3 +1,7 @@
+*.swp
+*.pdf
+*.tuc
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
