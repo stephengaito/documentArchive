@@ -3,6 +3,7 @@
 \section[title=Conclusion]
 
 \addDocumentDirectory{doc}
+\addMainDocument{jParser.tex}
 
 \prependJoylolCode{default}
 \placeJoylolCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
@@ -68,18 +69,6 @@
   {}
 
 \addCCodeProgram{jParser})
-  
-\addMainDocument{jParser.tex}
-\addSubDocument{jParserOverview.tex} 
-\addSubDocument{jcf/jParserJCF.tex} 
-\addSubDocument{jcf/jParserJCFCode.tex} 
-\addSubDocument{jcoalg/jParserJCoAlg.tex} 
-\addSubDocument{jcoalg/jParserJCoAlgCode.tex} 
-\addSubDocument{jsexp/jParserJSExp.tex} 
-\addSubDocument{jsexp/jParserJSExpCode.tex} 
-\addSubDocument{jrm/jParserJRM.tex} 
-\addSubDocument{jrm/jParserJRMCode.tex} 
-\addSubDocument{jParserConclusion.tex} 
 
 \addCCodeTargets{default}
 
@@ -105,14 +94,6 @@
 
 \prependLmsfile{default}
 \placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
-
-\startLmsfile
-
-require 'lms.contextDoc'
-
-contextDoc.targets(lpTargets)
-
-\stopLmsfile
 
 \createLmsfileFile%
   {default}%

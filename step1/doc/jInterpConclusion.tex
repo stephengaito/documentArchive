@@ -4,6 +4,7 @@
 \section[title=Conclusion]
 
 \addDocumentDirectory{doc}
+\addMainDocument{jInterp.tex}
 
 \CHeaderIncludeGuard{public}{JINTERP}
 \prependCHeader{public}
@@ -62,34 +63,6 @@
 
 \addCCodeProgram{jInterp})
   
-\addMainDocument{jInterp.tex}
-\addSubDocument{jInterpOverview.tex} 
-\addSubDocument{objects/jInterpObjects.tex}
-\addSubDocument{objects/jInterpJObjs.tex}
-\addSubDocument{objects/jInterpPairs.tex}
-\addSubDocument{objects/jInterpSymbols.tex}
-\addSubDocument{objects/jInterpStringBuffers.tex}
-\addSubDocument{objects/jInterpUIntegers.tex}
-\addSubDocument{objects/jInterpContexts.tex}
-\addSubDocument{objects/jInterpCFunctions.tex}
-\addSubDocument{objects/jInterpSymbolTables.tex}
-\addSubDocument{interpreter/jInterpInterpreter.tex}
-\addSubDocument{interpreter/jInterpContext.tex}
-\addSubDocument{interpreter/jInterpWordsBasic.tex}
-\addSubDocument{interpreter/jInterpWordsControl.tex}
-\addSubDocument{interpreter/jInterpWordsOperators.tex}
-\addSubDocument{interpreter/jInterpEvaluation.tex}
-\addSubDocument{jPeg/jInterpJPeg.tex}
-\addSubDocument{jPeg/jInterpJPegOverview.tex}
-\addSubDocument{jPeg/jInterpJPegPrimitives.tex}
-\addSubDocument{jPeg/jInterpJPegCapture.tex}
-\addSubDocument{jPeg/jInterpJPegChoice.tex}
-\addSubDocument{jPeg/jInterpJPegPattern.tex}
-\addSubDocument{jPeg/jInterpJPegExamples.tex}
-\addSubDocument{jPeg/jInterpJPegLispParser.tex}
-\addSubDocument{jInterpMain.tex}
-\addSubDocument{jInterpConclusion.tex} 
-
 \addCCodeTargets{default}
 
 \addCTestInclude{<stdio.h>}
@@ -114,14 +87,6 @@
 
 \prependLmsfile{default}
 \placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
-
-\startLmsfile
-
-require 'lms.contextDoc'
-
-contextDoc.targets(lpTargets)
-
-\stopLmsfile
 
 \createLmsfileFile%
   {default}%

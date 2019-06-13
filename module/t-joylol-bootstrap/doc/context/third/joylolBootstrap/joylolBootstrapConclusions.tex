@@ -4,6 +4,10 @@
 
 \addDocumentDirectory%
   {t-joylol-bootstrap/doc/context/third/joylolBootstrap}
+\addConTeXtModuleDirectory%
+  {t-joylol-bootstrap/tex/context/third/joylolBootstrap}
+
+\addMainDocument{joylolBootstrap.tex}
 
 \createMkIVCodeFile%
   {default}%
@@ -15,27 +19,10 @@
   {t-joylol-bootstrap.lua}%
   {-- A Lua file}
 
-\addMainDocument{joylolBootstrap.tex}
-\addSubDocument{joylolBootstrapOverview.tex}
-\addSubDocument{joylolBootstrapCode.tex}
-\addSubDocument{joylolBootstrapPreamble.tex}
-\addSubDocument{joylolBootstrapConclusions.tex}
-
-\addConTeXtModuleDirectory%
-  {t-joylol-bootstrap/tex/context/third/joylolBootstrap}
-
 \compileLmsfile{default}
 
 \prependLmsfile{default}
 \placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
-
-\startLmsfile
-
-require 'lms.contextDoc'
-
-contextDoc.targets(lpTargets)
-
-\stopLmsfile
 
 \createLmsfileFile%
   {default}%

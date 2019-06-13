@@ -21,29 +21,14 @@ lpTargets = litProgs.targets{
   docDir    = 'doc',
 }
 
-require 'lms.cTests'
+require 'lms.contextDoc'
 
-cTests.targets(lpTargets, {
-  testExecs = {
-    'allCTests',
-  },
-  cHeaderFiles = {
-    'joylol/jInterp.h',
-    'joylol/jInterp-private.h',
-  },
-  cCodeFiles = {
-    'jInterp.c',
-    'jInterpLib.c',
-  },
-  testLibDirs = {
-  },
-  testLibs = {
-  },
-})
+contextDoc.targets(lpTargets)
+
 
 require 'lms.c'
 
-c.targets(lpTargets, {
+cTargets = c.targets(lpTargets, {
   programs = {
     'jInterp',
   },
@@ -57,6 +42,15 @@ c.targets(lpTargets, {
   },
 })
 
-require 'lms.contextDoc'
+require 'lms.cTests'
 
-contextDoc.targets(lpTargets)
+cTests.targets(cTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
+})
+

@@ -3,6 +3,7 @@
 \section[title=Conclusion]
 
 \addDocumentDirectory{doc}
+\addMainDocument{jCompiler.tex}
 
 \prependJoylolCode{default}
 \placeJoylolCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
@@ -75,15 +76,6 @@
   {}
 
 \addCCodeProgram{jCompiler})
-  
-\addMainDocument{jCompiler.tex}
-\addSubDocument{jCompilerOverview.tex}
-\addSubDocument{jcf/jCompilerJCF.tex}
-\addSubDocument{jcf/jCompilerJCFOverview.tex}
-\addSubDocument{jcoalg/jCompilerJCoAlg.tex}
-\addSubDocument{jsexp/jCompilerJSExp.tex}
-\addSubDocument{jrm/jCompilerJRM.tex}
-\addSubDocument{jCompilerConclusion.tex} 
 
 \addCCodeTargets{default}
 
@@ -109,14 +101,6 @@
 
 \prependLmsfile{default}
 \placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
-
-\startLmsfile
-
-require 'lms.contextDoc'
-
-contextDoc.targets(lpTargets)
-
-\stopLmsfile
 
 \createLmsfileFile%
   {default}%
