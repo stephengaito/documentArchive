@@ -14,12 +14,16 @@
 -- express or implied. See the License for the specific language
 -- governing permissions and limitations under the License. end
 
-require 'lms.litProgs'
+require 'lms.contextDoc'
 
-lpTargets = litProgs.targets{
+ctxTargets = contextDoc.targets{
   mainDoc  = 'joylolBootstrap.tex',
   docDir    = 't-joylol-bootstrap/doc/context/third/joylolBootstrap',
 }
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets(ctxTargets)
 
 require 'lms.contextMod'
 
@@ -30,8 +34,4 @@ contextMod.targets(lpTargets, {
   },
   moduleDir = 't-joylol-bootstrap/tex/context/third/joylolBootstrap',
 })
-
-require 'lms.contextDoc'
-
-contextDoc.targets(lpTargets)
 

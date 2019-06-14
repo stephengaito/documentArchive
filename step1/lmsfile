@@ -14,16 +14,16 @@
 -- express or implied. See the License for the specific language
 -- governing permissions and limitations under the License. end
 
-require 'lms.litProgs'
+require 'lms.contextDoc'
 
-lpTargets = litProgs.targets{
+ctxTargets = contextDoc.targets{
   mainDoc  = 'jInterp.tex',
   docDir    = 'doc',
 }
 
-require 'lms.contextDoc'
+require 'lms.litProgs'
 
-contextDoc.targets(lpTargets)
+lpTargets = litProgs.targets(ctxTargets)
 
 
 require 'lms.c'
