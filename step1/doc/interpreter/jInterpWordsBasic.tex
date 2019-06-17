@@ -105,6 +105,7 @@ static void doWrite(
     return;
   }
 
+  assert(isStringBufferObj(asRenderBuffer(aCtx)));
   strBufPrintf(asRenderBuffer(aCtx), "%s", asSymbol(aString));
   if (newLine) strBufPrintf(asRenderBuffer(aCtx), "%s" "\n");
 }
@@ -130,16 +131,28 @@ static void writeObjWord(ContextObj* aCtx) {
   }
   size_t depthInt = asUInteger(depth);
     
+  assert(isStringBufferObj(asRenderBuffer(aCtx)));
   printJObj(asRenderBuffer(aCtx), lol, "", depthInt);
+}
+
+static void printRenderBuffer(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+  assert(isStringBufferObj(asRenderBuffer(aCtx)));
+  
+  printf("%s\n", getCString(asRenderBuffer(aCtx)));
 }
 \stopCCode
 
 \startCCode
 void registerOutputWords(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
-  registerCFunction(asCtxSymbols(aCtx), "writeStr", writeWord);
-  registerCFunction(asCtxSymbols(aCtx), "writeNL",  writeNLWord);
-  registerCFunction(asCtxSymbols(aCtx), "writeObj", writeObjWord);
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
+  
+  registerCFunction(symTab, "writeStr",    writeWord);
+  registerCFunction(symTab, "writeNL",     writeNLWord);
+  registerCFunction(symTab, "writeObj",    writeObjWord);
+  registerCFunction(symTab, "printBuffer", printRenderBuffer);
 }
 \stopCCode
 
@@ -422,6 +435,7 @@ static void isUIntegerWord(ContextObj* aCtx) {
 void registerUIntegerWords(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
   
   registerCFunction(symTab, "isUInteger", isUIntegerWord);
   registerCFunction(symTab, "+",          addWord);
@@ -491,7 +505,8 @@ static void pushEmptyList(ContextObj *aCtx) {
 void registerListWords(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   SymbolTableObj *symTab = asCtxSymbols(aCtx);
-
+  assert(isSymbolTableObj(symTab));
+  
   registerCFunction(symTab, "isNil",     isNilWord);
   registerCFunction(symTab, "isList",    isPairWord);
   registerCFunction(symTab, "isPair",    isPairWord);
@@ -531,12 +546,14 @@ void equalSymbolWord(ContextObj* aCtx) {
 \startCCode
 void registerSymbolWords(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
-  
-  SymbolObj *newLineObj = newSymbol("\n", "newLine", 0);
-  insertSymbol(asCtxSymbols(aCtx), "newLine", asJObj(newLineObj));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
 
-  registerCFunction(asCtxSymbols(aCtx), "isSymbol", isSymbolWord);
-  registerCFunction(asCtxSymbols(aCtx), "=Sym",     equalSymbolWord);
+  SymbolObj *newLineObj = newSymbol("\n", "newLine", 0);
+  insertSymbol(symTab, "newLine", asJObj(newLineObj));
+
+  registerCFunction(symTab, "isSymbol", isSymbolWord);
+  registerCFunction(symTab, "=Sym",     equalSymbolWord);
 }
 \stopCCode
 

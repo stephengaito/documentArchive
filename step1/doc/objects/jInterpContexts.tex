@@ -95,6 +95,7 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   newObj->showDepth          = 5;
   newObj->exceptionRaised    = false;
   newObj->parent             = NULL;
+  initializeRenderer(newObj);
   return newObj;
 }
 \stopCCode
@@ -236,6 +237,7 @@ void parseFile(ContextObj *aCtx, Symbol *aTextFilePath) {
   }
 
   asParserText(aCtx)     = textBuffer;
+  asParserTextName(aCtx) = aTextFilePath;
   asParserTextSize(aCtx) = textSize;
 }
 \stopCCode

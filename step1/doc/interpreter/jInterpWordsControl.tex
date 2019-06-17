@@ -767,8 +767,11 @@ void breakPointOn(ContextObj *aCtx, Symbol *aSymbol) {
   DEBUG(ParserDebug, "breakPointOnWord: [%s]\n", aSymbol);
   assert(isContextObj(aCtx));
   if (!aSymbol) return;
-  deleteSymbol(asCtxSymbols(aCtx), aSymbol);
-  registerCFunction(asCtxSymbols(aCtx), aSymbol, breakPointWord);
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
+  
+  deleteSymbol(symTab, aSymbol);
+  registerCFunction(symTab, aSymbol, breakPointWord);
 }
 \stopCCode
 
