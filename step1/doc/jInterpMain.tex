@@ -58,6 +58,7 @@ int main(int argc, char *argv[]){
   for(; optind < argc; optind++) {
     rootCtx->tracingOn = false;
     printf("interpreting: [%s]\n", argv[optind]);
+    printf("------------------------------------------\n");
     if (tracingOn) printf("==============\ncalling parseFile\n\n");
     parseFile(rootCtx, argv[optind]);
     if (tracingOn) {
@@ -85,7 +86,8 @@ int main(int argc, char *argv[]){
       rootCtx->tracingOn = tracingOn;
     }
     evalCommandInContext(rootCtx, NULL);
-    printf("\nfinished interpreting [%s]\n\n", argv[optind]);
+    printf("\n------------------------------------------\n");
+    printf("finished interpreting [%s]\n\n", argv[optind]);
   }
 }
 \stopCCode

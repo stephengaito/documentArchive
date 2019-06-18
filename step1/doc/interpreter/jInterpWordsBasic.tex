@@ -107,7 +107,7 @@ static void doWrite(
 
   assert(isStringBufferObj(asRenderBuffer(aCtx)));
   strBufPrintf(asRenderBuffer(aCtx), "%s", asSymbol(aString));
-  if (newLine) strBufPrintf(asRenderBuffer(aCtx), "%s" "\n");
+  if (newLine) strBufPrintf(asRenderBuffer(aCtx), "%s", "\n");
 }
 
 static void writeWord(ContextObj *aCtx) {
@@ -139,7 +139,7 @@ static void printRenderBuffer(ContextObj* aCtx) {
   assert(isContextObj(aCtx));
   assert(isStringBufferObj(asRenderBuffer(aCtx)));
   
-  printf("%s\n", getCString(asRenderBuffer(aCtx)));
+  printf("%s", getCString(asRenderBuffer(aCtx)));
 }
 \stopCCode
 
