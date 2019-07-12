@@ -1,0 +1,49 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Operator Precedence Parsing] 
+
+We base our implementation of Operator Precedence Parsing on Andy Chu's 
+excellent exposition of Pratt Parsing, \cite{chu2016prattParsing} and 
+\cite{chu2016prattParsingGitHub}. 
+
+Quoting Chu:
+
+\startBlockQuote
+
+To me, these are its [Pratt Parsing's] salient characteristics: 
+
+\startitemize[n]
+
+\item It's mutually recursive between a core \type{parse(int rbp)} 
+function and \type{nud()} and \type{led()} \quote{plugin functions} for 
+each operator. In my code, these are the \type{p.ParseUntil(int 
+precedence)} method, and \type{Null*()} and \type{Left*()} functions. 
+
+\item Many recursive algorithms like tree traversal are purely functional. 
+In contrast, Pratt parsing has the property that the recursive procedures 
+also mutate state, i.e. the current token. This is just like recursive 
+descent parsing, which is one reason they go together well. 
+
+\stopitemize
+\stopBlockQuote
+
+In our case our \quote{parser} (\quote{context}) state is maintained in 
+the jPeg context. We add nud (null denotation) and led (left denotaiton) 
+dictionaries to contain references to the \quote{plugin functions} 
+(denotations) for each operator. 
+
+We implement \type{lookupLeft} and \type{lookupNull} jPeg words as well as 
+corresponding \type{registerLeftDenotation} and 
+\type{registerNullDenotation} joylol words to lookup and register left and 
+null denotations respectively. 
+
+Chu's Pratt Parser's \type{ParseUntil} function, is really a 
+\type{parseUntil} structure similar to the existing jPeg repeat structures 
+(\type{repeat}, \type{repeatAtLeast}, and \type{repeatAtMost}). Hence, we 
+implement primitive jPeg \type{parseWhile} and \type{parseUntil} words 
+from which Chu's Pratt Parser \type{ParseUntil} can be built. 
+
+Given these new jPeg privitives, we can then build joylol words which 
+implement a more comprehensive Pratt Parser similar to the praser outlined 
+by Chu, \cite{chu2016prattParsing} and \cite{chu2016prattParsingGitHub}. 
+
