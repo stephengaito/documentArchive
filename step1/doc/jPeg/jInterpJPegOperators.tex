@@ -152,3 +152,121 @@ void jPegLookupNullDenotation(ContextObj *aCtx) {
 \stopCTest
 \stopTestCase
 \stopTestSuite
+
+\startTestSuite[registerLeftDenotation and lookupLeftDenotation]
+
+\startCHeader
+void jPegRegisterLeftDenotation(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegRegisterLeftDenotation(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, name2register);
+  popCtxDataInto(aCtx, ledList);
+
+  if (!isSymbolObj(name2register)) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a symbol as top");
+    return;
+  }
+
+  if (!isPairObj(ledList)) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a list as second");
+    return;
+  }
+
+  // ensure nudList has correct constituents
+  if (listLength(ledList) != 3) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a list with two elements");
+    return;    
+  }
+  
+  JObj *firstElement = getNthElement(ledList, 0);
+  if (!isSymbolObj(firstElement) && !isCFunctionObj(firstElement)) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a function as first element");
+    return;    
+  }
+
+  JObj *secondElement = getNthElement(ledList, 1);
+  if (!isUIntegerObj(secondElement)) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a uInteger as second element");
+    return;    
+  }
+
+  JObj *thirdElement = getNthElement(ledList, 2);
+  if (!isUIntegerObj(thirdElement)) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a uInteger as third element");
+    return;    
+  }
+
+  if (!asParserLeds(aCtx)) reinitializeParser(aCtx, "default");
+  SymbolTableObj *leds = asParserLeds(aCtx);
+  insertSymbol(leds, asSymbol(name2register), ledList);
+}
+\stopCCode
+
+\startCHeader
+void jPegLookupLeftDenotation(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegLookupLeftDenotation(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, name2lookup);
+
+  if (!isSymbolObj(name2lookup)) {
+    raiseExceptionMsg(aCtx,
+      "lookupLeftDenotation requires a symbol as top");
+    return;
+  }
+
+  if (!asParserLeds(aCtx)) reinitializeParser(aCtx, "default");
+  SymbolTableObj *leds = asParserLeds(aCtx);
+  pushCtxData(aCtx, findSymbol(leds, asSymbol(name2lookup)));
+}
+\stopCCode
+
+\startTestCase[should be able to register and lookup a left denotation]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushUIntegerCtxData(aCtx, 201);
+  pushUIntegerCtxData(aCtx, 200);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "testLed");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "+");
+  jPegRegisterLeftDenotation(aCtx);
+  AssertPtrNull(aCtx->data);
+  
+  pushSymbolCtxData(aCtx, "+");
+  jPegLookupLeftDenotation(aCtx);
+  popCtxDataInto(aCtx, ledList);
+  AssertIntTrue(isPairObj(ledList));
+  AssertIntEquals(listLength(ledList), 3);
+  JObj *firstElement = getNthElement(ledList, 0);
+  AssertIntTrue(isSymbolObj(firstElement));
+  AssertStrEquals(asSymbol(firstElement), "testLed");
+  JObj *secondElement = getNthElement(ledList, 1);
+  AssertIntTrue(isUIntegerObj(secondElement));
+  AssertIntEquals(asUInteger(secondElement), 200);
+  JObj *thirdElement = getNthElement(ledList, 2);
+  AssertIntTrue(isUIntegerObj(thirdElement));
+  AssertIntEquals(asUInteger(thirdElement), 201);
+\stopCTest
+\stopTestCase
+\stopTestSuite
