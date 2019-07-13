@@ -101,7 +101,7 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   newObj->showDepth             = 5;
   newObj->exceptionRaised       = false;
   newObj->parent                = NULL;
-  initializeRenderer(newObj);
+  reinitializeRenderer(newObj);
   return newObj;
 }
 \stopCCode
@@ -126,7 +126,7 @@ ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
   AssertPtrNull(asParserSymbols(aCtx));
   AssertPtrNull(asParserNuds(aCtx));
   AssertPtrNull(asParserLeds(aCtx));
-  AssertPtrNull(asRenderBuffer(aCtx));
+  AssertPtrNotNull(asRenderBuffer(aCtx));
   AssertIntFalse(aCtx->tracingOn);
   AssertIntFalse(aCtx->debug);
   AssertPtrNull(asCtxCommand(aCtx));
@@ -278,14 +278,14 @@ void parseFile(ContextObj *aCtx, Symbol *aTextFilePath) {
 \stopTestCase
 \stopTestSuite
 
-\startTestSuite[initializeRenderer]
+\startTestSuite[reinitializeRenderer]
 
 \startCHeader
-void initializeRenderer(ContextObj *aCtx);
+void reinitializeRenderer(ContextObj *aCtx);
 \stopCHeader
 
 \startCCode
-void initializeRenderer(ContextObj *aCtx) {
+void reinitializeRenderer(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
   asRenderBuffer(aCtx) = newStringBuffer();
@@ -297,9 +297,11 @@ void initializeRenderer(ContextObj *aCtx) {
 \startCTest
   ContextObj *aCtx = newContext(NULL, NULL, "testCtxRenderer");
   AssertIntTrue(isContextObj(aCtx));
-  
-  AssertPtrNull(asRenderBuffer(aCtx));
-  initializeRenderer(aCtx);
+  StringBufferObj *origBuffer = asRenderBuffer(aCtx);
+  AssertPtrNotNull(origBuffer);
+  reinitializeRenderer(aCtx);
+  StringBufferObj *newBuffer  = asRenderBuffer(aCtx);
+  AssertPtrNotEquals(origBuffer, newBuffer)
   AssertIntTrue(isStringBufferObj(asRenderBuffer(aCtx)));
 \stopCTest
 \stopTestCase
@@ -344,7 +346,7 @@ size_t writeRenderedText(ContextObj *aCtx, Symbol *aTextFilePath) {
   ContextObj *aCtx = newContext(NULL, NULL, "testRenderText");
   AssertIntTrue(isContextObj(aCtx));
   
-  initializeRenderer(aCtx);
+  reinitializeRenderer(aCtx);
   
   StringBufferObj *aStrBuf = asRenderBuffer(aCtx);
   
