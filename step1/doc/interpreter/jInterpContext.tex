@@ -130,6 +130,8 @@ void showCtxStack(
 void showCtxData(ContextObj *aCtx);
 
 void showCtxProcess(ContextObj *aCtx);
+
+void showCtxJObj(ContextObj *aCtx, JObj *aJObj);
 \stopCHeader
 
 \startCCode
@@ -510,4 +512,8 @@ void showCtxProcess(ContextObj *aCtx) {
   showCtxStack(aCtx, aCtx->process, "p");
 }
 
+void showCtxJObj(ContextObj *aCtx, JObj* aJObj){
+  assert(isContextObj(aCtx));
+  showCtxStack(aCtx, aJObj, "obj");
+}
 \stopCCode

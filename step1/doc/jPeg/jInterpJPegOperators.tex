@@ -32,8 +32,8 @@ the jPeg context. We add nud (null denotation) and led (left denotaiton)
 dictionaries to contain references to the \quote{plugin functions} 
 (denotations) for each operator. 
 
-We implement \type{lookupLeft} and \type{lookupNull} jPeg words as well as 
-corresponding \type{registerLeftDenotation} and 
+We implement \type{lookupLeftDenotation} and \type{lookupNullDenotation} 
+jPeg words as well as corresponding \type{registerLeftDenotation} and 
 \type{registerNullDenotation} joylol words to lookup and register left and 
 null denotations respectively. 
 
@@ -47,3 +47,108 @@ Given these new jPeg privitives, we can then build joylol words which
 implement a more comprehensive Pratt Parser similar to the praser outlined 
 by Chu, \cite{chu2016prattParsing} and \cite{chu2016prattParsingGitHub}. 
 
+\startTestSuite[registerNullDenotation and lookupNullDenotation]
+
+\startCHeader
+void jPegRegisterNullDenotation(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegRegisterNullDenotation(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, name2register);
+  popCtxDataInto(aCtx, nudList);
+
+  if (!isSymbolObj(name2register)) {
+    raiseExceptionMsg(aCtx,
+      "register null denotation requires a symbol as top");
+    return;
+  }
+
+  if (!isPairObj(nudList)) {
+    raiseExceptionMsg(aCtx,
+      "register null denotation requires a list as second");
+    return;
+  }
+
+  // ensure nudList has correct constituents
+  if (listLength(nudList) != 2) {
+    raiseExceptionMsg(aCtx,
+      "register null denotation requires a list with two elements");
+    return;    
+  }
+  
+  JObj *firstElement = getNthElement(nudList, 0);
+  if (!isSymbolObj(firstElement) && !isCFunctionObj(firstElement)) {
+    raiseExceptionMsg(aCtx,
+      "register null denotation requires a function as first element");
+    return;    
+  }
+
+  JObj *secondElement = getNthElement(nudList, 1);
+  if (!isUIntegerObj(secondElement)) {
+    raiseExceptionMsg(aCtx,
+      "register null denotation requires a uInteger as second element");
+    return;    
+  }
+
+  if (!asParserNuds(aCtx)) reinitializeParser(aCtx, "default");
+  SymbolTableObj *nuds = asParserNuds(aCtx);
+  insertSymbol(nuds, asSymbol(name2register), nudList);
+}
+\stopCCode
+
+\startCHeader
+void jPegLookupNullDenotation(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegLookupNullDenotation(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, name2lookup);
+
+  if (!isSymbolObj(name2lookup)) {
+    raiseExceptionMsg(aCtx,
+      "lookupNullDenotation requires a symbol as top");
+    return;
+  }
+
+  if (!asParserNuds(aCtx)) reinitializeParser(aCtx, "default");
+  SymbolTableObj *nuds = asParserNuds(aCtx);
+  pushCtxData(aCtx, findSymbol(nuds, asSymbol(name2lookup)));
+}
+\stopCCode
+
+\startTestCase[should be able to register and lookup a null denotation]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushUIntegerCtxData(aCtx, 200);
+  pushSymbolCtxData(aCtx, "testNud");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "~");
+  jPegRegisterNullDenotation(aCtx);
+  AssertPtrNull(aCtx->data);
+  
+  pushSymbolCtxData(aCtx, "~");
+  jPegLookupNullDenotation(aCtx);
+  popCtxDataInto(aCtx, nudList);
+  AssertIntTrue(isPairObj(nudList));
+  AssertIntEquals(listLength(nudList), 2);
+  JObj *firstElement = getNthElement(nudList, 0);
+  AssertIntTrue(isSymbolObj(firstElement));
+  AssertStrEquals(asSymbol(firstElement), "testNud");
+  JObj *secondElement = getNthElement(nudList, 1);
+  AssertIntTrue(isUIntegerObj(secondElement));
+  AssertIntEquals(asUInteger(secondElement), 200);
+\stopCTest
+\stopTestCase
+\stopTestSuite

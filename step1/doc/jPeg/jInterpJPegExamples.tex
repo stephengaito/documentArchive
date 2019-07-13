@@ -36,6 +36,8 @@ void registerJPegWords(ContextObj *aCtx) {
   registerCFunction(symTab, "parseCoCharSet",            jPegCoCharSetWord);
   registerCFunction(symTab, "parseSpan",                 jPegSpanWord);
   registerCFunction(symTab, "parseCoSpan",               jPegCoSpanWord);
+  registerCFunction(symTab, "registerNullDenotation",    jPegRegisterNullDenotation);
+  registerCFunction(symTab, "lookupNullDenotation",      jPegLookupNullDenotation);
 }
 \stopCCode
 

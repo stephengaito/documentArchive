@@ -79,10 +79,11 @@ PairObj *newPair(JObj *car, JObj *cdr) {
   }
 \stopCHeader
 
-\startTestSuite[listLength]
+\startTestSuite[listLength and getNthElement]
 
 \startCHeader
 UInteger listLength(JObj *aList);
+JObj    *getNthElement(JObj *aList, UInteger n);
 \stopCHeader
 
 \startCCode
@@ -98,22 +99,39 @@ UInteger listLength(JObj *aList) {
   }
   return numEntries;
 }
+
+JObj *getNthElement(JObj *aList, UInteger n) {
+  if (!aList) return NULL;
+  
+  if (!isPairObj(aList)) return NULL;
+  
+  UInteger numEntries = 0;
+  while(isPairObj(aList)) {
+    if (numEntries == n) return asCar(aList);
+    aList = asCdr(aList);
+    numEntries++;
+  }
+  return NULL;
+}
 \stopCCode
 
-\startTestCase[should return the length of a list]
+\startTestCase[should return the length of a list as well as respective elements]
 
 \startCTest
   AssertIntZero(listLength(NULL));
   AssertIntEquals(listLength(asJObj(newUInteger(42))), 1);
 
   JObj *aList =
-    asJObj(newPair(NULL, 
-      asJObj(newPair(NULL,
-        asJObj(newPair(NULL, NULL))
+    asJObj(newPair(asJObj(newUInteger(0)), 
+      asJObj(newPair(asJObj(newUInteger(1)),
+        asJObj(newPair(asJObj(newUInteger(2)), NULL))
       ))
     ));
   
   AssertIntEquals(listLength(aList), 3);
+  AssertIntEquals(asUInteger(getNthElement(aList,0)), 0);
+  AssertIntEquals(asUInteger(getNthElement(aList,1)), 1);
+  AssertIntEquals(asUInteger(getNthElement(aList,2)), 2);
 \stopCTest
 \stopTestCase
 \stopTestSuite
