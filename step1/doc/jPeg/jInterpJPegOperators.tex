@@ -80,7 +80,9 @@ void jPegRegisterNullDenotation(ContextObj *aCtx) {
   }
   
   JObj *firstElement = getNthElement(nudList, 0);
-  if (!isSymbolObj(firstElement) && !isCFunctionObj(firstElement)) {
+  if (!isSymbolObj(firstElement) &&
+      !isCFunctionObj(firstElement) &&
+      !isPairObj(firstElement)) {
     raiseExceptionMsg(aCtx,
       "register null denotation requires a function as first element");
     return;    
@@ -100,6 +102,9 @@ void jPegRegisterNullDenotation(ContextObj *aCtx) {
 \stopCCode
 
 \startCHeader
+#define jPegLookupNullDenotationFunc(aCtx, name2lookup) \
+  findSymbol(asParserNuds(aCtx), asSymbol(name2lookup))
+
 void jPegLookupNullDenotation(ContextObj *aCtx);
 \stopCHeader
 
@@ -116,8 +121,7 @@ void jPegLookupNullDenotation(ContextObj *aCtx) {
   }
 
   if (!asParserNuds(aCtx)) reinitializeParser(aCtx, "default");
-  SymbolTableObj *nuds = asParserNuds(aCtx);
-  pushCtxData(aCtx, findSymbol(nuds, asSymbol(name2lookup)));
+  pushCtxData(aCtx, jPegLookupNullDenotationFunc(aCtx, name2lookup));
 }
 \stopCCode
 
@@ -186,7 +190,9 @@ void jPegRegisterLeftDenotation(ContextObj *aCtx) {
   }
   
   JObj *firstElement = getNthElement(ledList, 0);
-  if (!isSymbolObj(firstElement) && !isCFunctionObj(firstElement)) {
+  if (!isSymbolObj(firstElement) &&
+      !isCFunctionObj(firstElement) &&
+      !isPairObj(firstElement)) {
     raiseExceptionMsg(aCtx,
       "register left denotation requires a function as first element");
     return;    
@@ -213,6 +219,9 @@ void jPegRegisterLeftDenotation(ContextObj *aCtx) {
 \stopCCode
 
 \startCHeader
+#define jPegLookupLeftDenotationFunc(aCtx, name2lookup)  \
+  findSymbol(asParserLeds(aCtx), asSymbol(name2lookup))
+
 void jPegLookupLeftDenotation(ContextObj *aCtx);
 \stopCHeader
 
@@ -229,8 +238,7 @@ void jPegLookupLeftDenotation(ContextObj *aCtx) {
   }
 
   if (!asParserLeds(aCtx)) reinitializeParser(aCtx, "default");
-  SymbolTableObj *leds = asParserLeds(aCtx);
-  pushCtxData(aCtx, findSymbol(leds, asSymbol(name2lookup)));
+  pushCtxData(aCtx, jPegLookupLeftDenotationFunc(aCtx, name2lookup));
 }
 \stopCCode
 
@@ -267,6 +275,84 @@ void jPegLookupLeftDenotation(ContextObj *aCtx) {
   JObj *thirdElement = getNthElement(ledList, 2);
   AssertIntTrue(isUIntegerObj(thirdElement));
   AssertIntEquals(asUInteger(thirdElement), 201);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[parseExpression]
+
+\startCHeader
+void jPegParseNullExpressionContinue(ContextObj *aCtx);
+void jPegParseLeftExpressionContinue(ContextObj *aCtx);
+void jPegParseExpression(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegParseNullExpressionContinue(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxProcessInto(aCtx, rightBindingPrecedence);
+  popCtxProcessInto(aCtx, tokenizer);
+  popCtxProcessInto(aCtx, backTrackPosition);
+  peekCtxDataInto(aCtx, token);
+  
+  // token SHOULD be a symbol... how do we fail if it isn't???
+  
+  JObj *nudList = jPegLookupNullDenotationFunc(aCtx, token);
+  getNthElementInto(nudList, 0, nudFunction);
+  getNthElementInto(nudList, 1, bindingPrecedence);
+  pushCtxData(aCtx, bindingPrecedence);
+  // token is already now on the second
+  pushCtxProcess(aCtx, nudFunction);
+}
+
+void jPegParseLeftExpressionContinue(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  
+}
+
+void jPegParseExpression(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, parseExpList);
+  
+  getNthElementInto(aCtx, 0, tokenizer);
+  getNthElementInto(aCtx, 1, rightBindingPrecedence);
+  
+  if (!isSymbolObj(tokenizer) &&
+      !isCFunctionObj(tokenizer) &&
+      !isPairObj(tokenizer)) {
+    raiseExceptionMsg(aCtx,
+      "parse expression requires a function as top");
+    return;
+  }
+
+  if (!isUIntegerObj(rightBindingPrecedence)) {
+    raiseExceptionMsg(aCtx,
+      "parse expression requires a UInteger as second");
+    return;
+  }
+  
+  // ToDo: how do we deal with failure?!?!?!?
+  // such as end of input?
+  
+  // asParserFailed(aCtx) = true;
+  
+  pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
+  pushCtxProcess(aCtx, tokenizer);
+  pushCtxProcess(aCtx, righBindingPrecedence);
+  pushSymbolCtxProcess(aCtx, "parseNullExpressionCont");
+  
+  if (isPairObj(tokenizer)) prependListCtxProcess(aCtx, tokenizer)
+  else pushCtxProcess(aCtx, tokenizer)
+}
+\stopCCode
+
+\startTextCase[should]
+
+\startCTest
+
 \stopCTest
 \stopTestCase
 \stopTestSuite

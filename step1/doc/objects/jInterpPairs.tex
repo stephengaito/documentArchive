@@ -84,6 +84,20 @@ PairObj *newPair(JObj *car, JObj *cdr) {
 \startCHeader
 UInteger listLength(JObj *aList);
 JObj    *getNthElement(JObj *aList, UInteger n);
+
+#define getNthElementInto(aCtx, nElem, aVar)    \
+assert(isContextObj(aCtx));                     \
+JObj *aVar = getNthElement(aCtx, nElem);        \
+if (aCtx->tracingOn) {                          \
+  StringBufferObj *aStrBuf = newStringBuffer(); \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);        \
+  printJObj(aStrBuf, asJObj(aVar), "", 20);     \
+  strBufPrintf(aStrBuf, "\n");                  \
+  printf("%s", getCString(aStrBuf));            \
+  strBufClose(aStrBuf);                         \
+  free(aStrBuf);                                \
+}
+
 \stopCHeader
 
 \startCCode

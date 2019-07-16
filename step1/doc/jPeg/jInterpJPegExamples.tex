@@ -38,6 +38,11 @@ void registerJPegWords(ContextObj *aCtx) {
   registerCFunction(symTab, "parseCoSpan",               jPegCoSpanWord);
   registerCFunction(symTab, "registerNullDenotation",    jPegRegisterNullDenotation);
   registerCFunction(symTab, "lookupNullDenotation",      jPegLookupNullDenotation);
+  registerCFunction(symTab, "registerLeftDenotation",    jPegRegisterLeftDenotation);
+  registerCFunction(symTab, "lookupLeftDenotation",      jPegLookupLeftDenotation);
+  registerCFunction(symTab, "parseExpression",           jPegParseExpression);
+  registerCFunction(symTab, "parseNullExpressionCont",   jPegParseNullExpressionContinue);
+  registerCFunction(symTab, "parseLeftExpressionCont",   jPegParseLeftExpressionContinue);
 }
 \stopCCode
 
