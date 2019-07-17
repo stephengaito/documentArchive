@@ -296,20 +296,60 @@ void jPegParseNullExpressionContinue(ContextObj *aCtx) {
   popCtxProcessInto(aCtx, backTrackPosition);
   peekCtxDataInto(aCtx, token);
   
-  // token SHOULD be a symbol... how do we fail if it isn't???
+  // token SHOULD be a symbol... if not then fail
+  if (!isSymbolObj(token)) pushSymbolCtxProcess(aCtx, "parseFail");
   
   JObj *nudList = jPegLookupNullDenotationFunc(aCtx, token);
+  if (!isPairObj(nudList)) pushSymbolCtxProcess(aCtx, "parseFail");
+  
   getNthElementInto(nudList, 0, nudFunction);
   getNthElementInto(nudList, 1, bindingPrecedence);
+  
   pushCtxData(aCtx, bindingPrecedence);
   // token is already now on the second
   pushCtxProcess(aCtx, nudFunction);
 }
 
+void jPegParseLeftTokenExpressionContinue(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxProcessInto(aCtx, rightBindingPrecedence);
+  popCtxProcessInto(aCtx, tokenizer);
+  popCtxProcessInto(aCtx, backTrackPosition);
+  peekCtxDataInto(aCtx, token);
+  
+  // token SHOULD be a symbol... if not then fail
+  if (!isSymbolObj(token)) pushSymbolCtxProcess(aCtx, "parseFail");
+  
+  JObj *ledList = jPegLookupLeftDenotationFunc(aCtx, token);
+  if (!isPairObj(ledList)) pushSymbolCtxProcess(aCtx, "parseFail");
+  
+  getNthElementInto(ledList, 0, ledFunction);
+  getNthElementInto(ledList, 1, ledLeftBindingPrecedence);
+  getNthElementInto(ledList, 2, ledRightBindingPrecedence);
+  
+  // how do we decide we are done?
+  if (ledLeftBindingPrecedence < rightBindingPrecedence) {
+    // we are done
+    return;
+  }
+  
+  // how do we repeat (again)
+  pushCtxProcess(aCtx, backTrackPosition);
+  pushCtxProcess(aCtx, tokenizer);
+  pushCtxProcess(aCtx, rightBindingPrecedence);
+
+  // parse next token
+  
+}
+
 void jPegParseLeftExpressionContinue(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
-  
+  pushCtxData(aCtx, bindingPrecedence);
+  // token is already now on the second
+  pushCtxProcess(aCtx, ledFunction);
+
 }
 
 void jPegParseExpression(ContextObj *aCtx) {
