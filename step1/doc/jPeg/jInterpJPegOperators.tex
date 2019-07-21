@@ -281,77 +281,87 @@ void jPegLookupLeftDenotation(ContextObj *aCtx) {
 
 \startTestSuite[parseExpression]
 
+In order to parse an expression we mimic the Chu's pratt parser's 
+\type{parseUntil}, \cite[righttext=found in tdop.py in the Parser 
+class][chu2016prattParsingGitHub]: 
+
+\starttyping
+  def ParseUntil(self, rbp):
+    """
+    Parse to the right, eating tokens until we encounter a token with binding
+    power LESS THAN OR EQUAL TO rbp.
+    """
+    if self.AtToken('eof'):
+      raise ParseError('Unexpected end of input')
+
+    t = self.token
+    self.Next()  # skip over the token, e.g. ! ~ + -
+
+    null_info = self.spec.LookupNull(t.type)
+    node = null_info.nud(self, t, null_info.bp)
+
+    while True:
+      t = self.token
+      left_info = self.spec.LookupLeft(t.type)
+
+      # Examples:
+      # If we see 1*2+  , rbp = 27 and lbp = 25, so stop.
+      # If we see 1+2+  , rbp = 25 and lbp = 25, so stop.
+      # If we see 1**2**, rbp = 26 and lbp = 27, so keep going.
+      if rbp >= left_info.lbp:
+        break
+      self.Next()  # skip over the token, e.g. / *
+
+      node = left_info.led(self, t, node, left_info.rbp)
+
+    return node
+\stoptyping
+
+\noindent in an optimized internal \joylol\ ANSI-C code. This means that 
+we break the over all function into a number of smaller blocks (in much 
+the same way a compiler would).\footnote{Note that since Chu's parser 
+throws, but effectively ingores, errors, Chu's code does not have an 
+explicit test for the presence of a \quote{null denotation}. Since we 
+actively (jPeg) fail, we must be more careful.} The over all expression 
+parsing is orchestrated by the \type{parseExpression} word, which expects 
+a list which contains a jPeg tokenizer as well as the right binding 
+precedence for the over all expression to be parsed. 
+
+The \type{parseExpression} word sets up the over all expression parsing 
+and calls the provided tokenizer after setting up the 
+\type{parseNullExpression} word as its (eventual) continuation. 
+
+The \type{parseNullExpression} word determines if the token obtained from 
+the tokenizer has a \quote{null denotation}, and if so invokes that null 
+denotation after setting up the \type{parseLeftExpression} word as its 
+(eventaul) continuation. If the token obtained is does not have a valid 
+\quote{null denotation} then the \quote{parseLeftExpression} word is used 
+as the (imediate) continuation instead. 
+
+The \type{parseLeftExpression} word first checks that the token has a 
+valid \quote{left denotation}. If the token has no valid \quote{left 
+denotation}, then the \type{parseLeftExpression} word (jPeg) fails. If the 
+token has a valid \quote{left denotation} the \type{parseLeftExpression} 
+word checks to see if the \quote{left binding precedence} of the 
+\quote{left denotation} is \emph{less than} the right binding precedence 
+supplied to the original \type{parseExpression}. If the \quote{left 
+binding precedence} of the \quote{left denotation} \emph{is} less than the 
+right binding precedence supplied to the original \type{parseExpression} 
+the overall \type{parseExpression} word has (jPeg) succedded and is done. 
+If \quote{left binding precedence} of the \quote{left denotation} is 
+\emph{less than} the right binding precedence supplied to the original 
+\type{parseExpression}, then the \type{parseLeftExpression} word sets 
+itself up as the (ultimate) continuation, sets up the \quote{left 
+denotation} function as the (eventual) continution, and invokes the 
+tokenizer as the continuation. 
+
 \startCHeader
+void jPegParseExpression(ContextObj *aCtx);
 void jPegParseNullExpressionContinue(ContextObj *aCtx);
 void jPegParseLeftExpressionContinue(ContextObj *aCtx);
-void jPegParseExpression(ContextObj *aCtx);
 \stopCHeader
 
 \startCCode
-void jPegParseNullExpressionContinue(ContextObj *aCtx) {
-  assert(isContextObj(aCtx));
-  
-  popCtxProcessInto(aCtx, rightBindingPrecedence);
-  popCtxProcessInto(aCtx, tokenizer);
-  popCtxProcessInto(aCtx, backTrackPosition);
-  peekCtxDataInto(aCtx, token);
-  
-  // token SHOULD be a symbol... if not then fail
-  if (!isSymbolObj(token)) pushSymbolCtxProcess(aCtx, "parseFail");
-  
-  JObj *nudList = jPegLookupNullDenotationFunc(aCtx, token);
-  if (!isPairObj(nudList)) pushSymbolCtxProcess(aCtx, "parseFail");
-  
-  getNthElementInto(nudList, 0, nudFunction);
-  getNthElementInto(nudList, 1, bindingPrecedence);
-  
-  pushCtxData(aCtx, bindingPrecedence);
-  // token is already now on the second
-  pushCtxProcess(aCtx, nudFunction);
-}
-
-void jPegParseLeftTokenExpressionContinue(ContextObj *aCtx) {
-  assert(isContextObj(aCtx));
-  
-  popCtxProcessInto(aCtx, rightBindingPrecedence);
-  popCtxProcessInto(aCtx, tokenizer);
-  popCtxProcessInto(aCtx, backTrackPosition);
-  peekCtxDataInto(aCtx, token);
-  
-  // token SHOULD be a symbol... if not then fail
-  if (!isSymbolObj(token)) pushSymbolCtxProcess(aCtx, "parseFail");
-  
-  JObj *ledList = jPegLookupLeftDenotationFunc(aCtx, token);
-  if (!isPairObj(ledList)) pushSymbolCtxProcess(aCtx, "parseFail");
-  
-  getNthElementInto(ledList, 0, ledFunction);
-  getNthElementInto(ledList, 1, ledLeftBindingPrecedence);
-  getNthElementInto(ledList, 2, ledRightBindingPrecedence);
-  
-  // how do we decide we are done?
-  if (ledLeftBindingPrecedence < rightBindingPrecedence) {
-    // we are done
-    return;
-  }
-  
-  // how do we repeat (again)
-  pushCtxProcess(aCtx, backTrackPosition);
-  pushCtxProcess(aCtx, tokenizer);
-  pushCtxProcess(aCtx, rightBindingPrecedence);
-
-  // parse next token
-  
-}
-
-void jPegParseLeftExpressionContinue(ContextObj *aCtx) {
-  assert(isContextObj(aCtx));
-  
-  pushCtxData(aCtx, bindingPrecedence);
-  // token is already now on the second
-  pushCtxProcess(aCtx, ledFunction);
-
-}
-
 void jPegParseExpression(ContextObj *aCtx) {
   assert(isContextObj(aCtx));
   
@@ -374,22 +384,99 @@ void jPegParseExpression(ContextObj *aCtx) {
     return;
   }
   
-  // ToDo: how do we deal with failure?!?!?!?
-  // such as end of input?
-  
-  // asParserFailed(aCtx) = true;
-  
+  // setup the parseNUllExpression as the continuation
   pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
   pushCtxProcess(aCtx, tokenizer);
   pushCtxProcess(aCtx, righBindingPrecedence);
   pushSymbolCtxProcess(aCtx, "parseNullExpressionCont");
   
+  // now invoke the tokenizer
+  if (isPairObj(tokenizer)) prependListCtxProcess(aCtx, tokenizer)
+  else pushCtxProcess(aCtx, tokenizer)
+}
+void jPegParseNullExpressionContinue(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxProcessInto(aCtx, rightBindingPrecedence);
+  popCtxProcessInto(aCtx, tokenizer);
+  popCtxProcessInto(aCtx, backTrackPosition);
+  peekCtxDataInto(aCtx, token);
+  
+  // token SHOULD be a symbol... if not then fail
+  if (!isSymbolObj(token)) pushSymbolCtxProcess(aCtx, "parseFail");
+  
+  JObj *nudList = jPegLookupNullDenotationFunc(aCtx, token);
+  
+  // setup the process stack for the parse expression continuations
+  pushCtxProcess(aCtx, backTrackPosition);
+  pushCtxProcess(aCtx, tokenizer);
+  pushCtxProcess(aCtx, rightBindingPrecedence);
+  
+  if (isPairObj(nudList)) {
+    // there is no associated null denotation so just continue with
+    // parseLeftExpression word as continuation 
+    pushSymbolCtxProcess(aCtx, "parseLeftExpressionCont");
+    return;
+  }
+
+  // this symbol does have a null denotation so setup the 
+  // parseLeftExpressionCont as the (eventual) continuation
+  pushSymbolCtxProcess(aCtx, "parseTokenExpressionCont");
+  
+  // this symbol does have a null denotation so invoke that word
+  getNthElementInto(nudList, 0, nudFunction);
+  getNthElementInto(nudList, 1, nudBindingPrecedence);
+  
+  pushCtxData(aCtx, nudBindingPrecedence);
+  // token is already now on the second
+  pushCtxProcess(aCtx, nudFunction);
+}
+
+void jPegParseLeftExpressionContinue(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxProcessInto(aCtx, rightBindingPrecedence);
+  popCtxProcessInto(aCtx, tokenizer);
+  popCtxProcessInto(aCtx, backTrackPosition);
+  peekCtxDataInto(aCtx, token);
+  
+  // token SHOULD be a symbol... if not then fail
+  if (!isSymbolObj(token)) pushSymbolCtxProcess(aCtx, "parseFail");
+  
+  JObj *ledList = jPegLookupLeftDenotationFunc(aCtx, token);
+  if (!isPairObj(ledList)) pushSymbolCtxProcess(aCtx, "parseFail");
+  
+  getNthElementInto(ledList, 0, ledFunction);
+  getNthElementInto(ledList, 1, ledLeftBindingPrecedence);
+  getNthElementInto(ledList, 2, ledRightBindingPrecedence);
+  
+  // how do we decide we are done?
+  if (ledLeftBindingPrecedence < rightBindingPrecedence) {
+    // we are done
+    return;
+  }
+    // setup parseLeftExpression word as the ultimate continuation
+  pushCtxProcess(aCtx, backTrackPosition);
+  pushCtxProcess(aCtx, tokenizer);
+  pushCtxProcess(aCtx, rightBindingPrecedence);
+  pushSymbolCtxProcess(aCtx, "parseLeftExpressionCont");
+  
+  // setup the left denotation function as the eventual continuation
+  // (with the token on the top of the data stack)
+  pushCtxData(aCtx, bindingPrecedence);
+  // token is already now on the second
+  // now invoke the tokenizer
+  if (isPairObj(ledFunction)) prependListCtxProcess(aCtx, ledFunction)
+  else pushCtxProcess(aCtx, ledFunction);
+  // do we need to swap the top and second on the data stack?
+  
+  // now invoke the tokenizer
   if (isPairObj(tokenizer)) prependListCtxProcess(aCtx, tokenizer)
   else pushCtxProcess(aCtx, tokenizer)
 }
 \stopCCode
 
-\startTextCase[should]
+\startTestCase[should]
 
 \startCTest
 
