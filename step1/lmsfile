@@ -23,7 +23,12 @@ ctxTargets = contextDoc.targets{
 
 require 'lms.litProgs'
 
-lpTargets = litProgs.targets(ctxTargets)
+lpTargets = litProgs.targets(ctxTargets, {
+  directories = {
+    'joylol',
+    'joylol',
+  },
+})
 
 
 require 'lms.c'

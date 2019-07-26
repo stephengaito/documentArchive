@@ -14,36 +14,26 @@
 -- express or implied. See the License for the specific language
 -- governing permissions and limitations under the License. end
 
-require 'lms.litProgs'
+require 'lms.contextDoc'
 
-lpTargets = litProgs.targets{
+ctxTargets = contextDoc.targets{
   mainDoc  = 'jCompiler.tex',
   docDir    = 'doc',
 }
 
-require 'lms.cTests'
+require 'lms.litProgs'
 
-cTests.targets(lpTargets, {
-  testExecs = {
-    'allCTests',
-  },
-  cHeaderFiles = {
-    'joylol/jCompiler.h',
-    'joylol/jCompiler-private.h',
-  },
-  cCodeFiles = {
-    'jCompiler.c',
-    'jCompilerLib.c',
-  },
-  testLibDirs = {
-  },
-  testLibs = {
+lpTargets = litProgs.targets(ctxTargets, {
+  directories = {
+    'joylol',
+    'joylol',
   },
 })
 
+
 require 'lms.c'
 
-c.targets(lpTargets, {
+cTargets = c.targets(lpTargets, {
   programs = {
     'jCompiler',
   },
@@ -57,6 +47,15 @@ c.targets(lpTargets, {
   },
 })
 
-require 'lms.contextDoc'
+require 'lms.cTests'
 
-contextDoc.targets(lpTargets)
+cTests.targets(cTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
+})
+
