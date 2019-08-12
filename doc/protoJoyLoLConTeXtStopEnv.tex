@@ -1,5 +1,21 @@
 % A ConTeXt document [master document: protoJoyLoL.tex ]
 
+\startenvironment protoJoyLoLConTeXStopEnv
+
+\addCTestTargets{default}
+
+%\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\prependLmsfile{default}
+\placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+
 \stopbodymatter
 
 \startbackmatter
@@ -7,3 +23,6 @@
     \placelistofpublications
   \stopchapter
 \stopbackmatter
+
+\stopenvironment
+

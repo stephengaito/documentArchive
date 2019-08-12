@@ -91,4 +91,26 @@ int main(int argc, char *argv[]){
   }
 }
 \stopCCode
+
+\prependCCode{jInterpMain}
+\startCCode
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <unistd.h>
+#include <getopt.h>
+
+#include "joylol/jInterp.h"
+#include "joylol/jInterp-private.h"
+\stopCCode
+
+\prependCCode{jInterpMain}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createCCodeFile%
+  {jInterpMain}%
+  {jInterp.c}%
+  {}
+
 \setCCodeStream{default}

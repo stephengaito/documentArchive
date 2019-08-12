@@ -3,9 +3,13 @@
 \usemodule[t-diSimp]
 
 \startDiSimpComponent jInterp
-
 \usebtxdataset[jInterpBib.lua]
 \diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jInterp.tex}
+
+\clearCHeader{public}
+\clearCHeader{private}
 
 \chapter[title=Step 1: Proto-\joylol\ Interpreter]
 
@@ -21,6 +25,22 @@
 
 \diSimpComponent jInterpConclusion
 
+\CHeaderIncludeGuard{public}{JINTERP}
+\prependCHeader{public}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createCHeaderFile%
+  {public}
+  {joylol/jInterp.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JINTERP_PRIVATE}
+\prependCHeader{private}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createCHeaderFile%
+  {private}
+  {joylol/jInterp-private.h}
+  {}
+  
 \diSimpEnvironment protoJoyLoLConTeXtStopEnv
 
 \stopDiSimpComponent

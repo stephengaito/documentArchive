@@ -1,47 +1,9 @@
-% A ConTeXt document [master document: jInterp.tex ]
+.% A ConTeXt document [master document: jInterp.tex ]
 
 
 \section[title=Conclusion]
 
-\addDocumentDirectory{doc}
-\addMainDocument{jInterp.tex}
 
-\CHeaderIncludeGuard{public}{JINTERP}
-\prependCHeader{public}
-\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
-\createCHeaderFile%
-  {public}
-  {joylol/jInterp.h}
-  {}
-
-\CHeaderIncludeGuard{private}{JINTERP_PRIVATE}
-\prependCHeader{private}
-\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
-\createCHeaderFile%
-  {private}
-  {joylol/jInterp-private.h}
-  {}
-
-\prependCCode{jInterpMain}
-\startCCode
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <unistd.h>
-#include <getopt.h>
-
-#include "joylol/jInterp.h"
-#include "joylol/jInterp-private.h"
-\stopCCode
-
-\prependCCode{jInterpMain}
-\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
-
-\createCCodeFile%
-  {jInterpMain}%
-  {jInterp.c}%
-  {}
 
 \prependCCode{default}
 \startCCode
@@ -81,16 +43,3 @@
   {allCTests.c}%
   {}
 
-\addCTestTargets{default}
-
-%\addJoyLoLTargets{default}
-
-\compileLmsfile{default}
-
-\prependLmsfile{default}
-\placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
-
-\createLmsfileFile%
-  {default}%
-  {lmsfile}%
-  {-- A Lua Make System file}
