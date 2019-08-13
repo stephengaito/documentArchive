@@ -14,19 +14,17 @@
 -- express or implied. See the License for the specific language
 -- governing permissions and limitations under the License. end
 
-print("HELLO WORLD!")
-
 require 'lms.contextDoc'
 
 ctxTargets = contextDoc.targets{
-  mainDoc  = 'protoJoyLoL.tex',
-  subDirs = {
+  mainDoc        = 'protoJoyLoL.tex',
+  docDir         = 'doc',
+  lmsfileSubDirs = {
     'step1',
     'step2',
     'step3',
     'module',
   },
-  docDir    = 'doc',
 }
 
 require 'lms.litProgs'
@@ -40,6 +38,8 @@ lpTargets = litProgs.targets(ctxTargets, {
     },
   },
 })
+
+
 
 
 recurseTargets(ctxTargets)
