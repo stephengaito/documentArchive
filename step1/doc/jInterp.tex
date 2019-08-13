@@ -8,36 +8,36 @@
 
 \addMainDocument{jInterp.tex}
 
-\clearCHeader{public}
-\clearCHeader{private}
+\clearCHeader{jInterp}
+\clearCHeader{jInterpPrivate}
 
 \chapter[title=Step 1: Proto-\joylol\ Interpreter]
 
 \diSimpComponent jInterpOverview
 
-\diSimpComponent objects/jInterpObjects
+\diSimpRecurseComponent{objects}{doc}{jInterpObjects}
 
-\diSimpComponent interpreter/jInterpInterpreter
+\diSimpRecurseComponent{interpreter}{doc}{jInterpInterpreter}
 
-\diSimpComponent jPeg/jInterpJPeg
+\diSimpRecurseComponent{jPeg}{doc}{jInterpJPeg}
 
 \diSimpComponent jInterpMain
 
 \diSimpComponent jInterpConclusion
 
-\CHeaderIncludeGuard{public}{JINTERP}
-\prependCHeader{public}
+\CHeaderIncludeGuard{jInterp}{JINTERP}
+\prependCHeader{jInterp}
 \placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \createCHeaderFile%
-  {public}
+  {jInterp}
   {joylol/jInterp.h}
   {}
 
-\CHeaderIncludeGuard{private}{JINTERP_PRIVATE}
-\prependCHeader{private}
+\CHeaderIncludeGuard{jInterpPrivate}{JINTERP_PRIVATE}
+\prependCHeader{jInterpPrivate}
 \placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
 \createCHeaderFile%
-  {private}
+  {jInterpPrivate}
   {joylol/jInterp-private.h}
   {}
   
