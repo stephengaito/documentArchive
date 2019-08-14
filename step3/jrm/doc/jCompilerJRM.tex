@@ -1,0 +1,16 @@
+% A ConTeXt document [master document: ../jCompiler.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jCompilerJRM
+
+\usebtxdataset[jCompilerJRMBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jCompilerJRM.tex}
+
+\section[title=Joylol Register Machine Parser]
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

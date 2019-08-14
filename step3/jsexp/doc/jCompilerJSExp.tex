@@ -1,0 +1,16 @@
+% A ConTeXt document [master document: ../jCompiler.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jCompilerJSExp
+
+\usebtxdataset[jCompilerJSExpBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jCompilerJSExp.tex}
+
+\section[title=Joylol S-Expression Parser]
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

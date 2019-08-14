@@ -1,5 +1,13 @@
 % A ConTeXt document [master document: ../jInterp.tex ]
 
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jInterpObjects
+\usebtxdataset[jInterpObjectsBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jInterpObjects.tex}
+
 \section[title=Objects]
 
 \setCHeaderStream{public}
@@ -119,3 +127,7 @@ JObjTagName jObjTagNameMap[] = {
 \diSimpComponent jInterpCFunctions
 
 \diSimpComponent jInterpSymbolTables
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

@@ -2,22 +2,24 @@
 
 \usemodule[t-diSimp]
 
-\startDiSimpComponent joylolCompiler
+\startDiSimpComponent jCompiler
 
-\usebtxdataset[joylolCompilerBib.lua]
+\usebtxdataset[jCompilerBib.lua]
 \diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jCompiler.tex}
 
 \chapter[title=Step 3: \joylol\ Compiler]
 
 \diSimpComponent jCompilerOverview
 
-\diSimpComponent jcf/jCompilerJCF
+\diSimpRecurseComponent{jcf}{doc}{jCompilerJCF}
 
-\diSimpComponent jcoalg/jCompilerJCoAlg
+\diSimpRecurseComponent{jcoalg}{doc}{jCompilerJCoAlg}
 
-\diSimpComponent jsexp/jCompilerJSExp
+\diSimpRecurseComponent{jsexp}{doc}{jCompilerJSExp}
 
-\diSimpComponent jrm/jCompilerJRM
+\diSimpRecurseComponent{jrm}{doc}{jCompilerJRM}
 
 \diSimpComponent jCompilerConclusion
 

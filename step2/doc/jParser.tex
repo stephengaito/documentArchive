@@ -2,22 +2,24 @@
 
 \usemodule[t-diSimp]
 
-\startDiSimpComponent joylolParser
+\startDiSimpComponent jParser
 
-\usebtxdataset[joylolParserBib.lua]
+\usebtxdataset[jParserBib.lua]
 \diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jParser.tex}
 
 \chapter[title=Step 2: \joylol\ parser]
 
 \diSimpComponent jParserOverview
 
-\diSimpComponent jcf/jParserJCF
+\diSimpRecurseComponent{jcf}{doc}{jParserJCF}
 
-\diSimpComponent jcoalg/jParserJCoAlg
+\diSimpRecurseComponent{jcoalg}{doc}{jParserJCoAlg}
 
-\diSimpComponent jsexp/jParserJSExp
+\diSimpRecurseComponent{jsexp}{doc}{jParserJSExp}
 
-\diSimpComponent jrm/jParserJRM
+\diSimpRecurseComponent{jrm}{doc}{jParserJRM}
 
 \diSimpComponent jParserConclusion
 

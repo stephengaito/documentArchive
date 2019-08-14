@@ -1,0 +1,18 @@
+% A ConTeXt document [master document: ../jCompiler.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jCompilerJCF
+
+\usebtxdataset[jCompilerJCFBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jCompilerJCF.tex}
+
+\section[title=Joylol Configuration File Parser]
+
+\diSimpComponent jCompilerJCFOverview
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

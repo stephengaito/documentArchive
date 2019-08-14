@@ -1,7 +1,14 @@
 % A ConTeXt document [master document: ../jInterp.tex ]
 
-\section[title=jPeg]
+\usemodule[t-diSimp]
 
+\startDiSimpComponent jInterpJPeg
+\usebtxdataset[jInterpJPegBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jInterpJPeg.tex}
+
+\section[title=jPeg]
 
 \diSimpComponent jInterpJPegOverview
 
@@ -18,3 +25,7 @@
 \diSimpComponent jInterpJPegExamples
 
 \diSimpComponent jInterpJPegLispParser
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent
