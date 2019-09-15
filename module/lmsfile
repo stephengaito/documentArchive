@@ -17,8 +17,10 @@
 require 'lms.contextDoc'
 
 ctxTargets = contextDoc.targets{
-  mainDoc  = 'joylolBootstrap.tex',
-  docDir    = 't-joylol-bootstrap/doc/context/third/joylolBootstrap',
+  mainDoc        = 'joylolBootstrap.tex',
+  docDir         = 't-joylol-bootstrap/doc/context/third/joylolBootstrap',
+  lmsfileSubDirs = {
+  },
 }
 
 require 'lms.litProgs'
@@ -32,8 +34,8 @@ lpTargets = litProgs.targets(ctxTargets, {
       't-joylol-bootstrap.lua',
     },
     lmsfileFiles = {
-      'lmsfile'
-    }
+      'lmsfile',
+    },
   },
 })
 
@@ -42,4 +44,9 @@ require 'lms.contextMod'
 contextMod.targets(lpTargets, {
   moduleDir = 't-joylol-bootstrap/tex/context/third/joylolBootstrap',
 })
+
+
+
+recurseTargets(ctxTargets)
+
 
