@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# This bash script obtains and installs a local copy of the png++ 
+# library of header files.
+#
+# See: https://www.nongnu.org/pngpp/
+#
+
+pushd ..
+
+mkdir -p installed
+
+pushd installed
+
+wget http://download.savannah.nongnu.org/releases/pngpp/png++-0.2.9.tar.gz
+wget http://download.savannah.nongnu.org/releases/pngpp/png++-0.2.9.tar.gz.sig
+
+tar xvf png++-0.2.9.tar.gz
+
+popd
+
+popd
+
+ln -s ../installed/png++-0.2.9 png++
+

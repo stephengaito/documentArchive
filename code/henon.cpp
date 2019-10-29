@@ -4,7 +4,7 @@
 #include <iostream>
 #include <ostream>
 
-#include <png++/png.hpp>
+#include <png.hpp>
 
 
 png::image< png::rgb_pixel_16 > image(1024, 1024);
