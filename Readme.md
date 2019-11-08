@@ -17,4 +17,9 @@ Consider using one of the following png warppers
 
 3. http://www.nongnu.org/pngpp/doc/0.2.9/
 
+4. https://github.com/miloyip/svpng (simple but 1 byte per channel only)
+
+Consider using one of the following 
+
+1. https://github.com/miloyip/line (a range of simple line drawing functions)
 
