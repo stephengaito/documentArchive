@@ -1,7 +1,7 @@
 *.swp
 *.pdf
 *.tuc
-
+lmsfileInfo
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

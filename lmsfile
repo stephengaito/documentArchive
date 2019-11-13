@@ -4,9 +4,6 @@ require 'lms.contextDoc'
 
 contextDoc.targets{
   mainDoc  = 'realAnalysis.tex',
-  docFiles = {
-    'introduction.tex',
-  },
   docDir    = 'doc',
 }
 

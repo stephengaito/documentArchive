@@ -1,0 +1,76 @@
+% A ConTeXt document [master document: realAnalysis.tex]
+
+\chapter[title=Computing The Universe: Fans]
+
+Our objective in this chapter is to show that a \emph{process} can 
+\quote{compute} the \quote{collection} of all zero-one sequences. To do 
+this we exhibit a \joylol\ program, \type{zeroOne}, which computes this 
+collection. 
+
+Since this \joylol\ program is a \emph{process}, its pre and post 
+conditions are very simple: \type{true} and \type{false} respectively. The 
+\type{true} precondition implies that \type{zeroOne} has \emph{no} 
+particular preconditions. The \type{false} postcondition implies that 
+\type{zeroOne} \emph{is} a \emph{process} which never stops, since if it 
+did, what ever it had computed in a finite number of steps would have been 
+incorrect (\type{false}). 
+
+The really important condition for a process, such as \type{zeroOne}, is 
+its \emph{invariant}. This process invariant, will be intimately related 
+to the particular \emph{way} in which we \emph{structure} the process's 
+computation. For the \type{zeroOne} process, we will use a recursive 
+structure which... 
+
+Since we are considering the construction of an infinite structure, we can 
+\emph{not} assume the use of a finite RAM machine, we \emph{must} use a 
+purely stack based approach. We \emph{can} however use \quote{local} 
+variables to hold intermediate sub-stack structures. 
+
+Since we are computing a \emph{process}, if we use a recursive 
+computation, then the recursion code can not depend upon any 
+\emph{computation} happening in its continuation. This is because any 
+continuation which the recursive code \quote{uses} will never be executed. 
+
+The question is how do we want to structure the evolving \emph{\joylol\ 
+structure}? We want to \emph{construct} every \emph{finite} zero-one 
+sequence of every \emph{length}. To do this we build a \quote{tree} (a 
+list of lists) whose every node consists of a list of three items. The 
+first item is the fully constructed finite list of zeros and ones, the 
+\quote{current sequence}. The second item is the (sub) tree of zero-one 
+sequences which all \emph{begin} with the current sequence followed by a 
+\emph{zero}. The third item is the (sub) tree of zero-one sequences which 
+are \emph{being} with the current sequence followed by a \emph{one}. 
+
+Typically when recursing over a tree, we can compute in a depth-first or 
+breadth-first manner. However since we are computing a \emph{process} we 
+can not use a depth-first approach since we would never complete the first 
+sub-tree at each level. This means that we must use a breadth-first 
+approach. However, at each step, we can only compute one more level of 
+each sub-tree. 
+
+This requires us to keep \quote{back-track} points so that when the 
+addtion of one additional level of a given sub-tree is complete, we know 
+where to \quote{back-track to} in order to start building the next level. 
+
+As back-track point, we will partially dismantle the already completed 
+tree which is being built on the data stack, onto the process stack. 
+
+The invariant is that at the end of a complete level of a given sub-tree, 
+we have a complete (sub) tree. 
+
+\starttyping
+\startJoylolCode
+
+\startPrecondition
+true
+\stopPrecondition
+
+
+
+
+\startPostcondition
+false
+\stopPostcondition
+
+\stopJoylolCode
+\stoptyping
