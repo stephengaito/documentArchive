@@ -39,7 +39,7 @@ first item is the fully constructed finite list of zeros and ones, the
 \quote{current sequence}. The second item is the (sub) tree of zero-one 
 sequences which all \emph{begin} with the current sequence followed by a 
 \emph{zero}. The third item is the (sub) tree of zero-one sequences which 
-are \emph{being} with the current sequence followed by a \emph{one}. 
+all \emph{being} with the current sequence followed by a \emph{one}. 
 
 Typically when recursing over a tree, we can compute in a depth-first or 
 breadth-first manner. However since we are computing a \emph{process} we 
@@ -49,17 +49,91 @@ approach. However, at each step, we can only compute one more level of
 each sub-tree. 
 
 This requires us to keep \quote{back-track} points so that when the 
-addtion of one additional level of a given sub-tree is complete, we know 
+addition of one additional level of a given sub-tree is complete, we know 
 where to \quote{back-track to} in order to start building the next level. 
 
-As back-track point, we will partially dismantle the already completed 
-tree which is being built on the data stack, onto the process stack. 
+As back-track point, we will partially dismantle, onto the process stack, 
+the already completed tree which is being built on the data stack. 
 
 The invariant is that at the end of a complete level of a given sub-tree, 
 we have a complete (sub) tree. 
 
+We begin by defining a local variable, \type{seq}, in the local context. 
+To declare this variable, we need to provide the invariant which all 
+values will satisfy. To do this, we need to agree on what a \quote{zero} 
+and a \quote{one} \emph{is}. Since a null list is \type{()}, we will 
+define a \quote{zero} as \type{(())} and a \quote{one} as \type{(()())} 
+respectively. This means that a \quote{zero-one} \emph{sequence} is a list 
+of \quote{zero}s and \quote{one}s. For example the sequence of 
+\type{010110} would be denoted: \type{( (()) (()()) (()) (()()) (()()) 
+(()) )}. 
+
+In \joylol\ we define a \quote{zero} as 
+
 \starttyping
 \startJoylolCode
+
+\stopJoylolCode
+\stoptyping
+
+So our algorithm is:
+
+The process stack will be an alternation between partial trees, 
+code-continuations. We will have the following six code-continuations:
+
+\startitemize
+
+\item The \type{buildSubTree} method pushes both itself and then the 
+\type{goLeft} method onto the process stack. 
+
+\item The \type{buildOneLevel} method takes the top of the data stack and 
+places it into the \type{seq} local context variable. It then builds a 
+one-level sub-tree using the value of the \type{seq} variable as a prefix 
+and leaves the construction on the top of the data stack. 
+
+\item The \type{goLeft} method takes the top of the data stack and places 
+it in the \type{seq} local context variable and then checks the top of the 
+stack. 
+
+If the top of the stack is the empty list then the \type{goLeft} method 
+places a copy of the first item of the top of the data stack onto the new 
+top of the data stack. It then places \type{buildOneLevel}, \type{goRight} 
+and then \type{joinLeftSubTree} onto the process stack. 
+
+If the top of the data stack is \emph{not} the empty list, then the 
+\type{goLeft} method takes the second item from the list at the top of the 
+data stack and places this item on the top of the data stack, and then 
+places \type{goLeft} and then \type{joinLeftSubTree} onto the top of the 
+process stack. 
+
+\item The \type{joinLeftSubTree} method takes the top of the data stack 
+and places it in the second item of the second object on the data stack. 
+
+\item The \type{goRight} method takes the top of the data stack and places 
+it in the \type{seq} local context variable and then checks the top of the 
+stack. 
+
+If the top of the stack is the empty list then the \type{goRight} method 
+places a copy of the first item of the top of the data stack onto the new 
+top of the data stack. It then places \type{buildOneLevel} and then 
+\type{joinRightSubTree} on the process stack. 
+
+If the top of the stack is \emph{not} the empty list, then the 
+\type{goRight} method takes the third item from the list at the top of the 
+data stack and places this item on the top of the data stack and then 
+places \type{goLeft} and then \type{joinRightSubTree} onto the top of the 
+process stack. 
+
+\item The \type{joinRightSubTree} method takes the top of the data stack 
+and places it in the third item of the second object on the top of the 
+data stack. 
+
+\stopitemize
+
+\starttyping
+\startJoylolCode
+
+
 
 \startPrecondition
 true
@@ -72,5 +146,8 @@ true
 false
 \stopPostcondition
 
-\stopJoylolCode
-\stoptyping
+\stopJoylolCode \stoptyping 
+
+Having built the fan of all \quote{zero-one} sequences, we now show how to 
+alter this algorithm to build the fan of all sequences of natural numbers. 
+
