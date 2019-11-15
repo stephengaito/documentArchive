@@ -2,6 +2,88 @@
 
 \chapter[title=Computing The Universe: Fans]
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\placefigure[here][fig:zeroOneTree]
+{A tree of \quote{zero}s and \quote{one}s}
+\bgroup\startMPcode{commDiag}
+
+setupCommDiags ;
+
+addObject(1, 16, "()") ;
+
+addObject(2, 8,  "0") ;
+addObject(2, 24, "1") ;
+
+addObject(3, 4,  "00") ;
+addObject(3, 12,  "01") ;
+addObject(3, 20, "10") ;
+addObject(3, 28, "11") ;
+
+addObject(4, 2,  "000") ;
+addObject(4, 6,  "001") ;
+addObject(4, 10, "010") ;
+addObject(4, 14, "011") ;
+addObject(4, 18, "100") ;
+addObject(4, 22, "101") ;
+addObject(4, 26, "110") ;
+addObject(4, 30, "111") ;
+
+addObject(5, 1,  "");
+addObject(5, 3,  "");
+addObject(5, 5,  "");
+addObject(5, 7,  "");
+addObject(5, 9,  "");
+addObject(5, 11, "");
+addObject(5, 13, "");
+addObject(5, 15, "");
+addObject(5, 17, "");
+addObject(5, 19, "");
+addObject(5, 21, "");
+addObject(5, 23, "");
+addObject(5, 25, "");
+addObject(5, 27, "");
+addObject(5, 29, "");
+addObject(5, 31, "");
+
+drawRegularObjects(0.75cm, 0.4cm) ;
+
+addArrow(1,16,  2,8,   "-", 0)()()("", 0, top) ;
+addArrow(1,16,  2,24,  "-", 0)()()("", 0, top) ;
+
+addArrow(2,8,  3,4,   "-", 0)()()("", 0, top) ;
+addArrow(2,8,  3,12,  "-", 0)()()("", 0, top) ;
+addArrow(2,24, 3,20,  "-", 0)()()("", 0, top) ;
+addArrow(2,24, 3,28,  "-", 0)()()("", 0, top) ;
+
+addArrow(3,4,  4,2,   "-", 0)()()("", 0, top) ;
+addArrow(3,4,  4,6,   "-", 0)()()("", 0, top) ;
+addArrow(3,12, 4,10,  "-", 0)()()("", 0, top) ;
+addArrow(3,12, 4,14,  "-", 0)()()("", 0, top) ;
+addArrow(3,20, 4,18,  "-", 0)()()("", 0, top) ;
+addArrow(3,20, 4,22,  "-", 0)()()("", 0, top) ;
+addArrow(3,28, 4,26,  "-", 0)()()("", 0, top) ;
+addArrow(3,28, 4,30,  "-", 0)()()("", 0, top) ;
+
+addArrow(4,2,  5,1,  "-", 0)()()("", 0, top) ;
+addArrow(4,2,  5,3,  "-", 0)()()("", 0, top) ;
+addArrow(4,6,  5,5,  "-", 0)()()("", 0, top) ;
+addArrow(4,6,  5,7,  "-", 0)()()("", 0, top) ;
+addArrow(4,10, 5,9,  "-", 0)()()("", 0, top) ;
+addArrow(4,10, 5,11, "-", 0)()()("", 0, top) ;
+addArrow(4,14, 5,13, "-", 0)()()("", 0, top) ;
+addArrow(4,14, 5,15, "-", 0)()()("", 0, top) ;
+addArrow(4,18, 5,17, "-", 0)()()("", 0, top) ;
+addArrow(4,18, 5,19, "-", 0)()()("", 0, top) ;
+addArrow(4,22, 5,21, "-", 0)()()("", 0, top) ;
+addArrow(4,22, 5,23, "-", 0)()()("", 0, top) ;
+addArrow(4,26, 5,25, "-", 0)()()("", 0, top) ;
+addArrow(4,26, 5,27, "-", 0)()()("", 0, top) ;
+addArrow(4,30, 5,29, "-", 0)()()("", 0, top) ;
+addArrow(4,30, 5,31, "-", 0)()()("", 0, top) ;
+
+\stopMPcode\egroup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 Our objective in this chapter is to show that a \emph{process} can 
 \quote{compute} the \quote{collection} of all zero-one sequences. To do 
 this we exhibit a \joylol\ program, \type{zeroOne}, which computes this 
@@ -86,10 +168,24 @@ code-continuations. We will have the following six code-continuations:
 \item The \type{buildSubTree} method pushes both itself and then the 
 \type{goLeft} method onto the process stack. 
 
+\starttyping
+\startJoylolCode
+buildSubTree()() -> ()(goLeft buildSubTree)
+\stopJoylolCode
+\stoptyping
+
 \item The \type{buildOneLevel} method takes the top of the data stack and 
 places it into the \type{seq} local context variable. It then builds a 
 one-level sub-tree using the value of the \type{seq} variable as a prefix 
 and leaves the construction on the top of the data stack. 
+
+\starttyping
+\startJoylolCode
+buildOneLevel(seq:isSeqZO)() -> (
+  (((seq zero) () ()) ((seq one) () ()))
+)()
+\stopJoylolCode
+\stoptyping
 
 \item The \type{goLeft} method takes the top of the data stack and places 
 it in the \type{seq} local context variable and then checks the top of the 
@@ -106,8 +202,27 @@ data stack and places this item on the top of the data stack, and then
 places \type{goLeft} and then \type{joinLeftSubTree} onto the top of the 
 process stack. 
 
+\starttyping
+\startJoylolCode
+goLeft(seq:isSeqZO top:isTree)() {
+  if (top isEmpty) {
+    -> (seq)( buildOneLevel gotRight joinLeftSubTree )
+  } else {
+    -> ((cadr top) top)( goLeft joinLeftSubTree )
+  }
+}
+\stopJoylolCode
+\stoptyping
+
 \item The \type{joinLeftSubTree} method takes the top of the data stack 
 and places it in the second item of the second object on the data stack. 
+
+\starttyping
+\startJoylolCode
+joinLeftSubTree(leftTree:isTree top:isTree)()
+-> ( ((car top)(leftTree)(cadd top)))()
+\stopJoylolCode
+\stoptyping
 
 \item The \type{goRight} method takes the top of the data stack and places 
 it in the \type{seq} local context variable and then checks the top of the 
@@ -124,29 +239,39 @@ data stack and places this item on the top of the data stack and then
 places \type{goLeft} and then \type{joinRightSubTree} onto the top of the 
 process stack. 
 
+\starttyping
+\startJoylolCode
+goRight(seq:isSeqZO top:isTree)() {
+  if (top isEmpty) {
+    -> (seq)( buildOnLevel joinRightSubTree)
+  } else {
+    -> ((cadd top) top)( goLeft joinRightSubTree)
+  }
+}
+\stopJoylolCode
+\stoptyping
+
 \item The \type{joinRightSubTree} method takes the top of the data stack 
 and places it in the third item of the second object on the top of the 
 data stack. 
 
-\stopitemize
+\starttyping
+\startJoylolCode
+joinRightSubTree (rightTree:isTree top:isTree)()
+-> ( ((car top)(cadr top)(rightTree)))()
+\stopJoylolCode
+\stoptyping
+
+\item Finally, the \type{buildZeroOneTree} method places 
+\type{buildSubTree} onto the top of the process stack. 
 
 \starttyping
 \startJoylolCode
+buildZeroOneTree()() -> ()( buildSubTree )
+\stopJoylolCode
+\stoptyping
 
-
-
-\startPrecondition
-true
-\stopPrecondition
-
-
-
-
-\startPostcondition
-false
-\stopPostcondition
-
-\stopJoylolCode \stoptyping 
+\stopitemize
 
 Having built the fan of all \quote{zero-one} sequences, we now show how to 
 alter this algorithm to build the fan of all sequences of natural numbers. 
