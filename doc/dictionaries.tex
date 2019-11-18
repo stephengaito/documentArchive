@@ -1,0 +1,111 @@
+% A ConTeXt document [master document: realAnalysis.tex]
+
+\chapter[title=Dictionaries: The work horses of Set and Category theory]
+
+Dictionaries are structures which provide the ability to \quote{store} a 
+collection of \quote{key}-\quote{value} pairs for later \quote{retrieval}. 
+They effectively implement a form of \quote{Random access memory}, for any 
+given \quote{key} you can \quote{retrieve} its associated \quote{value}. 
+For computationally-bounded collections, you can also determine whether or 
+not the \quote{key}-\quote{value} pair is already stored in the 
+collection. For computationally-unbounded collections, this is no longer 
+possible. \TODO{provide correct computational terminology}.
+
+We will implement three types of dictionary.
+
+\startitemize[n]
+
+\item {\bf Linear List based dictionary}
+
+List based dictionaries are the simplest to implement, but have only 
+\quote{linear}, $O(n)$, performance. 
+
+\item {\bf Binary Tree based dictionary}
+
+We can implement either balanced or unbalanced trees. The balancing 
+operation is only guaranteed to complete for computationally-bounded 
+collections. Unbalanced trees have worst-case performance which approaches 
+a simple list. Balanced trees can maintain a worst-case performance of 
+$O(\ln(n))$. Unfortunately only computationally-bounded collections can be 
+balanced in a finite amount of time. There will always be 
+computationally-unbounded collections whose worst-case balancing time is 
+infinite, and so never halts and/or whose worst-case retrieval time 
+degrades to $O(n)$. This means that in the worst-case 
+computationally-unbounded collections Tree based dictionaries are not 
+really much better than List based dictionaries. 
+
+There are essentially two types of \emph{balanced} Tree based dictionary, 
+dependent upon the information they keep to determine how to rebalance. 
+Red-Black trees, \cite{cormenLeisersonRivestStein2009introAlgorithms} 
+Chapter 13, which keep only one bit of information and are balanced 
+\quote{locally}, and AVL trees, 
+\cite{cormenLeisersonRivestStein2009introAlgorithms} Problem 13-3, which 
+keep the depth of the tree \quote{below} a node. For unbounded 
+collections, this depth will potentially be infinite for each node. 
+
+\item {\bf Hash based dictionary}
+
+Hash based dictionaries can only be implemented for computationally-bounded 
+collections of key-value pairs. 
+
+\stopitemize
+
+Each type has very different performance. More importantly, only the List 
+and Tree based dictionaries are suitable for processes. Hash based 
+dictionaries are only suitable for bounded collections of objects, 
+otherwise known as finite sets. This distinction between bounded and 
+unbounded collections and their associated types of dictionaries is 
+central to all of theoretical mathematics. 
+
+For bounded (computationally-finite) collections, we can implement 
+dictionaries which only have one entry per key. For computationally 
+unbounded (infinite processes) collections, we can only implement 
+dictionaries which have (potentially) multiple entries per key. In terms 
+of set theory, sets can only ever be bounded collections, unbounded 
+collections are represented by \emph{multi}-sets. 
+
+For any dictionary we will implement the following methods:
+
+\startitemize
+
+\item \type{insert}: Insert a new key-value pair. For 
+computationally-bounded collections we guarantee that a given key will 
+only exist once in the dictionary, and hence any existing value 
+corresponding to the given key will be \emph{replaced}. For 
+computationally-unbounded collections, this guarantee can no longer be 
+maintained. This means that for computationally-unbounded collections 
+there may be multiple key-value pairs with the same keys but different 
+values \emph{simultaneously}. 
+
+\item \type{getValueFor}: Search for and retrieve the value for a given 
+key. For computationally-bounded collections this method is guaranteed to 
+complete and hence returns \type{nil} if the dictionary does not contain 
+the key. For computationally-unbounded collections this method can no 
+longer guarantee to complete (halt). 
+
+\item \type{delete}: Search for and remove the key (and any associated 
+value(s)). Again, this is only guaranteed to complete for 
+computationally-bounded collections.
+
+\stopitemize
+
+\section[title=List based dictionaries]
+
+\starttyping
+\startJoylolCode
+
+insert (dict:isDict (key value) )() -> (dict:list )()
+
+insert ( ((key aValue) :: rest:isDict ) (key value))() -> 
+  ( ((key value) :: rest:isDict) )()
+
+insert ( ((anotherKey aValue) :: rest:isDict ) (key value))() ->
+  ( )
+  
+\stopJoylolCode
+\stoptyping
+
+\section[title=Tree based dictionaries]
+
+\section[title=Hash based dictionaries]
+
