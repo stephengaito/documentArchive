@@ -91,19 +91,56 @@ computationally-bounded collections.
 
 \section[title=List based dictionaries]
 
+
+\subsection[title=\type{insert}]
+
+For a computationally-unbounded dictionary, to insert a key-value pair we 
+simply append it to the beginning of the list. 
+
 \starttyping
 \startJoylolCode
 
-insert (dict:isDict (key value) )() -> (dict:list )()
-
-insert ( ((key aValue) :: rest:isDict ) (key value))() -> 
-  ( ((key value) :: rest:isDict) )()
-
-insert ( ((anotherKey aValue) :: rest:isDict ) (key value))() ->
-  ( )
+insert ( dict:isDict (key value) )() 
+  -> ( dict (key value) )( appendToList )
   
 \stopJoylolCode
 \stoptyping
+
+\subsection[title=\type{delete}]
+
+For a computationally-unbounded dictionary, to delete a key-value pair we 
+simply insert a key with a \type{nil} value. 
+
+\starttyping
+\startJoylolCode
+
+delete ( dict:isDict key )() 
+  -> ( dict (key nil) )( insert )
+
+\stopJoylolCode
+\stoptyping
+
+\subsection[title=\type{getValueFor}]
+
+For a computationally-unbounded dictionary, we sequentially \quote{walk} 
+down the list looking for the first key-value pair with the given key, and 
+if found return the value. If the dictionary does not contain the given 
+key, the \type{getValueFor} process never halts. 
+
+\starttyping
+\startJoylolCode
+
+getValueFor ( ( (key aValue) dict:isDict ) key )() 
+  -> ( aValue )()
+
+getValueFor ( ( (aKey aValue) dict:isDict ) key )()
+  -> ( dict key )( getValueFor )
+
+\stopJoylolCode
+\stoptyping
+
+\TODO{How do we \emph{specify} that we do not halt if the key does not 
+exist in the collection? How do we prove this? Can we prove this?} 
 
 \section[title=Tree based dictionaries]
 
