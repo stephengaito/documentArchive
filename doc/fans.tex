@@ -105,13 +105,16 @@ structure which...
 
 Since we are considering the construction of an infinite structure, we can 
 \emph{not} assume the use of a finite RAM machine, we \emph{must} use a 
-purely stack based approach. We \emph{can} however use \quote{local} 
-variables to hold intermediate sub-stack structures. 
+purely stack based approach. We \emph{can} however use a finite collection 
+of \quote{local} variables to hold intermediate sub-stack structures. 
 
 Since we are computing a \emph{process}, if we use a recursive 
 computation, then the recursion code can not depend upon any 
 \emph{computation} happening in its continuation. This is because any 
 continuation which the recursive code \quote{uses} will never be executed. 
+\ToDo{Not true! We do use continuations below. For each level the 
+continuations are completed except for the \quote{last} \type{zeroOne} 
+(repetition) itself.} 
 
 The question is how do we want to structure the evolving \emph{\joylol\ 
 structure}? We want to \emph{construct} every \emph{finite} zero-one 
