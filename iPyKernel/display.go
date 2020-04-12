@@ -1,4 +1,4 @@
-package main
+package iPyKernel
 
 import (
 	"bytes"
@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+  
+  adaptor "github.com/stephengaito/goJoyLoL/iPyJoyLoLAdaptor"
 )
 
 // Support an interface similar - but not identical - to the IPython (canonical Jupyter kernel).
@@ -97,7 +99,7 @@ func stubDisplay(Data) error {
 // fill kernel.renderer map used to convert interpreted types
 // to known rendering interfaces
 func (kernel *Kernel) initRenderers() {
-	kernel.render = make(map[string]xreflect.Type)
+	kernel.render = make(map[string]adaptor.JType)
 	for name, typ := range kernel.display.Types {
 		if typ.Kind() == reflect.Interface {
 			kernel.render[name] = typ
@@ -108,10 +110,13 @@ func (kernel *Kernel) initRenderers() {
 // if vals[] contain a single non-nil value which is auto-renderable,
 // convert it to Data and return it.
 // otherwise return MakeData("text/plain", fmt.Sprint(vals...))
-func (kernel *Kernel) autoRenderResults(vals []interface{}, types []xreflect.Type) Data {
+func (kernel *Kernel) autoRenderResults(
+  vals  []interface{},
+  types []adaptor.JType,
+) Data {
 	var nilcount int
 	var obj interface{}
-	var typ xreflect.Type
+	var typ reflect.Type
 	for i, val := range vals {
 		if kernel.canAutoRender(val, types[i]) {
 			obj = val
@@ -131,7 +136,10 @@ func (kernel *Kernel) autoRenderResults(vals []interface{}, types []xreflect.Typ
 }
 
 // return true if data type should be auto-rendered graphically
-func (kernel *Kernel) canAutoRender(data interface{}, typ xreflect.Type) bool {
+func (kernel *Kernel) canAutoRender(
+  data interface{},
+  typ reflect.Type,
+) bool {
 	switch data.(type) {
 	case Data, Renderer, SimpleRenderer, HTMLer, JavaScripter, JPEGer, JSONer,
 		Latexer, Markdowner, PNGer, PDFer, SVGer, image.Image:
@@ -248,7 +256,11 @@ var autoRenderers = map[string]func(Data, interface{}) Data{
 }
 
 // detect and render data types that should be auto-rendered graphically
-func (kernel *Kernel) autoRender(mimeType string, arg interface{}, typ xreflect.Type) Data {
+func (kernel *Kernel) autoRender(
+  mimeType string,
+  arg interface{},
+  typ reflect.Type,
+) Data {
 	var data Data
 	// try Data
 	if x, ok := arg.(Data); ok {
@@ -273,7 +285,7 @@ func (kernel *Kernel) autoRender(mimeType string, arg interface{}, typ xreflect.
 			conv := kernel.ir.Comp.Converter(typ, xtyp)
 			x := arg
 			if conv != nil {
-				x = basereflect.Interface(conv(reflect.ValueOf(x)))
+				x = adaptor.Interface(conv(reflect.ValueOf(x)))
 				if x == nil {
 					continue
 				}

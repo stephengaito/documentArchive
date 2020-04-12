@@ -1,4 +1,4 @@
-package main
+package iPyKernel
 
 import (
 	"context"

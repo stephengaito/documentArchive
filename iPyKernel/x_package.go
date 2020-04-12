@@ -1,13 +1,15 @@
-package main
+package iPyKernel
 
 import (
 	"image"
 	"image/color"
 	r "reflect"
+  
+  adaptor "github.com/stephengaito/goJoyLoL/iPyJoyLoLAdaptor"
 )
 
 // prepare imports.Package for interpreted code
-var display = imports.Package{
+var display = adaptor.Package{
 	Binds: map[string]r.Value{
 		"Any":                r.ValueOf(Any),
 		"Auto":               r.ValueOf(Auto),
@@ -189,6 +191,6 @@ func (P *proxy_image_Image) ColorModel() color.Model {
 // --------------------------------------------------------
 // allow importing "display" and "github.com/gopherdata/gophernotes" packages
 func init() {
-	imports.Packages["display"] = display
-	imports.Packages["github.com/gopherdata/gophernotes"] = display
+	adaptor.Packages["display"] = display
+	adaptor.Packages["github.com/gopherdata/gophernotes"] = display
 }

@@ -1,4 +1,4 @@
-package main
+package iPyKernel
 
 import (
 	"flag"
@@ -23,5 +23,5 @@ func main() {
 	}
 
 	// Run the kernel.
-	runKernel(flag.Arg(0))
+	RunKernel(flag.Arg(0))
 }

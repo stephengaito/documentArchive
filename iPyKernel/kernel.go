@@ -1,4 +1,4 @@
-package main
+package iPyKernel
 
 import (
 	"context"
@@ -18,6 +18,14 @@ import (
 
 	"github.com/go-zeromq/zmq4"
 	"golang.org/x/xerrors"
+
+  adaptor "github.com/stephengaito/goJoyLoL/iPyJoyLoLAdaptor"
+
+	//"github.com/cosmos72/gomacro/ast2"
+	//"github.com/cosmos72/gomacro/base"
+	//basereflect "github.com/cosmos72/gomacro/base/reflect"
+	//interp "github.com/cosmos72/gomacro/fast"
+	//"github.com/cosmos72/gomacro/xreflect"
 
 	// compile and link files generated in imports/
 	//_ "github.com/gopherdata/gophernotes/imports"
@@ -103,18 +111,18 @@ func (s *Socket) RunWithSocket(run func(socket zmq4.Socket) error) error {
 }
 
 type Kernel struct {
-	jInterp *JInterp
-	display *interp.Import
+	ir      *adaptor.Interpreter
+	display *adaptor.Import
 	// map name -> HTMLer, JSONer, Renderer...
 	// used to convert interpreted types to one of these interfaces
-	render map[string]xreflect.Type
+	render map[string]adaptor.JType
 }
 
 // runKernel is the main entry point to start the kernel.
-func runKernel(connectionFile string) {
+func RunKernel(connectionFile string) {
 
 	// Create a new interpreter for evaluating notebook code.
-	ir := interp.New()
+	ir := adaptor.NewInterpreter()
 
 	// Throw out the error/warning messages that gomacro outputs writes to these streams.
 	ir.Comp.Stdout = ioutil.Discard
@@ -462,7 +470,10 @@ func (kernel *Kernel) handleExecuteRequest(receipt msgReceipt) error {
 
 // doEval evaluates the code in the interpreter. This function captures an uncaught panic
 // as well as the values of the last statement/expression.
-func doEval(jInterp *JInterp, code string) (val []interface{}, typ []xreflect.Type, err error) {
+func doEval(
+  ir *adaptor.Interpreter,
+  code string,
+) (val []interface{}, typ []adaptor.JType, err error) {
 
 	// Capture a panic from the evaluation if one occurs and store it in the `err` return parameter.
 	defer func() {
@@ -480,10 +491,10 @@ func doEval(jInterp *JInterp, code string) (val []interface{}, typ []xreflect.Ty
 	compiler := ir.Comp
 
 	// Don't show the gomacro prompt.
-	compiler.Options &^= base.OptShowPrompt
+	compiler.Options &^= adaptor.OptShowPrompt
 
 	// Don't swallow panics as they are recovered above and handled with a Jupyter `error` message instead.
-	compiler.Options &^= base.OptTrapPanic
+	compiler.Options &^= adaptor.OptTrapPanic
 
 	// Reset the error line so that error messages correspond to the lines from the cell.
 	compiler.Line = 0
@@ -492,7 +503,7 @@ func doEval(jInterp *JInterp, code string) (val []interface{}, typ []xreflect.Ty
 	// These may panic but this will be recovered by the deferred recover() above so that the error
 	// may be returned instead.
 	nodes := compiler.ParseBytes([]byte(code))
-	srcAst := ast2.AnyToAst(nodes, "doEval")
+	srcAst := adaptor.AnyToAst(nodes, "doEval")
 
 	// If there is no srcAst then we must be evaluating nothing. The result must be nil then.
 	if srcAst == nil {
@@ -525,7 +536,7 @@ func doEval(jInterp *JInterp, code string) (val []interface{}, typ []xreflect.Ty
 		nonNilCount := 0
 		values := make([]interface{}, len(results))
 		for i, result := range results {
-			val := basereflect.Interface(result)
+			val := adaptor.Interface(result)
 			if val != nil {
 				nonNilCount++
 			}
@@ -620,7 +631,10 @@ func startHeartbeat(hbSocket Socket, wg *sync.WaitGroup) (shutdown chan struct{}
 }
 
 // find and execute special commands in code, remove them from returned string
-func evalSpecialCommands(ir *interp.Interp, code string) string {
+func evalSpecialCommands(
+  ir   *adaptor.Interpreter,
+  code  string,
+) string {
 	lines := strings.Split(code, "\n")
 	for i, line := range lines {
 		line = strings.TrimSpace(line)
@@ -633,7 +647,10 @@ func evalSpecialCommands(ir *interp.Interp, code string) string {
 }
 
 // execute special command
-func evalSpecialCommand(ir *interp.Interp, line string) {
+func evalSpecialCommand(
+  ir *adaptor.Interpreter,
+  line string,
+) {
 	const help string = "available special commands:\n  %go111module {on|off}\n  %help"
 
 	args := strings.SplitN(line, " ", 2)
@@ -646,9 +663,9 @@ func evalSpecialCommand(ir *interp.Interp, line string) {
 
 	case "%go111module":
 		if arg == "on" {
-			ir.Comp.CompGlobals.Options |= base.OptModuleImport
+			ir.Comp.CompGlobals.Options |= adaptor.OptModuleImport
 		} else if arg == "off" {
-			ir.Comp.CompGlobals.Options &^= base.OptModuleImport
+			ir.Comp.CompGlobals.Options &^= adaptor.OptModuleImport
 		} else {
 			panic(fmt.Errorf("special command %s: expecting a single argument 'on' or 'off', found: %q", cmd, arg))
 		}
