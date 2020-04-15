@@ -17,7 +17,16 @@ interface.
 ## Resources
 
 - https://blog.golang.org/cgo
+
 - https://golang.org/cmd/cgo/
+
 - https://golang.org/misc/cgo/testcshared/cshared_test.go
 
 - https://github.com/gopherdata/gophernotes
+
+- [Xeus C++ IPython Kernel](https://github.com/jupyter-xeus/xeus)
+
+- [Xeus-Cling Cling (C++ interpreter) IPython 
+Kernel](https://github.com/jupyter-xeus/xeus) 
+
+- [Cling](https://github.com/root-project/cling)

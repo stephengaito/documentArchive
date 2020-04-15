@@ -1,3 +1,0 @@
-
-extern void sayHello(void);
-
