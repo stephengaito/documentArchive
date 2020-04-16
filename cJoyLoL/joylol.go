@@ -2,7 +2,7 @@
 
 package cJoyLoL
 
-//#include "joylol.h"
+// #include "joylol.h"
 import "C"
 
 import (

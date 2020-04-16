@@ -16,10 +16,10 @@
 /// \brief Test the JBlock utilities
 ///
 char *newJBlockCTest(void) {
-  JBlock *aJBlock = newJBlock(100);
+  JBlock *aJBlock = newJBlock(100, 2);
   
   cTest_NotNil_MayFail("aJBlock nil", aJBlock);
-  cTest_UIntEquals("wrong aJBlock.size", aJBlock->size, (size_t)100);
+  cTest_UIntEquals("wrong aJBlock.size", aJBlock->size, (size_t)(100*2));
   
   return 0;
 }

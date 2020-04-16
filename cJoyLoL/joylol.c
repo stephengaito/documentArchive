@@ -7,8 +7,10 @@
 
 /// Create a new JBlock of size ``size``.
 //
-JBlock *newJBlock(size_t size) {
-  JBlock *newBlock = (JBlock*)calloc(1, size);
-  newBlock->size = size;
+JBlock *newJBlock(size_t subBlockSize, size_t numSubBlocks) {
+  JBlock *newBlock = (JBlock*)calloc(numSubBlocks, subBlockSize);
+  newBlock->size = subBlockSize * numSubBlocks;
   return newBlock;
 }
+
+

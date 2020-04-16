@@ -6,6 +6,4 @@
 
 #include "cTests.h"
  
-// Test the JBlock utilities
-//
 extern char *newJBlockCTest();
