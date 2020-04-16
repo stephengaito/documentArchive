@@ -1,5 +1,8 @@
 // +build tests
 
+// ANSI-C tests of the JoyLoL system using our cTests testing framework 
+//
+
 #include <stdio.h>
 #include <string.h>
 #include <memory.h>
@@ -10,6 +13,8 @@
 #include "_cgo_export.h"
 #include "cTests.h"
 
+/// \brief Test the JBlock utilities
+///
 char *newJBlockCTest(void) {
   JBlock *aJBlock = newJBlock(100);
   

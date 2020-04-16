@@ -1,8 +1,11 @@
 // +build tests
 
-#include "cTests.h"
+/// \file
+/// \brief ANSI-C tests of the JoyLoL system using our cTests testing 
+/// framework 
 
-extern void initCTests();
-extern void reportCTests();
+#include "cTests.h"
  
+// Test the JBlock utilities
+//
 extern char *newJBlockCTest();
