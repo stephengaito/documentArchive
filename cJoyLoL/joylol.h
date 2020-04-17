@@ -8,6 +8,19 @@
 */
 
 #include <stdlib.h>
+#include <stdint.h>
+
+typedef uint8_t  JUint8;
+typedef int8_t   JInt8;
+typedef uint16_t JUInt16;
+typedef int16_t  JInt16;
+typedef uint32_t JUInt32;
+typedef int32_t  JInt32;
+typedef uint64_t JUInt64;
+typedef int64_t  JInt64;
+
+typedef void*    RMPtr;
+
 
 /// \brief The standard entries in all JObject structures.
 ///
@@ -67,4 +80,55 @@ typedef struct JDictEntry {
   
 } JDictEntry;
 
-#endif
+
+// need JString
+// need JInt / JUInt
+//
+
+// Question: How do I deal with the memory requirements of variable length 
+// strings/ints? Are they immutable? How long lived are they generally? Do 
+// strings and ints vary in their longevity (re-usability)?
+
+// Long lived objects can be assigned directly a JBlock (ie directly off 
+// the underlying heap). Short lived objects should be assigned from a 
+// pool of same sized objects to help make reuse easier. 
+
+// For JInts we can have the generic JInts directly off JBlocks. But 
+// specific JIntXXXs as pools of same sized objects. 
+
+// For JStrings?? How to determing short vs long lived strings... should 
+// we have JString allocated as a JBlock and JStrXXXXs, say JStr256 or 
+// JStr1024, for short lived strings allocated from a pool of same sized 
+// objects? 
+
+// Need JPair
+
+// Need JCFunc
+// Need JPFunc (packed func of JObjPtr)
+
+// How do I allow sequences of mixed Funcs? Do I have Func references 
+// which have the lowest bit set for packed funcs and unset for CFuncs? 
+
+// How does the func interpreter deal with litterals? We use a quote 
+// function which takes the next reference and pushs it on the data stack. 
+
+// So PFuncs are really packed arrays of JObj's, ie. short sequences of 
+// packed process stacks. 
+
+// What is a JObjPtr? How "big" is it? It clearly depends upon a specific 
+// RegisterMachine size. So do we have RegisterMachine and 
+// RegisterMachineXXX? In a RegisterMachine JObjPtr would be a JInt. BUT 
+// we get into an infinite regress... since a JInt must somewhere defined 
+// its (current) maximum size... as a JInt?!?!? 
+
+// However RegisterMachine64 does make sense... and clearly describe's its 
+// limitiations. 
+
+// We *can* implement a RegisterMachine as a confederation of (limited) 
+// RegisterMachineXXXs. In this case the JObjPtr contains a size parameter 
+// which varies as the over all RegisterMachine "grows" in "size". That 
+// is, if the RegisterMachine needs to up-size itself, it needs to 
+// instruct all of the confederated machines to up-size their JObjPts. 
+
+#endif 
+
