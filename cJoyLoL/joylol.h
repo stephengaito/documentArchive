@@ -10,17 +10,32 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+/// \brief JoyLoL unsigned 8 bit integer 
 typedef uint8_t  JUint8;
+
+/// \brief JoyLoL signed 8 bit integer 
 typedef int8_t   JInt8;
+
+/// \brief JoyLoL unsigned 16 bit integer 
 typedef uint16_t JUInt16;
+
+/// \brief JoyLoL signed 16 bit integer 
 typedef int16_t  JInt16;
+
+/// \brief JoyLoL unsigned 32 bit integer 
 typedef uint32_t JUInt32;
+
+/// \brief JoyLoL signed 32 bit integer 
 typedef int32_t  JInt32;
+
+/// \brief JoyLoL unsigned 64 bit integer 
 typedef uint64_t JUInt64;
+
+/// \brief JoyLoL signed 64 bit integer 
 typedef int64_t  JInt64;
 
+/// \brief (JoyLoL) Register Machine Pointer
 typedef void*    RMPtr;
-
 
 /// \brief The standard entries in all JObject structures.
 ///
@@ -80,6 +95,16 @@ typedef struct JDictEntry {
   
 } JDictEntry;
 
+
+/// \brief JRM64 represents a single 64 bit Register Machine
+///
+typedef struct JRM64 {
+  JOBJ_BASE;
+  
+  
+} JRM64;
+
+extern JRM64 *newJRM64(void);
 
 // need JString
 // need JInt / JUInt

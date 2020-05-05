@@ -5,12 +5,17 @@
 #include <stdio.h>
 #include "joylol.h"
 
-/// Create a new JBlock of size ``size``.
+/// \brief Create a new JBlock of size ``size``.
 //
 JBlock *newJBlock(size_t subBlockSize, size_t numSubBlocks) {
-  JBlock *newBlock = (JBlock*)calloc(numSubBlocks, subBlockSize);
-  newBlock->size = subBlockSize * numSubBlocks;
+  size_t lSize = subBlockSize * numSubBlocks;
+  JBlock *newBlock = (JBlock*)calloc(1, lSize + sizeof(JBlock));
+  newBlock->size = lSize;
   return newBlock;
 }
 
 
+JRM64 *newJRM64(void) {
+  JRM64 *newRM = (JRM64*)newJBlock(sizeof(JRM64), 1);
+  return newRM;
+}
