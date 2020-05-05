@@ -1,5 +1,3 @@
-// +build tests
-
 // ANSI-C tests of the JoyLoL system using our cTests testing framework 
 //
 
@@ -8,29 +6,32 @@
 #include <memory.h>
 
 #include "joylol.h"
-#include "joylolCTests.h"
+#include "cJoyLoLCGoTests.h"
 
 #include "_cgo_export.h"
-#include "cTests.h"
+#include "cGoTests.h"
+
+/// \testFixture utils Test the utilities
 
 /// \brief Test the JBlock utilities
-/// \silly This is a silly comment
+/// \inFixture utils
 ///
-char *newJBlockCTest(void) {
+char *newJBlockCGoTest(void* data) {
   JBlock *aJBlock = newJBlock(100, 2);
   
-  cTest_NotNil_MayFail("aJBlock nil", aJBlock);
-  cTest_UIntEquals("wrong aJBlock.size", aJBlock->size, (size_t)(100*2));
+  cGoTest_NotNil_MayFail("aJBlock nil", aJBlock);
+  cGoTest_UIntEquals("wrong aJBlock.size", aJBlock->size, (size_t)(100*2));
   
   return 0;
 }
 
 /// \brief Test the RM64 utilities
+/// \inFixture utils
 ///
-char *newJRM64CTest(void) {
+char *newJRM64CGoTest(void* data) {
   JRM64 *aRegisterMachine = newJRM64();
   
-  cTest_NotNil_MayFail("aRegisterMachine nil", aRegisterMachine);
+  cGoTest_NotNil_MayFail("aRegisterMachine nil", aRegisterMachine);
   
   return 0;
 }
