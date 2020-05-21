@@ -1,0 +1,10 @@
+{
+    "argv": [
+        "goIPyJoyLoL",
+        "{connection_file}"
+    ],
+    "display_name": "JoyLoL",
+    "language": "joyLoL",
+    "name": "joyLoL"
+}
+

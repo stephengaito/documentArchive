@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# This bash script runs the collection of document servers needed to provide 
+# web-browser access to all of the separate parts of the 
+# goIPythonKernelToolkit project. 
+
+reset
+
+echo "-----------------------------------------------------------------"
+echo ""
+echo "http://172.17.0.2:6060/index.html"
+echo ""
+echo "use ./bin/killDocServers to kill all document servers"
+echo ""
+echo "-----------------------------------------------------------------"
+echo ""
+
+
+docTool-goJoyLoL
+
+echo "" 
+
+pushd tmp/html/goJoyLoL/html
+webfsd -p 6060 -F &
+popd
+
+echo ""
+
+mkdir -p tmp/html/cJoyLoL/html
+pushd cJoyLoL
+doxygen
+popd
+pushd tmp/html/cJoyLoL/html
+webfsd -p 6061 -F &
+popd
+
+echo ""
+
+mkdir -p tmp/html/goIPyJoyLoLAdaptor/html
+pushd goIPyJoyLoL/goIPyJoyLoLAdaptor
+doxygen
+popd
+pushd tmp/html/goIPyJoyLoLAdaptor/html
+webfsd -p 6062 -F &
+popd
+
+echo ""
+
+pushd cJoyLoL
+godoc --http=0.0.0.0:6071 &
+popd
+
+echo ""
+
+pushd goIPyJoyLoL
+godoc --http=0.0.0.0:6072 &
+popd
+
+echo ""
+
+echo ""
+echo "-----------------------------------------------------------------"
+echo ""
+echo "http://172.17.0.2:6060/index.html"
+echo ""
+echo "use ./bin/killDocServers to kill all document servers"
+echo ""
+echo "-----------------------------------------------------------------"
+echo ""
+
