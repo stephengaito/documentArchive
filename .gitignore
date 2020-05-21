@@ -1,7 +1,10 @@
+!cGoTests/*
 *GoTests.go
 *GoTests_test.go
 *GoTests.h
 *GoTestsUtils.c
+*GoTests.c
+goIPyJoyLoLAdaptor/joyLoLCode.go
 runCGoTests
 clearCGoTests
 

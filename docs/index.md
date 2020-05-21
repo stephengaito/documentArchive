@@ -6,6 +6,10 @@ This is a complex project. It is *critical* that we expose as much of the
 structure of the code as possible, preferably with good (internal) 
 documentation.
 
+# Jupyter
+
+- **[Jupyter (local)](http://172.17.0.2:8888)**
+
 # Go code
 
 - **[cJoyLoL](http://172.17.0.2:6071/pkg/github.com/stephengaito/goJoyLoL/cJoyLoL/)**

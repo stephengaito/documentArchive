@@ -1,14 +1,9 @@
 #!/bin/bash
 
-# This bash script installs a given goIPy kernel for the local user 
+# This bash script installs the goIPyJoyLoL kernel for the local user
 
-if [ "$#" -ne 1 ]; then
-  echo "usage: installGoIPyKernel <name of kernel>"
-  exit -1
-fi
-
-KERNEL_NAME=$1
-SOURCE_KERNEL_DIR=kernels/$KERNEL_NAME
+KERNEL_NAME=goIPyJoyLoL
+SOURCE_KERNEL_DIR=$KERNEL_NAME
 INSTALL_KERNEL_DIR=$HOME/.local/share/jupyter/kernels/$KERNEL_NAME
 
 # go get -d -u github.com/stephengaito/goIPythonKernelToolkit/kernels/$KERNEL_NAME

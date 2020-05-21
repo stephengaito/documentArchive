@@ -3,8 +3,6 @@ module github.com/stephengaito/goJoyLoL
 go 1.14
 
 require (
-	github.com/go-zeromq/zmq4 v0.9.0
-	github.com/gofrs/uuid v3.2.0+incompatible
-	github.com/yuin/goldmark v1.1.30
-	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
+	github.com/davecgh/go-spew v1.1.0
+	github.com/stephengaito/goIPythonKernelToolkit/goIPyKernel v0.0.0-20200521084111-1f6e7753eda5
 )

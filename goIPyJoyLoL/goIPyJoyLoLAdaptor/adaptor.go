@@ -9,6 +9,8 @@ import (
   "os"
   "time"
   
+  "github.com/davecgh/go-spew/spew"
+  "github.com/stephengaito/goJoyLoL/cJoyLoL"
   tk "github.com/stephengaito/goIPythonKernelToolkit/goIPyKernel"
 )
 
@@ -27,9 +29,15 @@ type GoAdaptor struct {
   //
   AdaptorIdFormat string
 
+  
+  // IPyJoyLoLDebugging determines whether or not to send debugging 
+  // information to Jupyter via stdout
+  //
+  IPyJoyLoLDebugging bool
+  
   // The JoyLoL State
   //
-  JoyLoL *JoyLoLState
+  JoyLoL *cJoyLoL.JoyLoLState
 }
 
 // Create a new adaptor.
@@ -44,10 +52,10 @@ func NewGoAdaptor() *GoAdaptor {
     time.Now().Format("2006/01/02-15:04:05"),
     os.Getpid(),
   )
-  
+    
   // now create the ruby state..
   //
-  rubyState := CreateRubyState()
+  joylolState := cJoyLoL.CreateJoyLoLState()
 
   // now load the IPyJoyLoLData.joy code (for the GoEvalRubyString)
   //
@@ -56,16 +64,15 @@ func NewGoAdaptor() *GoAdaptor {
   if err != nil {
     panic("Could not load IPyJoyLoLData.joy from the internal fileSystem!")
   }
-  _, err = rubyState.LoadRubyCode("IPyJoyLoLData.joy", IPyJoyLoLDataCode)
+  _, err = joylolState.LoadJoyLoLCode("IPyJoyLoLData.joy", IPyJoyLoLDataCode)
   if err != nil {
     panic("Could not load IPyJoyLoLData.joy into running Ruby!")
   }
-  
-  IPyJoyLoLDebugging = false
-  
+    
   return &GoAdaptor{
-    AdaptorIdFormat: adaptorIdFormat,
-    Ruby:            rubyState,
+    AdaptorIdFormat:    adaptorIdFormat,
+    IPyJoyLoLDebugging: true, 
+    JoyLoL:             joylolState,
   }
 }
 
@@ -79,7 +86,7 @@ func (adaptor *GoAdaptor) GetKernelInfo() tk.KernelInfo {
     Banner:                fmt.Sprintf("Go kernel: goIPyJoyLoL - v%s", Version),
     LanguageInfo:          tk.KernelLanguageInfo{
       Name:          "joyLoL",
-      Version:       adaptor.JoyLoL.GetRubyVersion(),
+      Version:       adaptor.JoyLoL.GetJoyLoLVersion(),
       FileExtension: ".joy",
     },
     HelpLinks: []tk.HelpLink{
@@ -141,6 +148,15 @@ func (adaptor *GoAdaptor) EvaluateCode(
   adaptorIdStr :=
     fmt.Sprintf(adaptor.AdaptorIdFormat, execCounter, execSubCounter)
   
+  if adaptor.IPyJoyLoLDebugging {
+    fmt.Printf("GoEvalJoyLoLString\n")
+    fmt.Printf("  joylolCodeName: [%s]\n", adaptorIdStr)
+    fmt.Printf("   joylolCodeStr: [%s]\n", code)
+  }
+  
   dataObj := adaptor.JoyLoL.GoEvalJoyLoLString(adaptorIdStr, code)
+  
+  if adaptor.IPyJoyLoLDebugging { spew.Dump(dataObj) }
+
   return dataObj, nil
 }
