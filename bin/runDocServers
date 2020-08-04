@@ -4,11 +4,13 @@
 # web-browser access to all of the separate parts of the 
 # goIPythonKernelToolkit project. 
 
+source /common/ipAddress
+
 reset
 
 echo "-----------------------------------------------------------------"
 echo ""
-echo "http://172.17.0.2:6060/index.html"
+echo "http://$ipAddress:6060/index.html"
 echo ""
 echo "use ./bin/killDocServers to kill all document servers"
 echo ""
@@ -61,7 +63,7 @@ echo ""
 echo ""
 echo "-----------------------------------------------------------------"
 echo ""
-echo "http://172.17.0.2:6060/index.html"
+echo "http://$ipAddress:6060/index.html"
 echo ""
 echo "use ./bin/killDocServers to kill all document servers"
 echo ""

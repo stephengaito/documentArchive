@@ -25,7 +25,8 @@ import (
 )
 func main() {
 
-  md2htmlRegexp := regexp.MustCompile("\\.md\\)")
+  md2htmlRegexp   := regexp.MustCompile("\\.md\\)")
+  ipAddressRegexp := regexp.MustCompile("LOCAL_IP_ADDRESS")
 
   md := goldmark.New(
     goldmark.WithExtensions(extension.GFM),
@@ -58,6 +59,8 @@ func main() {
       mdFileBytes, err := ioutil.ReadFile(path)
       if err != nil { return err }
       htmlFileBytes    := md2htmlRegexp.ReplaceAll(mdFileBytes, []byte(".html)"))
+      localIpAddress := os.Getenv("ipAddress")
+      htmlFileBytes   = ipAddressRegexp.ReplaceAll(htmlFileBytes, []byte(localIpAddress))
       
       var buf bytes.Buffer
       err = md.Convert(htmlFileBytes, &buf)
