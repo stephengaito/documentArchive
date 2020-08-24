@@ -18,7 +18,7 @@ echo "-----------------------------------------------------------------"
 echo ""
 
 
-docTool-goJoyLoL
+docTool docs tmp/html/goJoyLoL/html
 
 echo "" 
 
