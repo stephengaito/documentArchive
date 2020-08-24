@@ -6,6 +6,10 @@ This is a complex project. It is *critical* that we expose as much of the
 structure of the code as possible, preferably with good (internal) 
 documentation.
 
+# What to do next
+
+- [ToDo](ToDo.html)
+
 # Jupyter
 
 - **[Jupyter (local)](http://LOCAL_IP_ADDRESS:8888)**
