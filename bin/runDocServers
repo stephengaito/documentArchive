@@ -30,7 +30,7 @@ echo ""
 
 mkdir -p tmp/html/cJoyLoL/html
 pushd cJoyLoL
-doxygen
+frama-c-doxygen
 popd
 pushd tmp/html/cJoyLoL/html
 webfsd -p 6061 -F &
@@ -40,7 +40,7 @@ echo ""
 
 mkdir -p tmp/html/goIPyJoyLoLAdaptor/html
 pushd goIPyJoyLoL/goIPyJoyLoLAdaptor
-doxygen
+frama-c-doxygen
 popd
 pushd tmp/html/goIPyJoyLoLAdaptor/html
 webfsd -p 6062 -F &
@@ -69,4 +69,3 @@ echo "use ./bin/killDocServers to kill all document servers"
 echo ""
 echo "-----------------------------------------------------------------"
 echo ""
-

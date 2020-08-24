@@ -70,6 +70,25 @@ typedef struct JBlock {
   struct JBlock *next;
 } JBlock;
 
+
+/// \brief Create a new JBlock of size ``size``.
+///
+/// \param subBlockSize size_t the size of each item in the JBlock
+/// \param numSubBlocks size_t the number of items in the JBlock
+/// \returns a single JBlock with space to store numSubBlocks of size 
+/// subBlockSize 
+/*@
+ requires subBlockSize > 0 && numSubBlocks > 0;
+///
+/// this is a test
+///
+ allocates \result;
+///
+/// this is another test
+///
+ ensures \valid(\result);
+ ensures \result->size == subBlockSize * numSubBlocks;
+*/
 extern JBlock *newJBlock(size_t subBlockSize, size_t numSubBlocks );
 
 
