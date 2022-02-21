@@ -1,0 +1,82 @@
+% A ConTeXt document [master document: setTheory.tex]
+
+\chapter[title=Introduction]
+
+
+
+We limber up by computing, as a process, the \emph{universe} of all 0-1 
+sequences. 
+
+To do this we essentially need to walk a growing tree of 0-1 sequences. At 
+the tip of each branch we then add two new tips, one for 0 and one for 1. 
+However, to ensure that we build the whole tree of 0-1 sequences, we must 
+pursue a \emph{breadth first} walk of the existing tree at any 
+\quote{point of time}. 
+
+In a register machine, we might keep a pointer based \quote{in memory} 
+structure to capture the tree of 0-1 sequences. In such a situation, we 
+could \quote{simply} \quote{walk} the pointers in this in memory tree. 
+However, \emph{any} particular register machine has a correspondingly 
+fixed memory size. Any such fixed memory size is small relative to the 
+\emph{universe} of 0-1 sequences. This means that we can \emph{not} use a 
+register machine to compute the universe of 0-1 sequences. 
+
+With any non-register machine based program written in \joylol, the 
+fundamental problem is that we can only work at the top of the data and 
+process stacks. This means that we need to keep track of a \emph{stack} of 
+past left-right tree walking choices, as well as a \emph{stack} of tree 
+parts obtained while \quote{walking} \quote{up} along a given branch. 
+
+Since the stack of left-right tree walking choices represent what we need 
+to do next, we shall keep them, in reverse order of \quote{execution}, on 
+the process stack. Similarly, the stack of tree parts represent the parts 
+of the tree that we have dismantled as we \quote{walk} \quote{up} to the 
+tip of a given branch. As we back-track along the stack of choices, we 
+must put these tree parts back onto the \quote{underlying} \quote{tree}. 
+This suggests that we keep the stack of tree parts on the data stack. 
+
+Since we are programming a \emph{process}, we know that it will never 
+complete its computation. This means that while our specification of this 
+process may have a useful precondition, since the process never completes, 
+our specification has no (particularly) meaningful post-condition. How do 
+we ensure that our program computes what we say it computes? We do this by 
+ensuring an invariant is satisfied at regular points in overall 
+computation. 
+
+Our precondition is simply that the \quote{tree} is empty. Our regular 
+invariant, is that, at regular points in the computation, we have a 
+\emph{complete} tree of 0-1 sequences of size $n$. In order to show that 
+our process computes the \quote{whole} universe of 0-1 sequences, we 
+\quote{simply} have to show that the over all computation will pass the 
+computational point at which the tree of depth $n$ has been constructed 
+for every $n$ we might choose. 
+
+Our invariant should be true when ever the stack of choices is empty, as 
+this is the point at which a particular breadth sweep has finished and the 
+next breadth sweep is about to begin. In particular we must show two 
+things, (1) that this end of breadth sweep occurs infinitely often in the 
+computation, and (2) each successive end of breadth sweep has built a 
+successively larger portion of the tree of 0-1 sequences. 
+
+We could place the tree parts onto the process stack near the next choice 
+operator. 
+
+We need a \quote{build at tip} word which places a tree of depth one onto 
+the top of the data stack. 
+
+We need a \quote{take left branch} word. If there is no left branch, then 
+we \quote{build at the tip} leaving the result on the data stack for the 
+corresponding \quote{rebuild tree} to build it into a new sub-tree.
+
+We need a \quote{dismantle tree} word which places the left and right 
+branches on to the top two elements of the data stack, and places a 
+\quote{rebuild tree}, \quote{take right branch} and, \quote{take left 
+branch} onto the top of the process stack (in that order). 
+
+We need a \quote{rebuild tree} word which builds the sub-trees on the top 
+two elements of the data stack into one tree on the top of the data stack. 
+
+We need a \quote{take right branch} which swaps the top two elements of 
+the data stack. If there is no right branch, then we build at the tip 
+leaving it on the top of the data stack.
+

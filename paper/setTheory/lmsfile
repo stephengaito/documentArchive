@@ -1,0 +1,12 @@
+-- A Lua Make System file
+
+require 'lms.contextDoc'
+
+contextDoc.targets{
+  mainDoc  = 'setTheory.tex',
+  docFiles = {
+    'introduction.tex',
+  },
+  docDir    = 'doc',
+}
+
