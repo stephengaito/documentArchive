@@ -1,0 +1,116 @@
+% A ConTeXt document [master document: joyLoLMinus.tex ]
+
+\section[title=ANSI-C Main]
+
+\setCCodeStream{jInterpMain}
+\startCCode
+
+/* option parser configuration */
+static struct option longOpts[] = {
+  {"trace", no_argument, 0, 't'},
+  {"quite", no_argument, 0, 'q'},
+  {"debug", no_argument, 0, 'd'},
+  {"help",  no_argument, 0, 'h'},
+  {0, 0, 0, 0}
+};
+ /* getopt_long stores the option index here. */
+static int optId = 0;
+
+int main(int argc, char *argv[]){
+
+  printf("joylolMinus\n");
+  ContextObj *rootCtx = newContext(NULL, NULL, "rootCtx");
+  assert(isContextObj(rootCtx));
+  int opt = 0;
+  
+  int tracingOn = false;
+  
+  while ((opt = getopt_long(argc, argv,
+                            "dtqh",
+                            longOpts, &optId)) != -1) {
+    switch (opt) {
+      case 'd': rootCtx->debug = true; break;
+      case 't': tracingOn  = true; break;
+      case 'q':
+        tracingOn          = false;
+        rootCtx->tracingOn = false;
+        rootCtx->debug     = false;
+        break;
+      case 'h':
+      default:
+        fprintf(stderr, "Usage: %s [options] [file...]\n\n", argv[0]);
+        fprintf(stderr, "options:\n");
+        fprintf(stderr, "  -d --debug\n");
+        fprintf(stderr, "  -t --trace\n");
+        fprintf(stderr, "  -q --quiet\n\n");
+        fprintf(stderr, "files to load:\n");
+        fprintf(stderr, "  Any remaining options are treated as files to be loaded.\n");
+
+        exit(-1);
+    }
+  }
+
+  registerBasicWords(rootCtx);
+  registerControlWords(rootCtx);
+  registerJPegWords(rootCtx);
+  registerSExpressionParser(rootCtx);
+  
+  for(; optind < argc; optind++) {
+    rootCtx->tracingOn = false;
+    printf("interpreting: [%s]\n", argv[optind]);
+    printf("------------------------------------------\n");
+    if (tracingOn) printf("==============\ncalling parseFile\n\n");
+    parseFile(rootCtx, argv[optind]);
+    if (tracingOn) {
+      printf("input file: [%s]\n", rootCtx->parserTextName);
+      printf("contents:   [%s]\n", rootCtx->parserText);
+      printf("==============\ncalling parseSExpression\n\n");
+    }
+    parseSExpressionWord(rootCtx);
+    if (tracingOn) {
+      showCtxData(rootCtx);
+      showCtxProcess(rootCtx);
+      printf("==============\ncalling evalCommandInContext (parseSExpressionWord)\n\n");
+    }
+    evalCommandInContext(rootCtx, NULL);
+    if (tracingOn) {
+      showCtxData(rootCtx);
+      showCtxProcess(rootCtx);
+      printf("==============\ncalling interpretWord\n\n");
+    }
+    interpretWord(rootCtx);
+    if (tracingOn) {
+      showCtxData(rootCtx);
+      showCtxProcess(rootCtx);
+      printf("==============\ncalling evalCommandInContext (interpretWord)\n\n");
+      rootCtx->tracingOn = tracingOn;
+    }
+    evalCommandInContext(rootCtx, NULL);
+    printf("\n------------------------------------------\n");
+    printf("finished interpreting [%s]\n\n", argv[optind]);
+  }
+}
+\stopCCode
+
+\prependCCode{jInterpMain}
+\startCCode
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <unistd.h>
+#include <getopt.h>
+
+#include "joylol/jInterp.h"
+#include "joylol/jInterp-private.h"
+\stopCCode
+
+\prependCCode{jInterpMain}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createCCodeFile%
+  {jInterpMain}%
+  {jInterp.c}%
+  {}
+
+\setCCodeStream{default}

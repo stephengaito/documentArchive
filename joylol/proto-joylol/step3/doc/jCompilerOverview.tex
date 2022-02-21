@@ -1,0 +1,41 @@
+% A ConTeXt document [master document: jPeg.tex ]
+
+\section[title=Overview]
+
+For the initial version of the syntax for both the JoyLoL Configuration 
+Language, and the JoyLoL Language itself, we make essential use of 
+Bertrand Meyer's definition of the early version of Eiffel contained in 
+\cite{meyer1992eiffelTheLanguage}. We will however make extensive changes 
+to suit a new purpose. Eiffel's essential use of \quote{programming by 
+contract} is however very close to one of our twin purposes for JoyLoL. 
+
+We structure the various parsers using ideas from Meyer's 
+\cite{meyer1990theoryProgrammingLanguages}. The specific parser languages 
+are (originally) loosely based upon the \quote{Language for assembling 
+classes in Eiffel} (Lace) (\cite{meyer1992eiffelTheLanguage} Appendix D) 
+as well as the Eiffel language itself (\cite{meyer1992eiffelTheLanguage} 
+summarized in Appendix H). However we structure the \joylol\ language as a 
+\quote{enclosing} \joylol\ CoAlgebra Specification language 
+(\joylolCoAlg), enclosing the (initial) pair of \joylol\ implementation 
+languages, \joylol\ S-Expression language (\joylolSExp) together with the 
+\joylol\ Register Machine language (\joylolRM). While the \joylol\ 
+language we develop here is a \quote{conservative extension} of the fixed 
+point of the \joylol\ semantic functor, \joylolZero, the \joylol\ 
+S-Expression language (\joylolSExp) is closer in structure to the fixed 
+point language, \joylolZero. 
+
+\setJoylolCodeStream{concreteParser}
+\startJoylolCode
+( pattern ) "P" define
+( 1 repeatAtMost) "?" define
+( 0 repeatAtLeast ) "*" define
+( 1 repeatAtLeast ) "+" define
+( 1 any ) "." define
+//( 1 charSet ) "??" define
+//( 0 span ) "???" define
+//( 1 span ) "???" define
+//( 1 coSpan ) "????" define
+\stopJoylolCode
+\setJoylolCodeStream{default}
+
+

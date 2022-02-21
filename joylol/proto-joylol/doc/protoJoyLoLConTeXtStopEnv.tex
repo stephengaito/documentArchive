@@ -1,0 +1,23 @@
+% A ConTeXt document [master document: protoJoyLoL.tex ]
+
+\startenvironment protoJoyLoLConTeXStopEnv
+
+\compileLmsfile{default}
+\prependLmsfile{default}
+\placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\addRecurseTargetsToLmsfile{default}
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+
+\stopbodymatter
+
+\startbackmatter
+  \startchapter[title=Bibliography]
+    \placelistofpublications
+  \stopchapter
+\stopbackmatter
+
+\stopenvironment
+

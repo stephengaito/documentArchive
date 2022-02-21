@@ -1,0 +1,72 @@
+% A ConTeXt MkIV module
+
+% from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapPreamble.tex after line: 0
+
+%C Copyright 2019 PerceptiSys Ltd (Stephen Gaito)
+%C
+%C Licensed under the Apache License, Version 2.0 (the "License");
+%C you may not use this file except in compliance with the License.
+%C You may obtain a copy of the License at
+%C
+%C    http://www.apache.org/licenses/LICENSE-2.0
+%C
+%C Unless required by applicable law or agreed to in writing,
+%C software distributed under the License is distributed on an "AS
+%C IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+%C express or implied. See the License for the specific language
+%C governing permissions and limitations under the License. end
+
+% from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapPreamble.tex after line: 0
+
+%D \module
+%D   [     file=t-joylol-bootstrap,
+%D      version=2019.03.13,
+%D        title=\CONTEXT\ User module,
+%D     subtitle=The JoyLoL Bootstrap \ConTeXt\ module,
+%D       author=Stephen Gaito,
+%D         date=\currentdate,
+%D    copyright=PerceptiSys Ltd (Stephen Gaito),
+%D        email=stephen@perceptisys.co.uk,
+%D      license=Apache License]
+
+% begin info
+%
+% title   : JoyLoL Bootstrap definitions
+% comment : Provides structured document and code generation
+% status  : under development, mkiv only
+%
+% end info
+
+\unprotect
+
+\ctxloadluafile{t-joylol-bootstrap}
+\ctxloadluafile{t-joylol-bootstrap-config}
+
+% from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 0
+
+\defineLitProgs
+  [JoylolCode]
+  [ option=lisp, numbering=line,
+    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
+  ]
+ 
+\setLitProgsOriginMarker[JoylolCode][markJoylolCodeOrigin]
+
+% from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapCode.tex after line: 50
+
+\def\loadCoAlgebraCollection#1{
+  \directlua{
+    thirddata.literateProgs.loadCoAlgebraCollection('#1')
+  }
+}
+
+\def\extractConcreteParserFromTo#1#2{
+  \directlua{
+    thirddata.literateProgs.extractConcreteParserFromTo('#1', '#2')
+  }
+}
+
+% from file: ~/ExpositionGit/tools/conTeXt/protoJoyLoL/module/t-joylol-bootstrap/doc/context/third/joylolBootstrap/joylolBootstrapPreamble.tex after line: 0
+
+\protect \endinput
+

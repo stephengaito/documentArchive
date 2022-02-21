@@ -1,0 +1,485 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Operator Precedence Parsing] 
+
+We base our implementation of Operator Precedence Parsing on Andy Chu's 
+excellent exposition of Pratt Parsing, \cite{chu2016prattParsing} and 
+\cite{chu2016prattParsingGitHub}. 
+
+Quoting Chu:
+
+\startBlockQuote
+
+To me, these are its [Pratt Parsing's] salient characteristics: 
+
+\startitemize[n]
+
+\item It's mutually recursive between a core \type{parse(int rbp)} 
+function and \type{nud()} and \type{led()} \quote{plugin functions} for 
+each operator. In my code, these are the \type{p.ParseUntil(int 
+precedence)} method, and \type{Null*()} and \type{Left*()} functions. 
+
+\item Many recursive algorithms like tree traversal are purely functional. 
+In contrast, Pratt parsing has the property that the recursive procedures 
+also mutate state, i.e. the current token. This is just like recursive 
+descent parsing, which is one reason they go together well. 
+
+\stopitemize
+\stopBlockQuote
+
+In our case our \quote{parser} (\quote{context}) state is maintained in 
+the jPeg context. We add nud (null denotation) and led (left denotaiton) 
+dictionaries to contain references to the \quote{plugin functions} 
+(denotations) for each operator. 
+
+We implement \type{lookupLeftDenotation} and \type{lookupNullDenotation} 
+jPeg words as well as corresponding \type{registerLeftDenotation} and 
+\type{registerNullDenotation} joylol words to lookup and register left and 
+null denotations respectively. 
+
+Chu's Pratt Parser's \type{ParseUntil} function, is really a 
+\type{parseUntil} structure similar to the existing jPeg repeat structures 
+(\type{repeat}, \type{repeatAtLeast}, and \type{repeatAtMost}). Hence, we 
+implement primitive jPeg \type{parseWhile} and \type{parseUntil} words 
+from which Chu's Pratt Parser \type{ParseUntil} can be built. 
+
+Given these new jPeg privitives, we can then build joylol words which 
+implement a more comprehensive Pratt Parser similar to the praser outlined 
+by Chu, \cite{chu2016prattParsing} and \cite{chu2016prattParsingGitHub}. 
+
+\startTestSuite[registerNullDenotation and lookupNullDenotation]
+
+\startCHeader
+void jPegRegisterNullDenotation(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegRegisterNullDenotation(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, name2register);
+  popCtxDataInto(aCtx, nudList);
+
+  if (!isSymbolObj(name2register)) {
+    raiseExceptionMsg(aCtx,
+      "register null denotation requires a symbol as top");
+    return;
+  }
+
+  if (!isPairObj(nudList)) {
+    raiseExceptionMsg(aCtx,
+      "register null denotation requires a list as second");
+    return;
+  }
+
+  // ensure nudList has correct constituents
+  if (listLength(nudList) != 2) {
+    raiseExceptionMsg(aCtx,
+      "register null denotation requires a list with two elements");
+    return;    
+  }
+  
+  JObj *firstElement = getNthElement(nudList, 0);
+  if (!isSymbolObj(firstElement) &&
+      !isCFunctionObj(firstElement) &&
+      !isPairObj(firstElement)) {
+    raiseExceptionMsg(aCtx,
+      "register null denotation requires a function as first element");
+    return;    
+  }
+
+  JObj *secondElement = getNthElement(nudList, 1);
+  if (!isUIntegerObj(secondElement)) {
+    raiseExceptionMsg(aCtx,
+      "register null denotation requires a uInteger as second element");
+    return;    
+  }
+
+  if (!asParserNuds(aCtx)) reinitializeParser(aCtx, "default");
+  SymbolTableObj *nuds = asParserNuds(aCtx);
+  insertSymbol(nuds, asSymbol(name2register), nudList);
+}
+\stopCCode
+
+\startCHeader
+#define jPegLookupNullDenotationFunc(aCtx, name2lookup) \
+  findSymbol(asParserNuds(aCtx), asSymbol(name2lookup))
+
+void jPegLookupNullDenotation(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegLookupNullDenotation(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, name2lookup);
+
+  if (!isSymbolObj(name2lookup)) {
+    raiseExceptionMsg(aCtx,
+      "lookupNullDenotation requires a symbol as top");
+    return;
+  }
+
+  if (!asParserNuds(aCtx)) reinitializeParser(aCtx, "default");
+  pushCtxData(aCtx, jPegLookupNullDenotationFunc(aCtx, name2lookup));
+}
+\stopCCode
+
+\startTestCase[should be able to register and lookup a null denotation]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushUIntegerCtxData(aCtx, 200);
+  pushSymbolCtxData(aCtx, "testNud");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "~");
+  jPegRegisterNullDenotation(aCtx);
+  AssertPtrNull(aCtx->data);
+  
+  pushSymbolCtxData(aCtx, "~");
+  jPegLookupNullDenotation(aCtx);
+  popCtxDataInto(aCtx, nudList);
+  AssertIntTrue(isPairObj(nudList));
+  AssertIntEquals(listLength(nudList), 2);
+  JObj *firstElement = getNthElement(nudList, 0);
+  AssertIntTrue(isSymbolObj(firstElement));
+  AssertStrEquals(asSymbol(firstElement), "testNud");
+  JObj *secondElement = getNthElement(nudList, 1);
+  AssertIntTrue(isUIntegerObj(secondElement));
+  AssertIntEquals(asUInteger(secondElement), 200);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerLeftDenotation and lookupLeftDenotation]
+
+\startCHeader
+void jPegRegisterLeftDenotation(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegRegisterLeftDenotation(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, name2register);
+  popCtxDataInto(aCtx, ledList);
+
+  if (!isSymbolObj(name2register)) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a symbol as top");
+    return;
+  }
+
+  if (!isPairObj(ledList)) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a list as second");
+    return;
+  }
+
+  // ensure nudList has correct constituents
+  if (listLength(ledList) != 3) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a list with two elements");
+    return;    
+  }
+  
+  JObj *firstElement = getNthElement(ledList, 0);
+  if (!isSymbolObj(firstElement) &&
+      !isCFunctionObj(firstElement) &&
+      !isPairObj(firstElement)) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a function as first element");
+    return;    
+  }
+
+  JObj *secondElement = getNthElement(ledList, 1);
+  if (!isUIntegerObj(secondElement)) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a uInteger as second element");
+    return;    
+  }
+
+  JObj *thirdElement = getNthElement(ledList, 2);
+  if (!isUIntegerObj(thirdElement)) {
+    raiseExceptionMsg(aCtx,
+      "register left denotation requires a uInteger as third element");
+    return;    
+  }
+
+  if (!asParserLeds(aCtx)) reinitializeParser(aCtx, "default");
+  SymbolTableObj *leds = asParserLeds(aCtx);
+  insertSymbol(leds, asSymbol(name2register), ledList);
+}
+\stopCCode
+
+\startCHeader
+#define jPegLookupLeftDenotationFunc(aCtx, name2lookup)  \
+  findSymbol(asParserLeds(aCtx), asSymbol(name2lookup))
+
+void jPegLookupLeftDenotation(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegLookupLeftDenotation(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, name2lookup);
+
+  if (!isSymbolObj(name2lookup)) {
+    raiseExceptionMsg(aCtx,
+      "lookupLeftDenotation requires a symbol as top");
+    return;
+  }
+
+  if (!asParserLeds(aCtx)) reinitializeParser(aCtx, "default");
+  pushCtxData(aCtx, jPegLookupLeftDenotationFunc(aCtx, name2lookup));
+}
+\stopCCode
+
+\startTestCase[should be able to register and lookup a left denotation]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  registerBasicWords(aCtx);
+  registerControlWords(aCtx);
+  registerJPegWords(aCtx);
+  
+  pushUIntegerCtxData(aCtx, 201);
+  pushUIntegerCtxData(aCtx, 200);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "testLed");
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, "+");
+  jPegRegisterLeftDenotation(aCtx);
+  AssertPtrNull(aCtx->data);
+  
+  pushSymbolCtxData(aCtx, "+");
+  jPegLookupLeftDenotation(aCtx);
+  popCtxDataInto(aCtx, ledList);
+  AssertIntTrue(isPairObj(ledList));
+  AssertIntEquals(listLength(ledList), 3);
+  JObj *firstElement = getNthElement(ledList, 0);
+  AssertIntTrue(isSymbolObj(firstElement));
+  AssertStrEquals(asSymbol(firstElement), "testLed");
+  JObj *secondElement = getNthElement(ledList, 1);
+  AssertIntTrue(isUIntegerObj(secondElement));
+  AssertIntEquals(asUInteger(secondElement), 200);
+  JObj *thirdElement = getNthElement(ledList, 2);
+  AssertIntTrue(isUIntegerObj(thirdElement));
+  AssertIntEquals(asUInteger(thirdElement), 201);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[parseExpression]
+
+In order to parse an expression we mimic the Chu's pratt parser's 
+\type{parseUntil}, \cite[righttext=found in tdop.py in the Parser 
+class][chu2016prattParsingGitHub]: 
+
+\starttyping
+  def ParseUntil(self, rbp):
+    """
+    Parse to the right, eating tokens until we encounter a token with binding
+    power LESS THAN OR EQUAL TO rbp.
+    """
+    if self.AtToken('eof'):
+      raise ParseError('Unexpected end of input')
+
+    t = self.token
+    self.Next()  # skip over the token, e.g. ! ~ + -
+
+    null_info = self.spec.LookupNull(t.type)
+    node = null_info.nud(self, t, null_info.bp)
+
+    while True:
+      t = self.token
+      left_info = self.spec.LookupLeft(t.type)
+
+      # Examples:
+      # If we see 1*2+  , rbp = 27 and lbp = 25, so stop.
+      # If we see 1+2+  , rbp = 25 and lbp = 25, so stop.
+      # If we see 1**2**, rbp = 26 and lbp = 27, so keep going.
+      if rbp >= left_info.lbp:
+        break
+      self.Next()  # skip over the token, e.g. / *
+
+      node = left_info.led(self, t, node, left_info.rbp)
+
+    return node
+\stoptyping
+
+\noindent in an optimized internal \joylol\ ANSI-C code. This means that 
+we break the over all function into a number of smaller blocks (in much 
+the same way a compiler would).\footnote{Note that since Chu's parser 
+throws, but effectively ingores, errors, Chu's code does not have an 
+explicit test for the presence of a \quote{null denotation}. Since we 
+actively (jPeg) fail, we must be more careful.} The over all expression 
+parsing is orchestrated by the \type{parseExpression} word, which expects 
+a list which contains a jPeg tokenizer as well as the right binding 
+precedence for the over all expression to be parsed. 
+
+The \type{parseExpression} word sets up the over all expression parsing 
+and calls the provided tokenizer after setting up the 
+\type{parseNullExpression} word as its (eventual) continuation. 
+
+The \type{parseNullExpression} word determines if the token obtained from 
+the tokenizer has a \quote{null denotation}, and if so invokes that null 
+denotation after setting up the \type{parseLeftExpression} word as its 
+(eventaul) continuation. If the token obtained is does not have a valid 
+\quote{null denotation} then the \quote{parseLeftExpression} word is used 
+as the (imediate) continuation instead. 
+
+The \type{parseLeftExpression} word first checks that the token has a 
+valid \quote{left denotation}. If the token has no valid \quote{left 
+denotation}, then the \type{parseLeftExpression} word (jPeg) fails. If the 
+token has a valid \quote{left denotation} the \type{parseLeftExpression} 
+word checks to see if the \quote{left binding precedence} of the 
+\quote{left denotation} is \emph{less than} the right binding precedence 
+supplied to the original \type{parseExpression}. If the \quote{left 
+binding precedence} of the \quote{left denotation} \emph{is} less than the 
+right binding precedence supplied to the original \type{parseExpression} 
+the overall \type{parseExpression} word has (jPeg) succedded and is done. 
+If \quote{left binding precedence} of the \quote{left denotation} is 
+\emph{less than} the right binding precedence supplied to the original 
+\type{parseExpression}, then the \type{parseLeftExpression} word sets 
+itself up as the (ultimate) continuation, sets up the \quote{left 
+denotation} function as the (eventual) continution, and invokes the 
+tokenizer as the continuation. 
+
+\startCHeader
+void jPegParseExpression(ContextObj *aCtx);
+void jPegParseNullExpressionContinue(ContextObj *aCtx);
+void jPegParseLeftExpressionContinue(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegParseExpression(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, parseExpList);
+  
+  getNthElementInto(aCtx, 0, tokenizer);
+  getNthElementInto(aCtx, 1, rightBindingPrecedence);
+  
+  if (!isSymbolObj(tokenizer) &&
+      !isCFunctionObj(tokenizer) &&
+      !isPairObj(tokenizer)) {
+    raiseExceptionMsg(aCtx,
+      "parse expression requires a function as top");
+    return;
+  }
+
+  if (!isUIntegerObj(rightBindingPrecedence)) {
+    raiseExceptionMsg(aCtx,
+      "parse expression requires a UInteger as second");
+    return;
+  }
+  
+  // setup the parseNUllExpression as the continuation
+  pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
+  pushCtxProcess(aCtx, tokenizer);
+  pushCtxProcess(aCtx, righBindingPrecedence);
+  pushSymbolCtxProcess(aCtx, "parseNullExpressionCont");
+  
+  // now invoke the tokenizer
+  if (isPairObj(tokenizer)) prependListCtxProcess(aCtx, tokenizer)
+  else pushCtxProcess(aCtx, tokenizer)
+}
+void jPegParseNullExpressionContinue(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxProcessInto(aCtx, rightBindingPrecedence);
+  popCtxProcessInto(aCtx, tokenizer);
+  popCtxProcessInto(aCtx, backTrackPosition);
+  peekCtxDataInto(aCtx, token);
+  
+  // token SHOULD be a symbol... if not then fail
+  if (!isSymbolObj(token)) pushSymbolCtxProcess(aCtx, "parseFail");
+  
+  JObj *nudList = jPegLookupNullDenotationFunc(aCtx, token);
+  
+  // setup the process stack for the parse expression continuations
+  pushCtxProcess(aCtx, backTrackPosition);
+  pushCtxProcess(aCtx, tokenizer);
+  pushCtxProcess(aCtx, rightBindingPrecedence);
+  
+  if (isPairObj(nudList)) {
+    // there is no associated null denotation so just continue with
+    // parseLeftExpression word as continuation 
+    pushSymbolCtxProcess(aCtx, "parseLeftExpressionCont");
+    return;
+  }
+
+  // this symbol does have a null denotation so setup the 
+  // parseLeftExpressionCont as the (eventual) continuation
+  pushSymbolCtxProcess(aCtx, "parseTokenExpressionCont");
+  
+  // this symbol does have a null denotation so invoke that word
+  getNthElementInto(nudList, 0, nudFunction);
+  getNthElementInto(nudList, 1, nudBindingPrecedence);
+  
+  pushCtxData(aCtx, nudBindingPrecedence);
+  // token is already now on the second
+  pushCtxProcess(aCtx, nudFunction);
+}
+
+void jPegParseLeftExpressionContinue(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxProcessInto(aCtx, rightBindingPrecedence);
+  popCtxProcessInto(aCtx, tokenizer);
+  popCtxProcessInto(aCtx, backTrackPosition);
+  peekCtxDataInto(aCtx, token);
+  
+  // token SHOULD be a symbol... if not then fail
+  if (!isSymbolObj(token)) pushSymbolCtxProcess(aCtx, "parseFail");
+  
+  JObj *ledList = jPegLookupLeftDenotationFunc(aCtx, token);
+  if (!isPairObj(ledList)) pushSymbolCtxProcess(aCtx, "parseFail");
+  
+  getNthElementInto(ledList, 0, ledFunction);
+  getNthElementInto(ledList, 1, ledLeftBindingPrecedence);
+  getNthElementInto(ledList, 2, ledRightBindingPrecedence);
+  
+  // how do we decide we are done?
+  if (ledLeftBindingPrecedence < rightBindingPrecedence) {
+    // we are done
+    return;
+  }
+    // setup parseLeftExpression word as the ultimate continuation
+  pushCtxProcess(aCtx, backTrackPosition);
+  pushCtxProcess(aCtx, tokenizer);
+  pushCtxProcess(aCtx, rightBindingPrecedence);
+  pushSymbolCtxProcess(aCtx, "parseLeftExpressionCont");
+  
+  // setup the left denotation function as the eventual continuation
+  // (with the token on the top of the data stack)
+  pushCtxData(aCtx, bindingPrecedence);
+  // token is already now on the second
+  // now invoke the tokenizer
+  if (isPairObj(ledFunction)) prependListCtxProcess(aCtx, ledFunction)
+  else pushCtxProcess(aCtx, ledFunction);
+  // do we need to swap the top and second on the data stack?
+  
+  // now invoke the tokenizer
+  if (isPairObj(tokenizer)) prependListCtxProcess(aCtx, tokenizer)
+  else pushCtxProcess(aCtx, tokenizer)
+}
+\stopCCode
+
+\startTestCase[should]
+
+\startCTest
+
+\stopCTest
+\stopTestCase
+\stopTestSuite

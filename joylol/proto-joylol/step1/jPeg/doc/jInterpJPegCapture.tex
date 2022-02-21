@@ -1,0 +1,72 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Capture]
+
+\startCHeader
+void jPegCaptureContinueWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegCaptureContinueWord(ContextObj *aCtx){
+  assert(isContextObj(aCtx));
+  
+  DEBUG(CaptureDebug, "jPegCaptureContinueWord%s\n","");
+  
+  popCtxProcessInto(aCtx, captureStartObj);
+  
+  if (!asParserFailed(aCtx)) {
+    if (!isUIntegerObj(captureStartObj)) {
+      DEBUG(CaptureDebug,
+        "jPegCaptureContinueWord: capture start is not a UInetger%s\n","");
+      raiseExceptionMsg(aCtx,
+        "jPeg capture parser expected a UInteger as capture start");
+      return;
+    }
+    UInteger captureStart = asUInteger(captureStartObj);
+    UInteger captureEnd   = asParserTextPosition(aCtx);
+    
+    if (captureStart <= captureEnd) {
+      size_t symbolLen = captureEnd - captureStart;
+      char *aNewSymbol = calloc(symbolLen+1, sizeof(char));
+      strncpy(
+        aNewSymbol,
+        asParserText(aCtx) + captureStart,
+        symbolLen
+      );
+      DEBUG(CaptureDebug,
+        "jPegCaptureContinueWord: start %zu end %zu symbol [%s]\n",
+        captureStart, captureEnd, aNewSymbol
+      );
+      pushCtxData(aCtx, asJObj(
+        newSymbol(aNewSymbol, asParserTextName(aCtx), captureStart)
+      ));
+    } else {
+      DEBUG(CaptureDebug,
+        "jPegCaptureContinueWord: capture end before capture start%s\n","");
+    }
+  } else {
+    DEBUG(CaptureDebug,
+      "jPegCaptureContinueWord: parser failed... ignoring capture%s\n","");
+  }
+  
+}
+\stopCCode
+
+\startCHeader
+void jPegCaptureWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void jPegCaptureWord(ContextObj *aCtx){
+  assert(isContextObj(aCtx));
+  
+  DEBUG(CaptureDebug, "jPegCaptureWord: startCapture: %zu\n",
+    asParserTextPosition(aCtx));
+
+  popCtxDataInto(aCtx, parser);
+    
+  pushUIntegerCtxProcess(aCtx, asParserTextPosition(aCtx));
+  pushSymbolCtxProcess(aCtx, "parseCaptureCont");
+  prependListCtxProcess(aCtx, parser);
+}
+\stopCCode

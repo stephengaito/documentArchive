@@ -1,0 +1,87 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Unsigned Integers]
+
+\startCHeader
+typedef size_t UInteger;
+typedef struct uInteger_struct {
+  size_t   tag;
+  UInteger theUInt;
+} UIntegerObj;
+
+#define isUIntegerObj(anObj) ((anObj) && (((JObj*)(anObj))->tag == UIntegerTag))
+#define asUIntegerObj(anObj) ((UIntegerObj*)(anObj))
+#define asUInteger(anObj)    (((UIntegerObj*)(anObj))->theUInt)
+\stopCHeader
+
+\startTestSuite[newUInterger]
+
+\startCHeader
+UIntegerObj *newUInteger(UInteger aUInt);
+\stopCHeader
+
+\startCCode
+UIntegerObj *newUInteger(UInteger aUInt) {
+  UIntegerObj *newObj =
+    (UIntegerObj*)calloc(1, sizeof(UIntegerObj));
+  newObj->tag     = UIntegerTag;
+  newObj->theUInt = aUInt;
+  return newObj;
+}
+\stopCCode
+
+\startTestCase[should create a new UInteger]
+
+\startCTest
+  UIntegerObj* aUInt = newUInteger(42);
+  AssertIntTrue(isUIntegerObj(aUInt));
+  AssertIntEquals(getJObjTag(aUInt), UIntegerTag);
+  AssertIntEquals(asUInteger(aUInt), 42);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[uIntergerPrinter]
+\startCHeader
+void uIntegerPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
+\stopCHeader
+
+\startCCode
+void uIntegerPrinter(
+  StringBufferObj *aStrBuf,
+  JObj           *anObj,
+  Symbol         *indent,
+  size_t          timeToLive
+) {
+  assert(isUIntegerObj(anObj));
+  DEBUG(PrintingDebug, "uIntegerPrinter %p [%zu]\n", anObj, asUInteger(anObj));
+  if (indent) {
+    strBufPrintf(aStrBuf, "%s%zu\n", indent, asUInteger(anObj));
+  } else {
+    strBufPrintf(aStrBuf, "%zu ", asUInteger(anObj));
+  }
+}
+\stopCCode
+
+\startTestCase[should print a UInteger]
+
+\startCTest
+  UIntegerObj *aUInt = newUInteger(42);
+  AssertIntTrue(isUIntegerObj(aUInt));
+  
+  StringBufferObj *aStrBuf = newStringBuffer();
+  uIntegerPrinter(aStrBuf, asJObj(aUInt), "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "42");
+  AssertStrMatches(getCString(aStrBuf), "\n");
+  
+  strBufReOpen(aStrBuf);
+  uIntegerPrinter(aStrBuf, asJObj(aUInt), NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "42 ");
+\stopCTest
+\stopTestCase
+\stopTestSuite

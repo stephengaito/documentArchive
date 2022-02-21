@@ -1,0 +1,444 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Contexts]
+
+In order to keep things simple we amalgamate the \joylol\ Context with the 
+Parser Machine (a specialized Context) and the Renderer Machine (another 
+specialized Context). 
+
+\startCHeader
+typedef struct symbolTable_struct SymbolTableObj;
+typedef struct context_struct ContextObj;
+
+typedef struct context_struct {
+  size_t           tag;
+  JObj            *data;
+  JObj            *process;
+  JObj            *command;
+  Symbol          *name;
+  SymbolTableObj  *symbolTable;
+  Boolean          parserCommitted;
+  Boolean          parserFailed;
+  Symbol          *parserText;
+  Symbol          *parserTextName;
+  size_t           parserTextSize;
+  size_t           parserTextPosition;
+  SymbolTableObj  *parserSymbolTable;
+  SymbolTableObj  *parserNullDenotations;
+  SymbolTableObj  *parserLeftDenotations;
+  JObj            *parserBTPs;
+  StringBufferObj *renderBuffer;
+  Boolean          tracingOn;
+  Boolean          debug;
+  Boolean          breakPoint;
+  size_t           showDepth;
+  Boolean          exceptionRaised;
+  ContextObj      *parent;
+} ContextObj;
+
+#define isContextObj(anObj) ((anObj) && (((ContextObj*)(anObj))->tag == ContextTag))
+#define asContextObj(anObj) ((ContextObj*)(anObj))
+#define asCtxName(anObj) (((ContextObj*)(anObj))->name)
+#define asCtxData(anObj) (((ContextObj*)(anObj))->data)
+#define asCtxProcess(anObj) (((ContextObj*)(anObj))->process)
+#define asCtxCommand(anObj) (((ContextObj*)(anObj))->command)
+#define asCtxSymbols(anObj) (((ContextObj*)(anObj))->symbolTable)
+#define asCtxBreakPoint(anObj) (((ContextObj*)(anObj))->breakPoint)
+#define asParserCommitted(anObj) (((ContextObj*)(anObj))->parserCommitted)
+#define asParserFailed(anObj) (((ContextObj*)(anObj))->parserFailed)
+#define asParserText(anObj) (((ContextObj*)(anObj))->parserText)
+#define asParserTextName(anObj) (((ContextObj*)(anObj))->parserTextName)
+#define asParserTextSize(anObj) (((ContextObj*)(anObj))->parserTextSize)
+#define asParserTextPosition(anObj) (((ContextObj*)(anObj))->parserTextPosition)
+#define resetParserTextPosition(anObj) \
+  asParserTextPosition(anObj) = 0
+#define getParserCurChar(anObj) \
+  (*((char*)(asParserText(anObj)+asParserTextPosition(anObj))))
+#define advanceParserTextPosition(anObj) asParserTextPosition(anObj)++
+#define asParserSymbols(anObj) (((ContextObj*)(anObj))->parserSymbolTable)
+#define asParserNuds(anObj) (((ContextObj*)(anObj))->parserNullDenotations)
+#define asParserLeds(anObj) (((ContextObj*)(anObj))->parserLeftDenotations)
+#define asParserBTPs(anObj) (((ContextObj*)(anObj))->parserBTPs)
+#define asRenderBuffer(anObj) (((ContextObj*)(anObj))->renderBuffer)
+#define asCtxExceptionRaised(anObj) (((ContextObj*)(anObj))->exceptionRaised)
+#define resetCtxExceptionRaised(anObj) \
+  asCtxExceptionRaised(anObj) = 0
+\stopCHeader
+
+\startTestSuite[newContext]
+
+\startCHeader
+ContextObj *newContext(JObj *data, JObj *process, Symbol *name);
+\stopCHeader
+
+\startCCode
+ContextObj *newContext(JObj *data, JObj *process, Symbol *name) {
+  ContextObj *newObj =
+    (ContextObj*)calloc(1, sizeof(ContextObj));
+  newObj->tag                   = ContextTag;
+  newObj->data                  = data;
+  newObj->process               = process;
+  newObj->command               = NULL;
+  newObj->name                  = strdup(name);
+  Symbol *tableName             = appendSymbols(name, "Symbols");
+  
+  assert(tableName);
+  newObj->symbolTable           = newSymbolTable(tableName);
+  free((char*)tableName);
+  
+  newObj->parserCommitted       = false;
+  newObj->parserFailed          = false;
+  newObj->parserText            = NULL;
+  newObj->parserTextSize        = 0;
+  newObj->parserTextPosition    = 0;
+  newObj->parserSymbolTable     = NULL;
+  newObj->parserNullDenotations = NULL;
+  newObj->parserLeftDenotations = NULL;
+  newObj->renderBuffer          = NULL;
+  newObj->tracingOn             = false;
+  newObj->debug                 = false;
+  newObj->breakPoint            = false;
+  newObj->showDepth             = 5;
+  newObj->exceptionRaised       = false;
+  newObj->parent                = NULL;
+  reinitializeRenderer(newObj);
+  return newObj;
+}
+\stopCCode
+
+\startTestCase[should create a new context]
+
+\startCTest
+  JObj *data       = asJObj(newPair(NULL, NULL));
+  JObj *process    = asJObj(newPair(NULL, NULL));
+  ContextObj* aCtx = newContext(data, process, "TestCtx");
+  AssertIntTrue(isContextObj(aCtx));
+  AssertIntEquals(getJObjTag(aCtx), ContextTag);
+  AssertStrEquals(asCtxName(aCtx), "TestCtx");
+  AssertPtrEquals(asCtxData(aCtx), data);
+  AssertPtrEquals(asCtxProcess(aCtx), process);
+  AssertIntFalse(asCtxBreakPoint(aCtx));
+  AssertIntTrue(isSymbolTableObj(asCtxSymbols(aCtx)));
+  AssertIntFalse(asParserFailed(aCtx));
+  AssertPtrNull(asParserText(aCtx));
+  AssertIntZero(asParserTextSize(aCtx));
+  AssertIntZero(asParserTextPosition(aCtx));
+  AssertPtrNull(asParserSymbols(aCtx));
+  AssertPtrNull(asParserNuds(aCtx));
+  AssertPtrNull(asParserLeds(aCtx));
+  AssertPtrNotNull(asRenderBuffer(aCtx));
+  AssertIntFalse(aCtx->tracingOn);
+  AssertIntFalse(aCtx->debug);
+  AssertPtrNull(asCtxCommand(aCtx));
+  AssertIntFalse(aCtx->exceptionRaised);
+  AssertPtrNull(aCtx->parent);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[reinitializeParser]
+
+\startCHeader
+void reinitializeParser(ContextObj *aCtx, Symbol *parserName);
+\stopCHeader
+
+\startCCode
+void reinitializeParser(ContextObj *aCtx, Symbol *parserName) {
+  assert(isContextObj(aCtx));
+  if (asParserSymbols(aCtx)) free(asParserSymbols(aCtx));
+  asParserSymbols(aCtx)    = newSymbolTable(parserName);
+  if (asParserNuds(aCtx))    free(asParserNuds(aCtx));
+  asParserNuds(aCtx)       = newSymbolTable(parserName);
+  if (asParserLeds(aCtx))    free(asParserLeds(aCtx));
+  asParserLeds(aCtx)       = newSymbolTable(parserName);
+}
+\stopCCode
+
+\startTestCase[should create the parser symbol table]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testCtxParser");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  AssertPtrNull(asParserSymbols(aCtx));
+  reinitializeParser(aCtx, "testParser");
+  AssertIntTrue(isSymbolTableObj(asParserSymbols(aCtx)));
+  AssertStrEquals(asSymbolTableName(asParserSymbols(aCtx)), "testParser");
+  AssertIntTrue(isSymbolTableObj(asParserNuds(aCtx)));
+  AssertStrEquals(asSymbolTableName(asParserNuds(aCtx)),    "testParser");
+  AssertIntTrue(isSymbolTableObj(asParserLeds(aCtx)));
+  AssertStrEquals(asSymbolTableName(asParserLeds(aCtx)),    "testParser");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+
+\startTestSuite[parseString]
+
+\startCHeader
+void parseString(ContextObj *aCtx, Symbol *aStringToParse);
+\stopCHeader
+
+\startCCode
+void parseString(ContextObj *aCtx, Symbol *aStringToParse) {
+  assert(isContextObj(aCtx));
+  
+  size_t aStrSize = 0;
+  if (aStringToParse) aStrSize = strlen(aStringToParse);
+    
+  asParserText(aCtx)         = aStringToParse;
+  asParserTextSize(aCtx)     = aStrSize;
+  asParserTextPosition(aCtx) = 0;
+  asParserCommitted(aCtx)    = false;
+  asParserFailed(aCtx)       = false;
+}
+\stopCCode
+
+\startTestCase[should load a string into parser text]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParseString");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  AssertPtrNull(asParserText(aCtx));
+  AssertIntZero(asParserTextSize(aCtx));
+  parseString(aCtx, "");
+  AssertPtrNotNull(asParserText(aCtx));
+  AssertIntEquals(asParserTextSize(aCtx), 0);
+  AssertStrMatches(asParserText(aCtx), "");
+  
+  asParserText(aCtx)     = NULL;
+  asParserTextSize(aCtx) = 0;
+  AssertPtrNull(asParserText(aCtx));
+  AssertIntZero(asParserTextSize(aCtx));
+  parseString(aCtx, "This is a test");
+  AssertPtrNotNull(asParserText(aCtx));
+  AssertIntEquals(asParserTextSize(aCtx), 14);
+  AssertStrMatches(asParserText(aCtx), "This is a test");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[parseFile]
+
+\startCHeader
+void parseFile(ContextObj *aCtx, Symbol *aTextFilePath);
+\stopCHeader
+
+\startCCode
+void parseFile(ContextObj *aCtx, Symbol *aTextFilePath) {
+  assert(isContextObj(aCtx));
+  
+  if (!aTextFilePath || !aTextFilePath[0]) return;
+  
+  FILE *textFile = fopen(aTextFilePath, "r");
+  
+  if (!textFile) return;
+  
+  fseek(textFile, 0L, SEEK_END);
+  size_t textSize = ftell(textFile);
+  rewind(textFile);
+  
+  if (textSize < 1) return;
+  
+  char *textBuffer = (char*)calloc(textSize+1, sizeof(char));
+  if (!textBuffer) return;
+  
+  size_t bytesRead = fread(textBuffer, sizeof(char), textSize, textFile);
+
+  fclose(textFile);
+  
+  if (bytesRead != textSize) {
+    free(textBuffer);
+    return;
+  }
+
+  asParserText(aCtx)     = textBuffer;
+  asParserTextName(aCtx) = aTextFilePath;
+  asParserTextSize(aCtx) = textSize;
+}
+\stopCCode
+
+\startTestCase[should load file into parser text]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testParserText");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  AssertPtrNull(asParserText(aCtx));
+  AssertIntZero(asParserTextSize(aCtx));
+  parseFile(aCtx, "doc/objects/testContextParseFile.txt");
+  AssertPtrNotNull(asParserText(aCtx));
+  AssertIntEquals(asParserTextSize(aCtx), 105);
+  
+  AssertStrMatches(asParserText(aCtx), "This is a");
+  AssertStrMatches(asParserText(aCtx), "last");
+  AssertStrMatches(asParserText(aCtx), "([<{}>])");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[reinitializeRenderer]
+
+\startCHeader
+void reinitializeRenderer(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void reinitializeRenderer(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  asRenderBuffer(aCtx) = newStringBuffer();
+}
+\stopCCode
+
+\startTestCase[should create the render buffer]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testCtxRenderer");
+  AssertIntTrue(isContextObj(aCtx));
+  StringBufferObj *origBuffer = asRenderBuffer(aCtx);
+  AssertPtrNotNull(origBuffer);
+  reinitializeRenderer(aCtx);
+  StringBufferObj *newBuffer  = asRenderBuffer(aCtx);
+  AssertPtrNotEquals(origBuffer, newBuffer)
+  AssertIntTrue(isStringBufferObj(asRenderBuffer(aCtx)));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[writeRenderedText]
+
+\startCHeader
+size_t writeRenderedText(ContextObj *aCtx, Symbol *aTextFilePath);
+\stopCHeader
+
+\startCCode
+size_t writeRenderedText(ContextObj *aCtx, Symbol *aTextFilePath) {
+  assert(isContextObj(aCtx));
+
+  Symbol *renderedText = getCString(asRenderBuffer(aCtx));
+  
+  if (!renderedText || !renderedText[0]) return 0;
+  
+  size_t renderedTextSize = strlen(renderedText);
+
+  if (renderedTextSize < 1) return 0;
+  
+  if (!aTextFilePath || !aTextFilePath[0]) return 0;
+  
+  FILE *textFile = fopen(aTextFilePath, "w");
+  
+  if (!textFile) return 0;
+
+  size_t bytesWritten =
+    fwrite(renderedText, sizeof(char), renderedTextSize, textFile);
+  
+  fclose(textFile);
+  
+  return bytesWritten;
+}
+\stopCCode
+
+\startTestCase[should write rendered text]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testRenderText");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  reinitializeRenderer(aCtx);
+  
+  StringBufferObj *aStrBuf = asRenderBuffer(aCtx);
+  
+  strBufPrintf(aStrBuf, "%s", "This is a test of rendering\n");
+  
+  Symbol *testFilePath = "doc/objects/testContextRenderFile.txt";
+  size_t bytesWritten  = writeRenderedText(aCtx, testFilePath);
+  AssertIntEquals(bytesWritten, 28);
+  
+  char *testBuffer = calloc(bytesWritten+1, sizeof(char));
+  AssertPtrNotNull(testBuffer);
+  
+  FILE *renderFile = fopen(testFilePath, "r");
+  size_t bytesRead = fread(testBuffer, sizeof(char), bytesWritten, renderFile);
+  fclose(renderFile);
+  AssertIntEquals(bytesRead, bytesWritten);
+  AssertStrEquals(getCString(asRenderBuffer(aCtx)), testBuffer);
+  free(testBuffer);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[contextPrinter]
+
+\startCHeader
+void contextPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
+\stopCHeader
+
+\startCCode
+void contextPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
+  DEBUG(PrintingDebug, "contextPrinter %p\n",
+  anObj);
+  assert(isContextObj(anObj));
+  if (indent) {
+    char *newIndent = appendSymbols(indent, "    ");
+    strBufPrintf(aStrBuf, "%s<context:%s>\n", indent, asCtxName(anObj));
+    strBufPrintf(aStrBuf, "%s  <data[%zu]>\n",
+      indent, listLength(asCtxData(anObj)));
+    //printJObj(aStrBuf, asCtxData(anObj), newIndent, 20);
+    strBufPrintf(aStrBuf, "%s  <process[%zu]>\n",
+      indent, listLength(asCtxProcess(anObj)));
+    //printJObj(aStrBuf, asCtxProcess(anObj), newIndent, 20);
+    free(newIndent);
+  } else {
+    strBufPrintf(aStrBuf, "<context:%s ", asCtxName(anObj));
+    strBufPrintf(aStrBuf, "  <data[%zu]: ",
+      listLength(asCtxData(anObj)));
+    //printJObj(aStrBuf, asCtxData(anObj), NULL, 20);
+    strBufPrintf(aStrBuf, "> <process[%zu]: ",
+      listLength(asCtxProcess(anObj)));
+    //printJObj(aStrBuf, asCtxProcess(anObj), NULL, 20);
+    strBufPrintf(aStrBuf, "> >");
+  }
+}
+\stopCCode
+
+\startTestCase[should print a context object]
+
+\startCTest
+  JObj *data       = asJObj(newPair(NULL, NULL));
+  JObj *process    = asJObj(newPair(NULL, NULL));
+  ContextObj* aCtx = newContext(data, process, "TestCtx");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  StringBufferObj *aStrBuf = newStringBuffer();
+  AssertIntTrue(isStringBufferObj(aStrBuf));
+  
+  contextPrinter(aStrBuf, asJObj(aCtx), "  ", 20);
+  //AssertStrMatches(getCString(aStrBuf), "null");
+  AssertStrMatches(getCString(aStrBuf), "<context:TestCtx>")
+  AssertStrMatches(getCString(aStrBuf), "<data%[1%]>")
+  AssertStrMatches(getCString(aStrBuf), "<process%[1%]>")
+  AssertStrMatches(getCString(aStrBuf), "\n")
+
+  strBufReOpen(aStrBuf);
+  contextPrinter(aStrBuf, asJObj(aCtx), NULL, 20);
+  //AssertStrEquals(getCString(aStrBuf), "<context:TestCtx   <data: (  )  > <process: (  )  > >");
+  AssertStrEquals(getCString(aStrBuf), "<context:TestCtx   <data[1]: > <process[1]: > >");
+  AssertStrDoesNotMatch(getCString(aStrBuf), "\n");
+  
+  strBufClose(aStrBuf);
+  free(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite

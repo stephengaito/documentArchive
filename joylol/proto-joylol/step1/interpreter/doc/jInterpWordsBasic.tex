@@ -1,0 +1,603 @@
+% A ConTeXt document [master document: ../jInterp.tex]
+
+\subsection[title=Basic words]
+
+\subsubsection[title=Boolean words]
+\startCCode
+void isTrueWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, top);
+  if (isTrueObj(top)) {
+    pushBooleanCtxData(aCtx, true);
+  } else
+    pushBooleanCtxData(aCtx, false);
+}
+
+void isFalseWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, top);
+  if (isTrueObj(top)) {
+    pushBooleanCtxData(aCtx, false);
+  } else
+    pushBooleanCtxData(aCtx, true);
+}
+#define notWord ifFalseWord
+
+void orWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, first);
+  popCtxDataInto(aCtx, second);
+  
+  if (isTrueObj(first)) {
+    pushBooleanCtxData(aCtx, true);
+  } else if (isTrueObj(second)) {
+    pushBooleanCtxData(aCtx, true);
+  } else {
+    pushBooleanCtxData(aCtx, false);
+  }
+}
+
+void andWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, first);
+  popCtxDataInto(aCtx, second);
+  
+  if (isTrueObj(first) && isFalseObj(second)) {
+    pushBooleanCtxData(aCtx, true);
+  } else {
+    pushBooleanCtxData(aCtx, false);
+  }
+}
+
+void registerBooleanWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));  
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  
+  UIntegerObj *trueUInt  = newUInteger(true);
+  insertSymbol(symTab, "true", asJObj(trueUInt));
+
+  UIntegerObj *falseUInt = newUInteger(false);
+  insertSymbol(symTab, "false", asJObj(falseUInt));
+
+  registerCFunction(symTab, "isTrue",    isTrueWord);
+  registerCFunction(symTab, "isFalse",   isFalseWord);
+  registerCFunction(symTab, "not",       isFalseWord);
+  registerCFunction(symTab, "or",        orWord);
+  registerCFunction(symTab, "and",       andWord);
+}
+\stopCCode
+
+\subsubsection[title=Symbol table words]
+
+\startCCode
+void lookupWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+  popCtxDataInto(aCtx, name2lookup);
+
+  if (!isSymbolObj(name2lookup)) {
+    raiseExceptionMsg(aCtx,
+      "lookup requires a symbol as top");
+    return;
+  }
+
+  pushCtxData(aCtx, 
+    findSymbol(asCtxSymbols(aCtx), asSymbol(name2lookup))
+  );
+}
+
+void registerSymbolTableWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));  
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+
+  registerCFunction(symTab, "lookup", lookupWord);
+}
+\stopCCode
+
+\subsubsection[title=Output words]
+
+\startCCode
+static void doWrite(
+  ContextObj      *aCtx,
+  Boolean          newLine
+) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, aString);
+  if (!isSymbolObj(aString)) {
+    raiseExceptionMsg(aCtx,
+      "write expected a symbol as aString");
+    return;
+  }
+
+  assert(isStringBufferObj(asRenderBuffer(aCtx)));
+  strBufPrintf(asRenderBuffer(aCtx), "%s", asSymbol(aString));
+  if (newLine) strBufPrintf(asRenderBuffer(aCtx), "%s", "\n");
+}
+
+static void writeWord(ContextObj *aCtx) {
+  doWrite(aCtx, false);
+}
+
+static void writeNLWord(ContextObj *aCtx) {
+  doWrite(aCtx, true);
+}
+
+static void writeObjWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, lol);
+  popCtxDataInto(aCtx, depth);
+  
+  if (!isUIntegerObj(depth)) {
+    raiseExceptionMsg(aCtx,
+      "printLoL expected a UInteger as depth");
+    return;
+  }
+  size_t depthInt = asUInteger(depth);
+    
+  assert(isStringBufferObj(asRenderBuffer(aCtx)));
+  printJObj(asRenderBuffer(aCtx), lol, "", depthInt);
+}
+
+static void printRenderBuffer(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+  assert(isStringBufferObj(asRenderBuffer(aCtx)));
+  
+  printf("%s", getCString(asRenderBuffer(aCtx)));
+}
+\stopCCode
+
+\startCCode
+void registerOutputWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
+  
+  registerCFunction(symTab, "writeStr",    writeWord);
+  registerCFunction(symTab, "writeNL",     writeNLWord);
+  registerCFunction(symTab, "writeObj",    writeObjWord);
+  registerCFunction(symTab, "printBuffer", printRenderBuffer);
+}
+\stopCCode
+
+\subsubsection[title=UInterger words]
+
+\startCCode
+static void addWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "addition requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  UIntegerObj* sum = newUInteger(asUInteger(top1) + asUInteger(top2));
+  pushCtxData(aCtx, asJObj(sum));
+}
+\stopCCode
+
+\startCCode
+static void subtractWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "subtraction requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  UInteger uIntDiff = 0;
+  if (asUInteger(top2) < asUInteger(top1)) {
+    uIntDiff = asUInteger(top1) - asUInteger(top2);
+  }
+  UIntegerObj* difference = newUInteger(uIntDiff);
+  pushCtxData(aCtx, asJObj(difference));
+}
+\stopCCode
+
+\startCCode
+static void subtractReverseWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "(reverse) subtraction requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  UInteger uIntDiff = 0;
+  if (asUInteger(top1) < asUInteger(top2)) {
+    uIntDiff = asUInteger(top2) - asUInteger(top1);
+  }
+  UIntegerObj* difference = newUInteger(uIntDiff);
+  pushCtxData(aCtx, asJObj(difference));
+}
+\stopCCode
+
+\startCCode
+static void multiplyWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "multiplication requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  UIntegerObj* product = newUInteger(asUInteger(top1) * asUInteger(top2));
+  pushCtxData(aCtx, asJObj(product));
+}
+\stopCCode
+
+\startCCode
+static void quotientWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  if (asUInteger(top2) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the denominator is not zero"
+    );
+    return;
+  }
+  UIntegerObj* product = newUInteger(asUInteger(top1) % asUInteger(top2));
+  pushCtxData(aCtx, asJObj(product));
+}
+
+static void quotientReverseWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  if (asUInteger(top1) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer quotient requires that the denominator is not zero"
+    );
+    return;
+  }
+  UIntegerObj* product = newUInteger(asUInteger(top2) % asUInteger(top1));
+  pushCtxData(aCtx, asJObj(product));
+}
+
+static void remainderWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  if (asUInteger(top2) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the denominator is not zero"
+    );
+    return;
+  }
+  UIntegerObj* product = newUInteger(asUInteger(top1) / asUInteger(top2));
+  pushCtxData(aCtx, asJObj(product));
+}
+
+static void remainderReverseWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  if (!isUIntegerObj(top1) || !isUIntegerObj(top2)) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the top two stack elements are UIntegers"
+    );
+    return;
+  }
+  if (asUInteger(top1) == 0) {
+    raiseExceptionMsg(aCtx,
+      "integer remainder requires that the denominator is not zero"
+    );
+    return;
+  }
+  UIntegerObj* product = newUInteger(asUInteger(top2) / asUInteger(top1));
+  pushCtxData(aCtx, asJObj(product));
+}
+\stopCCode
+
+\startCCode
+static void lessThanUIntWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  
+  UInteger result = false;
+  if (isUIntegerObj(top1) &&
+      isUIntegerObj(top2) &&
+      (asUInteger(top1) < asUInteger(top2))) result = true;
+  DEBUG(ContextDebug, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void lessThanEqualUIntWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  UInteger result = false;
+  if (isUIntegerObj(top1) &&
+      isUIntegerObj(top2) &&
+      (asUInteger(top1) <= asUInteger(top2))) result = true;
+  DEBUG(ContextDebug, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void greaterThanUIntWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  UInteger result = false;
+  if (isUIntegerObj(top1) &&
+      isUIntegerObj(top2) &&
+      (asUInteger(top1) > asUInteger(top2))) result = true;
+  DEBUG(ContextDebug, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void greaterThanEqualUIntWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  UInteger result = false;
+  if (isUIntegerObj(top1) &&
+      isUIntegerObj(top2) &&
+      (asUInteger(top1) >= asUInteger(top2))) result = true;
+  DEBUG(ContextDebug, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void equalUIntWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  UInteger result = false;
+  if (isUIntegerObj(top1) &&
+      isUIntegerObj(top2) &&
+      (asUInteger(top1) == asUInteger(top2))) result = true;
+  DEBUG(ContextDebug, "equalNat: %zu\n", result);
+  pushCtxData(aCtx, top2);
+  pushCtxData(aCtx, top1);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void isZeroWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  UInteger result = false;
+  if (isUIntegerObj(top) &&
+      (asUInteger(top) == 0)) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void isUIntegerWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  UInteger result = false;
+  if (isUIntegerObj(top)) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+void registerUIntegerWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
+  
+  registerCFunction(symTab, "isUInteger", isUIntegerWord);
+  registerCFunction(symTab, "+",          addWord);
+  registerCFunction(symTab, "-",          subtractWord);
+  registerCFunction(symTab, "-rev",       subtractReverseWord);
+  registerCFunction(symTab, "*",          multiplyWord);
+  registerCFunction(symTab, "/",          quotientWord);
+  registerCFunction(symTab, "/rev",       quotientReverseWord);
+  registerCFunction(symTab, "%",          remainderWord);
+  registerCFunction(symTab, "%rev",       remainderReverseWord);
+  registerCFunction(symTab, "<UInt",      lessThanUIntWord);
+  registerCFunction(symTab, "<=UInt",     lessThanEqualUIntWord);
+  registerCFunction(symTab, ">UInt",      greaterThanUIntWord);
+  registerCFunction(symTab, ">=UInt",     greaterThanEqualUIntWord);
+  registerCFunction(symTab, "=UInt",      equalUIntWord);
+  registerCFunction(symTab, "isZero",     isZeroWord);
+}
+\stopCCode
+
+\subsubsection[title=List words]
+
+\startCCode
+static void isNilWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  Boolean result = false;
+  if (!top) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void isPairWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  Boolean result = false;
+  if (isPairObj(top)) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void isAtomWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  Boolean result = false;
+  if (isAtomObj(top)) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+static void pushEmptyList(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  
+  pushNullCtxData(aCtx);
+}
+\stopCCode
+
+\startCCode
+void registerListWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
+  
+  registerCFunction(symTab, "isNil",     isNilWord);
+  registerCFunction(symTab, "isList",    isPairWord);
+  registerCFunction(symTab, "isPair",    isPairWord);
+  registerCFunction(symTab, "isAtom",    isAtomWord);
+  registerCFunction(symTab, "emptyList", pushEmptyList);
+}
+\stopCCode
+
+\section[title=Symbol words]
+
+\startCCode
+static void isSymbolWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top);
+  Boolean result = false;
+  if (isSymbolObj(top)) result = true;
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+void equalSymbolWord(ContextObj* aCtx) {
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  Boolean result = false;
+  if (isSymbolObj(top1) && isSymbolObj(top2)) {
+    if (strcmp(asSymbol(top1), asSymbol(top2)) == 0) result = true;
+  }
+  pushCtxData(aCtx, asJObj(newUInteger(result)));
+}
+\stopCCode
+
+\startCCode
+void registerSymbolWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
+
+  SymbolObj *newLineObj = newSymbol("\n", "newLine", 0);
+  insertSymbol(symTab, "newLine", asJObj(newLineObj));
+
+  registerCFunction(symTab, "isSymbol", isSymbolWord);
+  registerCFunction(symTab, "=Sym",     equalSymbolWord);
+}
+\stopCCode
+
+\startTestSuite[registerBasicWords]
+
+\startCHeader
+void registerBasicWords(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void registerBasicWords(ContextObj *aCtx) {
+  registerBooleanWords(aCtx);
+  registerSymbolTableWords(aCtx);
+  registerOutputWords(aCtx);
+  registerUIntegerWords(aCtx);
+  registerListWords(aCtx);
+  registerSymbolWords(aCtx);
+}
+\stopCCode
+
+\startTestCase[should register the basic words]
+
+\startCHeader
+void equalSymbolWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testRegisterBasicWords");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  AssertIntTrue(isSymbolTableObj(symTab));
+  AssertPtrNull(findSymbol(symTab, "true"));
+  registerBasicWords(aCtx);
+  JObj *shouldBeTrue = findSymbol(symTab, "true");
+  AssertPtrNotNull(shouldBeTrue);
+  AssertIntTrue(isUIntegerObj(shouldBeTrue));
+  AssertIntEquals(asUInteger(shouldBeTrue), true);
+  
+  JObj *shouldBeEqualSym = findSymbol(symTab, "=Sym");
+  AssertPtrNotNull(shouldBeEqualSym);
+  AssertIntTrue(isCFunctionObj(shouldBeEqualSym));
+  AssertPtrEquals(asCFunction(shouldBeEqualSym), equalSymbolWord);
+\stopCTest
+
+\stopTestCase
+\stopTestSuite

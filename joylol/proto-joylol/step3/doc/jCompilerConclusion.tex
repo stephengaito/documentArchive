@@ -1,0 +1,107 @@
+% A ConTeXt document [master document: jCompiler.tex ]
+
+\section[title=Conclusion]
+
+\addDocumentDirectory{doc}
+
+\prependJoylolCode{default}
+\placeJoylolCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createJoylolCodeFile%
+  {default}
+  {jCompiler.joy}
+  {// A JoyLoL file}
+
+\extractConcreteParserFromTo{default}{concreteParser}
+\prependJoylolCode{concreteParser}
+\placeJoylolCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createJoylolCodeFile%
+  {concreteParser}
+  {jParser.joy}
+  {// A JoyLoL file}
+
+\CHeaderIncludeGuard{public}{JCOMPILER}
+\prependCHeader{public}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createCHeaderFile%
+  {public}
+  {joylol/jCompiler.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JCOMPILER_PRIVATE}
+\prependCHeader{private}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createCHeaderFile%
+  {private}
+  {joylol/jCompiler-private.h}
+  {}
+
+\prependCCode{jCompilerMain}
+\startCCode
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jCompiler.h"
+#include "joylol/jCompiler-private.h"
+\stopCCode
+
+\prependCCode{jCompilerMain}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createCCodeFile%
+  {jCompilerMain}%
+  {jCompiler.c}%
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jCompiler.h"
+#include "joylol/jCompiler-private.h"
+\stopCCode
+
+\prependCCode{default}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createCCodeFile%
+  {default}%
+  {jCompilerLib.c}%
+  {}
+
+\addCCodeProgram{jCompiler})
+
+\addCCodeTargets{default}
+
+\addCTestInclude{<stdio.h>}
+\addCTestInclude{<stdarg.h>}
+\addCTestInclude{<stdlib.h>}
+\addCTestInclude{<string.h>}
+\addCTestInclude{<assert.h>}
+\addCTestInclude{<joylol/jCompiler.h>}
+
+\addCTestCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addCTestTargets{default}
+
+%\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\prependLmsfile{default}
+\placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

@@ -1,0 +1,101 @@
+% A ConTeXt document [master document: jPeg.tex ]
+
+\section[title=Conclusion]
+
+\addDocumentDirectory{doc}
+\addMainDocument{jParser.tex}
+
+\prependJoylolCode{default}
+\placeJoylolCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createJoylolCodeFile%
+  {default}
+  {jParser.joy}
+  {// A JoyLoL file}
+
+\CHeaderIncludeGuard{public}{JPARSER}
+\prependCHeader{public}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createCHeaderFile%
+  {public}
+  {joylol/jParser.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JPARSER_PRIVATE}
+\prependCHeader{private}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createCHeaderFile%
+  {private}
+  {joylol/jParser-private.h}
+  {}
+
+\prependCCode{jParserMain}
+\startCCode
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jParser.h"
+#include "joylol/jParser-private.h"
+\stopCCode
+
+\prependCCode{jParserMain}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createCCodeFile%
+  {jParserMain}%
+  {jParser.c}%
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jParser.h"
+#include "joylol/jParser-private.h"
+\stopCCode
+
+\prependCCode{default}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createCCodeFile%
+  {default}%
+  {jParserLib.c}%
+  {}
+
+\addCCodeProgram{jParser})
+
+\addCCodeTargets{default}
+
+\addCTestInclude{<stdio.h>}
+\addCTestInclude{<stdarg.h>}
+\addCTestInclude{<stdlib.h>}
+\addCTestInclude{<string.h>}
+\addCTestInclude{<assert.h>}
+\addCTestInclude{<joylol/jParser.h>}
+
+\addCTestCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addCTestTargets{default}
+
+%\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\prependLmsfile{default}
+\placeLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

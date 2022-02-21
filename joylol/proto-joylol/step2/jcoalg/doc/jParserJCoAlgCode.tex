@@ -1,0 +1,35 @@
+% A ConTeXt document [master document: ../jParser.tex ]
+
+\starttyping
+
+classDeclaration = 
+  indexing^0
+  classHeader
+  formalGenerics^0
+  obsolete^0
+  inheritance^0
+  creators^0
+  features^0
+  invariants^0
+  "end" ( "--" "class" className)^0
+  
+indexing = "indexing" indexList
+indexList = indexClause (";" indexClause)^0
+indexClause = indexID^0 indexTerms
+indexID = identifier ":"
+indexTerms = indexValue ("," indexValue)^0
+indexValue = identifier + manifestConstant
+
+classHeader = headerMark^0 "class" className
+headerMark = "deferred" + "expanded"
+className = identifier
+
+formalGenerics = "[" formalGenericList "]"
+formalGenericList = formalGeneric ("," formalGeneric )^0
+formalGeneric     = formalGenericName constraint^0
+formalGenericName = identifier
+constraint = "->" classType
+classType = className actualGenerics^0
+actualGenerics = 
+
+\stoptyping

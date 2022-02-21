@@ -1,0 +1,146 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Symbols]
+
+\startTestSuite[appendSymbols]
+
+\startCCode
+char *appendSymbols(Symbol *sym1, Symbol *sym2) {
+  size_t sym1len = 0;
+  if (sym1) sym1len = strlen(sym1);
+  size_t sym2len = 0;
+  if (sym2) sym2len = strlen(sym2);
+
+  char *newSym =
+    (char*)calloc(
+      sym1len+sym2len+1,
+      sizeof(char)
+    );
+  assert(newSym);
+  if (sym1) strcat(newSym, sym1);
+  if (sym2) strcat(newSym, sym2);
+  return newSym;
+}
+\stopCCode
+
+\startTestCase[should append two symbols]
+
+\startCTest
+  Symbol* newSymb = appendSymbols("prefix-", "-suffix");
+  AssertStrEquals(newSymb, "prefix--suffix");
+  newSymb = appendSymbols(NULL, "-suffix");
+  AssertStrEquals(newSymb, "-suffix");
+  newSymb = appendSymbols("prefix-", NULL);
+  AssertStrEquals(newSymb, "prefix-");
+  newSymb = appendSymbols(NULL, NULL);
+  AssertStrEquals(newSymb, "");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startCHeader
+typedef struct symbol_struct {
+  size_t    tag;
+  Symbol   *symbol;
+  Symbol   *file;
+  UInteger  line;
+} SymbolObj;
+
+#define isSymbolObj(anObj) ((anObj) && (((JObj*)(anObj))->tag == SymbolTag))
+#define asSymbolObj(anObj) ((SymbolObj*)(anObj))
+#define asSymbol(anObj)    (((SymbolObj*)(anObj))->symbol)
+#define asFile(anObj)      (((SymbolObj*)(anObj))->file)
+#define asLine(anObj)      (((SymbolObj*)(anObj))->line)
+
+#define symbolIs(anObj, aSymbol)                \
+  (isSymbolObj(anObj) && (aSymbol) &&           \
+    (strcmp(asSymbol(anObj), (aSymbol)) == 0))
+    
+#define symbolContains(anObj, aSymbol)    \
+  (isSymbolObj(anObj) && (aSymbol) &&     \
+    (strstr(asSymbol(anObj), (aSymbol))))
+    
+#define symbolStartsWith(anObj, aSymbol)                      \
+  (isSymbolObj(anObj) && (aSymbol) &&                         \
+    (strstr(asSymbol(anObj), (aSymbol)) == asSymbol(anObj)))
+\stopCHeader
+
+\startTestSuite[newSymbol]
+
+\startCHeader
+SymbolObj *newSymbol(Symbol *aSymbol, Symbol *aFile, UInteger aLine);
+\stopCHeader
+
+\startCCode
+SymbolObj *newSymbol(Symbol *aSymbol, Symbol *aFile, UInteger aLine) {
+  SymbolObj *newObj =
+    (SymbolObj*)calloc(1, sizeof(SymbolObj));
+  newObj->tag    = SymbolTag;
+  newObj->symbol = strdup(aSymbol);
+  newObj->file   = aFile;
+  newObj->line   = aLine;
+  return newObj;
+}
+\stopCCode
+
+\startTestCase[should create a new symbol]
+
+\startCTest
+  SymbolObj* aSymb = newSymbol("This is a test", "testFile", 42);
+  AssertIntTrue(isSymbolObj(aSymb));
+  AssertIntEquals(getJObjTag(aSymb), SymbolTag);
+  AssertStrEquals(asSymbol(aSymb), "This is a test");
+  AssertStrEquals(asFile(aSymb), "testFile");
+  AssertIntEquals(asLine(aSymb), 42);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[symbolPrinter]
+
+\startCHeader
+void symbolPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
+\stopCHeader
+
+\startCCode
+void symbolPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
+  assert(isSymbolObj(anObj));
+  DEBUG(PrintingDebug, "symbolPrinter %p [%s]\n", anObj, asSymbol(anObj));
+  if (indent) {
+    strBufPrintf(aStrBuf, "%s\"%s\"\n", indent, asSymbol(anObj));
+  } else {
+    strBufPrintf(aStrBuf, "\"%s\" ", asSymbol(anObj));
+  }
+}
+\stopCCode
+
+\startTestCase[should print a symbol]
+
+\startCTest
+  SymbolObj *aSymb = newSymbol("This is a test", NULL, 0);
+  StringBufferObj *aStrBuf = newStringBuffer();
+  symbolPrinter(aStrBuf, asJObj(aSymb), "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "This is a test");
+  AssertStrMatches(getCString(aStrBuf), "\n");
+  
+  strBufReOpen(aStrBuf);
+  symbolPrinter(aStrBuf, asJObj(aSymb), NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "\"This is a test\" ");
+  AssertStrDoesNotMatch(getCString(aStrBuf), "\n");
+  
+  strBufClose(aStrBuf);
+  free(aStrBuf);
+\stopCTest
+
+\stopTestCase
+\stopTestSuite

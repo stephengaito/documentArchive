@@ -1,0 +1,164 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=JObjects]
+
+\startCHeader
+typedef struct jObject_struct {
+  size_t tag;
+} JObj;
+
+#define isJObj(anObj) \
+  ((anObj) && ((((JObj*)(anObj))->tag) == JObjTag))
+#define asJObj(anObj)  ((JObj*)(anObj))
+#define getJObjTag(anObj)  (((JObj*)(anObj))->tag)
+#define hasValidJObjTag(anObj) (getJObjTag(anObj) < LAST_JOBJ_TAG)
+#define getJObjName(anObj) \
+  ((anObj) ? (jObjTagNameMap[getJObjTag(anObj)].name) : "null")
+#define hasJObjPrinter(anObj)                   \
+  ((anObj) &&                                   \
+   hasValidJObjTag(anObj) &&       \
+   (jObjTagNameMap[getJObjTag(anObj)].printer)  \ 
+  )
+#define getJObjPrinter(anObj) (jObjTagNameMap[getJObjTag(anObj)].printer) 
+\stopCHeader
+
+\startTestSuite[newJObject]
+
+\startCHeader
+JObj *newJObject(void);
+\stopCHeader
+
+\startCCode
+JObj *newJObject(void) {
+  JObj *newObj =
+    (JObj*)calloc(1, sizeof(JObj));
+  newObj->tag = JObjTag;
+  return newObj;
+}
+\stopCCode
+
+\startTestCase[should create a new jObj]
+
+\startCTest
+  JObj *aJObj = newJObject();
+  AssertIntTrue(isJObj(aJObj));
+  AssertIntEquals(getJObjTag(aJObj), JObjTag);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[printJObj]
+
+\startCHeader
+void printJObj(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj, 
+  Symbol          *indent,
+  size_t           timeToLive
+);
+
+void showJObjFull(JObj *anObj, Symbol *indent, size_t timeToLive);
+#define showJObj(anObj) showJObjFull(anObj, "  ", 20)
+\stopCHeader
+
+\startCCode
+void printJObj(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
+  DEBUG(PrintingDebug, "printJObj %p, %s\n",
+    anObj, getJObjName(anObj)
+  );
+  if (!anObj) {
+    if (indent) {
+      strBufPrintf(aStrBuf, "%s<null>: null\n", indent);
+    } else {
+      strBufPrintf(aStrBuf, "%s", " ");
+    }
+    return;
+  }
+  
+  assert(anObj->tag < LAST_JOBJ_TAG);
+  
+  jObjTagNameMap[getJObjTag(anObj)].printer(
+    aStrBuf,
+    anObj,
+    indent,
+    timeToLive
+  );
+}
+
+void showJObjFull(JObj *anObj, Symbol *indent, size_t timeToLive) {
+  StringBufferObj *aStrBuf = newStringBuffer();
+  printJObj(aStrBuf, anObj, indent, timeToLive);
+  printf("%s\n", getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  free(aStrBuf);
+}
+\stopCCode
+
+\startTestCase[should print null]
+
+\startCTest
+  StringBufferObj *aStrBuf = newStringBuffer();
+  printJObj(aStrBuf, NULL, "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "<null>: null");
+  AssertStrMatches(getCString(aStrBuf), "\n");
+  
+  strBufReOpen(aStrBuf);
+  printJObj(aStrBuf, NULL, NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), " ");
+  AssertStrDoesNotMatch(getCString(aStrBuf), "\n");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[jObjPrinter]
+
+\startCHeader
+void jObjPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t          timeToLive
+);
+\stopCHeader
+
+\startCCode
+void jObjPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
+  DEBUG(PrintingDebug, "jObjPrinter %p\n", anObj);
+  assert(isStringBufferObj(aStrBuf));
+  assert(isJObj(anObj));
+  if (indent) {
+    strBufPrintf(aStrBuf, "%s<JObj:%p>\n", indent, anObj);
+  } else {
+    strBufPrintf(aStrBuf, "<JObj:%p> ", anObj);
+  }
+}
+\stopCCode
+
+\startTestCase[should print a jObj]
+
+\startCTest
+  StringBufferObj *aStrBuf = newStringBuffer();
+  JObj *aJObj = newJObject();
+  AssertIntTrue(isJObj(aJObj));
+  
+  jObjPrinter(aStrBuf, aJObj, "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "<JObj:");
+  AssertStrMatches(getCString(aStrBuf), "\n");
+
+  strBufReOpen(aStrBuf);
+  jObjPrinter(aStrBuf, aJObj, NULL, 20);
+  AssertStrMatches(getCString(aStrBuf), "<JObj:");
+  AssertStrDoesNotMatch(getCString(aStrBuf), "\n");
+\stopCTest
+\stopTestCase
+\stopTestSuite

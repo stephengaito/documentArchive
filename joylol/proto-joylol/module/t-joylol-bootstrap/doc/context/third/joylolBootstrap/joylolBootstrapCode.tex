@@ -1,0 +1,249 @@
+% A ConTeXt document [master document: protoJoyLoL.tex ]
+
+\section[title=JoyLoL bootstrap code] \goto{website}[url(https://disimplex.org/papers/workingDraft/2019/04/protoJoyLoL/protoJoyLoL.html#pf103)]
+
+QUESTION: How do we load a *.joy file? Where do we put this command?
+
+\subsection{JoyLoL code environment}
+
+\subsubsection{Examples}
+
+\subsubsection{Implementation}
+
+We begin by registering the \type{JoylolCode} code type with the build 
+srcTypes system. This will ensure the \type{\createJoylolCodeFile} macro 
+(and corresponding lua code) knows how to deal with files of 
+\type{JoylolCode}. 
+
+\startLuaCode
+build.srcTypes = build.srcTypes or { }
+build.srcTypes['Joylol'] = 'joylol'
+\stopLuaCode
+
+\startMkIVCode
+\defineLitProgs
+  [JoylolCode]
+  [ option=lisp, numbering=line,
+    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
+  ]
+  
+\setLitProgsOriginMarker[JoylolCode][markJoylolCodeOrigin]
+\stopMkIVCode
+
+\startLuaCode
+local function markJoylolCodeOrigin()
+  local codeType       = setDefs(code, 'JoylolCode')
+  local codeStream     = setDefs(codeType, 'curCodeStream', 'default')
+  codeStream           = setDefs(codeType, codeStream)
+  return sFmt('// from file: %s after line: %s',
+    codeStream.fileName,
+    toStr(
+      mFloor(
+        codeStream.startLine/code.lineModulus
+      )*code.lineModulus
+    )
+  )
+end
+
+litProgs.markJoylolCodeOrigin = markJoylolCodeOrigin
+\stopLuaCode
+
+\subsection[title=Automatic generation of parsers]
+
+In this subsection we write the Lua/LPeg code required to extract the 
+concrete parsers from the \joylol\ CoAlgebra step 3 code.
+
+\startMkIVCode
+\def\loadCoAlgebraCollection#1{
+  \directlua{
+    thirddata.literateProgs.loadCoAlgebraCollection('#1')
+  }
+}
+
+\def\extractConcreteParserFromTo#1#2{
+  \directlua{
+    thirddata.literateProgs.extractConcreteParserFromTo('#1', '#2')
+  }
+}
+\stopMkIVCode
+
+\startLuaCode
+
+local function loadCoAlgebraCollection(aCollectionPath)
+
+  texio.write_nl(">>>>>>>>>>LOAD>>>>>>>>>>")
+  texio.write_nl("from CoAlgebra collection: ["..aCollectionPath.."]")
+  local newPath = replaceEnvironmentVarsInPath(aCollectionPath)
+  texio.write_nl("from CoAlgebra collection: ["..newPath.."]")
+  recursivelyFindFiles(newPath, '%.joy$', function(aPath)
+    texio.write_nl(aPath)
+  end)
+--  texio.write_nl(lpPP(os.env))
+--  texio.write_nl(lpPP(fromCodeStream))
+--  texio.write_nl(">>>>>>>>>>LOAD<<<<<<<<<<")
+--  texio.write_nl("to code stream: [coAlgTable]")
+--  texio.write_nl(lpPP(coAlgTable))
+--  texio.write_nl(">>>>>>>>>>LOAD<<<<<<<<<<")
+--  texio.write_nl("to code stream: ["..toCodeStreamName.."]")
+--  texio.write_nl(lpPP(toCodeStream))  
+--  texio.write_nl("<<<<<<<<<<LOAD<<<<<<<<<<\n")
+--  texio.write_nl(lpPP(codeType))
+  texio.write_nl("<<<<<<<<<<LOAD<<<<<<<<<<\n")
+end
+
+litProgs.loadCoAlgebraCollection = loadCoAlgebraCollection
+\stopLuaCode
+
+\startLuaCode
+local P, R, S, V, C, Cc, Cg, Ct = 
+  lpeg.P, lpeg.R, lpeg.S, lpeg.V, lpeg.C, lpeg.Cc, lpeg.Cg, lpeg.Ct
+local lMatch = lpeg.match
+
+local currentCoAlg = "unknown"
+local coAlgTable   = {}
+
+local function extractCoAlg(aMatch)
+  currentCoAlg       = aMatch
+  coAlgTable[aMatch] = {}
+end
+
+local function extractInherit(aMatch)
+  coAlgTable[currentCoAlg] = coAlgTable[currentCoAlg] or {}
+  
+  coAlgTable[currentCoAlg]['parents'] = 
+    coAlgTable[currentCoAlg]['parents'] or {}
+  tInsert(coAlgTable[currentCoAlg]['parents'], aMatch)  
+  
+  coAlgTable[aMatch] = coAlgTable[aMatch] or { }
+  
+  coAlgTable[aMatch]['children'] = 
+    coAlgTable[aMatch]['children'] or {}
+  tInsert(coAlgTable[aMatch]['children'], currentCoAlg)
+end
+
+local function extractParser(anId, aParser)
+  coAlgTable[anId] = coAlgTable[anId] or {}
+  
+  coAlgTable[anId]['parser'] = aParser
+end
+
+local function buildParserStream(parserStream)
+  local coAlgNames = { }
+  for aCoAlg, aBody in pairs(coAlgTable) do
+    tInsert(coAlgNames, aCoAlg)
+    if aBody['children'] then
+      local choiceBody = {}
+      for i, aChild in ipairs(aBody['children']) do
+        tInsert(choiceBody, "parse"..aChild)
+      end
+      aBody['parser'] = "( "..tConcat(choiceBody, '\n').." ) choice"
+    end
+  end
+  
+  tSort(coAlgNames)
+  
+  for i, aCoAlg in ipairs(coAlgNames) do
+    local aBody   = coAlgTable[aCoAlg]
+    local aParser = "( "..aBody['parser'].." ) \"parse"..aCoAlg.."\" define"
+    tInsert(parserStream, aParser)
+  end
+end
+
+local function extractConcreteParserFromTo(fromCodeStreamName, toCodeStreamName)
+  local codeType       = setDefs(code, 'Joylol')
+  fromCodeStreamName   = fromCodeStreamName or 'default'
+  toCodeStreamName     = toCodeStreamName   or 'parser'
+  local fromCodeStream = setDefs(codeType, fromCodeStreamName)
+  local toCodeStream   = setDefs(codeType, toCodeStreamName)
+
+  local ws       = S('\r\n\f\t ')^1
+  local id       = R('AZ', 'az') * (R('AZ', 'az', '09') + S('_-'))^0
+\stopLuaCode
+
+This is the most important section of the extract code. At this point we 
+define a crude LPeg parser which scans for three patterns.
+
+\startitemize[n]
+
+\item \bold{CoAlgebra} We look for the pattern: \type{CoAlgebra <id>}. 
+
+\startLuaCode
+  local coAlg =
+    ( P('CoAlgebra') * ws * C(id) ) / extractCoAlg
+\stopLuaCode
+
+\item \bold{Inheritance} We look for the pattern: \type{inherit <id> ;}. 
+Note that at the moment we can \emph{only} deal with single inheritance. 
+
+\startLuaCode
+  local inherit  =
+    ( P('inherit') * ws * C(id) * ws * P(';') ) / extractInherit
+\stopLuaCode
+
+\item \bold{(Concrete) Parser} In order to identify the concrete parser 
+code, we scan for a much more complex pattern. This pattern starts by 
+looking for \type{feature -- Concrete Syntax}. It then looks for the 
+pattern \type{parse} followed by an identifier with \emph{no} intervening 
+white space. Finally it captures all of the text between a \emph{single} 
+pair of \type{beginSExp} and \type{endSExp} words. 
+
+\startLuaCode
+  local concreteParser   = (
+    P('feature') * ws * P('--') * ws * 
+    P('Concrete') * ws * P('Syntax') * ws *
+    P('parse') * C(id) * 
+    ( 1 - P('beginSExp') )^1 *  P('beginSExp') *
+    C( ( 1 - P('endSExp') )^1 ) * P('endSExp')
+    ) / extractParser
+\stopLuaCode
+
+\stopitemize
+
+Note that each of the above sub-parsers, takes any captures and stores 
+them in our \type{coAlgTable} using the three functions 
+\type{extractCoAlg}, \type{extractInherit}, and \type{extractParser} 
+respectively. Each of these functions were defined above.
+
+We now put these three sub-parsers together in an ordered choice and wrap 
+this choice in the LPeg code required to scan a whole text multiple times. 
+The final line in the following code simply runs the LPeg parser over the 
+existing code in the \type{fromCodeStream}. All captured information is 
+stored in the \type{coAlgTable} Lua table. 
+
+\startLuaCode
+  local parts    = coAlg + inherit + concreteParser
+  local matchPat = Ct( P{ parts + 1 * lpeg.V(1) }^0 )
+  lMatch(matchPat, tConcat(fromCodeStream, '\n\n'))
+\stopLuaCode
+
+Having run the LPeg parser, we now need to add the extracted concrete 
+parsers after any existing \joylol\ code in the \type{toCodeStream} using 
+the lua function \type{buildParserStream} defined above.
+
+\startLuaCode
+  tInsert(codeType[toCodeStreamName], 
+    "// START of automatically generated jPEG parser")
+  tInsert(codeType[toCodeStreamName],
+    "// listed alphabetically by definition")
+  buildParserStream(codeType[toCodeStreamName])
+  tInsert(codeType[toCodeStreamName], 
+    "// END of automatically generated jPEG parser")
+  
+--  texio.write_nl(">>>>>>>>>>EXTRACT>>>>>>>>>>")
+--  texio.write_nl("from code stream: ["..fromCodeStreamName.."]")
+--  texio.write_nl(lpPP(fromCodeStream))
+--  texio.write_nl(">>>>>>>>>>EXTRACT<<<<<<<<<<")
+--  texio.write_nl("to code stream: [coAlgTable]")
+--  texio.write_nl(lpPP(coAlgTable))
+--  texio.write_nl(">>>>>>>>>>EXTRACT<<<<<<<<<<")
+--  texio.write_nl("to code stream: ["..toCodeStreamName.."]")
+--  texio.write_nl(lpPP(toCodeStream))  
+--  texio.write_nl("<<<<<<<<<<EXTRACT<<<<<<<<<<\n")
+--  texio.write_nl(lpPP(codeType))
+--  texio.write_nl("<<<<<<<<<<EXTRACT<<<<<<<<<<\n")
+end
+
+litProgs.extractConcreteParserFromTo = extractConcreteParserFromTo
+\stopLuaCode
+
+

@@ -1,0 +1,133 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jInterpObjects
+\usebtxdataset[jInterpObjectsBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jInterpObjects.tex}
+
+\section[title=Objects]
+
+\setCHeaderStream{public}
+\startCHeader
+typedef size_t Boolean;
+typedef size_t UInteger;
+#define false 0
+#define true  1
+
+#define isFalseObj(anObj)                                           \
+  (!(anObj) || (isUIntegerObj(anObj) && (asUInteger(anObj) == 0)))
+#define isTrueObj(anObj)                                            \
+  ((anObj) && (!isUIntegerObj(anObj) || (asUInteger(anObj) != 0)))
+
+typedef const char Symbol;
+typedef struct jObject_struct JObj;
+typedef struct string_buffer_struct StringBufferObj;
+typedef void (PrintFunction)(
+  StringBufferObj *aStrBuf,
+  JObj            *aJObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
+char *appendSymbols(Symbol *sym1, Symbol *sym2);
+
+typedef struct jObjectTagName_struct {
+  size_t         tag;
+  Symbol        *name;
+  PrintFunction *printer;
+} JObjTagName;
+
+extern JObjTagName jObjTagNameMap[];
+
+#ifndef NDEBUG
+#include <stdio.h>
+extern size_t debugFlags;
+#define DebugMask   0xff
+#define setDebuggingFlags(someFlags)    \
+  debugFlags = someFlags
+#define getDebuggingFlagsInto(aVar)     \
+  size_t aVar = debugFlags
+#define DEBUG(debugMask, format, ... )  \
+  if (debugFlags & debugMask) {         \
+    printf(format, __VA_ARGS__ );       \
+  }
+#define shouldDebug(debugMask) \
+  (debugFlags & (debugMask))
+#else
+#define startDebuggingFlags(aCtx)
+#define stopDebugggingFlags(aCtx)
+#define DEBUG(debugMask, format, ...)
+#define shouldDebug   false
+#endif
+
+#define CaptureDebug     0x01
+#define ParserDebug      0x02
+#define ContextDebug     0x04
+#define TraceDebug       0x08
+#define SymbolTableDebug 0x10
+#define PrintingDebug    0x20
+\stopCHeader
+
+\startCCode
+size_t debugFlags = 0;
+\stopCCode
+
+\startCHeader
+#define JObjTag         0
+#define PairTag         1
+#define SymbolTag       2
+#define UIntegerTag     3
+#define StringBufferTag 4
+#define ContextTag      5
+#define CFunctionTag    6
+#define CtxCFunctionTag 7
+#define SymbolTableTag  8
+#define LAST_JOBJ_TAG   9
+
+#define JObjName          "JObj"
+#define PairName          "Pair"
+#define SymbolName        "Symbol"
+#define UIntegerName      "UInteger"
+#define StringBufferName  "StringBuffer"
+#define ContextName       "Context"
+#define CFunctionName     "CFunction"
+#define CtxCFunctionName  "CtxCFunction"
+#define SymbolTableName   "SymbolTable"
+\stopCHeader
+
+\startCCode
+JObjTagName jObjTagNameMap[] = {
+  {JObjTag,         JObjName,         jObjPrinter},
+  {PairTag,         PairName,         pairPrinter},
+  {SymbolTag,       SymbolName,       symbolPrinter},
+  {UIntegerTag,     UIntegerName,     uIntegerPrinter},
+  {StringBufferTag, StringBufferName, stringBufferPrinter},
+  {ContextTag,      ContextName,      contextPrinter},
+  {CFunctionTag,    CFunctionName,    cFunctionPrinter},
+  {CtxCFunctionTag, CtxCFunctionName, ctxCFunctionPrinter},
+  {SymbolTableTag,  SymbolTableName,  symbolTablePrinter},
+  {0,               NULL,             NULL}
+};
+\stopCCode
+
+\diSimpComponent jInterpJObjs
+
+\diSimpComponent jInterpPairs
+
+\diSimpComponent jInterpSymbols
+
+\diSimpComponent jInterpUIntegers
+
+\diSimpComponent jInterpStringBuffers
+
+\diSimpComponent jInterpContexts
+
+\diSimpComponent jInterpCFunctions
+
+\diSimpComponent jInterpSymbolTables
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

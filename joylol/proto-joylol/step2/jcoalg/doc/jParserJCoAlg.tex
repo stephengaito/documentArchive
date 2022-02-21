@@ -1,0 +1,18 @@
+% A ConTeXt document [master document: ../jParser.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jParserJCoAlg
+
+\usebtxdataset[jParserJCoAlgBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jParserJCoAlg.tex}
+
+\section[title=Joylol CoAlgebra Parser]
+
+\diSimpComponent jParserJCoAlgCode
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

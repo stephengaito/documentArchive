@@ -1,0 +1,118 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Primitives]
+
+\TODO{At the moment we do NOT deal correctly with UTF-8 characters.... 
+which we can and should.} 
+
+We need to implement the following \joylol\ words:
+
+\startitemize[1]
+
+\item \bold{\type{Fail}} successively takes items off the process stack 
+until it reaches a choice symbol. It then places the last list back on the 
+process stack. 
+
+\item \bold{\type{Commit}} takes no arguments, and ensures that the first 
+subsequent failure is ignored.
+
+\item \bold{\type{Choice}} takes a list of patterns and applies each in 
+turn until one succeeds. It does this by taking the top item off the list 
+and then placing, itself, the reduced list, and then prepends the top item 
+onto the process stack. 
+
+\item \bold{\type{Any}} takes one argument which is the number of 
+characters to match. All characters will match. 
+
+\item \bold{\type{Pattern}} takes one argument which is the explicit 
+sequence of characters which should be matched. 
+
+\item \bold{\type{CharSet}} Takes two arguments. The first argument should 
+be a list of symbols which together make up the set of characters which 
+can be matched once. The second argument is the number of characters which 
+\emph{must} match characters in the character set. 
+
+\item \bold{\type{coCharSet}} Takes two arguments. The first argument 
+which like a \bold{\type{CharSet}}, should be a list of symbols which 
+together make up the set of characters which \emph{should not} be matched, 
+all characters which are \emph{not} in the character set \emph{will} be 
+matched. The second argument is the number of characters which \emph{must} 
+\emph{not} match characters in the character set.
+
+\item \bold{\type{Span}} Takes two arguments. The top argument is the list 
+of symbols from which to form the character set. The second argument is 
+the minimum number of times that should be matched by this character set. 
+A \bold{\type{span}} matches as many consecutive characters that are in 
+the character set as possible. \bold{\type{Span}} will only fail if it can 
+not match at least the specified minimum number of characters. 
+
+\item \bold{\type{coSpan}} Like \bold{\type{Span}}, \bold{\type{coSpan}}, 
+takes two arguments. The top argument is a list of symbols from which to 
+form the character set. The second argument is the minimum number of times 
+that should be matched by characters which are \emph{not} in this 
+character set. A \bold{\type{coSpan}} matches as many consecutive 
+characters that are \emph{not} in the character set as possible. 
+\bold{\type{coSpan}} will only fail if it can not match at least the 
+specified minimum number of characters. 
+
+\item \bold{\type{RepeatAtLeast}} repeats the top pattern at least second 
+argument times. 
+
+\item \bold{\type{RepeatAtMost}} repeats the top pattern at most second 
+argument times. 
+
+\stopitemize 
+
+\TODO{We have not covered \quote{\bold{\type{not}}}, 
+\quote{\bold{\type{and}}}, CharSet difference, captures, or actions on 
+captures.} 
+
+As suggested in \cite{ierusalimschy2008lpegArticle} we might implement 
+captures using a \type{Capture} call with three distinct arguments: 
+
+\startitemize[n] 
+
+\item \type{begin n} where the actual capture begins $n$ characters before 
+the current character. This capture method should be called \emph{as soon 
+as} it is known that the current path will succeed. 
+
+\item \type{end} this marks the end of a capture 
+
+\item \type{full n} this is the same as a \type{begin n} immediately 
+followed by an \type{end}. 
+
+\stopitemize 
+
+For all of the above \joylol\ words, the data stack must include both the 
+current text structure (which must include a indication of the current 
+character) as well as the current collection of captures. 
+
+A compiler is a pipeline of co-routines. The parser might itself be a 
+pipeline of co-routines, one for the lexer, one for the ultimate parser, 
+but there could be numerous intermediary co-routines parsing more complex 
+syntactic structures. 
+
+\startCCode
+static void parseSymbolWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, top);
+  if (!isSymbolObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "parse symbol expected a symbol as top");
+    return;
+  }
+  parseString(aCtx, asSymbol(top));
+}
+
+static void parseFileWord(ContextObj *aCtx) {
+  popCtxDataInto(aCtx, top);
+  if (!isSymbolObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "parse file expected a symbol as top");
+    return;
+  }
+  parseFile(aCtx, asSymbol(top));
+}
+\stopCCode
+
+
+

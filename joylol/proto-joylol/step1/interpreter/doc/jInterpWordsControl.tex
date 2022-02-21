@@ -1,0 +1,851 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Context control code]
+
+\subsection[title=Operators]
+
+\subsection[title=Combinators]
+
+\startCHeader
+void pushListWord(ContextObj* aCtx);
+\stopCHeader
+
+\startCCode
+void pushListWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "pushListWord%s\n", "");
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, aList);
+  top = asJObj(newPair(top, NULL));
+  aList = asJObj(concatLists(top, aList));
+  pushCtxData(aCtx, aList);
+}
+\stopCCode
+
+\startCHeader
+void popListWord(ContextObj* aCtx);
+\stopCHeader
+
+\startCCode
+void popListWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "popListWord%s\n", "");
+  popCtxDataInto(aCtx, aList);
+  popListInto(aCtx, aList, top);
+  pushCtxData(aCtx, aList);
+  pushCtxData(aCtx, top);
+}
+\stopCCode
+
+\startCHeader
+void wrapWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void wrapWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "wrapWord%s\n", "");
+  popCtxDataInto(aCtx, top);
+  top = asJObj(newPair(top, NULL));
+  pushCtxData(aCtx, top);
+}
+\stopCCode
+
+\startCHeader
+void prependWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void prependWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "prependWord%s\n", "");
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  JObj* result = asJObj(concatLists(top, second));
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\startCHeader
+void appendWord(ContextObj* aCtx);
+\stopCHeader
+
+\startCCode
+void appendWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "apendWord%s\n", "");
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  JObj* result = asJObj(concatLists(second, top));
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\startCHeader
+void extractWord(ContextObj* aCtx);
+\stopCHeader
+
+\startCCode
+void extractWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "extractWord%s\n", "");
+  popCtxDataInto(aCtx, top);
+  prependListCtxData(aCtx, top);
+}
+\stopCCode
+
+\startCHeader
+void interpretWord(ContextObj* aCtx);
+\stopCHeader
+
+\startCCode
+void interpretWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "interpretWord%s\n", "");
+  popCtxDataInto(aCtx, top);
+  prependListCtxProcess(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+void ifteWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "ifteWord%s\n", "");
+  popCtxDataInto(aCtx, topElse);
+  popCtxDataInto(aCtx, topThen);
+  popCtxDataInto(aCtx, topIf);
+  pushCtxProcess(aCtx, topElse); // save for later
+  pushCtxProcess(aCtx, topThen); // save for later
+  pushSymbolCtxProcess(aCtx, "ifteCont");
+  prependListCtxProcess(aCtx, topIf); // execute the if condition
+}
+\stopCCode
+
+\startCCode
+static void ifteContWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "ifteContWord%s\n", "");
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, topIf);
+  popCtxProcessInto(aCtx, topThen);
+  popCtxProcessInto(aCtx, topElse);
+  if (isTrueObj(topIf)) {
+    prependListCtxProcess(aCtx, topThen);
+  } else {
+    prependListCtxProcess(aCtx, topElse);
+  }
+}
+\stopCCode
+
+\startCCode
+static void forWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "forWord%s\n", "");
+  assert(isContextObj(aCtx));
+
+  popCtxProcessInto(aCtx, nextCommand);
+  if (symbolIs(nextCommand, "forDone")) {
+    // this for loop is done
+    DEBUG(TraceDebug, "forWord DONE%s\n", "");
+  } else {
+    DEBUG(TraceDebug, "forWord continue%s\n", "");
+    pushSymbolCtxProcess(aCtx, "for");
+    prependListCtxProcess(aCtx, nextCommand);
+  }
+}
+\stopCCode
+
+\startCCode
+static void forDoneWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "forDoneWord%s\n", "");
+  // ignore
+}
+\stopCCode
+
+\startCCode
+static void lispInterpretWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "lispInterpretWord%s\n", "");
+  popCtxDataInto(aCtx, top);
+  if (!isPairObj(top)) {
+    raiseExceptionMsg(aCtx,
+      "listInterpret expected a pair as top");
+    return;
+  }
+  JObj* operationName = asCar(top);
+  JObj* operationBody = asCdr(top);
+  pushCtxProcess(aCtx, operationName);
+  pushCtxProcess(aCtx, operationBody);
+}
+\stopCCode
+
+\startCCode
+static void lispForWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "lispForWord%s\n", "");
+  assert(isContextObj(aCtx));
+
+  popCtxProcessInto(aCtx, nextCommand);
+  if (symbolIs(nextCommand, "forDone")) {
+    // this lisp for loop is done
+    DEBUG(TraceDebug, "lispForAP DONE%s\n", "");
+  } else {
+    DEBUG(TraceDebug, "lispForAP continue%s\n", "");
+    if (!isPairObj(nextCommand)) {
+      raiseExceptionMsg(aCtx,
+        "listFor (continue) expected a pair as nextCommand");
+      return;
+    }
+    JObj* operationName = asCar(nextCommand);
+    JObj* operationBody = asCdr(nextCommand);
+    pushSymbolCtxProcess(aCtx, "lispFor");
+    pushCtxProcess(aCtx, operationName);
+    pushCtxProcess(aCtx, operationBody);
+  }
+}
+\stopCCode
+
+\startCCode
+static void doneWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "doneWord%s\n", "");
+  assert(isContextObj(aCtx));
+  aCtx->process = NULL;
+}
+\stopCCode
+
+\startCCode
+static void clearContextWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "clearContextWord%s\n", "");
+  assert(isContextObj(aCtx));
+  aCtx->data    = NULL;
+  aCtx->process = NULL;
+}
+\stopCCode
+
+\subsection[title=Exception handling]
+
+\startCCode
+static void tryWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "tryWord%s\n", "");
+  popCtxDataInto(aCtx, handlerExp);
+  popCtxDataInto(aCtx, tryExp);
+  pushCtxProcess(aCtx, handlerExp);
+  pushSymbolCtxProcess(aCtx, "tryHandler");
+  prependListCtxProcess(aCtx, tryExp);
+}
+\stopCCode
+
+\startCCode
+static void raiseWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "raiseWord%s\n", "");
+  assert(isContextObj(aCtx));
+  aCtx->exceptionRaised = true;
+  popCtxDataInto(aCtx, raiseExp);
+  pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
+  prependListCtxProcess(aCtx, raiseExp);
+}
+\stopCCode
+
+\startCCode
+static void raiseIfFalseWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "raiseIfFalseWord%s\n", "");
+  assert(isContextObj(aCtx));
+
+  popCtxDataInto(aCtx, condition);
+  popCtxProcessInto(aCtx, raiseExp);
+  if (isFalseObj(condition)) {
+    pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
+    prependListCtxProcess(aCtx, raiseExp);
+  }
+}
+\stopCCode
+
+\startCCode
+ContextObj *findFirstTryHandlerWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "findFirstTryHandlerWord%s\n", "");
+  assert(isContextObj(aCtx));
+
+  if (aCtx->process) {
+    popCtxProcessInto(aCtx, aCommand);
+    if (symbolIs(aCommand, "tryHandler")) {
+      aCtx->exceptionRaised = false;
+      popCtxProcessInto(aCtx, handlerExp);
+      prependListCtxProcess(aCtx, handlerExp);
+      return aCtx;
+    }
+    pushSymbolCtxProcess(aCtx, "findFirstTryHandler");
+    return aCtx;
+  }
+
+  ContextObj* parentCtx = aCtx->parent;
+  if (!parentCtx) {
+    aCtx->exceptionRaised = true;
+    return aCtx;
+  }
+
+  assert(isContextObj(parentCtx));
+  
+  popCtxDataInto(   aCtx,      oldContextTop );
+  pushCtxData(      parentCtx, oldContextTop );
+  
+  wrapWord(parentCtx);
+  
+  pushSymbolCtxProcess( parentCtx, "raise"       );
+
+  if (aCtx->tracingOn) {
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(aStrBuf,
+      "findFirstTryHandler(switchCtx)\n oldCtx: %s\n newCtx: %s\n",
+      aCtx->name, parentCtx->name
+    );
+    strBufPrintf(aStrBuf, "top = ");
+    printJObj(aStrBuf, oldContextTop, "", 20);
+    strBufPrintf(aStrBuf, "\n");
+    printf("%s", getCString(aStrBuf));
+    strBufClose(aStrBuf);
+    free(aStrBuf);
+  }
+
+  return parentCtx;
+}
+\stopCCode
+
+\startCCode
+static void tryHandlerWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "tryHandlerWord%s\n", "");
+  popCtxProcessInto(aCtx, handlerExp);
+}
+\stopCCode
+
+\startCHeader
+extern void raiseExceptionImpl(
+  ContextObj *aCtx,
+  Symbol     *message
+);
+
+#define raiseException(aCtx, message) \
+  raiseExceptionImpl(aCtx, message)
+
+#define raiseExceptionMsg(aCtx, message)  \
+  pushNullCtxData(aCtx);                  \
+  raiseExceptionImpl(aCtx, message)
+\stopCHeader
+
+\startCCode
+void raiseExceptionImpl(
+  ContextObj *aCtx,
+  Symbol     *message
+) {
+  DEBUG(ParserDebug, "raiseExceptionImp%s\n", "");
+  assert(isContextObj(aCtx));
+
+  if (!message) message = "unknown";
+
+  Symbol *file = "unknown(command)";
+  size_t  line = 0;
+  if (isSymbolObj(aCtx->command)) {
+    file = asFile(aCtx->command);
+    line = asLine(aCtx->command);
+  }
+
+  DEBUG(TraceDebug, "raiseException %p [%s] (%s) <%s> %zu\n",
+    aCtx, aCtx->name, message, file, line
+  );
+
+  wrapWord(aCtx);
+  pushSymbolCtxData(aCtx, file);
+  prependWord(aCtx);
+  pushUIntegerCtxData(aCtx, line);
+  prependWord(aCtx);
+  pushSymbolCtxData(aCtx, message);
+  prependWord(aCtx);
+  pushCtxData(aCtx, asJObj(aCtx));
+  prependWord(aCtx);
+  wrapWord(aCtx);
+  pushSymbolCtxProcess(aCtx, "raise");
+  
+  if (aCtx->tracingOn) {
+    DEBUG(TraceDebug, "raiseException -> tracing%s\n", "");
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(aStrBuf, "d>>");
+    printJObj(aStrBuf, aCtx->data, "", 20);
+    strBufPrintf(aStrBuf, "\n");
+    strBufPrintf(aStrBuf, "p>>");
+    printJObj(aStrBuf, aCtx->process, "", 20);
+    strBufPrintf(aStrBuf, "\n");
+    printf("%s", getCString(aStrBuf));
+    strBufClose(aStrBuf);
+    free(aStrBuf);
+    DEBUG(TraceDebug, "raiseException <- tracing%s\n", "");
+  }
+}
+\stopCCode
+
+\startCHeader
+extern void reportException(ContextObj* aCtx);
+\stopCHeader
+
+\startCCode
+void reportException(
+  ContextObj* aCtx
+) {
+  DEBUG(ParserDebug, "reportExceptionWord%s\n", "");
+  assert(isContextObj(aCtx));
+
+  DEBUG(TraceDebug, "reportException %p [%s] %zu\n",
+    aCtx, aCtx->name, aCtx->exceptionRaised
+  );
+  if (!aCtx->exceptionRaised) return;
+
+  extractWord(aCtx);
+
+  popCtxDataInto(aCtx, expCtxObj);
+  ContextObj *expCtx = aCtx;
+  if (isContextObj(expCtxObj)) {
+    expCtx = asContextObj(expCtxObj);
+  }
+  
+  popCtxDataInto(aCtx, expMsg);
+  popCtxDataInto(aCtx, expLine);
+  popCtxDataInto(aCtx, expFile);
+  popCtxDataInto(aCtx, expStack);
+  StringBufferObj *aStrBuf = newStringBuffer();
+  strBufPrintf(aStrBuf, "\nUNHANDLED EXCEPTION:\n");
+  printJObj(aStrBuf, expMsg, "", 20);
+  strBufPrintf(aStrBuf, "\n\n     in file: ");
+  if (isSymbolObj(expFile)) {
+    strBufPrintf(aStrBuf, "%s", asSymbol(expFile));
+  } else {
+    printJObj(aStrBuf, expFile, NULL, 20);
+  }
+  strBufPrintf(aStrBuf,   "\n     on line: ");
+  printJObj(aStrBuf, expLine, NULL, 20);
+  strBufPrintf(aStrBuf, "\n\n   wordStack: ");
+  printJObj(aStrBuf, expStack, "", 20);
+  strBufPrintf(aStrBuf,   "\n     context: %s", expCtx->name);
+  strBufPrintf(aStrBuf,   "\n   dataStack: ");
+  printJObj(aStrBuf, aCtx->data, "", 20);
+  strBufPrintf(aStrBuf,   "\nprocessStack: ");
+  printJObj(aStrBuf, aCtx->process, "", 20);
+  strBufPrintf(aStrBuf, "\n");
+  printf("%s", getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  free(aStrBuf);
+  aCtx->exceptionRaised = false;
+}
+\stopCCode
+
+\subsection[title=Support]
+\startCCode
+static void defineWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "defineWord%s\n", "");
+  assert(isContextObj(aCtx));  
+  popCtxDataInto(aCtx, name);
+  popCtxDataInto(aCtx, definition);
+
+  if (!isSymbolObj(name)) {
+//    pushNullCtxData(aCtx);
+//    pushOnTopCtxData(aCtx, name);
+//    pushOnTopCtxData(aCtx, definition);
+    raiseExceptionMsg(aCtx,
+      "define requires a symbol as wordDefinition top"
+    );
+    return;
+  }
+  insertSymbol(asCtxSymbols(aCtx), asSymbol(name), definition);
+}
+\stopCCode
+
+\starttyping
+\startCCode
+static void defineContextWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "defineContextWord%s\n", "");
+  assert(isContextObj(aCtx));
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataIntoImpl(aCtx, contextName);
+  popCtxDataIntoImpl(aCtx, contextNamedIn);
+  popCtxDataIntoImpl(aCtx, contextNamingScope);
+  popCtxDataIntoImpl(aCtx, contextData);
+  popCtxDataIntoImpl(aCtx, contextProcess);
+  if (!isSymbol(contextName)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, contextProcess);
+    pushOnTopCtxDataImpl(aCtx, contextData);
+    pushOnTopCtxDataImpl(aCtx, contextNamingScope);
+    pushOnTopCtxDataImpl(aCtx, contextNamedIn);
+    pushOnTopCtxDataImpl(aCtx, contextName);
+    raiseException(aCtx,
+      "defineContext required a symbol as top");
+    return;
+  }
+  if (!isDictionary(contextNamedIn)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, contextProcess);
+    pushOnTopCtxDataImpl(aCtx, contextData);
+    pushOnTopCtxDataImpl(aCtx, contextNamingScope);
+    pushOnTopCtxDataImpl(aCtx, contextNamedIn);
+    pushOnTopCtxDataImpl(aCtx, contextName);
+    raiseException(aCtx,
+      "defineContext required a dictionary as second");
+    return;
+  }
+  if (!isDictionary(contextNamingScope)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, contextProcess);
+    pushOnTopCtxDataImpl(aCtx, contextData);
+    pushOnTopCtxDataImpl(aCtx, contextNamingScope);
+    pushOnTopCtxDataImpl(aCtx, contextNamedIn);
+    pushOnTopCtxDataImpl(aCtx, contextName);
+    raiseException(aCtx,
+      "defineContext required a dictionary as third");
+    return;
+  }
+  ContextObj* newCtx = newContext(
+    jInterp,
+    asSymbol(contextName),
+    aCtx,
+    (DictObj*)contextNamingScope,
+    contextData,
+    contextProcess
+  );
+  assert(newCtx);
+  defineContextIn(
+    jInterp,
+    (DictObj*)contextNamedIn,
+    asSymbol(contextName),
+    newCtx
+  );
+}
+\stopCCode
+
+\startCCode
+static void newContextWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "newContextWord%s\n", "");
+  assert(isContextObj(aCtx));
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+
+  popCtxDataIntoImpl(aCtx, contextName);
+  popCtxDataIntoImpl(aCtx, contextNamingScope);
+  popCtxDataIntoImpl(aCtx, contextData);
+  popCtxDataIntoImpl(aCtx, contextProcess);
+  if (!isSymbol(contextName)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, contextProcess);
+    pushOnTopCtxDataImpl(aCtx, contextData);
+    pushOnTopCtxDataImpl(aCtx, contextNamingScope);
+    pushOnTopCtxDataImpl(aCtx, contextName);
+    raiseException(aCtx,
+      "newContext requires a symbol as top");
+    return;
+  }
+  if (!isDictionary(contextNamingScope)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, contextProcess);
+    pushOnTopCtxDataImpl(aCtx, contextData);
+    pushOnTopCtxDataImpl(aCtx, contextNamingScope);
+    pushOnTopCtxDataImpl(aCtx, contextName);
+    raiseException(aCtx,
+      "newContext requires a dictionary as second");
+    return;
+  }
+  ContextObj* newCtx = newContext(
+    jInterp,
+    asSymbol(contextName),
+    aCtx,
+    (DictObj*)contextNamingScope,
+    contextData,
+    contextProcess
+  );
+  assert(newCtx);
+  pushCtxDataImpl(aCtx, (JObj*)newCtx);
+}
+\stopCCode
+
+\startCCode
+static void thisContextWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "thisContextWord%s\n", "");
+  assert(isContextObj(aCtx));
+  DEBUG(aCtx->jInterp, "thisContextAP > %p\n", aCtx);
+  pushCtxDataImpl(aCtx, (JObj*)aCtx);
+  DEBUG(aCtx->jInterp, "thisContextAP < %p\n", aCtx);
+}
+\stopCCode
+
+\startCCode
+static ContextObj* switchCtxWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "switchCtxWord%s\n", "");
+  assert(isContextObj(aCtx));
+
+  popCtxDataIntoImpl(aCtx, newContext);
+  popCtxDataIntoImpl(aCtx, oldContextTop);
+  if (!isContext(newContext)) {
+    raiseExceptionMsg(aCtx,
+      "switchCtx required a context as top");
+    return aCtx;
+  }
+  
+  //
+  // switch to newContext
+  //
+  DEBUG(aCtx->jInterp, "switchCtxAP -> switching origCtx: %s\n",
+    aCtx->name);
+  ContextObj* newCtx = (ContextObj*)newContext;
+  assert(newCtx);
+
+  pushCtxDataImpl(newCtx, oldContextTop);
+  newCtx->tracingOn = aCtx->tracingOn;
+  DEBUG(aCtx->jInterp, "switchCtxAP <- switching newCtx: %s\n",
+            newCtx->name);
+  //
+  return newCtx;
+}
+\stopCCode
+
+\startCCode
+static void defineNamingWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "defineNamingWord%s\n", "");
+  assert(isContextObj(aCtx));
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataIntoImpl(aCtx, dictName);
+  popCtxDataIntoImpl(aCtx, dictNamedIn);
+  popCtxDataIntoImpl(aCtx, dictNamingScope);
+  if (!isSymbol(dictName)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, dictNamingScope);
+    pushOnTopCtxDataImpl(aCtx, dictNamedIn);
+    pushOnTopCtxDataImpl(aCtx, dictName);
+    raiseException(aCtx,
+      "defineNaming required a symbol as top");
+    return;
+  }
+  if (!isDictionary(dictNamedIn)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, dictNamingScope);
+    pushOnTopCtxDataImpl(aCtx, dictNamedIn);
+    pushOnTopCtxDataImpl(aCtx, dictName);
+    raiseException(aCtx,
+      "defineNaming requires a dictionary as second");
+    return;
+  }
+  if (!isDictionary(dictNamingScope)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, dictNamingScope);
+    pushOnTopCtxDataImpl(aCtx, dictNamedIn);
+    pushOnTopCtxDataImpl(aCtx, dictName);
+    raiseException(aCtx,
+      "defineNaming requires a dictionary as third");
+    return;
+  }
+  DictObj* newDict =
+    newDictionary(
+      jInterp,
+      asSymbol(dictName),
+      (DictObj*)dictNamingScope
+    );
+  assert(newDict);
+  defineNamingIn(
+    jInterp,
+    (DictObj*)dictNamedIn,
+    asSymbol(dictName),
+    newDict
+  );
+}
+\stopCCode
+
+\startCCode
+static void newNamingWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "newNamingWord%s\n", "");
+  assert(isContextObj(aCtx));
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+
+  popCtxDataIntoImpl(aCtx, dictName);
+  popCtxDataIntoImpl(aCtx, dictNamingScope);
+  if (!isSymbol(dictName)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, dictNamingScope);
+    pushOnTopCtxDataImpl(aCtx, dictName);
+    raiseException(aCtx,
+      "defineNaming requires a symbol as top");
+    return;
+  }
+  if (!isDictionary(dictNamingScope)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, dictNamingScope);
+    pushOnTopCtxDataImpl(aCtx, dictName);
+    raiseException(aCtx,
+      "defineNaming requires a dictionary as second");
+    return;
+  }
+
+  DictObj* newDict =
+    newDictionary(
+      jInterp,
+      asSymbol(dictName),
+      (DictObj*)dictNamingScope
+    );
+  assert(newDict);
+  pushCtxDataImpl(aCtx, (JObj*)newDict);
+}
+\stopCCode
+
+\startCCode
+static void localizeNamingWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "localizeNamingWord%s\n", "");
+  assert(isContextObj(aCtx));
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataIntoImpl(aCtx, localNaming);
+  if (!isSymbol(localNaming)){
+    raiseExceptionMsg(aCtx,
+      "localizeNaming requires a symbol as top");
+    return;
+  }
+  
+  DictObj* newDict = 
+    newDictionary(
+      jInterp,
+      asSymbol(localNaming),
+      aCtx->dict
+    );
+  assert(newDict);
+  aCtx->dict = newDict;
+}
+\stopCCode
+
+\startCCode
+static void thisNamingWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "thisNmingWord%s\n", "");
+  assert(isContextObj(aCtx));
+  pushCtxDataImpl(aCtx, (JObj*)(aCtx->dict));
+}
+\stopCCode
+\stoptyping
+
+\startCCode
+static void undefineWord(ContextObj* aCtx) {
+  DEBUG(ParserDebug, "undefineWord%s\n", "");
+  assert(isContextObj(aCtx));
+  
+  popCtxDataInto(aCtx, nameList);
+
+  if (!isPairObj(nameList)) {
+    raiseExceptionMsg(aCtx,
+      "undefine requires a list quoted symbol as second");
+    return;
+  }
+  
+  popListInto(aCtx, nameList, name);
+  
+  if (!isSymbolObj(name)) {
+//    pushNullCtxDataImpl(aCtx);
+//    pushOnTopCtxDataImpl(aCtx, namingScope);
+//    pushOnTopCtxDataImpl(aCtx, name);
+    raiseExceptionMsg(aCtx,
+      "undefine requires a list quoted symbol as second");
+    return;
+  }
+  deleteSymbol(asCtxSymbols(aCtx), asSymbol(name));
+  }
+\stopCCode
+
+
+\startCHeader
+void breakPointWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void breakPointWord(ContextObj *aCtx) {
+  DEBUG(ParserDebug, "breakPointWordWord%s\n", "");
+  assert(isContextObj(aCtx));
+  asCtxBreakPoint(aCtx) = true;
+  if (aCtx->tracingOn) printf("breakPoint: breaking\n");
+}
+\stopCCode
+
+\startCHeader
+void breakPointOn(ContextObj *aCtx, Symbol *aSymbol);
+\stopCHeader
+
+\startCCode
+void breakPointOn(ContextObj *aCtx, Symbol *aSymbol) {
+  DEBUG(ParserDebug, "breakPointOnWord: [%s]\n", aSymbol);
+  assert(isContextObj(aCtx));
+  if (!aSymbol) return;
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
+  
+  deleteSymbol(symTab, aSymbol);
+  registerCFunction(symTab, aSymbol, breakPointWord);
+}
+\stopCCode
+
+\startTestSuite[registerControlWords]
+
+\startCHeader
+void registerControlWords(ContextObj *aCtx);
+\stopCHeader
+
+\startCCode
+void registerControlWords(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  assert(isSymbolTableObj(symTab));
+ 
+  registerCFunction(symTab, "pushList",       pushListWord);
+  registerCFunction(symTab, "popList",        popListWord);
+  registerCFunction(symTab, "wrap",           wrapWord);
+  registerCFunction(symTab, "prepend",        prependWord);
+  registerCFunction(symTab, "append",         appendWord);
+  registerCFunction(symTab, "extract",        extractWord);
+  registerCFunction(symTab, "i",              interpretWord);
+  registerCFunction(symTab, "interpret",      interpretWord);
+  registerCFunction(symTab, "ifte",           ifteWord);
+  registerCFunction(symTab, "ifteCont",       ifteContWord);
+  registerCFunction(symTab, "for",            forWord);
+  registerCFunction(symTab, "forDone",        forDoneWord);
+  registerCFunction(symTab, "lispInterpret",  lispInterpretWord);
+  registerCFunction(symTab, "lispFor",        lispForWord);
+  registerCFunction(symTab, "define",         defineWord);
+//  registerCFunction(symTab, "defineContext",  defineContextWord);
+//  registerCFunction(symTab, "newContext",     newContextWord);
+//  registerCFunction(symTab, "thisContext",    thisContextWord);
+//  registerCFunction(symTab, "defineNaming",   defineNamingWord);
+//  registerCFunction(symTab, "newNaming",      newNamingWord);
+//  registerCFunction(symTab, "localizeNaming", localizeNamingWord);
+//  registerCFunction(symTab, "thisNaming",     thisNamingWord);
+  registerCFunction(symTab, "undefine",       undefineWord);
+  registerCFunction(symTab, "done",           doneWord);
+  registerCFunction(symTab, "clear",          clearContextWord);
+  registerCFunction(symTab, "try",            tryWord);
+  registerCFunction(symTab, "raise",          raiseWord);
+  registerCFunction(symTab, "raiseIfFalse",   raiseIfFalseWord);
+  registerCFunction(symTab, "tryHandler",     tryHandlerWord);
+  registerCFunction(symTab, "breakPoint",     breakPointWord);
+  
+  registerCtxCFunction(symTab, "findFirstTryHandler", findFirstTryHandlerWord);
+//  extendCtxJoyLoLInRoot(jInterp, "switchCtx",           "", switchCtxWord,           "");
+}
+\stopCCode
+
+\startTestCase[should register control words]
+
+\startCHeader
+void ifteWord(ContextObj *aCtx);
+ContextObj *findFirstTryHandlerWord(ContextObj *aCtx);
+\stopCHeader
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testRegisterControlWords");
+  AssertIntTrue(isContextObj(aCtx));
+  
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  AssertIntTrue(isSymbolTableObj(symTab));
+  AssertPtrNull(findSymbol(symTab, "ifte"));
+  
+  registerControlWords(aCtx);
+  JObj *shouldBeIFTE = findSymbol(symTab, "ifte");
+  AssertIntTrue(isCFunctionObj(shouldBeIFTE));
+  AssertPtrEquals(asCFunction(shouldBeIFTE), ifteWord);
+  
+  JObj *shouldBeTryHandler = findSymbol(symTab, "findFirstTryHandler");
+  AssertIntTrue(isCtxCFunctionObj(shouldBeTryHandler));
+  AssertPtrEquals(asCtxCFunction(shouldBeTryHandler), findFirstTryHandlerWord);
+\stopCTest
+\stopTestCase
+\stopTestSuite

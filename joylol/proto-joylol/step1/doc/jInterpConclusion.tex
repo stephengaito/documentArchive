@@ -1,0 +1,45 @@
+.% A ConTeXt document [master document: jInterp.tex ]
+
+
+\section[title=Conclusion]
+
+
+
+\prependCCode{default}
+\startCCode
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jInterp.h"
+#include "joylol/jInterp-private.h"
+\stopCCode
+
+\prependCCode{default}
+\placeCCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createCCodeFile%
+  {default}%
+  {jInterpLib.c}%
+  {}
+
+\addCCodeProgram{jInterp})
+  
+\addCCodeTargets{default}
+
+\addCTestInclude{<stdio.h>}
+\addCTestInclude{<stdarg.h>}
+\addCTestInclude{<stdlib.h>}
+\addCTestInclude{<string.h>}
+\addCTestInclude{<assert.h>}
+\addCTestInclude{<joylol/jInterp.h>}
+
+\addCTestCopyright{PerceptiSys Ltd (Stephen Gaito)}
+
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+

@@ -1,0 +1,364 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Pairs]
+
+\startCHeader
+typedef struct pair_struct {
+  size_t tag;
+  JObj  *car;
+  JObj  *cdr;
+} PairObj;
+
+#define asPairObj(anObj) ((PairObj*)(anObj))
+#define isPairObj(anObj) ((anObj) && (((anObj)->tag) == PairTag))
+#define isAtomObj(anObj) ((anObj) && (((anObj)->tag) != PairTag))
+#define asCar(anObj)     (((PairObj*)(anObj))->car)
+#define asCdr(anObj)     (((PairObj*)(anObj))->cdr)
+\stopCHeader
+
+\startTestSuite[newPair]
+
+\startCHeader
+PairObj *newPair(JObj *car, JObj *cdr);
+\stopCHeader
+
+\startCCode
+PairObj *newPair(JObj *car, JObj *cdr) {
+  PairObj *newObj =
+    (PairObj*)calloc(1, sizeof(PairObj));
+  newObj->tag = PairTag;
+  newObj->car = car;
+  newObj->cdr = cdr;
+  return newObj;
+}
+\stopCCode
+
+\startTestCase[should create a new pair]
+
+\startCTest
+  JObj *lolA = asJObj(newPair(NULL, NULL));
+  JObj *lolB = asJObj(newPair(NULL, NULL));
+  JObj *lol  = asJObj(newPair(lolA, lolB));
+  AssertIntTrue(isPairObj(lol));
+  AssertIntEquals(getJObjTag(lol), PairTag);
+  AssertPtrEquals(asCar(lol), lolA);
+  AssertPtrEquals(asCdr(lol), lolB);  
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+
+\startTestSuite[car and cdr]
+\startTestCase[should return the car and cdr]
+
+\startCTest
+  JObj *pairA = asJObj(newPair(NULL, NULL));
+  JObj *pairB = asJObj(newPair(NULL, NULL));
+  JObj *aPair = asJObj(newPair(pairA, pairB));
+  AssertPtrEquals(asCar(aPair), pairA);
+  AssertPtrEquals(asCdr(aPair), pairB);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startCHeader
+#define popListInto(aCtx, aList, aJObjVar)                \
+  JObj* aJObjVar = NULL;                                  \
+  if (isPairObj(aList)) {                                 \
+    aJObjVar = asCar(aList);                              \
+    aList    = asCdr(aList);                              \
+  }                                                       \
+  if (aCtx->tracingOn) {                                  \
+    StringBufferObj *aStrBuf = newStringBuffer();         \
+    strBufPrintf(aStrBuf, "%s.%s = ", #aList, #aJObjVar); \
+    printJObj(aStrBuf, aJObjVar, "", 20);                 \
+    strBufPrintf(aStrBuf, "\n");                          \
+    printf("%s", getCString(aStrBuf));                    \
+    strBufClose(aStrBuf);                                 \
+    free(aStrBuf);                                        \
+  }
+\stopCHeader
+
+\startTestSuite[listLength and getNthElement]
+
+\startCHeader
+UInteger listLength(JObj *aList);
+JObj    *getNthElement(JObj *aList, UInteger n);
+
+#define getNthElementInto(aCtx, nElem, aVar)    \
+assert(isContextObj(aCtx));                     \
+JObj *aVar = getNthElement(aCtx, nElem);        \
+if (aCtx->tracingOn) {                          \
+  StringBufferObj *aStrBuf = newStringBuffer(); \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);        \
+  printJObj(aStrBuf, asJObj(aVar), "", 20);     \
+  strBufPrintf(aStrBuf, "\n");                  \
+  printf("%s", getCString(aStrBuf));            \
+  strBufClose(aStrBuf);                         \
+  free(aStrBuf);                                \
+}
+
+\stopCHeader
+
+\startCCode
+UInteger listLength(JObj *aList) {
+  if (!aList) return 0;
+  
+  if (!isPairObj(aList)) return 1;
+  
+  UInteger numEntries = 0;
+  while(isPairObj(aList)) {
+    aList = asCdr(aList);
+    numEntries++;
+  }
+  return numEntries;
+}
+
+JObj *getNthElement(JObj *aList, UInteger n) {
+  if (!aList) return NULL;
+  
+  if (!isPairObj(aList)) return NULL;
+  
+  UInteger numEntries = 0;
+  while(isPairObj(aList)) {
+    if (numEntries == n) return asCar(aList);
+    aList = asCdr(aList);
+    numEntries++;
+  }
+  return NULL;
+}
+\stopCCode
+
+\startTestCase[should return the length of a list as well as respective elements]
+
+\startCTest
+  AssertIntZero(listLength(NULL));
+  AssertIntEquals(listLength(asJObj(newUInteger(42))), 1);
+
+  JObj *aList =
+    asJObj(newPair(asJObj(newUInteger(0)), 
+      asJObj(newPair(asJObj(newUInteger(1)),
+        asJObj(newPair(asJObj(newUInteger(2)), NULL))
+      ))
+    ));
+  
+  AssertIntEquals(listLength(aList), 3);
+  AssertIntEquals(asUInteger(getNthElement(aList,0)), 0);
+  AssertIntEquals(asUInteger(getNthElement(aList,1)), 1);
+  AssertIntEquals(asUInteger(getNthElement(aList,2)), 2);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[concatLists]
+
+\startCHeader
+JObj* concatLists(JObj *firstList, JObj *secondList);
+\stopCHeader
+
+\startCCode
+JObj* concatLists(
+  JObj *firstList,
+  JObj *secondList
+) {
+  JObj *result = NULL;
+ 
+  if (isPairObj(firstList)) {
+    result = firstList;
+  } else {
+    result = asJObj(newPair(firstList, NULL));
+  }
+ 
+  if (!secondList) return result;
+  // ensure that the second list is a LIST
+  if (!isPairObj(secondList)) {
+    secondList = asJObj(newPair(secondList, NULL));
+  }
+
+  if (!asCar(result)) return secondList;
+ 
+  // find end of firstList/result
+  JObj* lolList = result;
+  while(isPairObj(asCdr(lolList))) {
+    lolList = asCdr(lolList);
+  }
+
+  // ensure that if firstList/result ends in a non-pair we make it a pair
+  if (asCdr(lolList) && !isPairObj(asCdr(lolList))) {
+    asCdr(lolList) = asJObj(newPair(asCdr(lolList), NULL));
+    assert(asCdr(lolList));
+    lolList = asCdr(lolList);
+  }
+
+  // place secondList at the end of firstList/result
+  assert(!asCdr(lolList));
+  asCdr(lolList) = secondList;
+ 
+  return result;
+}
+\stopCCode
+
+\startTestCase[should concatenate two LoLs]
+\startCTest
+  StringBufferObj *aStrBuf = newStringBuffer();
+  
+  JObj* result = concatLists(NULL, NULL);
+  AssertIntTrue(isPairObj(result));
+  printJObj(aStrBuf, result, NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "(  )  ");
+  strBufClose(aStrBuf);
+  
+  JObj *trueBool  = asJObj(newUInteger(1));
+  result = concatLists(trueBool, NULL);
+  AssertIntTrue(isPairObj(result));
+  AssertIntTrue(isUIntegerObj(asCar(result)));
+  AssertIntEquals(asUInteger(asCar(result)), 1);
+  AssertPtrNull(asCdr(result));
+  printJObj(aStrBuf, result, NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "( 1 )  ");
+  strBufClose(aStrBuf);
+  
+  JObj *falseBool = asJObj(newUInteger(0));
+  result = concatLists(trueBool, falseBool);
+  AssertIntTrue(isPairObj(result));
+  AssertIntTrue(isUIntegerObj(asCar(result)));
+  AssertIntEquals(asUInteger(asCar(result)), 1);
+  AssertIntTrue(isPairObj(asCdr(result)));
+  AssertIntTrue(isUIntegerObj(asCar(asCdr(result))));
+  AssertIntEquals(asUInteger(asCar(asCdr(result))), 0);
+  printJObj(aStrBuf, result, NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "( 1 ) ( 0 )  ");
+  strBufClose(aStrBuf);
+  
+  JObj* firstList = result;
+  result = concatLists(result, NULL);
+  AssertPtrEquals(firstList, result);
+  printJObj(aStrBuf, result, NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "( 1 ) ( 0 )  ");
+  strBufClose(aStrBuf);
+  
+  result = concatLists(firstList, trueBool);
+  AssertPtrNotNull(result);
+  AssertPtrEquals(firstList, result);
+  AssertPtrNotNull(asCar(result));
+  AssertIntTrue(isUIntegerObj(asCar(result)));
+  AssertIntEquals(asUInteger(asCar(result)), 1);
+  AssertPtrNotNull(asCdr(result));
+  AssertIntTrue(isPairObj(asCdr(result)));
+  AssertIntTrue(isUIntegerObj(asCar(asCdr(result))));
+  printJObj(aStrBuf, result, NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "( 1 ) ( 0 ) ( 1 )  ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[copyLoL]
+
+\startCHeader
+JObj* copyLoL(JObj* aLoL);
+\stopCHeader
+
+\startCCode
+JObj* copyLoL(JObj* aLoL) {
+  if (!aLoL) return NULL;
+  if (isAtomObj(aLoL)) return aLoL;
+
+  return asJObj(newPair(
+    copyLoL(asCar(aLoL)),
+    copyLoL(asCdr(aLoL))
+  ));
+}
+\stopCCode
+
+\startTestCase[should make a correct copy]
+
+\startCTest
+  JObj *bool   = asJObj(newUInteger(1));
+  JObj *pairA  = asJObj(newPair(bool, NULL));
+  JObj *pairB  = asJObj(newPair(pairA, bool));
+  JObj *aPair0 = asJObj(newPair(pairA, pairB));
+  JObj *aPair1 = copyLoL(aPair0);
+  AssertIntTrue(isUIntegerObj(bool));
+  AssertIntTrue(isPairObj(pairA));
+  AssertIntTrue(isPairObj(pairB));
+  AssertIntTrue(isPairObj(aPair0));
+  AssertIntTrue(isPairObj(aPair1));
+
+  AssertIntTrue(isPairObj(asCar(aPair1)));
+  AssertPtrNotEquals(asCar(aPair1), pairA);
+
+  AssertIntTrue(isUIntegerObj(asCar(asCar(aPair1))));
+  AssertPtrEquals(asCar(asCar(aPair1)), bool);
+  AssertIntEquals(asUInteger(asCar(asCar(aPair1))), 1);
+
+  AssertPtrNull(asCdr(asCar(aPair1)));
+
+  AssertIntTrue(isPairObj(asCdr(aPair1)));
+  AssertPtrNotEquals(asCdr(aPair1), pairB);
+
+  AssertIntTrue(isPairObj(asCar(asCdr(aPair1))));
+
+  AssertIntTrue(isUIntegerObj(asCdr(asCdr(aPair1))));
+  AssertPtrEquals(asCdr(asCdr(aPair1)), bool);
+  AssertIntEquals(asUInteger(asCdr(asCdr(aPair1))), 1);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[pairPrinter]
+
+\startCHeader
+void pairPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t          timeToLive
+);
+\stopCHeader
+
+\startCCode
+void pairPrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
+  assert(isStringBufferObj(aStrBuf));
+  assert(isPairObj(anObj));
+  DEBUG(PrintingDebug, "pairPrinter %p [%p, %p]\n",
+    anObj, asCar(anObj), asCdr(anObj) );
+  
+  if (indent) {
+    strBufPrintf(aStrBuf, "%s( \n", indent);
+    Symbol *newIndent = appendSymbols(indent, "  ");
+    printJObj(aStrBuf, asCar(anObj), newIndent, timeToLive - 1);
+    free((char*)newIndent);
+    strBufPrintf(aStrBuf, "%s)\n", indent);
+    printJObj(aStrBuf, asCdr(anObj), indent, timeToLive - 1);
+  } else {
+    strBufPrintf(aStrBuf, "%s", "( ");
+    printJObj(aStrBuf, asCar(anObj), indent, timeToLive - 1);
+    strBufPrintf(aStrBuf, "%s", ") ");
+    printJObj(aStrBuf, asCdr(anObj), indent, timeToLive - 1);
+  }
+  
+}
+\stopCCode
+
+\startTestCase[should print pairs]
+
+\startCTest
+  PairObj *pairA = newPair(NULL, NULL);
+  PairObj *pairB = newPair(NULL, NULL);
+  PairObj* aNewPair = newPair(asJObj(pairA), asJObj(pairB));
+  AssertIntTrue(isPairObj(aNewPair));
+  StringBufferObj *aStrBuf = newStringBuffer();
+  printJObj(aStrBuf, asJObj(aNewPair), NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "( (  )  ) (  )  ");
+  strBufClose(aStrBuf);
+  free(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+

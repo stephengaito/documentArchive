@@ -1,0 +1,274 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\subsection[title=Evaluation]
+
+\startCCode
+static void traceAction(
+  ContextObj *aCtx,
+  Symbol     *action,
+  JObj       *aLoL
+) {
+  assert(isContextObj(aCtx));
+  DEBUG(TraceDebug, "traceAction: %p [%s] %s:%p\n",
+    aCtx, action, getJObjName(aLoL), aLoL);
+
+  StringBufferObj *aStrBuf = newStringBuffer();
+  strBufPrintf(aStrBuf, "%s: ", action);
+  printJObj(aStrBuf, aLoL, "", 20);
+  strBufPrintf(aStrBuf, "\n");
+  printf("%s", getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  free(aStrBuf);
+}
+\stopCCode
+
+
+\startTestSuite[evalCommandInContext]
+
+\startCHeader
+void evalCommandInContext(
+  ContextObj *aCtx,
+  JObj       *command
+);
+\stopCHeader
+
+\startCCode
+void evalCommandInContext(
+  ContextObj *aCtx,
+  JObj       *command
+) {
+  assert(aCtx);
+  
+  DEBUG(TraceDebug, "evalCommandInContext > %p [%s] %p\n",
+    aCtx, aCtx->name, command);
+  //
+  // push this command onto the top of the process stack
+  //
+  if (command) pushCtxProcess(aCtx, command);
+  //
+  while(aCtx->process && !aCtx->breakPoint) {
+    //
+    // ensure we have the most recent dictionary
+    //
+    SymbolTableObj *symbolTable = aCtx->symbolTable;
+    assert(isSymbolTableObj(symbolTable));
+    
+    if (aCtx->tracingOn) {
+      printf(
+        "\n----------------------------------------------------\n"
+      );
+      printf(
+        "ctx: %s(%s)\n",
+        aCtx->name, symbolTable->name
+      );
+    }
+    //
+    // pop the next command off the process stack
+    //
+    command = popCtxProcess(aCtx);
+    aCtx->command = command;
+    //assert(command);
+    //
+    if (isCFunctionObj(command)) {
+      assert(asCFunction(command));
+      //
+      // this is a normal CFunction
+      // (this ONLY makes changes to the data and process stacks)
+      //
+      if (aCtx->tracingOn)
+        traceAction(aCtx, "calling(c)", command);
+      (asCFunction(command))(aCtx);
+      //
+    } else if (isCtxCFunctionObj(command)) {
+        assert(asCtxCFunction(command));
+        //
+        // this is a CTX CFunction
+        // (we allow it to change the current context
+        //  in addition to any changes of the data and process stacks
+        //  of either the old or new contexts)
+        //
+        if (aCtx->tracingOn) 
+          traceAction(aCtx, "calling(c-ctx)", command);
+        aCtx = (asCtxCFunction(command))(aCtx);
+        assert(aCtx);
+        //    
+//    } else if (isAssertion(command)) {
+//      //
+//      // this is an assertion ...
+//      //   ... so assert it 
+//      //
+//      if (aCtx->tracingOn) 
+//        traceAction(aCtx, "asserting", command);
+//      //
+//      if (!evalAssertionInContext(aCtx, (AssertionObj*)command)) {
+//        //
+//        // this assertion failed... 
+//        //   ... so report it
+//        //
+//        pushNullCtxData(aCtx);
+//        pushOnTopCtxData(aCtx, command);
+//        raiseException(aCtx,
+//          "assertion failed"
+//        );
+//      }
+    } else if (!isSymbolObj(command)) {
+      //
+      // if the command is not a Symbol ...
+      //  ...  push it onto the top of the data stack
+      //
+      if (aCtx->tracingOn)
+        traceAction(aCtx, "adding(nonSym)", command);
+      pushCtxData(aCtx, command);
+      //
+   } else {
+      //
+      // if the command is a symbol ...
+      //  ... look up the symbol's association in the dictionary
+      //
+      JObj* assoc = findSymbol(symbolTable, asSymbol(command));
+      //
+      if (!assoc) {
+        //
+        // if the association is empty.. push this symbol onto the top
+        // of the data stack (re-evaluating this symbol would lead to an
+        // infinite loop)
+        //
+        if (aCtx->tracingOn)
+          traceAction(aCtx, "adding(noValue)", command);
+        pushCtxData(aCtx, command);
+        //
+      } else if (isPairObj(assoc)) {
+        //
+        // if the association is a LoL.. push this LoL onto the top of the
+        // process stack
+        //
+        if (aCtx->tracingOn) {
+          traceAction(aCtx, "calling(joylol)", command);
+          traceAction(aCtx, "evaluating",      assoc);
+        }
+        prependListCtxProcess(aCtx, copyLoL(assoc));
+        //
+      } else if (isCFunctionObj(assoc)) {
+        //
+        // if the association is a function.. call the function
+        //
+        assert(asCFunction(assoc));
+        //
+        // this is a normal CFunction
+        //
+        if (aCtx->tracingOn)
+          traceAction(aCtx, "calling(c)", command);
+        (asCFunction(assoc))(aCtx);
+        //
+      } else if (isCtxCFunctionObj(assoc)) {
+        assert(asCtxCFunction(assoc));
+        //
+        // this is a CTX CFunction
+        //
+        if (aCtx->tracingOn) 
+          traceAction(aCtx, "calling(c-ctx)", command);
+        aCtx = (asCtxCFunction(assoc))(aCtx);
+        assert(aCtx);
+        //
+      } else {
+        //
+        // if the association is NOT a PairAtom or Function...
+        // ... push this new ATOM onto the top of the process stack
+        //
+        if (aCtx->tracingOn) {
+          traceAction(aCtx, "calling(joylol)", command);
+          traceAction(aCtx, "evaluating",      assoc);
+        }
+        pushCtxProcess(aCtx, assoc);
+        //
+      }
+    }
+    if (aCtx->tracingOn) {
+      DEBUG(TraceDebug, "evalCommandInContext -> tracing%s\n", "");
+      showCtxData(aCtx);
+      showCtxProcess(aCtx);
+      DEBUG(TraceDebug, "evalCommandInContext <- tracing%s\n", "");
+    }
+  } // aCtx->process is empty OR a breakPoint has been requested
+  if (aCtx->tracingOn && aCtx->process && aCtx->breakPoint) {
+    printf("evalCommandInContext stopped at breakPoint\n");
+  }
+  // aCtx->command = NULL;
+  DEBUG(TraceDebug, "evalCommandInContext < %p %p\n", aCtx, command);
+}
+\stopCCode
+
+\startTestCase[should eval some commands]
+
+\startCTest
+  ContextObj *aCtx = newContext(NULL, NULL, "testEvalCommandCtx");
+  AssertIntTrue(isContextObj(aCtx));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  AssertPtrNull(asCtxCommand(aCtx));
+  
+  evalCommandInContext(aCtx, asJObj(newUInteger(42)));
+  AssertPtrNotNull(asCtxData(aCtx));
+  JObj *data = asCtxData(aCtx);
+  AssertIntTrue(isPairObj(data));
+  AssertIntTrue(isUIntegerObj(asCar(data)));
+  AssertIntEquals(asUInteger(asCar(data)), 42);
+  AssertPtrNull(asCtxProcess(aCtx));
+  AssertPtrNotNull(asCtxCommand(aCtx));
+  AssertIntTrue(isUIntegerObj(asCtxCommand(aCtx)));
+  AssertIntEquals(asUInteger(asCtxCommand(aCtx)), 42);
+  
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  registerBasicWords(aCtx);
+  JObj *shouldBeTrue = findSymbol(symTab, "true");
+  AssertPtrNotNull(shouldBeTrue);
+  AssertIntTrue(isUIntegerObj(shouldBeTrue));
+  AssertIntEquals(asUInteger(shouldBeTrue), true);
+  evalCommandInContext(aCtx, asJObj(newSymbol("true", NULL, 0)));
+  AssertPtrNull(asCtxProcess(aCtx));
+  AssertPtrNotNull(asCtxCommand(aCtx));
+  AssertIntTrue(isUIntegerObj(asCtxCommand(aCtx)));
+  AssertIntEquals(asUInteger(asCtxCommand(aCtx)), 1);
+  
+  data = asCtxData(aCtx);
+  AssertIntTrue(isPairObj(data));
+  AssertIntTrue(isUIntegerObj(asCar(data)));
+  AssertIntEquals(asUInteger(asCar(data)), true);
+  AssertIntTrue(isPairObj(asCdr(data)));
+  AssertIntTrue(isUIntegerObj(asCar(asCdr(data))));
+  AssertIntEquals(asUInteger(asCar(asCdr(data))), 42);
+    
+  registerControlWords(aCtx);
+  AssertIntTrue(isCFunctionObj(findSymbol(symTab, "ifte")));
+  AssertIntTrue(isCFunctionObj(findSymbol(symTab, "ifteCont")));
+  AssertIntTrue(isCFunctionObj(findSymbol(symTab, "clear")));
+  
+  evalCommandInContext(aCtx, asJObj(newSymbol("clear", NULL, 0)));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  pushCtxData(aCtx, asJObj(newUInteger(true)));
+  pushCtxData(aCtx, asJObj(newUInteger(42)));
+  pushCtxData(aCtx, asJObj(newUInteger(43)));
+  evalCommandInContext(aCtx, asJObj(newSymbol("ifte", NULL, 0)));
+  data = asCtxData(aCtx);
+  AssertIntTrue(isPairObj(data));
+  AssertIntTrue(isUIntegerObj(asCar(data)));
+  AssertIntEquals(asUInteger(asCar(data)), 42);
+  
+  evalCommandInContext(aCtx, asJObj(newSymbol("clear", NULL, 0)));
+  AssertPtrNull(asCtxData(aCtx));
+  AssertPtrNull(asCtxProcess(aCtx));
+  
+  pushCtxData(aCtx, asJObj(newPair(asJObj(newUInteger(false)), NULL)));
+  pushCtxData(aCtx, asJObj(newUInteger(42)));
+  pushCtxData(aCtx, asJObj(newUInteger(43)));
+  evalCommandInContext(aCtx, asJObj(newSymbol("ifte", NULL, 0)));
+  data = asCtxData(aCtx);
+  AssertIntTrue(isPairObj(data));
+  AssertIntTrue(isUIntegerObj(asCar(data)));
+  AssertIntEquals(asUInteger(asCar(data)), 43);
+\stopCTest
+
+\stopTestCase
+\stopTestSuite

@@ -1,0 +1,28 @@
+% A ConTeXt document [master document: protoJoyLoL.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jCompiler
+
+\usebtxdataset[jCompilerBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jCompiler.tex}
+
+\chapter[title=Step 3: \joylol\ Compiler]
+
+\diSimpComponent jCompilerOverview
+
+\diSimpRecurseComponent{jcf}{doc}{jCompilerJCF}
+
+\diSimpRecurseComponent{jcoalg}{doc}{jCompilerJCoAlg}
+
+\diSimpRecurseComponent{jsexp}{doc}{jCompilerJSExp}
+
+\diSimpRecurseComponent{jrm}{doc}{jCompilerJRM}
+
+\diSimpComponent jCompilerConclusion
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

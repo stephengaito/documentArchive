@@ -1,0 +1,31 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jInterpJPeg
+\usebtxdataset[jInterpJPegBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jInterpJPeg.tex}
+
+\section[title=jPeg]
+
+\diSimpComponent jInterpJPegOverview
+
+\diSimpComponent jInterpJPegPrimitives
+
+\diSimpComponent jInterpJPegCapture
+
+\diSimpComponent jInterpJPegChoice
+
+\diSimpComponent jInterpJPegPattern
+
+\diSimpComponent jInterpJPegOperators
+
+\diSimpComponent jInterpJPegExamples
+
+\diSimpComponent jInterpJPegLispParser
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

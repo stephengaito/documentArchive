@@ -1,0 +1,628 @@
+% A ConTeXt document [master document: joyLoLMinus.tex ]
+
+\subsection[title=Symbol Table]
+
+\startCHeader
+typedef struct symbolEntry_struct {
+  Symbol *symbol;
+  JObj   *jObj;
+} SymbolEntry;
+
+typedef struct symbolTable_struct {
+  size_t       tag;
+  SymbolEntry *symbols;
+  size_t       numSymbols;
+  size_t       maxSymbols;
+  Symbol      *name;
+} SymbolTableObj;
+
+#define SymbolTable_GrowthSize 10
+
+#define isSymbolTableObj(anObj) \
+  ((anObj) && ((((JObj*)(anObj))->tag) == SymbolTableTag))
+#define asSymbolTableObj(anObj) ((SymbolTableObj*)(anObj))
+#define asSymbolTableName(anObj) (((SymbolTableObj*)(anObj))->name)
+\stopCHeader
+
+\startTestSuite[newSymbolTable]
+
+\startCHeader
+SymbolTableObj *newSymbolTable(Symbol *name);
+\stopCHeader
+
+\startCCode
+SymbolTableObj *newSymbolTable(Symbol *name) {
+  SymbolTableObj *newTable =
+    (SymbolTableObj*)calloc(1, sizeof(SymbolTableObj));
+  assert(newTable);
+  newTable->tag        = SymbolTableTag;
+  newTable->symbols    = NULL;
+  newTable->numSymbols = 0;
+  newTable->maxSymbols = 0;
+  newTable->name       = strdup(name);
+  return newTable;
+}
+\stopCCode
+
+\startTestCase[should create a new symbolTable]
+
+\startCTest
+  Symbol *aName = "TestSymTab";
+  SymbolTableObj *aSymTab = newSymbolTable(aName);
+  AssertIntTrue(isSymbolTableObj(aSymTab));
+  AssertPtrNull(aSymTab->symbols);
+  AssertIntZero(aSymTab->numSymbols);
+  AssertIntZero(aSymTab->maxSymbols);
+  AssertStrEquals(aSymTab->name, aName);
+  AssertPtrNotEquals(aSymTab->name, aName);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[findSymbolIndex]
+
+\startCHeader
+size_t findSymbolIndex(
+  SymbolTableObj *aTable,
+  Symbol         *aSymbol
+);
+\stopCHeader
+
+\startCCode
+size_t findSymbolIndex(SymbolTableObj *aTable,  Symbol *aSymbol) {
+  assert(aTable);
+  assert(aSymbol);
+  
+  size_t firstIndex = 0;
+  size_t lastIndex  = aTable->numSymbols;
+  
+  while(1) {
+    assert(0 <= firstIndex);
+    assert(firstIndex <= lastIndex);
+    assert(lastIndex  <= aTable->maxSymbols);
+    
+    if (firstIndex == lastIndex) {
+      return firstIndex;
+    } else if (firstIndex + 1 == lastIndex) {
+      int cmp = strcmp(aTable->symbols[firstIndex].symbol, aSymbol);
+      if (0 <= cmp) {
+        return firstIndex;
+      } else {
+        return lastIndex;
+      }
+    } else {
+      size_t probeIndex = (firstIndex + lastIndex) >> 1; // divide by two
+      assert(firstIndex <= probeIndex);
+      assert(probeIndex <= lastIndex);
+      int cmp = strcmp(aTable->symbols[probeIndex].symbol, aSymbol);
+      if (cmp == 0) {
+        return probeIndex;
+      } else if (cmp < 0) {
+        firstIndex = probeIndex;
+      } else {
+        lastIndex = probeIndex;
+      }
+    }
+  }  
+}
+\stopCCode
+
+\startTestCase[should not find index of all required symbols]
+
+\startCTest
+  SymbolTableObj *aSymTab = newSymbolTable("TestSymTab1");
+  AssertIntTrue(isSymbolTableObj(aSymTab));
+  
+  AssertIntEquals(findSymbolIndex(aSymTab, "TestSym"), 0);
+  UIntegerObj *int42 = newUInteger(42);
+  UIntegerObj *int43 = newUInteger(43);
+  UIntegerObj *int44 = newUInteger(44);
+  
+  insertSymbol(aSymTab, "first",  asJObj(int42));
+  insertSymbol(aSymTab, "second", asJObj(int43));
+  insertSymbol(aSymTab, "third",  asJObj(int44));
+  
+  AssertIntEquals(findSymbolIndex(aSymTab, "first"),  0);
+  AssertIntEquals(findSymbolIndex(aSymTab, "second"), 1);
+  AssertIntEquals(findSymbolIndex(aSymTab, "third"),  2);
+  
+  AssertIntEquals(findSymbolIndex(aSymTab, "aBeforeAllSymbols"),       0);
+  AssertIntEquals(findSymbolIndex(aSymTab, "gBetweenFirstAndSecond"),  1);
+  AssertIntEquals(findSymbolIndex(aSymTab, "szBetweenSecondAndThird"), 2);
+  AssertIntEquals(findSymbolIndex(aSymTab, "zAfterAllSymbols"),        3);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[findSymbol]
+
+\startCHeader
+JObj *findSymbol(
+  SymbolTableObj *aTable,
+  Symbol         *aSymbol
+);
+\stopCHeader
+
+\startCCode
+JObj *findSymbol(SymbolTableObj *aTable, Symbol *aSymbol) {  
+  assert(aTable);
+  assert(aSymbol);
+  
+  size_t symbolIndex = findSymbolIndex(aTable, aSymbol);
+  assert(0 <= symbolIndex);
+  assert(symbolIndex <= aTable->numSymbols);
+  assert(symbolIndex <= aTable->maxSymbols);
+    
+  if (symbolIndex == aTable->numSymbols) return NULL;
+  
+  int cmp = strcmp(aTable->symbols[symbolIndex].symbol, aSymbol);
+  
+  if (cmp != 0) return NULL;
+  
+  return aTable->symbols[symbolIndex].jObj;
+}
+\stopCCode
+
+\startTestCase[should find the correct (first) symbol table entry]
+
+\startCTest
+  SymbolTableObj *aSymTab = newSymbolTable("TestSymTab2");
+  AssertIntTrue(isSymbolTableObj(aSymTab));
+  
+  AssertIntEquals(findSymbolIndex(aSymTab, "TestSym"), 0);
+  UIntegerObj *int42 = newUInteger(42);
+  UIntegerObj *int43 = newUInteger(43);
+  UIntegerObj *int44 = newUInteger(44);
+  
+  insertSymbol(aSymTab, "first",  asJObj(int42));
+  insertSymbol(aSymTab, "second", asJObj(int43));
+  insertSymbol(aSymTab, "third",  asJObj(int44));
+  
+  AssertPtrEquals(findSymbol(aSymTab, "first"),  asJObj(int42));
+  AssertPtrEquals(findSymbol(aSymTab, "second"), asJObj(int43));
+  AssertPtrEquals(findSymbol(aSymTab, "third"),  asJObj(int44));
+  
+  AssertPtrNull(findSymbol(aSymTab, "aBeforeAllSymbols"));
+  AssertPtrNull(findSymbol(aSymTab, "gBetweenFirstAndSecond"));
+  AssertPtrNull(findSymbol(aSymTab, "szBetweenSecondAndThird"));
+  AssertPtrNull(findSymbol(aSymTab, "zAfterAllSymbols"));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[increaseMaxSymbols]
+
+\startCHeader
+void increaseMaxSymbols(SymbolTableObj *aTable);
+\stopCHeader
+
+\startCCode
+void increaseMaxSymbols(SymbolTableObj *aTable) {
+  assert(aTable);
+  SymbolEntry *oldSymbols = aTable->symbols;
+  size_t newMaxSymbols    = aTable->maxSymbols + SymbolTable_GrowthSize;
+  SymbolEntry *newSymbols =
+    (SymbolEntry*)calloc(newMaxSymbols, sizeof(SymbolEntry));
+  assert(newSymbols);
+  if (oldSymbols) {
+    memcpy(
+      newSymbols,
+      oldSymbols,
+      ((aTable->maxSymbols) * sizeof(SymbolEntry))
+    );
+    free(oldSymbols);
+    oldSymbols = NULL;
+  }
+  aTable->symbols    = newSymbols;
+  aTable->maxSymbols = newMaxSymbols;
+  assert(aTable->symbols);
+  assert(aTable->numSymbols <= aTable->maxSymbols);
+}
+\stopCCode
+
+\startTestCase[should increase the maximum number of symbols in the table]
+
+\startCTest
+  SymbolTableObj *aSymTab = newSymbolTable("TestSymTab3");
+  AssertIntTrue(isSymbolTableObj(aSymTab));
+  
+  AssertPtrNull(aSymTab->symbols);
+  AssertIntZero(aSymTab->numSymbols);
+  AssertIntZero(aSymTab->maxSymbols);
+  
+  increaseMaxSymbols(aSymTab);
+  AssertPtrNotNull(aSymTab->symbols);
+  AssertIntZero(aSymTab->numSymbols);
+  AssertIntEquals(aSymTab->maxSymbols, SymbolTable_GrowthSize);
+
+  UIntegerObj *int42 = newUInteger(42);
+  UIntegerObj *int43 = newUInteger(43);
+  UIntegerObj *int44 = newUInteger(44);
+  
+  insertSymbol(aSymTab, "first",  asJObj(int42));
+  insertSymbol(aSymTab, "second", asJObj(int43));
+  insertSymbol(aSymTab, "third",  asJObj(int44));
+  
+  AssertIntEquals(findSymbolIndex(aSymTab, "first"),  0);
+  AssertIntEquals(findSymbolIndex(aSymTab, "second"), 1);
+  AssertIntEquals(findSymbolIndex(aSymTab, "third"),  2);
+
+  AssertPtrEquals(findSymbol(aSymTab, "first"),  asJObj(int42));
+  AssertPtrEquals(findSymbol(aSymTab, "second"), asJObj(int43));
+  AssertPtrEquals(findSymbol(aSymTab, "third"),  asJObj(int44));
+
+  increaseMaxSymbols(aSymTab);
+  AssertPtrNotNull(aSymTab->symbols);
+  AssertIntEquals(aSymTab->numSymbols, 3);
+  AssertIntEquals(aSymTab->maxSymbols, 2*SymbolTable_GrowthSize);
+
+  AssertIntEquals(findSymbolIndex(aSymTab, "first"),  0);
+  AssertIntEquals(findSymbolIndex(aSymTab, "second"), 1);
+  AssertIntEquals(findSymbolIndex(aSymTab, "third"),  2);
+
+  AssertPtrEquals(findSymbol(aSymTab, "first"),  asJObj(int42));
+  AssertPtrEquals(findSymbol(aSymTab, "second"), asJObj(int43));
+  AssertPtrEquals(findSymbol(aSymTab, "third"),  asJObj(int44));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[insertSymbol]
+
+\startCHeader
+void insertSymbol(
+  SymbolTableObj *aTable,
+  Symbol         *aSymbol,
+  JObj *anObj
+);
+\stopCHeader
+
+\startCCode
+void insertSymbol(SymbolTableObj *aTable, Symbol *aSymbol, JObj *anObj) {
+  assert(aTable);
+  assert(aSymbol);
+  
+  size_t symbolIndex = findSymbolIndex(aTable, aSymbol);
+  assert(0 <= symbolIndex);
+  assert(symbolIndex <= aTable->numSymbols);
+  assert(symbolIndex <= aTable->maxSymbols);
+  
+  DEBUG(SymbolTableDebug,
+    "insertSymbol: index: %zd  num: %zd max: %zd\n",
+    symbolIndex,
+    aTable->numSymbols,
+    aTable->maxSymbols
+  );
+  DEBUG(SymbolTableDebug,
+    "insertSymbol: inserting: [%s]<%s>: %p\n",
+    aSymbol,
+    getJObjName(anObj),
+    anObj
+  );
+  if (symbolIndex < aTable->numSymbols) {
+    DEBUG(SymbolTableDebug,
+      "insertSymbol: found: [%s]\n",
+      aTable->symbols[symbolIndex].symbol
+    );
+  } else {
+    DEBUG(SymbolTableDebug, "%s", "insertSymbol: found: no symbols\n");
+  }
+  
+  if (symbolIndex == aTable->numSymbols) {
+    if (aTable->maxSymbols <= aTable->numSymbols) increaseMaxSymbols(aTable);
+    aTable->symbols[aTable->numSymbols].symbol = strdup(aSymbol);
+    aTable->symbols[aTable->numSymbols].jObj   = anObj;
+    aTable->numSymbols++;
+    assert(aTable->numSymbols <= aTable->maxSymbols);
+    return;
+  }
+  
+  int cmp = strcmp(aTable->symbols[symbolIndex].symbol, aSymbol);
+  assert(0 <= cmp);
+  if (cmp == 0) return; // symbol has already been inserted
+  if (cmp != 0) { // aSymbol is less than the current index.. so make space
+    if (aTable->maxSymbols <= aTable->numSymbols) increaseMaxSymbols(aTable);
+    SymbolEntry *newSymbol = aTable->symbols + aTable->numSymbols;
+    SymbolEntry *curSymbol = newSymbol - 1;
+    SymbolEntry *insSymbol = aTable->symbols + symbolIndex;
+    for (; insSymbol < newSymbol ; ) {
+      newSymbol->symbol = curSymbol->symbol;
+      newSymbol->jObj   = curSymbol->jObj;
+      newSymbol--;
+      curSymbol--;
+    }
+  }
+  aTable->symbols[symbolIndex].symbol = strdup(aSymbol);
+  aTable->symbols[symbolIndex].jObj   = anObj;
+  aTable->numSymbols++;
+  assert(aTable->numSymbols <= aTable->maxSymbols);
+}
+\stopCCode
+
+\startTestCase[should insert a new symbol]
+
+\startCTest
+  SymbolTableObj *aSymTab = newSymbolTable("TestSymTab4");
+  AssertIntTrue(isSymbolTableObj(aSymTab));
+
+  JObj* jObjs[100];
+  char aSym[5];
+  aSym[0] = ' ';
+  aSym[1] = 'S';
+  aSym[2] = 'y';
+  aSym[3] = 'm';
+  aSym[4] = 0;
+  for(char aChar = 'Z'; 'A' <= aChar; aChar--) {
+    aSym[0]      = aChar;
+    jObjs[(UInteger)aChar] = asJObj(newUInteger((UInteger)aChar));
+    insertSymbol(aSymTab, aSym, jObjs[(UInteger)aChar]);
+  }
+  
+  AssertPtrEquals(findSymbol(aSymTab, "KSym"), jObjs['K']);
+  AssertPtrEquals(findSymbol(aSymTab, "OSym"), jObjs['O']);
+  AssertPtrEquals(findSymbol(aSymTab, "DSym"), jObjs['D']);
+  AssertPtrEquals(findSymbol(aSymTab, "USym"), jObjs['U']);
+  
+  UIntegerObj *int42 = newUInteger(42);
+  insertSymbol(aSymTab, "KSym", asJObj(int42));
+  AssertPtrEquals(findSymbol(aSymTab, "KSym"), jObjs['K']);
+  insertSymbol(aSymTab, "KASym", asJObj(int42));
+  AssertPtrEquals(findSymbol(aSymTab, "KASym"), asJObj(int42));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[deleteSymbol]
+
+\startCHeader
+void deleteSymbol(
+  SymbolTableObj *aTable,
+  Symbol         *aSymbol
+);
+\stopCHeader
+
+\startCCode
+void deleteSymbol(SymbolTableObj *aTable, Symbol *aSymbol) {
+  assert(aTable);
+  assert(aSymbol);
+  
+  size_t symbolIndex = findSymbolIndex(aTable, aSymbol);
+  assert(0 <= symbolIndex);
+  assert(symbolIndex <= aTable->numSymbols);
+  assert(symbolIndex <= aTable->maxSymbols);
+
+  if (symbolIndex == aTable->numSymbols) return; // nothing to delete
+  
+  int cmp = strcmp(aTable->symbols[symbolIndex].symbol, aSymbol);
+  if (cmp != 0) return; // nothing to delete
+  SymbolEntry *newSymbol = aTable->symbols + symbolIndex;
+  SymbolEntry *curSymbol = newSymbol + 1;
+  SymbolEntry *lastSymbol = aTable->symbols + aTable->numSymbols;
+  for (; curSymbol < lastSymbol ; ) {
+    newSymbol->symbol = curSymbol->symbol;
+    newSymbol->jObj   = curSymbol->jObj;
+    newSymbol++;
+    curSymbol++;
+  }
+  aTable->symbols[aTable->numSymbols].symbol = NULL;
+  aTable->numSymbols--;
+  assert(0 <= aTable->numSymbols);
+}
+\stopCCode
+
+\startTestCase[should delete the symbol entry corresponding to a symbol]
+
+\startCTest
+  SymbolTableObj *aSymTab = newSymbolTable("TestSymTab5");
+  AssertIntTrue(isSymbolTableObj(aSymTab));
+  
+  UIntegerObj *int42 = newUInteger(42);
+  UIntegerObj *int43 = newUInteger(43);
+  UIntegerObj *int44 = newUInteger(44);
+  
+  insertSymbol(aSymTab, "first",  asJObj(int42));
+  insertSymbol(aSymTab, "second", asJObj(int43));
+  insertSymbol(aSymTab, "third",  asJObj(int44));
+  
+  AssertIntEquals(findSymbolIndex(aSymTab, "first"),  0);
+  AssertIntEquals(findSymbolIndex(aSymTab, "second"), 1);
+  AssertIntEquals(findSymbolIndex(aSymTab, "third"),  2);
+
+  deleteSymbol(aSymTab, "second");
+  AssertPtrNull(findSymbol(aSymTab,"second"));
+  AssertIntEquals(findSymbolIndex(aSymTab, "first"),  0);
+  AssertIntEquals(findSymbolIndex(aSymTab, "third"),  1);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerCFunction]
+
+\startCHeader
+void registerCFunction(
+  SymbolTableObj *aTable,
+  Symbol         *symbol,
+  CFunction      *func
+);
+\stopCHeader
+
+\startCCode
+void registerCFunction(
+  SymbolTableObj *aTable,
+  Symbol         *symbol,
+  CFunction      *func
+) {
+  assert(aTable);
+  assert(symbol);
+  assert(func);
+  
+  CFunctionObj *newObj = newCFunction(func);
+  insertSymbol(aTable, symbol, asJObj(newObj));
+}
+\stopCCode
+
+\startTestCase[should register a CFunction]
+\startCTest
+  void testCFunction(ContextObj* aCtx){
+    // do nothing
+  }
+
+  SymbolTableObj *aSymTab = newSymbolTable("TestSymTab6");
+  AssertIntTrue(isSymbolTableObj(aSymTab));
+
+  registerCFunction(aSymTab, "testCFunction", testCFunction);
+  JObj *aCFunc = findSymbol(aSymTab, "testCFunction");
+  AssertIntTrue(isCFunctionObj(aCFunc));
+  AssertPtrEquals(asCFunction(aCFunc), testCFunction);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerCtxCFunction]
+
+\startCHeader
+void registerCtxCFunction(
+  SymbolTableObj *aTable,
+  Symbol         *symbol,
+  CtxCFunction   *func
+);
+\stopCHeader
+
+\startCCode
+void registerCtxCFunction(
+  SymbolTableObj *aTable,
+  Symbol         *symbol,
+  CtxCFunction   *func
+) {
+  assert(aTable);
+  assert(symbol);
+  assert(func);
+  
+  CtxCFunctionObj *newObj = newCtxCFunction(func);
+  insertSymbol(aTable, symbol, asJObj(newObj));
+}
+\stopCCode
+
+\startTestCase[should register a CtxCFunction]
+
+\startCTest
+  ContextObj *testCtxCFunction(ContextObj* aCtx){
+    // do nothing but return aCtx
+    return aCtx;
+  }
+
+  SymbolTableObj *aSymTab = newSymbolTable("TestSymTab7");
+  AssertIntTrue(isSymbolTableObj(aSymTab));
+  
+  registerCtxCFunction(aSymTab, "testCtxCFunction", testCtxCFunction);
+  JObj *aCtxCFunc = findSymbol(aSymTab, "testCtxCFunction");
+  AssertIntTrue(isCtxCFunctionObj(aCtxCFunc));
+  AssertPtrEquals(asCtxCFunction(aCtxCFunc), testCtxCFunction);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[symbolTablePrinter]
+
+\startCHeader
+void symbolTablePrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+);
+
+//void printTableToFile(
+//  SymbolTableObj *aTable,
+//  FILE           *aFile,
+//  Symbol         *indent
+//);
+
+\stopCHeader
+
+\startCCode
+void symbolTablePrinter(
+  StringBufferObj *aStrBuf,
+  JObj            *anObj,
+  Symbol          *indent,
+  size_t           timeToLive
+) {
+  DEBUG(PrintingDebug, "symbolTablePrinter %p\n", anObj);
+  assert(isSymbolTableObj(anObj));
+  
+  SymbolTableObj *aTable = asSymbolTableObj(anObj);
+  
+  if (indent) {
+    char* newIndent = appendSymbols(indent, "  ");
+    for( size_t i = 0; i < aTable->numSymbols; i++) {
+      strBufPrintf(
+        aStrBuf,
+        "%ssymTab[%zd] = [%s]\n",
+        indent,
+        i,
+        aTable->symbols[i].symbol
+      );
+      printJObj(
+        aStrBuf,
+        aTable->symbols[i].jObj,
+        newIndent,
+        timeToLive
+      );
+    }
+    free(newIndent);
+  } else {
+    for( size_t i = 0; i < aTable->numSymbols; i++) {
+      strBufPrintf(
+        aStrBuf,
+        "<symTab[%zd] = [%s] ",
+        i,
+        aTable->symbols[i].symbol
+      );
+      printJObj(
+        aStrBuf,
+        aTable->symbols[i].jObj,
+        NULL,
+        timeToLive
+      );
+      strBufPrintf(aStrBuf, "%s", "> ");
+    }
+  }
+}
+\stopCCode
+
+\startTestCase[should print the symbol table]
+
+\startCTest
+  SymbolTableObj *aSymTab = newSymbolTable("TestSymTab8");
+  AssertIntTrue(isSymbolTableObj(aSymTab));
+
+  UIntegerObj *int42 = newUInteger(42);
+  UIntegerObj *int43 = newUInteger(43);
+  UIntegerObj *int44 = newUInteger(44);
+  
+  insertSymbol(aSymTab, "first",  asJObj(int42));
+  insertSymbol(aSymTab, "second", asJObj(int43));
+  insertSymbol(aSymTab, "third",  asJObj(int44));
+  
+  StringBufferObj *aStrBuf = newStringBuffer();
+  AssertIntTrue(isStringBufferObj(aStrBuf));
+
+  symbolTablePrinter(aStrBuf, asJObj(aSymTab), "  ", 20);
+  AssertStrMatches(getCString(aStrBuf), "symTab%[");
+  AssertStrMatches(getCString(aStrBuf), "%] = %[");
+  AssertStrMatches(getCString(aStrBuf), "%[first%]");
+  AssertStrMatches(getCString(aStrBuf), "%[second%]");
+  AssertStrMatches(getCString(aStrBuf), "%[third%]");
+  AssertStrMatches(getCString(aStrBuf), "42");
+  AssertStrMatches(getCString(aStrBuf), "43");
+  AssertStrMatches(getCString(aStrBuf), "44");
+  AssertStrMatches(getCString(aStrBuf), "\n");
+
+  strBufReOpen(aStrBuf);
+  symbolTablePrinter(aStrBuf, asJObj(aSymTab), NULL, 20);
+  AssertStrEquals(getCString(aStrBuf), "<symTab[0] = [first] 42 > <symTab[1] = [second] 43 > <symTab[2] = [third] 44 > ");
+  AssertStrDoesNotMatch(getCString(aStrBuf), "\n");
+  
+\stopCTest
+\stopTestCase
+\stopTestSuite

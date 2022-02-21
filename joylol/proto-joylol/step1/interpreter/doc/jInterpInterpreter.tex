@@ -1,0 +1,25 @@
+% A ConTeXt document [master document: ../jInterp.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jInterpInterpreter
+\usebtxdataset[jInterpInterpreterBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jInterpInterpreter.tex}
+
+\section[title=Interpreter]
+
+\diSimpComponent jInterpContext
+
+\diSimpComponent jInterpWordsControl
+
+\diSimpComponent jInterpWordsBasic
+
+\diSimpComponent jInterpWordsOperators
+
+\diSimpComponent jInterpEvaluation
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

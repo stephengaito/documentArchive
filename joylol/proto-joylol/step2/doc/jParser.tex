@@ -1,0 +1,28 @@
+% A ConTeXt document [master document: protoJoyLoL.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jParser
+
+\usebtxdataset[jParserBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jParser.tex}
+
+\chapter[title=Step 2: \joylol\ parser]
+
+\diSimpComponent jParserOverview
+
+\diSimpRecurseComponent{jcf}{doc}{jParserJCF}
+
+\diSimpRecurseComponent{jcoalg}{doc}{jParserJCoAlg}
+
+\diSimpRecurseComponent{jsexp}{doc}{jParserJSExp}
+
+\diSimpRecurseComponent{jrm}{doc}{jParserJRM}
+
+\diSimpComponent jParserConclusion
+
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

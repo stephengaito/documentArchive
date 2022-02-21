@@ -1,0 +1,321 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=JoyLoL operators]
+
+In this section we develop the primary JoyLoL operators. These operators 
+are modelled upon those used by Manfred von Thun in his language Joy, 
+\cite{vonThun1994overview}. We will implement his full range of unary, 
+binary and ternary operators as defined in the \quote{General Operators} 
+section of \cite{vonThun1995atomicPrograms}. We provide a duplicate set 
+for each of the data and process stacks of a given context. We will also 
+provide a set which transfer items between the data and process stacks. We 
+will use slightly more mnemonic names. 
+
+\subsection[title=Unary operators]
+
+\startCCode
+static void pop1DWord(ContextObj* aCtx) {
+  popCtxData(aCtx);
+}
+\stopCCode
+
+\startCCode
+static void pop1PWord(ContextObj* aCtx) {
+  popCtxProcess(aCtx);
+}
+\stopCCode
+
+
+\startCHeader
+void dup1DWord(ContextObj* aCtx);
+\stopCHeader
+
+\startCCode
+void dup1DWord(ContextObj* aCtx) {
+  peekCtxDataInto(aCtx, top);
+  pushCtxData(aCtx, copyLoL(top));
+}
+\stopCCode
+
+\startCCode
+static void dup1PWord(ContextObj* aCtx) {
+  peekCtxProcessInto(aCtx, top);
+  pushCtxProcess(aCtx, copyLoL(top));
+}
+\stopCCode
+
+\subsection[title=Binary operators]
+
+\startCHeader
+void swap12DWord(ContextObj* aCtx);
+\stopCHeader
+
+\startCCode
+void swap12DWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, second);
+}
+\stopCCode
+
+\startCCode
+static void swap12PWord(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  pushCtxProcess(aCtx, top);
+  pushCtxProcess(aCtx, second);
+}
+\stopCCode
+
+\startCCode
+static void pop2DWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxData(aCtx);
+  pushCtxData(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void pop2PWord(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcess(aCtx);
+  pushCtxProcess(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void pop12DWord(ContextObj* aCtx) {
+  popCtxData(aCtx);
+  popCtxData(aCtx);
+}
+\stopCCode
+
+\startCCode
+static void pop12PWord(ContextObj* aCtx) {
+  popCtxProcess(aCtx);
+  popCtxProcess(aCtx);
+}
+\stopCCode
+
+\startCCode
+static void dup2DWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, copyLoL(second));
+  pushCtxData(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void dup2PWord(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  pushCtxProcess(aCtx, second);
+  pushCtxProcess(aCtx, copyLoL(second));
+  pushCtxProcess(aCtx, top);
+}
+\stopCCode
+
+\subsection[title=Ternary operators]
+
+\startCCode
+static void swap13DWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, third);
+}
+\stopCCode
+
+\startCCode
+static void swap13PWord(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  popCtxProcessInto(aCtx, third);
+  pushCtxProcess(aCtx, top);
+  pushCtxProcess(aCtx, second);
+  pushCtxProcess(aCtx, third);
+}
+\stopCCode
+
+\startCCode
+static void swap23DWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, third);
+  pushCtxData(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void swap23PWord(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  popCtxProcessInto(aCtx, third);
+  pushCtxProcess(aCtx, second);
+  pushCtxProcess(aCtx, third);
+  pushCtxProcess(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void rollUp3DWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, third);
+  pushCtxData(aCtx, second);
+}
+\stopCCode
+
+\startCCode
+static void rollUp3PWord(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  popCtxProcessInto(aCtx, third);
+  pushCtxProcess(aCtx, top);
+  pushCtxProcess(aCtx, third);
+  pushCtxProcess(aCtx, second);
+}
+\stopCCode
+
+\startCCode
+static void rollDown3DWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, third);
+}
+\stopCCode
+
+\startCCode
+static void rollDown3PWord(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  popCtxProcessInto(aCtx, third);
+  pushCtxProcess(aCtx, second);
+  pushCtxProcess(aCtx, top);
+  pushCtxProcess(aCtx, third);
+}
+\stopCCode
+
+\startCCode
+static void choiceDWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  if (isTrueObj(top)) {
+    pushCtxData(aCtx, second);
+  } else {
+    pushCtxData(aCtx, third);
+  }
+}
+\stopCCode
+
+\startCCode
+static void choicePWord(ContextObj* aCtx) {
+  popCtxProcessInto(aCtx, top);
+  popCtxProcessInto(aCtx, second);
+  popCtxProcessInto(aCtx, third);
+  if (isTrueObj(top)) {
+    pushCtxProcess(aCtx, second);
+  } else {
+    pushCtxProcess(aCtx, third);
+  }
+}
+\stopCCode
+
+\subsection[title=Quaternary operators]
+
+\startCCode
+static void swap14DWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  popCtxDataInto(aCtx, fourth);
+  pushCtxData(aCtx, top);
+  pushCtxData(aCtx, third);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, fourth);
+}
+\stopCCode
+
+\startCCode
+static void swap24DWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  popCtxDataInto(aCtx, fourth);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, third);
+  pushCtxData(aCtx, fourth);
+  pushCtxData(aCtx, top);
+}
+\stopCCode
+
+\startCCode
+static void swap34DWord(ContextObj* aCtx) {
+  popCtxDataInto(aCtx, top);
+  popCtxDataInto(aCtx, second);
+  popCtxDataInto(aCtx, third);
+  popCtxDataInto(aCtx, fourth);
+  pushCtxData(aCtx, third);
+  pushCtxData(aCtx, fourth);
+  pushCtxData(aCtx, second);
+  pushCtxData(aCtx, top);
+}
+\stopCCode
+
+\subsection[title=Registering operators]
+
+\startCCode
+void initContextAOOperators(ContextObj *aCtx) {
+  assert(isContextObj(aCtx));
+  SymbolTableObj *symTab = asCtxSymbols(aCtx);
+  
+  // unary operators
+  registerCFunction(symTab, "pop1D", pop1DWord);
+  registerCFunction(symTab, "pop1P", pop1PWord);
+  registerCFunction(symTab, "dup1D", dup1DWord);
+  registerCFunction(symTab, "dup1P", dup1PWord);
+  //
+  // binary operators
+  //
+  registerCFunction(symTab, "swap12D", swap12DWord);
+  registerCFunction(symTab, "swap12P", swap12PWord);
+  registerCFunction(symTab, "pop2D",   pop2DWord);
+  registerCFunction(symTab, "pop2P",   pop2PWord);
+  registerCFunction(symTab, "pop12D",  pop12DWord);
+  registerCFunction(symTab, "pop12P",  pop12PWord);
+  registerCFunction(symTab, "dup2D",   dup2DWord);
+  registerCFunction(symTab, "dup2P",   dup2PWord);
+  //
+  // ternary operators
+  //
+  registerCFunction(symTab, "swap13D",    swap13DWord);
+  registerCFunction(symTab, "swap13P",    swap13PWord);
+  registerCFunction(symTab, "swap23D",    swap23DWord);
+  registerCFunction(symTab, "swap23P",    swap23PWord);
+  registerCFunction(symTab, "rollUp3D",   rollUp3DWord);
+  registerCFunction(symTab, "rollUp3P",   rollUp3PWord);
+  registerCFunction(symTab, "rollDown3D", rollDown3DWord);
+  registerCFunction(symTab, "rollDown3P", rollDown3PWord);
+  registerCFunction(symTab, "choiceD",    choiceDWord);
+  registerCFunction(symTab, "choiceP",    choicePWord);
+  //
+  // quarternary operators
+  //
+  registerCFunction(symTab, "swap14D", swap14DWord);
+  registerCFunction(symTab, "swap24D", swap24DWord);
+  registerCFunction(symTab, "swap34D", swap34DWord);
+}
+\stopCCode

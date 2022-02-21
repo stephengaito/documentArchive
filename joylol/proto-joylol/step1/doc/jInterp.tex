@@ -1,0 +1,48 @@
+% A ConTeXt document [master document: protoJoyLoL.tex ]
+
+\usemodule[t-diSimp]
+
+\showDiSimpMessages
+
+\startDiSimpComponent jInterp
+\usebtxdataset[jInterpBib.lua]
+\diSimpEnvironment protoJoyLoLConTeXtStartEnv
+
+\addMainDocument{jInterp.tex}
+
+\clearCHeader{jInterp}
+\clearCHeader{jInterpPrivate}
+
+\chapter[title=Step 1: Proto-\joylol\ Interpreter]
+
+\diSimpComponent jInterpOverview
+
+\diSimpRecurseComponent{objects}{doc}{jInterpObjects}
+
+\diSimpRecurseComponent{interpreter}{doc}{jInterpInterpreter}
+
+\diSimpRecurseComponent{jPeg}{doc}{jInterpJPeg}
+
+\diSimpComponent jInterpMain
+
+\diSimpComponent jInterpConclusion
+
+\CHeaderIncludeGuard{jInterp}{JINTERP}
+\prependCHeader{jInterp}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createCHeaderFile%
+  {jInterp}
+  {joylol/jInterp.h}
+  {}
+
+\CHeaderIncludeGuard{jInterpPrivate}{JINTERP_PRIVATE}
+\prependCHeader{jInterpPrivate}
+\placeCHeaderCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createCHeaderFile%
+  {jInterpPrivate}
+  {joylol/jInterp-private.h}
+  {}
+  
+\diSimpEnvironment protoJoyLoLConTeXtStopEnv
+
+\stopDiSimpComponent
