@@ -1,0 +1,705 @@
+% A ConTeXt document [master document: hilbertsProgram.tex]
+
+\chapter[title=Of Wee Beasties and Idealized Mathematicians]
+
+
+In this chapter, over the next four definitions, \in[beastieBeing], 
+\in[beastieActions], \in[beastieTests], \in[beastieIdentity], below, we 
+will explore what a wee beastie \emph{is}, can \emph{do}, can \emph{know}, 
+and can \emph{identify}. We do this by formally and \emph{computationally} 
+defining a wee beastie's \quote{Reality} using the rigorous computational 
+language \joylol. In fact, since we identify any wee beastie with a 
+\joylol\ computation, our definitions in this chapter are actually 
+defining the \quote{core} of the \joylol\ computer language. These four 
+definitions are, of necessity, inter-referential. They are essentially 
+different facets of the same combined definition of what the \joylol\ 
+computer langauge is, as well as what a wee beastie's reality is. 
+
+Intuitionistic Mathematics, as initiated by Brouwer, has identified the 
+concept of the \quote{Idealized Mathematician}. Since this document is 
+focused upon the \emph{Mathematics} of the \quote{Reality} which a wee 
+beastie can know, for this document, we will identify any wee beastie with 
+this Idealized Mathematician, and conversely, any Idealized Mathematician, 
+with this wee beastie. 
+
+Unlike Kant, this idealization makes \emph{no} assumptions about the 
+structure of time or space. One consequence of our analysis of what a wee 
+beastie can know, is space-time itself. 
+
+Following Hilbert, we will assume a number of undefined terms which will 
+be defined by their use in our theory. In the following definitions, using 
+well known practice from Computer Science, we \emph{could} use the word 
+\quote{widget} to emphasize, with Hilbert, that our undefined terms can 
+represent anything which behaves in the prescribed way. Having made this 
+point, we will actually use the undefined but slightly more suggestive 
+terminology of \quote{Lists of Lists} or \lols. 
+
+\section[title={A wee beastie's reality, the \joylol\ interpreter}]
+
+\startDefinition[beastieBeing]
+
+Any wee beastie \emph{is} a \quote{triple} of \lols, called the 
+\quote{data} \quote{stack}, the \quote{process} \quote{stack} and the 
+\quote{definition} \lol, respectively. 
+
+At each \quote{computational instant}, the wee beastie takes the 
+\quote{top} \lol\ off of the \quote{process} \quote{stack} and 
+\quote{interprets} it by either: 
+
+\startitemize[n] 
+
+\item \bold{Reserved word}: If the \quote{top} \lol\ is a \quote{reserved} 
+\quote{word}, as defined in any of the four definitions, 
+\in[beastieBeing], \in[beastieActions], \in[beastieTests], or 
+\in[beastieIdentity], then the beastie makes the described changes to the 
+\quote{data} and \quote{process} \quote{stacks}. 
+
+\item \bold{Known word}: If the \quote{top} \lol\ is a \quote{known} 
+\quote{word}, then the wee beastie \quote{\type{push}}es the 
+\quote{definition} of the known word onto the \quote{top} of the 
+\quote{data} \quote{stack} and the \quote{\type{interpret}} \quote{word} 
+onto the \quote{top} of the \quote{process} \quote{stack}. 
+
+\item \bold{Otherwise}: The wee beastie \quote{\type{push}}es the \lol\ 
+onto the \quote{top} of the \quote{data} \quote{stack}. 
+
+\stopitemize 
+
+\stopDefinition 
+
+These \lols\ are important. For \emph{our} wee beasties, every thing is a 
+\lol. Since we are considering the \emph{computational} basis of 
+\quote{Reality}, we will assume that any wee beastie is a computational 
+entity. At any one instant of \quote{time}, this wee beastie (or its 
+associated computation) will be in a particular \quote{state}. For our 
+purposes, these states \emph{will be} \lols.
+
+At the same time these \lols\ will also capture the \quote{textual} 
+description of any given program. While we could use any programming 
+language, we will base our \emph{computational} foundations on the 
+language \joylol\ which is in turn loosely based upon Manfred von 
+Thun's \emph{concatenative} stack based language, \type{joy}\footnote{To 
+better understand Manfred von Thun's programming language, \type{joy}, see 
+\cite{vonThun1994overview} for an overview of the language and 
+\cite{vonThun1994mathematicalFoundations} for an overview of the 
+mathematical foundations of the language. The \quote{original} 
+\emph{concatenative} stack based programming language was \type{Forth}. 
+See \cite{brodie1987StartingForth} and \cite{brodie2004thinkingForth} for 
+introductions to \type{Forth}.}. While most programming languages are 
+applicative and make extensive use of variables, we will use a 
+semantically simpler concatenative stack based language. 
+
+\startMMundi In classical terms the category of computations of an 
+applicative functional language, such as \type{Haskell}, corresponds to a 
+Topos, and that of a concatenative stack based functional language, such 
+as \joylol\ or \type{joy}, assumes no more structure than that of a 
+Category. Not surprisingly, we will, eventually, show that the 
+computational power of \joylol\ is equivalent to that of any other 
+programming language. In classical terms this means that the Category of 
+\joylol's computations actually has the structure of a Topos (or 
+more correctly a Topos-CoTopos pair). \stopMMundi 
+
+In fact to make \joylol\ semantically even simpler, we explicitly expose 
+the stack of process \quote{continuations}\footnote{For a good, early, 
+introduction to the use of continuations to capture the semantics of 
+programming languages, see chapter 5 of 
+\cite{gordon1979denotationalDescriptionProgLangs}.}. This means that the 
+\quote{instantaneous} \quote{state} of any \joylol\ computation, is 
+captured by a pair of \lols\ interpreted as the \quote{data stack} and 
+\quote{process stack} respectively. 
+
+The \joylol\ interpreter then in each computational \quote{instance}, 
+takes one \lol\ off the top of the \quote{process stack} 
+
+\section[title=What \emph{can} a \quote{wee beastie} do?]
+
+We begin our trilogy of definitions by considering what a wee beastie can 
+\emph{do} to its environment. 
+
+\startDefinition[beastieActions]
+
+We assume any wee beastie exists in a \quote{collection} of \quote{List of 
+Lists} (\lols) represented itself as a \lol. With these \lols, a wee 
+beastie can: 
+
+\startitemize[n]
+
+\item \bold{Atomic actions}
+
+\startitemize[n]
+
+\item \bold{Constructive actions}
+
+\startitemize[n]
+
+\item \bold{\quote{\type{nil}} action}: create a new \quote{top} 
+\quote{\type{nil}} \lol. 
+
+\starttyping
+{ }
+( nil )
+{ dataStack top isNil }
+\stoptyping
+
+\item \bold{\quote{\type{cons}} action}: create a new \quote{top} \lol\ by 
+removing the \quote{top} two \lols\ and \quote{\type{cons}}ing them 
+together. 
+
+\starttyping
+{ x y }
+( cons )
+{ (x y) }
+\stoptyping
+
+\stopitemize
+
+\item \bold{Destructive actions}
+
+\startitemize[n]
+
+\item \bold{\quote{\type{pop}} action}: delete the \quote{top} \lol\ by 
+\quote{\type{pop}}ing it off the stack. 
+
+\starttyping
+{ x }
+( pop )
+{ }
+\stoptyping
+
+\item \bold{\quote{\type{carCdr}} action}: create two new \quote{top} 
+\lols\ by removing the \quote{top} \lol\ and replacing it with both the 
+\quote{\type{car}} and \quote{\type{cdr}} of the original \lol. 
+
+\starttyping
+{ (x y) }
+( carCdr )
+{ x y }
+\stoptyping
+
+\stopitemize
+
+\item \bold{Data Stack manipulation}
+
+\startitemize[n]
+
+\item \bold{\quote{\type{dup}} action}: \quote{\type{dup}}licate the 
+\quote{top} \lol. 
+
+\starttyping
+{ x }
+( dup )
+{ x x }
+\stoptyping
+
+\item \bold{\quote{\type{swap}} action}: \quote{\type{swap}} the 
+\quote{order} of the \quote{top} two \lols. 
+
+\starttyping
+{ x y }
+( swap )
+{ y x }
+\stoptyping
+
+\stopitemize
+
+\item \bold{Process Stack manipulation}
+
+\startitemize[n]
+
+\item \bold{\quote{\type{interpret}} action}:
+
+\item \bold{\quote{\type{choice}} action}:
+
+\item \bold{\quote{\type{repeat}} action}: 
+
+\item \bold{\quote{\type{test}} action}:
+
+\stopitemize
+
+\item \bold{Definition list manipulation}
+
+\startitemize[n]
+
+\item \bold{\quote{\type{define}} action}: 
+
+\stopitemize
+
+\stopitemize
+
+\item \bold{Action Combinators}
+
+\startitemize[n]
+
+\item \bold{composition}: the action which \quote{performs} a pair of 
+actions one followed by the other. If $a$ and $b$ are two actions, then 
+the \quote{composition} action is explicitly denoted as 
+\quote{\explicitCompose{a}{b}} or more simply as \quote{\compose{a}{b}}. 
+
+\item \bold{non-deterministic choice}: The action which \quote{performs} 
+one or other of a pair of actions. There is, however, \emph{no 
+pre-determined} reason for the choice. If $a$ and $b$ are two actions, 
+then the \quote{(non-determinitsic) choice} action is denoted 
+\quote{\ndChoice{a}{b}}. 
+
+\item \bold{non-deterministic repeat}: The action which performs an action 
+multiple times before \quote{completing}. However, the number of 
+repetitions is \emph{not pre-determined}. If $a$ is an action, then we 
+denote the \quote{(non-deterministic) repetition} action as 
+\quote{\repets{a}}. 
+
+\item \bold{test}: The action which \quote{completes} if a given 
+test\footnote{Tests are defined in \in{Definition}[beastieTests].} 
+succeeds. If $t$ is a test then we denote the \quote{test} action by 
+\quote{\test{t}}. 
+
+\stopitemize
+
+\stopitemize
+
+\noindent This is \emph{all} that any wee beastie, or (Idealized) 
+Mathematician can \emph{do} to \lols\ in its environment\footnote{In 
+Volume II, we will add one more thing that a \emph{transfinite} wee 
+beastie can do.}. 
+
+\stopDefinition
+
+\startMMundi
+
+The atomic actions provide the \emph{only} actions that a wee beastie can 
+perform \emph{\quote{directly}} on its environment. All other actions are 
+formed via various action combinators from these four atomic actions and, 
+via the \quote{test} action, any of the tests defined below. 
+
+The pair of definitions, \in[beastieActions] and \in[beastieTests], are 
+essentially Dynamic Logic with the addition of the least, $\mu$, and 
+greatest, $\nu$, fixed point operators taken from $\mu$-modal logic. See 
+\cite{harelKozenTiuryn2000dynamicLogic} and 
+\cite{demriGorankoLange2016temporalLogics} respectively for a more 
+in-depth discussion. 
+
+Notice our \emph{explicit} use of John McCarthy's notation for the 
+programming language LISP,
+\cite{mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. 
+
+Since the definitions \in[beastieActions], \in[beastieTests], and 
+\in[beastieIdentity] are co-dependent, we postpone any further commentary 
+until Section \in[beastieReality]. 
+
+\stopMMundi
+
+\section[title=What \emph{can} a \quote{wee beastie} know?]
+
+\startDefinition[beastieTests]
+
+Again, we assume that any wee beastie exists in a 
+\quote{collection} of \lols. With these \lols, a wee beastie 
+can preform (\emph{compute}) the following tests:
+
+\startitemize[n]
+
+\item Atomic Tests
+
+\startitemize[n]
+
+\item The test which always succeeds, denoted \quote{\true} or 
+\quote{\top}. 
+
+\item The test which always fails, denoted \quote{\false} or 
+\quote{\bottom}. 
+
+\item The test which succeeds if the \quote{top} \lol\ is 
+\quote{\type{nil}}, denoted \quote{\isNil}.
+
+\stopitemize
+
+\item Static Test Combinators
+
+\startitemize[n]
+
+\item The test which succeeds if given pair of other tests both succeed. 
+If $s$ and $t$ are two tests, then the \quote{conjunction} test is denoted 
+\quote{$s \land t$}.
+
+\item The test which succeeds if one or more of a given pair of other 
+tests succeeds. If $s$ and $t$ are two tests, the \quote{disjunction} test 
+is denoted \quote{$s \lor t$}.
+
+\item The test which succeeds if a given other test fails. If $t$ is a 
+test, then the \quote{negation} test is denoted \quote{$\lnot\; t$}. 
+
+\stopitemize
+
+\item Dynamic Test Combinators
+
+\startitemize[n]
+
+\item The test which succeeds if a given other test succeeds after all 
+possible computations of a given action. If $t$ is a test and $a$ is an 
+action, then the \quote{necessity} test is denoted \quote{$[a]t$}. 
+
+\item The test which succeeds if a given other test succeeds after at 
+least one possible computation of a given action. If $t$ is a test and $a$ 
+is an action, then the \quote{possibility} test is denoted 
+\quote{$\langle a\rangle t$}. 
+
+\item The test which succeeds if \TODO{complete the description of the 
+$\mu$ operator}.
+
+\item The test which succeeds if \TODO{complete the description of the 
+$\nu$ operator}. 
+
+\stopitemize
+
+\stopitemize
+
+If any of the above tests does \emph{not} succeed, then that test fails. 
+This is \emph{all} that any wee beastie (or Idealized Mathematician) can 
+know by testing \lols\ in its environment. 
+
+\stopDefinition
+
+\startMMundi
+
+The atomic tests provide the \emph{only} tests that a wee beastie can 
+perform \emph{\quote{directly}} on its environment. All other tests are 
+formed via various test combinators from these three atomic tests, and, 
+via the \quote{necessity} and \quote{posibility} tests, any actions 
+defined above. Of these three atomic tests, only the third atomic test 
+increases the wee beastie's knowledge of its environment. Neither of the 
+first two atomic tests reference the \quote{state} of the wee beastie's 
+environment. 
+
+The three static test combinators correspond to the core of classical 
+(static) propositional logic. Note that we do \emph{not} assume the 
+classical \quote{principle of the excluded middle}, hence we must define 
+both the \quote{logical} \quote{conjunction} (\quote{and}) as well as the 
+\quote{logical} \quote{disjunction} (\quote{or}) operators. It will turn 
+out that while the principle of the excluded middle \emph{is} valid for 
+any finitely defined collection of (non-)well-founded \lols, it need 
+\emph{not} be valid for \quote{asymptotically} defined collection 
+(non-)well-founded \lols. 
+
+Classical logic, including propositional, first or higher order, concerns 
+itself with \quote{properties} of a single \emph{fixed} \quote{unchanging} 
+\quote{world}. Since there is no change, there is no corresponding sense 
+of \quote{time}. Wee beasties, such as ourselves, experience a 
+\quote{world} of constant change. While we will not (yet) explicitly 
+define time, as wee beasties, we are naturally interested in what will 
+happen to our world if we change it. The dynamic test combinators capture 
+how given tests will change if a wee beastie changes its environment by 
+first performing one of its possible actions on its environment. 
+
+As mentioned above the pair of definitions, \in[beastieActions] and 
+\in[beastieTests], are essentially Dynamic Logic, 
+\cite{harelKozenTiuryn2000dynamicLogic}, augmented with the $\mu$ and 
+$\nu$ operators taken from $\mu$-modal logic, 
+\cite{demriGorankoLange2016temporalLogics}. 
+
+\stopMMundi 
+
+\section[title=Identity and Bisimulation]
+
+When can a wee beastie know that two \lols, in its environment, are the 
+\emph{same} \lol? Given the capabilities listed above, a wee beastie can 
+never know if two \lols\ are \emph{identical}, the \emph{same} or 
+\emph{equal}. The best a wee beastie can do is to compare a pair of \lol's 
+using the same collection of \emph{tests}. 
+
+\TODO{\emph{If} we have a proof of the well-foundedness of a given 
+collection of tests, \emph{then} we can talk about the identity of a given 
+well-founded object. The critical thing here is that since everything is 
+well-founded, we know that the computation of identity will terminate with 
+either an affermation or a denial of the claim of identity.} 
+
+\startDefinition[beastieIdentity]
+
+Two \lols\ are \emph{Bisimilar} if they pass the same collection of tests.
+
+\stopDefinition
+
+\startMMundi This concept of Bisimulation has been identified by a number 
+of Mathematicians and Computer Scientists. From the theory of 
+non-well-founded sets, see \cite{aczel1988nonWellFoundedSets}. From the 
+theory of co-algebras, see Chapter 3 of \cite{jacobs2017coalgebras}. 
+\stopMMundi 
+
+Finally, linking the above three definitions together we make the 
+following assertion about any wee beastie and its environment of \lols: 
+
+\begingroup\startAssertion
+
+\startitemize[n]
+
+\item \quote{\type{car}} of the \quote{\type{nil}} \lol\ is bisimular to 
+\quote{\type{nil}}. \TODO{Is this correct?}
+
+\item \quote{\type{cdr}} of the \quote{\type{nil}} \lol\ is bisimular to 
+\quote{\type{nil}}. \TODO{Is this correct?}
+
+\item \quote{\type{car}} of the \quote{\type{cons}} of two \lols\ is 
+bisimular to the first \lol. 
+
+\item \quote{\type{cdr}} of the \quote{\type{cons}} of two \lols\ is 
+bisimular to the second \lol. 
+
+\item \quote{\type{cons}} of the pair of \lols\ obtained by 
+\quote{\type{car}} and \quote{\type{cdr}} of the same \lol, is bisimular 
+to the original \lol. 
+
+\stopitemize
+
+\stopAssertion\endgroup
+
+\section[title=Rigour]
+
+\TODO{How do we program the verification engine? For (Basic) Dynamic Logic 
+we build the minimal/maximal filtration (see 
+\cite{demriGorankoLange2016temporalLogics} section 5.5.1 page 124; see 
+also \cite{harelKozenTiuryn2000dynamicLogic} section 5.4 page 171 (for 
+PDL) and section 11.4 page 297 (for first-order))(is this essentially a 
+tableau?). I suspect we play the two person games on this underlying 
+filtration to prove satisfiablity of $\mu$-modal logics, see 
+\cite{demriGorankoLange2016temporalLogics} section 15.4 page 682 AND 
+preceeding sections. How does the above inter-relate with 
+\cite{harelKozenTiuryn2000dynamicLogic} deductive logic? Are these simply 
+moves in the construction of the filtration? Do we extend this deductive 
+logic to allow for bisimularity assertions? (See below)} 
+
+\TODO{What is the structure of the pre and post conditions? We do NOT want 
+to use meta-variables, so we use deBruijn indexing. However we may have 
+complex repeated expressions, how do we identify these? Do we 
+\quote{assign} them to \quote{(meta)-variables} or do we define them as 
+\quote{symbols}? Use of meta-variables would allow \quote{pattern 
+matching} (similar to Haskell), however this would require a unification 
+engine adding to the base \joylol's complexity. I suspect meta-variables 
+should be left for some future \joylol\ extension.} 
+
+\TODO{How do we deal with identity inside a condition and between pre and 
+post conditions? Clearly we have no identity, but we can assert 
+bisimularity. Bisimularity \emph{between} pre and post conditions requires 
+the ability to \quote{reference} both data/process/definition \lols\ in 
+both pre/post \quote{states}.} 
+
+As a result of these assertions, the only \quote{meaningful} tests are 
+those which consist of collections of \quote{\type{car}}s and 
+\quote{\type{cdr}}s. Assertions 3 and 4 imply that any 
+\quote{\type{cons}}s can be undone by appropriate use of 
+\quote{\type{car}}s and \quote{\type{cdr}}s. \TODO{Is this a meaningful 
+observation?} 
+
+\startChapterAppendices
+
+The following Appendices to this chapter provide detailed specifications 
+of aspects of a wee beastie's environment which, while required by the 
+definitions above, are of a more technical nature. Example 
+\emph{implementations} of these specifications can be found in the 
+main Appendix \in[implementation] to this book.
+
+\chapterAppendix[title={Texts: transcribing Lists of Lists}]
+
+To be useful, any \joylol\ program needs to be written down in a format 
+which can be stored over time and transmitted through space. The 
+traditional way to do this is to transcribe a \joylol\ program to and from 
+a \quote{string of characters}. This chapter appendix specifies how this 
+is done. 
+
+While it might seem strange to worry about texts and transcription of 
+textual artefacts in a \emph{mathematical} document, any \emph{formal} 
+foundation of mathematics does start by listing the collection of allowed 
+symbols, see for example \cite{kleene2009introMetaMathematics}. In 
+particular, we \emph{could} develop the whole of mathematics using just 
+two symbols: \quote{(}, and \quote{)}. However, to be kind to \quote{bears 
+of very little brain} (like myself), we will use, at least initially, a 
+richer collection of symbols. In line with the typical practice of 
+Computer Science, we parse tree structures of symbols from texts as 
+sequences of characters. This enables the collection of meaningful symbols 
+to expand as needed for a particular discussion. 
+
+\subChapterAppendix[title=Characters, reference=characterSpec]
+
+A character is a fundamental representation of a glyph of one or other 
+human language. \quote{Printed} characters are currently used by humans, 
+to communicate ideas between themselves. For our purposes, a character is 
+an indivisible entity. The collection of characters has an associated 
+order relationship. So we know when a given character is ordered before, 
+equal to, or ordered after another given character. 
+
+In current computational systems, characters are usually implemented using 
+the Unicode consortium's \quote{UTF-8} specifications. All we will assume 
+in this document, is that the few characters we actually need, and which 
+are explicitly \quote{named} below, have the \quote{standard} ASCII 
+ordering. The \joylol\ code in this document will only ever use ASCII 
+characters. However since the ASCII characters are explicitly the initial 
+sub-set of the UTF-8 characters, this presents no particular problems for 
+future work. 
+
+Characters are often sub-divided into specific \quote{useful} 
+sub-collections. For our purposes, we will subdivide our character set 
+into \quote{white space}, \quote{structural} and \quote{symbol} 
+characters. 
+
+\startDefinition
+
+The white space characters consist of the ASCII characters less than or 
+equal to the \quote{~} (space) character. Formally, 
+\defineSymb{\type{isWhiteSpace?}} is defined to be: 
+
+\starttyping
+{ dataStack top isCharacter? }
+( \space lessThanEqual )
+{ dataStack top isBoolean? }
+\stoptyping
+
+\TODO{How do I show that the \emph{same} character is still on top of the 
+data stack. The current assertions are \emph{active}. Stating that we have 
+the \quote{same} character is a rather more \emph{passive} statement. 
+Should I use a stack description language similar to that used by 
+\cite{diggins2008simpleTypeInference}?} 
+
+The structural characters consist of the ASCII characters, \quote{(}, 
+\quote{)}, \quote{\{}, \quote{\}}, \quote{"}, \quote{'}, and 
+\quote{\textbackslash}. Formally, 
+\defineSymb{\type{isStructuralCharacter?}} is defined to be: 
+
+\starttyping
+{ dataStack top isCharacter? }
+(
+  ( "(" isEqualCharacter? )
+  ( ")" isEqualCharacter? )
+  ( "{" isEqualCharacter? )
+  ( "}" isEqualCharacter? )
+  ( '"' isEqualCharacter? )
+  ( "'" isEqualCharacter? )
+  ( "\" isEqualCharacter? )
+  or
+)
+{ dataStack top isBoolean? }
+
+\stoptyping
+
+The symbol characters consist of all non-white space and non-structural 
+characters. Formally, \defineSymb{\type{isSymbolCharacter?}} is defined to 
+be: 
+
+\starttyping
+{ dataStack top isCharacter? }
+(
+  ( isWhiteSpace? not)
+  ( isStructuralCharacter? not)
+  and
+)
+{ dataStack top isBoolean? }
+\stoptyping
+
+\stopDefinition
+
+\subChapterAppendix[title=Symbols, reference=symbolSpec]
+
+\TODO{\type{explodeSymbol}, \type{createSymbol}, and \type{isSymbol?} are 
+all core methods.... how and where is this shown? } 
+
+\startDefinition 
+
+A \useWord{symbol} is an object which can be created from, or exploded to, 
+a sequence of characters. 
+
+Structural symbols, when exploded, consist of a single structural 
+character. Formally we define \defineSymb{\type{isStructuralSymbol}} to 
+be: 
+
+\starttyping
+{ dataStack top isSymbol? }
+(
+  ( explodeSymbol listLength 1 numbersEqual )
+  ( explodeSymbol isStructuralCharacter? isListOf? )
+  and
+)
+{ dataStack top isBoolean? }
+\stoptyping
+
+Non-structural or atomic symbols, when exploded, consist of a sequence of 
+arbitrary fixed length, which does not include any white-space or 
+structural characters. Formally we define 
+\defineSymb{\type{isAtomicSymbol}} to be: 
+
+\starttyping
+{ dataStack top isSymbol? }
+(
+  ( 
+    explodeSymbol
+    ( isWhiteSpace? isStructuralCharacter?  or not )
+    isListOf?
+  )
+)
+{ dataStack top isBoolean? }
+\stoptyping
+
+
+Symbols are ordered corresponding to the lexicographical ordering of their 
+exploded character sequences. Formally we define 
+\defineSymb{\type{symbolIsLessThan?}} to be: 
+
+\starttyping
+{
+  (dataStack top isSymbol?)
+  (dataStack top2 isSymbol?)
+  and
+}
+( explodeString explodeString isCharacterLessThan? isListOf?
+)
+{ isBoolean? }
+\stoptyping
+
+\TODO{The above \joylol\ code is critically missing the required swaps and 
+duplicates!!! Do the other comparison cases!} 
+
+\stopDefinition
+
+\subChapterAppendix[title=Texts, reference=textSpec]
+
+A text is a list or sequence of characters.
+
+\subChapterAppendix[title=Parsing, reference=parsingSpec]
+
+Parsing is the process of extracting a \quote{parse tree} of symbols from 
+a text. 
+
+\chapterAppendix[title=Containers]
+
+In our specification of wee beasties we assumed a number of specifications 
+of the containers, Lists, Stacks and Dictionaries. This chapter appendix 
+provides the full specifications for each of these concepts. In Computer 
+Science, a container is a structure which contains other structures. 
+Usually, but not always, all of the contained structures are of the same 
+(super) type. 
+
+\subChapterAppendix[title=Lists, reference=listSpec]
+
+A list is a container which contains a sequence of \lols.
+
+\subChapterAppendix[title=Stacks, reference=stackSpec]
+
+A stack is a container which only allows access via the push and pop 
+methods. A typical implementation would be using a list. If a dictionary 
+is known to be well-founded, then it is easy to specify that the 
+dictionary has exactly one instance of any key, value pair. If a 
+dictionary is potentially non-well-founded, it is impossible to implement 
+this uniqueness constraint. This means that the concept of 
+\quote{dictionary} has both well-founded, dictionary, as well as a 
+non-well-founded, multi-dictionary, variants. 
+
+\subChapterAppendix[title=Dictionaries, reference=dictionarySpec]
+
+A dictionary is a container which implements a key to value mapping. It 
+allows you to find a value given its key, or to add a key, value pair. 
+Similar to a dictionary, if a set is known to be well-founded, then it is 
+easy to specify that the set has exactly one instance of any element. 
+However, if a set is potentially non-well-founded, it is impossible to 
+implement this uniqueness constraint. This means that the concept of 
+\quote{set} has both well-founded, set, as well as a non-well-founded, 
+multi-set, variants. Similarly, we have well-founded powersets as well as 
+potentially non-well-founded multi-powersets respectively. 
+
+\subChapterAppendix[title={Sets and Power Sets}, reference=setSpec]
+
+\stopChapterAppendices

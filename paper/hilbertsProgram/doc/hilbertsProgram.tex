@@ -1,0 +1,101 @@
+% A ConTeXt document
+
+\usemodule[t-diSimp]
+\usemodule[t-commdiag]
+
+\setShortTitle{Hilbert's Program}
+
+\usebtxdataset[hilbertsProgramBib.lua]
+\setupbtx[apa:cite][alternative=short]
+\setupbtxrendering[apa][sorttype=short, numbering=short]
+
+\starttext
+%\showstruts
+%\showglyphs
+%\showfontkerns
+%\showmakeup[hbox]
+%\showmakeup[line]
+%\showallmakeup
+%\showlayout
+
+\placeTitlePage{Hilbert's Program Revisited}%
+  {Volume I}%
+  {Base case: $\omega$-computation}
+
+%\setvariable{diSimp}{ISBN}{1234567890123}
+\placeCopyrightPage{PerceptiSys Ltd (Stephen Gaito)}{none assigned}
+
+\blank[5*big, force]
+
+\startBlockQuote
+
+\noindent Wee, sleekit, cowrin, tim'rous beastie, \\
+O, what a panic's in thy breastie! \\
+Thou need na start awa sae hasty \\
+Wi bickering brattle! \\
+I wad be laith to rin an' chase thee, \\
+Wi' murdering pattle. \\
+(Robert Burns' \quotation{To a Mouse} November 1785)
+
+\stopBlockQuote
+
+\blank[5*big]
+
+\startBlockQuote
+
+\noindent\emph{Question:} \\
+\indent What Physics could a wee beastie write down,\\
+\indent if a wee beastie could write down Physics?
+
+\noindent\emph{Answer:} \\
+\indent Quantum Relativity.
+
+\stopBlockQuote
+
+\blank[5*big]
+
+\startBlockQuote
+
+\noindent This cycle of papers is dedicated\\
+to all beasties great and small\\
+who have given their lives\\
+so that one species can know itself.
+
+\stopBlockQuote
+
+\startfrontmatter
+\component preface
+\startchapter[title=Contents]
+  \placecontent[criterium=all]
+\stopchapter
+\stopfrontmatter
+
+\startbodymatter
+
+\part[title=Theory]
+\component introduction/introduction
+\component weeBeastie
+\component computation
+\component formal
+
+\part[title={Implementing \joylol\ in \joylol}]
+\component implementation/implementation
+
+\stopbodymatter
+
+\startbackmatter
+\chapter[title=Bibliography]
+  \placelistofpublications
+  
+\chapter[title=Glossary]
+
+\chapter[title=Symbols]
+  \placeindexSymbol
+  
+\chapter[title=Subject Index]
+  \placeindex
+
+\stopbackmatter
+
+\stoptext
+

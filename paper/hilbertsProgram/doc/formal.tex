@@ -1,0 +1,305 @@
+% A ConTeXt document [master document: hilbertsProgram.tex]
+
+\chapter[title=Formal System]
+
+By its very nature, the process of founding Mathematics is circular. All 
+previous attempts at founding Mathematics, have quietly assumed 
+\emph{Mathematical} Logic, in one form or another, as a given. Less 
+obviously, all previous foundations of Mathematics, have also implicitly 
+assumed that \emph{something} can \emph{compute} the logical validity of a 
+proof, and hence have implicitly assumed the \emph{Mathematical} theory of 
+computation. 
+
+Since we can, \quotation{from moment to moment, see that we have made 
+marks in the sand}, we will simply assume that we can \emph{compute}. But 
+\emph{if} we are going to \emph{found} Mathematics by \emph{Computing} 
+things, how do we know that what we have computed is really what we set 
+out to compute? How do we compute the validity of what we have computed? 
+What do we mean by the validity of what we have computed? 
+
+Previous attempts to found Mathematics answered their equivilant questions 
+using Logic. 
+
+Talk about Mathematicians as (Rigorous) (Computer) Language designers... 
+mathematicians design languages with which to computer interesting 
+\quote{results} in a rigorous way. 
+
+
+Talk about intuition, classical proofs, computational proofs.
+
+Talk about proof relevant mathematics and proof existent mathematics.
+
+Talk about how classical/intuitionistic constructive/non-constructive 
+debate misses the point. All of mathematics is one.. the real question is 
+which "collections" of mathematical objects admit proofs of the various 
+types. Recursive sets are classical, Recursively enumerable sets are 
+intuitionistic. non-constructive proofs require unbounded search using 
+axiom of choice. 
+
+Talk about proofs as computation traces. Proof sketches provide way-points 
+in any given computation traces. Existence of a proof-computation-trace 
+"proves" a theorem, but "having" computational traces, or various 
+way-points, provide far more information for the purposes of both 
+"understanding" and "generalization". 
+
+The "base space" of computational traces form a category, while the fibers 
+of logic or type theory, form a topos. Essentially this is because JoyLoL 
+computational traces can be concatenated but the logic "about" the 
+computational traces, must identify "things" "inside" each computation. 
+Hence we do not use variables in the base space, but we do in the fibres. 
+
+non-total computation is formally based upon the ideas from 
+lindstrom1989nonWellFoundedSetsMartinLofTypeTheory NOTE that the 
+uniformity of the computation from step to step is critical to providing a 
+well defined computation at infinity. 
+
+Object Language
+
+Meta-Language
+
+We need the ability to specify (sub)collections of \quote{computational 
+results}. 
+
+\subject[title=A Tale of many languages]
+
+talk about joylol and joylol0
+
+talk about conservative extensions
+
+talk about mathematicians/programmers versus sceptical 
+philosophers/business analysts
+
+talk about intuition being operationalized... how do we tell if we have 
+operationalized correctly? 
+
+talk about intuitive "ordinals", ""
+
+Need to "prove" something simple
+
+
+Define DictNode:
+
+\starttyping
+typedef struct joylol_object_struct {
+  JClass    *type;
+  TagType    tag;
+  FlagsType  flags; // an arbitrary collection of bits
+} JObj;
+
+typedef struct dictNode_object_struct {
+  JObj         super;
+  Symbol      *symbol;
+  JObj        *preObs;
+  JObj        *value;
+  JObj        *postObs;
+  DictNodeObj *left;
+  DictNodeObj *right;
+  DictNodeObj *previous;
+  DictNodeObj *next;
+  size_t       height;
+  long         balance;
+} DictNodeObj;
+\stoptyping
+
+\section[title=Mappae Mundi]
+
+Our foundation of mathematics is best understood as an, alas, fairly 
+complex multi-induction of a Categorical natural transformation between a 
+pair of functors. While we do not require Category theory for this 
+induction, using ideas from Category theory helps us navigate through this 
+complexity. In effect Category theory provides one (of many) mappa mundi. 
+
+The ideas required to navigate through this multi-induction, comes from 
+Bart Jacob's pair of books \cite{jacobs1999categoricalLogicTypeTheory} and 
+\cite{jacobs2017coalgebras} combined with Harel, Kozen and Tiuryn's 
+\cite{harelKozenTiuryn2000dynamicLogic} as well as Demri, Goranko and 
+Lange's \cite{demriGorankoLange2016temporalLogics}. 
+
+Coalgebras, bisimulations, modal logic, invariants and liftings of both 
+relations and predicates, permeate everything we do, 
+\cite{jacobs2017coalgebras}. In particular Modal logics via the predicate 
+lifting approach using the natural transformation between a pair of 
+functors, see Definition 6.5.1 \cite{jacobs2017coalgebras}\footnote{See 
+also \cite{kupkePattinson2011coalgModalLogics} discussion of the same 
+ideas.}, is particularly important. However \emph{the} modal logic that we 
+are after is Dynamic Logic, see sections 5.2 and 11.3 
+\cite{harelKozenTiuryn2000dynamicLogic}. This \quote{modal logic} actually 
+requires the lifting of \emph{both} predicates and relations.
+
+The critical complication comes from our need to \quote{prove} that the 
+natural transformation between the pair of functors, which is a 
+\emph{computation}, actually computes what we say it computes. To do this 
+we will make use of the tools found in 
+\cite{demriGorankoLange2016temporalLogics} culminating in the 
+\quote{Satisfiability-Checking Game for ${L}_\mu$} found in section 
+15.4.1. Central to this is the use of the least and greatest fixed point 
+operators, $\mu$ and $\nu$, in a $\mu$-modal logic variant of Dynamic 
+Logic. We will use \quote{Lawvere's mating rule} definition of $\forall$ 
+and $\exists$ as described in Jacob's Lemma 4.1.8 
+\cite{jacobs1999categoricalLogicTypeTheory}. However, since we are 
+defining a concatenative computational language, instead of forming fibres 
+over \emph{sets} of variables we fibre over lists. The fibres are then all 
+the possible \quote{valuations} of a given list. 
+
+In all of this, the critically important thing is that the \emph{syntax} 
+of the Dynamic (modal) logic is interpreted in the \emph{semantics} of the 
+coalgebra of lists of lists. In the literature\footnote{See for example, 
+\cite{jacobs2017coalgebras} section 6.5 and 
+\cite{kupkePattinson2011coalgModalLogics}.}, the \quote{predicate lifting} 
+approach, using a natural transformation between a pair of functors, while 
+syntactically more concrete, is seen as slightly more arbitrary in that 
+there are potentially more choices of syntactical functors. While strictly 
+not necessary, we will follow the more concrete syntactical 
+\quote{predicate lifting} approach to make it easier for mere mortals, 
+such as ourselves, to follow the construction. Part of this construction 
+will however emphasize how each particular syntactical structure \emph{is 
+written} in a more formal list of lists format. 
+
+In all cases, the functors we construct, are computable functions written 
+in the \joylolZero\ language which is the chosen syntax. We 
+\quote{implement} this \joylolZero\ language in two ways. Firstly the 
+natural transformation \emph{is} the implementation (interpreter) of the 
+syntax, \joylolZero, in the semantics of list of lists. However, to 
+provide a portable interpreter of the \joylolZero\ language, we annotate 
+the natural transformation with small chuncks of ANSI-C code, which when 
+collectively compiled using an ANSI-C compiler, provide an executable 
+which can interpret any \joylolZero\ code on any modern computer. In 
+particular, this means that \joylolZero\ interprets itself. 
+
+As well as annotating the natural transformation with ANSI-C code, an 
+integral part of the \joylolZero\ code which implements the natural 
+transformation, is a running Hoare logic description of the pre and post 
+conditions of each computational step. In order to keep the complexity of 
+this construction to a minimum, we keep the initial \joylolZero\ 
+interpreter (the natural transformation) as simple as possible. However, 
+this means that the \joylolZero\ interpreter is not able to make even 
+obvious inferences. Once \joylolZero\ has been accepted as correct, 
+future, more sophisticated, versions of \joylol\ can be built based upon 
+\joylolZero. In particular, these more sophisticated versions of \joylol\ 
+can be given greater inferential power with which to make the proofs of 
+computational correctness simpler. 
+
+For the rest of this subsection we sketch, using a high-level, classical, 
+Categorical point of view, the construction of the \joylolZero\ 
+interpreter. Being mappae mundi, each of the classical parts of this 
+sketch are merely suggestive of the actual construction we will need. 
+However, in each case, these mappae mundi provide useful points of 
+reference with which to orient ourselves as we build our actual 
+construction. To help keep the parallels to mind we will keep the 
+\quote{names} of each \quote{component} part we sketch here, in the final 
+construction below. 
+
+We begin by taking six \quote{component} parts from Definition 6.5.1 of 
+\cite{jacobs2017coalgebras}: 
+
+\startitemize[n]
+
+\item A functor, $F : \lol\ \rightarrow \lol$, which \quote{defines} the 
+Coalgebra of Lists of Lists. This coalgebra of Lists of Lists, \emph{is} 
+the semantics of the \joylolZero\ computational language. 
+
+\item The terminal $F$-Coalgebra $(\lol, c:\lol \rightarrow F(\lol)$. We 
+assert that this terminal coalgebra actually exists. 
+
+\item A functor, $L : \lol\ \rightarrow \lol$, which \quote{defines} the 
+Algebra of the $\mu$-modal Dynamic Logic which we call \joylolZero. This 
+algebra \emph{is} the syntax of the \joylolZero\ computational language. 
+
+\item The initial $L$-Algebra $(\text{L}, \gamma:L(\text{L}) \rightarrow 
+\text{L})$. 
+
+\item A functor, $P = 2^{(-)} : \lol^{\text{op}} \rightarrow \lol$, which 
+is the contravariant \quote{powerset} functor. 
+
+\item A natural transformation, $\delta : LP \Rightarrow PF$, which is the 
+\emph{interpreter} of the \joylolZero\ computational language. 
+
+\stopitemize
+
+\ \par
+
+Following Chapter 2 of \cite{jacobs1999categoricalLogicTypeTheory}, we can 
+view \joylolZero\ as essentially a \quote{simple type theory} with the 
+single basic type, \lol. Contexts are important. For us a context is 
+actually a (data) stack description, see 
+\cite{diggins2008simpleTypeInference}. This means that the \quote{rules} 
+of context (stack) manipulation will be slightly different for our case. 
+
+\TODO{describe the classifying category Definition 2.1.1 
+\cite{jacobs1999categoricalLogicTypeTheory}... is essentially \joylolZero\ 
+\quote{programs}. The arrows are the process stack while the objects are 
+the data stack.} 
+
+\TODO{explore the $\lambda 1$ and $\lambda 1_\times$-calculi described in 
+section 2.3 \cite{jacobs1999categoricalLogicTypeTheory}. Comment on the 
+fact that propositions as types are \joylolZero\ programs. Where do the 
+type formers fit in to our work?} 
+
+\TODO{In the terminology of \cite{jacobs1999categoricalLogicTypeTheory}, 
+the $\mu$-modal Dynamic Logic is really the \emph{simultaneous} addition 
+of a Simple Type Theory (the program part) and a First-order predicate 
+logic (the predicate part) at the same time. See Chapters 2 and 4 
+\cite{jacobs1999categoricalLogicTypeTheory}. In particular see sections 
+4.2.4 through 4.2.7 of \cite{jacobs1999categoricalLogicTypeTheory}. We 
+will retain Jabob's structured contexts by having a stack description as 
+well as a separate collection of predicate in every context.} 
+
+We will also be interested in the functorial semantics described in 
+section 2.2 of \cite{jacobs1999categoricalLogicTypeTheory}. Since we are 
+building a fixed point of the functorial semantics operator ...
+
+\TODO{describe the structure of our Dynamic Logic sections 5.1, 5.2, 11.1, 
+11.2, and 11.3 in \cite{harelKozenTiuryn2000dynamicLogic}} 
+
+What is a set? Computationally there are many ways to \emph{implement} a 
+\quote{set}. The easiest is to simply list all of the elements, 
+\emph{once} for each element. For \emph{data} it is easy to ensure a given 
+element is contained in the list exactly once. While we will show that it 
+is possible to \emph{sort} a \emph{process}, and hence remove duplicates, 
+it is equally easy to realize that one can only remove all duplicates in 
+the infinitely sorted limit. Any particular \emph{finite} sorted 
+approximation to the infinite sort, may always have multiple copies of any 
+given element. This suggests that \quote{mulit-sets} or \quote{bags} are 
+more natural \emph{computataional} equivalent to the \emph{axiomatic} 
+concept of \quote{set}. \TODO{Find references for multi-sets.}
+
+What then is the \emph{computational} equivalent of the \quote{power-set}. 
+It should be the \quote{power-multi-set}. \TODO{While the collection of 
+all sub-multi-sets of a given multi-set can include arbitrary 
+multiplicities, we \emph{should} define a \emph{sub}-multi-set to only 
+have multiplicities \emph{less than or equal to} the multiplicities of the 
+parent multi-set. We can then define a characteristic function to 
+choose/reject a given multi-set element. Then the power-multi-set is the 
+collection of all of these characteristic functions.} 
+
+\TODO{discuss functions based upon interpreted code OR lists.} 
+
+
+Finally, at the moment, we will \emph{only} provide the base case of 
+$\omega$-computational foundations. The additional computational 
+\quote{axiom} required to get us from the base case to all of mathematics 
+is simple and from a classical compuational point of view, fairly evident, 
+but will require some philosophical reflection. We leave this 
+computational \quote{axiom} until much later in this document where we can 
+give it the careful consideration it requires. 
+
+\TODO{Provide a selection of useful references to Category/Topos theory} 
+
+\section[title=Semantic Functor]
+
+\startMMundi We begin by building the Semantic Functor, $F$, together with 
+its associated $F$-Coalgebra map, $c : \lol \rightarrow F(\lol)$. Using 
+the notation from Section 2.2.2 in \cite{jacobs2017coalgebras} on 
+\quote{Binary $A$-Trees}, our $F$ functor will be essentially $F : \lol 
+\rightarrow \lol \times \lol$.\stopMMundi 
+
+\section[title=Syntaxtic Functor]
+
+We now proceed by building the Syntaxtic Functor, $L$, together with its 
+associated $L$-Algebra map, $\gamma : L(\text{L}) \rightarrow \text{L}$. 
+
+\TODO{While at the same time we will build the natural transformation, 
+$\delta : LP \Rightarrow PF$.} 
+
+\TODO{We need to build the injection from $\text{L} \rightarrow \lol$.} 
+

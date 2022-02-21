@@ -1,0 +1,23 @@
+-- A Lua Make System file
+
+require 'lms.contextDoc'
+
+contextDoc.targets{
+  mainDoc  = 'hilbertsProgram.tex',
+  docFiles = {
+    'preface.tex',
+    'introduction/introduction.tex',
+    'introduction/goals.tex',
+    'introduction/philosophy.tex',
+    'introduction/mathematics.tex',
+    'introduction/computers.tex',
+    'introduction/engineering.tex',
+    'introduction/strategy.tex',
+    'weeBeastie.tex',
+    'computation.tex',
+    'formal.tex',
+    'implementation/implementation.tex'
+  },
+  docDir    = 'doc',
+}
+

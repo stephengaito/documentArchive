@@ -1,0 +1,633 @@
+% A ConTeXt document [master document: hilbertsProgram.tex]
+
+\section[title=Some Mathematics]
+
+\subsection[title=A tale of two foundations]
+
+In this document, we are \emph{explicitly} re-founding mathematics using a 
+\emph{computational} as opposed to a \emph{logical} tool-set. To a 
+classically trained mathematician, these computational foundations will be 
+strange at first. The complexity of the foundations of any building 
+prefigure the building itself. However any foundations only make sense if 
+one reflects on what the building \emph{will be} rather than what the 
+foundations are. It is no different in mathematics. 
+
+To help overcome the initial strangeness of these computational 
+foundations, we will provide a running commentary using (as yet) classical 
+mathematical terminology. Once we have the new foundations secure we can 
+translate all of classical mathematics into the new tools. However, until 
+the foundations are secure, we need to carefully distinguish between 
+\emph{extra-foundational commentary} using classical mathematics, 
+typically, classical Category theory, and the actual re-founded 
+foundations. 
+
+\startMMundi As this paragraph shows, we will distinguish any 
+\emph{extra-foundational comments} by placing them between 
+\color[darkgray]{grey} angled over and under bars. The angled over bar 
+will also contain the words \emph{\color[darkgray]{Classical commentary}}. 
+From the beginning of the next subsection, all \emph{extra-foundational 
+comments} will be carefully delineated from the re-foundations themselves. 
+\stopMMundi 
+
+\subsection[title=What \emph{does} a Mathematician do?]
+
+\startMMundi
+
+With a \emph{computational} foundation for Mathematics, from the point of 
+view of Computer Science, the task of Mathematics, is to provide various 
+specialized \emph{rigorous programming languages}. Each of these 
+programming languages provides users, engineers, scientists and other 
+mathematicians, languages in which complicated computations are easier to 
+understand and perform. The languages of Group theory, Lie Algebras, 
+Differential Topology, Number theory, and Algebraic Geometry, are just one 
+scattered collection of examples. 
+
+Any given programming language consists of a pair of a \emph{syntax} and a 
+corresponding \emph{semantics}. The syntax defines which finite texts 
+represent valid static descriptions of the dynamic unfolding of various 
+computations. The corresponding semantics provides a compositional 
+interpretation of the meaning of any given syntactic text. In the theory 
+of Computer Science, the connection between a given syntax and a given 
+semantic model, is a collection of \emph{GSOS} laws. From a categorical 
+point of view, any collection of GSOS laws is represented by a 
+distributivity law, a natural transformation, between a pair of 
+endo-functors. The initial algebra of one of these endo-functors 
+represents the syntax of the programming language. The final coalgebra of 
+the other endo-functor represents the semantics. The natural 
+transformation itself, is effectively an \emph{interpreter} for the 
+programming language. 
+
+The importance of this description is that there can be many syntaxes 
+representing the various mathematical languages, areas or disciplines. 
+Equally, there could be many different semantics into which a given syntax 
+is interpreted. At the moment, within the logical foundation of 
+mathematics, the semantics of mathematics is generally agreed to be set 
+theory augmented with first-order logic. That is, it is generally assumed 
+that any mathematical discipline can be transcribed or interpreted in the 
+language of first-order set theory, which in turn provides a 
+\quote{rigorous} meaning to statements in the original discipline. 
+
+For a computational foundation of Mathematics, we seek a semantics in 
+which various syntaxes can be easily interpreted via GSOS laws. While 
+there may be many categorically equivalent semantics, including, for 
+example, some form of first-order set theory, we will, in this document, 
+base our semantics on Lists of Lists. We will show that these Lists of 
+Lists are effectively a fixed point of the \quote{semantic interpretation 
+functor}.
+
+A critical criteria which the Lists of Lists semantics satisfies which 
+almost any form of first-order set theory will not satisfy, is a 
+combination of textual and conceptual simplicity. Like any axiomatic 
+theory, the basic axioms must be assumed \quote{true}, or in our 
+compuational case \quote{computationally correct}. Our Lists of Lists 
+semantics will rely on a very small collection of computations which are, 
+for Lists of Lists, both textually simple and \quote{obviously 
+computationally correct}. 
+
+In this computational interpretation, what is a proof? Classically we have 
+a distinction between \emph{constructive} and \emph{(non-constructive) 
+existence} proofs. Constructive proofs are, by and large, essentially 
+computations. Indeed in one of the most common formalisms of constructive 
+logic, Per Martin-L\"of's type theory, there is a theory of how to extract 
+computational programs from the constructive type theoretic proof. 
+
+We will argue that all non-constructive existence proofs correspond to 
+searches. The proof by contradiction is essentially a proof that a given 
+search algorithm will complete, we just do not know how or when. Nor can 
+we provide a closed form solution, all we can provide is a specification 
+of what a given solution, once found, will satisfy. 
+
+Given that vanishingly few existing computer programs are proven 
+completely correct, how do we know that a given program text computes what 
+it purports to compute? At a high level, we use Hoare's system of pre and 
+post conditions and show that the given program text, if started in an 
+environment satisfying its preconditions will, if it halts, leave its 
+environment in a condition which satisfies its postconditions. Since any 
+semantic interpretation of a programming language is \emph{compositional}, 
+we can recursively apply Hoare's pre and post conditions to each sub-text 
+of a given program until we ultimately reach \emph{atomic} statements 
+which are declared to satisfy particular pre and post conditions. This is 
+not dissimilar to how we currently structure a fully formal proof in set 
+theory. 
+
+In mathematics based upon either (classical) logic or computation, we need 
+a logic. Unfortunately our existing first-order logic does not \quote{deal 
+with} the underlying dynamics of computation. Equally importantly, 
+existing (classical) logic is deemed to \emph{be} the \quote{structure} of 
+\quote{human} thought (and argumentation). That is first-order logic is 
+essentially \emph{extra-mathematical} as it pre-figures mathematical 
+discourse.
+
+The logic we will use to establish the computational correctness of a 
+given program text, will be the $\mu$-modal logic of an underlying 
+Interpreted Transition System associated with the chosen semantic model. 
+This logic is inherently designed to deal with the dynamics of 
+computation. More importantly, the $\mu$-modal logic we will define, will 
+be intimately related to the structure of our semantic interpretation of 
+computation. Once we define our semantic interpretation, the $\mu$-modal 
+logic is given. Even more importantly there are well defined algorithms 
+based upon the theory of two person parity games which can \emph{compute} 
+the satisfiability of the collection of pre and post conditions asserted 
+about any particular program text purporting to itself compute a 
+mathematical result. 
+
+So in this computational interpretation, what do typical mathematicians 
+do? Some search for new algorithms to solve new problems. Some worry about 
+finding the most conceptually elegant (efficient) algorithm to program the 
+proof of a given theorem. Others worry about the expressivity of the 
+language they use in a given discipline. Yet others worry about the 
+semantic interpretation of the particular language they use. In all of 
+these cases the annotation of any given algorithm with a satisfiable 
+collection of $\mu$-modal pre and post conditions is required for any 
+completely rigorous mathematical result. 
+
+\stopMMundi
+
+\subsection[title=Cast of thousands]
+
+\startMMundi
+
+To help us navigate through our relatively complex \quote{story}, it will 
+be useful to introduce our cast of thousands: 
+
+\startitemize[n]
+
+\item \bold{Transition Systems} the basis of $\mu$-modal logic for 
+processes. A transition system whose transition relation is transitive, is 
+a Category (and is the basis of Dynamic Logic). 
+
+\item \bold{Categories} 
+
+\item \bold{The category of \wflol s}: most important for our work will be 
+the \emph{category} of Lists of Lists, \catWFLoL. The \emph{objects} of 
+\catWFLoL\ will be the collection of \wflols. The \emph{morphisms} of 
+\catWFLoL\ will be any \emph{finite sequence} of the list operators, 
+\type{cons}, \type{car}, \type{cdr} and \type{nil}. Composition of 
+morphisms in \catWFLoL, is simple concatenation of finite sequences of list 
+operators. 
+
+\item \bold{The category of \lol s}: most important for our work will be 
+the \emph{category} of Lists of Lists, \catLoL. The \emph{objects} of 
+\catLoL\ will be the collection of \lols. The \emph{morphisms} of 
+\catLoL\ will be any \emph{finite sequence} of the list operators, 
+\type{cons}, \type{car}, \type{cdr} and \type{nil}. Composition of 
+morphisms in \catLoL, is simple concatenation of finite sequences of list 
+operators. 
+
+\item \bold{The \wflol\ functor}: $\funcWFLoL : \catWFLoL \rightarrow \catWFLoL$ 
+defined by 
+
+\placeformula[+]\startformula
+  \funcWFLoL(X) = 1 + X \times X
+\stopformula
+
+\noindent For $X \in \catWFLoL$. Note that \funcWFLoL\ is an endo-functor of 
+the category \catWFLoL. 
+
+\item \bold{The \lol\ functor}: $\funcLoL : \catLoL \rightarrow \catLoL$ 
+defined by 
+
+\placeformula[+]\startformula
+  \funcLoL(X) = 1 + X \times X
+\stopformula
+
+\noindent For $X \in \catLoL$. Note that \funcLoL\ is an endo-functor of 
+the category \catLoL. 
+
+\item \bold{Algebras of \funcLoL}: Given any 
+
+\item \bold{CoAlgebras of \funcLoL}:
+
+\item \bold{\lol functor as a monad}:
+
+\item \bold{\lol functor as a comonad}:
+
+\item \bold{Eilenberg-Moore category of \funcLoL\ as a monad}:
+
+\item \bold{Eilenberg-Moore category of \funcLoL\ as a comonad}:
+
+\item \bold{Kleisli category of \funcLoL\ as a monad}: provides the natural 
+category in which to discuss the process traces, and (eventually) space-time.
+
+\item \bold{Kleisli category of \funcLoL\ as a comonad}: ?
+
+\item \bold{Multi-sets}: We implement \quote{sets} using \lols\ using a 
+\quote{mulit-set}. Basically a multi-set is a list of elements which might 
+have multiple \quote{copies} of any given element. For 
+\quote{sets}/\quote{multi-sets} in \wflol\ we \emph{could} sort the list 
+and remove any duplicates. However, while it is possible to sort (in the 
+limit) non-well-founded objects in \lol and/or non-well-founded lists of 
+objects, any finite computational approximation will by necessity be a 
+multi-set. Hence we generally deal with mulit-sets instead of sets. 
+
+\item \bold{Multi-powerset}: Generalizing powersets we get 
+multi-powersets. The (co)(contra)variant (multi-)powerset, \powerSet, is a 
+(co)monad. 
+
+\item \bold{GSOS laws}: see \cite{jacobs2017coalgebras} definition 5.5.6 on 
+page 323. 
+
+\stopitemize
+
+\stopMMundi
+
+\subsection[title=A Beastie's environment, reference=beastieReality] 
+
+\startMMundi
+
+From a classical point of view, the atomic actions that a wee beastie can 
+perform on its environment, defines a \quote{List of Lists} or 
+\quote{Trees} \emph{endo-functor}, $T : \Set \rightarrow \Set$, from the 
+Category of sets, \Set, to itself:
+
+\placeformula[+]\startformula
+  T : \Set \rightarrow \Set
+\stopformula
+
+\noindent This functor is defined by:
+
+\placeformula[+]\startformula\startalign[n=3]
+  \NC T : \NC X \mapsto \bold{1} + X \times X \NC \quad \text{(on objects)}   \NR
+  \NC T : \NC f \mapsto \bold{1} + f \times f \NC \quad \text{(on morphisms)} \NR
+\stopalign\stopformula
+
+\noindent Let \wflol, denote the set of \emph{finite}, 
+$\omega$-computationally\footnote{For a given ordinal, $\lambda$, the 
+concept of \quote{$\lambda$-computational power}, is critical to our 
+theory. In the next volume, once we have progressed far enough to be able 
+to define the ordinals, we will define $\lambda$-computation as the 
+computing \quote{power} associated with a wee beastie whose computational 
+\quote{traces} are at most $\lambda$ in length. } well-founded, binary 
+trees. Then there is an isomorphism:
+
+\placesubformula\startformula
+  \alpha : T(\wflol) \longRightIsoArrow \wflol
+\stopformula
+
+\noindent Recalling that $T(\wflol) = \bold{1} + \wflol \times \wflol$, 
+then this isomorphism is defined by: 
+
+\placeformula[+]\startformula\startalign
+  \NC \alpha(\star) \NC = \type{nil}        \NR
+  \NC \alpha(x, y)  \NC = \type{cons}(x, y) \NR
+\stopalign\stopformula
+
+\noindent This isomorphism makes \wflol\ an \emph{initial algebra}, 
+that is an initial object in the category of $T$-algebras, 
+$\bold{Alg}(T)$.
+
+On \quote{paper}, any particular $\omega$-computationally well-founded 
+binary tree can be denoted by either a balanced collection of left and 
+right round brackets, \quote{(} and \quote{)} or a collection of the 
+functions \type{cons} and \type{nil}\footnote{The function \type{nil}, 
+being nullary, may be written with or without left, right pairs of round 
+brackets.}. For example: 
+
+\placeformula[+]\startformula\starttyping
+((() ()) ())
+\stoptyping\stopformula
+
+\noindent or alternatively 
+
+\placeformula[+]\startformula\starttyping
+cons(cons(nil, nil), nil)
+\stoptyping\stopformula
+
+\noindent both denote the binary tree:
+
+\placeformula[+]\startformula\startMPcode{commDiag}
+  setupCommDiags ;
+  
+  addObject(1,4, "\type{cons}") ;
+  addObject(2,2, "\type{cons}") ;
+  addObject(3,1, "\type{nil}") ;
+  addObject(3,3, "\type{nil}") ;
+  addObject(2,5, "\type{nil}") ;
+  
+  drawRegularObjects(1cm, 1cm) ;
+  
+  addArrow(1,4, 2,2, "-", 0)()()("", 0.5, );
+  addArrow(1,4, 2,5, "-", 0)()()("", 0.5, );
+  addArrow(2,2, 3,1, "-", 0)()()("", 0.5, );
+  addArrow(2,2, 3,3, "-", 0)()()("", 0.5, );
+
+\stopMPcode\stopformula
+
+\noindent We will explicitly provide parsers for both notations below. 
+
+Let \lol, denote the set of \emph{potentially} \emph{countably infinite}, 
+$\omega$-computationally \emph{non-well-founded}, binary trees and maps 
+between them. Then, there is an isomorphism: 
+
+\placesubformula\startformula
+  \zeta : \lol \longRightIsoArrow T(\lol)
+\stopformula
+
+\noindent Recalling that $T(\lol) = \bold{1} + \lol \times \lol$, 
+then this isomorphism is defined by: 
+
+\placeformula[+]\startformula\startalign
+  \NC \zeta(\type{nil}) \NC = \star                          \NR
+  \NC \zeta(\type{x})   \NC = (\type{car}(x), \type{cdr}(x)) \NR
+\stopalign\stopformula
+
+\noindent This isomorphism makes \lol\ a \emph{final coalgebra}, that is a 
+final object in the category of $T$-coalgebras, $\bold{CoAlg}(T)$. 
+
+Assuming a wee beastie has $\omega$-computational power, then clearly any 
+\lol\ a wee beastie might \emph{create}, from scratch, must be 
+well-founded. However, given any already \emph{existing} \lol, a wee 
+beastie can not know if it is well-founded or not. Hence, for our work, 
+the collection of \emph{non-well-founded} \lols\ is the \emph{primary} 
+collection. The sub-collection of \emph{well-founded} \lols, is important 
+but secondary. 
+
+\stopMMundi 
+
+\subsection[title=Barr's ladder]
+
+\startMMundi
+
+Because of its importance for our work we explicitly work out Barr's 
+Theorem 3.2, \cite{barr1993terminalCoalgebrasWellFounded} and 
+\cite{barr1994terminalCoalgebrasCorrection}, for the \quote{Lists of 
+Lists} or \quote{Trees} endo-functor defined above. 
+
+\blank[1ex] We begin by noting that:\blank[1ex]
+
+\startitemize[n]
+
+\item $\emptySet$ is the empty set in \Set. It is also the initial 
+object of \Set\ (up to isomorphism). 
+
+\item $\bold{1}$ is the singleton set in \Set. It is the final object of 
+\Set\ (up to isomorphism). To be definite, we will use $\bold{1} = \{ 
+\type{nil} \}$ which is the set whose only \emph{element} is 
+\quote{\type{nil}}. 
+
+\item Since $\emptySet$ and $\bold{1}$ are, respectively, the initial and 
+final objects in \Set, we know that there is a unique morphism between 
+them: $k : \emptySet \rightarrow \bold{1}$. Furthermore since there are 
+\emph{no} morphisms \emph{into} $\emptySet$, the morphism, $k$ is 
+trivially monic. Explicitly, as a mapping in \Set, the morphism $k$ has 
+the empty graph. 
+
+\item The set, $T(\emptySet) = \{ \type{nil} \} = \bold{1}$.
+
+\item The set, $T(\bold{1}) = \{ \type{nil}, (\type{nil}, \type{nil}) \} = 
+T^2(\emptySet)$. 
+
+\item Since $T(\emptySet) = \bold{1}$ and $\emptySet$ is the initial 
+object, we know that $k = j$. 
+
+\item Explicitly, $T(k) : T(\emptySet) \rightarrow T(\bold{1})$ is the 
+morphism $\bold{1} + k \times k$, hence $T(\type{nil}) = \type{nil}$ 
+
+\item Since $\bold{1}$ is the final object in \Set, there is a unique 
+morphism $t: T(\bold{1}) \rightarrow \bold{1}$. Explicitly we have:
+
+\startformula\startalign
+  \NC t(\type{nil})               \NC = \type{nil} \NR
+  \NC t((\type{nil}, \type{nil})) \NC = \type{nil} \NR
+\stopalign\stopformula
+
+\noindent Hence $t \circ T(k)$ is the identity of $T(\emptySet) = 
+\bold{1}$. In particular, $t \circ T(k)$ is surjective.
+
+\item Since there is a unique morphism between $\emptySet$ and $\bold{1}$, 
+we know that $k = t \circ T(k) \circ j$. 
+
+\item The above ensures that
+
+\startitemize[a]
+
+\item there exists unique embedding morphisms, 
+$\overstrike{j}_n : T^n(\emptySet) \rightarrow \wflol$. 
+
+\item there exists unique projection (or truncation) 
+morphisms $\overstrike{t}_n : \lol \rightarrow T^n(\bold{1}) = 
+T^{n+1}(\emptySet)$. 
+
+\item there exists a unique embedding morphism, 
+$\overstrike{j}_{\infinity} : \wflol \rightarrow \lol$. 
+
+\item there exists a unique projection (or trunction) morphism, 
+$\overstrike{t}_{\infinity} : \lol \rightarrow \wflol$. This projection 
+makes $\lol \overset{\overstrike{t}_{\infinity}}{\rightarrow} \wflol$ into 
+a fibration with \lol\ the total space and \wflol\ the base space. For a 
+complete discussion of our use of fibrations to build up logics, see 
+\cite{jacobs1999categoricalLogicTypeTheory}. \TODO{Is this s cloven split 
+firbration?} 
+
+The fibres in this fibration represent the sets of all completions of a 
+given finite tree. In the terms of Symbolic Dynamics, each fiber over a 
+given finite tree, is a cylinder. The collection of all cylinders forms a 
+basis for a topology for \lol. In fact this topology is given by the 
+metric, $d(y, y') = 2^{-n}$ for the largest $n$ for which 
+$\overstrike{t}_n(y) = \overstrike{t}_n(y')$ (see, for example, 
+\cite{barr1993terminalCoalgebrasWellFounded}). 
+
+\stopitemize
+
+\noindent As with anything in Category theory, all of the above are unique 
+\emph{up to isomorphisms}. 
+
+\item \TODO{What more needs to be stated? Look at 
+\cite{ruttenTuri1994coalgebraSemanticsConcurrency} section 3.4} 
+
+\stopitemize
+%\setupformula[location=left]
+\placeformula[left]\startformula \startMPcode{commDiag}
+  setupCommDiags ; 
+  
+  addObject(1,7, "\wflol");
+  addObject(2,1, "\emptySet");
+  addObject(2,2, "T(\emptySet)");
+  addObject(2,3, "\cdots");
+  addObject(2,4, "T^n(\emptySet)");
+  addObject(2,5, "T^{n+1}(\emptySet)");
+  addObject(2,6, "\cdots");
+  
+  addObject(3,1, "\bold{1}");
+  addObject(3,2, "T(\bold{1})");
+  addObject(3,3, "\cdots");
+  addObject(3,4, "T^n(\bold{1})");
+  addObject(3,5, "T^{n+1}(\bold{1})");
+  addObject(3,6, "\cdots");
+  
+  addObject(4,7, "\lol");
+
+  initColWidths(1.5cm);
+  initRowHeights(1.75cm);
+  colWidths[1] := 2cm;
+  colWidths[4] := 2.5cm;
+  colWidths[6] := 1cm;
+  drawObjects;
+
+  addArrow(2,1, 1,7, ">", 20)()()("\overstrike{j}_0",     0.2, );
+  addArrow(2,2, 1,7, ">", 20)()()("\overstrike{j}_1",     0.2, );
+  addArrow(2,4, 1,7, ">", 20)()()("\overstrike{j}_n",     0.2, );
+  addArrow(2,5, 1,7, ">", 20)()()("\overstrike{j}_{n+1}", 0.2, );
+  
+  addArrow(3,1, 2,2, "=", 0)()()("",           0.5, );
+  addArrow(3,2, 2,3, "=", 0)()()("",           0.5, );
+  addArrow(3,3, 2,4, "=", 0)()()("",           0.5, );
+  addArrow(3,4, 2,5, "=", 0)()()("",           0.5, );
+  addArrow(3,5, 2,6, "=", 0)()()("",           0.5, );
+
+  addArrow(2,1, 2,2, ">", 0)()()("j",          0.5, bot);
+  addArrow(2,2, 2,3, ">", 0)()()("",           0.5, );
+  addArrow(2,3, 2,4, ">", 0)()()("",           0.5, );
+  %begingroup ;  interim labeloffset := 8bp ;
+  addArrow(2,4, 2,5, ">", 0)()()("T^n(j)",     0.5, bot);
+  %endgroup ; 
+  addArrow(2,5, 2,6, ">", 0)()()("",           0.5, );
+
+  addArrow(2,1, 3,1, ">", 0)()()("k",          0.5, );
+  addArrow(2,2, 3,2, ">", 0)()()("T(k)",       0.5, );
+  addArrow(2,4, 3,4, ">", 0)()()("T^n(k)",     0.5, );
+  addArrow(2,5, 3,5, ">", 0)()()("T^{n+1}(k)", 0.5, );
+
+  addArrow(3,2, 3,1, ">", 0)()()("t",          0.5, top);
+  addArrow(3,3, 3,2, ">", 0)()()("",           0.5, );
+  addArrow(3,4, 3,3, ">", 0)()()("",           0.5, );
+  %begingroup ;  interim labeloffset := 8bp ;
+  addArrow(3,5, 3,4, ">", 0)()()("T^{n+1}(t)", 0.5, top);
+  %endgroup ; 
+  addArrow(3,6, 3,5, ">", 0)()()("",           0.5, );
+
+  addArrow(4,7, 3,1, ">", 20)()()("\overstrike{t}_0",     0.8, );
+  addArrow(4,7, 3,2, ">", 20)()()("\overstrike{t}_1",     0.8, );
+  addArrow(4,7, 3,4, ">", 20)()()("\overstrike{t}_n",     0.8, );
+  addArrow(4,7, 3,5, ">", 20)()()("\overstrike{t}_{n+1}", 0.8, );
+  
+  addArrow(1,7, 4,7, ">", 10)()()("\overstrike{j}_{\infinity}", 0.5, rt);
+  addArrow(4,7, 1,7, ">", 10)()()("\overstrike{t}_{\infinity}", 0.5, lft);
+
+\stopMPcode \stopformula
+
+\stopMMundi
+
+\startMMundi
+
+\TODO{We want to show that the \emph{category}, \catWFLoL, is a topos and 
+that the corresponding category, \catLoL, is a \emph{co}-topos. For 
+\catWFLoL, the objects are finite trees, and the morphisms are 
+\joylolZero\ \emph{computations} (traces). For \catLoL, the objects are 
+finte \quote{cylinders} on the underlying set, \lol. The morphisms are 
+again \joylolZero\ \emph{computations} (traces).} 
+
+\stopMMundi
+
+\startMMundi
+
+Definitions \in[beastieActions] and \in[beastieTests] together define a 
+pair of syntax, $\Sigma : \Set \rightarrow \Set$, and behaviour, $B : \Set 
+\rightarrow \Set$, \emph{endo-functors} from the Category of Sets, \Set, 
+to itself together with a collection of GSOS rules\footnote{See, for 
+example, \cite{turiPlotkin1997operationalSemantics}, 
+\cite{klin2011bialgebrasSOS}, and \cite{jacobs2017coalgebras}.}. 
+
+The syntax functor: 
+
+\placeformula[+]\startformula\startalign
+  \NC \Sigma : \NC \Set \rightarrow \Set           \NR
+  \NC \Sigma : \NC \bold{1} + X \times X \mapsto X \NR
+\stopalign\stopformula
+
+\noindent is defined by
+
+\placeformula[+]\startformula\startalign
+  \NC \Sigma(\star) \NC = \type{nil}        \NR
+  \NC \Sigma(x, y)  \NC = \type{cons}(x, y) \NR
+\stopalign\stopformula
+
+\noindent Let \catWFLoL, denote the sub-category of \Set\ of 
+\emph{finite}, $\omega$-computationally\footnote{For a given ordinal, 
+$\lambda$, the concept of \quote{$\lambda$-computational power}, is 
+critical to our theory. In the next volume, once we have progressed far 
+enough to be able to define the ordinals, we will define 
+$\lambda$-computation as the computing \quote{power} associated with a wee 
+beastie whose computational \quote{traces} are at most $\lambda$ in 
+length. } well-founded, binary trees, and maps between them. Then, 
+
+\placesubformula\startformula\startalign
+  \NC \Sigma : \catWFLoL \NC \rightarrow \catWFLoL        \NR
+  \NC \Sigma(\catWFLoL)  \NC \longRightIsoArrow \catWFLoL \NR
+\stopalign\stopformula
+
+\noindent is an isomorphism making \catWFLoL\ an \emph{initial algebra}, 
+that is an initial object in the category of $\Sigma$-algebras, 
+$\bold{Alg}(\Sigma)$.
+
+Similarly, the behaviour functor: 
+
+\placeformula[+]\startformula\startalign
+  \NC B : \NC \Set \rightarrow \Set           \NR
+  \NC B : \NC X \mapsto \bold{1} + X \times X \NR
+\stopalign\stopformula
+
+\noindent is defined by
+
+\placeformula[+]\startformula\startalign
+  \NC B(\type{nil}) \NC = \star                          \NR
+  \NC B(\type{x})   \NC = (\type{car}(x), \type{cdr}(x)) \NR
+\stopalign\stopformula
+
+\noindent Let \catLoL, denote the sub-category of \Set\ of 
+\emph{potentially} \emph{countably infinite}, $\omega$-computationally 
+\emph{non-well-founded}, binary trees and maps between them. Then, 
+
+\placesubformula\startformula\startalign
+  \NC \Sigma : \catLoL \NC \rightarrow \catLoL                \NR
+  \NC \catLoL          \NC \longRightIsoArrow \Sigma(\catLoL) \NR
+\stopalign\stopformula
+
+\noindent is an isomorphism making \catLoL\ a \emph{final algebra}, 
+that is an final object in the category of $\Sigma$-coalgebras, 
+$\bold{CoAlg}(\Sigma)$.
+
+
+\stopMMundi
+
+\subsection[title=Lawvere's Theorem]
+
+
+\startSectionAppendices
+\sectionAppendix[title=First section appendix]
+
+adlfjoud fodf dofoadufoudof ododu dfuosd fo dofuodfodof odfod adoiu dfosd 
+fusd aoudf odfud foud s dofosd fusdoudfoso d sdf osdf oudsodu sdfu sdf d 
+udo sd s df sd dg g dg dg dg gwg g dg dg dg adlfjoud fodf dofoadufoudof 
+ododu dfuosd fo dofuodfodof odfod adoiu dfosd fusd aoudf odfud foud s 
+dofosd fusdoudfoso d sdf osdf oudsodu sdfu sdf d udo sd s df sd dg g dg dg 
+dg gwg g dg dg dg 
+
+\subSectionAppendix[title=A test subsubsection]
+
+adlfjoud fodf dofoadufoudof ododu dfuosd fo dofuodfodof odfod adoiu dfosd 
+fusd aoudf odfud foud s dofosd fusdoudfoso d sdf osdf oudsodu sdfu sdf d 
+udo sd s df sd dg g dg dg dg gwg g dg dg dg adlfjoud fodf dofoadufoudof 
+ododu dfuosd fo dofuodfodof odfod adoiu dfosd fusd aoudf odfud foud s 
+dofosd fusdoudfoso d sdf osdf oudsodu sdfu sdf d udo sd s df sd dg g dg dg 
+dg gwg g dg dg dg 
+
+\sectionAppendix[title=Second section appendix]
+
+adlfjoud fodf dofoadufoudof ododu dfuosd fo dofuodfodof odfod adoiu dfosd 
+fusd aoudf odfud foud s dofosd fusdoudfoso d sdf osdf oudsodu sdfu sdf d 
+udo sd s df sd dg g dg dg dg gwg g dg dg dg adlfjoud fodf dofoadufoudof 
+ododu dfuosd fo dofuodfodof odfod adoiu dfosd fusd aoudf odfud foud s 
+dofosd fusdoudfoso d sdf osdf oudsodu sdfu sdf d udo sd s df sd dg g dg dg 
+dg gwg g dg dg dg 
+
+\sectionAppendix[title=Third section appendix]
+
+adlfjoud fodf dofoadufoudof ododu dfuosd fo dofuodfodof odfod adoiu dfosd 
+fusd aoudf odfud foud s dofosd fusdoudfoso d sdf osdf oudsodu sdfu sdf d 
+udo sd s df sd dg g dg dg dg gwg g dg dg dg adlfjoud fodf dofoadufoudof 
+ododu dfuosd fo dofuodfodof odfod adoiu dfosd fusd aoudf odfud foud s 
+dofosd fusdoudfoso d sdf osdf oudsodu sdfu sdf d udo sd s df sd dg g dg dg 
+dg gwg g dg dg dg 
+
+\stopSectionAppendices
