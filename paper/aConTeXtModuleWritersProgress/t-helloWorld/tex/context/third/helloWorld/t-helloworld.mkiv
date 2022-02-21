@@ -1,0 +1,204 @@
+% A ConTeXt MkIV module
+%D \module
+%D   [     file=t-helloworld,
+%D      version=2017.03.06,
+%D        title=\CONTEXT\ User module,
+%D     subtitle=Hello World in ConTeXt and LuaTeX,
+%D       author=Stephen Gaito,
+%D         date=\currentdate,
+%D    copyright=PerceptiSys Ltd (Stephen Gaito),
+%D        email=stephen@perceptisys.co.uk,
+%D      license=MIT License]
+
+%C Copyright (C) 2017 PerceptiSys Ltd (Stephen Gaito)
+%C
+%C Permission is hereby granted, free of charge, to any person obtaining a 
+%C copy of this software and associated documentation files (the 
+%C "Software"), to deal in the Software without restriction, including 
+%C without limitation the rights to use, copy, modify, merge, publish, 
+%C distribute, sublicense, and/or sell copies of the Software, and to 
+%C permit persons to whom the Software is furnished to do so, subject to 
+%C the following conditions: 
+%C
+%C The above copyright notice and this permission notice shall be included 
+%C in all copies or substantial portions of the Software. 
+%C
+%C THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+%C OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+%C MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+%C IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+%C CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+%C TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+%C SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+% begin info
+%
+% title   : Hello World in ConTeXt and LuaTeX
+% comment : An ultra simple example ConTeXt module
+% status  : under development, mkiv only
+%
+% end info
+
+%M \usemodule[helloworld]
+%M \loadsetups[t-helloworld.xml]
+
+%M \setupinteraction
+%M   [state=start,
+%M    color=green,
+%M    style=bold]
+%M % make chapter, section bookmarks visible when opening document
+%M \placebookmarks[chapter,section,subsection][chapter,section]
+%M \setupinteractionscreen[option=bookmark]
+
+%D \startsection[title=Introduction]
+
+%D The HelloWorld \ConTeXt\ module is intentionally simple. All it does is 
+%D say Hello. Its primary purpose is to provide a simple example module 
+%D with which to discuss the most often used core \ConTeXt\ module 
+%D building commands. 
+
+%D \listnamespaces\
+
+%D \stopsection
+
+\unprotect
+
+% Question: Do we need to define any constants or variables?
+
+\installnamespace{helloWorld}
+
+\installcommandhandler \????helloWorld {helloWorld} \????helloWorld
+
+
+%D \startsection[title=Hello World command]
+
+%D \startsubsection[title=Examples]
+
+%D This is a test of the Hello World \ConTeXt\ module. 
+
+%D The following \type{\helloWorld} macros, with and without the optional 
+%D argument, use \ConTeXt\ to write the words `Hello World' and `Hello 
+%D Chris' respectively. 
+
+%D The command \type{\helloWorld} produces:
+
+%D \helloWorld
+
+%D The command \type{\helloWorld[Chris]} produces:
+
+%D \helloWorld[Chris] 
+
+%D The command \type{\helloWorld[Bonjour][Chris]} produces:
+
+%D \helloWorld[Bonjour][Chris] 
+
+%D %\helloWorld[color=blue][Chris] 
+
+%D \stopsubsection
+
+%D \startsubsection[title=Implementation]
+
+\unexpanded\def\helloWorld{\dodoubleempty\helloWorld_direct}
+
+\def\helloWorld_direct
+  {\ifsecondargument
+     \expandafter\helloWorld_direct_double
+   \else\iffirstargument
+     \doubleexpandafter\helloWorld_direct_single
+   \else
+     \doubleexpandafter\helloWorld_direct_none
+   \fi\fi}
+
+\def\helloWorld_direct_double[#1][#2]{#1 #2!}
+   
+\def\helloWorld_direct_single[#1][#2]{Hello #1!}
+   
+\def\helloWorld_direct_none[#1][#2]{Hello World!}
+
+%D \stopsubsection
+%D \stopsection
+
+%D \startsection[title=Hello World environment]
+
+%D \startsubsection[title=Examples]
+
+%D \starttyping
+%D \startHelloWorld 
+%D 
+%D \input darwin
+%D
+%D \stopHelloWorld
+%D \stoptyping
+%D produces:
+
+%D \startHelloWorld 
+%D
+%D \input darwin
+%D
+%D \stopHelloWorld
+
+%D \stopsubsection
+
+%D \startsubsection[title=Implementation: Start]
+
+\unexpanded\def\startHelloWorld{\dodoubleempty\helloWorld_start}
+
+\def\helloWorld_start
+  {\ifsecondargument
+     \expandafter\helloWorld_start_double
+   \else\iffirstargument
+     \doubleexpandafter\helloWorld_start_single
+   \else
+     \doubleexpandafter\helloWorld_start_none
+   \fi\fi}
+
+\def\helloWorld_start_double[#1][#2]{starting: #1 #2!}
+   
+\def\helloWorld_start_single[#1][#2]{starting: Hello #1!}
+   
+\def\helloWorld_start_none[#1][#2]{starting: Hello World!}
+
+%D \stopsubsection
+
+%D \startsubsection[title=Implementation: Stop]
+
+\unexpanded\def\stopHelloWorld{\dodoubleempty\helloWorld_stop}
+
+\def\helloWorld_stop
+  {\ifsecondargument
+     \expandafter\helloWorld_stop_double
+   \else\iffirstargument
+     \doubleexpandafter\helloWorld_stop_single
+   \else
+     \doubleexpandafter\helloWorld_stop_none
+   \fi\fi}
+
+\def\helloWorld_stop_double[#1][#2]{stopping: #1 #2!}
+   
+\def\helloWorld_stop_single[#1][#2]{stopping: Hello #1!}
+   
+\def\helloWorld_stop_none[#1][#2]{stopping: Hello World!}
+
+%D \stopsubsection
+
+%D \stopsection
+
+%D \startsection[title=Hello Lua command]
+
+%D The \type{\helloLua} macros use lua to write the words `Hello World' 
+%D and `Hello Chris' to the \LuaTeX\ logs and console. 
+
+%D %\helloLua\
+
+%D %\helloLua[Chris]
+
+
+\unexpanded\def\helloLua{\directlua{texio.write_nl("Hello from Lua!")}}
+
+%D \stopsection
+
+%D \startsection[title=Hello Lua environment]
+
+%D \stopsection
+
+\protect \endinput

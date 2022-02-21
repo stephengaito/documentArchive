@@ -1,0 +1,176 @@
+% A ConTeXt document [master document: moduleWriting.tex ]
+
+\startcomponent documentation
+
+\useURL[cGarden][http://wiki.contextgarden.net][][ConTeXt Garden Wiki]
+\useURL[cRef][http://pmrb.free.fr/contextref.pdf][][ConTeXt reference manual]
+\useURL[cExcursion][http://wiki.contextgarden.net/ConTeXt,_an_excursion][][ConTeXt Mark IV an excursion]
+\useURL[cStandalone][http://wiki.contextgarden.net/ConTeXt_Standalone][][Standalone Installation instructions]
+
+
+
+\startchapter[title=Documentation]
+
+\startsection[title=Finding out how to do things]
+
+As the \goto{\ConTeXt\ Garden wiki}[url(cGarden)] suggests the best place 
+for a \emph{document} writer to begin learning \ConTeXt\ is by reading 
+either the \goto{\ConTeXt\ Reference Manual}[url(cRef)] or the 
+\goto{\ConTeXt\ Mark IV, an excursion}[url(cExcursion)]\footnote{However, 
+the 'Excursions' document linked to from the \ConTeXt\ Garden wiki is 
+rather old. The most up to date version can be found in the doc 
+subdirectory of any local \goto{Standalone installation}[url(cStandalone)] 
+in the directory 
+\type{tex/texmf-context/doc/context/documents/general/manuals/ma-cb-en.pdf}} 
+document. 
+
+For a \emph{module} writer, the documentation, while copious, is spread 
+more widely. Again the best places to start are still the reference and 
+excursion manuals. Inside any \goto{Standalone 
+installation}[url(cStandalone)] there is a collection of current manuals 
+located in the directory 
+\type{tex/texmf-context/doc/context/documents/general/manuals}.
+
+\startsubsection[title=Local web-servers]
+
+More importantly are the comments contained in the \ConTeXt\ source code 
+it self. Assuming you have installed the \goto{Standalone 
+installation}[url(cStandalone)], the \type{mtxrun --script server --auto} 
+command will provide a local web-server which can be used, among other 
+things, to browse the primary collection of \ConTeXt\ commands, their 
+syntax and more importantly the \ConTeXt\ module file which contains the 
+command definition. \ConTeXt's core module code is very cleanly written 
+and more importantly contains supporting discussion of the intent behind 
+the higher level command definitions. All of this code and discussion can 
+be easily found using your browser's find in page function. 
+
+This module provides the \type{mtxrun --script xrefs --build} command 
+which walks through the code in a local standalone copy of \ConTeXt\ to 
+produce a collection of static cross reference web-pages. By default these 
+pages are created in the \type{xrefs} directory located beside the main 
+\type{tex} directory of your standalone installation. You can use any 
+web-server to server these pages. These cross reference web-pages provide 
+a simple tool to browse the existing \ConTeXt\ source code, together with 
+collections of links to the usage of important commands. These cross 
+reference web-pages also provide a way to browse the existing the 
+\ConTeXt\ interface definition XML syntax, together with all known 
+examples of each XML entity's use. 
+
+To use either of these commands, it is important to remember to 
+\type{mtxrun --generate} after any major change to your standalone 
+installation. For Unix users, this module has provided, in the \type{bin} 
+directory, simple bash scripts which can be used to automate the running 
+of these web-servers. 
+
+\stopsubsection
+
+\stopsection
+
+\startsection[title=Providing documentation]
+
+There are two ways to document a given \ConTeXt\ module, by either providing 
+documentation embedded in the module definition file, or conversely by 
+writing various \ConTeXt\ documents. 
+
+\startsubsection[title=Internal documentation]
+
+The \ConTeXt\ module documentation system makes use of \TeX\ comments 
+embedded inside the module definition files to provide literate 
+programming style documentation of the macro definitions for any given 
+module. 
+
+There are four distinct types of document comments, in each case 
+
+\startitemize
+
+\item Standard \TeX\ comments begin with a \type{%} character and continue 
+until the end of the current line of text. Any such comments will be embedded 
+into the definitional section of the module documentation. For example:
+
+\starttyping
+
+% begin info
+%
+% title   : ConTests: Unit testing for \CONTEXT\
+% comment : Unit testing for \CONTEXT\ using LunaTest
+% status  : under development, mkiv only
+%
+% end info
+
+\stoptyping
+
+\item In a Copyright section, each line begins with \type{%C} and continues 
+to the end of the current line. For example:
+
+\starttyping
+
+%C Copyright (C) 2017 PerceptiSys Ltd (Stephen Gaito)
+%C
+%C Permission is hereby granted, free of charge, to any person obtaining
+%C a copy of this software and associated documentation files (the 
+%C "Software"), to deal in the Software without restriction, including 
+%C without limitation the rights to use, copy, modify, merge, publish, 
+%C distribute, sublicense, and/or sell copies of the Software, and to 
+%C permit persons to whom the Software is furnished to do so, subject
+%C to the following conditions:
+%C
+%C The above copyright notice and this permission notice shall be included 
+%C in all copies or substantial portions of the Software.
+%C
+%C THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+%C OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+%C MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+%C IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+%C ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+%C TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+%C SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+\stoptyping
+
+\item In a 
+
+\stopitemize
+
+The following description of the documentation comments has been taken from 
+the \type{mtx-modules.lua} file in the 
+\type{<contextInsallation>/tex/texmf-context/scripts/context/lua} directory. 
+
+\starttyping
+
+-- Documentation can be woven into a source file. This script can generates
+-- a file with the documentation and source fragments properly tagged. The
+-- documentation is included as comment:
+--
+-- %D ......  some kind of documentation
+-- %M ......  macros needed for documenation
+-- %S B       begin skipping
+-- %S E       end skipping
+--
+-- The generated file is structured as:
+--
+-- \starttypen
+-- \startmodule[type=suffix]
+-- \startdocumentation
+-- \stopdocumentation
+-- \startdefinition
+-- \stopdefinition
+-- \stopmodule
+-- \stoptypen
+--
+-- Macro definitions specific to the documentation are not surrounded by
+-- start-stop commands. The suffix specification can be overruled at runtime,
+-- but defaults to the file extension. This specification can be used for language
+-- depended verbatim typesetting.
+--
+-- In the mkiv variant we filter the \module settings so that we don't have
+-- to mess with global document settings.
+
+\stoptyping
+
+\stopsubsection
+
+\stopsection
+
+\stopchapter
+
+\stopcomponent
