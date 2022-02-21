@@ -1,0 +1,122 @@
+%% Introduction
+
+\chapter{Introduction}
+
+What is a computation? Turing, \cite{turing1936computableNumbersMachines}, is cited by
+G\"odel, \cite[page 195]{godel1986collectedWorksI} (as quoted in
+\cite{sieg2006godelComputability}), as providing the first convincing \emph{mechanistic}
+mathematical definition of a computational process as performed by a human. Turing's
+student, Gandy, \cite{gandy1980churchsThesisMechanisms}, provided a similar
+\emph{mechanistic} mathematical definition of a computational process as performed by a
+\emph{finite machine}. Both Turing and Gandy focused upon providing arguments justifying
+why particular mathematical structures provided reasonable definitions of computational
+\emph{devices}. In order to understand potentially trans-finite computation, we will take
+an essentially dual approach. We will look at mathematical structures which represent
+\emph{traces} of a (trans-finite) computation, and then work back to mathematical
+structures which could have produced these traces. Rather surprisingly, to capture
+\emph{trans-finite} computational traces, we are forced investigate conveniently
+structured labelled graphs known as \emph{categories}.
+
+What is a computation? Any \emph{description} of a computational process made by a finite
+being, will inevitably consist of a collection of ``marks in the sand'', ink-marks on
+paper, or bit-patterns in the memory of a computer. Theoretical Computer Science has three
+ways of verifying properties of the computational processes represented by these
+collections of symbols. 
+%
+\begin{itemize}
+%
+\item \define{Operational Semantics}{},
+\cite{plotkin1981structuralOperationalSemantics}, provides a description of a transition 
+system which models a program.
+%
+\item \define{Denotational
+Semantics}{}, \cite{scott1970theoryComputation, stoy1981scottStracheyTheory}, provides
+mathematical structures which represent the underlying \emph{state} of a compuation.
+%
+\item \define{Axiomatic Semantics}{}, \cite{floyd1967programSemantics, 
+hoare1969axiomaticSemantics} provides an axiomatic system of natural deduction rules with 
+which to \emph{prove} that a program meets a specific \emph{logical} specification.
+%
+\end{itemize}
+%
+Winskel, \cite{winskel1993formalSemanticsProgrammingLanguages}, provides a good
+introduction to these three types of computational semantics\footnote{Not surprisingly the
+ideas contained in this article were originally inspired by Winskel's study of
+computational traces using event structures and bisimulation, see, for example,
+\cite{winskel2007eventStructures}, and \cite{joyalNielsenWinskel1996bisimulation}}. Gries,
+\cite{gries1981scienceProgramming}, provides a particularly detailed account of building
+programs via their axiomatic semantical proofs of correctness.
+
+What is a computation? A \define{computation}{} is the transformation of one mathematical
+structure representing an un-transformed \define{state}{} into a correspondingly modified
+mathematical structure representing the transformed state. Essentially the genius of
+Turing and Gandy was to define those transformations which a finite human, or machine
+could perform. What happens if we place no such restrictions? If there are no
+restrictions, how do we know what a computation computes?
+
+\TODO{merge these different introductions}
+
+This paper is a prequel to our cycle of papers aiming to provide a rigorous mathematical
+theory of what limited, ``Modi-potent'', beings can understand of Reality. One of the
+central tenets of this ``Theory of Reality'' is that the correct foundations of
+Mathematics is not first order logic but rather computation. However to recover all of
+classical mathematics inside these computational foundations, we need a theory of
+computation which is more powerful than classical (non oracle) Turing machines allow. This
+paper provides definitions of these more powerful, trans-finite Turing machines in a
+classical Set Theory setting. Subsequent papers will redo these definitions in the context
+of computational foundations.
+
+There have been numerous previous attempts to define ``more powerful'' Turing machines,
+some of which, for example, oracle or ``o-machines'', date back to Turing's original work.
+More recently the area of ``hypercomputation'' has attracted some interest, some of which
+is rather controversial. Ord, \cite{ord2006hyperComputation}, provides a good review of
+much of this work\footnote{For a high-level overview with some additional citations, see
+the Wikipedia articles, \cite{wikipedia2015hyperComputation} and
+\cite{wikipedia2015superRecursiveAlgorithm}, as well as the nLab article,
+\cite{nLab2015hyperComputation}}. Some authors claim that there (may) exist physical
+implementations of hypercomputational devices, \emph{we make \emph{no} such claims}.
+Davis, \cite{davis2004hyperComputation}, provides a summary of some of the arguments
+against these claims. Instead, our interest comes from our desire to capture
+non-constructive classical mathematics in a computational setting. Indeed the current work
+provides a context in which the various ``hypercomputational'' schemes can be compared and
+understood.
+
+\TODO{\cite{hamkinsLewis1998inifiniteTimeTuringMachines}}
+
+Our aim in this paper is to explicitly explore a more uniform definition of Turing machine
+which will differ simply in the power of the maximal ordinal used by the Turing machine.
+We do this using ``classical'' socially checked proofs using ``classical'' set theory. You
+are welcome to choose your favourite axiomization using first order predicate logic. In
+subsequent papers we will found mathematics using a form of trans-finite computation which
+is equivalent to our current definition of trans-finite Turing Machine. 
+
+Classically, the interest and hence the definitions of both computation and set theory,
+have been focused upon computations which \emph{halt} and sets which are
+\emph{well-founded}. Our computational foundations will admit that there are some
+interesting computations and structures which do not halt or, alternatively, are
+non-well-founded. In categorical terms the halting computations and well-founded sets are
+\emph{algebraic}, while the non-halting processes and non-well-founded structures are
+\emph{co-algebraic}. While we will not make any use of co-algebraic structures in this
+paper, our subsequent papers will make essential use of these co-algebraic structures.
+
+Of particular importance for either the classical or computational definitions of
+trans-finite computation, is the power of the Axiom of Choice(s) used. For our purposes
+there are three versions of the Axiom of Choice, in increasing power:
+%
+\begin{enumerate}
+\item Prime Ideal Theorem (PIT)
+\item Axiom of Choice (AoC)
+\item Global Axiom of Choice (GAoC)
+\end{enumerate}
+
+The Prime Ideal Theorem (PIT) is used to define the ``result'' of computation at
+limit ordinals, which corresponds to creation of limit points or alternatively
+the closure, via ``ideal points'' of any computation.
+
+The Axiom of Choice (AoC) itself, is used to define sequential computation, or
+equivalently, to ensure the existence of lists of any required ordinal size.
+
+While we will not use the Global Axiom of Choice (GAoC) in any essential way in
+our work, we will see that the GAoC is required to ensure the existence of
+co-algebraic lists, when we work, in subsequent papers, with Co-Algebraic
+structures.

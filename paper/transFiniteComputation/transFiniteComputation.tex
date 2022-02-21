@@ -1,0 +1,93 @@
+% LaTeX source for the trans-finite Turing document
+%
+\documentclass[a4paper,openany]{amsbook}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[tikzAll]{disitt}
+\usepackage{disitt-symbols}
+\usepackage[backend=biber,style=alphabetic,citestyle=alphabetic]{biblatex}
+\addbibresource{transFiniteComputation.bib}
+\usepackage{mdframed}
+\newmdenv[linecolor=white,backgroundcolor=gray!10]{infobox}
+\newenvironment{myQuote}{\begin{quotation}}{\end{quotation}}
+\surroundwithmdframed[linecolor=white,backgroundcolor=gray!10]{myQuote}
+
+\begin{document}
+\frontmatter
+\sloppy
+
+\title[Computation: Classical version]{Trans-finite Computation: The classical version}
+\input{frontMatter}
+\subjclass[2010]{Primary unknown; Secondary unknown} %
+\keywords{Keyword one, keyword two etc.}%
+
+\begin{abstract}
+We investigate what it means for a finite being to verify trans-finite computational
+algorithms.
+\end{abstract} 
+\maketitle 
+\tableofcontents 
+\mainmatter
+
+\input{introduction}
+
+\input{time}
+
+\input{spaceTime}
+
+\chapter{State machines}
+
+\begin{definition}
+
+A state machine... A finite state machine is a state machine ...
+
+\end{definition}
+
+\subsection{$\aleph_0$-non-deterministic Turing Machine}
+
+\subsection{o-machines}
+
+\section{Trans-finite defintions}
+
+\section{Relationship with o-machines}
+
+\begin{theorem}
+
+Given a set, $\gamma$, there exists a trans-finite Turing machine, $T$, corresponding to
+the $\gamma$-o-machine, $O$.
+
+\end{theorem}
+
+
+\begin{theorem}
+
+Given a trans-finite Turing machine, $T$, there exists a set, $\gamma$, and a
+$\gamma$-o-machine, $O$, that simulates $T$.
+
+\end{theorem}
+
+\begin{proof}
+something proving the previous theorem.
+\end{proof}
+
+\chapter{Trans-finite computability theory}
+
+\chapter{Reflections}
+
+Tukey's lemma, \cite[Maximal Principle II, page 10]{jech1973axiomOfChoice}, seems rather
+anomalous since, of the equivalent forms of the Axiom of Choice, it is the only one to
+\emph{explicitly} mention the finite/infinite boundary. In fact if we look carefully at
+the \emph{proof} of the equivalents, \cite[Theorem 2.1, page 10]{jech1973axiomOfChoice},
+trans-finite induction is used at least twice.  A deep question is: ``would an infinite
+being have a more powerful, from our point of view, concept of the finite-infinite
+boundary and hence a more powerful trans-finite induction?'' In other words would an 
+infinite being have a different concept of what ``finite'' means?
+
+For us, as finite beings, what the Tukey's lemma anomaly is ``saying'' is that, finite
+beings can only ever obtain a \emph{finite}, and hence limited, description of the
+``full'' mathematics of an infinite being. That is the finite/infinite boundary of 
+trans-finite induction provides a fundamental boundary for any finite being.
+
+\printbibliography
+\end{document}
+
