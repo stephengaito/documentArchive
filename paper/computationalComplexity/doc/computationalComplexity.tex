@@ -1,0 +1,57 @@
+% A ConTeXt document
+
+\usemodule[t-diSimp]
+\usemodule[t-commdiag]
+
+\setShortTitle{Computational Complexity}
+
+\usebtxdataset[computationalComplexityBib.lua]
+\setupbtx[apa:cite][alternative=short]
+\setupbtxrendering[apa][sorttype=short, numbering=short]
+
+\starttext
+%\showstruts
+%\showglyphs
+%\showfontkerns
+%\showmakeup[hbox]
+%\showmakeup[line]
+%\showallmakeup
+%\showlayout
+
+\placeTitlePage{A look at Computational Complexity using JoyLoL}%
+  {}%
+  {}
+
+%\setvariable{diSimp}{ISBN}{1234567890123}
+\placeCopyrightPage{PerceptiSys Ltd (Stephen Gaito)}{none assigned}
+
+
+\startfrontmatter
+\component preface
+\startchapter[title=Contents]
+  \placecontent[criterium=all]
+\stopchapter
+\stopfrontmatter
+
+\startbodymatter
+
+\component introduction
+
+\stopbodymatter
+
+\startbackmatter
+\chapter[title=Bibliography]
+  \placelistofpublications
+  
+\chapter[title=Glossary]
+
+\chapter[title=Symbols]
+  \placeindexSymbol
+  
+\chapter[title=Subject Index]
+  \placeindex
+
+\stopbackmatter
+
+\stoptext
+
