@@ -1,0 +1,9 @@
+-- A Lua Make System file
+
+require 'lms.contextDoc'
+
+contextDoc.targets{
+  mainDoc  = 'realAnalysis.tex',
+  docDir    = 'doc',
+}
+
