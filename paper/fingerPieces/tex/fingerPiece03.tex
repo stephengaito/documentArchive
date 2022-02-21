@@ -1,0 +1,390 @@
+% building Plato's engine
+
+\TODO{We take Cantor's \emph{improper-infinite} seriously. See
+\cite{cantor1996earlyPapersTransfinite} in among other letters/documents section
+2 (page 884) and section 4 paragraph 4 page 888 of Cantor's Grundlangen. NEED to
+find section where Cantor describes what will become known variously as
+Burali-Forti or Cantor's paradox. Note that in this section Cantor clearly
+considers the proper-infinite as well-founded, where as the improper infinite is
+(by implication) non-well-founded.}
+
+\TODO{cite simpson1988hilbertsProg and zach2006hilbertProgram on summary of
+Hilbert's program} \TODO{history of Leibniz's (logic) calculus see endnote 6 in
+sieg1994mechanicalProceeduresMathematics} \TODO{why logic? see page 74
+sieg1994mechanicalProceeduresMathematics}
+
+While few mathematicians realise it, the primary activity of Mathematics is to
+create (Domain Specific) Computational Languages, otherwise known as Programming
+Languages. Those scientists and engineers who \emph{use} mathematics, use it to
+\emph{compute} useful values given a \emph{mathematical} model and
+various observations. Even ``pure'' mathematicians \emph{compute} the truth of a
+proposition. The (current) foundations of Mathematics are predicated on the
+assumption that the truth of any mathematical statement can be proven using
+first order logic together with the axioms of set theory. Proof theory is really
+the study of how these proofs \emph{compute} the \emph{truth} of a statement.
+
+The \emph{problem} with the current foundations of mathematics is that, given
+the `Liar paradox', \emph{computing truth} is problematic, since the
+\emph{semantic meaning of truth} can be encoded in the syntactic structure of
+any sufficiently interesting theory based on first order logic. This is the
+substance of both Russell's paradox as well as G\"odel's proof that first order
+theories can not be both consistent and complete.
+
+As practised, mathematics is really a \emph{collection} of loosely inter-related
+languages. The ``purpose'' of set theory is to provide a ``universe'' of
+mathematical objects within which ``normal'' mathematics can be understood to
+exist. We accept the existence and (relative) consistency of these languages by
+(ultimately) interpreting them in set theory, which is itself just one of the
+many languages. In fact there are a number of different languages which we
+``accept'' as ``set theory''. Since all of these languages, set theory or not,
+are ultimately based upon logic and the computation of truth we can only ever
+``prove'' relative consistency of one language by interpreting it in another. In
+particular, we ``accept'' the consistency of one set theory by interpreting it
+in another set theory.
+
+Instead of computing the truth of the existence of mathematical objects using
+the axioms of the first order set theory, we show that we can directly
+\emph{compute} these objects using a small collection of intuitively simple
+computational primitives. In fact there are a number of equivalent small
+collections of computational primitives we could choose from. The type-less
+$\lambda$-calculus is certainly one of these.
+
+In order to ``compute'' the \emph{whole} of classical mathematics, at least one
+of these simple computational primitives will have to be as ``powerful'' as the
+Axiom of Choice. We will show that \emph{transfinite} computation is equivalent
+to the Axiom of Choice. The simplest way to define an intuitively meaningful
+notion of transfinite computation, is to use transfinite lists, alternatively
+known as sequences. While the type-less $\lambda$-calculus can certainly define
+both lists and numbers, we prefer to use a variant of Pure Lisp since lists and
+the manipulation of lists are ``first class'' computational primitives in Lisp.
+``Pure (1.5) Lisp'', \cite{mcCarthy1960lisp}, uses recursion in the form of the
+``lambda'' operator and application. We choose to replace recursion with
+iteration in the form of the ``while/do'' operator.
+
+To define transfinite computation we will need to begin by defining the
+ordinals. For each ordinal there is a corresponding concept of computation up to
+that ordinal. We will define the transfinite ordinals essentially in the same
+way that Cantor did. \TODO{choose correct reference}
+
+Given that it is generally assumed that we, as finite beings, are only capable
+of finite computation, how do we know if a transfinite computation is
+``correct''? Theoretical Computer Science has three answers to this problem:
+denotational, operational and axiomatic semantics, based roughly on Tarski's
+semantic interpretation of truth, Gentzen's proof theory, and Type-theory
+respectively. While the computational versions of semantics ultimately depend
+upon mathematical set theory, we will use these concepts to define a fixed point
+interpretation of our variant of Pure Lisp, and hence a \emph{computational}
+foundation for Mathematics. Essentially we will follow Hilbert's original
+program but replace logic with transfinite computation.
+
+\begin{myQuote}
+As every self respecting Computer Scientist knows, Plato's universe does not
+consist of a collection of ``Sets'' but rather a ``collection'' of Lists of
+Lists. \quad ``Before the Set, was the List''
+\end{myQuote}
+
+Our objective is to compute a universe of objects, Plato's Wilderness, suitable
+to provide the foundations of Mathematics. We do this by defining Plato's
+Programming Language, (PPL).
+
+\section{Criteria for any Foundation of Mathematics}
+
+Following Hatcher, \cite{hatcher1982logicalFoundationsMath}, we posit the
+following list of critera any Foundation of Mathematics must satisfy:
+
+\begin{enumerate}
+\item \textbf{A foundation of mathematics must be adequate for a reasonably large
+portion of mathematics.}
+
+\noindent If we ``assume'' something as powerful as the Axiom of Choice, we will
+be able to recover the whole of current mathematical set theory (smaller than
+the first strongly inaccessible cardinal).
+
+\item \textbf{A foundation must derive from some intuitively natural principles.}
+
+\noindent The foundational (co-)data language \emph{is} the List of Lists. The
+only operations on this language are LISP's car, cdr, cons, together with
+failure and repetition.
+
+\item \textbf{The basic principles and primitive (undefined) notions should be
+as economical as possible.}
+
+\noindent See above.
+
+\item \textbf{The foundation must be consistent.}
+
+\noindent For a computational foundation, consistency is given since we are
+\emph{computing} the (standard) model of the formal theory. What is more
+important is that the formal theory is fully abstract, that is the denotation
+and operational semantics are equivalent, in logical terms, the formal theory is
+both sound and complete.
+
+\item \textbf{The foundation should be expressed (or expressible) as a formal system.}
+
+\noindent In computational terms, each formal system is a (programming) language
+complete with a syntax as well as denotational, operational and axiomatic
+semantics. Every such formal system \emph{must} have (at least) a denotational
+interpretation into the foundational (co-)data language.
+
+\item \textbf{The construction of everyday mathematics in the system should be
+``natural'' and ``orderly''.}
+
+\noindent With the proposed computational foundations of mathematics, there is a
+collection of formal theories each of which have (at least) an interpretation in
+the (co-)data language. Each of these formal theories should be tailored to the
+mathematical field in question, so by definition they should represent
+``natural'' and ``orderly'' systems in which to conduct mathematics in a given
+field.
+
+\end{enumerate}
+
+\section{Plato's Wilderness: Base Case: The Playground}
+
+Before we define transfinite computation, we will begin with the slightly
+``easier'' finite computation.  We loosely follow LISP 1.5's example,
+\cite{mcCarthy1960lisp}, by organising our Plato language as a tower of
+different types of expressions, the bottom layer being the object expressions
+and the top layer being meta-expressions. We also loosely follow Mike Gordon's
+1973 PhD thesis, \cite{gordon1973semanticsPureLisp}, to work through the
+semantics of our form of Plato's language.
+
+
+\begin{cTikzPictureWorking}
+
+\fill[orange!20!white] (0,0) -- (8,0) -- (8,6) -- (0,6)
+  -- (0,5) -- (7,5) -- (7,1) -- (0,1) -- (0,0);
+
+% outer box
+\path (0,0) edge (8,0);
+\path (0,0) edge (0,6);
+\path (8,0) edge (8,6);
+\path (0,6) edge (8,6);
+
+% L-expression box
+\path (5,1) edge (5,2);
+\path (2,1) edge (2,2);
+\path (2,2) edge (5,2);
+
+% S-expression box
+\path (0,1) edge (7,1);
+\path (0,3) edge (7,3);
+\path (7,1) edge (7,3);
+
+% M-expression box
+\path (2,4) edge (5,4);
+\path (7,3) edge (7,5);
+
+% M_F-expression box
+\path (0,5) edge (7,5);
+\path (2,4) edge (2,5);
+\path (5,4) edge (5,5);
+
+% dashed boundary
+\path (7,2) edge[dashed] (8,2);
+
+\node at (4,5.7)   {(Universal) Interpreter - Process};
+\node at (4,5.25)  {(Co-algebra)};
+\node at (3.5,4.5) {M$_F$-expression};
+\node at (3.5,3.5) {M-expression};
+\node at (3.5,2.5) {S-expression};
+\node at (3.5,1.5) {S$_{\emptySet}$-expression};
+\node at (4,0.7)   {(Universal) Interpreter - Memory};
+\node at (4,0.25)  {(Algebra)};
+
+\end{cTikzPictureWorking}
+
+The processor part of the interpreter, could be a human, a computer, or a Lisp
+machine. The memory part of the interpreter, could be sand, paper, an abacus,
+computer RAM, or Lisp machine list memory.
+
+An L-expression is that subset of all Lisp S-exrepssions which have no atoms
+other than NIL, and hence are pure Lists of Lists.
+
+Our objective is to build an interpreter, like John McCarthy's original Lisp
+programming language, \cite{mcCarthy1960lisp,
+mcCarthyAbrahamsEdwardsHartLevin1965lispManual}. We will use ideas from the two
+excellent texts teaching Programming Language Design using the PLT Racket
+dialect of Lisp,
+\cite{krishnamurthi2007programmingLanguagesApplicationInterpretation,
+krishnamurthi2012programmingLanguagesApplicationInterpretation,
+friedmanWand2008essentialsProgrammingLanguages, racket2016racket}, as well as
+the Graph Programming Language (GP), pioneered by Detlef Plump's group at the
+University of York, \cite{steinert2007graphProgramming,
+manningPlump2008yorkMachine, plump2009graphProgramming,
+plumpSteinert2010semanticsGraphProgramming, plump2012graphProgramming}.
+
+Our interpreter is based upon the York Abstract Machine (YAM),
+\cite{manningPlump2008yorkMachine}. While the YAM is a bytecode interpreter, we
+will simply interpret to either Racket/Lisp or Haskell. We will implement
+Prolog/Haskell style pattern matching by implementing a unification subsystem,
+\cite[section
+30.5.1]{krishnamurthi2007programmingLanguagesApplicationInterpretation}, as well
+as Prolog backtracking search,
+\cite[34.1.1]{krishnamurthi2007programmingLanguagesApplicationInterpretation}.
+
+We will also provide proof of correctness of all computation using Denotational,
+Operational, Axiomatic and Weakest Precondition based semantics,
+\cite{gunter1992semainticProgrammingLanguages,
+winskel1993formalSemanticsProgrammingLanguages, gries1981scienceProgramming,
+scott1970theoryComputation, plotkin1981structuralOperationalSemantics,
+hoare1969axiomaticSemantics, dijkstra1975guardedCommandsFormalDerivation}. More
+specifically these ideas have been worked out for Graph Programming by Detlef
+Plump's group, \cite{steinert2007graphProgramming,
+plumpSteinert2010semanticsGraphProgramming, poskittPlump2010hoareLogic,
+poskittPlump2010hoareCalculus}.
+
+\section{(co-)data language}
+
+We begin by providing the syntax of our diSimplex (co-)data language following the
+standard set by \cite{friedmanWand2008essentialsProgrammingLanguages}.
+
+\newcommand{\MExp}[1]{& \textnormal{MExp:} & #1  \nonumber \\}
+\newcommand{\denExp}[2]{\ensuremath{ \underline{\lbrack \! \lbrack #1 \rbrack \! \rbrack} #2}}
+\newcommand{\denEql}[3]{\ensuremath{ \underline{ \lbrack \! \lbrack #1 \rbrack \! \rbrack} #2 = #3}}
+\newcommand{\Denotation}[1]{& \textnormal{Den:} & #1 \nonumber \\}
+\newcommand{\coDenExp}[2]{\ensuremath{ \overline{ \lbrack \! \lbrack #1 \rbrack \! \rbrack} #2}}
+\newcommand{\coDenEql}[3]{\ensuremath{ \overline{ \lbrack \! \lbrack #1 \rbrack \! \rbrack} #2 = #3}}
+\newcommand{\coDenotation}[1]{& \textnormal{coDen:} & #1 \nonumber \\}
+\newcommand{\opExp}[4]{\ensuremath{\langle #1 , #2 \rangle \rightarrow \langle #3 , #4 \rangle }}
+\newcommand{\Operational}[1]{& \textnormal{Oper:} & %
+ \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \\}
+\newcommand{\Axiomatic}[1]{& \textnormal{Axiom:} & %
+ \begin{minipage}{6cm} \begin{prooftree} #1 \end{prooftree} \end{minipage} \nonumber }
+
+\subsection{List expressions}
+
+\begin{bnf}\label{ch3-null-list}
+ \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfTD{)} \nonumber }
+ \MExp{( \bnfSP \bnfTD{nil} \bnfSP )}
+ \Denotation{\denEql{\bnfSP(\bnfSP)\bnfSP}{\sigma}{()}}
+ \Operational{
+  \AxiomC{}
+  \RightLabel{$(\bnfSP)$}
+  \UnaryInfC{\opExp{()}{\sigma}{()}{\sigma}}}
+ \Axiomatic{
+  \AxiomC{}
+  \RightLabel{$(\bnfSP)$}
+  \UnaryInfC{()}
+ }
+\end{bnf}
+
+\begin{bnf}\label{cons-list}
+ \bnfProd{ListExp}{ \bnfTD{(} \bnfSP \bnfPN{ListExp} \bnfSP \bnfPN{ListExp} \bnfSP \bnfTD{)} \nonumber }
+ \MExp{( \bnfSP \bnfTD{cons} \bnfSP \bnfTD{list1} \bnfSP \bnfTD{list2} \bnfSP )}
+ \Denotation{\denEql{\bnfSP\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}\bnfSP}
+  {\sigma}{(\bnfSP \denExp{\bnfTD{list1}}{\sigma} \bnfSP
+   \denExp{\bnfTD{list2}}{\sigma} \bnfSP)}}
+ \Operational{
+  \AxiomC{\opExp{list1}{\sigma}{\lambda_1}{\sigma}}
+  \AxiomC{\opExp{list2}{\sigma}{\lambda_2}{\sigma}}
+  \RightLabel{$\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}$}
+  \BinaryInfC{\opExp{\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}}{\sigma}
+                   {(\bnfSP \lambda_1\bnfSP\lambda_2\bnfSP)}{\sigma}}
+ }
+ \Axiomatic{
+  \AxiomC{$\lambda_1$}
+  \AxiomC{$\lambda_2$}
+  \RightLabel{$\bnfTD{cons}\bnfSP\bnfTD{list1}\bnfSP\bnfTD{list2}$}
+  \BinaryInfC{$(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)$}
+ }
+\end{bnf}
+
+\begin{bnf}\label{car-list}
+ \bnfProd{ListExp}{ \bnfTD{car} \bnfSP \bnfPN{ListExp} \nonumber }
+ \MExp{( \bnfSP \bnfTD{car} \bnfSP \bnfTD{list1} \bnfSP )}
+ \Denotation{\denEql{\bnfSP\bnfTD{car}\bnfSP\bnfTD{list1}\bnfSP}
+  {\sigma}{\begin{cases}
+  \lambda_1 \text{ if } \opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)} \\
+  \bot \text{ otherwise }
+  \end{cases}}}
+ \Operational{
+  \AxiomC{\opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)}{\sigma}}
+  \RightLabel{$\bnfTD{car}\bnfSP\bnfTD{list1}$}
+  \UnaryInfC{\opExp{\bnfSP\bnfTD{car}\bnfSP\bnfTD{list1}}{\sigma}{\lambda_1}{\sigma}}
+ }
+ \Axiomatic{
+  \AxiomC{ $ ( \bnfSP \lambda_1 \bnfSP \lambda_2 \bnfSP ) $ }
+  \RightLabel{$\bnfTD{car}\bnfSP\bnfTD{list1}$}
+  \UnaryInfC{ $ \lambda_1 $ }
+ }
+\end{bnf}
+
+\begin{bnf}\label{cdr-list}
+ \bnfProd{ListExp}{ \bnfTD{cdr} \bnfSP \bnfPN{ListExp} \nonumber }
+ \MExp{( \bnfSP \bnfTD{cdr} \bnfSP \bnfTD{list1} \bnfSP )}
+ \Denotation{\denEql{\bnfSP\bnfTD{cdr}\bnfSP\bnfTD{list1}\bnfSP}
+  {\sigma}{\begin{cases}
+   \lambda_2 \text{ if } \opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)} \\
+   \bot \text{ otherwise }
+  \end{cases}}}
+ \Operational{
+  \AxiomC{\opExp{list1}{\sigma}{(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)}{\sigma}}
+  \RightLabel{$\bnfTD{cdr}\bnfSP\bnfTD{list1}$}
+  \UnaryInfC{\bnfSP\opExp{\bnfTD{car}\bnfSP\bnfTD{list1}\bnfSP}
+   {\sigma}{\lambda_2}{\sigma}}
+ }
+ \Axiomatic{
+  \AxiomC{$(\bnfSP\lambda_1\bnfSP\lambda_2\bnfSP)$}
+  \RightLabel{$\bnfTD{cdr}\bnfSP\bnfTD{list1}$}
+  \UnaryInfC{$\lambda_2$}
+ }
+\end{bnf}
+
+\subsection{Command expressions}
+
+\begin{bnf}
+ \bnfProd{Proof}{ \bnfTD{Begin} \bnfSP \bnfPN{Expression} \bnfSP \bnfTD{End} \nonumber }
+ \MExp{( \bnfSP \bnfTD{proof} \bnfSP \bnfTD{exp1} \bnfSP )}
+ \Denotation{something}
+% \Operational{something}
+ \Axiomatic{
+  \AxiomC{}
+  \RightLabel{empty-ctx}
+  \UnaryInfC{\cJudgement{\cdot}}
+ }
+\end{bnf}
+
+\begin{bnf}
+ \bnfProd{Expression}{\bnfPN{List} \nonumber }
+ \MExp{( \bnfSP \bnfTD{list} \bnfSP \bnfTD{list1} \bnfSP )}
+ \Denotation{something}
+% \Operational{something}
+% \Axiomatic{something}
+\end{bnf}
+
+\begin{bnf}
+ \bnfProd{Expression}{ \bnfTD{null?} \bnfSP \bnfPN{List} \nonumber }
+ \MExp{( \bnfSP \bnfTD{null?} \bnfSP \bnfTD{list1} \bnfSP )}
+ \Denotation{something}
+% \Operational{something}
+% \Axiomatic{something}
+\end{bnf}
+
+\begin{bnf}
+ \bnfProd{Expression}{ \bnfTD{if}   \bnfSP \bnfPN{Expression} \bnfSP
+                       \bnfTD{then} \bnfSP \bnfPN{Expression} \bnfSP
+                       \bnfTD{else} \bnfSP \bnfPN{Expression} \nonumber }
+ \MExp{( \bnfSP \bnfTD{if} \bnfSP \bnfTD{exp1} \bnfSP \bnfTD{exp2} \bnfSP \bnfTD{exp3} \bnfSP )}
+ \Denotation{something}
+% \Operational{something}
+% \Axiomatic{something}
+\end{bnf}
+
+\begin{bnf}
+ \bnfProd{Expression}{ \bnfPN{Identifier} \nonumber }
+ \MExp{( \bnfSP \bnfTD{var} \bnfSP \bnfTD{var1} \bnfSP )}
+ \Denotation{something}
+% \Operational{something}
+% \Axiomatic{something}
+\end{bnf}
+
+\begin{bnf}
+ \bnfProd{Expression}{ \bnfTD{let} \bnfSP \bnfPN{Identifier} \bnfSP
+                       \bnfTD{=}   \bnfSP \bnfPN{Expression} \nonumber }
+ \MExp{( \bnfSP \bnfTD{let} \bnfSP \bnfTD{var1} \bnfSP \bnfTD{exp1} \bnfSP )}
+ \Denotation{something}
+% \Operational{something}
+% \Axiomatic{something}
+\end{bnf}
+
+

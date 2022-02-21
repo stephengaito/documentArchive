@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# This bash script automates the documentation process
+
+rm -rf *.pdf
+rm -rf doc
+mkdir -p doc
+
+# Produce the HTML output
+scribble --htmls --dest doc pkgs/diSimp/scribblings/diSimp.scrbl
+
+# Produce the PDF output
+scribble --pdf pkgs/diSimp/scribblings/diSimp.scrbl
+

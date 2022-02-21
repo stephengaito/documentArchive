@@ -1,0 +1,64 @@
+#!/usr/bin/env racket
+#lang racket
+
+(define ignoreValue0 (system "reset"))
+
+;; RUN TESTS 
+;;
+(require racket/rerequire)
+
+(current-directory "pkgs/diSimp/tests")
+
+(define (rackunit-modules)
+  (remove*
+    (map string->path '())
+    (filter 
+      (lambda (aPath) (equal? (filename-extension aPath) #"rkt"))
+      (directory-list)
+    )
+  )
+)
+
+(define (run-tests aPath)
+  (begin
+    (printf "\nRuning tests for [~a]\n" aPath) (flush-output)
+    (dynamic-rerequire aPath)
+  )
+)
+
+(define ignoreValues (map run-tests (rackunit-modules)))
+
+;; CHECK DOCUMENTATION using doc-coverage
+;;
+(current-directory "..") ; now "pkgs/diSimp"
+
+(require racket/path)
+(require doc-coverage)
+
+(define (scribble-modules)
+  (remove*
+    (map string->path (list "info.rkt" "main.rkt"))
+    (filter 
+      (lambda (aPath) (equal? (filename-extension aPath) #"rkt"))
+      (directory-list)
+    )
+  )
+)
+
+(define (check-module-documentation aModule)
+  (let ([ moduleName 
+          (string->symbol
+            (string-append "diSimp/" 
+              (path->string (path-replace-suffix aModule ""))
+            )
+          )
+       ])
+    (begin 
+      (printf "\nChecking documentation for [~a]\n" moduleName) (flush-output)
+      (dynamic-rerequire moduleName)
+      (check-all-documented moduleName)
+    )
+  )
+)
+
+(define ingoreValues2 (map check-module-documentation (scribble-modules)))

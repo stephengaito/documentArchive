@@ -1,0 +1,52 @@
+% Design considerations
+
+\section{Goals}
+
+We want to build a very simple language which is based upon the static 
+list of lists.
+
+We want this language to be:
+\begin{enumerate}
+\item Functional language
+\item Computational/RunTime as well as CompileTime processes
+  \begin{itemize}
+  \item This will really be implemented as meta-levels
+  \item Type checking will be a meta-process
+  \end{itemize}
+\item Lazy
+\item Have continuations (to allow "lazy processes")
+\item Modules to allow layering of mathematical detail
+\end{enumerate}
+
+Effectively we are building the universal interpreter.
+
+It is of profound importance that we switch out of the normal computational
+theory mode of fascination with halting processes which return a result.  In our
+computational theory, \emph{some} processes \emph{might} terminate and return an
+(more or less) ``interesting'' result, \emph{but} halting must not be critical to the
+\emph{meaning} of computational theory.
+
+We have nominally chosen the Lisp/Scheme dialect Racket,
+\cite{racket2016racket}, as the most appropriate target programming language to
+provide a simple base implementation of a List of Lists.
+
+Our implementation of an interpreter for mathematics is primarily based upon the
+ideas in \cite{friedmanWand2008essentialsProgrammingLanguages} and
+\cite{krishnamurthi2007programmingLanguagesApplicationInterpretation} (see also
+\cite{krishnamurthi2012programmingLanguagesApplicationInterpretation}).
+
+From a software \emph{engineering} point of view we want to use the procedural
+representation, \cite[section
+2.2.3]{friedmanWand2008essentialsProgrammingLanguages}, rather than the data
+representation, \cite[section
+2.2.2]{friedmanWand2008essentialsProgrammingLanguages}. While both
+representations have essentially the same code, the data representation forces
+\emph{all} of this code to be located in the same interpreter method which makes
+modularization and layering of new mathematical concepts more difficult. In
+particular, the procedural representation does not require global changes to be
+made.
+
+Our definition of computation will be data/trace based however our interpreter
+will likely be based upon the Lambda calculus and/or pattern
+matching/replacement. \TODO{How does the limit operation from the trace
+interpretation map over to the Lambda calculus?}

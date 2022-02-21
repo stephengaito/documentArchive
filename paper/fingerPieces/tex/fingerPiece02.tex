@@ -1,0 +1,59 @@
+% Attempt 02
+
+\section{Introduction}
+
+Our aim in this paper is to define trans-finite computation totally outside of
+first-order logic and any classical set theory.
+
+The primary idea that enables this work is that classical proof-theory, in the
+form of natural deduction and/or sequent calculus, is really a computational
+system which ``computes'' the \emph{truth-value} of a ``proof-structure''.
+Instead of computing a truth-value of a ``proof-structure'', we compute instead
+a structure. To capture trans-finite computation and hence the whole of
+classical set theory, which is a primary aim, we will need to ``assume''
+computational abilities equivalent to the Axiom of Choice and one or other of
+the Large Cardinal Axioms.
+
+One of the consequences of this work is that Zermelo-Fraenkel set theory with
+the Axiom of Choice (ZFC), and hence any first-order logical theory relatively
+consistent with ZFC, are all \emph{absolutely} consistent.
+
+When the dust settles, another consequence of this work is that \emph{there is no
+\emph{external} logic}. Logic does ``exist'', but only as the \emph{internal}
+Mitchell-B\'enabou language of Plato's Topos which is the algebraic part of the
+structures built by this theory.
+
+This work has been inspired by the computational aspects of both Martin-L\"of,
+\cite{martinLofSambin1984typeTh, nordstromPeterssonSmith1990typeTh,
+thompson1991typeTh, nordstromPeterssonSmith2000typeTh} and Homotopy Type
+Theories, \cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}. We begin by
+reinterpretting Type Theory so that it computes structures rather then
+truth-values of proofs. 
+
+If we have a totally \emph{computational} theory of structures, how do we know
+that an ``algorithm'' computes the structures it is ``intended'' to compute? The
+key idea here, taken from Theoretical Computer Science, is to use the
+triumvirate of Denotational, Operational and Axiomatic \emph{Semantics}
+\cite{gunter1992semainticProgrammingLanguages,
+winskel1993formalSemanticsProgrammingLanguages, gries1981scienceProgramming}.
+Most importantly, we view the Type Theoretic axioms as the axioms of a
+programming language whose denotational semantics is Plato's Topos.
+
+Contexts are one of the key ideas of classical type theory, where a given
+context lists that collection of free variables in a sequent, \cite{
+jacobs1999categoricalLogicTypeTheory,
+awodeyCoquandVoevodsky2013homotopyTypeTheory}, however we reinterpret contexts
+not as flat lists of free variables, but rather as the structures themselves.
+
+So the structures we compute are lists of lists. If computation were finite, and
+not trans-finite, \emph{algebraic} lists and dually \emph{co-algebraic}
+sequences, would be defined by the endofunctor:
+\begin{equation*}
+F(X) = X \times X
+\end{equation*}
+For a good overview of these ideas see, \cite{jacobs2012coalg}. However if we
+want to capture trans-finite computation, we need to handle limit points of
+lists and sequences. Examples of this type of work can be found in
+\cite{aczel1988nonWellFoundedSets, joyalMoerdijk1995algSetTh}.
+
+Actually the structures we compute, the contexts, are, from the point of view of computer science, sparse memories, and are, from the point of view of classical mathematics, $\alpha$-sequences, \cite{jech2003setTheory}.

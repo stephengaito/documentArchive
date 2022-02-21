@@ -1,0 +1,246 @@
+\section{Some philosophy}
+
+\emph{What can an finite being do?} For our purposes it can \emph{do} two
+important things:
+\begin{enumerate}
+\item It \emph{can} make a finite series of changes in reality (``markings in
+the sand'') in a finite amount of time.
+\item It can \emph{dream} of making trans-finite changes in reality in a
+trans-finite amount of time.
+\end{enumerate}
+
+\emph{What can a finite being do?} Again for our purposes it can do two
+important things:
+\begin{enumerate}
+\item It can \emph{construct} finite structures in a finite amount of time.
+\item It can \emph{observe} a finite amount of a potentially non-finite
+structure in a finite amount of time.
+\end{enumerate}
+
+Previous attempts at providing a foundation for Mathematics from the past 200
+years have focused upon providing \emph{logical} arguments for the existence and
+properties of mathematical entities. All existing definitions of set theory, such
+as Zermelo-Fraenklel's set theory with the Axiom of Choice based upon first
+order logic, or type theory, such as the recent Homotopy Type Theory,
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, continue this approach.
+
+Existing (\emph{logical}) foundations of Mathematics focus upon using natural
+deduction (in one form or another) to recursively \emph{compute} the \emph{truth
+value} of a logical \emph{sentence} which is built out of component
+sub-sentences. These logical sentences are semantically construed to be
+\emph{about} the existence or properties of Mathematical structures\footnote{See
+for example the discussion in \cite{hatcher1982logicalFoundationsMath}.}. It is
+the essentially semantic nature of these logical sentences which provide the
+\emph{bite} in the various logical paradoxes which the current foundations of
+mathematics have been designed to avoid.
+
+Unfortunately, the existing \emph{logical} foundations of mathematics avoid
+these paradoxes by forbidding non-well-founded structures, which in turn
+requires the use of what is essentially non-finite computational methods to
+model the observation of physical reality. The primary thesis of the current
+\emph{computational} foundations of mathematics, is that by analysing the
+computational nature of the observational process of the sciences, and
+\emph{explicitly} allowing non-well-founded structures, we obtain a simpler
+mathematics which better reflects the way scientists actually work. Our
+secondary thesis is that trans-finite mathematics is only required to provide an
+understanding of how finitely constructive mathematics ``fits into'' existing
+mathematical practice.
+
+Being finite beings, we must limit ourselves to making a finite number of
+``marks in the sand'' in a finite amount of time. Since we are assuming \emph{no
+external} mathematical environment to this work, we need to define the whole of
+the mathematics that we are using at once.
+
+We make two primary assumptions:
+\begin{enumerate}
+\item We can make an arbitrary but finite number of \emph{different} marks or
+symbols.
+\item Given an existing collection of such symbols, we can add a finite
+collection of additional symbols.
+\end{enumerate}
+
+We will provide what is essentially a type theoretic foundations for
+mathematics, see, for example, the recent Homotopy Type Theory,
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}. However, instead of
+essentially \emph{logical} judgements that a given logical sentence is ``true'',
+we use \emph{computational} judgements that a structure can be built or dually
+has been observed.
+
+\section{Defining the Universe using Natural Judgements}
+
+Our primary aim is to begin building the Universe, \Universe{}{}.
+
+When the dust settles we will have a \emph{functional} programming language
+whose denotation will be a generalisation of a Topos, which we will call the
+``Universal Topos''. The Universal Topos will be a generalisation of a Topos
+\emph{because} it will \emph{explicitly} contain non-well founded co-algebraic
+objects and not \emph{just} the well-founded algebraic ``sets''. Again, when the
+dust settles, we will be able to work in the \emph{internal higher-order
+intuitionistic logic} of the Topos. There will be \emph{no} external logic,
+since this Topos \emph{will be a foundation for the \emph{whole} of
+mathematics}. In fact the Universal Topos will be \emph{extensional} and will
+satisfy the categorical equivalent of the Axiom of Choice, so the internal
+logic, of the Universal Topos, will actually be higher-order classical logic.
+
+In \emph{logical} type theory, such as Homotopy Type Theory,
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, all judgements are
+judgements \emph{in} a \emph{context}. These contexts provide a ``list'' of the
+``free'' variables in the judgement. These contexts provide the objects of the
+classifying category associated with the type theory, see for example,
+\cite{jacobs1999categoricalLogicTypeTheory}. In the current \emph{computational}
+type theory, contexts \emph{are} a sequential (``historical'') \emph{record} of
+how an object has been constructed, or dually, observed. In a computational type
+theory, the contexts are the objects being computed, built or observed.
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{empty-ctx}
+\UnaryInfC{\cJudgement{\cdot}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$\context{\mathcal{\hat{J}}} \vdash \mathcal{J}$}
+\RightLabel{next-ctx}
+\UnaryInfC{\cJudgement{\mathcal{\hat{J}}, \mathcal{J}}}
+\end{prooftree}
+
+As any self respecting functional programmer will recognise, this is a twisted,
+\emph{co-algebraic}, definition of a list. Instead of growing to the right, this list
+structure grows to the left. As we will see below, the pair of inference rules, empty-ctx
+and next-ctx together imply that a context is a mapping from the \emph{computable}
+ordinals into the collection of judgements. For omnipotent beings, the computable ordinals
+\emph{are} the ordinals.
+
+\begin{prooftree}
+\AxiomC{$\context{\mathcal{J}_0, \ldots, \mathcal{J}_n} \vdash \mathcal{J}_{n+1}$}
+\RightLabel{successor-ctx}
+\UnaryInfC{\cJudgement{\mathcal{J}_0, \ldots, \mathcal{J}_n, \mathcal{J}_{n+1}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$\context{\mathcal{J}_0, \ldots, \mathcal{J}_n} \vdash 
+\cJudgement{\mathcal{J}_{n+1}, \ldots, \mathcal{J}_{n+m}}$}
+\RightLabel{flatten-1-ctx}
+\UnaryInfC{$\context{\mathcal{J}_0, \ldots, \mathcal{J}_n, \mathcal{J}_{n+1}} \vdash 
+\cJudgement{\mathcal{J}_{n+2}, \ldots, \mathcal{J}_{n+m}}$}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$\context{\mathcal{J}_0, \ldots, \mathcal{J}_n} \vdash 
+\cJudgement{\cJudgement{\mathcal{J}_{n+1,0},\ldots,\mathcal{J}_{n+1,k}}, \ldots, 
+\mathcal{J}_{n+m}}$}
+\RightLabel{flatten-2-ctx}
+\UnaryInfC{$\context{\mathcal{J}_0, \ldots, \mathcal{J}_n, \mathcal{J}_{n+1,0}} \vdash 
+\cJudgement{\cJudgement{\mathcal{J}_{n+1,1},\ldots,\mathcal{J}_{n+1,k}}, \ldots, 
+\mathcal{J}_{n+m}}$}
+\end{prooftree}
+
+\TODO{I now assert that the two flattens above provide sufficient computational power to
+compute the total flattening of any countably structured context.... PROVE THIS.
+Essentially given these rules, a context is a countably infinitely branching countably
+infinitely deep tree. To flatten it we need to follow a weaving breadth first pattern
+continuously revisiting nodes until in the ``countably inifinite time'' it is flattened. 
+This \emph{will} be a typcial problem/solution for diSimplicial structures. Essentially this 
+is nothing more nor less than a \emph{fair} parallel scheduling algorithm for the parallel 
+application of, in this case, the flattening rules on all branches simultaneously. }
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{empty-\Universe{}{}}
+\UnaryInfC{\judgement{\emptyset}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{\Universe{}{}-\Universe{}{}}
+\UnaryInfC{\judgement{\Universe{}{}}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{x}{y}}
+\AxiomC{\judgement{y}{z}}
+\RightLabel{transitive-\Universe{}{}}
+\BinaryInfC{\judgement{x}{z}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{\Universe{}{\emptyset}-\Universe{}{}}
+\UnaryInfC{\judgement{\Universe{}{\emptyset}}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{x}{\Universe{}{}}}
+\AxiomC{\judgement{y}{\Universe{}{}}}
+\RightLabel{$(\cdot)^{\emptyset}$-Intro}
+\BinaryInfC{\judgement{\Delta_{\emptyset}(x)}{y^{\emptyset}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{y}{\Universe{}{}}}
+\AxiomC{\judgement{x}{y^{\emptyset}}}
+\RightLabel{\Universe{}{\emptyset}-Elim}
+\BinaryInfC{\judgement{\textbf{Label}(x)}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{x}{\Universe{}{}}}
+\AxiomC{\judgement{y}{\Universe{}{}}}
+\AxiomC{$ x \subSet y$}
+\RightLabel{\Universe{}{\emptyset}-Elim}
+\TrinaryInfC{\judgement{\textbf{Label}(x)}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{x}{\Universe{}{\emptyset}}}
+\RightLabel{\Universe{}{\emptyset}-Elim}
+\UnaryInfC{\judgement{\textbf{Dim}(x)}{\Universe{}{}}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\judgement{x}{\Universe{}{\emptyset}}}
+\RightLabel{\Universe{}{\emptyset}-Elim}
+\UnaryInfC{$\textbf{Dim}(x) =_{\Universe{}{}} \emptyset$}
+\end{prooftree}
+
+\hrule
+
+\begin{prooftree}
+\AxiomC{$\context{\Gamma} \vdash \judgement{a}{b}$}
+\AxiomC{$\context{\Gamma} \vdash \judgement{b}{a}$}
+\RightLabel{antisymmetry-partOf}
+\BinaryInfC{$\context{\Gamma} \vdash a =_{\Universe{}{}} b$}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$c\mathcal{J}_0$}
+\AxiomC{$\cdots$}
+\AxiomC{$c\mathcal{J}_{\gamma}$}
+\RightLabel{Name}
+\TrinaryInfC{$c\mathcal{J}$}
+\end{prooftree}
+
+\section{Defining the Universe using Programming Language}
+
+\begin{haskell}
+data Universe = DeltaE Universe
+  | Delta0 Universe DeltaE
+  | Delta1 Universe Delta0 Delta0
+
+empty = ??
+
+zero = DeltaE empty
+
+one = DeltaE zero
+  
+label :: Universe -> Universe
+  DeltaE x = x
+  Delta0 x _ = x
+  Delta1 x _ _ = x
+
+pi0 :: Universe -> Universe
+  Delta0 _ x = x
+  Delta1 _ x _ = x
+  
+\end{haskell}
+

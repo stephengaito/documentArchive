@@ -1,0 +1,82 @@
+% Plato's universe
+
+\begin{racket}
+(println "Hello from Plato's universe!")
+\end{racket}
+
+To begin \emph{computationally} ``building'' Plato's universe we need agree what
+computation means. One of the key concepts in this body of work is the essential
+duality between \emph{algebraic} and \emph{co-algebraic} structures. A good
+introduction to this duality can be found in Bart Jacobs' excellent book,
+\cite{jacobs2012coalg}. As we slowly extend the computational power of this
+theory we will alternate the basis for our evolving definition of computation
+between both algebraic and co-algebraic structures.
+
+To begin with we will define computation algebraically. Note that this will not
+be Turing's definition, \cite{turing1936computableNumbersMachines}, though we
+will, eventually, show our base case equivilant to Turing's definition. Our base
+case definition of computation is based upon Type Theory's use of natural
+deduction to \emph{compute} ``truth'', see \cite{gentzen1969collectedPapers},
+\cite{kleene2009introMetaMathematics}, and
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}. However instead of
+\emph{implicitly} computing ``truth'' we will \emph{explicitly} compute
+structures in Plato's universe.
+
+To begin we need to answer the meta-physical question: ``What is a structure?''
+The simplest correct answer is, ``we can never know'', all we can ever do is
+\emph{co-algebraically} ``observe'' a structure\footnote{Classically the
+co-algebraic operation is termed ``destruction'' due to the fact that one of the
+simplest co-algebraic structures, as first studied by computer scientists, is
+the list, which is essentially ``time-future''. However this notion of
+desctruction breaks down as soon as you attempt, which we will, to understand
+``space-time'' structures representing both spacial extension as well as past,
+present and future.}. Meta-physically, two structures with exactly the same
+observable structure, are \emph{identical} structures, this is the co-algebraic
+concept of \emph{bi-simulation}. However, what a structure is observed to be,
+depends critically on the available computational \emph{power}. We will,
+eventually, measure our computational power by the ordinals. Given a pair of
+ordinals, $\alpha < \beta$, two structures which are bi-simular given a
+computational power of $\alpha$, need not be bi-simular given a computational
+power of $\beta$, since some of the ``extra'' observations might differ.
+
+The next most important thing we need to answer is: ``What is computation?'' As
+alluded to above, computation will have an associated notion of
+\emph{computational power} indexed by the ordinals. However, at the moment, we
+have no notion of what an ordinal is. We will begin our evolving definition of
+computation with the base case of $\omega$-computation, essentially any finitely
+powered computation. As also alluded to above, we base our definition of
+computation on the computation done by natural deduction, however instead of
+computing ``truth'' we compute observation-structures.
+
+From the persepective of a computer scientist, we will essentially define a
+functional language, however, it is critical to realize, our base language
+\emph{is not} related to the $\lambda$-calculus. Not surprisingly, the
+$\lambda$-calculus \emph{will} be defined as a derived language of our base
+functional language.
+
+In its most general form, the defintion of $\beta$-powered computation, for any
+$\beta$, will consist of an $\alpha$-collection of \define{rules}{}, for some
+$\alpha < \beta$ which individually define how a given observed-structure is
+transformed into a new observered structure. An individual computation, called a
+\define{computation-trace}{} or \define{process-trace}{}, is then a
+\define{path}{} of rule applications. For our base case, we will define
+\TODO{how many?} rules and a computation-trace will be a \define{list}{} of
+rule applications.
+
+One of the primary reasons for exploring a computation foundation for
+Mathematics, is to realize Hilbert's program. While G\"odel proved that
+Hilbert's original \emph{logically} based program was infeasible, we will
+provide a \emph{computationally} based equivalent program which does work. One
+of the reasons Hilbert originally proposed his program was to provide
+mechanically check-able rigorous proofs. In parallel with the development of the
+mathematical definitions of computation, we will build computational artifacts
+which \emph{implement} these definitions. More importantly, these computational
+artifacts can \emph{check} any computational proof in finite space-time.
+
+Note that a $\beta$-powered computation for any uncountable $\beta$, can not, by
+definition, compute in \emph{finite} space-time. However we will show how to
+prove, using finite space-time, that a given finitely defined
+$\beta$-computation, if preformed with $\beta$ sized space-time, would compute
+the correct results, this is the import of Tony Hoare's Axiomatic Semantics.
+
+

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# This bash script simply copies the local diSimp commands to the user's 
+# private .diSimp directory.
+
+GLOBALDIR=$HOME/.diSimp
+
+RUBYLIB=$GLOBALDIR/ruby/lib
+
+echo "copying local diSimp build tool commands"
+mkdir -p $RUBYLIB/diSimpBuilder/commands
+mkdir -p $RUBYLIB/diSimpBuilder/templates
+cp -R lib/* $RUBYLIB

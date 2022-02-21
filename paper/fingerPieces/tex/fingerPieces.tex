@@ -1,0 +1,77 @@
+% LaTeX source for the fingerPieces document
+%
+
+\documentclass[a4paper,openany]{amsbook}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{disitt}
+\usepackage{disitt-symbols}
+\usepackage{disitt-code}
+\usepackage[backend=biber,style=alphabetic,citestyle=alphabetic]{biblatex}
+\addbibresource{fingerPieces.bib}
+\usepackage{mdframed}
+\newmdenv[linecolor=white,backgroundcolor=gray!10]{infobox}
+\newenvironment{myQuote}{\begin{quotation}}{\end{quotation}}
+\surroundwithmdframed[linecolor=white,backgroundcolor=gray!10]{myQuote}
+\input{../racket/latex/racket.tex}
+
+\begin{document}
+
+\sloppy
+
+\title[Short Title]{Long Title}
+\input{frontMatter}
+\subjclass[2010]{Primary unknown; Secondary unknown} %
+\keywords{Keyword one, keyword two etc.}%
+
+\begin{abstract}
+This mini-book containing various chapters which each provide a place to start
+``finger pieces'' for re-use in other papers.
+\end{abstract} 
+\maketitle 
+\tableofcontents 
+
+\racketRequirePkg{rackunit}
+
+\chapter{Finger Piece 1}
+\input{fingerPiece01.tex}
+
+\chapter{Finger Piece 2}
+\input{fingerPiece02.tex}
+
+\chapter{Building the Plato engine}
+\racketRequireFile{fingerPiece03.rkt}
+\input{fingerPiece03.tex}
+
+\chapter{Plato's Universe}
+\racketRequireFile{fingerPiece04.rkt}
+\input{fingerPiece04.tex}
+
+\chapter{Peano Arithmetic}
+\racketRequireFile{fingerPiece05.rkt}
+\input{fingerPiece05.tex}
+
+\chapter{Design considerations}
+\input{fingerPiece06.tex}
+
+\chapter{Computation}
+\input{fingerPiece07.tex}
+
+\chapter{The Story so far}
+\input{fingerPiece08.tex}
+
+\chapter{DiSimp Language}
+\input{fingerPiece09.tex}
+
+\appendix
+\chapter{diSimp}
+\input{../racket/latex/diSimp.tex}
+
+\chapter{diSimpRacketLayer}
+\input{../racket/latex/diSimpRacketLayer.tex}
+
+
+\printbibliography
+\end{document}
+
+

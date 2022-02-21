@@ -1,0 +1,51 @@
+#!/usr/bin/env racket
+#lang racket
+
+(require net/sendurl)
+
+(require
+  diSimpExplorer/server/restfulServlets
+  diSimpExplorer/server/dseFramework
+  diSimpExplorer/specs/server/specsFramework
+)
+
+;; parse the command line
+;;
+(define main-page   (make-parameter "/all"))
+(define browser-cmd (make-parameter ""))
+;;
+(command-line
+  #:program "checkBrowserSpecifications"
+  #:once-each
+    [ ("-f" "--functional")
+      "Check functional specifications"
+      (main-page "/functional") ]
+    [ ("-i" "--integration")
+      "Check integration specifications"
+      (main-page "/integration") ]
+    [ ("-u" "--unit")
+      "Check unit specifications"
+      (main-page "/unit") ]
+  #:args browser-command
+  (browser-cmd (string-join browser-command " " #:after-last " "))
+)
+
+;; determine which browser to use 
+;;
+(if (non-empty-string? (string-trim (browser-cmd)))
+  (begin 
+    (external-browser (cons (browser-cmd) ""))
+    (display (string-join (list "using browser command: [" (browser-cmd) "]\n")))
+  )
+  (display "using the default browser\n")
+)
+
+;; Start the sever
+;;
+(run
+  #:launch-browser? #t
+  #:quit? #t
+  #:port 0
+  #:servlet-path (main-page)
+)
+

@@ -1,0 +1,406 @@
+% Computation
+
+Our express aim is to provide a \emph{computational} foundation for mathematics.
+To do this we will use a number fundamental concepts or realizations:
+\begin{enumerate}
+\item	Lists/sequences are the fundamental ``objects''. Sets and logic are
+derivative concepts.
+
+\item	Categories are central to the definition of computation. They form the
+natural structures with which to ``generalize'' Turing's tabular definition of a
+computational machine or more recent labelled state transition machine
+descriptions at the heart of Turing's definition of computation. More
+importantly they provide the natural structures with which to describe
+\emph{provably correct} computation because they codify the ``mechanics'' of
+natural deduction.
+
+\item	Turing's choice-machines (c-machines; non-deterministic machines) are more
+fundamental than his automatic-machines (a-machines; determinisitic machines).
+The von Neuman architecture can be viewed as a c-machine overlayed with a form
+of (modal) Hennessy-Milner logic and McCarthy's LISP to ensure deterministic
+computation. Compare the `Wizard Book's description of the arithmetic data-paths
+and central processing units of Register Machines, \cite[Chapter
+5]{abelsonSussmanSussman1996structureInterpretationComputerPrograms}.
+
+\item	Provably correct computation depends upon the triumvirate of Denotational,
+Operational and Axiomatic Semantics pioneered by Scott, Strachey, Plotkin, Floyd
+and Hoare in the late 1960's, 1970's and early 1980's. These semantics roughly
+correspond to Tarski's semantical model theory, Gentzen's
+natural-deduction/proof-theory, and (very roughly) Church's typed
+$\lambda$-calculus respectively from the 1930's and 1940's.
+
+\item	To provide a computational foundation for mathematics, we seek the
+\emph{largest} fixed point of the syntax/semantics.  That is we seek a syntax
+which is its own semantics. This means that non-well founded structures,
+potentially non-terminating processes and co-algebras, are \emph{central} to
+this exposition. Ironically, the past 100 years of the foundations of
+mathematical thought has consistently striven to banish non-well founded
+structures as the basis of, among others, Russell's paradox. In fact, we see the
+\emph{semantic interpretation} of the linguistic concept of `truth'' of what is
+essentially the logical liar paradox, as the source of these paradoxes.
+
+\item	The primary objective of the working mathematician is to \emph{prove} that
+``useful'' computations are correct. Different mathematical communities use
+different (computational) languages focused upon different interpretations of
+the concept of ``usefulness''. The objective of the community of foundational
+mathematicians is to provide the tools required to prove that these various
+(mathematical) (computational) languages \emph{are} correct.
+
+\end{enumerate}
+
+Current mathematical practice is to provide socially checked linguistic proofs
+in a style, which, we collectively assume, can be translated into a completely
+logical notation. There are, at present, a number of initiatives to replace
+these socially checked proofs with proof outlines constructed using
+``interactive theorem provers'' such as ACL2, Agda, Coq, HOL, Isabelle, or
+Mizar. All of these systems use one or other system of logic (first, second or
+higher-order). Our objective is to show that the collection of formally proven
+computations, is a complementary \emph{pair} of Topoi whose internal logics are
+the ``standard'' first order (modal) logic of Set Theory.
+
+Hilbert's original goal was to ``remain in Cantor's paradise'' by proving that
+the axioms of a general foundation for mathematics (at one level) were
+\emph{consistent} using more restrictive ``finitist'' arguments at a higher
+meta-level. To recover the \emph{whole} of current mathematical practice using a
+\emph{computational} definition of rigour, we will be forced to make use of some
+definition of trans-finite computation, which is, not surprisingly, generally
+assumed to be beyond the abilities of finite-beings such as ourselves and our
+computational devices. This means that \emph{at some (meta-)level}, we must,
+like Hilbert, identify and prove correct a finte-computation which proves all
+``lower'' level computations to be correct.
+
+\section{What is mathematics \emph{about}?}
+
+In order to provide a conceptual map of what a computational foundations of
+mathematics should ``look like'', we need to begin by sketching ``what
+mathematics is \emph{about}''.
+
+``Mathematics is the Queen of all the sciences''. 
+
+No mater what a mathematician may consider mathematics to be ``about'', they can
+not deny how deeply entwined mathematics is with the computation of scientific
+models, whose primary aim is, in turn, to provide predictive models of
+essentially \emph{physical} \emph{observations}. The most critical presumption
+that we collectively make, is that, while the ``things'' of our external
+``reality'' are \emph{meta-stable}, due to various conservation laws, these
+external procecesses are, realative to ``our'' ``existence'', ``eternal''.
+
+One of the most important principles of a computational foundation for
+mathematics, is that, mathematics is ``all about'', what a being of limited
+computational ability can observe about the realatively eternal processes around
+them. So one interpretation of ``what mathematics is \emph{about}'', is that
+mathematics is the study of the \emph{structure} of the \emph{observations} of
+``external'' processes.
+
+The second most important principle of a computational foundation for
+mathematics, is that mathematics \emph{is} \emph{computational}. Understanding
+the implications of computation, provides additional insight to the underlying
+structure of mathematics. In particular, the deep division between ``large'' and
+``small'' is really \emph{computational} and \emph{not} \emph{simply} a
+``device'' to keep mathematics from ``falling into'' Russel's paradox.
+
+So, in summary, mathematics is as much \emph{about} what can be ``constructed'',
+as \emph{about} what can be observed. That is, mathematics is the subtle
+interplay between algebra (constructions) and co-algebra (observations).
+
+Even though the co-algebraic structure of observations of (potentially) eternal
+processes might be nominally about eternal processes, the \emph{structure} of
+the observations is limited by the computational power of the observer. For
+finite beings such as ourselves and our computers, the structure of the
+non-well-founded co-algebraic observations are dominated by our ability to
+observe \emph{only}  a \emph{finite} amount of any external process. In
+particular, the structure of these non-well-founded co-algebraic observations is
+\emph{precisely} dual to the well-founded algebraic constructions.  While it is
+well known that the well-founded set theory forms a Topos, we will see that the
+non-well-founded co-set theory of co-algebraic observations, also forms a
+(Co-)Topos of exactly the same, but dual, structure. More importantly these pair
+of Topoi form a ``fully abstract''\footnote{The concept of ``fully abstract''
+comes from the Semantic theory of Programming Languages, where a programming
+language is fully abstract if its (algebraic) denotational semantics complements
+its (co-algebraic) operational semantics. See \cite[Section
+2.4]{jacobs2012coalg}, the work of Turi, Rutten, and Plotkin,
+\cite{turiRutten1998finalSemantics, turi1996operationalSemantics,
+turiPlotkin1997operationalSemantics}, and originally \cite{plotkin1977lcf}.}
+pair, for which the co-algebraic topos is the topological completion of the
+algebraic topos, see \cite{barr1993terminalCoalgebrasWellFounded}\footnote{It is
+ironic that one of Barr's original motivations for this paper was to ``show''
+that Aczel's non-well-founded set theory, \cite{aczel1988nonWellFoundedSets},
+was \emph{not} necessary for the understanding of co-algebras.}
+
+\section{Semi-formal overview}
+
+As I have repeatedly reminded my children, \emph{mathematics is easy}, every
+step is essentially ``trivial'', \emph{what is hard} is keeping track of the
+volumes of detail. The skill of a mathematician is in being able to
+simultaneously keep track of this volume of detail by keeping an ``eye'' on the
+``big picture''. 
+
+To provide a computational foundation for mathematics is no different. In this
+case, the ``big picture'' is best understood by using ideas from both Category
+theory and (Programming) Language theory. We assert that while the following
+overview uses ideas which are currently defined using classical set theory, our
+subsequent development does not make any use of either first order logic or set
+theory, until of course these classical concepts have been given computational
+definitions.
+
+We begin by explicitly building a labelled transition system using a small
+collection of rules using the tools (but not the underlying goals) of type
+theory, see \cite[Appendix A.2]{awodeyCoquandVoevodsky2013homotopyTypeTheory} as
+well as \cite{jacobs1999categoricalLogicTypeTheory}. This labelled transition
+system is, for our purposes, a ``modern'' form of Turing machine. It is also a
+finite category which provides a sketch for the category of list computations.
+\TODO{provide references for sketches}.
+
+Our first task will be to show that this collection of list computations
+\emph{is} a category and more importantly that this category is in fact a Topos
+which more over satisfies the categorical version of the axiom of choice (in
+this case the countable axiom of choice). The significance of being a topos is
+that there is an internal (higher order) logic \emph{and} an associated
+set-theory. Since the category of list computations satisfies the axiom of
+choice, the internal logic is classical.
+
+\TODO{what are the next steps?}
+
+Current mathematical practice in the foundations of mathematics, is to accept
+socially checked finite proofs at the meta-mathematical level. Our aim is to
+provide provably correct computational proofs at \emph{all} levels. In this
+section we \emph{begin} by providing a merely socially agreed semi-formal
+overview of the ideas which we will provide fully proven computational proofs in
+later sections.
+
+Many current mathematical expositions of the foundations of mathematics are
+essentially circular. To provide a description of the \emph{language} of (first
+order) logic, they assume a knowledge of set theory. To provide a formal
+definition of Set Theory, they rely on that of first order logic, which in turn
+depends upon the corresponding \emph{language} of logic.
+
+We assert that the exposition given below, is not circular. However ``booting
+the foundations of mathematics''\footnotemark, without any circular
+dependencies, is a very tedious progression of detailed constructions. In this
+section, to provide a high-level orientation of this ``bootstrapping'' process,
+we provide a description which is inherently circular. We accept this
+circularity because we give a \emph{promise} that the subsequent, ``real''
+definitions are not circular (but are tedious).
+
+\footnotetext{``Booting the foundations of mathematics'', is very similar to
+booting a computer at power on, or building the very first compiler for the very
+first programming language. Everything must be done from scratch with very few
+resources.
+
+Bootstrapping a computer at power on is in practice a very tedious process,
+involving loading ultra-simple code from well know locations in the CPU's local
+address space, which then, in turn, loads slightly more complex code from well
+know locations on some external disk, which, in turn, loads ...
+
+Building the first ever compiler for the very first language with no other
+compilation tools is equally a very tedious process, one which, given modern
+cross-compilation techniques, has, almost certainly, not been done since
+sometime in late 1969 with the advent of the first self-hosting version of Unix
+complete with a C compiler, see \cite[Chapter 2]{salus2008openSourceHistory}.
+
+Bootstrapping Mathematics involves an equally tedious process. We must identify
+specific mappings which are simple enough for the community of mathematicians to
+understand, and more importantly, ``believe'' reasonably ``true'', but which is
+complex enough to, in turn, define all subsequent, more complex, mathematical
+structures.}
+
+At a ``high-level'' of description, the ``boot'' process is fairly simple. We
+begin by constructing three related, simple, and more importantly \emph{finite},
+non-deterministic computational machines each of whose collection of productions
+\emph{are} significate parts of the universe of Plato's playground.
+\TODO{complete this description}
+
+\section{Syntax}
+
+When we are done we will have a well-ordering, $\mathfrak{W}(\bottom, \le)$
+endowed with a predecessor mapping which indexes a collection of
+(meta-)mathematical syntaxes. The lowest syntax, $S_{\bottom}$, corresponding to
+the ``object language'', consists exclusively of the symbols: `(', `)', and `.`.
+The syntaxes at any higher level may contain additional symbols. For each
+syntax, $S_{\tau}$, except $S_{\bottom}$, there is a distinguished symbol,
+`$\$_{\tau}$', as well as a distinguished collection of symbols,
+$\mathfrak{I}_{\tau}$, of identifiers and for each $\bottom < \tau$, $\$_{\tau}$
+is an identifier. There is an associated mapping, $|\cdot | : S^* \mapsTo
+\mathfrak{W}$ from the collection of symbol texts to the well-ordering.
+
+One of the key concepts in the various semantics is that of the state
+(environment or valuation). A state is a mapping, $\sigma : \mathfrak{I} \mapsTo
+\Universe{}{}$, from the collection of identifiers to \Universe{}{} where
+$|\sigma(x)| \le |x|$.
+
+We begin by defining our (initially) finite-computational universe,
+\Universe{}{}, which we call ``Plato's playground'', to include all structures
+in the largest fixed point of the following collection of rules:
+
+\subsection{Lists of lists}
+
+\subsubsection{Syntax}
+
+At the \emph{object} level, we have the following expression syntax:
+
+\begin{bnf*}\label{ch7-null-list}
+ \bnfProd{ListExp}{ 
+   \bnfTD{(} \bnfSP \bnfTD{)} \nonumber 
+   \bnfOR 
+   \bnfTD{(} \bnfSP \bnfPN{ListExp} \bnfSP 
+   \bnfTD{.} \bnfSP \bnfPN{ListExp} \bnfSP \bnfTD{)}
+ }
+\end{bnf*}
+
+At the \emph{meta/computational} level, we have the following extend the object
+syntax as follows:
+
+\begin{bnf*}
+ \bnfProd{ListExp}{\bnfTD{(} \bnfSP \bnfTD{car} \bnfSP \bnfPN{ListExp} \bnfSP \bnfTD{)} 
+ \bnfOR \bnfTD{(} \bnfSP \bnfTD{cdr} \bnfSP \bnfPN{ListExp} \bnfSP \bnfTD{)}}
+\end{bnf*}
+
+\subsubsection{Axiomatic Semantics}
+
+Classically, the axiomatic semantics of a particular computational fragment,
+consists of a precondition, the computational fragment, and a post-condition. In
+our case these pre and post conditions are observations, which we, recursively,
+build from a given structure, $\Gamma$, using a succession of either,
+\car{\Gamma}, or \cdr{\Gamma}, observations. These observations are assertions
+that a given (recursive) observation on a given object, $\Gamma$, exists. We
+denote a given base observation as, \observation{\Gamma}{\cdot}{\car{\Gamma}} or
+\observation{\Gamma}{\cdot}{\cdr{\Gamma}}. More complex observations can be
+built out of simpler \emph{named} observations listed in the context. For
+example the observation \observation{\Gamma}{\name{x}{\car{\Gamma}}}{\cdr{x}} is
+the same as \observation{\Gamma}{\cdot}{\cdr{\car{\Gamma}}}.
+
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{empty-list}
+\UnaryInfC{(() . ())}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{(x . y)}
+\RightLabel{duplicate}
+\UnaryInfC{(x . (x . y))}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{\observation{\Gamma}{}{\name{x}{\car{\Gamma}}}}
+\AxiomC{\observation{\Gamma}{}{\name{y}{\car{\cdr{\Gamma}}}}}
+\AxiomC{\observation{\Gamma}{}{\name{x}{\cdr{\cdr{\Gamma}}}}}
+\RightLabel{pair}
+\TrinaryInfC{\observation{\Gamma'}{}{((x . y) . z)}}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{(x . (y . z))}
+\RightLabel{pair}
+\UnaryInfC{((x . y) . z)}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{((x . y) . z)}
+\RightLabel{car}
+\UnaryInfC{(x . z)}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{((x . y) . z)}
+\RightLabel{cdr}
+\UnaryInfC{(y . z)}
+\end{prooftree}
+
+Liguistically we interpret these five rules to mean:
+\begin{itemize}
+\item	The empty list is a member of the universe.
+
+\item	If $(x.y)$ is a list in the universe, then the list, $(x.(x.y))$, is also
+in the universe.
+
+\item	If $x$ and $y$ are lists in the universe, then the ``pair'', $(x.y)$, of
+$x$ and $y$ is also in the universe.
+
+\item	If the ``pair'', $(x.y)$ is in the universe, then so is its first
+(``car'') member.
+
+\item	If the ``pair'', $(x.y)$ is in the universe, then so is its last
+(``cdr'') member.
+\end{itemize}
+
+\begin{cTikzPictureWorking}
+\node at (-1, 0)	{$\emptySet{}$};
+\node at (0, 0)     {\Universe{}{}};
+\draw[->] (-1, 0) -- (0,0);
+\draw[->] (0.1,0) arc [ start angle = 200, end angle = 540, radius = 1];
+\draw[->] (0.2,0) arc [ start angle = 200, end angle = 540, radius = 0.75];
+\draw[->] (0.3,0) arc [ start angle = 200, end angle = 540, radius = 0.5];
+\draw[->] (0.4,0) arc [ start angle = 200, end angle = 540, radius = 0.25];
+\end{cTikzPictureWorking}
+
+
+We explicitly accept that any member of the universe, \Universe{}{}, might not
+be finite. That is, any member of the universe might be, what computer
+scientists call, a ``stream'', and in deed it might be a ``stream'' of
+``streams''.
+
+A \emph{denotational semantics} is provided by a mapping, $[ \cdot ]_{\cdot} :
+\Universe{}{} \crossProduct \Sigma \mapsTo \Universe{}{}$, from an element of
+\Universe{}{} together with a given state, $\sigma$, to a specific element of a
+collection of semantic entities. Correspondingly, the denotational semantics of
+the first rule is that the \emph{syntactical form} $()$ (the marks in the sand
+`$($' and `$)$') together with any environment (including the empty environment)
+maps to the $()$ element in the \Universe{}{}. In a more mathematical notation,
+$[()]_{\sigma} = ()$. Similarly the denotational semantics of the second rule is
+that given an environment, $\sigma$, which contains a mapping for the variables,
+$x$ and $y$, the syntactic form $(x , y)$, is mapped to the element of
+\Universe{}{} given by $[ ( x . y ) ]_{\sigma} = ( [x]_{\sigma} . [y]_{\sigma} )
+= ( \sigma(x) . \sigma(y) )$. Note that for these two rules and hence for any
+syntactic structure in Plato's playground, the denotational semantics of the
+syntax \emph{is} the syntax, and hence Plato's playground is the fixed-point of
+the denotational semantics.
+
+\emph{Operational semantics} is provided by a 
+
+\emph{Axiomatic semantics} is provided by
+
+\section{Mud's eye view}
+
+In this section we pursue a mud's eye view of the construction of Plato's
+playground. While it does not represent the best way to conceptually understand
+the \emph{meaning} of Plato's playground, it \emph{does} satisfy the requirement
+of exhibiting an \emph{explicit finitist} construction.
+
+The typical activity of the mathematical community is to build language
+extensions of the foundational structure. So at any one time Plato's playground
+will be the minimal language in a partially ordered collection of currently
+useful/interesting linguistic extensions. A language extension consists of the
+specification of a syntax/semantics mapping which is a fixed point on the
+minimal language of Plato's playground itself.
+
+The conceptually simplest linguistic extension, since it is closest to one of
+the inspirations of Plato's playground, is the LISP extension. Following LISP
+convention, \cite{mcCarthy1960lisp}, we refer to Plato's playground itself as
+the foundational language of F-expressions, while the LISP extension itself
+consists of the additional symbolic langauge of S-expressions. In fact ``the''
+LISP extension is actually a family of mutually consistent extensions. One which
+adds lists (S$_{\text{L}}$-expressions), one which adds the natural numbers
+(S$_{\text{N}}$-expressions), one which adds the lambda calculus
+(S$_{\lambda}$-expressions), and so on, as need or interest arises.
+
+For the F-expressions, we allow ourselves three symbols `(', `)',
+'.'\footnote{To make things readable, as humans we are also allowed to use any
+amount of whitespace (in ASCII Unix notation the characters `\textvisiblespace'
+(space), `\textbackslash t' (tab), `\textbackslash n' (newline), `\textbackslash
+r' (return) ). All whitespace is ignored. Following LISP conventions we are also
+allowed one line comments, in that anything \emph{including and after} the
+character `;' (semicolon) is ignored up to the end of the current line.}.
+
+For the S-expressions, we allow ourselves any of the printable ASCII
+characters\footnote{We could in principle allow any collection of printable
+characters such as, for example, the UTF-8 characters. However, for current
+purposes the ASCII characters are sufficient and yield a simpler core
+description.}.
+
+The S$_{\text{L}}$, S$_{\text{N}}$, and S$_{\lambda}$-expressions all inherit
+the same collection of characters as the S-expressions, but provide additional
+semantics not present in the base S-expressions.
+
+\section{Booting Mathematics}
+
