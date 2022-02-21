@@ -1,0 +1,1128 @@
+% A ConTeXt document [master document: jInterps.tex]
+
+\section[title=JoyLoL interpreter]
+
+\setCHeaderStream{public}
+\setCCodeStream{interpreter}
+
+In this section we concentrate on the C code required to implement the 
+kernel JoyLoL CoAlgebra. The CoAlgebra, \type{CoAlg}, is the base of the 
+JoyLoL interpreter. This CoAlgebra has two parts, a \quote{class} part, 
+and an \quote{instance} part. This class part manages the loading, 
+registration and listing of new \quote{external} CoAlgebras. The instance 
+part, discussed in the next section, manages the creation and removal of 
+CoAlgebra \quote{values} (more commonly know as \quote{object} instances). 
+
+Any given implementation of the overall JoyLoL \emph{system} will consist 
+of a number of CoAlgebraic extensions which are loaded into a JoyLoL 
+\quote{core}. Any given core will provide some resources for the 
+extensions to use. Before we can document the generic structure of an 
+extension, we need to provide a method to allow the JoyLoL interpreter 
+extension to obtain these resources from the core. 
+
+\startTestSuite[get Lua-state global JoyLoL-Callback LightUserData]
+
+Each JoyLoL core implementation will have a number of specific resources 
+such as C-functions which it needs to register with the JoyLoL 
+interpreter. In particular the core specific Input/Output will need to be 
+available to the JoyLoL interpreter soon after it loads in order to allow 
+it to correctly communicate with the core and hence the user. The 
+\type{getJoyLoLCallbackInto} and \type{setJoyLoLCallbackFrom} macros 
+provide this capability by registering a well known \quote{callback} 
+C-function \emph{before} the JoyLoL interpreter is loaded. 
+
+The callback C-function takes an unsigned integer as its sole argument and 
+returns a \type{void*} to the returned resource. 
+
+\startCHeader
+typedef void *(JoyLoLCallback)(
+  lua_State*,
+  size_t
+);
+\stopCHeader
+
+The currently well known resources are:
+
+\setCHeaderStream{public}
+\startCHeader
+#define JoyLoLCallback_StdOutMethod   1
+#define JoyLoLCallback_StdErrMethod   2
+#define JoyLoLCallback_Verbose        3
+#define JoyLoLCallback_Debug          4
+#define JoyLoLCallback_Trace          5
+#define JoyLoLCallback_Quiet          6
+#define JoyLoLCallback_ConfigFile     7
+#define JoyLoLCallback_UserPath       8
+#define JoyLoLCallback_LocalPath      9
+#define JoyLoLCallback_SystemPath     10
+
+typedef void (StdOutputMethod)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+);
+\stopCHeader
+
+The core implementation can then use the \type{setJoyLoLCallbackFrom} 
+macro to store the address of its specific callback C-function as a 
+LightUserData in the Lua Registry at the \type{JoyLoLCallbackKey}. The 
+JoyLoL interpreter, once it is loaded, can get the address of the callback 
+C-function using the \type{getJoyLoLCallbackInto} macro. 
+
+This means that \type{joyLoLCallbackKey} must be a unique value, but has no 
+meaningful value \emph{other than} its uniqueness. To do this we 
+transliterate the first 4 characters of the string \quote{JyLCallbackKey} 
+into hexadecimal using the standard \type{ASCII} character codes. 
+
+\startCHeader
+//                           J y L C a l l b a c k K e y
+#define joyLoLCallbackKey 0x4A794C43L
+
+#define getJoyLoLCallbackInto(lstate, aCallback)  \
+  lua_rawgetp(                                    \
+    lstate,                                       \
+    LUA_REGISTRYINDEX,                            \
+    (void *)joyLoLCallbackKey                     \
+  );                                              \
+  JoyLoLCallback* aCallback =                     \
+    (JoyLoLCallback*)lua_touserdata (lstate, -1); \
+  lua_pop(lstate, 1);                             \
+  if (!aCallback) {                               \
+    /*return*/ luaL_error(lstate, "%s%s%s%s",     \
+      "\nERROR:\n",                               \
+      "  Could not get the Lua registered\n",     \
+      "  JoyLoLCallback method!\n",               \
+      "  Have you required joylol.core.xxx?\n");  \
+  }
+\stopCHeader
+
+\startCHeader
+#define setJoyLoLCallbackFrom(lstate, aCallback)    \
+  lua_pushlightuserdata(lstate, (void *)aCallback); \
+  lua_rawsetp(                                      \
+    lstate,                                         \
+    LUA_REGISTRYINDEX,                              \
+    (void *)joyLoLCallbackKey                       \
+  )
+\stopCHeader
+
+\startTestCase[should get a Lua-State global JoyLoL-Callback LightUserData] 
+
+\startCTest
+  // NOTE we MUST test using ctestsCallback 
+  // OR we MUST reset the call back to ctestsCallback
+  //
+  JoyLoLCallback *origCallback = ctestsCallback;
+  setJoyLoLCallbackFrom(lstate, origCallback);
+  getJoyLoLCallbackInto(lstate, aCallback);
+  AssertPtrNotNull(aCallback);
+  AssertPtrEquals(origCallback, aCallback);
+  getJoyLoLCallbackInto(lstate, newCallback);
+  AssertPtrNotNull(newCallback);
+  AssertPtrEquals(origCallback, newCallback);  
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\section[title=CoAlgebra extensions]
+
+The ANSI-C implementation of a CoAlgebra is as a simple \type{struct} 
+which contains the following items:
+
+\startitemize
+
+\item a \type{size_t} value which is unique for each registered CoAlgebra 
+and hence acting as a test for identity, 
+
+\item a \type{Symbol} value which provides a human readable \emph{name} 
+for the CoAlgebra, 
+
+\item a \type{C-function} which (recursively) tests for equality of two 
+CoAlgebra instances of given type of CoAlgebra.
+
+\item a \type{C-function} with (re)registers a given CoAlgebra with the 
+JoyLoL interpreter. This registration function's primary purpose is two 
+fold. It registers the CoAlgebra with the central collection of known 
+CoAlgebras (to be discussed in the next subsection, below), as well as 
+registers the individual JoyLoL functions provided by the CoAlgebra with 
+the interpreter's dictionary of words. 
+
+\stopitemize
+
+\startCHeader
+typedef Boolean (JClassInitialize)(
+  JoyLoLInterp*,
+  JClass*
+);
+
+typedef Boolean (JObjEquality)(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+
+typedef struct string_buffer_object_struct StringBufferObj;
+typedef Boolean (JObjPrint)(
+  StringBufferObj *aStBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+
+typedef JObj* (JObjCopy)(
+  JoyLoLInterp*,
+  JObj*
+);
+
+typedef Boolean (JObjRelease)(
+  JoyLoLInterp*,
+  JObj*
+);
+
+typedef void*   CoAlgData;
+
+typedef struct joylol_class_struct {
+  Symbol           *name;
+  JoyLoLInterp     *jInterp;
+  size_t            tag;
+  size_t            objectSize;
+  size_t            numObjectsPerBlock;
+  JObj             *freeObjects;
+  ObjectBlock      *rootObjectBlock;
+  JClassInitialize *initializeFunc;
+  JClassInitialize *registerFunc;
+  JObjEquality     *equalityFunc;
+  JObjPrint        *printFunc;
+  JObjCopy         *copyFunc;
+  JObjRelease      *releaseFunc;
+} JClass;
+
+typedef JObj* (JInterpNewObject)(
+  JoyLoLInterp *jInterp,
+  TagType       aTag
+);
+
+typedef size_t (JInterpRegisterJClass)(
+  JoyLoLInterp *jInterp,
+  JClass   *theJClass
+);
+
+typedef struct crossCompiler_object_struct CrossCompilerObj;
+typedef size_t (JInterpRegisterCrossCompiler)(
+  JoyLoLInterp     *jInterp,
+  CrossCompilerObj *aCompiler
+);
+
+typedef void (JInterpInitializeAllLoaded)(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp
+);
+
+typedef struct joylolinterp_class_struct {
+  JClass                        super;
+  JInterpNewObject             *newObjectFunc;
+  JInterpRegisterJClass        *registerJClassFunc;
+  JInterpRegisterCrossCompiler *registerCrossCompilerFunc;
+  JInterpInitializeAllLoaded   *initializeAllLoadedFunc;
+  JInterpInitializeAllLoaded   *registerAllLoadedFunc;
+} JoyLoLInterpClass;
+\stopCHeader
+
+\subsection[title=JoyLoLInterp structures]
+
+The \type{JoyLoLInterp} structure provides access to all of the CoAlgebras 
+known to a given JoyLoL interpreter. As such it will be accessed 
+repeatedly, so should probably be accessible with as few memory accesses 
+as possible. 
+
+\startCHeader
+typedef struct dictNode_object_struct DictNodeObj;
+
+typedef struct loader_object_struct LoaderObj;
+typedef struct context_object_struct ContextObj;
+typedef struct dictionary_object_struct DictObj;
+typedef struct crossCompiler_object_struct CrossCompilerObj;
+
+typedef struct joylol_interpreter_struct {
+  lua_State        *lstate;
+  size_t            numCoAlgs;
+  size_t            maxNumCoAlgs;
+  JClass          **coAlgs;
+  LoaderObj        *loader;
+  ContextObj       *rootCtx;
+  size_t            numCompilers;
+  size_t            maxNumCompilers;
+  CrossCompilerObj **compilers;
+  Boolean           verbose;
+  Boolean           debug;
+  Boolean           tracing;
+  Boolean           quiet;
+  StdOutputMethod  *writeStdOut;
+  StdOutputMethod  *writeStdErr;
+} JoyLoLInterp;
+
+#define getJClass(jInterp, aTag)     \
+  (                                  \
+    assert(jInterp),                 \
+    assert(aTag),                    \
+    assert((jInterp)->coAlgs),       \
+    assert((jInterp)->coAlgs[aTag]), \
+    ((jInterp)->coAlgs[aTag])        \
+  )
+
+#define getJInterpClass(jInterp)                            \
+  ((JoyLoLInterpClass*)getJClass(jInterp, JInterpsTag))
+
+typedef struct assertions_class_struct AssertionsClass;
+#define getAssertionsClass(jInterp)                         \
+  ((AssertionsClass*)getJClass(jInterp, AssertionsTag))
+
+typedef struct booleans_class_struct BooleansClass;
+#define getBooleansClass(jInterp)                           \
+  ((BooleansClass*)getJClass(jInterp, BooleansTag))
+
+typedef struct cFunctions_class_struct CFunctionsClass;
+#define getCFunctionsClass(jInterp)                         \
+  ((CFunctionsClass*)getJClass(jInterp, CFunctionsTag))
+
+typedef struct coAlgebras_class_struct CoAlgebrasClass;
+#define getCoAlgebrasClass(jInterp)                         \
+  ((CoAlgebrasClass*)getJClass(jInterp, CoAlgebrasTag))
+
+typedef struct contexts_class_struct ContextsClass;
+#define getContextsClass(jInterp)                           \
+  ((ContextsClass*)getJClass(jInterp, ContextsTag))
+
+typedef struct crossCompilers_class_struct CrossCompilersClass;
+#define getCrossCompilersClass(jInterp)                     \
+  ((CrossCompilersClass*)getJClass(jInterp, CrossCompilersTag))
+
+typedef struct dictNodes_class_struct DictNodesClass;
+#define getDictNodesClass(jInterp)                          \
+  ((DictNodesClass*)getJClass(jInterp, DictNodesTag))
+
+typedef struct dictionaries_class_struct DictionariesClass;
+#define getDictionariesClass(jInterp)                       \
+  ((DictionariesClass*)getJClass(jInterp, DictionariesTag))
+
+typedef struct fragments_class_struct FragmentsClass;
+#define getFragmentsClass(jInterp)                          \
+  ((FragmentsClass*)getJClass(jInterp, FragmentsTag))
+
+typedef struct implementations_class_struct ImplementationsClass;
+#define getImplementationsClass(jInterp)                          \
+  ((ImplementationsClass*)getJClass(jInterp, ImplementationsTag))
+
+typedef struct loaders_class_struct LoadersClass;
+#define getLoadersClass(jInterp)                            \
+  ((LoadersClass*)getJClass(jInterp, LoadersTag))
+
+typedef struct luaFunctions_class_struct LuaFunctionsClass;
+#define getLuaFunctionsClass(jInterp)                       \
+  ((LuaFunctionsClass*)getJClass(jInterp, LuaFunctionsTag))
+
+typedef struct naturals_class_struct NaturalsClass;
+#define getNaturalsClass(jInterp)                           \
+  ((NaturalsClass*)getJClass(jInterp, NaturalsTag))
+
+typedef struct pairs_class_struct PairsClass;
+#define getPairsClass(jInterp)                              \
+  ((PairsClass*)getJClass(jInterp, PairsTag))
+
+typedef struct parsers_class_struct ParsersClass;
+#define getParsersClass(jInterp)                            \
+  ((ParsersClass*)getJClass(jInterp, ParsersTag))
+
+typedef struct rules_class_struct RulesClass;
+#define getRulesClass(jInterp)                            \
+  ((RulesClass*)getJClass(jInterp, RulesTag))
+
+typedef struct signals_class_struct SignalsClass;
+#define getSignalsClass(jInterp)                      \
+  ((SignalsClass*)getJClass(jInterp, SignalsTag))
+
+typedef struct stringBuffers_class_struct StringBuffersClass;
+#define getStringBuffersClass(jInterp)                      \
+  ((StringBuffersClass*)getJClass(jInterp, StringBuffersTag))
+
+typedef struct symbols_class_struct SymbolsClass;
+#define getSymbolsClass(jInterp)                            \
+  ((SymbolsClass*)getJClass(jInterp, SymbolsTag))
+  
+typedef struct templates_class_struct TemplatesClass;
+#define getTemplatesClass(jInterp)                          \
+  ((TemplatesClass*)getJClass(jInterp, TemplatesTag))
+
+typedef struct texts_class_struct TextsClass;
+#define getTextsClass(jInterp)                              \
+  ((TextsClass*)getJClass(jInterp, TextsTag))
+\stopCHeader
+
+\startTestSuite[newJoyLoLInterp]
+
+To be able to either test or use a JoyLoL interpreter, we must first be 
+able to obtain a new one. The (privately defined) \type{newJoyLoLInterp} 
+creates a new \type{JoyLoLInterp} structure and ensures it is properly 
+initialized. Note that we \emph{could} have multiple instances of 
+\type{JoyLoLInterp} in a running program. 
+
+\setCHeaderStream{private}
+\startCHeader
+extern JoyLoLInterp* newJoyLoLInterp(lua_State *lstate);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JoyLoLInterp* newJoyLoLInterp(lua_State *lstate) {
+  // we need to create a new JoyLoLInterp structure...
+  //
+  JoyLoLInterp* jInterp = joyLoLCalloc(1, JoyLoLInterp);
+  assert(jInterp);
+
+  jInterp->lstate = lstate;
+  
+  // before we do anything else we need to install the
+  // core's Output methods
+  getJoyLoLCallbackInto(lstate, getCoreResources);
+  assert(getCoreResources);
+  jInterp->writeStdOut =
+    getCoreResources(lstate, JoyLoLCallback_StdOutMethod);
+  jInterp->writeStdErr =
+    getCoreResources(lstate, JoyLoLCallback_StdErrMethod);
+  if (!(jInterp->writeStdOut) || !(jInterp->writeStdErr)) {
+    /*return*/ luaL_error(lstate, "%s%s",
+      "\nERROR:\n",
+      "  Could not get the core output methods\n");
+  }
+  jInterp->verbose =
+    (Boolean)getCoreResources(lstate, JoyLoLCallback_Verbose);
+    
+  jInterp->debug = 
+    (Boolean)getCoreResources(lstate, JoyLoLCallback_Debug);
+    
+  jInterp->tracing = 
+    (Boolean)getCoreResources(lstate, JoyLoLCallback_Trace);
+
+  jInterp->quiet =
+    (Boolean)getCoreResources(lstate, JoyLoLCallback_Quiet);
+
+  DEBUG(jInterp, "Creating jInterp %p\n", jInterp);
+    
+  size_t maxNum =
+    NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT;
+  jInterp->numCoAlgs    = NumRequiredCoAlgs;
+  jInterp->maxNumCoAlgs = maxNum;
+  jInterp->coAlgs       = joyLoLCalloc(maxNum, JClass*);
+  
+  DEBUG(jInterp, "Created coAlgs vector %p %zu %zu\n",
+    jInterp->coAlgs, jInterp->numCoAlgs, jInterp->maxNumCoAlgs);
+  
+  for (size_t i = 0; i < jInterp->maxNumCoAlgs; i++) {
+    jInterp->coAlgs[i] = NULL;
+  }
+
+  DEBUG(jInterp, "Initialized coAlgs %p\n", jInterp);
+  
+  maxNum =
+    NumRequiredCrossCompilers + JOYLOL_COMPILERS_INCREMENT;
+  jInterp->numCompilers    = NumRequiredCrossCompilers;
+  jInterp->maxNumCompilers = maxNum;
+  jInterp->compilers       = joyLoLCalloc(maxNum, CrossCompilerObj*);
+
+  DEBUG(jInterp, "Created crossCompilers vector %p %zu %zu\n",
+    jInterp->compilers, 
+    jInterp->numCompilers,
+    jInterp->maxNumCompilers);
+
+  for (size_t i = 0; i < jInterp->maxNumCompilers; i++) {
+    jInterp->compilers[i] = NULL;
+  }
+
+  DEBUG(jInterp, "Initialized compilers %p\n", jInterp);
+
+  //jInterp->dict    = NULL;
+  jInterp->loader  = NULL;
+  jInterp->rootCtx = NULL;
+    
+  DEBUG(jInterp, "Initialized jInterp %p\n", jInterp);
+
+  return jInterp;
+}
+\stopCCode
+
+\startTestCase[should create a valid JoyLoLInterp instance]
+
+\startCTest
+  JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
+  AssertPtrNotNull(jInterp);
+  
+  AssertIntEquals(jInterp->numCoAlgs,
+    NumRequiredCoAlgs);
+  AssertIntEquals(jInterp->maxNumCoAlgs,
+    NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT);
+  AssertPtrNotNull(jInterp->coAlgs);
+  
+  for (size_t i = 0; i < jInterp->maxNumCoAlgs; i++) {
+    AssertPtrNull(jInterp->coAlgs[i]);
+  }
+  
+  AssertPtrNull(jInterp->rootCtx);
+  AssertPtrNull(jInterp->loader);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[get Lua-state global JoyLoLInterp LightUserData]
+
+We want the ability to have different JoyLoL interpreters for each Lua 
+state. However, we also need fast access to the C-implementations of the 
+loaded CoAlgebras registered with a given JoyLoL interpreter. To achieve 
+this we use the Lua Registry with the \quote{well-known} key 
+\type{joyLoLInterpKey}. We store a pointer to the JoyLoL interpreter 
+\type{JoyLoLInterp}, as a LightUserData, in the Lua registry under the key 
+\type{joyLoLInterpKey}, so that it is only accessible by the C 
+implementation of any CoAlgebra. This ensures that the pointer to 
+\type{JoyLoLInterp} is unique for any particular Lua state, but can be 
+different for each distinct Lua state. 
+
+This means that \type{joyLoLInterpKey} must be a unique value, but has no 
+meaningful value \emph{other than} its uniqueness. To do this we 
+transliterate the first 4 characters of the string \quote{JoyLoLInterpKey} 
+into hexadecimal using the standard \type{ASCII} character codes. 
+
+\startCHeader
+//                         J y L I n t e r p K e y
+#define joyLoLInterpKey 0x4A794C49L
+
+#define getJoyLoLInterpInto(lstate, jInterp)      \
+  lua_rawgetp(                                    \
+    lstate,                                       \
+    LUA_REGISTRYINDEX,                            \
+    (void *)joyLoLInterpKey                       \
+  );                                              \
+  JoyLoLInterp* jInterp =                         \
+    (JoyLoLInterp*)lua_touserdata (lstate, -1);   \
+  lua_pop(lstate, 1);                             \
+  if (!jInterp) {                                 \
+    /*return*/ luaL_error(lstate, "%s%s%s%s",     \
+      "\nERROR:\n",                               \
+      "  Could not get the Lua registered\n",     \
+      "  JoyLoLInterp instance!\n",               \
+      "  Have you required joylol.jInterps?\n");  \
+  }
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+#define setJoyLoLInterpInto(lstate, jInterp)      \
+  JoyLoLInterp *jInterp =                         \
+    newJoyLoLInterp(lstate);                      \
+  lua_pushlightuserdata(lstate, (void *)jInterp); \
+  lua_rawsetp(                                    \
+    lstate,                                       \
+    LUA_REGISTRYINDEX,                            \
+    (void *)joyLoLInterpKey                       \
+  )
+\stopCHeader
+\setCHeaderStream{public}
+
+\startTestCase[should get a Lua-State global JoyLoLInterp LightUserData] 
+
+\startCTest
+  getJoyLoLInterpInto(lstate, jInterp);
+  AssertPtrNotNull(jInterp);
+  AssertPtrEquals(jInterp->lstate, lstate);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertIntEquals(jInterp->numCoAlgs, NumRequiredCoAlgs);
+  AssertIntEquals(jInterp->maxNumCoAlgs,
+    NumRequiredCoAlgs + JOYLOL_COALGS_INCREMENT);
+  getJoyLoLInterpInto(lstate, newJInterp);
+  AssertPtrNotNull(newJInterp);
+  AssertPtrEquals(jInterp, newJInterp);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerCoAlgebra]
+
+\startCHeader
+#define registerJClass(jInterp, aTag)                              \
+  (                                                                    \
+    assert(getJInterpClass(jInterp)->registerJClassFunc),          \
+    (getJInterpClass(jInterp)->registerJClassFunc)(jInterp, aTag)  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+size_t registerJClassImpl(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+size_t registerJClassImpl(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  assert(theCoAlg);
+  
+  theCoAlg->jInterp = jInterp;
+  
+  for(size_t i = 0; i < jInterp->numCoAlgs; i++ ) {
+    if (jInterp->coAlgs[i]) {
+      if (strcmp(theCoAlg->name,
+        jInterp->coAlgs[i]->name) == 0) {
+    
+        // a coAlgebra with this name has already been registered. 
+        // so return its index...
+        return i;
+      }
+    }
+  }
+
+  // now check to see if this is a required coAlg
+  for (size_t i = 0; requiredCoAlgs[i].name; i++) {
+    if (strcmp(theCoAlg->name, requiredCoAlgs[i].name) == 0) {
+      size_t tag = requiredCoAlgs[i].tag;
+      if (!(jInterp->coAlgs[tag])) {
+        jInterp->coAlgs[tag] = theCoAlg;
+      }
+      theCoAlg->tag = tag;
+      return tag;
+    }
+  }
+
+  // we follow a policy of lazy management of the jInterp
+  // if jInterp->coAlgs is too small we expand it
+  if (jInterp->maxNumCoAlgs <= jInterp->numCoAlgs) {
+    // we need to expand the existing coAlgs structure...
+    //  
+    size_t oldnumCoAlgs     = jInterp->numCoAlgs;
+    size_t oldmaxNumCoAlgs  = jInterp->maxNumCoAlgs;
+    JClass **oldcoAlgs = jInterp->coAlgs;
+    
+    size_t newMaxNumCoAlgs =
+      oldmaxNumCoAlgs + JOYLOL_COALGS_INCREMENT;
+
+    jInterp->coAlgs =
+      joyLoLCalloc(newMaxNumCoAlgs, JClass*);
+    assert(jInterp->coAlgs);
+    
+    if (oldcoAlgs) {
+      memcpy(jInterp->coAlgs,
+        oldcoAlgs,
+        sizeof(JClass*)*oldnumCoAlgs);
+      free(oldcoAlgs);
+    }
+    
+    jInterp->numCoAlgs    = oldnumCoAlgs;
+    jInterp->maxNumCoAlgs = newMaxNumCoAlgs;
+  }
+  
+  size_t newCoAlg = jInterp->numCoAlgs;
+  
+  jInterp->coAlgs[newCoAlg] = theCoAlg;
+  theCoAlg->tag             = newCoAlg;
+  
+  jInterp->numCoAlgs++;
+  
+  return newCoAlg;
+}
+\stopCCode
+
+\startTestCase[should add lots of CoAlgs to a JoyLoLInterp]
+
+We start by adding one single \type{CoAlgebra}. 
+
+\startCTest
+  JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
+  char*             coAlgName          = strdup("newCoAlgA");
+  char*             coAlgNameEnd       = coAlgName + strlen("newCoAlg");
+  JClassInitialize *fakeInitializeFunc = (JClassInitialize*) 0x100;
+  JClassInitialize *fakeRegisterFunc   = (JClassInitialize*) 0x200;
+  JObjEquality     *fakeEqualityFunc   = (JObjEquality*)     0x300;
+  JObjPrint        *fakePrintFunc      = (JObjPrint*)        0x400;
+  
+  JClass* aCoAlg   = joyLoLCalloc(1, JClass);
+  AssertPtrNotNull(aCoAlg);
+  aCoAlg->name           = strdup("newCoAlgA");
+  aCoAlg->initializeFunc = fakeInitializeFunc;
+  aCoAlg->registerFunc   = fakeRegisterFunc;
+  aCoAlg->equalityFunc   = fakeEqualityFunc;
+  aCoAlg->printFunc      = fakePrintFunc;
+
+  size_t coAlgIdx = registerJClassImpl(jInterp, aCoAlg);
+  AssertIntEquals(coAlgIdx, NumRequiredCoAlgs);
+
+  JClass** coAlgsVec = jInterp->coAlgs;
+  AssertPtrNotNull(coAlgsVec);
+  AssertStrEquals(coAlgsVec[coAlgIdx]->name, "newCoAlgA");
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->initializeFunc, fakeInitializeFunc);
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->registerFunc,   fakeRegisterFunc);
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->equalityFunc,   fakeEqualityFunc);
+  AssertPtrEquals(coAlgsVec[coAlgIdx]->printFunc,      fakePrintFunc);
+\stopCTest
+
+Now we want to test the expansion of an existing CoAlgebras structure when 
+the existing one runs out of \quote{space}. 
+
+\startCTest
+  AssertIntTrue(JOYLOL_COALGS_INCREMENT < 26);
+  for(size_t i = 1; i < 26; i++) {
+    *coAlgNameEnd          = 'A' + i;
+    fakeInitializeFunc    += 1;
+    fakeRegisterFunc      += 1;
+    fakeEqualityFunc      += 1;
+    fakePrintFunc         += 1;
+    aCoAlg                 = joyLoLCalloc(1, JClass);
+    aCoAlg->name           = strdup(coAlgName);
+    aCoAlg->initializeFunc = fakeInitializeFunc;
+    aCoAlg->registerFunc   = fakeRegisterFunc;
+    aCoAlg->equalityFunc   = fakeEqualityFunc;
+    aCoAlg->printFunc      = fakePrintFunc;
+
+    registerJClassImpl(jInterp, aCoAlg);
+
+    JClass** coAlgsVec = jInterp->coAlgs;
+    AssertPtrNotNull(coAlgsVec);
+    size_t idx = NumRequiredCoAlgs + i;
+    AssertStrEquals(coAlgsVec[idx]->name, coAlgName);
+    AssertPtrEquals(coAlgsVec[idx]->initializeFunc, fakeInitializeFunc);
+    AssertPtrEquals(coAlgsVec[idx]->registerFunc,   fakeRegisterFunc);
+    AssertPtrEquals(coAlgsVec[idx]->equalityFunc,   fakeEqualityFunc);
+    AssertPtrEquals(coAlgsVec[idx]->printFunc,      fakePrintFunc);
+  }
+\stopCTest
+
+Now we want to test the addition of CoAlgebra with an existing name does 
+not change the number of registered CoAlgebras but simple returns the 
+existing CoAlgebra index. 
+
+\startCTest
+  size_t oldNumCoAlgs  = jInterp->numCoAlgs;
+
+  *coAlgNameEnd          = 'A' + 5;
+  aCoAlg                 = joyLoLCalloc(1, JClass);
+  aCoAlg->name           = strdup(coAlgName);
+  aCoAlg->initializeFunc = (JClassInitialize*) 0x100 + 5;
+  aCoAlg->registerFunc   = (JClassInitialize*) 0x200 + 5;
+  aCoAlg->equalityFunc   = (JObjEquality*)     0x300 + 5;
+  aCoAlg->printFunc      = (JObjPrint*)        0x400 + 5;
+  
+  size_t anIndex = registerJClassImpl(jInterp, aCoAlg);
+  AssertIntEquals(anIndex, 5 + NumRequiredCoAlgs);
+  AssertIntEquals(oldNumCoAlgs, jInterp->numCoAlgs);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerCrossCompiler]
+
+\startCHeader
+#define registerCrossCompiler(jInterp, aTag)      \
+  (                                               \
+    assert(getJInterpClass(jInterp)               \
+      ->registerCrossCompilerFunc),               \
+    (getJInterpClass(jInterp)                     \
+      ->registerCrossCompilerFunc)(jInterp, aTag) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+size_t registerCrossCompilerImpl(
+  JoyLoLInterp     *jInterp,
+  CrossCompilerObj *aCompiler
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+size_t registerCrossCompilerImpl(
+  JoyLoLInterp     *jInterp,
+  CrossCompilerObj *aCompiler
+) {
+  assert(jInterp);
+  assert(jInterp->compilers);
+  assert(aCompiler);
+  
+  for(size_t i = 0; i < jInterp->numCompilers; i++ ) {
+    if (jInterp->compilers[i]) {
+      if (strcmp(aCompiler->type,
+        jInterp->compilers[i]->type) == 0) {
+    
+        // a compiler with this name has already been registered. 
+        // so return its index...
+        return i;
+      }
+    }
+  }
+
+  // now check to see if this is a required coAlg
+  for (size_t i = 0; requiredCompilers[i].name; i++) {
+    if (strcmp(aCompiler->type, requiredCompilers[i].name) == 0) {
+      size_t tag = requiredCompilers[i].tag;
+      if (!(jInterp->compilers[tag])) {
+        jInterp->compilers[tag] = aCompiler;
+      }
+      return tag;
+    }
+  }
+
+  // we follow a policy of lazy management of the jInterp
+  // if jInterp->compilers is too small we expand it
+  if (jInterp->maxNumCompilers <= jInterp->numCompilers) {
+    // we need to expand the existing compilers structure...
+    //  
+    size_t oldNumCompilers          = jInterp->numCompilers;
+    size_t oldMaxNumCompilers       = jInterp->maxNumCompilers;
+    CrossCompilerObj** oldCompilers = jInterp->compilers;
+    
+    size_t newMaxNumCompilers =
+      oldMaxNumCompilers + JOYLOL_COMPILERS_INCREMENT;
+
+    jInterp->compilers =
+      joyLoLCalloc(newMaxNumCompilers, CrossCompilerObj*);
+    assert(jInterp->compilers);
+    
+    if (oldCompilers) {
+      memcpy(jInterp->compilers,
+        oldCompilers,
+        sizeof(CrossCompilerObj*)*oldNumCompilers);
+      free(oldCompilers);
+    }
+    
+    jInterp->numCompilers    = oldNumCompilers;
+    jInterp->maxNumCompilers = newMaxNumCompilers;
+  }
+  
+  size_t newCompiler = jInterp->numCompilers;
+  
+  jInterp->compilers[newCompiler] = aCompiler;
+  
+  jInterp->numCompilers++;
+  
+  return newCompiler;
+}
+\stopCCode
+
+\startTestCase[should add lots of Compilers to a JoyLoLInterp]
+
+We start by adding one single \type{Compiler}. 
+
+\startCTest
+  JoyLoLInterp *jInterp = newJoyLoLInterp(lstate);
+  char*             compilerType       = strdup("newCompilerA");
+  char*             compilerTypeEnd    = compilerType + strlen("newCompiler");
+  
+  CrossCompilerObj* aCompiler = joyLoLCalloc(1, CrossCompilerObj);
+  AssertPtrNotNull(aCompiler);
+  aCompiler->type               = strdup("newCompilerA");
+
+  size_t compilerIdx = registerCrossCompilerImpl(jInterp, aCompiler);
+  AssertIntEquals(compilerIdx, NumRequiredCrossCompilers);
+
+  CrossCompilerObj** compilers = jInterp->compilers;
+  AssertPtrNotNull(compilers);
+  AssertStrEquals(compilers[compilerIdx]->type, "newCompilerA");
+\stopCTest
+
+Now we want to test the expansion of an existing CoAlgebras structure when 
+the existing one runs out of \quote{space}.
+
+\startCTest
+  AssertIntTrue(JOYLOL_COALGS_INCREMENT < 26);
+  for(size_t i = 1; i < 26; i++) {
+    *compilerTypeEnd = 'A' + i;
+    aCompiler        = joyLoLCalloc(1, CrossCompilerObj);
+    aCompiler->type  = strdup(compilerType);
+
+    registerCrossCompilerImpl(jInterp, aCompiler);
+
+    CrossCompilerObj** compilers = jInterp->compilers;
+    AssertPtrNotNull(compilers);
+    size_t idx = NumRequiredCrossCompilers + i;
+    AssertStrEquals(compilers[idx]->type, compilerType);
+  }
+\stopCTest
+
+Now we want to test the addition of CoAlgebra with an existing name does 
+not change the number of registered CoAlgebras but simple returns the 
+existing CoAlgebra index. 
+
+\startCTest
+  size_t oldNumCompilers = jInterp->numCompilers;
+
+  *compilerTypeEnd       = 'A' + 5;
+  aCompiler              = joyLoLCalloc(1, CrossCompilerObj);
+  aCompiler->type        = strdup(compilerType);
+  
+  size_t anIndex = registerCrossCompilerImpl(jInterp, aCompiler);
+  AssertIntEquals(anIndex, 5 + NumRequiredCrossCompilers);
+  AssertIntEquals(oldNumCompilers, jInterp->numCompilers);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[initializeAllLoaded]
+
+\setCHeaderStream{public}
+\startCHeader
+#define initializeAllLoaded(lstate, jInterp)      \
+  (                                               \
+    assert(getJInterpClass(jInterp)               \
+      ->initializeAllLoadedFunc),                 \
+    (getJInterpClass(jInterp)                     \
+      ->initializeAllLoadedFunc(lstate, jInterp)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void initializeAllLoadedImpl(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void initializeAllLoadedImpl(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp
+) {
+  assert(lstate);
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  // now call the initialization function for each 
+  // loaded CoAlgebraic extension
+  for( size_t i = 1; i < jInterp->numCoAlgs; i++) {
+    if (jInterp->coAlgs[i]) {
+      JClass *aCoAlg = getJClass(jInterp, i);
+      if (jInterp->verbose) {
+        char output[1000];
+        memset(output, 0, 1000);
+        snprintf(output, 999, 
+          "    initializing [joylol.%s]\n",
+          aCoAlg->name);
+        jInterp->writeStdOut(jInterp, output);
+      }
+      if (aCoAlg->initializeFunc)
+        aCoAlg->initializeFunc(jInterp, aCoAlg);
+
+      if (jInterp->verbose) {
+        char output[1000];
+        memset(output, 0, 1000);
+        snprintf(output, 999, 
+          "    initialized [joylol.%s]\n",
+          aCoAlg->name);
+        jInterp->writeStdOut(jInterp, output);
+      }
+    }
+  }
+}
+\stopCCode
+\stopTestSuite
+
+\startTestSuite[registerAllLoaded]
+
+\setCHeaderStream{public}
+\startCHeader
+#define registerAllLoaded(lstate, jInterp)      \
+  (                                               \
+    assert(getJInterpClass(jInterp)               \
+      ->registerAllLoadedFunc),                 \
+    (getJInterpClass(jInterp)                     \
+      ->registerAllLoadedFunc(lstate, jInterp)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerAllLoadedImpl(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerAllLoadedImpl(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp
+) {
+  assert(lstate);
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  // now call the register function for each 
+  // loaded CoAlgebraic extension
+  for( size_t i = 1; i < jInterp->numCoAlgs; i++) {
+    if (jInterp->coAlgs[i]) {
+      JClass *aCoAlg = getJClass(jInterp, i);
+      if (jInterp->verbose) {
+        char output[1000];
+        memset(output, 0, 1000);
+        snprintf(output, 999,
+          "    registering words for [joylol.%s]\n",
+          aCoAlg->name);
+        jInterp->writeStdOut(jInterp, output);
+      }
+      if (aCoAlg->registerFunc)
+        aCoAlg->registerFunc(jInterp, aCoAlg);
+        
+      if (jInterp->verbose) {
+        char output[1000];
+        memset(output, 0, 1000);
+        snprintf(output, 999, 
+          "    registered words for [joylol.%s]\n",
+          aCoAlg->name);
+        jInterp->writeStdOut(jInterp, output);
+      }
+    }
+  }
+}
+\stopCCode
+\stopTestSuite
+
+\startTestSuite[getGitVersion]
+
+We need a generic way of obtaining the git version of a given CoAlgebra. 
+We do this in two parts. In the \type{bin} directory of any (collection 
+of) CoAlgebra(s) there should be a pair of shell scripts. The 
+\type{gitHook.sh} is a \type{bash} shell script which is run at various 
+points in the git event cycle to capture the git version information into 
+either a C-header file or a Lua file. These files can then be loaded as 
+needed into either a C-implementation or required by Lua code, to provide 
+information about the version of a given code artefact. The \type{bin} 
+directory should also contain a \type{setupGitHooks} \type{bash} script 
+which copies the \type{gitHook.sh} script into the correct places in the 
+\type{.git} directory. 
+
+For CoAlgebras implemented in ANSI-C, the following function will take the 
+git version information in the \type{gitVersion.h} file which is 
+statically linked in a given CoAlgabra's shared library and return the 
+value associated with any valid key requested. 
+
+\startCHeader
+typedef struct keyValueStruct {
+  const char *key;
+  const char *value;
+} KeyValues;
+
+#define getGitVersionInto(gitVersion, gitVersionKey, theValue)  \
+  Symbol* theValue = "key not found";                           \
+  for(size_t i = 0 ; gitVersion[i].key ; i++) {                 \
+    if (strcmp(gitVersionKey, gitVersion[i].key) == 0) {        \
+      theValue = gitVersion[i].value;                           \
+      break;                                                    \
+    }                                                           \
+  }
+\stopCHeader
+
+At the moment we can only (easily) test the \type{getGitVersion} function.
+
+\startTestCase[should get value associated with keys]
+\startCTest
+  static const KeyValues testKVs[] = {
+    { "key1", "value1" },
+    { "key2", "value2" },
+    { NULL,   NULL }
+  };
+  getGitVersionInto(testKVs, "key1", aValue0);
+  AssertPtrNotNull(aValue0);
+  AssertStrEquals(aValue0, "value1");
+  getGitVersionInto(testKVs, "key2", aValue1);
+  AssertPtrNotNull(aValue1);
+  AssertStrEquals(aValue1, "value2");
+  getGitVersionInto(testKVs, "noKey", aValue2);
+  AssertPtrNotNull(aValue2);
+  AssertStrEquals(aValue2, "key not found");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startCCode
+static Boolean initializeJInterps(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[regiserJInterps]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerJInterps(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerJInterps(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  
+  JoyLoLInterpClass* theCoAlg =
+    joyLoLCalloc(1, JoyLoLInterpClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name             = JInterpsName;
+  theCoAlg->super.objectSize       = sizeof(JoyLoLInterp);
+  theCoAlg->super.initializeFunc   = initializeJInterps;
+  theCoAlg->super.registerFunc     = registerJInterpWords;
+  theCoAlg->super.equalityFunc     = NULL;
+  theCoAlg->super.printFunc        = NULL;
+  theCoAlg->newObjectFunc          = newObjectImpl;
+  theCoAlg->registerJClassFunc     = registerJClassImpl;
+  theCoAlg->registerCrossCompilerFunc =
+    registerCrossCompilerImpl;
+  theCoAlg->initializeAllLoadedFunc =
+    initializeAllLoadedImpl;
+  theCoAlg->registerAllLoadedFunc =
+    registerAllLoadedImpl;
+    
+  size_t tag =     
+    registerJClassImpl(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == JInterpsTag);
+  assert(tag < jInterp->numCoAlgs);
+  assert(jInterp->coAlgs);
+  assert(jInterp->coAlgs[tag]);
+    
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the JInterps coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp 
+  // and run registerJInterps
+  //
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertIntTrue(JInterpsTag < jInterp->numCoAlgs);
+  AssertPtrNotNull(getJInterpClass(jInterp));
+  
+  JoyLoLInterpClass *jInterpClass = getJInterpClass(jInterp);
+  size_t result = registerJInterps(jInterp);
+  AssertIntTrue(result);
+  AssertPtrNotNull(getJInterpClass(jInterp));
+  AssertPtrEquals(getJInterpClass(jInterp), jInterpClass);
+  AssertIntEquals(
+    getJInterpClass(jInterp)->super.objectSize,
+    sizeof(JoyLoLInterp)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite
+

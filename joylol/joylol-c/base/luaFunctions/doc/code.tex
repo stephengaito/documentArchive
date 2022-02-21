@@ -1,0 +1,298 @@
+34% A ConTeXt document [master document: luaFunctions.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+%\dependsOn[boolean]
+
+\starttyping
+\startCHeader
+
+typedef void (CFunction)(Context*);
+
+typedef struct luaFunction_struct {
+  CoAlgebras super;
+  CFunction  theFunction;
+} CFunction;
+
+\stopCHeader
+
+\startJoyLoLWord[isCFunction]
+
+\preProcessStack[aCFunc][]
+\postDataStack[isBoolean]
+
+\startCCode
+
+if (!aCFunc) then
+  pushDataFalse(aCtx);
+if (aCFunc->isA == CFUNCTIONS_COALG) then
+  pushDataTrue(aCtx);
+pushDataFalse(aCtx);
+
+\stopCCode
+
+\stopJoyLoLWord
+
+\startJoyLoLWord[executeCFunc]
+
+\preProcessStack[aCFunc][]
+
+\startCCode
+
+if (!aCFunc) then
+  raiseExceptionMsg(aCtx, "no atom (CFunction)");
+if (aCFunc->super.isA != CFUNCTIONS_COALG) then
+  raiseExceptionMsg(aCtx, "not a CFunction");
+if (!aCFunc->theFunction) then
+  raiseExceptionMsg(aCtx, "no CFunction found");
+
+(aCFunc->theFunction)(aCtx);
+
+\stopCCode
+
+\stopJoyLoLWord
+\stoptyping
+
+\starttyping
+#ifndef JOYLOL_COALG_FUNCTIONS_H
+#define JOYLOL_COALG_FUNCTIONS_H
+
+typedef struct context_struct Context;
+typedef void (JoyLoLFunction)(Context*);
+
+typedef struct functions_struct {
+  CoAlgebra super;
+  // other things
+} Functions;
+
+extern Functions* createFunctionsCoAlgebra(void);
+extern void initFunctionsCoAlgebra(CoAlgebras* coAlgs);
+
+extern PairAtom* newJoyLoLFunc(CoAlgebras* coAlgs, JoyLoLFunction *aJoyLoLFunc);
+
+extern size_t isFunction(PairAtom* aLoL);
+
+#endif
+\stoptyping
+
+\starttyping
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/printer.h"
+
+static size_t equalityFuncCoAlg(CoAlgebra* klass,
+                                PairAtom* lolA, PairAtom* lolB,
+                                size_t debugFlag) {
+  DEBUG(debugFlag, "funcCoAlg-equal klass:%p a:%p b:%p\n", klass, lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (lolA->coAlg != klass) return FALSE;
+  if (lolB->coAlg != klass) return FALSE;
+  if (lolA->func != lolB->func) return FALSE;
+  return TRUE;
+}
+
+
+static size_t printSizeFuncCoAlg(PairAtom* aLoL, size_t debugFlag) {
+  DEBUG(debugFlag, "funcCoAlg-printSize: %p\n", aLoL);
+  assert(aLoL);
+  assert(aLoL->coAlg);
+  assert(aLoL->coAlg->isA == FUNCTION_COALG);
+  DEBUG(debugFlag, "funcCoAlg-printSize: func<%p> %p\n", aLoL->func, aLoL);
+  return 15;
+}
+
+static size_t printStrFuncCoAlg(PairAtom* aLoL,
+                               char* buffer, size_t bufferSize) {
+  assert(aLoL);
+  assert(aLoL->coAlg);
+  assert(aLoL->coAlg->isA == FUNCTION_COALG);
+
+  char ptoa[100];
+  sprintf(ptoa, "<%p> ", aLoL->func);
+  strcat(buffer, ptoa);
+  return TRUE;
+}
+
+Functions* createFunctionsCoAlgebra(void) {
+  Functions* funcs = (Functions*) calloc(1, sizeof(Functions));
+  initACoAlgebra((CoAlgebra*)funcs);
+
+  funcs->super.isA       = FUNCTION_COALG;
+  funcs->super.name      = LuaFunctionsName;
+  funcs->super.equality  = equalityFuncCoAlg;
+  funcs->super.printSize = printSizeFuncCoAlg;
+  funcs->super.printStr  = printStrFuncCoAlg;
+  return funcs;
+}
+
+PairAtom* newJoyLoLFunc(CoAlgebras* coAlgs, JoyLoLFunction *aFunc) {
+  assert(coAlgs);
+  PairAtom* aNewFunc = newPairAtom(coAlgs);
+  assert(aNewFunc);
+  aNewFunc->coAlg = (CoAlgebra*)coAlgs->functions;
+  aNewFunc->tag   = 0;
+  aNewFunc->func  = aFunc;
+  return aNewFunc;
+}
+
+size_t isFunction(PairAtom* aLoL) {
+  if (!aLoL) return FALSE;
+  if (aLoL->coAlg && (aLoL->coAlg->isA == FUNCTION_COALG)) return TRUE;
+  return FALSE;
+}
+
+static void isFunctionAP(Context* aCtx) {
+  assert(aCtx);
+  assert(aCtx->coAlgebras);
+  popCtxDataInto(aCtx, top);
+  PairAtom* result = NULL;
+  if (isFunction(top)) result = newBoolean(aCtx->coAlgebras, TRUE);
+  else                 result = newBoolean(aCtx->coAlgebras, FALSE);
+  pushCtxData(aCtx, result);
+}
+
+void initFunctionsCoAlgebra(CoAlgebras* coAlgs) {
+  extendJoyLoL(coAlgs, "isFunction", isFunctionAP);
+}
+\stoptyping
+
+\starttyping
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "CuTest.h"
+
+#include "joyLoL/macros.h"
+#include "joyLoL/coAlg/coAlgs.h"
+#include "joyLoL/dictionary.h"
+#include "joyLoL/lists.h"
+#include "joyLoL/printer.h"
+
+// suiteName: - Functions CoAlgebra tests -
+
+void Test_createFunctionsCoAlgebra(CuTest* tc) {
+  CoAlgebras *coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  CuAssertPtrNotNull(tc, coAlgs->functions);
+}
+
+void testJoyLoLFunction(Context* aCtx) { }
+
+
+void Test_newJoyLoLFunction(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  CuAssertPtrNotNull(tc, coAlgs->functions);
+
+  PairAtom* aNewFunc = newJoyLoLFunc(coAlgs, testJoyLoLFunction);
+  CuAssertPtrNotNull(tc, aNewFunc);
+  CuAssertPtrNotEquals(tc, aNewFunc, testJoyLoLFunction);
+  CuAssertPtrNotNull(tc, aNewFunc->coAlg);
+  CuAssertIntEquals(tc, aNewFunc->coAlg->isA, FUNCTION_COALG);
+  CuAssertPtrEquals(tc, aNewFunc->func, testJoyLoLFunction);
+  CuAssertTrue(tc, isFunction(aNewFunc));
+  CuAssertTrue(tc, isAtom(aNewFunc));
+  CuAssertFalse(tc, isBoolean(aNewFunc));
+  CuAssertFalse(tc, isContext(aNewFunc));
+  CuAssertFalse(tc, isNatural(aNewFunc));
+  CuAssertFalse(tc, isPair(aNewFunc));
+  CuAssertFalse(tc, isSymbol(aNewFunc));
+}
+
+void Test_printJoyLoLFuncion(CuTest* tc) {
+  CoAlgebras* coAlgs = createCoAlgebras();
+  CuAssertPtrNotNull(tc, coAlgs);
+  CuAssertPtrNotNull(tc, coAlgs->functions);
+
+  char buffer[100];
+  buffer[0] = 0;
+  sprintf((char*)&buffer, "<%p>", testJoyLoLFunction);
+
+  PairAtom* aNewFunc = newJoyLoLFunc(coAlgs, testJoyLoLFunction);
+  CuAssertPtrNotNull(tc, aNewFunc);
+  CuAssertIntEquals(tc, printSizeDebug(aNewFunc, FALSE), 15);
+  CuAssertStrEquals(tc, printLoLDebug(aNewFunc, FALSE), buffer);
+}
+\stoptyping
+
+\startTestSuite[registerLuaFunctions]
+
+\startCHeader
+typedef struct luaFunctions_class_struct {
+  JClass super;
+} LuaFunctionsClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializeLuaFunctions(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerLuaFunctions(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerLuaFunctions(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  
+  LuaFunctionsClass* theCoAlg =
+    joyLoLCalloc(1, LuaFunctionsClass);
+  theCoAlg->super.name           = LuaFunctionsName;
+  theCoAlg->super.objectSize     = sizeof(JObj);
+  theCoAlg->super.initializeFunc = initializeLuaFunctions;
+  theCoAlg->super.registerFunc   = registerLuaFunctionWords;
+  theCoAlg->super.equalityFunc   = NULL;
+  theCoAlg->super.printFunc      = NULL;
+  
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+
+  // do a sanity check...
+  assert(tag == LuaFunctionsTag);
+  assert(jInterp->coAlgs[tag]);
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the LuaFunctions coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerLuaFunctions
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getLuaFunctionsClass(jInterp));
+  LuaFunctionsClass *coAlg =
+    getLuaFunctionsClass(jInterp);
+  AssertIntTrue(registerLuaFunctions(jInterp));
+  AssertPtrNotNull(getLuaFunctionsClass(jInterp));
+  AssertPtrEquals(getLuaFunctionsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getLuaFunctionsClass(jInterp)->super.objectSize,
+    sizeof(JObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

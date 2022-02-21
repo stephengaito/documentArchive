@@ -1,0 +1,80 @@
+% A ConTeXt document [master document: coreTextadept.tex]
+
+\chapter[title=Textadept language module initialization]
+
+\setLuaCodeStream{init}
+
+\diSimpComponent gitVersion-lua
+
+\startLuaCode
+-- joylol command line interpreter 
+
+-- load the options
+joylol             = joylol         or { }
+joylol.options     = joylol.options or { }
+local options      = joylol.options
+
+options.verbose    =
+  options.verbose    or false
+options.debug      =
+  options.debug      or false
+options.configFile =
+  options.configFile or 'config'
+options.userPath   =
+  options.userPath   or os.getenv('HOME')..'/.joylol'
+options.localPath  =
+  options.localPath  or '/usr/local/lib/joylol'
+options.systemPath =
+  options.systemPath or '/usr/lib/joylol'
+
+-- Start by adding the standard joylol CoAlg locations to the Lua search 
+-- paths 
+
+local joylolPaths = {
+  options.userPath..'/?.lua',
+  options.localPath..'/?.lua',
+  options.systemPath..'/?.lua',
+  package.path
+}
+package.path = table.concat(joylolPaths, ';')
+
+local joylolCPaths = {
+  options.userPath..'/?.so',
+  options.localPath..'/?.so',
+  options.systemPath..'/?.so',
+  package.path
+}
+package.cpath = table.concat(joylolCPaths, ';')
+
+if options.verbose then print('loading [joylol.core.textadept]') end
+joylol = require 'joylol.core.textadept'
+if options.verbose then print('loaded [joylol.core.textadept]\n') end
+
+joylol.options = options
+
+--joylol.setVerbose(options.verbose)
+--joylol.setDebugging(options.debug)
+
+if (options.configFile) then
+  joylol.loadFile(options.configFile)
+end
+
+-- Initialization for the JoyLoL language
+
+-- add in luatex specific key codes
+keys['joylol'] = keys.context or {}
+-- keys.joylol.cg = require('context/ctags').goto_symbol    -- Ctrl-g
+--keys.joylol[not OSX and (GUI and 'cR' or 'cmr') or 'mR'] = require('common/messageBuffer').clearRunCompile
+keys.joylol['cR'] = require('common/messageBuffer').clearRunCompile
+
+-- tell textadept how to compile/run joylol files
+textadept.run.compile_commands.joylol = 'joylol "%f"'
+textadept.run.run_commands.joylol     = 'joylol "%f"'
+   
+-- add comment string for context
+textadept.editing.comment_string.joylol = ';'
+
+require 'joylol.repl'
+
+return { }
+\stopLuaCode

@@ -1,0 +1,22 @@
+% A ConTeXt document [master document: fragments.tex]
+
+\section[title=Words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerFragmentWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerFragmentWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  assert(jInterp);
+  return TRUE;
+}
+\stopCCode

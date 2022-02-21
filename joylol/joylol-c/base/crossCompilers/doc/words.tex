@@ -1,0 +1,24 @@
+% A ConTeXt document [master document: crossCompiler.tex]
+
+\section[title=Words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerCrossCompilerWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerCrossCompilerWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  assert(jInterp);
+  extendJoyLoLInRoot(jInterp, "addFragment", "", addFragmentAP, "");
+  
+  return TRUE;
+}
+\stopCCode

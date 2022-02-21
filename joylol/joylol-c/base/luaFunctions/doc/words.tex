@@ -1,0 +1,21 @@
+% A ConTeXt document [master document: luaFunctions.tex]
+
+\section[title=JoyLoL words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerLuaFunctionWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerLuaFunctionWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  return TRUE;
+}
+\stopCCode

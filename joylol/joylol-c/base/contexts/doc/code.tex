@@ -1,0 +1,434 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Code]
+
+\dependsOn[jInterps]
+\dependsOn[booleans]
+\dependsOn[naturals]
+\dependsOn[symbols]
+\dependsOn[stringBuffers]
+\dependsOn[cFunctions]
+\dependsOn[pairs]
+\dependsOn[texts]
+\dependsOn[parsers]
+\dependsOn[dictNodes]
+\setCHeaderStream{public}
+
+\startCHeader
+typedef struct context_tracing_label {
+  Symbol                       *name;
+  size_t                        count;
+  struct context_tracing_label *next;
+} CtxTracingLabel;
+
+typedef struct context_object_struct ContextObj;
+typedef struct context_object_struct {
+  JObj             super;
+  JoyLoLInterp    *jInterp;
+  Symbol          *name;
+  ContextObj      *parent;
+  JObj            *data;
+  JObj            *command;
+  JObj            *process;
+  JObj            *messages;
+  JObj            *listeners;
+  DictObj         *dict;
+  Boolean          exceptionRaised;
+  Boolean          showSpecifications;
+  Boolean          showStack;
+  size_t           showDepth;
+  Boolean          tracingOn;
+  CtxTracingLabel *tracingLabels;
+  Boolean          checkingOn;
+  Boolean          verbose;
+} ContextObj;
+
+\stopCHeader
+
+\startCHeader
+typedef ContextObj *(NewContext)(
+  JoyLoLInterp *jInterp,
+  Symbol       *name,
+  ContextObj   *parent,
+  DictObj      *dict,
+  JObj         *dataLoL,
+  JObj         *processLoL
+);
+
+#define newContext(jInterp, name, parent,     \
+  dict, dataLoL, processLoL)                  \
+  (                                           \
+    assert(getContextsClass(jInterp)          \
+      ->newContextFunc),                      \
+    (getContextsClass(jInterp)                \
+      ->newContextFunc(jInterp, name, parent, \
+        dict, dataLoL, processLoL))           \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern ContextObj* newContextImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *name,
+  ContextObj   *parent,
+  DictObj      *dict,
+  JObj         *dataLoL,
+  JObj         *processLoL
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+ContextObj* newContextImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *name,
+  ContextObj   *parent,
+  DictObj      *dict,
+  JObj         *dataLoL,
+  JObj         *processLoL
+) {
+  DEBUG(jInterp, "newContext %p [%s] %p %p %p %p\n",
+    jInterp, name, parent, dict, dataLoL, processLoL);
+  assert(jInterp);
+
+  ContextObj* context =
+    (ContextObj*) newObject(jInterp, ContextsTag);
+  assert(context);
+
+  context->jInterp            = jInterp;
+  context->name               = name;
+  context->parent             = parent;
+  context->dict               = dict;
+  context->data               = dataLoL;
+  context->command            = NULL;
+  context->process            = processLoL;
+  context->messages           = NULL;
+  context->listeners          = NULL;
+  if (jInterp->quiet) {
+    context->showSpecifications = FALSE;
+    context->showStack          = FALSE;
+  } else {
+    context->showSpecifications = TRUE;
+    context->showStack          = TRUE;
+  }
+  context->showDepth          = 5;
+  context->tracingOn          = FALSE;
+  context->tracingLabels      = NULL;
+  context->checkingOn         = FALSE;
+  context->verbose            = FALSE;
+  context->exceptionRaised    = FALSE;
+  if (jInterp->tracing) {
+    context->tracingOn        = TRUE;
+    context->showStack        = TRUE;
+  }
+  if (jInterp->verbose) {
+    context->verbose          = TRUE;
+  }
+
+  return context;
+}
+
+#define asName(aLoL)      (((ContextObj*)(aLoL))->name)
+#define asData(aLoL)      (((ContextObj*)(aLoL))->data)
+#define asCommand(aLoL)   (((ContextObj*)(aLoL))->command)
+#define asProcess(aLoL)   (((ContextObj*)(aLoL))->process)
+#define asMessages(aLoL)  (((ContextObj*)(aLoL))->messages)
+#define asListeners(aLoL) (((ContextObj*)(aLoL))->listeners)
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityContextsCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityContextsCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "contextCoAlg->equal a:%p b:%p\n",
+    lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA) != ContextsTag) return FALSE;
+  
+  if (timeToLive < 1) return TRUE;
+  timeToLive -= 1;
+  
+  size_t areEqual = TRUE;
+  lolEqual(jInterp, areEqual, asData(lolA),      asData(lolB),      timeToLive);
+  lolEqual(jInterp, areEqual, asCommand(lolA),   asCommand(lolB),   timeToLive);
+  lolEqual(jInterp, areEqual, asProcess(lolA),   asProcess(lolB),   timeToLive);
+  lolEqual(jInterp, areEqual, asMessages(lolA),  asMessages(lolB),  timeToLive);
+  lolEqual(jInterp, areEqual, asListeners(lolA), asListeners(lolB), timeToLive);
+  return areEqual;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printContextsCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+static void printContextName(
+  StringBufferObj *aStrBuf,
+  ContextObj      *aCtx
+) {
+  assert(aCtx);
+  if (aCtx->parent) {
+    printContextName(aStrBuf, aCtx->parent);
+    strBufPrintf(aStrBuf, ":");
+  }
+  strBufPrintf(aStrBuf, aCtx->name);
+}
+
+Boolean printContextsCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aStrBuf);
+
+  assert(aLoL);
+  assert(asType(aLoL));
+  assert(asTag(aLoL) == ContextsTag);
+  ContextObj* aCtx = (ContextObj*)aLoL;
+
+  if (timeToLive < 1) {
+    strBufPrintf(aStrBuf, "... ");  
+    return TRUE;
+  }
+  timeToLive -= 1;
+  
+  size_t printedOk = TRUE;
+  strBufPrintf(aStrBuf, "\n[");
+  printContextName(aStrBuf, aCtx);
+  strBufPrintf(aStrBuf, "(");
+  printLoL(aStrBuf, ((JObj*)aCtx->dict));
+  lolPrintStr(aStrBuf, printedOk, asData(aLoL),
+              ")[ d:( ", ") ", timeToLive);
+  lolPrintStr(aStrBuf, printedOk, asCommand(aLoL),
+              "c:( ", ") ", timeToLive);
+  lolPrintStr(aStrBuf, printedOk, asProcess(aLoL),
+              "p:( ", ") ", timeToLive);
+  lolPrintStr(aStrBuf, printedOk, asMessages(aLoL),
+              "m:( ", ") ", timeToLive);
+  lolPrintStr(aStrBuf, printedOk, asListeners(aLoL),
+              "l:( ", ") ", timeToLive);
+  strBufPrintf(aStrBuf, " ]]\n");
+  return printedOk;
+}
+\stopCCode
+
+\startTestSuite[registerContexts]
+
+\startCHeader
+typedef struct contexts_class_struct {
+  JClass           super;
+  NewContext      *newContextFunc;
+  ClearCtx        *clearCtxDataFunc;
+  PushCtx         *pushCtxDataFunc; 
+  PushCtx         *pushOnTopCtxDataFunc; 
+  PushNullCtx     *pushNullCtxDataFunc;
+  PushBooleanCtx  *pushBooleanCtxDataFunc;
+  PushNaturalCtx  *pushNaturalCtxDataFunc;
+  PushSymbolCtx   *pushSymbolCtxDataFunc;
+  PushParsedArrayOfStringsCtx 
+    *pushParsedArrayOfStringsCtxDataFunc;
+  PushParsedStringCtx
+    *pushParsedStringCtxDataFunc;
+  PushParsedTextCtx
+    *pushParsedTextCtxDataFunc;
+  PrependListCtx  *prependListCtxDataFunc;
+  PeekCtx         *peekCtxDataFunc;
+  PopCtx          *popCtxDataFunc;
+  ClearCtx        *clearCtxProcessFunc;
+  PushCtx         *pushCtxProcessFunc;
+  PushNullCtx     *pushNullCtxProcessFunc;
+  PushBooleanCtx  *pushBooleanCtxProcessFunc;
+  PushNaturalCtx  *pushNaturalCtxProcessFunc;
+  PushSymbolCtx   *pushSymbolCtxProcessFunc;
+  PushParsedArrayOfStringsCtx
+    *pushParsedArrayOfStringsCtxProcessFunc;
+  PushParsedStringCtx
+    *pushParsedStringCtxProcessFunc;
+  PushParsedTextCtx
+    *pushParsedTextCtxProcessFunc;
+  PrependListCtx  *prependListCtxProcessFunc;
+  PeekCtx         *peekCtxProcessFunc;
+  PopCtx          *popCtxProcessFunc;
+  ExtendJoyLoL    *extendJoyLoLFunc;
+  ExtendCtxJoyLoL *extendCtxJoyLoLFunc;
+  DefineJoyLoL    *defineJoyLoLFunc;
+  DefineContext   *defineContextFunc;
+  DefineNaming    *defineNamingFunc;
+  RaiseException  *raiseExceptionFunc;
+  ReportException
+    *reportExceptionFunc;
+  EvalCommandInContext
+    *evalCommandInContextFunc;
+  EvalContext     *evalContextFunc;
+  EvalTextInContext
+    *evalTextInContextFunc;
+  EvalArrayOfStringsInContext
+    *evalArrayOfStringsInContextFunc;
+  EvalStringInContext
+    *evalStringInContextFunc;
+} ContextsClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializeContexts(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  if (!jInterp->rootCtx) {
+    //
+    // create the globals dictionary
+    //
+    DictObj* aDict = newDictionary(jInterp, "globals", NULL);
+    DictNodeObj *globals = getSymbolEntry(aDict, "globals");
+    assert(globals);
+    globals->value = (JObj*)aDict;
+    //
+    // create the root/main context using the 
+    // globals dictionary
+    //
+    jInterp->rootCtx =
+      newContext(jInterp, "joylol-main", NULL, aDict, NULL, NULL);
+    DictNodeObj *mainCtx = getSymbolEntry(aDict, "main");
+    assert(mainCtx);
+    mainCtx->value = (JObj*)(jInterp->rootCtx);
+  }
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerContexts(
+  JoyLoLInterp *jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerContexts(
+  JoyLoLInterp *jInterp
+) {
+  ContextsClass* theCoAlg    = 
+    joyLoLCalloc(1, ContextsClass);
+  theCoAlg->super.name             = ContextsName;
+  theCoAlg->super.objectSize       = sizeof(ContextObj);
+  theCoAlg->super.initializeFunc   = initializeContexts;
+  theCoAlg->super.registerFunc     = registerContextWords;
+  theCoAlg->super.equalityFunc     = equalityContextsCoAlg;
+  theCoAlg->super.printFunc        = printContextsCoAlg;
+  theCoAlg->newContextFunc         = newContextImpl;
+  
+  theCoAlg->clearCtxDataFunc       = clearCtxDataImpl;
+  theCoAlg->pushCtxDataFunc        = pushCtxDataImpl;
+  theCoAlg->pushOnTopCtxDataFunc   = pushOnTopCtxDataImpl;
+  theCoAlg->pushNullCtxDataFunc    = pushNullCtxDataImpl;
+  theCoAlg->pushBooleanCtxDataFunc = pushBooleanCtxDataImpl;
+  theCoAlg->pushNaturalCtxDataFunc = pushNaturalCtxDataImpl;
+  theCoAlg->pushSymbolCtxDataFunc  = pushSymbolCtxDataImpl;
+  theCoAlg->pushParsedArrayOfStringsCtxDataFunc =
+    pushParsedArrayOfStringsCtxDataImpl;
+  theCoAlg->pushParsedStringCtxDataFunc =
+    pushParsedStringCtxDataImpl;
+  theCoAlg->pushParsedTextCtxDataFunc =
+    pushParsedTextCtxDataImpl;
+  theCoAlg->prependListCtxDataFunc = prependListCtxDataImpl;
+  theCoAlg->peekCtxDataFunc        = peekCtxDataImpl;
+  theCoAlg->popCtxDataFunc         = popCtxDataImpl;
+  
+  theCoAlg->clearCtxProcessFunc    = clearCtxProcessImpl;
+  theCoAlg->pushCtxProcessFunc     = pushCtxProcessImpl;
+  theCoAlg->pushNullCtxProcessFunc = pushNullCtxProcessImpl;
+  theCoAlg->pushBooleanCtxProcessFunc =
+    pushBooleanCtxProcessImpl;
+  theCoAlg->pushNaturalCtxProcessFunc =
+    pushNaturalCtxProcessImpl;
+  theCoAlg->pushSymbolCtxProcessFunc =
+    pushSymbolCtxProcessImpl;
+  theCoAlg->pushParsedArrayOfStringsCtxProcessFunc =
+    pushParsedArrayOfStringsCtxProcessImpl;
+  theCoAlg->pushParsedStringCtxProcessFunc =
+    pushParsedStringCtxProcessImpl;
+  theCoAlg->pushParsedTextCtxProcessFunc =
+    pushParsedTextCtxProcessImpl;
+  theCoAlg->prependListCtxProcessFunc =
+    prependListCtxProcessImpl;
+  theCoAlg->peekCtxProcessFunc      = peekCtxProcessImpl;
+  theCoAlg->popCtxProcessFunc      = popCtxProcessImpl;
+  
+  theCoAlg->extendJoyLoLFunc       = extendJoyLoLImpl;
+  theCoAlg->extendCtxJoyLoLFunc    = extendCtxJoyLoLImpl;
+  theCoAlg->defineJoyLoLFunc       = defineJoyLoLImpl;
+  theCoAlg->defineContextFunc      = defineContextImpl;
+  theCoAlg->defineNamingFunc       = defineNamingImpl;
+
+  theCoAlg->raiseExceptionFunc     = raiseExceptionImpl;
+  theCoAlg->reportExceptionFunc    = reportExceptionImpl;
+  
+  theCoAlg->evalCommandInContextFunc =
+    evalCommandInContextImpl;
+  theCoAlg->evalContextFunc        = evalContextImpl;
+  theCoAlg->evalTextInContextFunc  = evalTextInContextImpl;
+  theCoAlg->evalArrayOfStringsInContextFunc =
+    evalArrayOfStringsInContextImpl;
+  theCoAlg->evalStringInContextFunc =
+    evalStringInContextImpl;
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+
+  // do a sanity check...
+  assert(tag == ContextsTag);
+  assert(jInterp->coAlgs[tag]);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register contexts]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerContexts
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getContextsClass(jInterp));
+  ContextsClass *coAlg = getContextsClass(jInterp);
+  AssertIntTrue(registerContexts(jInterp));
+  AssertPtrNotNull(getContextsClass(jInterp));
+  AssertPtrEquals(getContextsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getContextsClass(jInterp)->super.objectSize,
+    sizeof(ContextObj)
+  )
+\stopCTest
+
+\stopTestCase
+\stopTestSuite

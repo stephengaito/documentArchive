@@ -1,0 +1,265 @@
+% A ConTeXt document [master document: signals.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\diSimpComponent gitVersion-c
+
+\startTestSuite[newSignal]
+
+\startCHeader
+
+#define SIGNAL_END_OF_TEXT 1
+
+typedef JObj* (NewSignal)(
+  JoyLoLInterp*,
+  size_t
+);
+
+#define newSignal(jInterp, aSignal)       \
+  (                                       \
+    assert(getSignalsClass(jInterp)       \
+      ->newSignalFunc),                   \
+    (getSignalsClass(jInterp)             \
+      ->newSignalFunc(jInterp, aSignal))  \
+  )
+
+#define asSignal(aLoL) ((aLoL)->flags)
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* newSignalImpl(
+  JoyLoLInterp *jInterp,
+  size_t        aSignal
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* newSignalImpl(
+  JoyLoLInterp *jInterp,
+  size_t        aSignal
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  JObj* result = newObject(jInterp, SignalsTag);
+  assert(result);
+  
+  result->type  = jInterp->coAlgs[SignalsTag];
+  result->flags = aSignal;
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new signal]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  JObj* aNewSignal = newSignal(jInterp, 12);
+  AssertPtrNotNull(aNewSignal);
+  AssertPtrNotNull(asType(aNewSignal));
+  AssertIntEquals(asTag(aNewSignal), SignalsTag);
+  AssertIntEquals(asFlags(aNewSignal), 12);
+  AssertIntTrue(isAtom(aNewSignal));
+  AssertIntTrue(isSignal(aNewSignal));
+  AssertIntFalse(isPair(aNewSignal));
+\stopCTest
+\stopTestCase
+
+\startTestCase[print Signal]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+
+  JObj* aLoL = newSignal(jInterp, 12);
+  AssertPtrNotNull(aLoL);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf), "signal:12 ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+
+\stopTestSuite
+
+\startTestSuite[isSignal]
+
+\startCHeader
+#define isSignal(aLoL)            \
+  (                               \
+    (                             \
+      (aLoL) &&                   \
+      asType(aLoL) &&             \
+      (asTag(aLoL) == SignalsTag) \
+    ) ?                           \
+      TRUE :                      \
+      FALSE                       \
+  )
+\stopCHeader
+
+\startTestCase[should return appropriate signal values]
+
+\startCTest
+  JObj *aSignal = newSignal(jInterp, 12);
+  AssertPtrNotNull(aSignal);
+  AssertPtrNotNull(asType(aSignal));
+  AssertIntEquals(asTag(aSignal), SignalsTag);
+  AssertIntEquals(asSignal(aSignal), 12);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityBoolCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityBoolCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "boolCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != SignalsTag) return FALSE;
+  if (asSignal(lolA) != asSignal(lolB)) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing signals]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printBoolCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printBoolCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == SignalsTag);
+
+  strBufPrintf(aStrBuf, "signal:%zu ", asSignal(aLoL));
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print signals]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[SignalsTag]);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  JObj* aNewSignal = newSignal(jInterp, 12);
+  AssertPtrNotNull(aNewSignal);
+  printLoL(aStrBuf, aNewSignal);
+  AssertStrEquals(getCString(aStrBuf), "signal:12 ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerSignals]
+
+\startCHeader
+typedef struct signals_class_struct {
+  JClass     super;
+  NewSignal *newSignalFunc;
+} SignalsClass;
+
+\stopCHeader
+
+\startCCode
+static Boolean initializeSignals(
+  JoyLoLInterp *jInterp,
+  JClass       *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerSignals(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerSignals(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  SignalsClass* theCoAlg
+    = joyLoLCalloc(1, SignalsClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name           = SignalsName;
+  theCoAlg->super.objectSize     = sizeof(JObj);
+  theCoAlg->super.initializeFunc = initializeSignals;
+  theCoAlg->super.registerFunc   = registerSignalWords;
+  theCoAlg->super.equalityFunc   = equalityBoolCoAlg;
+  theCoAlg->super.printFunc      = printBoolCoAlg;
+  theCoAlg->newSignalFunc        = newSignalImpl;
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == SignalsTag);
+  assert(jInterp->coAlgs[tag]);
+   
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Signals coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerSignals
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getSignalsClass(jInterp));
+  SignalsClass *coAlg = getSignalsClass(jInterp);
+  registerSignals(jInterp);
+  AssertPtrNotNull(getSignalsClass(jInterp));
+  AssertPtrEquals(getSignalsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getSignalsClass(jInterp)->super.objectSize,
+    sizeof(JObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

@@ -1,0 +1,38 @@
+% A ConTeXt document [master document: coAlgs.tex]
+
+\section[title=JoyLoL words]
+
+\startCCode
+static void isCoAlgebraAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (isCoAlgebra(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerCoAlgebraWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerCoAlgebraWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  assert(jInterp);
+  extendJoyLoLInRoot(jInterp, "isCoAlgebra", "", isCoAlgebraAP, "");
+  return TRUE;
+}
+\stopCCode

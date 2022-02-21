@@ -1,0 +1,310 @@
+% A ConTeXt document [master document: dictNodes.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+\dependsOn[symbols]
+\dependsOn[stringBuffers]
+
+\startCHeader
+typedef struct dictNode_object_struct DictNodeObj;
+
+typedef struct dictNode_object_struct {
+  JObj         super;
+  Symbol      *symbol;
+  JObj        *preObs;
+  JObj        *value;
+  JObj        *postObs;
+  DictNodeObj *left;
+  DictNodeObj *right;
+  DictNodeObj *previous;
+  DictNodeObj *next;
+  size_t       height;
+  long         balance;
+} DictNodeObj;
+\stopCHeader
+
+\startTestSuite[copyDictNodeFromTo]
+
+\startCHeader
+typedef void CopyDictNodeFromTo(
+  DictNodeObj *fromNode,
+  DictNodeObj *toNode
+);
+
+#define copyDictNodeFromTo(jInterp, fromNode, toNode) \
+  (                                                   \
+    assert(getDictNodesClass(jInterp)                 \
+      ->copyDictNodeFromToFunc),                      \
+    (getDictNodesClass(jInterp)                       \
+      ->copyDictNodeFromToFunc(fromNode, toNode))     \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void copyDictNodeFromToImpl(
+  DictNodeObj *fromNode,
+  DictNodeObj *toNode
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void copyDictNodeFromToImpl(
+  DictNodeObj *fromNode,
+  DictNodeObj *toNode
+) {
+  assert(fromNode);
+  assert(toNode);
+  toNode->super.flags = fromNode->super.flags;
+  toNode->symbol      = fromNode->symbol;
+  toNode->preObs      = fromNode->preObs;
+  toNode->value       = fromNode->value;
+  toNode->postObs     = fromNode->postObs;
+}
+\stopCCode
+
+\stopTestSuite
+
+\startTestSuite[newDict]
+
+\startCHeader
+typedef DictNodeObj *(NewDictNode)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSym
+);
+
+#define newDictNode(jInterp, aSym)      \
+  (                                     \
+    assert(getDictNodesClass(jInterp)   \
+      ->newDictNodeFunc),               \
+    (getDictNodesClass(jInterp)         \
+      ->newDictNodeFunc(jInterp, aSym)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern DictNodeObj *newDictNodeImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSym
+);
+
+#define dictAsSymbol(aNode)   ((DictNodeObj*)(aNode))->symbol
+#define dictAsPreObs(aNode)   ((DictNodeObj*)(aNode))->preObs
+#define dictAsValue(aNode)    ((DictNodeObj*)(aNode))->value
+#define dictAsPostObs(aNode)  ((DictNodeObj*)(aNode))->postObs
+#define dictAsLeft(aNode)     ((DictNodeObj*)(aNode))->left
+#define dictAsRight(aNode)    ((DictNodeObj*)(aNode))->right
+#define dictAsPrevious(aNode) ((DictNodeObj*)(aNode))->previous
+#define dictAsNext(aNode)     ((DictNodeObj*)(aNode))->next
+#define dictAsHeight(aNode)   ((DictNodeObj*)(aNode))->height
+#define dictAsBalance(aNode)  ((DictNodeObj*)(aNode))->balance
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+// We implement our dictionary as an AVL binary tree using AVLNodes.
+//
+// Our implementation is inspired by:
+// The Crazy Programmer's "Program for AVL Tree in C" (Neeraj Mishra)
+// http://www.thecrazyprogrammer.com/2014/03/c-program-for-avl-tree-implementation.html
+// and by:
+// Jianye Hao's CSC2100B Tutorial 4 "Binary and AVL Trees in C"
+// https://www.cse.cuhk.edu.hk/irwin.king/_media/teaching/csc2100b/tu4.pdf
+//
+// At the moment we only insert and search (we never delete).
+//
+// ANY AVLTree node can be the root of a new dictionary.
+//
+
+DictNodeObj *newDictNodeImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSym
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  assert(DictNodesTag < jInterp->numCoAlgs);
+  assert(jInterp->coAlgs[DictNodesTag]);
+  
+  assert(aSym);
+  
+  DEBUG(jInterp, "newDictNode [%s]\n", aSym);
+  JObj* newNode   = newObject(jInterp, DictNodesTag);
+  dictAsSymbol(newNode)   = strdup(aSym);
+  dictAsPreObs(newNode)   = NULL;
+  dictAsValue(newNode)    = NULL;
+  dictAsPostObs(newNode)  = NULL;
+  dictAsLeft(newNode)     = NULL;
+  dictAsRight(newNode)    = NULL;
+  dictAsPrevious(newNode) = NULL;
+  dictAsNext(newNode)     = NULL;
+  dictAsHeight(newNode)   = 1;
+  dictAsBalance(newNode)  = 0;
+  return (DictNodeObj*)newNode;
+}
+\stopCCode
+
+\startTestCase[should add a new dictNode object (AVL node)]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[DictNodesTag]);
+
+  DictNodeObj* aNode = newDictNode(jInterp, "aNodeSymbol");
+  AssertPtrNotNull(aNode);
+  AssertPtrNotNull(asType(aNode));
+  AssertIntEquals(asTag(aNode), DictNodesTag)
+  AssertPtrNotNull(dictAsSymbol(aNode));
+  AssertStrEquals(dictAsSymbol(aNode), "aNodeSymbol");
+  AssertPtrNull(dictAsValue(aNode));
+  AssertPtrNull(dictAsLeft(aNode));
+  AssertPtrNull(dictAsRight(aNode));
+  AssertPtrNull(dictAsPrevious(aNode));
+  AssertPtrNull(dictAsNext(aNode));
+  AssertIntEquals(dictAsHeight(aNode), 1);
+  AssertIntEquals(dictAsBalance(aNode), 0);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printDicionaryJObjInto(
+  StringBufferObj *aStrBuf,
+  JObj            *anAVLNode,
+  size_t           timeToLive
+);
+extern Boolean printDicInto(
+  StringBufferObj *aStrBuf,
+  DictNodeObj     *anAVLNode,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printDictionaryJObjInto(
+  StringBufferObj *aStrBuf,
+  JObj            *anAVLNode,
+  size_t           timeToLive
+) {
+  if (!anAVLNode) return FALSE;
+  if (asTag(anAVLNode) != DictNodesTag) return FALSE;
+  return printDicInto(
+    aStrBuf,
+    (DictNodeObj*)anAVLNode,
+    timeToLive
+  );
+}
+
+Boolean printDicInto(
+  StringBufferObj *aStrBuf,
+  DictNodeObj     *anAVLNode,
+  size_t           timeToLive
+) {
+  if (!anAVLNode) return TRUE;
+  if (timeToLive < 1) {
+    strBufPrintf(aStrBuf, "... ");
+    return TRUE;
+  }
+  timeToLive -= 1;
+  
+  strBufPrintf(aStrBuf, "[%s] l:( ", anAVLNode->symbol);
+  printDicInto(aStrBuf, anAVLNode->left, timeToLive);
+  strBufPrintf(aStrBuf, " ) r:( ");
+  printDicInto(aStrBuf, anAVLNode->right, timeToLive);
+  strBufPrintf(aStrBuf, " ) ");
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[registerDictNodes]
+
+\startCHeader
+typedef struct dictNodes_class_struct {
+  JClass super;
+  NewDictNode          *newDictNodeFunc;
+  CopyDictNodeFromTo   *copyDictNodeFromToFunc;
+  FindSymbolRecurse    *findSymbolRecurseFunc;
+  InsertSymbolRecurse  *insertSymbolRecurseFunc;
+  DeleteSymbolRecurse  *deleteSymbolRecurseFunc;
+  FindLUBSymbolRecurse *findLUBSymbolRecurseFunc;
+} DictNodesClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializeDictNodes(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerDictNodes(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerDictNodes(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  
+  DictNodesClass* theCoAlg =
+    joyLoLCalloc(1, DictNodesClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name             = DictNodesName;
+  theCoAlg->super.objectSize       = sizeof(DictNodeObj);
+  theCoAlg->super.initializeFunc   = initializeDictNodes;
+  theCoAlg->super.registerFunc     = registerDictNodeWords;
+  theCoAlg->super.equalityFunc     = NULL;
+  theCoAlg->super.printFunc        = printDictionaryJObjInto;
+  theCoAlg->newDictNodeFunc        = newDictNodeImpl;
+  theCoAlg->copyDictNodeFromToFunc = copyDictNodeFromToImpl;
+  theCoAlg->findSymbolRecurseFunc  = findSymbolRecurseImpl;
+  theCoAlg->insertSymbolRecurseFunc =
+    insertSymbolRecurseImpl;
+  theCoAlg->deleteSymbolRecurseFunc =
+    deleteSymbolRecurseImpl;
+  theCoAlg->findLUBSymbolRecurseFunc =
+    findLUBSymbolRecurseImpl;
+
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == DictNodesTag);
+  assert(jInterp->coAlgs[tag]);
+    
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the DictNodes coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run regiserDictNodes
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(getDictNodesClass(jInterp));
+  DictNodesClass *coAlg =
+    getDictNodesClass(jInterp);
+  AssertIntTrue(registerDictNodes(jInterp));
+  AssertPtrNotNull(getDictNodesClass(jInterp));
+  AssertPtrEquals(getDictNodesClass(jInterp), coAlg);
+  AssertIntEquals(
+    getDictNodesClass(jInterp)->super.objectSize, 
+    sizeof(DictNodeObj)
+  );
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\setCHeaderStream{public}

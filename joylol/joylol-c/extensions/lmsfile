@@ -1,0 +1,124 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+if clearScreen then os.execute('reset') end
+
+-- ensure the .joylol directories exist
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'include'
+})
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'include',
+  'joylol'
+})
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'joylol'
+})
+
+
+-- collect the list of subdirectories of base
+subDirs = { }
+
+for entry in lfs.dir('.') do
+  if not entry:match('^%..*$') and
+    (lfs.attributes(entry, 'mode') == 'directory') and
+    entry ~= 'doc' and
+    entry ~= 'utils' then
+    table.insert(subDirs, entry)
+  end
+end
+
+-- sort the list of subDirectories
+
+table.sort(subDirs)
+
+require 'lms.contextDoc'
+
+function prepareExtensionDocument()
+  local docFiles = { }
+  local texFileList = io.popen('find -name "*.tex"')
+  for docTexFilePath in texFileList:lines('*l') do 
+    if not docTexFilePath:find('releases') and
+        not docTexFilePath:find('buildDir') and
+        not docTexFilePath:find('bin')      and
+        not docTexFilePath:find('extensionCoAlgebras') then
+      if docTexFilePath:match('^%.%/doc%/') then
+        docTexFilePath = docTexFilePath:gsub('^%.%/doc%/','')
+      else
+        docTexFilePath = '.'..docTexFilePath
+      end
+      table.insert(docFiles, docTexFilePath)
+    end
+  end
+  contextDoc.targets{
+    mainDoc  = 'extensions.tex',
+    docFiles = docFiles,
+    docDir   = 'doc'
+  }
+end
+
+function refreshExtensionCoAlgebras()
+  local coAlgFile = io.open('doc/extensionCoAlgebras.tex', 'w')
+  coAlgFile:write([=[
+% A ConTeXt document [master document: joyLoL.tex ]
+
+% This document is automatically generated
+% using the:
+%  lms refreshBaseCoAlgebras
+% command
+
+]=])
+  for i, subDir in ipairs(subDirs) do
+    coAlgFile:write(
+      '\\diSimpComponent ../'..subDir..'/doc/'..subDir..'\n'
+    )
+  end
+  coAlgFile:write([=[
+  
+% refreshed on ]=]..os.date()..'\n\n')
+  coAlgFile:close()
+end
+
+cmd = 'lms'
+if 0 < #arg then
+  arguments = table.concat(arg, ' ')
+  if arguments:find('extensions') then
+    print('\nContexting extensions document')
+    refreshExtensionCoAlgebras()
+    prepareExtensionDocument()
+    mustHaveTarget('doc')
+    runTarget('doc')
+    os.exit(0)
+  elseif arguments:find('refreshExtensionCoAlgebras') then
+    print('\nRefreshing collection of extension coAlgebras')
+    refreshExtensionCoAlgebras()
+    os.exit(0)    
+  else
+    cmd = 'lms -c '..arguments
+  end
+end
+
+-- now that we are finished the document generation phases...
+-- we need to push 'utils' into the list of subDirs
+
+table.insert(subDirs, 'utils')
+
+-- now walk through sorted subDirectories
+-- running the lms command on each one
+
+curDir = lfs.currentdir()
+for i, subDir in ipairs(subDirs) do
+  runCmdIn(cmd, subDir)
+end
+
+os.exit(0)

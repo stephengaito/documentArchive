@@ -1,0 +1,517 @@
+% A ConTeXt document [master document: crossCompiler.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\diSimpComponent gitVersion-c
+
+\startCHeader
+typedef struct crossCompiler_object_struct {
+  JObj     super;
+  Symbol  *type;
+  DictObj *dict;
+} CrossCompilerObj;
+
+#define asCFunc(aLoL) (((CFunctionObj*)(aLoL))->func)
+\stopCHeader
+
+\startTestSuite[newCrossCompiler]
+
+\startCHeader
+typedef CrossCompilerObj* (NewCrossCompiler)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aType
+);
+
+#define newCrossCompiler(jInterp, aType)      \
+  (                                           \
+    assert(getCrossCompilersClass(jInterp)    \
+      ->newCrossCompilerFunc),                \
+    (getCrossCompilersClass(jInterp)          \
+      ->newCrossCompilerFunc(jInterp, aType)) \
+  )
+
+//#define asCrossCompiler(aLoL) (((aLoL)->flags) & BOOLEAN_FLAG_MASK)
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern CrossCompilerObj* newCrossCompilerImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aType
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+CrossCompilerObj* newCrossCompilerImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aType
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  CrossCompilerObj* result =
+    (CrossCompilerObj*)newObject(jInterp, CrossCompilersTag);
+  assert(result);
+  
+  result->type = strdup(aType);
+  result->dict = newDictionary(jInterp, aType, NULL);
+  
+  result->super.type   = jInterp->coAlgs[CrossCompilersTag];
+ 
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new crossCompiler]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  CrossCompilerObj* aNewCrossCompiler =
+    newCrossCompiler(jInterp, "ansiC");
+  AssertPtrNotNull(aNewCrossCompiler);
+  AssertPtrNotNull(asType(aNewCrossCompiler));
+  AssertIntEquals(asTag(aNewCrossCompiler), CrossCompilersTag);
+  AssertIntTrue(isAtom(aNewCrossCompiler));
+  AssertIntTrue(isCrossCompiler(aNewCrossCompiler));
+  AssertIntFalse(isPair(aNewCrossCompiler));
+  AssertPtrNotNull(aNewCrossCompiler->dict);
+  AssertIntTrue(isDictionary(aNewCrossCompiler->dict));
+\stopCTest
+\stopTestCase
+
+\startTestCase[print CrossCompiler]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+
+  CrossCompilerObj* aLoL =
+    newCrossCompiler(jInterp, "ansiC");
+  AssertPtrNotNull(aLoL);
+  printLoL(aStrBuf, (JObj*)aLoL);
+  AssertStrEquals(getCString(aStrBuf), "crossCompiler ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+
+\stopTestSuite
+
+\startTestSuite[addImplementation]
+
+\startCHeader
+typedef void (AddImplementation)(
+  JoyLoLInterp *jInterp,
+  Symbol       *ccType,
+  Symbol       *wordName,
+  Symbol       *implBody
+);
+
+#define addImplementation(jInterp, ccType, wordName, implBody)      \
+  (                                                                 \
+    assert(getCrossCompilersClass(jInterp)                          \
+      ->addImplementationFunc),                                     \
+    (getCrossCompilersClass(jInterp)                                \
+      ->addImplementationFunc(jInterp, ccType, wordName, implBody)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void addImplementationImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *ccType,
+  Symbol       *wordName,
+  Symbol       *implBody
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void addImplementationImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *ccType,
+  Symbol       *wordName,
+  Symbol       *implBody
+) {
+  assert(jInterp);
+  
+//  if (jInterp->debug) {
+  if (TRUE) {
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    strBufPrintf(aStrBuf, 
+      "DEBUG addImplementation crossCompiler: [%s]\n", ccType);
+    strBufPrintf(aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(aStrBuf, "Body: [%s]\n", implBody);
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  
+  assert(jInterp->compilers);
+
+  CrossCompilerObj *theCC = NULL;
+  if (strcmp(ccType, AnsicName) == 0) {
+    theCC = jInterp->compilers[AnsicCC];
+  } else if (strcmp(ccType, AnsicLuaName) == 0) {
+    theCC = jInterp->compilers[AnsicLuaCC];
+  } else if (strcmp(ccType, PureLuaName) == 0) {
+    theCC = jInterp->compilers[PureLuaCC];
+  }
+  
+  if (theCC) {
+    jInterp->writeStdOut(jInterp, "addImplementation found theCC\n");
+    checkObj(jInterp, theCC, CrossCompilersTag);
+    DictObj *ccDict = theCC->dict;
+    checkObj(jInterp, ccDict, DictionariesTag);
+    
+    DictNodeObj *entry = getSymbolEntry(ccDict, wordName);
+    assert(entry);
+    
+    checkObj(jInterp, entry, DictNodesTag);
+    
+    jInterp->writeStdOut(jInterp, "addImplementation created symbol\n");
+    ImplementationObj *implementation =
+      newImplementation(jInterp, wordName, implBody);
+    jInterp->writeStdOut(jInterp, "addImplementation created fragment\n");
+    
+    checkObj(jInterp, implementation, ImplementationsTag);
+    
+    entry->value = (JObj*)implementation;
+  } else {
+    // raise error -- NEEDS Context!
+    
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    strBufPrintf(aStrBuf, 
+      "ERROR(impl) could not find the [%s] cross compiler.\n", ccType);
+    strBufPrintf(aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(aStrBuf, "Body: [%s]\n", implBody);
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  jInterp->writeStdOut(jInterp, "addImplementation DONE\n");
+}
+
+static int lua_crossCompilers_addImplementation(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  Symbol *ccType   = luaL_checkstring(lstate, 1);
+  Symbol *wordName = luaL_checkstring(lstate, 2);
+  Symbol *implBody = luaL_checkstring(lstate, 3);
+  addImplementationImpl(jInterp, ccType, wordName, implBody);
+  lua_pop(lstate, 3);
+  return 0;
+}
+\stopCCode
+\stopTestSuite
+
+\startTestSuite[addFragment]
+
+\startCCode
+static void addFragmentAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+
+  popCtxDataInto(aCtx, ccTypeLoL);
+  if (!isSymbol(ccTypeLoL)) {
+    raiseExceptionMsg(aCtx,
+      "addFragment expected a symbol as ccType");
+    return;
+  }
+  Symbol *ccType = asSymbol(ccTypeLoL);
+  
+  popCtxDataInto(aCtx, wordNameLoL);
+  if (!isSymbol(wordNameLoL)) {
+    raiseExceptionMsg(aCtx,
+      "addFragment expected a symbol as wordName");
+    return;
+  }
+  Symbol *wordName = asSymbol(wordNameLoL);
+  
+  popCtxDataInto(aCtx, fragmentBodyLoL);
+  if (!isSymbol(fragmentBodyLoL)) {
+    raiseExceptionMsg(aCtx,
+      "addFragment expected a symbol as fragmentBody");
+    return;
+  }
+  Symbol *fragmentBody = asSymbol(fragmentBodyLoL);
+  
+//  if (jInterp->debug) {
+  if (TRUE) {
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    strBufPrintf(aStrBuf, 
+      "DEBUG addFragment crossCompiler: [%s]\n", ccType);
+    strBufPrintf(aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(aStrBuf, "Body: [%s]\n", fragmentBody);
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  assert(jInterp->compilers);
+
+  CrossCompilerObj *theCC = NULL;
+  if (strcmp(ccType, AnsicName) == 0) {
+    theCC = jInterp->compilers[AnsicCC];
+  } else if (strcmp(ccType, AnsicLuaName) == 0) {
+    theCC = jInterp->compilers[AnsicLuaCC];
+  } else if (strcmp(ccType, PureLuaName) == 0) {
+    theCC = jInterp->compilers[PureLuaCC];
+  }
+  if (theCC) {
+    checkObj(jInterp, theCC, CrossCompilersTag);
+    DictObj *ccDict = theCC->dict;
+    checkObj(jInterp, ccDict, DictionariesTag);
+    
+    DictNodeObj *entry = getSymbolEntry(ccDict, wordName);
+    assert(entry);
+    FragmentObj *fragment =
+      newFragment(jInterp, wordName, fragmentBody);
+    entry->value = (JObj*)fragment;
+  } else {
+    // raise error -- NEEDS Context!
+    
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    strBufPrintf(aStrBuf, 
+      "ERROR could not find the [%s] cross compiler.\n", ccType);
+    strBufPrintf(aStrBuf, "Word: [%s]\n", wordName);
+    strBufPrintf(aStrBuf, "Body: [%s]\n", fragmentBody);
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+}
+\stopCCode
+
+\startTestCase[should add a fragment to the appropriate compiler - ansic]
+\startCTest
+  pushSymbolCtxProcess(jInterp->rootCtx, "addFragment");
+  pushSymbolCtxProcess(jInterp->rootCtx, "ansic");
+  pushSymbolCtxProcess(jInterp->rootCtx, "test-ansic");
+  pushSymbolCtxProcess(jInterp->rootCtx, "this is a test");
+  pushSymbolCtxProcess(jInterp->rootCtx, "tracingOn");
+  pushSymbolCtxProcess(jInterp->rootCtx, "showStack");
+  evalContext(jInterp->rootCtx);
+  pushSymbolCtxProcess(jInterp->rootCtx, "showStack");
+  pushSymbolCtxProcess(jInterp->rootCtx, "tracingOff");
+  evalContext(jInterp->rootCtx);
+\stopCTest
+\skipTestCase
+
+\startCCode
+static int lua_crossCompilers_addFragment(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  
+  pushSymbolCtxProcess(jInterp->rootCtx, "addFragment");
+
+  Symbol *ccType       = luaL_checkstring(lstate, 1);
+  pushSymbolCtxProcess(jInterp->rootCtx, ccType);
+  
+  Symbol *wordName     = luaL_checkstring(lstate, 2);
+  pushSymbolCtxProcess(jInterp->rootCtx, wordName);
+  
+  Symbol *fragmentBody = luaL_checkstring(lstate, 3);
+  pushSymbolCtxProcess(jInterp->rootCtx, fragmentBody);
+    
+  //evalContext(jInterp->rootCtx);
+  
+  lua_pop(lstate, 3);
+  return 0;
+}
+\stopCCode
+
+\startTestCase[should add a fragment to the appropriate compiler - lua]
+\startLuaTest
+  local joylol       = thirddata.joylol
+  local ccType       = "ansic"
+  local wordName     = "test"
+  local fragmentBody = "this is a test"
+  joylol.crossCompiler.addFragment(ccType, wordName, fragmentBody)
+  print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+  print(joylol.showData)
+  print(joylol.showProcess)
+  print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+\stopLuaTest
+\skipTestCase
+\stopTestSuite
+
+\startTestSuite[isCrossCompiler]
+
+\startCHeader
+#define isCrossCompiler(aLoL)             \
+  (                                       \
+    (                                     \
+      (aLoL) &&                           \
+      asType(aLoL) &&                     \
+      (asTag(aLoL) == CrossCompilersTag)  \
+    ) ?                                   \
+      TRUE :                              \
+      FALSE                               \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityCrossCompilerCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityCrossCompilerCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "crossCompilerCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != CrossCompilersTag) return FALSE;
+  if (lolA != lolB) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing crossCompilers]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printCrossCompilerCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printCrossCompilerCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == CrossCompilersTag);
+
+  strBufPrintf(aStrBuf, "crossCompiler ");
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print crossCompilers]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[CrossCompilersTag]);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  CrossCompilerObj* aNewCrossCompiler =
+    newCrossCompiler(jInterp, "ansiC");
+  AssertPtrNotNull(aNewCrossCompiler);
+  printLoL(aStrBuf, (JObj*)aNewCrossCompiler);
+  AssertStrEquals(getCString(aStrBuf), "crossCompiler ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerCrossCompilers]
+
+\startCHeader
+typedef struct crossCompilers_class_struct {
+  JClass            super;
+  NewCrossCompiler  *newCrossCompilerFunc;
+  AddImplementation *addImplementationFunc;
+} CrossCompilersClass;
+
+\stopCHeader
+
+\startCCode
+static Boolean initializeCrossCompilers(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+
+  CrossCompilerObj *ansic =
+    newCrossCompilerImpl(jInterp, AnsicName);
+  registerCrossCompiler(jInterp, ansic);
+  CrossCompilerObj *ansicLua =
+    newCrossCompilerImpl(jInterp, AnsicLuaName);
+  registerCrossCompiler(jInterp, ansicLua);
+  CrossCompilerObj *pureLua =
+    newCrossCompilerImpl(jInterp, PureLuaName);
+  registerCrossCompiler(jInterp, pureLua);
+
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerCrossCompilers(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerCrossCompilers(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  CrossCompilersClass* theCoAlg
+    = joyLoLCalloc(1, CrossCompilersClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name            = CrossCompilersName;
+  theCoAlg->super.objectSize      = sizeof(CrossCompilerObj);
+  theCoAlg->super.initializeFunc  = initializeCrossCompilers;
+  theCoAlg->super.registerFunc    = registerCrossCompilerWords;
+  theCoAlg->super.equalityFunc    = equalityCrossCompilerCoAlg;
+  theCoAlg->super.printFunc       = printCrossCompilerCoAlg;
+  theCoAlg->newCrossCompilerFunc  = newCrossCompilerImpl;
+  theCoAlg->addImplementationFunc = addImplementationImpl;
+
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == CrossCompilersTag);
+  assert(jInterp->coAlgs[tag]);
+   
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the CrossCompilers coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerCrossCompilers
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getCrossCompilersClass(jInterp));
+  CrossCompilersClass *coAlg = getCrossCompilersClass(jInterp);
+  registerCrossCompilers(jInterp);
+  AssertPtrNotNull(getCrossCompilersClass(jInterp));
+  AssertPtrEquals(getCrossCompilersClass(jInterp), coAlg);
+  AssertIntEquals(
+    getCrossCompilersClass(jInterp)->super.objectSize,
+    sizeof(CrossCompilerObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

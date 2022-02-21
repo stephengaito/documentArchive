@@ -1,0 +1,625 @@
+% A ConTeXt document [master document: pairs.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+\dependsOn[symbols]
+\dependsOn[stringBuffers]
+%\dependsOn[context]
+
+\startCHeader
+typedef struct pairs_object_struct {
+  JObj  super;
+  JObj* car;
+  JObj* cdr;
+} PairsObj;
+\stopCHeader
+
+\startTestSuite[newPair]
+
+\startCHeader
+typedef JObj* (NewPair)(
+  JoyLoLInterp* jInterp,
+  JObj* car,
+  JObj* cdr
+);
+
+#define newPair(jInterp, aCar, aCdr)      \
+  (                                       \
+    assert(getPairsClass(jInterp)         \
+      ->newPairFunc),                     \
+    (getPairsClass(jInterp)               \
+      ->newPairFunc(jInterp, aCar, aCdr)) \
+  )
+
+#define asCar(aLoL) (((PairsObj*)(aLoL))->car)
+#define asCdr(aLoL) (((PairsObj*)(aLoL))->cdr)
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* newPairImpl(
+  JoyLoLInterp* jInterp,
+  JObj* car,
+  JObj* cdr
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* newPairImpl(
+  JoyLoLInterp* jInterp,
+  JObj* car,
+  JObj* cdr
+) {
+  assert(jInterp);
+  JObj* result = newObject(jInterp, PairsTag);
+  assert(result);
+  asCar(result) = car;
+  asCdr(result) = cdr;
+  DEBUG(jInterp, "newPair %p %p %p\n",
+    result, car, cdr);
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new pair]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  
+  JObj *lolA = newPair(jInterp, NULL, NULL);
+  JObj *lolB = newPair(jInterp, NULL, NULL);
+  JObj *lol  = newPair(jInterp, lolA, lolB);
+  AssertPtrEquals(asType(lol), jInterp->coAlgs[PairsTag]);
+  AssertIntEquals(asTag(lol), PairsTag);
+  AssertIntZero(asFlags(lol));
+  AssertPtrEquals(asCar(lol), lolA);
+  AssertPtrEquals(asCdr(lol), lolB);  
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[car and cdr]
+
+\startCHeader
+typedef JObj *(CarCdr)(JObj*);
+
+#define getCar(jInterp, aLoL)               \
+  (                                         \
+    assert(getPairsClass(jInterp)->carFunc),\
+    (getPairsClass(jInterp)->carFunc(aLoL)) \
+  )
+
+#define getCdr(jInterp, aLoL)               \
+  (                                         \
+    assert(getPairsClass(jInterp)->cdrFunc),\
+    (getPairsClass(jInterp)->cdrFunc(aLoL)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* carImpl(JObj* aLoL);
+extern JObj* cdrImpl(JObj* aLoL);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* carImpl(JObj* aLoL) {
+  if (!aLoL) return NULL;
+  if (asTag(aLoL) != PairsTag) return aLoL;
+  return asCar(aLoL);
+}
+
+JObj* cdrImpl(JObj* aLoL) {
+  if (!aLoL) return NULL;
+  if (asTag(aLoL) != PairsTag) return NULL;
+  return asCdr(aLoL);
+}
+\stopCCode
+
+\startTestCase[should return the car and cdr]
+
+\startCTest
+  JObj *pairA = newPair(jInterp, NULL, NULL);
+  JObj *pairB = newPair(jInterp, NULL, NULL);
+  JObj *aPair = newPair(jInterp, pairA, pairB);
+  AssertPtrEquals(getCar(jInterp, aPair), pairA);
+  AssertPtrEquals(getCdr(jInterp, aPair), pairB);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[popListInto]
+
+\startCHeader
+#define popListInto(aCtx, aList, aJObjVar)                \
+  JObj* aJObjVar = NULL;                                  \
+  if (isPair(aList)) {                                    \
+    aJObjVar = asCar(aList);                              \
+    aList    = asCdr(aList);                              \
+  }                                                       \
+  if (aCtx->tracingOn) {                                  \
+    JoyLoLInterp *jInterp = aCtx->jInterp;                \
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);     \
+    strBufPrintf(aStrBuf, "%s.%s = ", #aList, #aJObjVar); \
+    printLoL(aStrBuf, aJObjVar);                          \
+    strBufPrintf(aStrBuf, "\n");                          \
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));   \
+    strBufClose(aStrBuf);                                 \
+  }
+\stopCHeader
+
+\stopTestSuite
+
+\startTestSuite[concatLists]
+\startCHeader
+typedef JObj *(ConcatLists)(
+  JoyLoLInterp *jInterp,
+  JObj         *firstList,
+  JObj         *secondList
+);
+
+#define concatLists(jInterp, firstList, secondList)       \
+  (                                                       \
+    assert(getPairsClass(jInterp)->concatListsFunc),      \
+    (getPairsClass(jInterp)                               \
+      ->concatListsFunc(jInterp, firstList, secondList))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* concatListsImpl(
+  JoyLoLInterp *jInterp,
+  JObj         *firstList,
+  JObj         *secondList
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* concatListsImpl(
+  JoyLoLInterp *jInterp,
+  JObj         *firstList,
+  JObj         *secondList
+) {
+  assert(jInterp);
+  
+  JObj *result = NULL;
+  
+  if (firstList && isPair(firstList)) {
+    result = firstList;
+  } else {
+    result = newPairImpl(jInterp, firstList, NULL);
+  }
+  
+  if (!secondList) return result;
+  // ensure that the second list is a LIST
+  if (!isPair(secondList)) {
+    secondList = newPair(jInterp, secondList, NULL);
+  }
+
+  if (!asCar(result)) return secondList;
+  
+  // find end of firstList/result
+  JObj* lolList = result;
+  while(asCdr(lolList) && isPair(asCdr(lolList))) {
+    lolList = asCdr(lolList);
+  }
+
+  // ensure that if firstList/result ends in a non-pair we make it a pair
+  if (asCdr(lolList) && !isPair(asCdr(lolList))) {
+    asCdr(lolList) = newPair(jInterp, asCdr(lolList), NULL);
+    assert(asCdr(lolList));
+    lolList = asCdr(lolList);
+  }
+
+  // place secondList at the end of firstList/result
+  assert(!asCdr(lolList));
+  asCdr(lolList) = secondList;
+  
+  return result;
+}
+
+\stopCCode
+
+\startTestCase[should concatinate two LoLs]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  
+  JObj* result = concatLists(jInterp, NULL, NULL);
+  AssertPtrNotNull(result);
+  AssertIntTrue(isPair(result));
+  printLoL(aStrBuf, result);
+  AssertStrEquals(getCString(aStrBuf), "( ( ) ) ");
+  strBufClose(aStrBuf);
+  
+  JObj *trueBool  = newBoolean(jInterp, TRUE);
+  result = concatLists(jInterp, trueBool, NULL);
+  AssertPtrNotNull(result);
+  AssertIntTrue(isPair(result));
+  AssertPtrNotNull(asCar(result));
+  AssertIntTrue(isTrue(asCar(result)));
+  AssertPtrNull(asCdr(result));
+  printLoL(aStrBuf, result);
+  AssertStrEquals(getCString(aStrBuf), "( true ) ");
+  strBufClose(aStrBuf);
+  
+  JObj *falseBool = newBoolean(jInterp, FALSE);
+  result = concatLists(jInterp, trueBool, falseBool);
+  AssertPtrNotNull(result);
+  AssertIntTrue(isPair(result));
+  AssertPtrNotNull(asCar(result));
+  AssertIntTrue(isTrue(asCar(result)));
+  AssertPtrNotNull(asCdr(result));
+  AssertIntTrue(isFalse(asCdr(result)));
+  printLoL(aStrBuf, result);
+  AssertStrEquals(getCString(aStrBuf), "( true false ) ");
+  strBufClose(aStrBuf);
+  
+  JObj* firstList = result;
+  result = concatLists(jInterp, result, NULL);
+  AssertPtrEquals(firstList, result);
+  printLoL(aStrBuf, result);
+  AssertStrEquals(getCString(aStrBuf), "( true false ) ");
+  strBufClose(aStrBuf);
+  
+  result = concatLists(jInterp, firstList, trueBool);
+  AssertPtrNotNull(result);
+  AssertPtrEquals(firstList, result);
+  AssertPtrNotNull(asCar(result));
+  AssertIntTrue(isTrue(asCar(result)));
+  AssertPtrNotNull(asCdr(result));
+  AssertIntTrue(isPair(asCdr(result)));
+  AssertIntTrue(isFalse(asCar(asCdr(result))));
+  printLoL(aStrBuf, result);
+  AssertStrEquals(getCString(aStrBuf), "( true false true ) ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[copyLoL]
+
+\startCHeader
+typedef JObj* (CopyLoL)(
+  JoyLoLInterp* jInterp,
+  JObj* aLoL
+);
+
+#define copyLoL(jInterp, aLoL)      \
+  (                                 \
+    assert(getPairsClass(jInterp)   \
+      ->copyLoLFunc),               \
+    (getPairsClass(jInterp)         \
+      ->copyLoLFunc(jInterp, aLoL)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* copyLoLImpl(
+  JoyLoLInterp* jInterp,
+  JObj* aLoL
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* copyLoLImpl(
+  JoyLoLInterp* jInterp,
+  JObj* aLoL
+) {
+  assert(jInterp);
+  if (!aLoL) return NULL;
+  if (isAtom(aLoL)) return aLoL;
+
+  return newPair(jInterp,
+                 copyLoLImpl(jInterp, asCar(aLoL)),
+                 copyLoLImpl(jInterp, asCdr(aLoL))
+                 );
+}
+\stopCCode
+
+\startTestCase[should make a correct copy]
+
+\startCTest
+  JObj *bool   = newBoolean(jInterp, TRUE);
+  JObj *pairA  = newPair(jInterp, bool, NULL);
+  JObj *pairB  = newPair(jInterp, pairA, bool);
+  JObj *aPair0 = newPair(jInterp, pairA, pairB);
+  JObj *aPair1 = copyLoL(jInterp, aPair0);
+  AssertPtrNotNull(bool);
+  AssertPtrNotNull(pairA);
+  AssertPtrNotNull(pairB);
+  AssertPtrNotNull(aPair0);
+  AssertPtrNotNull(aPair1);
+  AssertPtrNotNull(asType(aPair1));
+  AssertPtrEquals(asType(aPair1),
+    (JClass*)getPairsClass(jInterp));
+
+  AssertPtrNotNull(asCar(aPair1));
+  AssertPtrNotEquals(asCar(aPair1), pairA);
+
+  AssertPtrNotNull(asCar(asCar(aPair1)));
+  AssertPtrEquals(asCar(asCar(aPair1)), bool);
+  AssertIntTrue(isBoolean(asCar(asCar(aPair1))));
+  AssertIntTrue(isTrue(asCar(asCar(aPair1))));
+
+  AssertPtrNull(asCdr(asCar(aPair1)));
+
+  AssertPtrNotNull(asCdr(aPair1));
+  AssertPtrNotEquals(asCdr(aPair1), pairB);
+
+  AssertPtrNotNull(asCar(asCdr(aPair1)));
+  AssertIntTrue(isPair(asCar(asCdr(aPair1))));
+
+  AssertPtrNotNull(asCdr(asCdr(aPair1)));
+  AssertPtrEquals(asCdr(asCdr(aPair1)), bool);
+  AssertIntTrue(isBoolean(asCdr(asCdr(aPair1))));
+  AssertIntTrue(isTrue(asCdr(asCdr(aPair1))));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[equalLoL]
+
+\startCHeader
+typedef Boolean (EqualLoL)(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+
+#define equalLoL(jInterp, lolA, lolB, ttl)      \
+  (                                             \
+    assert(getPairsClass(jInterp)               \
+      ->equalLoLFunc),                          \
+    (getPairsClass(jInterp)                     \
+      ->equalLoLFunc(jInterp, lolA, lolB, ttl)) \
+  )
+
+#define lolEqual(jInterp, areEqual, lolA, lolB, ttl)  \
+  if (areEqual && (lolA)) {			                      \
+    assert(asType(lolA));  			                      \
+    areEqual = (asType(lolA)->equalityFunc)	          \
+      (jInterp, (lolA), (lolB), (ttl));               \
+  }
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+Boolean equalLoLImpl(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalLoLImpl(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "equalLoL %p %p %zu\n", lolA, lolB, timeToLive);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA || !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (asType(lolA) && 
+     (asTag(lolA) != PairsTag)) {
+    return (asType(lolA)->equalityFunc)
+      (jInterp, lolA, lolB, timeToLive);
+  }
+
+  if (timeToLive < 1) return TRUE;
+
+  if (!equalLoLImpl(
+      jInterp, 
+      asCar(lolA),
+      asCar(lolB),
+      (timeToLive-1)
+    )) {
+    return FALSE;
+  }
+  return equalLoLImpl(
+    jInterp,
+    asCdr(lolA),
+    asCdr(lolB),
+    (timeToLive -1)
+  );
+}
+\stopCCode
+
+\startTestCase[should return true if pairs are equal]
+\startCTest
+  JObj *pairA = newPair(jInterp, NULL, NULL);
+  JObj *pairB = newPair(jInterp, NULL, NULL);
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getPairsClass(jInterp));
+  AssertPtrNotNull(getPairsClass(jInterp)->equalLoLFunc);
+  AssertIntTrue(equalLoL(jInterp, NULL, NULL, 10));
+  AssertIntTrue(equalLoL(jInterp, pairA, pairB, 10));
+  // need to test with NON-Pairs
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if pairs are not equal]
+\startCTest
+  JObj *pairA = newPair(jInterp, NULL,  NULL);
+  JObj *pairB = newPair(jInterp, pairA, NULL);
+  AssertIntFalse(equalLoL(jInterp, pairA, pairB, 10));
+  // need to test with NON-Pairs
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[printing pairs]
+
+\startCHeader
+#define lolPrintStr(                                \
+  aStrBuf, printedOk, aLoL, opener, closer, ttl)    \
+  if (aLoL) {								                        \
+    size_t isList = asTag(aLoL) == PairsTag;        \
+    if (isList) strBufPrintf((aStrBuf), (opener));  \
+    assert(asType(aLoL));						                \
+    (printedOk) = (printedOk) && 						        \
+      (asType(aLoL)->printFunc)                     \
+        ((aStrBuf), (aLoL), (ttl));                 \
+    if (isList) strBufPrintf((aStrBuf), (closer));  \
+  } else {								                          \
+    strBufPrintf((aStrBuf), (opener));						  \
+    strBufPrintf((aStrBuf), (closer));						  \
+  }
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printPairsCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printPairsCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aLoL);
+  assert(asType(aLoL));
+  assert(asTag(aLoL) == PairsTag);
+
+  if (timeToLive < 1) {
+    strBufPrintf(aStrBuf, "... ");
+    return TRUE;
+  }
+  
+  size_t printedOk = TRUE;
+  lolPrintStr(
+    aStrBuf,
+    printedOk,
+    asCar(aLoL),
+    "( ", ") ",
+    timeToLive-1
+  );
+  lolPrintStr(
+    aStrBuf,
+    printedOk,
+    asCdr(aLoL),
+    "",   "",
+    timeToLive-1
+  );
+  return printedOk;
+}
+\stopCCode
+
+\startTestCase[should print pairs]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(getPairsClass(jInterp));
+
+  JObj* aNewPair = newPair(jInterp,
+                               newPair(jInterp, NULL, NULL),
+                               newPair(jInterp, NULL, NULL));
+  AssertPtrNotNull(aNewPair);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoL(aStrBuf, aNewPair);
+  AssertStrEquals(getCString(aStrBuf), "( ( ( ) ) ( ) ) ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerPairs]
+
+\startCHeader
+typedef struct pairs_class_struct {
+  JClass       super;
+  NewPair     *newPairFunc;
+  CarCdr      *carFunc;
+  CarCdr      *cdrFunc;
+  ConcatLists *concatListsFunc;
+  EqualLoL    *equalLoLFunc;
+  CopyLoL     *copyLoLFunc;
+} PairsClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializePairs(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerPairs(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerPairs(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  
+  PairsClass* theCoAlg           = joyLoLCalloc(1, PairsClass);
+  theCoAlg->super.name           = PairsName;
+  theCoAlg->super.objectSize     = sizeof(PairsObj);
+  theCoAlg->super.initializeFunc = initializePairs;
+  theCoAlg->super.registerFunc   = registerPairWords;
+  theCoAlg->super.equalityFunc   = equalLoLImpl;
+  theCoAlg->super.printFunc      = printPairsCoAlg;
+  theCoAlg->newPairFunc          = newPairImpl;
+  theCoAlg->carFunc              = carImpl;
+  theCoAlg->cdrFunc              = cdrImpl;
+  theCoAlg->concatListsFunc      = concatListsImpl;
+  theCoAlg->equalLoLFunc         = equalLoLImpl;
+  theCoAlg->copyLoLFunc          = copyLoLImpl;
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // sanity check...
+  assert(tag == PairsTag);
+  assert(jInterp->coAlgs[tag]);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Pairs coAlg]
+
+\startCTest
+  // CTestSetup has already created a jInterp
+  // and run registerPairs
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(getPairsClass(jInterp));
+  PairsClass *coAlg = getPairsClass(jInterp);
+  AssertIntTrue(registerPairs(jInterp));
+  AssertPtrNotNull(getPairsClass(jInterp));
+  AssertPtrEquals(getPairsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getPairsClass(jInterp)->super.objectSize,
+    sizeof(PairsObj)
+  );
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\setCHeaderStream{public}

@@ -1,0 +1,115 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_CONTEXTS}
+\createCHeaderFile%
+  {public}
+  {joylol/contexts.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_CONTEXTS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/contexts-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/assertions.h>
+#include <joylol/booleans.h>
+#include <joylol/naturals.h>
+#include <joylol/signals.h>
+#include <joylol/symbols.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/cFunctions.h>
+#include <joylol/pairs.h>
+#include <joylol/texts.h>
+#include <joylol/parsers.h>
+#include <joylol/dictNodes.h>
+#include <joylol/dictionaries.h>
+#include <joylol/loaders.h>
+#include <joylol/contexts.h>
+#include <joylol/contexts-private.h>
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {contexts.c}%
+  {}
+
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/assertions.h>}
+\addCTestInclude{<joylol/booleans.h>}
+\addCTestInclude{<joylol/naturals.h>}
+\addCTestInclude{<joylol/signals.h>}
+\addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
+\addCTestInclude{<joylol/pairs.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/parsers.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
+\addCTestInclude{<joylol/dictNodes.h>}
+\addCTestInclude{<joylol/contexts.h>}
+\addCTestInclude{<joylol/contexts-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
+\addCTestLib{-lgmp}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.assertions");
+  requireLuaModule(lstate, "joylol.booleans");
+  requireLuaModule(lstate, "joylol.naturals");
+  requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.cFunctions");
+  requireLuaModule(lstate, "joylol.pairs");
+  requireLuaModule(lstate, "joylol.texts");
+  requireLuaModule(lstate, "joylol.parsers");
+  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.dictNodes");
+  requireStaticallyLinkedContexts(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
+\stopCTest
+
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{contexts.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{core.tex}
+\addSubDocument{coreData.tex}
+\addSubDocument{coreProcess.tex}
+\addSubDocument{control.tex}
+\addSubDocument{support.tex}
+\addSubDocument{eval.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{operators.tex}
+\addSubDocument{words.tex}
+\addSubDocument{conclusion.tex} 
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

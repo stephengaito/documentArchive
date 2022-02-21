@@ -1,0 +1,71 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'jInterps.tex',
+  docFiles = {
+    'overview.tex',
+    'objects.tex',
+    'interpreter.tex',
+    'words.tex',
+    'luaInit.tex',
+    'luaInterface.tex',
+    'luaScript.tex',
+    'conclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.contextMod'
+
+contextMod.targets(lpTargets, {
+  moduleFiles = {
+    'joylol.lua',
+  },
+  moduleDir = '<HOME>/.joylol',
+})
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'jInterps',
+  },
+  cHeaderFiles = {
+    'joylol/jInterps.h',
+    'joylol/jInterps-private.h',
+  },
+  cCodeFiles = {
+    'objects.c',
+    'interpreter.c',
+    'words.c',
+    'lua.c',
+  },
+  joylolCodeFiles = {
+  },
+  coAlgLibs = {
+  },
+})
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/jInterps.h',
+    'joylol/jInterps-private.h',
+  },
+  cCodeFiles = {
+    'objects.c',
+    'interpreter.c',
+    'words.c',
+    'lua.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+  },
+})

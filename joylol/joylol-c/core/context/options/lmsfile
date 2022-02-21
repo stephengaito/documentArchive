@@ -1,0 +1,23 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'coreContextOptions.tex',
+  docFiles = {
+    'overview.tex',
+    'preamble.tex',
+    'conclusion.tex',
+  },
+  docDir    = 't-joylol-opts/doc/context/third/joyLoLOpts',
+}
+
+require 'lms.contextMod'
+
+contextMod.targets(lpTargets, {
+  moduleFiles = {
+    't-joylol-opts.mkiv',
+    't-joylol-opts.lua',
+  },
+  moduleDir = 't-joylol-opts/tex/context/third/joyLoLOpts',
+})

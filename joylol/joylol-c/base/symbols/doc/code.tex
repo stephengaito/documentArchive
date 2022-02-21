@@ -1,0 +1,384 @@
+% A ConTeXt document [master document: symbols.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\startCHeader
+typedef struct symbol_object_struct {
+  JObj super;
+  Symbol *sym;
+  Symbol *file;
+  size_t  line;
+} SymbolObj;
+
+#define LOOKUP_SYMBOL_FLAG 0x8L
+
+#define asSymbol(aObj) (((SymbolObj*)(aObj))->sym)
+#define asFile(aObj)   (((SymbolObj*)(aObj))->file)
+#define asLine(aObj)   (((SymbolObj*)(aObj))->line)
+\stopCHeader
+
+\startTestSuite[newString]
+
+\stopTestSuite
+
+\startTestSuite[newSymbol]
+
+\startCHeader
+typedef JObj *(NewSymbol)(
+  JoyLoLInterp *jInterp,
+  Symbol       *theSymbol,
+  Symbol       *fileName,
+  size_t        line,
+  Boolean       isALookupSymbol
+);
+
+#define newSymbol(jInterp, aSymbol, fileName, line)             \
+  (                                                             \
+    assert(getSymbolsClass(jInterp)                             \
+      ->newSymbolFunc),                                         \
+    (getSymbolsClass(jInterp)                                   \
+      ->newSymbolFunc(jInterp, aSymbol, fileName, line, FALSE)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj *newSymbolImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSymbol,
+  Symbol       *fileName,
+  size_t        line,
+  Boolean       isALookupSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* newSymbolImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aSymbol,
+  Symbol       *fileName,
+  size_t        line,
+  Boolean       isALookupSymbol
+) {
+  assert(aSymbol);
+  assert(jInterp);
+  if (!fileName) fileName = "unknown(symbol)";
+  JObj* result = newObject(jInterp, SymbolsTag);
+  assert(result);
+  asSymbol(result) = strdup(aSymbol);
+  asFile(result)   = strdup(fileName);
+  asLine(result)   = line;
+  if (isALookupSymbol) {
+    result->flags |= LOOKUP_SYMBOL_FLAG;
+  }
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create some new symbols]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+
+  const char* testStr = "test string";
+  JObj* aNewSymbol = newSymbol(jInterp, testStr, "testStr", 11);
+  AssertPtrNotNull(aNewSymbol);
+  AssertPtrNotNull(asType(aNewSymbol));
+  AssertIntEquals(asTag(aNewSymbol), SymbolsTag);
+  AssertPtrNotNull(asSymbol(aNewSymbol));
+  AssertPtrNotEquals(asSymbol(aNewSymbol), testStr);
+  AssertIntEquals(strcmp(asSymbol(aNewSymbol), testStr), 0);
+  AssertStrEquals(asFile(aNewSymbol), "testStr");
+  AssertIntEquals(asLine(aNewSymbol), 11);
+  AssertIntTrue(isSymbol(aNewSymbol));
+  AssertIntTrue(isAtom(aNewSymbol));
+  AssertIntFalse(isPair(aNewSymbol));
+  
+  aNewSymbol = newSymbol(jInterp, testStr, NULL, 0);
+  AssertPtrNotNull(aNewSymbol);
+  AssertStrEquals(asFile(aNewSymbol), "unknown(symbol)");
+  
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[isSymbol and symbolIs]
+
+\startCHeader
+#define isSymbol(aLoL)            \
+  (                               \
+    (                             \
+      (aLoL) &&                   \
+      asType(aLoL) &&             \
+      (asTag(aLoL) == SymbolsTag) \
+    ) ?                           \
+      TRUE :                      \
+      FALSE                       \
+  )
+
+#define isLookupSymbol(aLoL)                  \
+  (                                           \
+    (                                         \
+      (aLoL) &&                               \
+      asType(aLoL) &&                         \
+      (asTag(aLoL) == SymbolsTag)             \
+      isFlagSet(aLoL, LOOKUP_SYMBOL_FLAG) &&  \
+    ) ?                                       \
+      TRUE :                                  \
+      FALSE                                   \
+  )\stopCHeader
+
+\startCHeader
+typedef Boolean (SymbolIs)(
+  JObj *aLoL,
+  Symbol   *aSymbol
+);
+
+#define symbolIs(jInterp, aLoL, aSymbol)  \
+  (                                       \
+    assert(getSymbolsClass(jInterp)       \
+      ->symbolIsFunc),                    \
+    (getSymbolsClass(jInterp)             \
+      ->symbolIsFunc(aLoL, aSymbol))      \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean symbolIsImpl(
+  JObj *aLoL, 
+  Symbol *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean symbolIsImpl(
+  JObj *aLoL,
+  Symbol *aSymbol
+) {
+  if (isSymbol(aLoL) &&
+      (strcmp(asSymbol(aLoL), aSymbol) == 0)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+\stopCCode
+
+\startTestCase[should return true if a symbol]
+
+\startCTest
+  JObj *aSym = newSymbol(jInterp, "this is a test", NULL, 0);
+  AssertIntTrue(isSymbol(aSym));
+  AssertIntTrue(symbolIs(jInterp, aSym, "this is a test"));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if not a symbol]
+\startCTest
+  AssertIntFalse(isSymbol(NULL));
+  AssertIntFalse(symbolIs(jInterp, NULL, "this is NOT a test"));
+  JObj *aObj = newObject(jInterp, BooleansTag);
+  AssertIntFalse(isSymbol(aObj));
+  AssertIntFalse(symbolIs(jInterp, aObj, "this is NOT a test"));
+  JObj *aSym = newSymbol(jInterp, "this is a test", NULL, 0);
+  AssertIntFalse(symbolIs(jInterp, aSym, "this is NOT a test"));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[symbol equality]
+
+\setCHeaderStream{private}
+\startCHeader
+Boolean symbolsEqual(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean symbolsEqual(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "symbolsEqual a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA || !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA) != SymbolsTag) return FALSE;
+  if (strcmp(asSymbol(lolA), asSymbol(lolB)) != 0) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should return true if symbols are equal]
+
+\startCTest
+  AssertIntTrue(symbolsEqual(jInterp, NULL, NULL, 10));
+  JObj *symA = newSymbol(jInterp, "the same text", NULL, 0);
+  JObj *symB = newSymbol(jInterp, "the same text", NULL, 0);
+  AssertIntTrue(symbolsEqual(jInterp, symA, symB, 10));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if symbols are not equal]
+
+\startCTest
+  JObj *symA = newSymbol(jInterp, "text A", NULL, 0);
+  JObj *symB = newSymbol(jInterp, "text B", NULL, 0);
+  AssertIntFalse(symbolsEqual(jInterp, NULL, symB, 10));
+  AssertIntFalse(symbolsEqual(jInterp, symA, NULL, 10));
+  AssertIntFalse(symbolsEqual(jInterp, symA, symB, 10));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+
+\startTestSuite[printing symbols]
+
+\setCHeaderStream{private}
+\startCHeader
+extern size_t printSymbolCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printSymbolCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == SymbolsTag);
+
+  if (isFlagSet(aLoL, LOOKUP_SYMBOL_FLAG)) {
+    ContextObj  *aCtx    = aStrBuf->theCtx;
+    assert(aCtx);
+    DictObj     *theDict = aCtx->dict;
+    assert(theDict);
+    DictNodeObj *assoc   =
+      getSymbolEntry(theDict, asSymbol(aLoL));
+  
+    if (assoc && assoc->value) {
+      printLoLTTL(aStrBuf, assoc->value, timeToLive-1);
+      return TRUE;
+    }
+  }
+
+  if (strchr(asSymbol(aLoL), ' ')) {
+    strBufPrintf(aStrBuf, "\"%s\" ", asSymbol(aLoL));
+  } else {
+    strBufPrintf(aStrBuf, "%s ", asSymbol(aLoL));
+  }
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print symbols]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[SymbolsTag]);
+
+  JObj* aNewSymbol = newSymbol(jInterp, "test string", NULL, 0);
+  AssertPtrNotNull(aNewSymbol);
+  
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+  
+  printLoL(aStrBuf, aNewSymbol);
+  AssertStrEquals(getCString(aStrBuf),
+    "\"test string\" ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerSymbols]
+
+\startCHeader
+typedef struct symbols_class_struct {
+  JClass  super;
+  NewSymbol  *newSymbolFunc;
+  SymbolIs   *symbolIsFunc;
+} SymbolsClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializeSymbols(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerSymbols(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerSymbols(JoyLoLInterp* jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  SymbolsClass* theCoAlg = joyLoLCalloc(1, SymbolsClass);
+  theCoAlg->super.name           = SymbolsName;
+  theCoAlg->super.objectSize     = sizeof(SymbolObj);
+  theCoAlg->super.initializeFunc = initializeSymbols;
+  theCoAlg->super.registerFunc   = registerSymbolWords;
+  theCoAlg->super.equalityFunc   = symbolsEqual;
+  theCoAlg->super.printFunc      = printSymbolCoAlg;
+  theCoAlg->newSymbolFunc        = newSymbolImpl;
+  theCoAlg->symbolIsFunc         = symbolIsImpl;
+
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // sanity check...
+  assert(tag == SymbolsTag);
+  assert(jInterp->coAlgs[tag]);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Symbols coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerSymbols
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getSymbolsClass(jInterp));
+  SymbolsClass *coAlg = getSymbolsClass(jInterp);
+  AssertIntTrue(registerSymbols(jInterp));
+  AssertPtrNotNull(getSymbolsClass(jInterp));
+  AssertPtrEquals(getSymbolsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getSymbolsClass(jInterp)->super.objectSize,
+    sizeof(SymbolObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

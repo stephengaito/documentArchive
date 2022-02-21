@@ -1,0 +1,55 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'signals.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'signals',
+  },
+  cHeaderFiles = {
+    'joylol/signals.h',
+    'joylol/signals-private.h',
+  },
+  cCodeFiles = {
+    'signals.c',
+  },
+  joylolCodeFiles = {
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+})
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/signals.h',
+    'joylol/signals-private.h',
+  },
+  cCodeFiles = {
+    'signals.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+})

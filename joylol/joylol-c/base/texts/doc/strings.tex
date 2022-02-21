@@ -1,0 +1,487 @@
+% A ConTeXt document [master document: texts.tex]
+
+\section[title=Strings]
+
+\startCHeader
+typedef struct text_object_struct TextObj;
+\stopCHeader
+
+\startCCode
+// Texts are a collection of characters, which are used by the Parser
+// to extract successive symbols.
+//
+// Texts are created on one of three backing suppliers of characters:
+// 1. a single string
+// 2. a NULL terminated array of strings
+// 3. an external file
+// 4. a readline interaction with a user
+//
+// In all four cases, the Parser's nextSymbol method requests successive
+// **lines** of characters (deliminated by new-line-characters).
+//
+// It is critical, for correct interaction with the user via readline,
+// that the initial line is NOT obtained until actually requested by
+// the parser's nextSymbol method.
+//
+// It is also critical that once completed, none of the sources, get
+// asked for subsequent lines.
+//
+// When the text has been completed, the nextLine function ensures
+// that aText->curLine is NULL.
+\stopCCode
+
+\startTestSuite[texts from a string]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void nextLineFromString(TextObj* aText);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void nextLineFromString(TextObj* aText) {
+  assert(aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "->nextLineFromString [%s]{%p:%p}\n",
+    aText->curLine, aText->curChar, aText->lastChar);
+  if (!aText) return;  // there is nothing we can do!
+  if (!aText->curLine) return; // there is nothing we can do!
+
+  // there is no next line so... we have already reached the end of the text
+  aText->completed  = TRUE;
+  aText->curLine    = NULL;
+  aText->curChar    = NULL;
+  aText->lastChar   = NULL;
+}
+\stopCCode
+
+\startCHeader
+typedef TextObj *(CreateTextFromString)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aString
+);
+
+#define createTextFromString(jInterp, aString)      \
+  (                                                 \
+    assert(getTextsClass(jInterp)                   \
+      ->createTextFromStringFunc),                  \
+    (getTextsClass(jInterp)                         \
+      ->createTextFromStringFunc(jInterp, aString)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern TextObj* createTextFromStringImpl(
+  JoyLoLInterp* jInterp,
+  Symbol* aString
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+TextObj* createTextFromStringImpl(
+  JoyLoLInterp *jInterp,
+  Symbol* aString
+) {
+  assert(jInterp);
+  assert(aString);
+  
+  TextObj* aText = (TextObj*)newObject(jInterp, TextsTag);
+  assert(aText);
+  //
+  // array of strings specific initializations
+  //
+  aText->curLine   = aString;
+  aText->curChar   = aText->curLine;
+  aText->lastChar  = aText->curChar + strlen(aText->curLine);
+  aText->nextLine  = nextLineFromString;
+  //
+  // general initializations
+  //
+  aText->jInterp   = jInterp;
+  aText->completed = FALSE;
+  aText->sym       = NULL;
+  //
+  aText->inputFile = NULL;
+  //
+  aText->newPrompt       = NULL;
+  aText->continuePrompt  = NULL;
+  aText->curPrompt       = NULL;
+  //
+  aText->textLines  = NULL;
+  aText->fileName   = strdup(aString);
+  aText->curLineNum = 0;
+
+  return aText;
+}
+\stopCCode
+
+\startTestCase[should create Text From A String]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  char* aString = "this (is a test) (of strings)";
+  TextObj* aText = createTextFromString(jInterp, aString);
+  AssertPtrNotNull(aText);
+
+  AssertPtrNull(aText->textLines);
+  AssertIntEquals(aText->curLineNum, 0);
+  AssertPtrEquals(aText->curLine, aString);
+  AssertPtrEquals(aText->curChar, aString);
+  AssertPtrEquals(aText->lastChar,
+    aString + strlen(aText->curLine)
+  );
+  
+  AssertPtrNotNull(aText->nextLine);
+  aText->nextLine(aText);
+  AssertPtrEquals((void*)aText->curLine, NULL);
+  AssertPtrEquals((void*)aText->curChar, NULL);
+  AssertIntEquals((aText->lastChar - aText->curChar), 0);
+
+  aText->nextLine(aText);
+  AssertPtrEquals((void*)aText->curLine, NULL);
+  AssertPtrEquals((void*)aText->curChar, NULL);
+  AssertIntEquals((aText->lastChar - aText->curChar), 0);
+\stopCTest
+\stopTestCase
+
+\startTestCase[nextSymbol should get next symbol]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromString(jInterp, "this (is a test) (of strings)");
+  AssertPtrNotNull(aText);
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "this");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "(");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "is");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "a");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "test");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), ")");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "(");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "of");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "strings");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), ")");
+
+  nextSymbol(aText);
+  AssertPtrNull(aText->sym);
+\stopCTest
+\stopTestCase
+
+\startTestCase[nextSymbol should deal with quotes]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromString(jInterp, "this \" is a test \" 'of strings'");
+  AssertPtrNotNull(aText);
+  
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "this");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), " is a test ");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "of strings");
+
+  nextSymbol(aText);
+  AssertPtrNull(aText->sym);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[texts from an array of strings]
+
+\setCHeaderStream{private}
+\startCHeader
+extern void nextLineFromArray(TextObj* aText);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void nextLineFromArray(TextObj* aText) {
+  assert(aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "->nextLineFromArray %s\n", "");
+  if (!aText) return;  // there is nothing we can do!
+  if (!aText->textLines) return; // there is nothing we can do!
+
+  if (!aText->textLines[aText->curLineNum]) {
+    // we have already reached the end of the text
+    aText->completed  = TRUE;
+    aText->curLine    = NULL;
+    aText->curChar    = NULL;
+    aText->lastChar   = NULL;
+    return;
+  }
+
+  aText->curLine  = aText->textLines[aText->curLineNum];
+
+  aText->curChar  = aText->curLine;
+
+  if (aText->curLine) {
+    aText->lastChar = aText->curChar + strlen(aText->curLine);
+  } else aText->lastChar = aText->curChar;
+
+  aText->curLineNum++;
+}
+\stopCCode
+
+\startCHeader
+typedef TextObj *(CreateTextFromArrayOfStrings)(
+  JoyLoLInterp *jInterp,
+  Symbol       *someTextLines[]
+);
+
+#define createTextFromArrayOfStrings(jInterp, textLines)      \
+  (                                                           \
+    assert(getTextsClass(jInterp)                             \
+      ->createTextFromArrayOfStringsFunc),                    \
+    (getTextsClass(jInterp)                                   \
+      ->createTextFromArrayOfStringsFunc(jInterp, textLines)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern TextObj* createTextFromArrayOfStringsImpl(
+  JoyLoLInterp* jInterp,
+  Symbol* someTextLines[]
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+TextObj* createTextFromArrayOfStringsImpl(
+  JoyLoLInterp *jInterp,
+  Symbol* someTextLines[]
+) {
+  assert(jInterp);
+  assert(someTextLines);
+  
+  TextObj* aText = (TextObj*)newObject(jInterp, TextsTag);
+  assert(aText);
+  //
+  // array of strings specific initializations
+  //
+  aText->textLines  = someTextLines;
+  aText->curLineNum = 0;
+  aText->nextLine   = nextLineFromArray;
+  //
+  // general initializations
+  //
+  aText->jInterp    = jInterp;
+  aText->completed  = FALSE;
+  aText->sym        = NULL;
+  aText->curLine    = NULL;
+  aText->curChar    = NULL;
+  aText->lastChar   = NULL;
+  //
+  aText->inputFile  = NULL;
+  aText->fileName   = strdup("arrayOfStrings");
+  //
+  aText->newPrompt       = NULL;
+  aText->continuePrompt  = NULL;
+  aText->curPrompt       = NULL;
+
+  return aText;
+}
+\stopCCode
+
+\CTestsSetup\
+\startCTest
+static Symbol* someLines[] = {
+  "  This is a first line  ",
+  "  This is a second line   ",
+  "",
+  " ([<{ }>]) ",
+  "     	",
+  "  This is the last line  ",
+  NULL
+};
+\stopCTest
+
+\startTestCase[should create Text From Array Of Strings]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText = createTextFromArrayOfStrings(jInterp, someLines);
+  AssertPtrNotNull(aText);
+
+  AssertPtrEquals((void*)aText->textLines, (void*)someLines);
+  AssertIntEquals(aText->curLineNum, 0);
+  AssertPtrNull(aText->curLine);
+  AssertPtrNull(aText->curChar);
+  AssertPtrNull(aText->lastChar);
+  
+  AssertPtrNotNull(aText->nextLine);
+  aText->nextLine(aText);
+
+  AssertPtrEquals((void*)aText->curLine, (void*)someLines[0]);
+  AssertPtrEquals((void*)aText->curChar, (void*)someLines[0]);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[0]));
+
+  aText->nextLine(aText);
+  AssertPtrEquals((void*)aText->curLine, (void*)someLines[1]);
+  AssertPtrEquals((void*)aText->curChar, (void*)someLines[1]);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[1]));
+
+  aText->nextLine(aText);
+  AssertPtrEquals((void*)aText->curLine, (void*)someLines[2]);
+  AssertPtrEquals((void*)aText->curChar, (void*)someLines[2]);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[2]));
+
+  aText->nextLine(aText);
+  AssertPtrEquals((void*)aText->curLine, (void*)someLines[3]);
+  AssertPtrEquals((void*)aText->curChar, (void*)someLines[3]);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[3]));
+
+  aText->nextLine(aText);
+  AssertPtrEquals((void*)aText->curLine, (void*)someLines[4]);
+  AssertPtrEquals((void*)aText->curChar, (void*)someLines[4]);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[4]));
+
+  aText->nextLine(aText);
+  AssertPtrEquals((void*)aText->curLine, (void*)someLines[5]);
+  AssertPtrEquals((void*)aText->curChar, (void*)someLines[5]);
+  AssertIntEquals((aText->lastChar - aText->curChar),
+                        strlen(someLines[5]));
+
+  aText->nextLine(aText);
+  AssertPtrEquals((void*)aText->curLine, NULL);
+  AssertPtrEquals((void*)aText->curChar, NULL);
+  AssertIntEquals((aText->lastChar - aText->curChar), 0);
+
+  aText->nextLine(aText);
+  AssertPtrEquals((void*)aText->curLine, NULL);
+  AssertPtrEquals((void*)aText->curChar, NULL);
+  AssertIntEquals((aText->lastChar - aText->curChar), 0);
+\stopCTest
+\stopTestCase
+
+\startTestCase[nextSymbol should get next symbol]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText = createTextFromArrayOfStrings(jInterp, someLines);
+  AssertPtrNotNull(aText);
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "This");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "is");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "a");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "first");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "line");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "This");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "is");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "a");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "second");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "line");
+
+  // " ([<{ }>]) "
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "(");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "[");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "<");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "{");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "}");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), ">");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "]");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), ")");
+
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "This");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "is");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "the");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "last");
+  nextSymbol(aText);
+  AssertPtrNotNull(aText->sym);
+  AssertStrEquals(asSymbol(aText->sym), "line");
+
+  nextSymbol(aText);
+  AssertPtrNull(aText->sym);
+\stopCTest
+\stopTestCase
+\stopTestSuite

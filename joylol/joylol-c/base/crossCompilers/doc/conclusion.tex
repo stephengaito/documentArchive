@@ -1,0 +1,108 @@
+% A ConTeXt document [master document: crossCompiler.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_CROSSCOMPILERS}
+\createCHeaderFile%
+  {public}
+  {joylol/crossCompilers.h}
+  {}
+
+\setCHeaderStream{private}
+\startCHeader
+extern size_t joylol_register_crossCompilers(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_CROSSCOMPILERS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/crossCompilers-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/symbols.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/dictNodes.h>
+#include <joylol/dictionaries.h>
+#include <joylol/texts.h>
+#include <joylol/cFunctions.h>
+#include <joylol/fragments.h>
+#include <joylol/implementations.h>
+#include <joylol/assertions.h>
+#include <joylol/contexts.h>
+#include <joylol/crossCompilers.h>
+#include <joylol/crossCompilers-private.h>
+// dictionary
+// printer
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {crossCompilers.c}%
+  {}
+
+  
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/assertions.h>}
+\addCTestInclude{<joylol/contexts.h>}
+\addCTestInclude{<joylol/crossCompilers.h>}
+\addCTestInclude{<joylol/crossCompilers-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.assertions");
+  requireLuaModule(lstate, "joylol.pairs");
+  requireLuaModule(lstate, "joylol.contexts");
+  requireLuaModule(lstate, "joylol.cFunctions");
+  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.dictNodes");
+  requireLuaModule(lstate, "joylol.fragments");
+  requireLuaModule(lstate, "joylol.pairs");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.symbols");
+  requireStaticallyLinkedCrossCompilers(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
+\stopCTest
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{crossCompilers.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{ansic.tex}
+\addSubDocument{ansicLua.tex}
+\addSubDocument{pureLua.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
+\addSubDocument{conclusion.tex} 
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

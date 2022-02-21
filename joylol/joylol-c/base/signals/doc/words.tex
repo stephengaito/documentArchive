@@ -1,0 +1,22 @@
+% A ConTeXt document [master document: signals.tex]
+
+\section[title=Words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerSignalWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerSignalWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  assert(jInterp);
+  return TRUE;
+}
+\stopCCode

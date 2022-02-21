@@ -1,0 +1,117 @@
+-- A Lua Make System file
+
+lfs = require 'lfs'
+
+if clearScreen then os.execute('reset') end
+
+-- ensure the .joylol directories exist
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'include'
+})
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'include',
+  'joylol'
+})
+
+lfs.mkdir(makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'joylol'
+})
+
+-- collect the list of subdirectories of base
+subDirs = { }
+
+for entry in lfs.dir('.') do
+  if not entry:match('^%..*$') and
+     (lfs.attributes(entry, 'mode') == 'directory') and
+     entry ~= 'doc' then
+    table.insert(subDirs, entry)
+  end
+end
+
+-- sort the list of subDirectories
+
+table.sort(subDirs)
+
+require 'lms.contextDoc'
+
+function prepareBaseDocument()
+  local docFiles = { }
+  local texFileList = io.popen('find -name "*.tex"')
+  for docTexFilePath in texFileList:lines('*l') do 
+    if not docTexFilePath:find('releases') and
+        not docTexFilePath:find('buildDir') and
+        not docTexFilePath:find('bin')      and
+        not docTexFilePath:find('baseCoAlgebras') then
+      if docTexFilePath:match('^%.%/doc%/') then
+        docTexFilePath = docTexFilePath:gsub('^%.%/doc%/','')
+      else
+        docTexFilePath = '.'..docTexFilePath
+      end
+      table.insert(docFiles, docTexFilePath)
+    end
+  end
+  contextDoc.targets{
+    mainDoc  = 'base.tex',
+    docFiles = docFiles,
+    docDir   = 'doc'
+  }
+end
+
+function refreshBaseCoAlgebras()
+  local coAlgFile = io.open('doc/baseCoAlgebras.tex', 'w')
+  coAlgFile:write([=[
+% A ConTeXt document [master document: joyLoL.tex ]
+
+% This document is automatically generated
+% using the:
+%  lms refreshBaseCoAlgebras
+% command
+
+]=])
+  for i, subDir in ipairs(subDirs) do
+    coAlgFile:write(
+      '\\diSimpComponent ../'..subDir..'/doc/'..subDir..'\n'
+    )
+  end
+  coAlgFile:write([=[
+  
+% refreshed on ]=]..os.date()..'\n\n')
+  coAlgFile:close()
+end
+
+
+cmd = 'lms'
+if 0 < #arg then
+  arguments = table.concat(arg, ' ')
+  if arguments:find('base') then
+    print('\nContexting base document')
+    refreshBaseCoAlgebras()
+    prepareBaseDocument()
+    mustHaveTarget('doc')
+    runTarget('doc')
+    os.exit(0)
+  elseif arguments:find('refreshBaseCoAlgebras') then
+    print('\nRefreshing collection of base coAlgebras')
+    refreshBaseCoAlgebras()
+    os.exit(0)
+  else
+    cmd = 'lms -c '..arguments
+  end
+end
+
+-- now walk through sorted subDirectories
+-- running the lms command on each one
+
+for i, subDir in ipairs(subDirs) do
+  runCmdIn(cmd, subDir)
+end
+
+os.exit(0)

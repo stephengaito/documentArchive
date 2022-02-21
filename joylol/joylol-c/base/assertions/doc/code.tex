@@ -1,0 +1,412 @@
+% A ConTeXt document [master document: assertions.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\diSimpComponent gitVersion-c
+
+\startCHeader
+typedef struct assertion_object_struct {
+  JObj     super;
+  JObj    *assertion;
+} AssertionObj;
+
+#define ASSERTION_FLAG_MASK  0x8L
+
+#define asAssertion(aLoL)             \
+  (((AssertionObj*)(aLoL))->assertion)
+  
+#define assertionValue(aLoL)              \
+  (((aLoL)->flags) & ASSERTION_FLAG_MASK)
+\stopCHeader
+
+\startTestSuite[newAssertion]
+
+\startCHeader
+typedef JObj* (NewAssertion)(
+  JoyLoLInterp *jInterp,
+  JObj         *anAssertion
+);
+
+#define newAssertion(jInterp, anAssertion)      \
+  (                                             \
+    assert(getAssertionsClass(jInterp)          \
+      ->newAssertionFunc),                      \
+    (getAssertionsClass(jInterp)                \
+      ->newAssertionFunc(jInterp, anAssertion)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* newAssertionImpl(
+  JoyLoLInterp *jInterp,
+  JObj         *anAssertion
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* newAssertionImpl(
+  JoyLoLInterp *jInterp,
+  JObj         *anAssertion
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  JObj* result = newObject(jInterp, AssertionsTag);
+  assert(result);
+  
+  result->type  = jInterp->coAlgs[AssertionsTag];
+  result->flags |= ASSERTION_FLAG_MASK; // default is TRUE
+  asAssertion(result) = anAssertion;
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new assertion]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  JObj* aNewBool      = newBoolean(jInterp, TRUE);
+  JObj* aNewAssertion = newAssertion(jInterp, aNewBool);
+  AssertPtrNotNull(aNewAssertion);
+  AssertPtrNotNull(asType(aNewAssertion));
+  AssertIntEquals(asTag(aNewAssertion), AssertionsTag);
+  AssertPtrNotNull(asAssertion(aNewAssertion));
+  AssertPtrEquals(asAssertion(aNewAssertion), aNewBool);
+  AssertIntTrue(asFlags(aNewAssertion));
+  AssertIntTrue(isAtom(aNewAssertion));
+  AssertIntTrue(isAssertion(aNewAssertion));
+  AssertIntFalse(isPair(aNewAssertion));
+\stopCTest
+\stopTestCase
+
+\startTestCase[print Assertion]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+
+  JObj* trueBool = newBoolean(jInterp,   TRUE);
+  JObj* aLoL     = newAssertion(jInterp, trueBool);
+  AssertPtrNotNull(aLoL);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf), "{ true } ");
+  strBufClose(aStrBuf);
+
+  JObj *falseBool = newBoolean(jInterp,   FALSE);
+  aLoL            = newAssertion(jInterp, falseBool);
+  AssertPtrNotNull(aLoL);
+  printLoL(aStrBuf, aLoL);
+  AssertStrEquals(getCString(aStrBuf), "{ false } ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[parseAssertion]
+
+\startCHeader
+typedef AssertionObj *(ParseAssertion)(
+  JoyLoLInterp *jInterp,
+  Symbol       *assertionStr
+);
+
+#define parseAssertion(jInterp, assertionStr)       \
+  (                                                 \
+    assert(getAssertionsClass(jInterp)              \
+      ->parseAssertionFunc),                        \
+    (getAssertionsClass(jInterp)                    \
+      ->parseAssertionFunc(jInterp, assertionStr))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern AssertionObj* parseAssertionImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *assertionStr
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+AssertionObj* parseAssertionImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *assertionStr
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  JObj *assertionList = NULL;
+  if (assertionStr && (assertionStr[0] != 0)) {
+    TextObj *assertionText = createTextFromString(jInterp, assertionStr);
+    assertionList = parseAllSymbols(assertionText);
+    freeText(assertionText);
+  }
+  if (!assertionList) assertionList = newPair(jInterp, NULL, NULL);
+
+  return (AssertionObj*)newAssertionImpl(jInterp, assertionList);
+}
+\stopCCode
+
+\startTestCase[should parse an assertion]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertionObj *aNewAssertion = parseAssertion(jInterp, " true ");
+  AssertPtrNotNull(aNewAssertion);
+  AssertPtrNotNull(asType(aNewAssertion));
+  AssertIntEquals(asTag(aNewAssertion), AssertionsTag);
+  AssertPtrNotNull(asAssertion(aNewAssertion));
+  AssertIntTrue(asFlags(aNewAssertion));
+  AssertIntTrue(isAtom(aNewAssertion));
+  AssertIntTrue(isAssertion(aNewAssertion));
+  AssertIntFalse(isPair(aNewAssertion));  
+  AssertIntTrue(isPair(asAssertion(aNewAssertion)));
+  AssertIntTrue(isSymbol(asCar(asAssertion(aNewAssertion))));
+  AssertStrEquals(asSymbol(asCar(asAssertion(aNewAssertion))), "true");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[isAssertion]
+
+\startCHeader
+#define isAssertion(aLoL)             \
+  (                                   \
+    (                                 \
+      (aLoL) &&                       \
+      asType(aLoL) &&                 \
+      (asTag(aLoL) == AssertionsTag)  \
+    ) ?                               \
+      TRUE :                          \
+      FALSE                           \
+  )
+\stopCHeader
+
+\startTestSuite[isTrue and isFalse]
+
+\startCHeader
+#define assertionTrue(aLoL)             \
+  (                                     \
+    (                                   \
+      (aLoL) &&                         \
+      asType(aLoL) &&                   \
+      (asTag(aLoL) == AssertionsTag) && \
+      assertionValue(aLoL)              \
+    ) ?                                 \
+      TRUE :                            \
+      FALSE                             \
+  )
+
+#define assertionFalse(aLoL)            \
+  (                                     \
+    (                                   \
+      (!aLoL) ||                        \
+      (!asType(aLoL)) ||                \
+      (asTag(aLoL) != AssertionsTag) || \
+      !assertionValue(aLoL)             \
+    ) ?                                 \
+      TRUE :                            \
+      FALSE                             \
+  )
+\stopCHeader
+
+\startTestCase[should return appropriate assertion values]
+
+\startCTest
+  JObj *trueBool    = newBoolean(jInterp,   TRUE);
+  JObj *anAssertion = newAssertion(jInterp, trueBool);
+  AssertPtrNotNull(anAssertion);
+  AssertPtrNotNull(asType(anAssertion));
+  AssertIntEquals(asTag(anAssertion), AssertionsTag);
+  AssertIntTrue(assertionValue(anAssertion));
+  AssertIntTrue(assertionTrue(anAssertion));
+  AssertIntFalse(assertionFalse(anAssertion));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityBoolCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityBoolCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "boolCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != AssertionsTag) return FALSE;
+  if (asAssertion(lolA) != asAssertion(lolB)) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing assertions]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printAssertionCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printAssertionCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *anAssertion,
+  size_t           timeToLive
+) {
+  assert(anAssertion);
+  assert(asType(anAssertion));
+  assert(asTag(anAssertion) == AssertionsTag);
+  JObj *theAssertionBody = asAssertion(anAssertion);
+  
+  DEBUG(aStrBuf->jInterp, "printAssertionsCoAlg %p %p %zu %p\n",
+    aStrBuf, anAssertion, timeToLive, theAssertionBody);
+    
+  if (timeToLive < 1) {
+    strBufPrintf(aStrBuf, "... ");
+    return TRUE;
+  }
+  
+  size_t printedOk = TRUE;
+  if (theAssertionBody) {
+    strBufPrintf(aStrBuf, "{ ");
+    printedOk =
+      (asType(theAssertionBody)->printFunc)
+        (aStrBuf, theAssertionBody, timeToLive-1);
+    strBufPrintf(aStrBuf, "} ");
+  } else {
+    strBufPrintf(aStrBuf, "{ } ");
+  }
+
+  return printedOk;
+}
+\stopCCode
+
+\startTestCase[should print assertions]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[AssertionsTag]);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  JObj* trueBoolean   = newBoolean(jInterp,   TRUE);
+  JObj* aNewAssertion = newAssertion(jInterp, trueBoolean);
+  AssertPtrNotNull(aNewAssertion);
+  printLoL(aStrBuf, aNewAssertion);
+  AssertStrEquals(getCString(aStrBuf), "{ true } ");
+  strBufClose(aStrBuf);
+  
+  JObj* falseBoolean = newBoolean(jInterp,   FALSE);
+  aNewAssertion      = newAssertion(jInterp, falseBoolean);
+  AssertPtrNotNull(aNewAssertion);  
+  printLoL(aStrBuf, aNewAssertion);
+  AssertStrEquals(getCString(aStrBuf), "{ false } ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerAssertions]
+
+\startCHeader
+typedef struct assertions_class_struct {
+  JClass       super;
+  NewAssertion      *newAssertionFunc;
+  ParseAssertion    *parseAssertionFunc;
+} AssertionsClass;
+
+\stopCHeader
+
+\startCCode
+static Boolean initializeAssertions(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerAssertions(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerAssertions(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  AssertionsClass* theCoAlg
+    = joyLoLCalloc(1, AssertionsClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name           = AssertionsName;
+  theCoAlg->super.objectSize     = sizeof(AssertionObj);
+  theCoAlg->super.initializeFunc = initializeAssertions;
+  theCoAlg->super.registerFunc   = registerAssertionWords;
+  theCoAlg->super.equalityFunc   = equalityBoolCoAlg;
+  theCoAlg->super.printFunc      = printAssertionCoAlg;
+  theCoAlg->newAssertionFunc     = newAssertionImpl;
+  theCoAlg->parseAssertionFunc   = parseAssertionImpl;
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == AssertionsTag);
+  assert(jInterp->coAlgs[tag]);
+   
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Assertions coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerAssertions
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getAssertionsClass(jInterp));
+  AssertionsClass *coAlg = getAssertionsClass(jInterp);
+  registerAssertions(jInterp);
+  AssertPtrNotNull(getAssertionsClass(jInterp));
+  AssertPtrEquals(getAssertionsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getAssertionsClass(jInterp)->super.objectSize,
+    sizeof(AssertionObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

@@ -1,0 +1,69 @@
+% A ConTeXt document [master document: luaFunctions.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_LUAFUNCTIONS}
+\createCHeaderFile%
+  {public}
+  {joylol/luaFunctions.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_LUAFUNCTIONS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/luaFunctions-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/luaFunctions.h>
+#include <joylol/luaFunctions-private.h>
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {luaFunctions.c}%
+  {}
+
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/luaFunctions.h>}
+\addCTestInclude{<joylol/luaFunctions-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedLuaFunctions(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
+\stopCTest
+
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{luaFunctions.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
+\addSubDocument{conclusion.tex} 
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

@@ -1,0 +1,111 @@
+% A ConTeXt document [master document: parsers.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_PARSERS}
+\createCHeaderFile%
+  {public}
+  {joylol/parsers.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_PARSERS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/parsers-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/assertions.h>
+#include <joylol/booleans.h>
+#include <joylol/symbols.h>
+#include <joylol/signals.h>
+#include <joylol/naturals.h>
+#include <joylol/pairs.h>
+#include <joylol/dictNodes.h>
+#include <joylol/texts.h>
+#include <joylol/parsers.h>
+#include <joylol/parsers-private.h>
+// dictionary
+// printer
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {parsers.c}%
+  {}
+
+\addCTestInclude{<gmp.h>}
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/assertions.h>}
+\addCTestInclude{<joylol/booleans.h>}
+\addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/signals.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/naturals.h>}
+\addCTestInclude{<joylol/pairs.h>}
+\addCTestInclude{<joylol/dictNodes.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
+\addCTestInclude{<joylol/assertions.h>}
+\addCTestInclude{<joylol/contexts.h>}
+\addCTestInclude{<joylol/parsers.h>}
+\addCTestInclude{<joylol/parsers-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
+\addCTestLib{-lgmp}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.assertions");
+  requireLuaModule(lstate, "joylol.booleans");
+  requireLuaModule(lstate, "joylol.signals");
+  requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.naturals");
+  requireLuaModule(lstate, "joylol.pairs");
+  requireLuaModule(lstate, "joylol.dictNodes");
+  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.cFunctions");
+  requireLuaModule(lstate, "joylol.contexts");
+  requireLuaModule(lstate, "joylol.texts");
+  requireStaticallyLinkedParsers(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
+\stopCTest
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{parsers.tex}
+\addSubDocument{overview.tex}
+\addSubDocument{code.tex}
+\addSubDocument{patterns.tex}
+\addSubDocument{captures.tex}
+\addSubDocument{joyLoLParser.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
+\addSubDocument{conclusion.tex} 
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

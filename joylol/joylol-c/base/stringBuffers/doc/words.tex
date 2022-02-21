@@ -1,0 +1,53 @@
+% A ConTeXt document [master document: stringBuffers.tex]
+
+\section[title=Words]
+
+\startCCode
+static void printLoLAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataInto(aCtx, lol);
+  popCtxDataInto(aCtx, depth);
+  
+  if (!isNatural(depth)) {
+    raiseExceptionMsg(aCtx,
+      "printLoL expected a natural as depth");
+    return;
+  }
+  size_t depthInt = SIZE_MAX;
+  double depthDbl = asNaturalDbl(jInterp, depth);
+  if (depthDbl < ((double)depthInt)) {
+    depthInt = ((size_t)depthDbl);
+  }
+  
+  StringBufferObj* aStrBuf = newStringBufferImpl(aCtx);
+  
+  printLoLImpl(aStrBuf, lol, depthInt);
+  JObj* result =
+    newSymbol(jInterp, getCString(aStrBuf), "strBuf", 0);
+  pushCtxData(aCtx, result);
+  
+  strBufClose(aStrBuf);
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerStringBufferWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerStringBufferWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  extendJoyLoLInRoot(jInterp, "printLoL", "", printLoLAP, "");
+  return TRUE;
+}
+\stopCCode

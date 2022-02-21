@@ -1,0 +1,105 @@
+% A ConTeXt document [master document: joylolCoAlg.tex] 
+
+\chapter[title=Rules]
+
+\startTestSuite[rule environment]
+
+% depends upon the 
+%   \buff_pickup{name}{startsequence}{stopsequence}{before}{after}{undent}
+% macro defined in buff-ini.mkiv
+% where:
+%  name          is the name of the buffer to be extracted
+%                  from the following text
+%  startsequence is the *macro* which starts the text
+%  stopsequence  is the *macro* (used as a literal) which
+%                  stops the text
+%  before        is the *macro* to be executed *before* text
+%                  is extracted
+%  after         is the *macro* to be executed *after* the 
+%                  text has been extracted
+%  undent        is .... ??
+
+\startMkIVCode
+\let\stopRule\relax
+
+\def\stopRuleDone{
+  \directlua{thirddata.joylolCoAlgs.stopRule()}
+}
+
+\def\startRule[#1]{
+  \directlua{thirddata.joylolCoAlgs.startRule('#1')}
+  \buff_pickup{_rules_buffer_}%
+    {startRule}{stopRule}%
+    {\relax}{\stopRuleDone}\plusone%
+}
+\stopMkIVCode
+
+\startLuaCode
+local function startRule(ruleName)
+  texio.write_nl("starting rule: ["..ruleName.."]")
+end
+
+coAlgs.startRule = startRule
+
+local sectionHeaders = tConcat({
+  'arguments',
+  'returns',
+  'preDataStack',
+  'preProcessStack',
+  'preConditions',
+  'postDataStack',
+  'postProcessStack',
+  'postConditions'
+}, '|'):lower()
+
+local function stopRule()
+  local rulesBody  = buffers.getcontent('_rules_buffer_'):gsub("\13", "\n")
+  local rules      = { }
+  local lines      = { }
+  local curSection = 'ignore'
+  for aLine in rulesBody:gmatch("[^\r\n]+") do
+    local aMatch = aLine:match("^%s*\\(%a+)%s*$")
+    if aMatch and
+      sectionHeaders:find(aMatch:lower(), 1, true)
+    then
+      rules[curSection] = lines
+      lines             = { }
+      curSection        = aMatch
+    else
+      tInsert(lines, aLine)
+    end
+  end
+  rules[curSection] = lines
+
+  texio.write_nl('---------rules-buffer-------------')
+  texio.write_nl(lpPP(rules))
+  texio.write_nl('---------rules-buffer-------------')
+end
+
+
+coAlgs.stopRule = stopRule
+\stopLuaCode
+
+\startTestCase[should manipulate buffers]
+\startConTest
+  \startRule[testRule]
+    \arguments
+      some argument content
+    \returns
+      some returns content
+    \preDataStack
+      some preDataStack content
+    \preProcessStack
+      some preProcessStack content
+    \preConditions
+      some preConditions content
+    \postDataStack
+      some postDataStack content
+    \postProcessStack
+      some postProcessStack content
+    \postConditions  
+      some postConditions content
+  \stopRule
+\stopConTest
+\stopTestCase
+\stopTestSuite

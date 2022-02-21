@@ -1,0 +1,76 @@
+% A ConTeXt document [master document: coreContext.tex]
+
+\chapter[title=Conclusion]
+
+\addDocumentDirectory%
+  {t-joylol/doc/context/third/joyLoL}
+
+\createMkIVCodeFile%
+  {default}%
+  {t-joylol.mkiv}%
+  {A ConTeXt MkIV module}
+
+\createLuaCodeFile%
+  {default}%
+  {t-joylol.lua}%
+  {-- A Lua file}
+
+\CHeaderIncludeGuard{public}{JOYLOL_CORE_CONTEXT}
+\createCHeaderFile%
+  {public}
+  {joylol/core/context.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_CORE_CONTEXT_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/core/context-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/cFunctions.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/dictNodes.h>
+#include <joylol/texts.h>
+#include <joylol/parsers.h>
+#include <joylol/assertions.h>
+#include <joylol/contexts.h>
+#include <joylol/loaders.h>
+//#include <joylol/core/context.h>
+//#include <joylol/core/context-private.h>
+// dictionary
+// printer
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {lua.c}%
+  {}
+
+\addMainDocument{coreContext.tex}
+\addSubDocument{overview.tex}
+\addSubDocument{luaInterface.tex}
+\addSubDocument{luaMain.tex}
+\addSubDocument{preamble.tex}
+\addSubDocument{conclusion.tex}
+\addConTeXtModuleDirectory%
+  {t-joylol/tex/context/third/joyLoL}
+
+\addJoyLoLTargets{default}
+  
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+  

@@ -1,0 +1,57 @@
+% A ConTeXt document [master document: joyLoL.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent avlTrees
+
+\usebtxdataset[avlTreesBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\chapter[title=AVL Trees]
+
+We explore the use of \joylol\ by building an implementation of AVL trees. 
+
+We need to define:
+
+\startitemize
+
+\item \bold{byte} (or \bold{uint8})
+
+\item \bold{uint64}
+
+\item \bold{int64}
+
+\item \bold{lists}
+
+\item \bold{array}
+
+\item \bold{uft8Char}
+
+\item \bold{Symbols}
+
+\item \bold{JoyLoLObjs}
+
+\item \bold{DictNodeObjs}
+
+\stopitemize
+
+\starttyping
+
+typedef struct dictNode_object_struct {
+  JObj         super;
+  Symbol      *symbol;
+  JObj        *preObs;
+  JObj        *value;
+  JObj        *postObs;
+  DictNodeObj *left;
+  DictNodeObj *right;
+  DictNodeObj *previous;
+  DictNodeObj *next;
+  size_t       height;
+  long         balance;
+} DictNodeObj;
+\stoptyping
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

@@ -1,0 +1,491 @@
+% A ConTeXt document [master document: dictNodes.tex]
+
+\section[title=Insert]
+
+\startTestSuite[insertSymbolRecurse]
+
+\setCHeaderStream{public}
+\startCHeader
+typedef DictNodeObj *(InsertSymbolRecurse)(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
+);
+
+#define insertSymbolRecurse(aDict, anAVLNode, aSymbol)      \
+  (                                                         \
+    assert(aDict),                                          \
+    assert(getDictNodesClass(aDict->jInterp)                \
+      ->insertSymbolRecurseFunc),                           \
+    (getDictNodesClass(aDict->jInterp)                      \
+      ->insertSymbolRecurseFunc(aDict, anAVLNode, aSymbol)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern DictNodeObj* insertSymbolRecurseImpl(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+DictNodeObj* insertSymbolRecurseImpl(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode,
+  Symbol      *aSymbol
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+  
+  if (!anAVLNode) return newDictNode(jInterp, aSymbol);
+
+  StringBufferObj *aStrBuf = 
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
+
+  DEBUG(jInterp, "\ninsertSymbolRecurse %p <%s>[%s] %ld:%zu\n",
+        anAVLNode, anAVLNode->symbol, aSymbol,
+        anAVLNode->balance, anAVLNode->height);
+
+  DEBUG(jInterp, "insertSymbolRecurse strncmp %d\n",
+        strcmp(aSymbol, anAVLNode->symbol));
+
+  int aStrCmp = strcmp(aSymbol, anAVLNode->symbol);
+  if (aStrCmp < 0) {
+    // aSymbol < anAVLNode->symbol // insert in LEFT subtree
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, ">-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+            anAVLNode, aSymbol, anAVLNode->balance,
+            anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+            getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    DictNodeObj* leftResult =
+      insertSymbolRecurse(aDict, anAVLNode->left, aSymbol);
+    assert(leftResult);
+    if (!anAVLNode->left) {
+      // we have inserted a new node ...
+      // ... insert this new node into the doubly linked list
+      //
+      DictNodeObj* oldPrevious           = anAVLNode->previous;
+      assert(aDict->firstSymbol);
+      if (oldPrevious) oldPrevious->next = leftResult;
+      else aDict->firstSymbol            = leftResult;
+      leftResult->next                   = anAVLNode;
+      leftResult->previous               = oldPrevious;
+      anAVLNode->previous                = leftResult;
+      //
+    }
+    anAVLNode->left = leftResult;
+    reCalculateAVLNodeHeightBalance(anAVLNode);
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, "<-insert LEFT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    //
+    if (2 < anAVLNode->balance) {
+      assert(anAVLNode->left);
+      if (strcmp(aSymbol, anAVLNode->left->symbol) < 0) {
+        anAVLNode = rotateLeftLeft(aDict, anAVLNode);
+      } else {
+        anAVLNode = rotateLeftRight(aDict, anAVLNode);
+      }
+    }
+  } else if (0 < aStrCmp) {
+    // aSymbol > anAVLNode->symbol // insert in RIGHT subtree
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, ">-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    DictNodeObj* rightResult =
+      insertSymbolRecurse(aDict, anAVLNode->right, aSymbol);
+    if (!anAVLNode->right) {
+      // we have inserted a new node ...
+      // ... insert this new node into the doubly linked list
+      //
+      DictNodeObj* oldNext           = anAVLNode->next;
+      if (oldNext) oldNext->previous = rightResult;
+      rightResult->previous          = anAVLNode;
+      rightResult->next              = oldNext;
+      anAVLNode->next                = rightResult;
+      //
+    }
+    anAVLNode->right = rightResult;
+    reCalculateAVLNodeHeightBalance(anAVLNode);
+    if (jInterp->debug) {
+      printDicInto(aStrBuf, anAVLNode, 10);
+      DEBUG(jInterp, "<-insert RIGHT subtree %p [%s] %ld:%zu=%zu %s\n",
+          anAVLNode, aSymbol, anAVLNode->balance,
+          anAVLNode->height, deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    //
+    if (anAVLNode->balance < -2) {
+      assert(anAVLNode->right);
+      if (strcmp(aSymbol, anAVLNode->right->symbol) > 0) {
+        anAVLNode = rotateRightRight(aDict, anAVLNode);
+      } else {
+        anAVLNode = rotateRightLeft(aDict, anAVLNode);
+      }
+    }
+  } else {
+    // aSymbol == anAVLNode->symbol // nothing to do...
+    DEBUG(jInterp,"symols equal <%s>[%s]\n",
+          anAVLNode->symbol, aSymbol);
+  }
+
+  reCalculateAVLNodeHeightBalance(anAVLNode);
+  return anAVLNode;
+}
+\stopCCode
+
+\startTestCase[should insert Symbol In Dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
+  
+  DictNodeObj* aSimpleDic = newDictNode(jInterp, "aNodeSymbol");
+  DictNodeObj* aNewDic = insertSymbolRecurse(aDict, aSimpleDic, "aNodeSymbol");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[aNodeSymbol] l:(  ) r:(  ) ");
+  strBufClose(aStrBuf);
+  AssertPtrNull(aNewDic->next);
+  AssertPtrNull(aNewDic->previous);
+  AssertIntTrue(aDict->firstSymbol != aNewDic);
+  AssertIntTrue(aDict->firstSymbol != aSimpleDic);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should insert Symbol Not In Dictionary]
+\startCTest
+  DEBUG(jInterp, "\n%s insert many symbols %s", "---------", "---------");
+
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  DictNodeObj* aSimpleDic = newDictNode(jInterp, "20");
+  aDict->root             = aSimpleDic;
+  aDict->firstSymbol      = aSimpleDic;
+
+  DictNodeObj* aNewDic = insertSymbolRecurse(aDict, aSimpleDic, "15");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  ) ");
+  strBufClose(aStrBuf);
+  //
+  // test insertion on the left into doubly linked list
+  //
+  AssertPtrNotNull(aNewDic->previous);
+  AssertPtrNull(aNewDic->next);
+  AssertPtrEquals(aDict->firstSymbol, aNewDic->previous);
+  AssertPtrEquals(aDict->firstSymbol->next, aNewDic);
+  AssertPtrNull(aDict->firstSymbol->previous);
+  AssertPtrNull(aNewDic->next);
+
+  // should invoke an LL
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "10");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  ) ");
+  strBufClose(aStrBuf);
+  //
+  // test insertion on the right into doubly linked list
+  // as well as a rotate right
+  //
+  AssertPtrNotNull(aNewDic->previous);
+  AssertPtrNotNull(aNewDic->next);
+  AssertPtrEquals(aDict->firstSymbol, aNewDic->previous);
+  AssertPtrEquals(aDict->firstSymbol->next, aNewDic);
+  AssertStrEquals(aDict->firstSymbol->symbol, "10");
+  AssertStrEquals(aNewDic->next->symbol, "20");
+  AssertPtrEquals(aNewDic->next->previous, aNewDic);
+  AssertPtrNull(aNewDic->next->next);
+
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "30");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [30] l:(  ) r:(  )  )  ) ");
+  strBufClose(aStrBuf);
+  
+  // should invoke an RR
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "35");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [20] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(aStrBuf);
+
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "25");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [20] l:(  ) r:( [25] l:(  ) r:(  )  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(aStrBuf);
+
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "23");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [30] l:( [23] l:( [20] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(aStrBuf);
+  
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "22");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[23] l:( [15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:( [22] l:(  ) r:(  )  )  )  ) r:( [30] l:( [25] l:(  ) r:(  )  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(aStrBuf);
+  
+  // now try and find all of the symbols...
+  DictNodeObj* aNode = findSymbolRecurse(aDict, aNewDic, "15");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "15");
+
+  aNode = findSymbolRecurse(aDict, aNewDic, "20");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "20");
+
+  aNode = findSymbolRecurse(aDict, aNewDic, "23");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "23");
+
+  checkAVLNode(jInterp, aNewDic);
+\stopCTest
+\stopTestCase
+
+
+\startTestCase[should insert Symbol LL]
+\startCTest
+  DEBUG(jInterp, "\n%s should invoke an LL %s\n", "---------", "---------");
+
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  DictNodeObj* aSimpleDic = newDictNode(jInterp,"20");
+  aDict->root             = aSimpleDic;
+  aDict->firstSymbol      = aSimpleDic;
+
+  DictNodeObj* aNewDic = insertSymbolRecurse(aDict, aSimpleDic, "15");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  ) ");
+  strBufClose(aStrBuf);
+  
+  // should invoke an LL
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "10");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[15] l:( [10] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  ) ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should insert Symbol RR]
+\startCTest
+  DEBUG(jInterp, "\n%s should invoke an RR %s\n", "---------", "---------");
+
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
+
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  DictNodeObj* aSimpleDic = newDictNode(jInterp,"20");
+  aDict->root             = aSimpleDic;
+  aDict->firstSymbol      = aSimpleDic;
+
+  DictNodeObj* aNewDic = insertSymbolRecurse(aDict, aSimpleDic, "25");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[20] l:(  ) r:( [25] l:(  ) r:(  )  ) ");
+  strBufClose(aStrBuf);
+  
+  // should invoke an RR
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "30");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[25] l:( [20] l:(  ) r:(  )  ) r:( [30] l:(  ) r:(  )  ) ");
+  strBufClose(aStrBuf);
+  
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "35");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[25] l:( [20] l:(  ) r:(  )  ) r:( [30] l:(  ) r:( [35] l:(  ) r:(  )  )  ) ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should insert Symbol LR]
+\startCTest
+  DEBUG(jInterp, "\n%s should invoke an LR %s\n", "---------", "---------");
+
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
+
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  DictNodeObj* aSimpleDic = newDictNode(jInterp,"20");
+  aDict->root             = aSimpleDic;
+  aDict->firstSymbol      = aSimpleDic;
+
+  DictNodeObj* aNewDic = insertSymbolRecurse(aDict, aSimpleDic, "15");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[20] l:( [15] l:(  ) r:(  )  ) r:(  ) ");
+  strBufClose(aStrBuf);
+  
+  // should invoke an LR
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "17");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[17] l:( [15] l:(  ) r:(  )  ) r:( [20] l:(  ) r:(  )  ) ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+
+
+\startTestCase[should insert Symbol RL]
+\startCTest
+  DEBUG(jInterp, "\n%s should invoke an RL %s\n", "---------", "---------");
+
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
+
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  DictNodeObj* aSimpleDic = newDictNode(jInterp,"20");
+  aDict->root             = aSimpleDic;
+  aDict->firstSymbol      = aSimpleDic;
+
+  DictNodeObj* aNewDic = insertSymbolRecurse(aDict, aSimpleDic, "25");
+  AssertPtrNotNull(aNewDic);
+  AssertPtrEquals(aSimpleDic, aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[20] l:(  ) r:( [25] l:(  ) r:(  )  ) ");
+  strBufClose(aStrBuf);
+  
+  // should invoke an RL
+  aNewDic = insertSymbolRecurse(aDict, aNewDic, "22");
+  AssertPtrNotNull(aNewDic);
+  printDicInto(aStrBuf, aNewDic, 10);
+  AssertStrEquals(getCString(aStrBuf),
+  "[22] l:( [20] l:(  ) r:(  )  ) r:( [25] l:(  ) r:(  )  ) ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should insert Symbol randomly]
+\startCTest
+
+  srand(time(NULL));
+
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
+
+  DictNodeObj* avlDic = newDictNode(jInterp,"0");
+  aDict->root         = avlDic;
+  aDict->firstSymbol  = avlDic;
+
+  for (int i = 0; i < 1000; i++) {
+    char itoa[100];
+    sprintf(itoa, "%03d", rand() % 100);
+    avlDic = insertSymbolRecurse(aDict, avlDic, itoa);
+  }
+  DictNodeObj *aNode = findSymbolRecurse(aDict, avlDic, "0");
+  if (!aNode) avlDic = insertSymbolRecurse(aDict, avlDic, "0");
+  aNode = findSymbolRecurse(aDict, avlDic, "100");
+  if (!aNode) avlDic = insertSymbolRecurse(aDict, avlDic, "100");
+  checkAVLNode(jInterp, avlDic);
+
+  aNode = findSymbolRecurse(aDict, avlDic, "0");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "0");
+  AssertPtrEquals(aDict->firstSymbol, aNode);
+  
+  aNode = findSymbolRecurse(aDict, avlDic, "100");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "100");
+  aNode = aDict->firstSymbol;
+  while (aNode->next) aNode = aNode->next;
+  AssertStrEquals(aNode->symbol, "100");
+  checkAVLNode(jInterp, avlDic);
+  
+//  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+//  printDictInto(aStrBuf, avlDic);
+//  printf("%s\n", getCString(jInterp, aStrBuf));
+//  printf("avl node height: %zu\n", deepCalculateAVLNodeHeight(avlDic));
+//  printf("avl node height: %zu\n", avlDic->height);
+//  printf("avl node balance: %d\n", avlDic->balance);
+\stopCTest
+\stopTestCase
+
+\startTestCase[should insert Symbol linearly]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
+
+  DictNodeObj* avlDic = newDictNode(jInterp,"10");
+  aDict->root         = avlDic;
+  aDict->firstSymbol  = avlDic;
+
+  for (int i = 10; i < 100; i++) {
+    char itoa[100];
+    sprintf(itoa, "%03d", i);
+    avlDic = insertSymbolRecurse(aDict, avlDic, itoa);
+  }
+  checkAVLNode(jInterp, avlDic);
+
+//  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+//  printDictInto(aStrBuf, avlDic);
+//  printf("%s\n", getCString(jInterp, aStrBuf));
+//  printf("avl node height: %zu\n", deepCalculateAVLNodeHeight(avlDic));
+//  printf("avl node height: %zu\n", avlDic->height);
+//  printf("avl node balance: %d\n", avlDic->balance);
+
+  AssertIntEquals(avlDic->height, deepCalculateAVLNodeHeight(avlDic));
+  AssertIntEquals(avlDic->height, 8);
+  AssertIntEquals(avlDic->balance, -2);
+\stopCTest
+\stopTestCase
+\stopTestSuite

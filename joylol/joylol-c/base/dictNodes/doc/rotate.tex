@@ -1,0 +1,241 @@
+% A ConTeXt document [master document: dictNodes.tex]
+
+\section[title=Rotate]
+
+\setCHeaderStream{private}
+
+\startCHeader
+extern DictNodeObj* rotateLeft(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+);
+\stopCHeader
+
+\startCCode
+DictNodeObj* rotateLeft(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+  
+  StringBufferObj *aStrBuf =
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, ">-rotateLeft %p %ld:%zu=%zu %s\n",
+          anAVLNode, anAVLNode->balance, anAVLNode->height,
+          deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  assert(anAVLNode->right);
+
+  DictNodeObj* newRoot = anAVLNode->right;
+  anAVLNode->right = newRoot->left;
+  newRoot->left    = anAVLNode;
+
+  reCalculateAVLNodeHeightBalance(anAVLNode);
+  reCalculateAVLNodeHeightBalance(newRoot);
+
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "<o-rotateLeft %p %ld:%zu=%zu %s\n",
+          anAVLNode, anAVLNode->balance, anAVLNode->height,
+          deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+    printDicInto(aStrBuf, newRoot, 10);
+    DEBUG(jInterp, "<n-rotateLeft %p %ld:%zu=%zu %s\n",
+          newRoot, newRoot->balance, newRoot->height,
+          deepCalculateAVLNodeHeight(newRoot),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
+  assert(newRoot->height == deepCalculateAVLNodeHeight(newRoot));
+  return newRoot;
+}
+\stopCCode
+
+\startCHeader
+extern DictNodeObj* rotateRight(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+);
+\stopCHeader
+
+\startCCode
+DictNodeObj* rotateRight(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+  
+  StringBufferObj *aStrBuf =
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, ">-rotateRight %p %ld:%zu=%zu %s\n",
+          anAVLNode, anAVLNode->balance, anAVLNode->height,
+          deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  assert(anAVLNode->left);
+
+  DictNodeObj* newRoot = anAVLNode->left;
+  anAVLNode->left = newRoot->right;
+  newRoot->right  = anAVLNode;
+
+  reCalculateAVLNodeHeightBalance(anAVLNode);
+  reCalculateAVLNodeHeightBalance(newRoot);
+
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "<o-rotateRight %p %ld:%zu=%zu %s\n",
+          anAVLNode, anAVLNode->balance, anAVLNode->height,
+          deepCalculateAVLNodeHeight(anAVLNode),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+    printDicInto(aStrBuf, newRoot, 10);
+    DEBUG(jInterp, "<n-rotateRight %p %ld:%zu=%zu %s\n",
+          newRoot, newRoot->balance, newRoot->height,
+          deepCalculateAVLNodeHeight(newRoot),
+          getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  assert(anAVLNode->height == deepCalculateAVLNodeHeight(anAVLNode));
+  assert(newRoot->height == deepCalculateAVLNodeHeight(newRoot));
+  return newRoot;
+}
+\stopCCode
+
+\startCHeader
+extern DictNodeObj* rotateLeftLeft(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+);
+\stopCHeader
+
+\startCCode
+DictNodeObj* rotateLeftLeft(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+  
+  if (jInterp->debug) {
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "LL %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  return rotateRight(aDict, anAVLNode);
+}
+\stopCCode
+
+\startCHeader
+extern DictNodeObj* rotateLeftRight(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+);
+\stopCHeader
+
+\startCCode
+DictNodeObj* rotateLeftRight(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+  
+  StringBufferObj *aStrBuf =
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "0-LR %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  anAVLNode->left = rotateLeft(aDict, anAVLNode->left);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "1-LR %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  return rotateRight(aDict, anAVLNode);
+}
+\stopCCode
+
+\startCHeader
+extern DictNodeObj* rotateRightLeft(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+);
+\stopCHeader
+
+\startCCode
+DictNodeObj* rotateRightLeft(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+  
+  StringBufferObj *aStrBuf =
+    (jInterp->debug ? newStringBuffer(jInterp->rootCtx) : NULL);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "0-RL %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  anAVLNode->right = rotateRight(aDict, anAVLNode->right);
+  if (jInterp->debug) {
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "1-RL %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  return rotateLeft(aDict, anAVLNode);
+}
+\stopCCode
+
+\startCHeader
+extern DictNodeObj* rotateRightRight(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+);
+\stopCHeader
+
+\startCCode
+DictNodeObj* rotateRightRight(
+  DictObj     *aDict,
+  DictNodeObj *anAVLNode
+) {
+  assert(aDict);
+  JoyLoLInterp *jInterp = aDict->jInterp;
+  assert(jInterp);
+  
+  if (jInterp->debug) {
+    StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+    printDicInto(aStrBuf, anAVLNode, 10);
+    DEBUG(jInterp, "RR %p %s\n",
+      anAVLNode, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  return rotateLeft(aDict, anAVLNode);
+}
+\stopCCode
+
+\setCHeaderStream{public}

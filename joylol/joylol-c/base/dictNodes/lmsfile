@@ -1,0 +1,62 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'dictNodes.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'find.tex',
+    'insert.tex',
+    'delete.tex',
+    'rotate.tex',
+    'check.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'dictNodes',
+  },
+  cHeaderFiles = {
+    'joylol/dictNodes.h',
+    'joylol/dictNodes-private.h',
+  },
+  cCodeFiles = {
+    'dictNodes.c',
+  },
+  joylolCodeFiles = {
+  },
+  coAlgLibs = {
+    'jInterps',
+    'symbols',
+    'stringBuffers',
+  },
+})
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/dictNodes.h',
+    'joylol/dictNodes-private.h',
+  },
+  cCodeFiles = {
+    'dictNodes.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+})

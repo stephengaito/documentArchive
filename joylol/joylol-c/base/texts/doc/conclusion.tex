@@ -1,0 +1,98 @@
+% A ConTeXt document [master document: texts.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_TEXTS}
+\createCHeaderFile%
+  {public}
+  {joylol/texts.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_TEXTS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/texts-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/symbols.h>
+#include <joylol/naturals.h>
+#include <joylol/dictNodes.h>
+#include <joylol/dictionaries.h>
+#include <joylol/cFunctions.h>
+#include <joylol/texts.h>
+#include <joylol/assertions.h>
+#include <joylol/contexts.h>
+#include <joylol/texts-private.h>
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {texts.c}%
+  {}
+
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/naturals.h>}
+\addCTestInclude{<joylol/dictionaries.h>}
+\addCTestInclude{<joylol/dictNodes.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/assertions.h>}
+\addCTestInclude{<joylol/contexts.h>}
+\addCTestInclude{<joylol/texts-private.h>}
+\addCTestLib{-lgmp}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.assertions");
+  requireLuaModule(lstate, "joylol.pairs");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.naturals");
+  requireLuaModule(lstate, "joylol.dictNodes");
+  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.cFunctions");
+  requireLuaModule(lstate, "joylol.contexts");
+  requireStaticallyLinkedTexts(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
+\stopCTest
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{texts.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{strings.tex}
+\addSubDocument{files.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
+\addSubDocument{conclusion.tex} 
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

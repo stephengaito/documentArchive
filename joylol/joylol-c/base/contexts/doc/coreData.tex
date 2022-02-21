@@ -1,0 +1,601 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Context core data code]
+\setCHeaderStream{public}
+
+\startJoyLoLFragment[pushData]
+
+\startRule[pushData]
+\arguments
+  (
+    aCtx
+    lolToPush
+  )
+\preDataStack
+  (
+    dataStack
+  )
+\postDataStack
+  (
+    (something)
+    dataStack
+  )
+\returns
+  (
+  )
+\stopRule
+
+\startFragment[ansic]
+  {{aCtx}}->data =
+    newPair({{aCtx}}->jInterp, {{lolToPush}}, {{aCtx}}->data);
+\stopFragment
+
+\stopJoyLoLFragment
+
+\startCHeader
+typedef void (ClearCtx)(
+  ContextObj *aCtx
+);
+
+#define clearCtxData(aCtx)                  \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->clearCtxDataFunc),                  \
+    (getContextsClass(aCtx->jInterp)        \
+      ->clearCtxDataFunc(aCtx))             \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void clearCtxDataImpl(
+  ContextObj *aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void clearCtxDataImpl(
+  ContextObj *aCtx
+) {
+  assert(aCtx);
+  aCtx->data = NULL;
+}
+\stopCCode
+
+\startCHeader
+typedef void (PushCtx)(
+  ContextObj *aCtx,
+  JObj       *lolToPush
+);
+
+#define pushCtxData(aCtx, lolToPush)        \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->pushCtxDataFunc),                   \
+    (getContextsClass(aCtx->jInterp)        \
+      ->pushCtxDataFunc(aCtx, lolToPush))   \
+  )
+
+#define pushOnTopCtxData(aCtx, lolToPush)       \
+  (                                             \
+    assert(aCtx),                               \
+    assert(getContextsClass(aCtx->jInterp)      \
+      ->pushOnTopCtxDataFunc),                  \
+    (getContextsClass(aCtx->jInterp)            \
+      ->pushOnTopCtxDataFunc(aCtx, lolToPush))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushCtxDataImpl(
+  ContextObj *aCtx,
+  JObj       *lolToPush
+);
+
+extern void pushOnTopCtxDataImpl(
+  ContextObj *aCtx,
+  JObj       *lolToPush
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushCtxDataImpl(
+  ContextObj *aCtx,
+  JObj       *lolToPush
+) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  aCtx->data = newPair(aCtx->jInterp, lolToPush, aCtx->data);
+}
+
+void pushOnTopCtxDataImpl(
+  ContextObj *aCtx,
+  JObj       *lolToPush
+) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  asCar(aCtx->data) =
+    newPair(aCtx->jInterp, lolToPush, asCar(aCtx->data));
+}
+\stopCCode
+
+\startCHeader
+typedef void (PushNullCtx)(
+  ContextObj *aCtx
+);
+
+#define pushNullCtxData(aCtx)               \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->pushNullCtxDataFunc),               \
+    (getContextsClass(aCtx->jInterp)        \
+      ->pushNullCtxDataFunc(aCtx))          \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushNullCtxDataImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushNullCtxDataImpl(
+  ContextObj* aCtx
+) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  aCtx->data = newPair(aCtx->jInterp, NULL, aCtx->data);
+}
+\stopCCode
+
+\startCHeader
+typedef void (PushBooleanCtx)(
+  ContextObj *aCtx,
+  Boolean     aBool
+);
+
+#define pushBooleanCtxData(aCtx, aBool)      \
+  (                                          \
+    assert(aCtx),                            \
+    assert(getContextsClass(aCtx->jInterp)   \
+      ->pushBooleanCtxDataFunc),             \
+    (getContextsClass(aCtx->jInterp)         \
+      ->pushBooleanCtxDataFunc(aCtx, aBool)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushBooleanCtxDataImpl(
+  ContextObj *aCtx,
+  Boolean     aBool
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushBooleanCtxDataImpl(
+  ContextObj *aCtx,
+  Boolean     aBool
+) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+
+  JObj* aBoolPA = newBoolean(aCtx->jInterp, aBool);
+  if (!aBoolPA) return;
+  aCtx->data = newPair(aCtx->jInterp, aBoolPA, aCtx->data);
+}
+\stopCCode
+
+\startCHeader
+typedef void (PushNaturalCtx)(
+  ContextObj *aCtx,
+  size_t      anNatural
+);
+
+#define pushNaturalCtxData(aCtx, aNatural)      \
+  (                                             \
+    assert(aCtx),                               \
+    assert(getContextsClass(aCtx->jInterp)      \
+      ->pushNaturalCtxDataFunc),                \
+    (getContextsClass(aCtx->jInterp)            \
+      ->pushNaturalCtxDataFunc(aCtx, aNatural)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushNaturalCtxDataImpl(
+  ContextObj *aCtx,
+  size_t      aNatural
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushNaturalCtxDataImpl(
+  ContextObj *aCtx,
+  size_t      aNatural
+) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+
+  char aNaturalStr[100];
+  aNaturalStr[0] = 0;
+  snprintf(aNaturalStr, 90, "%zu", aNatural);
+
+  JObj* aNaturalPA = newNatural(aCtx->jInterp, aNaturalStr);
+  if (!aNaturalPA) return;
+  aCtx->data = newPair(aCtx->jInterp, aNaturalPA, aCtx->data);
+}
+\stopCCode
+
+\startCHeader
+typedef void (PushSymbolCtx)(
+  ContextObj *aCtx,
+  Symbol     *aSymbol
+);
+
+#define pushSymbolCtxData(aCtx, aSymbol)      \
+  (                                           \
+    assert(aCtx),                             \
+    assert(getContextsClass(aCtx->jInterp)    \
+      ->pushSymbolCtxDataFunc),               \
+    (getContextsClass(aCtx->jInterp)          \
+      ->pushSymbolCtxDataFunc(aCtx, aSymbol)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushSymbolCtxDataImpl(
+  ContextObj* aCtx,
+  Symbol* aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushSymbolCtxDataImpl(
+  ContextObj* aCtx,
+  Symbol* aSymbol
+) {
+  assert(aCtx);
+  if (!aSymbol) return;
+  assert(aCtx->jInterp);
+
+  JObj* aSymbolPA = NULL;
+  if (strchr(aSymbol, '.')) {
+    aSymbolPA =
+      newSymbol(aCtx->jInterp, aSymbol, "pushSymbol", 0);
+  } else {
+    aSymbolPA = getAsSymbol(aCtx->dict, aSymbol, "pushSymbol", 0);
+  }
+  if (!aSymbolPA) return;
+  aCtx->data = newPair(aCtx->jInterp, aSymbolPA, aCtx->data);
+}
+\stopCCode
+
+\startCHeader
+typedef void (PushParsedArrayOfStringsCtx)(
+  ContextObj *aCtx,
+  Symbol     *someStrings[]
+);
+
+#define pushParsedArrayOfStringsCtxData(      \
+  aCtx, someStrings)                          \
+  (                                           \
+    assert(aCtx),                             \
+    assert(getContextsClass(aCtx->jInterp)    \
+      ->pushParsedArrayOfStringsCtxDataFunc), \
+    (getContextsClass(aCtx->jInterp)          \
+      ->pushParsedArrayOfStringsCtxDataFunc(  \
+        aCtx, someStrings))                   \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedArrayOfStringsCtxDataImpl(
+  ContextObj* aCtx,
+  Symbol* someStrings[]
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushParsedArrayOfStringsCtxDataImpl(
+  ContextObj* aCtx,
+  Symbol* someStrings[]
+) {
+  assert(aCtx);
+  if (!someStrings) return;
+  TextObj* aText =
+    createTextFromArrayOfStrings(aCtx->jInterp, someStrings);
+  pushParsedTextCtxData(aCtx, aText);
+  freeText(aText);
+}
+\stopCCode
+
+\startCHeader
+typedef void (PushParsedStringCtx)(
+  ContextObj *aCtx,
+  Symbol     *aString
+);
+
+#define pushParsedStringCtxData(aCtx, aString)      \
+  (                                                 \
+    assert(aCtx),                                   \
+    assert(getContextsClass(aCtx->jInterp)          \
+      ->pushParsedStringCtxDataFunc),               \
+    (getContextsClass(aCtx->jInterp)                \
+      ->pushParsedStringCtxDataFunc(aCtx, aString)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedStringCtxDataImpl(
+  ContextObj* aCtx,
+  Symbol* aString
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushParsedStringCtxDataImpl(
+  ContextObj* aCtx,
+  Symbol* aString
+) {
+  assert(aCtx);
+  if (!aString) return;
+  TextObj* aText =
+    createTextFromString(aCtx->jInterp, aString);
+  pushParsedTextCtxData(aCtx, aText);
+  freeText(aText);
+}
+\stopCCode
+
+\startCHeader
+typedef void (PushParsedTextCtx)(
+  ContextObj *aCtx,
+  TextObj    *aTex
+);
+
+#define pushParsedTextCtxData(aCtx, aText)      \
+  (                                             \
+    assert(aCtx),                               \
+    assert(getContextsClass(aCtx->jInterp)      \
+      ->pushParsedTextCtxDataFunc),             \
+    (getContextsClass(aCtx->jInterp)            \
+      ->pushParsedTextCtxDataFunc(aCtx, aText)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void pushParsedTextCtxDataImpl(
+  ContextObj* aCtx,
+  TextObj* aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void pushParsedTextCtxDataImpl(
+  ContextObj* aCtx,
+  TextObj* aText
+) {
+  assert(aCtx);
+  if (!aText) return;
+  assert(aCtx->jInterp);
+  JObj* aLoL = parseAllSymbols(aText);
+  if (!aLoL) return;
+  aCtx->data = newPair(aCtx->jInterp, aLoL, aCtx->data);
+}
+\stopCCode
+
+\startCHeader
+typedef void (PrependListCtx)(
+  ContextObj *aCtx,
+  JObj   *lolToPrepend
+);
+
+#define prependListCtxData(aCtx, lolToPrepend)      \
+  (                                                 \
+    assert(aCtx),                                   \
+    assert(getContextsClass(aCtx->jInterp)          \
+      ->prependListCtxDataFunc),                    \
+    (getContextsClass(aCtx->jInterp)                \
+      ->prependListCtxDataFunc(aCtx, lolToPrepend)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void prependListCtxDataImpl(
+  ContextObj* aCtx,
+  JObj* lolToPrepend
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void prependListCtxDataImpl(
+  ContextObj* aCtx,
+  JObj* lolToPrepend
+) {
+  assert(aCtx);
+  if (!lolToPrepend) return;
+
+  aCtx->data =
+    concatLists(aCtx->jInterp, lolToPrepend, aCtx->data);
+}
+\stopCCode
+
+\startCHeader
+typedef JObj *(PeekCtx)(
+  ContextObj *aCtx
+);
+
+#define peekCtxData(aCtx)                   \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->peekCtxDataFunc),                   \
+    (getContextsClass(aCtx->jInterp)        \
+      ->peekCtxDataFunc(aCtx))              \
+  )
+
+#define peekCtxDataInto(aCtx, aVar)                   \
+assert(aCtx);                                         \
+JObj* aVar = peekCtxData(aCtx);                       \
+if (aCtx->tracingOn) {                                \
+  JoyLoLInterp *jInterp = aCtx->jInterp;              \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);   \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);              \
+  printLoL(aStrBuf, aVar);                            \
+  strBufPrintf(aStrBuf, " (peek)\n");                 \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf)); \
+  strBufClose(aStrBuf);                               \
+}
+
+#define peekCtxDataIntoImpl(aCtx, aVar)               \
+assert(aCtx);                                         \
+JObj* aVar = peekCtxDataImpl(aCtx);                   \
+if (aCtx->tracingOn) {                                \
+  JoyLoLInterp *jInterp = aCtx->jInterp;              \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);   \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);              \
+  printLoL(aStrBuf, aVar);                            \
+  strBufPrintf(aStrBuf, " (peek)\n");                 \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf)); \
+  strBufClose(aStrBuf);                               \
+}
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* peekCtxDataImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* peekCtxDataImpl(
+  ContextObj* aCtx
+) {
+  assert(aCtx);
+  if (!aCtx->data) return NULL;
+
+  DEBUG(aCtx->jInterp, "peekCtxData: %p %p %zu\n",
+    aCtx->data, asType(aCtx->data), (size_t)asTag(aCtx->data)
+  );
+  assert(isPair(aCtx->data));
+  
+  JObj* peekedLoL = asCar(aCtx->data);
+  return peekedLoL;
+}
+\stopCCode
+
+\startCHeader
+typedef JObj *(PopCtx)(
+  ContextObj *aCtx
+);
+
+#define popCtxData(aCtx)                    \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->popCtxDataFunc),                    \
+    (getContextsClass(aCtx->jInterp)        \
+      ->popCtxDataFunc(aCtx))               \
+  )
+
+#define popCtxDataInto(aCtx, aVar)                    \
+assert(aCtx);                                         \
+JObj* aVar = popCtxData(aCtx);                        \
+if (aCtx->tracingOn) {                                \
+  JoyLoLInterp *jInterp = aCtx->jInterp;              \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);   \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);              \
+  printLoL(aStrBuf, aVar);                            \
+  strBufPrintf(aStrBuf, "\n");                        \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf)); \
+  strBufClose(aStrBuf);                               \
+}
+
+#define popCtxDataIntoImpl(aCtx, aVar)                \
+assert(aCtx);                                         \
+JObj* aVar = popCtxDataImpl(aCtx);                    \
+if (aCtx->tracingOn) {                                \
+  JoyLoLInterp *jInterp = aCtx->jInterp;              \
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);   \
+  strBufPrintf(aStrBuf, "%s = ", #aVar);              \
+  printLoL(aStrBuf, aVar);                            \
+  strBufPrintf(aStrBuf, "\n");                        \
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf)); \
+  strBufClose(aStrBuf);                               \
+}
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* popCtxDataImpl(
+  ContextObj* aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* popCtxDataImpl(
+  ContextObj* aCtx
+) {
+  assert(aCtx);
+  if (!aCtx->data) return NULL;
+
+  DEBUG(aCtx->jInterp, "popCtxData: %p %p %zu\n",
+    aCtx->data, asType(aCtx->data), (size_t)asTag(aCtx->data)
+  );
+  assert(isPair(aCtx->data));
+  
+  JObj* poppedLoL = asCar(aCtx->data);
+  aCtx->data      = asCdr(aCtx->data);
+  return poppedLoL;
+}
+\stopCCode
+
+\startCHeader
+#define showCtxStack(aCtx, aStack, stackLabel, aStrBuf)       \
+  {                                                           \
+    size_t index = 1;                                         \
+    JObj* curStack = aStack;                                  \
+    strBufPrintf(aStrBuf, "----\n");                          \
+    while(isPair(curStack)) {                                 \
+      if (aCtx->showDepth < index) break;                     \
+      strBufPrintf(aStrBuf, "%s[%zu]: ", stackLabel, index);  \
+      printLoL(aStrBuf, asCar(curStack));                     \
+      strBufPrintf(aStrBuf, "\n");                            \
+      curStack = asCdr(curStack);                             \
+      index++;                                                \
+    }                                                         \
+    strBufPrintf(aStrBuf, "%s[*]: ", stackLabel);             \
+    printLoL(aStrBuf, curStack);                              \
+    strBufPrintf(aStrBuf, "\n");                              \
+  }
+
+#define showCtxData(aCtx, aStrBuf)            \
+  assert(aCtx);                               \
+  showCtxStack(aCtx, aCtx->data, "d", aStrBuf)
+\stopCHeader
+

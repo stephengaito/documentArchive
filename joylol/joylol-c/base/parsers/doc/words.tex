@@ -1,0 +1,21 @@
+% A ConTeXt document [master document: parsers.tex]
+
+\section[title=JoyLoL words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerParserWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerParserWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+){
+  return TRUE;
+}
+\stopCCode

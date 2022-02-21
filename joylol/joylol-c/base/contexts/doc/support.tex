@@ -1,0 +1,405 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Supporting JoyLoL words]
+
+\startCHeader
+#define isContext(aLoL)           \
+  (                               \
+    (                             \
+      (aLoL) &&                   \
+      (aLoL->tag == ContextsTag)  \
+    ) ?                           \
+      TRUE :                      \
+      FALSE                       \
+  )
+\stopCHeader
+
+\startCCode
+static void isContextAP(ContextObj* aCtx) {
+  assert(aCtx);
+  popCtxDataIntoImpl(aCtx, top);
+  JObj* result = NULL;
+  if (isContext(top)) result = newBoolean(aCtx->jInterp, TRUE);
+  else                result = newBoolean(aCtx->jInterp, FALSE);
+  pushCtxDataImpl(aCtx, result);
+}
+\stopCCode
+
+\startCCode
+static void showStackOnAP(ContextObj* aCtx) {
+  assert(aCtx);
+  aCtx->showStack = TRUE;
+}
+\stopCCode
+
+\startCCode
+static void showStackOffAP(ContextObj* aCtx) {
+  assert(aCtx);
+  aCtx->showStack = FALSE;
+}
+\stopCCode
+
+\startCCode
+static void showStackAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  strBufPrintf(aStrBuf, "d>>");
+  printLoL(aStrBuf, aCtx->data);
+  strBufPrintf(aStrBuf, "\np>>");
+  printLoL(aStrBuf, aCtx->process);
+  strBufPrintf(aStrBuf, "\n");
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+}
+\stopCCode
+
+\startCCode
+static void tracingOnAP(ContextObj* aCtx) {
+  assert(aCtx);
+  aCtx->tracingOn = TRUE;
+}
+\stopCCode
+
+\startCCode
+static void tracingOffAP(ContextObj* aCtx) {
+  assert(aCtx);
+  aCtx->tracingOn = FALSE;
+}
+\stopCCode
+
+\startCCode
+static void debugOnAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  aCtx->jInterp->debug = TRUE;
+}
+\stopCCode
+
+\startCCode
+static void debugOffAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  aCtx->jInterp->debug = FALSE;
+}
+\stopCCode
+
+\startCCode
+static void verboseOnAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  aCtx->verbose = TRUE;
+  aCtx->jInterp->verbose = TRUE;
+}
+\stopCCode
+
+\startCCode
+static void verboseOffAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  aCtx->verbose = FALSE;
+  aCtx->jInterp->verbose = FALSE;
+}
+\stopCCode
+
+\startCCode
+static void checkingOnAP(ContextObj* aCtx) {
+  assert(aCtx);
+  aCtx->checkingOn = TRUE;
+}
+\stopCCode
+
+\startCCode
+static void checkingOffAP(ContextObj* aCtx) {
+  assert(aCtx);
+  aCtx->checkingOn = FALSE;
+}
+\stopCCode
+
+\startCCode
+static void definitionsAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  listDefinitions(aCtx->dict, aStrBuf);
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+}
+\stopCCode
+
+\startCCode
+static void definitionsInAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  popCtxDataIntoImpl(aCtx, namingScope);
+  if (!isDictionary(namingScope)) {
+    raiseExceptionMsg(aCtx,
+      "definitionsIn requires a dictionary as top");
+    return;
+  }
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  listDefinitions(((DictObj*)namingScope), aStrBuf);
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+}
+\stopCCode
+
+\startCCode
+static void showLoadExtensionsAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  LoaderObj* loader = jInterp->loader;
+  assert(loader);
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  listLoadExtensions(loader, aStrBuf);
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+}
+\stopCCode
+
+\startCCode
+static void showLoadPathsAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  LoaderObj* loader = jInterp->loader;
+  assert(loader);
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  listLoadPaths(loader, aStrBuf);
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+}
+\stopCCode
+
+\startCCode
+static void loadExtensionAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  LoaderObj *loader = jInterp->loader;
+  assert(loader);
+  popCtxDataIntoImpl(aCtx, top);
+  if (!isSymbol(top)) {
+    raiseExceptionMsg(aCtx,
+      "loadExtension requires a symbol as top");
+    return;
+  }
+  pushLoadExtension(loader, asSymbol(top));
+}
+\stopCCode
+
+\startCCode
+static void loadPathAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  LoaderObj *loader = jInterp->loader;
+  assert(loader);
+  popCtxDataIntoImpl(aCtx, top);
+  if (!isSymbol(top)) {
+    raiseExceptionMsg(aCtx,
+      "loadPath requires a symbol as top");
+    return;
+  }
+  pushLoadPath(loader, asSymbol(top));
+}
+\stopCCode
+
+\startCCode
+static void loadFileAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  DEBUG(aCtx->jInterp, "loadFileAP > %p\n", aCtx);
+  assert(aCtx);
+  popCtxDataIntoImpl(aCtx, top);
+  if (!isSymbol(top)) {
+    raiseExceptionMsg(aCtx,
+      "loadFile requires a symbol as top");
+    return;
+  }
+  
+  int oldVerboseFlag = aCtx->verbose;
+  aCtx->verbose = aCtx->showStack;
+  loadAFile(aCtx, asSymbol(top));
+  aCtx->verbose = oldVerboseFlag;
+  DEBUG(aCtx->jInterp, "loadFileAP < %p\n", aCtx);
+}
+\stopCCode
+
+\startCCode
+static void lispLoadFileAP(ContextObj* aCtx) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  DEBUG(aCtx->jInterp, "listLoadFileAP > %p\n", aCtx);
+  pushSymbolCtxProcess(aCtx, "lispInterpret");
+  loadFileAP(aCtx);
+  DEBUG(aCtx->jInterp, "listLoadFileAP < %p\n", aCtx);
+}
+\stopCCode
+
+\startCCode
+static void whatIsThis(
+  ContextObj *aCtx,
+  JObj       *top,
+  Symbol     *stackName
+) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  strBufPrintf(aStrBuf, "%s top ", stackName);
+
+  if (!top) {
+    strBufPrintf(aStrBuf, "is NIL\n");
+  } else {
+    if (!top->type) {
+      strBufPrintf(aStrBuf, "has no type\n");
+    } else {
+      strBufPrintf(aStrBuf,
+        "data top is a %s [",
+        top->type->name
+      );
+      printLoL(aStrBuf, top);
+      strBufPrintf(aStrBuf, "]\n");
+    }
+  }
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);      
+}
+
+static void whatIsThisDAP(ContextObj* aCtx) {
+  assert(aCtx);
+  
+  popCtxDataInto(aCtx, top);
+  pushCtxData(aCtx, top);
+  
+  whatIsThis(aCtx, top, "data");
+}
+
+static void whatIsThisPAP(ContextObj* aCtx) {
+  assert(aCtx);
+  
+  popCtxProcessInto(aCtx, top);
+  pushCtxProcess(aCtx, top);
+  
+  whatIsThis(aCtx, top, "process");
+}
+\stopCCode
+
+\startCCode
+static void exitJoylolAP(ContextObj *aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  popCtxDataInto(aCtx, top);
+  double resultDbl  = asNaturalDbl(jInterp, top);
+  int    resultCode = (int)resultDbl;
+  
+  if (jInterp->verbose) {
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(
+      aStrBuf,
+      "exiting joylol with code: %d\n",
+      resultCode
+    );
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+  }
+  exit(resultCode);
+}
+\stopCCode
+
+\startCCode
+static void tracingPointAP(ContextObj *aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  DictObj *theDict = aCtx->dict;
+  assert(theDict);
+    
+  popCtxDataInto(aCtx, tracingLabel);
+  
+  if (!isSymbol(tracingLabel)) {
+    pushNullCtxDataImpl(aCtx);
+    pushOnTopCtxDataImpl(aCtx, tracingLabel);
+    raiseException(aCtx,
+      "tracingPoint requires a symbol as top"
+    );
+    return;
+  }
+  
+  Symbol *theLabel = asSymbol(tracingLabel);
+
+  CtxTracingLabel *curLabel  = aCtx->tracingLabels;
+  CtxTracingLabel *lastLabel = NULL;
+
+  while (curLabel) {
+    if (strcmp(curLabel->name, theLabel) == 0 ) break;
+    lastLabel = curLabel;
+    curLabel  = curLabel->next;
+  }
+
+  if (!curLabel) {
+    curLabel = calloc(1, sizeof(CtxTracingLabel));
+    assert(curLabel);
+    curLabel->name  = strdup(theLabel);
+    curLabel->count = 0;
+    curLabel->next  = NULL;
+    if (lastLabel) {
+      lastLabel->next = curLabel;
+    } else {
+      aCtx->tracingLabels = curLabel;
+    }
+  }
+
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  strBufPrintf(aStrBuf, "tracingPoint: %zu <<%s>> %s %s\n",
+    curLabel->count, curLabel->name, aCtx->name, theDict->name
+  );
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  
+  curLabel->count++;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern void initContextsAPSupport(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void initContextsAPSupport(JoyLoLInterp *jInterp) {
+  extendJoyLoLInRoot(jInterp, "isContext",          "", isContextAP,          "");
+  extendJoyLoLInRoot(jInterp, "definitions",        "", definitionsAP,        "");
+  extendJoyLoLInRoot(jInterp, "definitionsIn",      "", definitionsInAP,      "");
+  extendJoyLoLInRoot(jInterp, "loadExtension",      "", loadExtensionAP,      "");
+  extendJoyLoLInRoot(jInterp, "loadPath",           "", loadPathAP,           "");
+  extendJoyLoLInRoot(jInterp, "load",               "", loadFileAP,           "");
+  extendJoyLoLInRoot(jInterp, "lispLoad",           "", lispLoadFileAP,       "");
+  extendJoyLoLInRoot(jInterp, "showLoadExtensions", "", showLoadExtensionsAP, "");
+  extendJoyLoLInRoot(jInterp, "showLoadPaths",      "", showLoadPathsAP,      "");
+  extendJoyLoLInRoot(jInterp, "showStack",          "", showStackAP,          "");
+  extendJoyLoLInRoot(jInterp, "showStackOn",        "", showStackOnAP,        "");
+  extendJoyLoLInRoot(jInterp, "showStackOff",       "", showStackOffAP,       "");
+  extendJoyLoLInRoot(jInterp, "tracingOn",          "", tracingOnAP,          "");
+  extendJoyLoLInRoot(jInterp, "tracingOff",         "", tracingOffAP,         "");
+  extendJoyLoLInRoot(jInterp, "verboseOn",          "", verboseOnAP,          "");
+  extendJoyLoLInRoot(jInterp, "verboseOff",         "", verboseOffAP,         "");
+  extendJoyLoLInRoot(jInterp, "debugOn",            "", debugOnAP,            "");
+  extendJoyLoLInRoot(jInterp, "debugOff",           "", debugOffAP,           "");
+  extendJoyLoLInRoot(jInterp, "checkingOn",         "", checkingOnAP,         "");
+  extendJoyLoLInRoot(jInterp, "checkingOff",        "", checkingOffAP,        "");
+  extendJoyLoLInRoot(jInterp, "whatIsThisD",        "", whatIsThisDAP,        "");
+  extendJoyLoLInRoot(jInterp, "whatIsThisP",        "", whatIsThisPAP,        "");
+  extendJoyLoLInRoot(jInterp, "exitJoylol",         "", exitJoylolAP,         "");
+  extendJoyLoLInRoot(jInterp, "tracingPoint",       "", tracingPointAP,       "");
+}
+\stopCCode

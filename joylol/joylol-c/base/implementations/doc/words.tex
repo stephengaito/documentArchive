@@ -1,0 +1,22 @@
+% A ConTeXt document [master document: implementations.tex]
+
+\section[title=Words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerImplementationWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerImplementationWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  assert(jInterp);
+  return TRUE;
+}
+\stopCCode

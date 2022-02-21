@@ -1,0 +1,56 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'stringBuffers.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'words.tex',
+    'lua.tex',
+    'conclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'stringBuffers',
+  },
+  cHeaderFiles = {
+    'joylol/stringBuffers.h',
+    'joylol/stringBuffers-private.h',
+  },
+  cCodeFiles = {
+    'stringBuffers.c',
+  },
+  joylolCodeFiles = {
+  },
+  coAlgLibs = {
+    'jInterps',
+    'symbols',
+  },
+})
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/stringBuffers.h',
+    'joylol/stringBuffers-private.h',
+  },
+  cCodeFiles = {
+    'stringBuffers.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+})

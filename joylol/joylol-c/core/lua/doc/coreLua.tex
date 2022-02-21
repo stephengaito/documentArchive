@@ -1,0 +1,28 @@
+% A ConTeXt document
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent coreLua
+
+\usebtxdataset[coreLuaBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\chapter[title=The core JoyLoL based on Lua]
+
+\declareJoyLoLCoAlg[core/lua]
+
+\diSimpComponent overview
+
+\diSimpComponent luaMain
+
+\diSimpComponent gitVersion-c
+
+\diSimpComponent readline
+
+\diSimpComponent luaInterface
+
+\diSimpComponent conclusion
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

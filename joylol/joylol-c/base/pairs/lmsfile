@@ -1,0 +1,57 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'pairs.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'pairs',
+  },
+  cHeaderFiles = {
+    'joylol/pairs.h',
+    'joylol/pairs-private.h',
+  },
+  cCodeFiles = {
+    'pairs.c',
+  },
+  joylolCodeFiles = {
+  },
+  coAlgLibs = {
+    'jInterps',
+    'symbols',
+    'stringBuffers',
+  },
+})
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/pairs.h',
+    'joylol/pairs-private.h',
+  },
+  cCodeFiles = {
+    'pairs.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+})

@@ -1,0 +1,782 @@
+% A ConTeXt document [master document: parsers.tex]
+
+\dependsOn[jInterps]
+\dependsOn[booleans]
+\dependsOn[symbols]
+\dependsOn[naturals]
+\dependsOn[pairs]
+\dependsOn[dictNodes]
+\dependsOn[texts]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\startCCode
+// The Parser parses a stream of characters obtained from a specific
+// text. Since one of the texts is backed by readline interaction with
+// a user, it is **critical** that nextSymbol ONLY get called when
+// the parser actually needs a nextSymbol (and NOT before).
+\stopCCode
+
+We start by providing some example strings that we want to be able to 
+parse. These will each be used as \type{CTest} examples below.
+
+\CTestsSetup\
+\startCTest
+static Symbol* simpleList[] = {
+  "this is a simple list ;; this is a comment ",
+  NULL
+};
+//
+static Symbol* simpleListWithSemiColons[] = {
+  " this ; is;a ;; this is a comment ",
+  " and;again ;; this is a second comment ",
+  NULL
+};
+//
+static Symbol* complexListWithSemiColons[] = {
+  " this ; is;a test with some semi-colons ;; this is a comment ",
+  " and;again;123;456;789 12;34 ;; this is a second comment ",
+  " and;one;more;time ;; this is a third comment ",
+  NULL
+};
+//
+static Symbol* moreComplexList[] = {
+  " this ( is ( a ( more ( complex ( list () ) ) ) ) ) ;; this is a comment ",
+  NULL
+};
+//
+static Symbol* differentList[] = {
+  " this is  a different ( ( () () () ) ( ( ( ) ) ) ) list ;; with a comment  ",
+  NULL
+};
+//
+//static Symbol* factorialStrs[] = {
+//  " ( 0 =nat ) ( pop 1 ) ( dup 1 - factorial * ) ifte ",
+//  NULL
+//};
+//
+//static Symbol* incorrectMarkerList[] = {
+//  " this ( is a list with incorrectly > matched list markers ",
+//  NULL
+//};
+//
+//static Symbol* unmatchedMarkerList[] = {
+//  " this ( is a list [ with unmatched list markers ",
+//  NULL
+//};
+//
+\stopCTest
+
+\startTestSuite[match list symbols]
+
+\setCHeaderStream{private}
+\startCHeader
+extern char matchingListSymbol(
+  Symbol* curSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+char matchingListSymbol(
+  Symbol* curSymbol
+) {
+  if (1 < strlen(curSymbol)) return 0;
+
+  if (curSymbol[0] == '(') return ')';
+  if (curSymbol[0] == '[') return ']';
+  if (curSymbol[0] == '{') return '}';
+
+  return 0;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern size_t isClosingSymbol(
+  Symbol* curSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+size_t isClosingSymbol(
+  Symbol* curSymbol
+) {
+  if (1 < strlen(curSymbol)) return 0;
+
+  if (curSymbol[0] == ')') return 1;
+  if (curSymbol[0] == ']') return 1;
+  if (curSymbol[0] == '}') return 1;
+
+  return 0;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+void reportMismatchedClosingSymbol(
+  TextObj* aText, 
+  char expected,
+  char found
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void reportMismatchedClosingSymbol(
+  TextObj* aText,
+  char expected,
+  char found
+) {
+  if (expected == 0) return;
+
+  char message[100];
+  memset(message, 0, 100);
+  strcat(message, "closing list expected [");
+  message[strlen(message)] = expected;
+  strcat(message, "] but found [");
+  message[strlen(message)] = found;
+  strcat(message, "]");
+  reportError(aText, message);
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+void reportUnmatchedClosingSymbol(
+  TextObj* aText,
+  char expected
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void reportUnmatchedClosingSymbol(
+  TextObj* aText,
+  char expected
+) {
+  if (expected == 0) return;
+
+  char message[100];
+  memset(message, 0, 100);
+  strcat(message, "adding unmatched list closing [");
+  message[strlen(message)] = expected;
+  strcat(message, "]");
+  reportError(aText, message);
+}
+\stopCCode
+
+\startTestCase[should match List Symbols]
+\startCTest
+  AssertIntEquals(matchingListSymbol("("), ')');
+  AssertIntEquals(matchingListSymbol("["), ']');
+  AssertIntEquals(matchingListSymbol("{"), '}');
+  AssertIntEquals(matchingListSymbol("#"), 0);
+  AssertIntEquals(matchingListSymbol("silly"), 0);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* parseList(
+  TextObj* aText,
+  char closingChar
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* parseList(
+  TextObj* aText,
+  char closingChar
+) {
+  assert(aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp,
+    "parseList %p '%c'\n", aText, closingChar);
+
+  JObj* firstPair = NULL;
+  JObj* lastPair  = NULL;
+
+  while (!aText->completed) {
+
+    nextSymbol(aText);
+    DEBUG(aText->jInterp,
+      "parseList ns: %p %zu\n",
+        aText->sym, (aText->sym ? (size_t)asTag(aText->sym) : 0));
+    if (!aText->sym) {
+      reportUnmatchedClosingSymbol(aText, closingChar);
+      return firstPair;
+    }
+
+    // check to see if this is a closing list symbol
+    if (isSymbol(aText->sym) &&
+        isClosingSymbol(asSymbol(aText->sym))) {
+      if (asSymbol(aText->sym)[0] != closingChar) {
+        reportMismatchedClosingSymbol(aText, closingChar,
+                                      asSymbol(aText->sym)[0]);
+      }
+      if (closingChar == '}') {
+        DEBUG(aText->jInterp, "parseList(assertion-a) %p %zu\n",
+          firstPair, (firstPair ? (size_t)asTag(firstPair) : 0));
+        firstPair = newAssertion(aText->jInterp, firstPair);
+        assert(isAssertion(firstPair));
+        DEBUG(aText->jInterp, "parseList(assertion-b) %p %zu\n",
+          firstPair, (firstPair ? (size_t)asTag(firstPair) : 0));
+      }
+      return firstPair;
+    }
+    assert(aText->jInterp);
+    JObj* aNewPair = newPair(aText->jInterp, NULL, NULL);
+
+    // check to see if this is an opening list symbol
+    if (isSymbol(aText->sym)) {
+      char matchingSymbol = matchingListSymbol(asSymbol(aText->sym));
+      if (0 < matchingSymbol) {
+        JObj *newList = parseList(aText, matchingSymbol);
+        asCar(aNewPair) = newList;
+      } else asCar(aNewPair) = aText->sym;
+    } else asCar(aNewPair) = aText->sym;
+
+    if (!firstPair) firstPair       = aNewPair;
+    if (lastPair)   asCdr(lastPair) = aNewPair;
+
+    lastPair = aNewPair;
+  }
+
+  if (0 < closingChar) reportUnmatchedClosingSymbol(aText, closingChar);
+  return firstPair;
+}
+\stopCCode
+
+\startTestSuite[parse one symbol]
+
+\startCHeader
+typedef JObj *(ParseOneSymbol)(
+  TextObj *aText
+);
+
+#define parseOneSymbol(aText)               \
+  (                                         \
+    assert(aText),                          \
+    assert(getParsersClass(aText->jInterp)  \
+      ->parseOneSymbolFunc),                \
+    (getParsersClass(aText->jInterp)        \
+      ->parseOneSymbolFunc(aText))          \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* parseOneSymbolImpl(
+  TextObj* aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* parseOneSymbolImpl(
+  TextObj* aText
+) {
+  assert(aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "parseOneSymbol %p\n", aText);
+  nextSymbol(aText);
+  if (!aText->sym) {
+    return newSignal(aText->jInterp, SIGNAL_END_OF_TEXT);
+  }
+
+  if (aText->sym->type &&
+     (asTag(aText->sym) != SymbolsTag)) return aText->sym;
+
+  // check to see if this is an opening list symbol
+  char matchingSymbol = matchingListSymbol(asSymbol(aText->sym));
+  if (0 < matchingSymbol) {
+    return parseList(aText, matchingSymbol);
+  }
+  return aText->sym;
+}
+\stopCCode
+
+\startTestCase[parse Simple List One Symbol At A Time]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromArrayOfStrings(jInterp, simpleList);
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "this");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "is");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "a");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "simple");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "list");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isSignal(aLoL));
+  AssertIntEquals(asSignal(aLoL), SIGNAL_END_OF_TEXT);
+  AssertIntTrue(aText->completed);
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse SemiColons One Symbol At A Time]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromArrayOfStrings(jInterp, simpleListWithSemiColons);
+
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "this");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), ";");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "is");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), ";");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "a");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "and");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), ";");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "again");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isSignal(aLoL));
+  AssertIntEquals(asSignal(aLoL), SIGNAL_END_OF_TEXT);
+  AssertIntTrue(aText->completed);
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse Complex List One Symbol At A Time]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText = createTextFromArrayOfStrings(jInterp, moreComplexList);
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), SymbolsTag);
+  AssertStrEquals(asSymbol(aLoL), "this");
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertPtrNotNull(asType(aLoL));
+  AssertIntEquals(asTag(aLoL), PairsTag);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoLTTL(aStrBuf, aLoL, 10);
+  AssertStrEquals(getCString(aStrBuf),
+    "( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ");
+  strBufClose(aStrBuf);
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isSignal(aLoL));
+  AssertIntEquals(asSignal(aLoL), SIGNAL_END_OF_TEXT);
+  AssertIntTrue(aText->completed);
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse Boolean and find it in main dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->rootCtx);
+  
+  DictObj* mainDic = jInterp->rootCtx->dict;
+  AssertPtrNotNull(mainDic);
+
+  TextObj* aText =
+    createTextFromString(jInterp, " true false ");
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isAtom(aLoL));
+  AssertIntTrue(isSymbol(aLoL));
+  AssertStrEquals(asSymbol(aLoL), "true");
+  DictNodeObj* aNode =
+    getSymbolEntry(mainDic, asSymbol(aLoL));
+  AssertPtrNotNull(aNode);
+  AssertPtrNotNull(aNode->value);
+  AssertIntTrue(isBoolean(aNode->value));
+  AssertIntTrue(asBoolean(aNode->value));
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isAtom(aLoL));
+  AssertIntTrue(isSymbol(aLoL));
+  AssertStrEquals(asSymbol(aLoL), "false");
+  aNode = getSymbolEntry(mainDic, asSymbol(aLoL));
+  AssertPtrNotNull(aNode);
+  AssertPtrNotNull(aNode->value);
+  AssertIntTrue(isBoolean(aNode->value));
+  AssertIntFalse(asBoolean(aNode->value));
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse Print Naturals]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromString(jInterp, " 1234567890 not1234567890 ");
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isAtom(aLoL));
+  AssertIntTrue(isNatural(aLoL));
+  AssertIntEquals( mpz_cmp_si(asNatural(aLoL), 1234567890), 0);
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoLTTL(aStrBuf, aLoL, 10);
+  AssertStrEquals(getCString(aStrBuf), "1234567890 ");
+  strBufClose(aStrBuf);
+
+  aLoL = parseOneSymbol(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isAtom(aLoL));
+  AssertIntTrue(isSymbol(aLoL));
+  AssertStrEquals(asSymbol(aLoL), "not1234567890");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[parse all symbols]
+
+\startCHeader
+typedef JObj *(ParseAllSymbols)(
+  TextObj *aText
+);
+
+#define parseAllSymbols(aText)              \
+  (                                         \
+    assert(aText),                          \
+    assert(getParsersClass(aText->jInterp)  \
+      ->parseAllSymbolsFunc),               \
+    (getParsersClass(aText->jInterp)        \
+      ->parseAllSymbolsFunc(aText))         \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* parseAllSymbolsImpl(
+  TextObj* aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* parseAllSymbolsImpl(
+  TextObj* aText
+) {
+  assert(aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "parseAllSymbols %p]\n", aText);
+  return parseList(aText, 0);
+}
+\stopCCode
+
+We begin by parsing and printing some strings which exercise \quote{happy 
+paths} in our parsing code. 
+
+\startTestCase[parse SemiColons All At Once]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromArrayOfStrings(jInterp, complexListWithSemiColons);
+
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseAllSymbols(aText);
+
+  AssertPtrNotNull(aLoL);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoLTTL(aStrBuf, aLoL, 30);
+  AssertStrEquals(getCString(aStrBuf),
+    "( this ; is ; a test with some semi-colons and ; again ; 123 ; 456 ; 789 12 ; 34 and ; one ; more ; time ) ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse Print Simple List and test copyLoLs]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromArrayOfStrings(jInterp, simpleList);
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseAllSymbols(aText);
+  AssertPtrNotNull(aLoL);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoLTTL(aStrBuf, aLoL, 10);
+  AssertStrEquals(getCString(aStrBuf), "( this is a simple list ) ");
+  strBufClose(aStrBuf);
+
+  JObj* lolCopy = copyLoL(jInterp, aLoL);
+  AssertPtrNotEquals(aLoL, lolCopy);
+  AssertIntTrue(equalLoL(jInterp, aLoL, lolCopy, 10));
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse Complex List From Single String]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromString(jInterp, moreComplexList[0]);
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseAllSymbols(aText);
+
+  AssertPtrNotNull(aLoL);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoLTTL(aStrBuf, aLoL, 20);
+  AssertStrEquals(getCString(aStrBuf),
+    "( this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ) ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse Print Complex List]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromArrayOfStrings(jInterp, moreComplexList);
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseAllSymbols(aText);
+  AssertPtrNotNull(aLoL);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoLTTL(aStrBuf, aLoL, 20);
+  AssertStrEquals(getCString(aStrBuf),
+    "( this ( is ( a ( more ( complex ( list ( ) ) ) ) ) ) ) ");
+  strBufClose(aStrBuf);
+  
+  JObj* lolCopy = copyLoL(jInterp, aLoL);
+  AssertPtrNotEquals(aLoL, lolCopy);
+  AssertIntTrue(equalLoL(jInterp, aLoL, lolCopy, 10));
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse Print Different List]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromArrayOfStrings(jInterp, differentList);
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseAllSymbols(aText);
+  AssertPtrNotNull(aLoL);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoLTTL(aStrBuf, aLoL, 10);
+  AssertStrEquals(getCString(aStrBuf),
+    "( this is a different ( ( ( ) ( ) ( ) ) ( ( ( ) ) ) ) list ) ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+
+\startTestCase[parse assertion]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  TextObj* aText =
+    createTextFromString(jInterp, " { true } ");
+  AssertPtrNotNull(aText);
+
+  //jInterp->debug = TRUE;
+
+  JObj *aLoL = parseAllSymbols(aText);
+  AssertPtrNotNull(aLoL);
+  AssertIntTrue(isPair(aLoL));
+  AssertIntTrue(isAssertion(asCar(aLoL)));
+  AssertPtrNull(asCdr(aLoL));
+\stopCTest
+\stopTestCase
+
+Now we parse and print some strings which exercise \quote{unhappy paths} 
+in our parsing code. 
+
+\startTestCase[parse Incorrect Marker List]
+\startCTest
+  CoAlgebras* coAlgs = createCoAlgebras();
+  AssertPtrNotNull(coAlgs);
+
+  Text* aText = createTextFromArrayOfStrings(coAlgs, incorrectMarkerList);
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseAllSymbols(aText);
+  AssertPtrNotNull(aLoL);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoLTTL(aStrBuf, aLoL, 10);
+  AssertStrEquals(getCString(aStrBuf),
+    "this ( is a list with incorrectly ) matched list markers");
+  strBufClose(aStrBuf);
+\stopCTest
+\ignoreTestCase
+
+\startTestCase[parse Unmatched Marker List]
+\startCTest
+  CoAlgebras* coAlgs = createCoAlgebras();
+  AssertPtrNotNull(coAlgs);
+
+  Text* aText = createTextFromArrayOfStrings(coAlgs, unmatchedMarkerList);
+  AssertPtrNotNull(aText);
+
+  JObj* aLoL = parseAllSymbols(aText);
+  AssertPtrNotNull(aLoL);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoLTTL(aStrBuf, aLoL, 10);
+  AssertStrEquals(getCString(aStrBuf),
+    "this ( is a list ( with unmatched list markers ) )");
+  strBufClose(aStrBuf);
+\stopCTest
+\ignoreTestCase
+\stopTestSuite
+
+\startTestSuite[registerParsers]
+
+\startCHeader
+typedef struct parsers_class_struct {
+  JClass       super;
+  ParseOneSymbol  *parseOneSymbolFunc;
+  ParseAllSymbols *parseAllSymbolsFunc;
+} ParsersClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializeParsers(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerParsers(
+  JoyLoLInterp *jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerParsers(
+  JoyLoLInterp *jInterp
+) {
+  assert(jInterp);
+  
+  ParsersClass* theCoAlg          = joyLoLCalloc(1, ParsersClass);
+  theCoAlg->super.name            = ParsersName;
+  theCoAlg->super.objectSize      = sizeof(JObj);
+  theCoAlg->super.initializeFunc  = initializeParsers;
+  theCoAlg->super.registerFunc    = registerParserWords;
+  theCoAlg->super.equalityFunc    = NULL;
+  theCoAlg->super.printFunc       = NULL;
+  theCoAlg->parseOneSymbolFunc    = parseOneSymbolImpl;
+  theCoAlg->parseAllSymbolsFunc   = parseAllSymbolsImpl;
+  
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == ParsersTag);
+  assert(jInterp->coAlgs[tag]);
+    
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Parsers coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerParsers
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getParsersClass(jInterp));
+  ParsersClass *coAlg = getParsersClass(jInterp);
+  AssertIntTrue(registerParsers(jInterp));
+  AssertPtrNotNull(getParsersClass(jInterp));
+  AssertPtrEquals(getParsersClass(jInterp), coAlg);
+  AssertIntEquals(
+    getParsersClass(jInterp)->super.objectSize,
+    sizeof(JObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

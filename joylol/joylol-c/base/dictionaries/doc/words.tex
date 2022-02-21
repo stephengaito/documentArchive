@@ -1,0 +1,50 @@
+% A ConTeXt document [master document: dictionaries.tex]
+
+\section[title=Words]
+
+\startCCode
+static void lookupAP(ContextObj* aCtx) {
+  assert(aCtx);
+  popCtxDataInto(aCtx, name2lookup);
+  popCtxDataInto(aCtx, aDict);
+
+  if (!isSymbol(name2lookup)) {
+    raiseExceptionMsg(aCtx,
+      "lookup requires a symbol as top");
+    return;
+  }
+
+  if (!isDict(aDict)) {
+    raiseExceptionMsg(aCtx,
+      "lookup requires a dictionary as second");
+    return;
+  }
+
+  DictNodeObj* entry =
+    findSymbol((DictObj*)aDict, asSymbol(name2lookup));
+  JObj* entryValue = NULL;
+  if (entry) entryValue = entry->value;
+  
+  pushCtxData(aCtx, entryValue);
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerDictionaryWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerDictionaryWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  assert(jInterp);
+  extendJoyLoLInRoot(jInterp, "lookup", "", lookupAP, "");
+  return TRUE;
+}
+\stopCCode

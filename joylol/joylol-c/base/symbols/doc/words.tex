@@ -1,0 +1,64 @@
+% A ConTeXt document [master document: symbols.tex]
+
+\section[title=Words]
+
+\startCCode
+static void isSymbolAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (isSymbol(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+
+\startCCode
+static void equalSymbolAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top1);
+  popCtxDataInto(aCtx, top2);
+  size_t result = FALSE;
+  if (isSymbol(top1) && isSymbol(top2)) {
+    if (strcmp(asSymbol(top1), asSymbol(top2)) == 0) result = TRUE;
+  }
+  DEBUG(jInterp, "equalSymbol: %zu\n", result);
+  pushCtxData(aCtx, newBoolean(jInterp, result));
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerSymbolWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerSymbolWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  assert(jInterp);
+  ContextObj *rootCtx = jInterp->rootCtx;
+  assert(rootCtx);
+  DictObj *dict = rootCtx->dict;
+  assert(dict);
+  
+  DictNodeObj* newLine = getSymbolEntry(dict, "newLine");
+  newLine->value = newSymbolImpl(jInterp, "\n", "newLine", 0, TRUE);
+
+  extendJoyLoLInRoot(jInterp, "isSymbol", "", isSymbolAP,    "");
+  extendJoyLoLInRoot(jInterp, "=Sym",     "", equalSymbolAP, "");
+
+  return TRUE;
+}
+\stopCCode

@@ -1,0 +1,126 @@
+% A ConTeXt document [master document: coreLua.tex]
+
+\section[title=Lua interface]
+
+\startCCode
+static int lua_core_lua_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  if (aKey) {
+    getGitVersionInto(gitVersionKeyValues, aKey, aValue);
+    lua_pushstring(lstate, aValue);
+  } else {
+    lua_pushstring(lstate, "no valid key provided");
+  }
+  return 1;
+}
+
+static int lua_core_lua_runREPL(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  runREPLInContext(jInterp->rootCtx);
+  return 0;
+}
+
+static const struct luaL_Reg lua_core_lua [] = {
+  { "gitVersion",   lua_core_lua_getGitVersion },
+  { "runREPL",      lua_core_lua_runREPL       },
+  {NULL, NULL}
+};
+
+static void coreLuaWriteStdOut(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
+  fprintf(stdout, "%s", aMessage);
+}
+
+static void coreLuaWriteStdErr(
+  JoyLoLInterp *jInterp,
+  Symbol       *aMessage
+) {
+  fprintf(stderr, "%s", aMessage);
+}
+
+static Boolean getBooleanOption(
+  lua_State *lstate, 
+  Symbol    *optionName
+) {
+  lua_getglobal(lstate, "joylol");
+  lua_getfield(lstate, -1, "options");
+  lua_getfield(lstate, -1, optionName);
+  Boolean aBool = (Boolean)lua_toboolean(lstate, -1);
+  lua_pop(lstate, 3);
+  return aBool;
+}
+
+static Symbol *getSymbolOption(
+  lua_State *lstate,
+  Symbol    *optionName
+) {
+  lua_getglobal(lstate, "joylol");
+  lua_getfield(lstate, -1, "options");
+  lua_getfield(lstate, -1, optionName);
+  Symbol *aSymbol = (Symbol*)lua_tostring(lstate, -1);
+  lua_pop(lstate, 3);
+  return aSymbol;
+}
+
+static void *coreLuaCallback(
+  lua_State *lstate,
+  size_t resourceId
+) {
+  if (resourceId == JoyLoLCallback_StdOutMethod) {
+    StdOutputMethod *coreWriteStdOut =
+      coreLuaWriteStdOut;
+    return (void*)coreWriteStdOut;
+  } else if (resourceId == JoyLoLCallback_StdErrMethod) {
+    StdOutputMethod *coreWriteStdErr =
+      coreLuaWriteStdErr;
+    return (void*)coreWriteStdErr;
+  } else if (resourceId == JoyLoLCallback_Verbose) {
+    Boolean verbose = getBooleanOption(lstate, "verbose");
+    return (void*)verbose;
+  } else if (resourceId == JoyLoLCallback_Debug) {
+    Boolean debug = getBooleanOption(lstate, "debug");
+    return (void*)debug;
+  } else if (resourceId == JoyLoLCallback_Trace) {
+    Boolean tracing = getBooleanOption(lstate, "tracing");
+    return (void*)tracing;
+  } else if (resourceId == JoyLoLCallback_Quiet) {
+    Boolean quiet = getBooleanOption(lstate, "quiet");
+    return (void*)quiet;
+  } else if (resourceId == JoyLoLCallback_ConfigFile) {
+    Symbol *configFile = getSymbolOption(lstate, "configFile");
+    return (void*)configFile;
+  } else if (resourceId == JoyLoLCallback_UserPath) {
+    Symbol *userPath = getSymbolOption(lstate, "userPath");
+    return (void*)userPath;
+  } else if (resourceId == JoyLoLCallback_LocalPath) {
+    Symbol *localPath = getSymbolOption(lstate, "localPath");
+    return (void*)localPath;
+  } else if (resourceId == JoyLoLCallback_SystemPath) {
+    Symbol *systemPath = getSymbolOption(lstate, "systemPath");
+    return (void*)systemPath;
+  }
+  return NULL;
+} 
+
+int luaopen_joylol_core_lua (lua_State *lstate) {
+  setJoyLoLCallbackFrom(lstate, coreLuaCallback);
+  lua_getglobal(lstate, "require");
+  lua_pushstring(lstate, "joylol.jInterps");
+  if (lua_pcall(lstate, 1, 1, 0)) {
+    return luaL_error(lstate,
+      "Failed to load [joylol.jInterps]\nERROR:\n%s\n",
+      lua_tostring(lstate, -1)
+    );
+  }
+  getJoyLoLInterpInto(lstate, jInterp);
+  lua_pushstring(lstate, "core");
+  lua_createtable(lstate,0, 1); // joylol.core 
+  lua_pushstring(lstate, "lua");
+  luaL_newlib(lstate, lua_core_lua);
+  lua_settable(lstate, -3);
+  lua_settable(lstate, -3);
+  return 1;
+}
+\stopCCode

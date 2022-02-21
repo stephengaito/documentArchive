@@ -1,0 +1,87 @@
+% A ConTeXt document [master document: cFunctions.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_CFUNCTIONS}
+\createCHeaderFile%
+  {public}
+  {joylol/cFunctions.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_CFUNCTIONS_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/cFunctions-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/booleans.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/cFunctions.h>
+#include <joylol/texts.h>
+#include <joylol/assertions.h>
+#include <joylol/contexts.h>
+#include <joylol/cFunctions-private.h>
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {cFunctions.c}%
+  {}
+
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/cFunctions.h>}
+\addCTestInclude{<joylol/texts.h>}
+\addCTestInclude{<joylol/assertions.h>}
+\addCTestInclude{<joylol/contexts.h>}
+\addCTestInclude{<joylol/cFunctions-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.assertions");
+  requireLuaModule(lstate, "joylol.pairs");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  requireLuaModule(lstate, "joylol.texts");
+  requireLuaModule(lstate, "joylol.dictionaries");
+  requireLuaModule(lstate, "joylol.dictNodes");
+  requireLuaModule(lstate, "joylol.contexts");
+  requireStaticallyLinkedCFunctions(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
+  initializeAllLoaded(lstate, jInterp);
+  registerAllLoaded(lstate, jInterp);
+\stopCTest
+
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{cFunctions.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
+\addSubDocument{conclusion.tex} 
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

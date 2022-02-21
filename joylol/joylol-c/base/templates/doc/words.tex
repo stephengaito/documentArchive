@@ -1,0 +1,21 @@
+% A ConTeXt document [master document: templates.tex]
+
+\section[title=JoyLol words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerTemplateWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerTemplateWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  return TRUE;
+}
+\stopCCode

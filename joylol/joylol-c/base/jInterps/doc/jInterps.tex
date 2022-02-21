@@ -1,0 +1,34 @@
+% A ConTeXt document
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jInterps
+
+\usebtxdataset[jInterpsBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\chapter[title=JoyLoL interpreter]
+
+\declareJoyLoLCoAlg[jInterps]
+
+\diSimpComponent overview
+
+\diSimpComponent objects
+
+\diSimpComponent interpreter
+
+%\diSimpComponent printer
+
+\diSimpComponent words
+
+\diSimpComponent luaInterface % should be BEFORE luaInit
+
+\diSimpComponent luaInit
+
+\diSimpComponent luaScript
+
+\diSimpComponent conclusion
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

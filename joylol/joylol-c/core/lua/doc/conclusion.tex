@@ -1,0 +1,82 @@
+% A ConTeXt document [master document: coreLua.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\createLuaCodeFile%
+  {default}%
+  {joylol.lua}%
+  {!/usr/bin/env texlua}
+
+\CHeaderIncludeGuard{public}{JOYLOL_CORE_LUA}
+\createCHeaderFile%
+  {public}
+  {joylol/core/lua.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_CORE_LUA_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/core/lua-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <readline/readline.h>
+#include <readline/history.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/cFunctions.h>
+#include <joylol/signals.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/dictNodes.h>
+#include <joylol/dictionaries.h>
+#include <joylol/texts.h>
+#include <joylol/parsers.h>
+#include <joylol/assertions.h>
+#include <joylol/contexts.h>
+#include <joylol/loaders.h>
+#include <joylol/core/lua.h>
+#include <joylol/core/lua-private.h>
+// dictionary
+// printer
+\stopCCode
+
+\addCCodeLib{-lreadline}
+
+\createCCodeFile%
+  {default}%
+  {lua.c}%
+  {}
+
+\addMainDocument{coreLua.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{luaMain.tex}
+\addSubDocument{readline.tex}
+\addSubDocument{luaInterface.tex}
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{<HOME>/bin}
+
+\startLmsfile
+local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}
+local joylolDep    = makePath{'buildDir', 'joylol.lua'}
+tInsert(installTargets, target{
+  target       = joylolTarget,
+  dependencies = { joylolDep },
+  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
+})
+\stopLmsfile
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

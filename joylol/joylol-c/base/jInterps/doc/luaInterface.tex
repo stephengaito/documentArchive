@@ -1,0 +1,501 @@
+% A ConTeXt document [master document: jInterps.tex]
+
+\section[title=Lua interface functions]
+\setCCodeStream{lua}
+
+\diSimpComponent gitVersion-c
+
+\startCCode
+static int lua_jInterps_getGitVersion (lua_State *lstate) {
+  Symbol* aKey   = lua_tostring(lstate, 1);
+  if (aKey) {
+    getGitVersionInto(gitVersionKeyValues, aKey, aValue);
+    lua_pushstring(lstate, aValue);
+  } else {
+    lua_pushstring(lstate, "no valid key provided");
+  }
+  return 1;
+}
+\stopCCode
+
+\startCCode
+static int lua_joylol_setVerbose(lua_State *lstate) {
+  Boolean verbose = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  assert(jInterp->rootCtx);
+  jInterp->verbose = verbose;
+  jInterp->rootCtx->verbose = verbose;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_setDebugging(lua_State *lstate) {
+  Boolean debugFlag = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  jInterp->debug = debugFlag;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_setTracing(lua_State *lstate) {
+  Boolean tracingFlag = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  assert(jInterp->rootCtx);
+  jInterp->tracing = tracingFlag;
+  jInterp->rootCtx->tracingOn = tracingFlag;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_setShowStack(lua_State *lstate) {
+  Boolean showStackFlag = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  assert(jInterp->rootCtx);
+  jInterp->rootCtx->showStack = showStackFlag;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_setShowSpecifications(lua_State *lstate) {
+  Boolean showSpecsFlag = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  assert(jInterp->rootCtx);
+  jInterp->rootCtx->showSpecifications = showSpecsFlag;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_setChecking(lua_State *lstate) {
+  Boolean checkingFlag = 
+    (lua_toboolean(lstate, 1) ? TRUE : FALSE);
+  getJoyLoLInterpInto(lstate, jInterp);
+  assert(jInterp);
+  assert(jInterp->rootCtx);
+  jInterp->rootCtx->checkingOn = checkingFlag;
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+
+static int lua_joylol_pushLoadPath(lua_State *lstate) {
+  Symbol *aPath = lua_tostring(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushLoadPath(jInterp->loader, aPath);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_loadFile(lua_State *lstate) {
+  Symbol *aFile = lua_tostring(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  loadAFile(jInterp->rootCtx, aFile);
+  lua_pop(lstate, 1);
+  return 0;
+}
+\stopCCode
+
+\startCCode
+static void pushLuaToJoylol(
+  lua_State  *lstate,
+  ContextObj *rootCtx,
+  Boolean     isData
+) {
+  int aType = lua_type(lstate, -1);
+  switch(aType) {
+  case LUA_TNIL : {
+    if (isData) {
+      pushNullCtxData(rootCtx);
+    } else {
+      pushNullCtxProcess(rootCtx);
+    }
+  } break;
+  case LUA_TNUMBER : {
+    lua_Number aDouble = lua_tonumber(lstate, 1);
+    if (isData) {
+      pushNaturalCtxData(rootCtx, (size_t)aDouble);
+    } else {
+      pushNaturalCtxProcess(rootCtx, (size_t)aDouble);
+    }
+  } break;
+  case LUA_TBOOLEAN : {
+    int aBool = lua_toboolean(lstate, -1);
+    if (isData) {
+      pushBooleanCtxData(rootCtx, aBool);
+    } else {
+      pushBooleanCtxProcess(rootCtx, aBool);
+    }
+  } break;
+  case LUA_TSTRING : {
+    Symbol *aString = lua_tostring(lstate, -1);
+    if (isData) {
+      pushSymbolCtxData(rootCtx, aString);
+    } else {
+      pushSymbolCtxProcess(rootCtx, aString);
+    }
+  } break;
+  case LUA_TTABLE : {
+    // we ONLY take numerically keyed items from tables
+    // that is we treat all tables as ARRAYS not HashTables
+    size_t tableLen = lua_rawlen(lstate, -1);
+    for (size_t i = 1; i <= tableLen; i++) {
+      lua_rawgeti(lstate, -1, i);
+      pushLuaToJoylol(lstate, rootCtx, isData);
+      lua_pop(lstate, 1);
+    }
+  } break;
+  case LUA_TFUNCTION :
+  case LUA_TUSERDATA :
+  case LUA_TTHREAD :
+  case LUA_TLIGHTUSERDATA :
+  default:
+    // ignore ....
+    break;
+  }
+}
+\stopCCode
+
+\startCCode
+static void peekJoylolToLua(
+  lua_State    *lstate,
+  JoyLoLInterp *jInterp,
+  JObj         *aLoL
+) {
+  if (!aLoL) {
+    lua_pushnil(lstate);
+  } else if (isAtom(aLoL)) {
+    if (isSymbol(aLoL)) {
+      lua_pushstring(lstate, asSymbol(aLoL));
+    } else if (isNatural(aLoL)) {
+      lua_pushnumber(lstate, asNaturalDbl(jInterp, aLoL));
+    } else if (isBoolean(aLoL)) {
+      lua_pushboolean(lstate, (isTrue(aLoL) ? TRUE : FALSE));
+    } else {
+      lua_pushstring(lstate, "unknownAtom");
+    }
+  } else {
+    lua_newtable(lstate);
+    for (size_t i = 1; aLoL; i++) {
+      peekJoylolToLua(lstate, jInterp, asCar(aLoL));
+      lua_rawseti(lstate, -2, i);
+      aLoL = asCdr(aLoL);
+    }
+  }
+}
+\stopCCode
+
+
+\startTestSuite[push/pop root context data]
+\startCCode
+static int lua_joylol_pushData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushLuaToJoylol(lstate, jInterp->rootCtx, TRUE);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_pushNullData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushNullCtxData(jInterp->rootCtx);
+  return 0;
+}
+
+static int lua_joylol_pushBooleanData(lua_State *lstate) {
+  Boolean aBool = lua_toboolean(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushBooleanCtxData(jInterp->rootCtx, aBool);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_pushNaturalData(lua_State *lstate) {
+  double aDouble = lua_tonumber(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushNaturalCtxData(jInterp->rootCtx, (size_t)aDouble);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_pushSymbolData(lua_State *lstate) {
+  Symbol *aString = lua_tostring(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushSymbolCtxData(jInterp->rootCtx, aString);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_pushParsedStringData(lua_State *lstate) {
+  Symbol *aString = lua_tostring(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushParsedStringCtxData(jInterp->rootCtx, aString);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_peekData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  JObj *aLoL = popCtxData(jInterp->rootCtx);
+  peekJoylolToLua(lstate, jInterp, aLoL);
+  pushCtxData(jInterp->rootCtx, aLoL);
+  return 1;
+}
+
+static int lua_joylol_popData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  JObj *aLoL = popCtxData(jInterp->rootCtx);
+  peekJoylolToLua(lstate, jInterp, aLoL);
+  return 1;
+}
+
+static int lua_joylol_clearData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  clearCtxData(jInterp->rootCtx);
+  return 0;
+}
+
+static int lua_joylol_showData(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  showCtxData(jInterp->rootCtx, aStrBuf);
+  lua_pushstring (lstate, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  return 1;
+}
+\stopCCode
+
+\startTestCase[should be able to push and pop on data]
+\startLuaTest
+  local joylol = thirddata.joylol
+  joylol.pushBooleanData(true)
+  local result = joylol.popData()
+  assert.isBoolean(result)
+  assert.isTrue(result)
+  
+  joylol.pushBooleanData(false)
+  result = joylol.popData()
+  assert.isBoolean(result)
+  assert.isFalse(result)
+  
+  joylol.pushNaturalData(1234.4999)
+  result = joylol.popData()
+  assert.isNumber(result)
+  -- note how we round down here
+  assert.isEqual(result, 1234)
+  
+  joylol.pushSymbolData("this is a test")
+  result = joylol.popData()
+  assert.isString(result)
+  assert.isEqual(result, "this is a test")
+  
+  joylol.pushParsedStringData("hello there ( this is a test ) 1234")
+  result = joylol.peekData()
+  assert.isTable(result)
+  assert.length(result, 4)
+  assert.isString(result[1])
+  assert.isEqual(result[1], "hello")
+  assert.isString(result[2])
+  assert.isEqual(result[2], "there")
+  local innerResult = result[3]
+  assert.isTable(innerResult)
+  assert.length(innerResult, 4)
+  assert.isEqual(innerResult[1], "this")
+  assert.isEqual(innerResult[2], "is")
+  assert.isEqual(innerResult[3], "a")
+  assert.isEqual(innerResult[4], "test")
+  assert.isNumber(result[4])
+  assert.isEqual(result[4], 1234)
+  joylol.clearData()
+  result = joylol.popData()
+  assert.isNil(result)
+\stopLuaTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[push/pop root context process]
+\startCCode
+static int lua_joylol_pushProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushLuaToJoylol(lstate, jInterp->rootCtx, FALSE);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_pushNullProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushNullCtxProcess(jInterp->rootCtx);
+  return 0;
+}
+
+static int lua_joylol_pushBooleanProcess(lua_State *lstate) {
+  Boolean aBool = lua_toboolean(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushBooleanCtxProcess(jInterp->rootCtx, aBool);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_pushNaturalProcess(lua_State *lstate) {
+  double aDouble = lua_tonumber(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushNaturalCtxProcess(jInterp->rootCtx, (size_t)aDouble);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_pushSymbolProcess(lua_State *lstate) {
+  Symbol *aString = lua_tostring(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushSymbolCtxProcess(jInterp->rootCtx, aString);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_pushParsedStringProcess(lua_State *lstate) {
+  Symbol *aString = lua_tostring(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  pushParsedStringCtxProcess(jInterp->rootCtx, aString);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_peekProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  JObj *aLoL = popCtxProcess(jInterp->rootCtx);
+  peekJoylolToLua(lstate, jInterp, aLoL);
+  pushCtxProcess(jInterp->rootCtx, aLoL);
+  return 1;
+}
+
+static int lua_joylol_popProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  JObj *aLoL = popCtxProcess(jInterp->rootCtx);
+  peekJoylolToLua(lstate, jInterp, aLoL);
+  return 1;
+}
+
+static int lua_joylol_clearProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  clearCtxProcess(jInterp->rootCtx);
+  return 0;
+}
+
+static int lua_joylol_showProcess(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  showCtxProcess(jInterp->rootCtx, aStrBuf);
+  lua_pushstring (lstate, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+  return 1;
+}
+\stopCCode
+
+\startTestCase[should be able to push and pop on process]
+\startLuaTest
+  local joylol = thirddata.joylol
+  joylol.pushBooleanProcess(true)
+  local result = joylol.popProcess()
+  assert.isBoolean(result)
+  assert.isTrue(result)
+  
+  joylol.pushBooleanProcess(false)
+  result = joylol.popProcess()
+  assert.isBoolean(result)
+  assert.isFalse(result)
+  
+  joylol.pushNaturalProcess(1234.56)
+  result = joylol.popProcess()
+  assert.isNumber(result)
+  -- note how we round up here
+  assert.isEqual(result, 1235)
+  
+  joylol.pushSymbolProcess("this is a test")
+  result = joylol.popProcess()
+  assert.isString(result)
+  assert.isEqual(result, "this is a test")
+
+  joylol.pushParsedStringProcess("hello there ( this is a test ) 1234")
+  result = joylol.peekProcess()
+  assert.isTable(result)
+  assert.length(result, 4)
+  assert.isString(result[1])
+  assert.isEqual(result[1], "hello")
+  assert.isString(result[2])
+  assert.isEqual(result[2], "there")
+  local innerResult = result[3]
+  assert.isTable(innerResult)
+  assert.length(innerResult, 4)
+  assert.isEqual(innerResult[1], "this")
+  assert.isEqual(innerResult[2], "is")
+  assert.isEqual(innerResult[3], "a")
+  assert.isEqual(innerResult[4], "test")
+  assert.isNumber(result[4])
+  assert.isEqual(result[4], 1234)
+  joylol.clearProcess()
+  result = joylol.popProcess()
+  assert.isNil(result)
+\stopLuaTest
+\stopTestCase
+\stopTestSuite
+
+\startCCode
+static int lua_joylol_evalString(lua_State *lstate) {
+  Symbol *aString = lua_tostring(lstate, 1);
+  getJoyLoLInterpInto(lstate, jInterp);
+  evalStringInContext(jInterp->rootCtx, aString);
+  lua_pop(lstate, 1);
+  return 0;
+}
+
+static int lua_joylol_eval(lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  evalContext(jInterp->rootCtx);
+  return 0;
+}
+\stopCCode
+
+\startCCode
+#define NumJoyLoLInterfaceFunctions 15
+static const struct luaL_Reg lua_joylol_interface [] = {
+  { "gitVersion",              lua_jInterps_getGitVersion         },
+  { "setVerbose",              lua_joylol_setVerbose              },
+  { "setDebugging",            lua_joylol_setDebugging            },
+  { "setTracing",              lua_joylol_setTracing              },
+  { "setShowStack",            lua_joylol_setShowStack            },
+  { "setShowSpecifications",   lua_joylol_setShowSpecifications   },
+  { "setChecking",             lua_joylol_setChecking             },
+  { "pushLoadPath",            lua_joylol_pushLoadPath            },
+  { "loadFile",                lua_joylol_loadFile                },
+  { "pushData",                lua_joylol_pushData                },
+  { "pushNullData",            lua_joylol_pushNullData            },
+  { "pushBooleanData",         lua_joylol_pushBooleanData         },
+  { "pushNaturalData",         lua_joylol_pushNaturalData         },
+  { "pushSymbolData",          lua_joylol_pushSymbolData          },
+  { "pushParsedStringData",    lua_joylol_pushParsedStringData    },
+  { "peekData",                lua_joylol_peekData                },
+  { "popData",                 lua_joylol_popData                 },
+  { "clearData",               lua_joylol_clearData               },
+  { "showData",                lua_joylol_showData                },
+  { "pushProcess",             lua_joylol_pushProcess             },
+  { "pushNullProcess",         lua_joylol_pushNullProcess         },
+  { "pushBooleanProcess",      lua_joylol_pushBooleanProcess      },
+  { "pushNaturalProcess",      lua_joylol_pushNaturalProcess      },
+  { "pushSymbolProcess",       lua_joylol_pushSymbolProcess       },
+  { "pushParsedStringProcess", lua_joylol_pushParsedStringProcess },
+  { "peekProcess",             lua_joylol_peekProcess             },
+  { "popProcess",              lua_joylol_popProcess              },
+  { "clearProcess",            lua_joylol_clearProcess            },
+  { "showProcess",             lua_joylol_showProcess             },
+  { "evalString",              lua_joylol_evalString              },
+  { "eval",                    lua_joylol_eval                    },
+  {NULL, NULL}
+};
+\stopCCode

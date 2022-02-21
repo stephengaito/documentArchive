@@ -1,0 +1,545 @@
+% A ConTeXt document [master document: stringBuffers.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+\dependsOn[symbols]
+%\dependsOn[context]
+
+\startCHeader
+typedef struct string_buffer_object_struct {
+  JObj          super;
+  JoyLoLInterp *jInterp;
+  ContextObj   *theCtx;
+  FILE         *memFile;
+  char         *buffer;
+  size_t        bufSize;
+} StringBufferObj;
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+#define asMemFile(aLoL)   (((StringBufferObj*)(aLoL))->memFile)
+#define asBuffer(aLoL)    (((StringBufferObj*)(aLoL))->buffer)
+#define asBufSize(aLoL)   (((StringBufferObj*)(aLoL))->bufSize)
+\stopCHeader
+\setCHeaderStream{public}
+
+\startTestSuite[newStringBuffer]
+
+
+\startCHeader
+typedef StringBufferObj* (NewStringBuffer)(
+  ContextObj *theCtx
+);
+
+#define newStringBuffer(theCtx)                   \
+  (                                               \
+    assert(theCtx),                               \
+    assert(theCtx->jInterp),                      \
+    assert(getStringBuffersClass(theCtx->jInterp) \
+      ->newStringBufferFunc),                     \
+    getStringBuffersClass(theCtx->jInterp)        \
+      ->newStringBufferFunc(theCtx)               \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern StringBufferObj* newStringBufferImpl(ContextObj *aCtx);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+StringBufferObj* newStringBufferImpl(ContextObj *aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+  StringBufferObj* result =
+    (StringBufferObj*)newObject(jInterp, StringBuffersTag);
+  assert(result);
+  asMemFile(result) = NULL;
+  asBuffer(result)  = NULL;
+  asBufSize(result) = 0;
+  result->theCtx    = aCtx;
+  result->jInterp   = jInterp;
+  return result;
+}
+\stopCCode
+
+\startCHeader
+typedef void (StrBufClose)(
+  StringBufferObj*
+);
+
+#define strBufClose(aStrBuf)                        \
+  (                                                 \
+    assert(aStrBuf),                                \
+    assert(aStrBuf->jInterp),                       \
+    assert(getStringBuffersClass(aStrBuf->jInterp)  \
+      ->strBufCloseFunc),                           \
+    getStringBuffersClass(aStrBuf->jInterp)         \
+      ->strBufCloseFunc(aStrBuf)                    \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void strBufCloseImpl(StringBufferObj* aStrBuf);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void strBufCloseImpl(StringBufferObj* aStrBuf) {
+  if (!isStringBuffer(aStrBuf)) return;
+
+  if (asMemFile(aStrBuf)) fclose(asMemFile(aStrBuf));
+  if (asBuffer(aStrBuf))  free(asBuffer(aStrBuf));
+  asMemFile(aStrBuf) = NULL;
+  asBuffer(aStrBuf)  = NULL;
+  asBufSize(aStrBuf) = 0;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern void strBufReOpen(StringBufferObj* aStrBuf);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void strBufReOpen(StringBufferObj* aStrBuf) {
+  if (!isStringBuffer(aStrBuf)) return;
+
+  if (asMemFile(aStrBuf)) strBufCloseImpl(aStrBuf);
+  asMemFile(aStrBuf) = 
+    open_memstream(&asBuffer(aStrBuf), &asBufSize(aStrBuf));
+}
+\stopCCode
+
+\startTestCase[should create some new stringBuffers]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  AssertPtrNotNull(asType(aStrBuf));
+  AssertIntEquals(asTag(aStrBuf), StringBuffersTag);
+  AssertPtrNull(asMemFile(aStrBuf));
+  AssertPtrNull(asBuffer(aStrBuf));
+  AssertIntZero(asBufSize(aStrBuf));
+  AssertIntTrue(isStringBuffer(aStrBuf));
+  AssertIntTrue(isAtom(aStrBuf));
+  AssertIntFalse(isPair(aStrBuf));
+  strBufClose(aStrBuf);
+  AssertPtrNull(asMemFile(aStrBuf));
+  AssertPtrNull(asBuffer(aStrBuf));
+  AssertStrEquals(getCString(aStrBuf), "");
+  AssertPtrNotNull(asBuffer(aStrBuf));
+  strBufClose(aStrBuf);
+  AssertPtrNull(asMemFile(aStrBuf));
+  AssertPtrNull(asBuffer(aStrBuf));
+  AssertIntZero(asBufSize(aStrBuf));
+  strBufPrintf(aStrBuf, "a test string");
+  AssertPtrNotNull(asMemFile(aStrBuf));
+  AssertStrEquals(getCString(aStrBuf), "a test string");
+  AssertPtrNotNull(asBuffer(aStrBuf));
+  AssertIntEquals(asBufSize(aStrBuf), 13);
+  strBufClose(aStrBuf); // need to release the FILE*
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[isStringBuffer]
+
+\startCHeader
+#define isStringBuffer(aStrBuf)            \
+  (                                        \
+    (                                      \
+      (aStrBuf) &&                         \
+      asType(aStrBuf) &&                   \
+      (asTag(aStrBuf) == StringBuffersTag) \
+    ) ?                                    \
+    TRUE : FALSE                           \
+  )
+\stopCHeader
+
+\startTestCase[should return true if a string buffer]
+
+\startCTest
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertIntTrue(isStringBuffer(aStrBuf));
+  //AssertIntTrue(symbolIs(aSym, "this is a test"));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if not a string buffer]
+\startCTest
+  AssertIntFalse(isStringBuffer(NULL));
+  JObj *aObj = newObject(jInterp, BooleansTag);
+  AssertIntFalse(isStringBuffer(aObj));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[getCString and strBufGetAsSymbol]
+
+\startCHeader
+typedef Symbol *(GetCString)(
+  StringBufferObj*
+);
+
+#define getCString(aStrBuf)                         \
+  (                                                 \
+    assert(aStrBuf),                                \
+    assert(aStrBuf->jInterp),                       \
+    assert(getStringBuffersClass(aStrBuf->jInterp)  \
+      ->getCStringFunc),                            \
+    (getStringBuffersClass(aStrBuf->jInterp)        \
+      ->getCStringFunc(aStrBuf))                    \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Symbol *getCStringImpl(StringBufferObj *aStrBuf);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Symbol *getCStringImpl(StringBufferObj *aStrBuf) {
+  if (!isStringBuffer(aStrBuf)) return NULL;
+  if (!asMemFile(aStrBuf)) strBufReOpen(aStrBuf);
+  fflush(asMemFile(aStrBuf));
+  return asBuffer(aStrBuf);
+}
+\stopCCode
+
+\stopTestSuite
+
+\startTestSuite[strBufPrintf]
+
+\startCHeader
+typedef Boolean (StrBufPrintf)(
+  StringBufferObj*,
+  Symbol*,
+  ...
+);
+
+#define strBufPrintf(aStrBuf, ...)                  \
+  (                                                 \
+    assert(aStrBuf),                                \
+    assert(aStrBuf->jInterp),                       \
+    assert(getStringBuffersClass(aStrBuf->jInterp)  \
+      ->strBufPrintfFunc),                          \
+    (getStringBuffersClass(aStrBuf->jInterp)        \
+      ->strBufPrintfFunc(aStrBuf, __VA_ARGS__ ))    \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean strBufPrintfImpl(
+  StringBufferObj   *aStrBuf,
+  const char        *format, 
+  ...
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean strBufPrintfImpl(
+  StringBufferObj   *aStrBuf,
+  const char        *format,
+  ...
+) {
+  if (!isStringBuffer(aStrBuf)) return FALSE;
+  if (!asMemFile(aStrBuf)) strBufReOpen(aStrBuf);
+  
+  va_list printfArgs;
+  va_start(printfArgs, format);
+  int numChars = vfprintf(asMemFile(aStrBuf), format, printfArgs);
+  va_end(printfArgs);
+  return (0 <= numChars);
+}
+\stopCCode
+
+\startTestCase[should printf to a sting buffer]
+\startCTest
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+  strBufPrintf(aStrBuf, "a test [%s]", "an inner string");
+  AssertStrEquals(getCString(aStrBuf), "a test [an inner string]");
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[stringBuffer equality]
+
+\setCHeaderStream{private}
+\startCHeader
+Boolean stringBuffersEqual(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+
+\startCCode
+Boolean stringBuffersEqual(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "stringBuffersEqual a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA || !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (asTag(lolA)  != StringBuffersTag) return FALSE;
+  if (strcmp(
+    getCStringImpl((StringBufferObj*)lolA),
+    getCStringImpl((StringBufferObj*)lolB)
+    ) != 0) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should return true if stringBuffers are equal]
+
+\startCTest
+  AssertIntTrue(stringBuffersEqual(jInterp, NULL, NULL, 10));
+  StringBufferObj *strBufA = newStringBuffer(jInterp->rootCtx);
+  strBufPrintf(strBufA, "test");
+  StringBufferObj *strBufB = newStringBuffer(jInterp->rootCtx);
+  strBufPrintf(strBufB, "test");
+  AssertIntTrue(stringBuffersEqual(
+    jInterp, (JObj*)strBufA, (JObj*)strBufB, 10));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if stringBuffers are not equal]
+
+\startCTest
+  StringBufferObj *strBufA = newStringBuffer(jInterp->rootCtx);
+  strBufPrintf(strBufA, "testA");
+  StringBufferObj *strBufB = newStringBuffer(jInterp->rootCtx);
+  strBufPrintf(strBufB, "testB");
+  AssertIntFalse(stringBuffersEqual(
+    jInterp, NULL, (JObj*)strBufB, 10));
+  AssertIntFalse(stringBuffersEqual(
+    jInterp, (JObj*)strBufA, NULL, 10));
+  AssertIntFalse(stringBuffersEqual(
+    jInterp, (JObj*)strBufA, (JObj*)strBufB, 10));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[printing stringBuffers]
+
+\setCHeaderStream{private}
+\startCHeader
+extern size_t printStringBufferCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printStringBufferCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aStrBuf);
+  assert(asTag(aStrBuf) == StringBuffersTag);
+  
+  assert(aLoL);
+  assert(asTag(aLoL) == StringBuffersTag);
+
+  strBufPrintfImpl(aStrBuf, "%s ", 
+    getCStringImpl((StringBufferObj*)aLoL));
+  return TRUE;
+}
+\stopCCode
+
+\startCHeader
+typedef void (PrintLoL)(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+
+#define printLoL(aStrBuf, aLoL)                     \
+  (                                                 \
+    assert(aStrBuf),                                \
+    assert(aStrBuf->jInterp),                       \
+    assert(getStringBuffersClass(aStrBuf->jInterp)  \
+      ->printLoLFunc),                              \
+    (getStringBuffersClass(aStrBuf->jInterp)        \
+      ->printLoLFunc(aStrBuf, aLoL, 20))            \
+  )
+
+#define printLoLTTL(aStrBuf, aLoL, ttl)             \
+  (                                                 \
+    assert(aStrBuf),                                \
+    assert(aStrBuf->jInterp),                       \
+    assert(getStringBuffersClass(aStrBuf->jInterp)  \
+      ->printLoLFunc),                              \
+    (getStringBuffersClass(aStrBuf->jInterp)        \
+      ->printLoLFunc(aStrBuf, aLoL, ttl))           \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+void printLoLImpl(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void printLoLImpl(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aStrBuf);
+  DEBUG(aStrBuf->jInterp,
+    "printLoL(start) %p %p %zu\n", aStrBuf, aLoL, timeToLive
+  );
+
+  if (aLoL) {
+    assert(asType(aLoL));
+    assert(asTag(aLoL));
+    DEBUG(aStrBuf->jInterp,
+      "printLoL(call) %p %p %p %uz\n",
+      aStrBuf, aLoL, asType(aLoL), asTag(aLoL)
+    );
+    assert(asType(aLoL)->tag == asTag(aLoL));
+    assert(asType(aLoL)->printFunc);
+
+    if (isPair(aLoL)) strBufPrintf(aStrBuf, "( ");
+    Boolean result =
+      (asType(aLoL)->printFunc)
+        (aStrBuf, aLoL, timeToLive);
+    if (isPair(aLoL)) strBufPrintf(aStrBuf, ") ");
+    assert(result);
+  } else strBufPrintf(aStrBuf, "( ) ");
+
+  DEBUG(aStrBuf->jInterp,
+    "printLoL(done) %p %p %zu\n", aStrBuf, aLoL, timeToLive
+  );
+}
+\stopCCode
+\startTestCase[should print stringBuffers]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(getStringBuffersClass(jInterp));
+
+  StringBufferObj* aTestStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aTestStrBuf);
+  strBufPrintf(aTestStrBuf, "test string");
+  
+  StringBufferObj* aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printStringBufferCoAlg(
+    aStrBuf, (JObj*)aTestStrBuf, 10);
+  AssertStrEquals(getCString(aStrBuf), "test string ");
+  
+  strBufClose(aStrBuf);
+  printLoL(aStrBuf, (JObj*)aTestStrBuf);
+  AssertStrEquals(getCString(aStrBuf), "test string ");
+  strBufClose(aStrBuf);
+  strBufClose(aTestStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerStringBuffers]
+
+\startCHeader
+typedef struct stringBuffers_class_struct {
+  JClass           super;
+  NewStringBuffer *newStringBufferFunc;
+  StrBufClose     *strBufCloseFunc;
+  GetCString      *getCStringFunc;
+  StrBufPrintf    *strBufPrintfFunc;
+  PrintLoL        *printLoLFunc;
+} StringBuffersClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializeStringBuffers(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerStringBuffers(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerStringBuffers(JoyLoLInterp* jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  StringBuffersClass* theCoAlg  =
+    joyLoLCalloc(1, StringBuffersClass);
+  theCoAlg->super.name            = StringBuffersName;
+  theCoAlg->super.objectSize      = sizeof(StringBufferObj);
+  theCoAlg->super.initializeFunc  = initializeStringBuffers;
+  theCoAlg->super.registerFunc    = registerStringBufferWords;
+  theCoAlg->super.equalityFunc    = stringBuffersEqual;
+  theCoAlg->super.printFunc       = printStringBufferCoAlg;
+  theCoAlg->newStringBufferFunc   = newStringBufferImpl;
+  theCoAlg->strBufCloseFunc       = strBufCloseImpl;
+  theCoAlg->getCStringFunc        = getCStringImpl;
+  theCoAlg->strBufPrintfFunc      = strBufPrintfImpl;
+  theCoAlg->printLoLFunc          = printLoLImpl;
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // sanity check...
+  assert(tag == StringBuffersTag);
+  assert(jInterp->coAlgs[tag]);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the stringBuffers coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerStringBuffers
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getStringBuffersClass(jInterp));
+  StringBuffersClass *coAlg =
+    getStringBuffersClass(jInterp);
+  AssertIntTrue(registerStringBuffers(jInterp));
+  AssertPtrNotNull(getStringBuffersClass(jInterp));
+  AssertPtrEquals(getStringBuffersClass(jInterp), coAlg);
+  AssertIntEquals(
+    getStringBuffersClass(jInterp)->super.objectSize,
+    sizeof(StringBufferObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

@@ -1,0 +1,84 @@
+% A ConTeXt document [master document: joyLoL.tex ]
+
+\chapter[title=CPU Model]
+
+In \cite{gaito2018hilbertsProgramRevisitedBaseCase} we modelled the 
+\emph{simple} model of computation which we call \joylol. However there 
+are no implementations of this \joylol\ model of computation in a 
+commercially available CPU. In this chapter we define a model of an 
+idealized \emph{commercially} available CPU upon which we can rigorously 
+implement pure \joylol. 
+
+In both our models of computation, pure \joylol\ and an idealized 
+commercial CPU, the important distinction is the underlying memory models. 
+The pure \joylol\ model of computation is essentially a \emph{restricted 
+access} Harvard model of memory. The pure \joylol\ model has a pair of 
+memories one each for the data and the process. Each memory is structured 
+as a stack for which only the \quote{top} of the stack can be directly 
+accessed. 
+
+We tend to assume that our commercial CPUs have a von Neumann model of 
+memory consisting of \emph{one, large, randomly accessible} memory at the 
+Instruction Set Architectural (ISA) interface\footnote{Note that most 
+modern CPUs actually have a modified Harvard architecture at level of the 
+the underlying micro-architecture, since they implement a pair of data and 
+instruction caches between the Random Access Memory (RAM) and the CPU 
+itself. We will, for our purposes, ignore this underlying 
+micro-architecture since we are only interested in modelling the ISA 
+interface. At the level of the ISA, both data and instructions are 
+\quote{loaded} from \quote{one} \quote{large} (randomly accessible) Memory 
+(RAM).}. As we will discuss below, for a mathematician, this assumption, 
+of a \emph{single, large, randomly accessible} memory, is misguided. 
+
+For a 64 bit CPU, the \emph{maximal} addressable memory is 16 Exabytes. 
+For a mathematician, this is \emph{tiny} when compared to $\omega$. We 
+could model a 128 bit CPU, or, an $x$ bit CPU for any particular value of 
+$x$ we might choose, however for any \emph{finite} value of $x$, we will 
+still have a \emph{maximal} addressable memory which is \emph{tiny} 
+compared to $\omega$. While we could consider an idealized $\omega$ bit 
+CPU, no such \emph{implementable} CPU exists. Our goal here is to model a 
+\emph{realizable} CPU upon which \joylol\ might be able to run 
+efficiently. 
+
+\section[title=Model details]
+
+\startitemize[n]
+
+\item Storage
+
+\startitemize[n]
+
+\item uint64, uint32, uint16, uint8
+
+\item int64, int32, int16, int8
+
+\item byte, utf8Char, char
+
+\item at the moment we do \emph{not} model floats or doubles
+
+\item we also do \emph{not} explicitly model pointers. (Should we?)
+
+\item arrays
+
+\item structures
+
+\stopitemize
+
+\item Actions
+
+\startitemize[n]
+
+\item array indexing
+
+\item addition, subtraction, mutiplication, division
+
+\item and, or, xor, ...
+
+\item assignments
+
+\item functions
+
+\stopitemize
+
+\stopitemize
+

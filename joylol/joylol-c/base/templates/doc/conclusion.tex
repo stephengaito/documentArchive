@@ -1,0 +1,70 @@
+% A ConTeXt document [master document: templates.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_TEMPLATES}
+\createCHeaderFile%
+  {public}
+  {joylol/templates.h}
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_TEMPLATES_PRIVATE}
+\createCHeaderFile%
+  {private}
+  {joylol/templates-private.h}
+  {}
+
+\prependCCode{default}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/templates.h>
+#include <joylol/templates-private.h>
+// dictionary
+// printer
+\stopCCode
+
+\createCCodeFile%
+  {default}%
+  {templates.c}%
+  {}
+
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/templates.h>}
+\addCTestInclude{<joylol/templates-private.h>}
+\addCTestLib{<HOME>/.joylol/joylol/jInterps}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireStaticallyLinkedTemplates(lstate);
+  getJoyLoLInterpInto(lstate, jInterp);
+\stopCTest
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{templates.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{code.tex}
+\addSubDocument{lua.tex}
+\addSubDocument{words.tex}
+\addSubDocument{conclusion.tex} 
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}

@@ -1,0 +1,54 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'coreLua.tex',
+  docFiles = {
+    'overview.tex',
+    'luaMain.tex',
+    'readline.tex',
+    'luaInterface.tex',
+    'conclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.contextMod'
+
+contextMod.targets(lpTargets, {
+  moduleFiles = {
+    'joylol.lua',
+  },
+  moduleDir = '<HOME>/bin',
+})
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'core/lua',
+  },
+  cHeaderFiles = {
+    'joylol/core/lua.h',
+    'joylol/core/lua-private.h',
+  },
+  cCodeFiles = {
+    'lua.c',
+  },
+  joylolCodeFiles = {
+  },
+  cCodeLibs = {
+    '-lreadline',
+  },
+  coAlgLibs = {
+  },
+})
+
+local joylolTarget = makePath{getEnv('HOME'), 'bin', 'joylol'}
+local joylolDep    = makePath{'buildDir', 'joylol.lua'}
+tInsert(installTargets, target{
+  target       = joylolTarget,
+  dependencies = { joylolDep },
+  command      = tConcat({'install -T', joylolDep, joylolTarget }, ' ')
+})

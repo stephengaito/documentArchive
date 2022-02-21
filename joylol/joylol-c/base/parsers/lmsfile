@@ -1,0 +1,65 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'parsers.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'patterns.tex',
+    'captures.tex',
+    'joyLoLParser.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'parsers',
+  },
+  cHeaderFiles = {
+    'joylol/parsers.h',
+    'joylol/parsers-private.h',
+  },
+  cCodeFiles = {
+    'parsers.c',
+  },
+  joylolCodeFiles = {
+  },
+  coAlgLibs = {
+    'jInterps',
+    'booleans',
+    'symbols',
+    'naturals',
+    'pairs',
+    'dictNodes',
+    'texts',
+  },
+})
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/parsers.h',
+    'joylol/parsers-private.h',
+  },
+  cCodeFiles = {
+    'parsers.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+    '-lgmp',
+  },
+})

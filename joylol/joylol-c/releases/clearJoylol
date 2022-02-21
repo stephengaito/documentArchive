@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# This bash script clears out the user's $HOME/.joylol directory
+
+mkdir -p $HOME/.joylol
+
+rm -rf $HOME/.joylol/*

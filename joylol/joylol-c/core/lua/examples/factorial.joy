@@ -1,0 +1,4 @@
+( ( dup 0 =nat ) ( pop 1 ) ( dup 1 -rev factorial * ) ifte )
+globals
+factorial
+define

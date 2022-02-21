@@ -1,0 +1,1029 @@
+% A ConTeXt document [master document: dictionaries.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\diSimpComponent gitVersion-c
+
+\startCHeader
+typedef struct dictionary_object_struct {
+  JObj          super;
+  JoyLoLInterp *jInterp;
+  Symbol       *name;
+  DictObj      *parent;
+  DictNodeObj  *root;
+  DictNodeObj  *firstSymbol;
+} DictObj;
+
+#define asCFunc(aLoL) (((CFunctionObj*)(aLoL))->func)
+\stopCHeader
+
+\startTestSuite[newDictionary]
+
+\startCHeader
+typedef DictObj* (NewDictionary)(
+  JoyLoLInterp *jInterp,
+  Symbol       *name,
+  DictObj      *parent
+);
+
+#define newDictionary(jInterp, name, parent)      \
+  (                                               \
+    assert(getDictionariesClass(jInterp)          \
+      ->newDictionaryFunc),                       \
+    (getDictionariesClass(jInterp)                \
+      ->newDictionaryFunc(jInterp, name, parent)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern DictObj* newDictionaryImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *name,
+  DictObj      *parent
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+DictObj* newDictionaryImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *name,
+  DictObj      *parent
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  DictObj* result =
+    (DictObj*)newObject(jInterp, DictionariesTag);
+  result->jInterp     = jInterp;
+  result->name        = strdup(name);
+  result->parent      = parent;
+  result->root        = NULL;
+  result->firstSymbol = NULL;
+  assert(result);
+  
+  result->super.type  = jInterp->coAlgs[DictionariesTag];
+ 
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new Dictionary]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  JObj* aNewDictionary = newDictionary(jInterp, "aName", NULL);
+  AssertPtrNotNull(aNewDictionary);
+  AssertPtrEquals(aNewDictionary->jInterp, jInterp);
+  AssertStrEquals(aNewDictionary->name, "aName");
+  AssertPtrNull(aNewDictionary->parent);
+  AssertPtrNull(aNewDictionary->root);
+  AssertPrtNull(aNewDictionary->firstSymbol);
+  AssertPtrNotNull(asType(aNewDictionary));
+  AssertIntEquals(asTag(aNewDictionary), DictionariesTag);
+  AssertIntTrue(isAtom(aNewDictionary));
+  AssertIntTrue(isDictionary(aNewDictionary));
+  AssertIntFalse(isPair(aNewDictionary));
+\stopCTest
+\stopTestCase
+
+\startCHeader
+#define isDict(aLoL)                    \
+  (                                     \
+    (                                   \
+      (aLoL) &&                         \
+      asType(aLoL) &&                   \
+      (asTag(aLoL) == DictionariesTag)  \
+    ) ?                                 \
+      TRUE :                            \
+      FALSE                             \
+  )
+\stopCHeader
+
+\startTestSuite[findSymbol]
+
+\setCHeaderStream{private}
+\startCHeader
+typedef DictNodeObj* (FindSymbol)(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
+extern DictNodeObj* findSymbolInThisDictionary(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
+extern DictNodeObj* findSymbol(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+DictNodeObj* findSymbolInThisDictionary(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  if (!aSymbol) return NULL;
+  assert(aDict);
+  return findSymbolRecurse(aDict, aDict->root, aSymbol);
+}
+
+DictNodeObj* findSymbol(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  if (!aSymbol) return NULL;
+  while (aDict) {
+    //
+    // Look for this symbol in this naming scope
+    //
+    DictNodeObj *aDictNode = 
+      findSymbolRecurse(aDict, aDict->root, aSymbol);
+    if (aDictNode) return aDictNode;
+    //
+    // We have not found this symbol in this naming scope
+    // so look in the parent's naming scope
+    //
+    aDict = aDict->parent;
+  }
+  //
+  // Alas, we have not found this symbol in any naming scope
+  //
+  return NULL;
+}
+\stopCCode
+
+\startTestCase[should find symbols in parent dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  DictObj* parentDict = newDictionary(jInterp, "parent", NULL);
+  AssertPtrNotNull(parentDict);
+  AssertPtrNull(parentDict->parent);
+  DictObj* childDict  = newDictionary(jInterp, "child", parentDict);
+  AssertPtrNotNull(childDict);
+  AssertPtrNotNull(childDict->parent);
+  AssertPtrEquals(childDict->parent, parentDict);
+  //
+  DictNodeObj* parentSym = findSymbol(childDict, "test");
+  AssertPtrNull(parentSym);
+  //
+  parentSym = 
+    createSymbolInThisDictionary(parentDict, "test");
+  AssertPtrNotNull(parentSym);
+  AssertStrEquals(parentSym->symbol, "test");
+  //
+  DictNodeObj* testSym = findSymbol(childDict, "test");
+  AssertPtrNotNull(testSym);
+  AssertPtrEquals(testSym, parentSym);
+  //
+  DictNodeObj* childSym =
+    createSymbolInThisDictionary(childDict, "test");
+  AssertPtrNotNull(childSym);
+  AssertPtrNotEquals(parentSym, childSym);
+  AssertStrEquals(childSym->symbol, "test");
+  //
+  testSym = findSymbol(childDict, "test");
+  AssertPtrNotNull(testSym);
+  AssertPtrEquals(testSym, childSym);
+  AssertPtrNotEquals(testSym, parentSym);
+  //
+  testSym = findSymbol(parentDict, "test");
+  AssertPtrNotNull(testSym);
+  AssertPtrNotEquals(testSym, childSym);
+  AssertPtrEquals(testSym, parentSym);
+  //
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  printLoL(aStrBuf, (JObj*)childDict);
+  AssertStrEquals(getCString(aStrBuf), "dict:parent.child ");
+  strBufClose(aStrBuf);  
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[insertSymbol]
+
+\startCCode
+static DictNodeObj* insertSymbol(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  assert(aDict);
+  assert(aSymbol);
+
+  // lazy initialization
+  if (!aDict->root) {
+    assert(aDict->jInterp);
+    DictNodeObj* firstNode = newDictNode(aDict->jInterp, aSymbol);
+    aDict->root            = firstNode;
+    aDict->firstSymbol     = firstNode;
+    return firstNode;
+  }
+
+  return insertSymbolRecurse(aDict, aDict->root, aSymbol);
+}
+\stopCCode
+\stopTestSuite
+
+\startTestSuite[deleteSymbol]
+
+\startCHeader
+typedef void (DeleteSymbol)(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
+#define deleteSymbol(aDict, aSymbol)            \
+  (                                             \
+    assert(aDict->jInterp),                     \
+    assert(getDictionariesClass(aDict->jInterp) \
+      ->deleteSymbolFunc),                      \
+    (getDictionariesClass(aDict->jInterp)       \
+      ->deleteSymbolFunc(aDict, aSymbol))       \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void deleteSymbolImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void deleteSymbolImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  if (!aSymbol) return;
+  assert(aDict);
+  //
+  // Look for the first dot
+  //
+  char* symPrefix = strdup(aSymbol);
+  char* restOfSym = strchr(symPrefix, '.');
+  //
+  if (!restOfSym) {
+    //
+    // no dot found so this is the end of the recursion
+    // just delete the symbol
+    //
+    aDict->root = 
+      deleteSymbolRecurse(aDict, aDict->root, aSymbol);
+    free(symPrefix); // this is *our* duplicate of aSymbol
+    return;
+  }
+  //
+  // a dot has been found...
+  // so split the symbol into two a the first dot...
+  //
+  *restOfSym = 0; // terminate the symPrefix at the dot
+  restOfSym++;    // move onto the next char
+  //
+  // now look for the prefix dictionary
+  // start by looking in the dictionary provided
+  //
+  // there is NO dot in the prefix...
+  // so just simply find the symbol
+  //
+  DictNodeObj* aDictSym = findSymbol(aDict, symPrefix);
+  if (!aDictSym || !isDictionary(aDictSym->value)) {
+    //
+    // there is no prefix dictionary
+    // there is nothing to delete...
+    // so free our duplicate of aSymbol
+    // and return
+    //
+    free(symPrefix);
+    return;
+  }
+  //
+  // a prefix dictionary HAS been found
+  // so setup the prefix dictionary
+  //
+  DictObj* prefixDict = (DictObj*)(aDictSym->value);
+  //
+  // and delete the restOfSym from the prefixDict
+  //
+  deleteSymbolImpl(prefixDict, restOfSym);
+  //
+  free(symPrefix); // this is *our* duplicate of aSymbol
+}
+\stopCCode
+
+\startTestCase[should delete random symbols from a randomly created dictionary]
+\startCTest
+  srand(time(NULL));
+
+  AssertPtrNotNull(jInterp);
+  DictObj *aDict = newDictionary(jInterp, "tests", NULL);
+
+  for (int i = 0; i < 1000; i++) {
+    char itoa[100];
+    sprintf(itoa, "%03d", rand() % 100);
+    createSymbolInThisDictionary(aDict, itoa);
+  }
+  createSymbolInThisDictionary(aDict, "000");
+  createSymbolInThisDictionary(aDict, "100");
+
+  DictNodeObj *aNode = findSymbol(aDict, "000");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "000");
+  AssertPtrEquals(aDict->firstSymbol, aNode);
+  
+  aNode = findSymbol(aDict, "100");
+  AssertPtrNotNull(aNode);
+  AssertStrEquals(aNode->symbol, "100");
+  aNode = aDict->firstSymbol;
+  while (aNode->next) aNode = aNode->next;
+  AssertStrEquals(aNode->symbol, "100");
+  
+  for (int i = 0; i < 1000; i++) {
+    char itoa[100];
+    int randNum = rand() % 100;
+    //
+    if (randNum == 0 || randNum == 100) continue;
+    //
+    sprintf(itoa, "%03d", randNum);
+    deleteSymbol(aDict, itoa);
+    DictNodeObj *aNode = aDict->firstSymbol;
+    AssertStrEquals(aNode->symbol, "000");
+    while (aNode->next) {
+      AssertStrNotEquals(aNode->symbol, itoa);
+      aNode = aNode->next;
+    }
+    AssertStrEquals(aNode->symbol, "100");   
+    while (aNode->previous) {
+      AssertStrNotEquals(aNode->symbol, itoa);
+      aNode = aNode->previous;
+    }
+    AssertStrEquals(aNode->symbol, "000");
+  }  
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[findLUBSymbol]
+\startCHeader
+typedef DictNodeObj *(FindLUBSymbol)(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
+#define findLUBSymbol(aDict, aSymbol)           \
+  (                                             \
+    assert(aDict),                              \
+    assert(getDictionariesClass(aDict->jInterp) \
+      ->findLUBSymbolFunc),                     \
+    (getDictionariesClass(aDict->jInterp)       \
+      ->findLUBSymbolFunc(aDict, aSymbol))      \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern DictNodeObj* findLUBSymbolImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+DictNodeObj* findLUBSymbolImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  assert(aDict);
+  if (!aSymbol) return aDict->firstSymbol;
+  return findLUBSymbolRecurse(aDict, aDict->root, aSymbol);
+}
+\stopCCode
+\stopTestSuite
+
+\startTestSuite[createSymbolInThisDictionary]
+
+\setCHeaderStream{private}
+\startCHeader
+extern DictNodeObj* createSymbolInThisDictionary(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+DictNodeObj* createSymbolInThisDictionary(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  assert(aDict);
+  if (!aSymbol) return NULL;
+  DictNodeObj* aSym =
+    findSymbolInThisDictionary(aDict, aSymbol);
+  if (!aSym) {
+    aDict->root = insertSymbol(aDict, aSymbol);
+    aSym = findSymbolInThisDictionary(aDict, aSymbol);
+  }
+  return aSym;
+}
+\stopCCode
+\stopTestSuite
+
+\startTestSuite[getSymbolEntry]
+
+\startCCode
+DictNodeObj* walkEntryPath(
+  DictObj    *aDict,
+  Symbol     *aSymbol,
+  FindSymbol *symbolFinder
+) {
+  assert(aDict);
+  assert(aSymbol);
+  DEBUG(aDict->jInterp,
+    "walkEntryPath: [%s](%p) [%s] %p\n",
+    aDict->name, aDict, aSymbol, symbolFinder
+  );
+  //
+  // Look for the first dot
+  //
+  char* symPrefix = strdup(aSymbol);
+  char* restOfSym = strchr(symPrefix, '.');
+  //
+  if (!restOfSym) {
+    DEBUG(aDict->jInterp, "no dot found in [%s]\n", aSymbol);
+    //
+    // no dot found so this is the end of the recursion
+    // just find the symbol or create one
+    //
+    DictNodeObj* aSym = symbolFinder(aDict, aSymbol);
+    if (!aSym) {
+      DEBUG(aDict->jInterp,
+        "creating new entry in [%s](%p) using [%s]\n",
+        aDict->name, aDict, aSymbol
+      );
+      aSym = createSymbolInThisDictionary(aDict, aSymbol);
+    }
+    free(symPrefix); // this is *our* duplicate of aSymbol
+    DEBUG(aDict->jInterp,
+      "using symbol [%s](%p) value: %p\n",
+      (aSym ? aSym->symbol : ""),
+      aSym,
+      (aSym ? aSym->value : NULL)
+    );
+    return aSym;
+  }
+  //
+  // a dot has been found...
+  // so split the symbol into two at the first dot...
+  //
+  *restOfSym = 0; // terminate the symPrefix at the dot
+  restOfSym++;    // move onto the next char
+  DEBUG(aDict->jInterp,
+    "dot found in [%s] splitting into [%s] and [%s]\n",
+    aSymbol, symPrefix, restOfSym
+  );
+
+  //
+  // setup the prefix dictionary
+  //
+  DictObj* prefixDict = NULL;
+  //
+  // now look for the prefix dictionary
+  // start by looking in the dictionary provided
+  //
+  DictNodeObj *aDictSym =
+    walkEntryPath(aDict, symPrefix, symbolFinder);
+  assert(aDictSym);
+  //
+  if (!aDictSym->value) {
+    //
+    // no dictionary found...
+    // create a new one...
+    // and use it as the prefix Dictionary
+    //
+    // WHICH PARENT DICTIONARY SHOULD WE USE?
+    //
+    prefixDict = 
+      newDictionary(aDict->jInterp, symPrefix, aDict);
+    aDictSym->value = (JObj*)prefixDict;
+    DEBUG(aDict->jInterp,
+      "no dictionary found in [%s](%p) created new dictionary: [%s](%p)\n",
+      symPrefix, aDict, prefixDict->name, prefixDict
+    );
+    //
+  } else {
+    //
+    // The prefix entry has been found...
+    //
+    if (isDictionary(aDictSym->value)) {
+      //
+      // the symbol IS a dictionary
+      // so use it as the prefix dictionary
+      //
+      prefixDict = (DictObj*)(aDictSym->value);
+      DEBUG(aDict->jInterp,
+        "prefix dictionary found: [%s](%p)\n",
+        prefixDict->name, prefixDict
+      );
+      //
+    } else {
+      //
+      // the symbol is NOT a dictionary...
+      // so replace the dot with an '_'
+      restOfSym--;
+      *restOfSym = '_';
+      // and retry...
+      //
+      // use the original dictionary
+      //
+      prefixDict = aDict;
+      //
+      // and use the modified symbol
+      //
+      restOfSym = symPrefix;
+      DEBUG(aDict->jInterp,
+        "non-dictionary found for prefix [%s]\n", symPrefix
+      );
+      DEBUG(aDict->jInterp,
+        "re-trying with dictionary: [%s](%p) and symbol [%s]\n",
+        prefixDict->name, prefixDict, restOfSym
+      );
+    }
+  }
+  assert(prefixDict);
+  //
+  DictNodeObj* aSym =
+    walkEntryPath(prefixDict, restOfSym, symbolFinder);
+  //
+  free(symPrefix); // this is *our* duplicate of aSymbol
+  DEBUG(aDict->jInterp,
+    "using symbol [%s](%p) value: %p\n",
+    (aSym ? aSym->symbol : ""),
+    aSym,
+    (aSym ? aSym->value : NULL)
+  );
+
+  return aSym;
+}
+\stopCCode
+
+\startCHeader
+typedef DictNodeObj *(GetSymbolEntry)(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
+#define getSymbolEntry(aDict, aSymbol)          \
+  (                                             \
+    assert(aDict),                              \
+    assert(getDictionariesClass(aDict->jInterp) \
+      ->getSymbolEntryFunc),                    \
+    (getDictionariesClass(aDict->jInterp)       \
+      ->getSymbolEntryFunc(aDict, aSymbol))     \
+  )
+
+#define getSymbolEntryInChild(aDict, aSymbol)       \
+  (                                                 \
+    assert(aDict),                                  \
+    assert(getDictionariesClass(aDict->jInterp)     \
+      ->getSymbolEntryFunc),                        \
+    (getDictionariesClass(aDict->jInterp)           \
+      ->getSymbolEntryInChildFunc(aDict, aSymbol))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern DictNodeObj* getSymbolEntryImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+
+extern DictNodeObj* getSymbolEntryInChildImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+DictNodeObj* getSymbolEntryImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  assert(aDict);
+  assert(aSymbol);
+  DEBUG(aDict->jInterp,
+    "getSymbolEntry: %p [%s]\n", aDict, aSymbol
+  );
+  return walkEntryPath(
+    aDict,
+    aSymbol,
+    findSymbol
+  );
+}
+
+DictNodeObj* getSymbolEntryInChildImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol
+) {
+  assert(aDict);
+  assert(aSymbol);
+  DEBUG(aDict->jInterp,
+    "getSymbolEntryInChild: %p [%s]\n", aDict, aSymbol
+  );
+  return walkEntryPath(
+    aDict,
+    aSymbol,
+    findSymbolInThisDictionary
+  );
+}
+\stopCCode
+
+\startTestCase[should get and delete dotted symbols]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  DictObj* parentDict =
+    newDictionary(jInterp, "parent", NULL);
+  AssertPtrNotNull(parentDict);
+  AssertPtrNull(parentDict->parent);
+  DictNodeObj* parentEntry =
+    createSymbolInThisDictionary(parentDict, "parent");
+  AssertPtrNotNull(parentEntry);
+  parentEntry->value = (JObj*)parentDict;
+  
+  DictObj* childDict =
+    newDictionary(jInterp, "child", parentDict);
+  AssertPtrNotNull(childDict);
+  AssertPtrNotNull(childDict->parent);
+  AssertPtrEquals(childDict->parent, parentDict);
+  DictNodeObj* childEntry =
+    createSymbolInThisDictionary(parentDict, "child");
+  AssertPtrNotNull(childEntry);
+  childEntry->value = (JObj*)childDict;
+  
+  DictNodeObj* testSym = 
+    createSymbolInThisDictionary(childDict, "test");
+  AssertPtrNotNull(testSym);
+  AssertStrEquals(testSym->symbol, "test");
+  
+  DictNodeObj* foundSym =
+    getSymbolEntry(childDict, "test");
+  AssertPtrNotNull(foundSym);
+  AssertPtrEquals(foundSym, testSym);
+
+  foundSym = getSymbolEntry(parentDict, "child.test");
+  AssertPtrNotNull(foundSym);
+  AssertPtrEquals(foundSym, testSym);
+  
+  foundSym = getSymbolEntry(childDict, "child.test");
+  AssertPtrNotNull(foundSym);
+  AssertPtrEquals(foundSym, testSym);
+  
+  DictNodeObj* aTestSym =
+    getSymbolEntry(parentDict, "assert.test");
+  AssertPtrNotNull(aTestSym);
+  AssertPtrNotEquals(aTestSym, testSym);
+  AssertStrEquals(aTestSym->symbol, "test");
+  
+  DictNodeObj* aDictSym =
+    getSymbolEntry(childDict, "assert");
+  AssertPtrNotNull(aDictSym);
+  AssertPtrNotNull(aDictSym->value);
+  AssertIntTrue(isDictionary(aDictSym->value));
+  DictObj* aDict = (DictObj*)(aDictSym->value);
+  
+  foundSym = getSymbolEntry(aDict, "test");
+  AssertPtrNotNull(foundSym);
+  AssertPtrEquals(foundSym, aTestSym);
+  
+  deleteSymbol(childDict, "assert.test");
+  foundSym = findSymbol(childDict, "assert");
+  AssertPtrNotNull(foundSym);
+  AssertPtrEquals(foundSym, aDictSym);
+  AssertPtrNotNull(foundSym->value);
+  AssertIntTrue(isDictionary(foundSym->value));
+  AssertPtrEquals(foundSym->value, (JObj*)aDict);
+  
+  foundSym = findSymbol(aDict, "test");
+  AssertPtrNull(foundSym);
+  
+  foundSym = findSymbol(childDict, "test");
+  AssertPtrNotNull(foundSym);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[getAsSymbol]
+
+\startCHeader
+typedef JObj *(GetAsSymbol)(
+  DictObj *aDict,
+  Symbol  *aSymbol,
+  Symbol  *fileName,
+  size_t   line
+);
+
+#define getAsSymbol(aDict, aSymbol, fileName, line)       \
+  (                                                       \
+    assert(aDict),                                        \
+    assert(getDictionariesClass(aDict->jInterp)           \
+      ->getAsSymbolFunc),                                 \
+    (getDictionariesClass(aDict->jInterp)                 \
+      ->getAsSymbolFunc(aDict, aSymbol, fileName, line))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* getAsSymbolImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol,
+  Symbol  *fileName,
+  size_t   line
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* getAsSymbolImpl(
+  DictObj *aDict,
+  Symbol  *aSymbol,
+  Symbol  *fileName,
+  size_t   line
+) {
+  assert(aDict);
+  DictNodeObj* aSym = getSymbolEntryImpl(aDict, aSymbol);
+  assert(aSym);
+  return newSymbol(aDict->jInterp, aSym->symbol, fileName, 0);
+}
+\stopCCode
+\stopTestSuite
+
+\startTestSuite[listDefinitions]
+
+\startCHeader
+typedef void (ListDefinitions)(
+  DictObj         *aDict,
+  StringBufferObj *aStrBuf
+);
+
+#define listDefinitions(aDict, aStrBuf)         \
+  (                                             \
+    assert(aDict),                              \
+    assert(getDictionariesClass(aDict->jInterp) \
+      ->listDefinitionsFunc),                   \
+    (getDictionariesClass(aDict->jInterp)       \
+      ->listDefinitionsFunc(aDict, aStrBuf))    \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void listDefinitionsImpl(
+  DictObj         *aDict,
+  StringBufferObj *aStrBuf
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void listDefinitionsImpl(
+  DictObj         *aDict,
+  StringBufferObj *aStrBuf
+) {
+  assert(aDict);
+  DictNodeObj* curNode = aDict->firstSymbol;
+  while(curNode) {
+    if (curNode->value) {
+      strBufPrintf(aStrBuf,"%s == ", curNode->symbol);
+      printLoL(aStrBuf, curNode->value);
+      strBufPrintf(aStrBuf,"\n");
+    }
+    curNode = curNode->next;
+  }
+}
+\stopCCode
+
+\startTestCase[print Dictionary]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+
+  DictObj* aLoL = newDictionary(jInterp, "tests", NULL);
+  AssertPtrNotNull(aLoL);
+  printLoL(aStrBuf, (JObj*)aLoL);
+  AssertStrEquals(getCString(aStrBuf), "dict:tests ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[isDictionary]
+\startCHeader
+#define isDictionary(aLoL)              \
+  (                                     \
+    (                                   \
+      (aLoL) &&                         \
+      asType(aLoL) &&                   \
+      (asTag(aLoL) == DictionariesTag)  \
+    ) ?                                 \
+      TRUE :                            \
+      FALSE                             \
+  )
+\stopCHeader
+\stopTestSuite
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityDictionaryCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityDictionaryCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "dictionaryCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != DictionariesTag) return FALSE;
+  if (lolA != lolB) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing dictionaries]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printDictionaryCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+static void printDictionaryName(
+  StringBufferObj *aStrBuf,
+  DictObj         *aDict
+) {
+  assert(aDict);
+  if (aDict->parent) {
+    printDictionaryName(aStrBuf, aDict->parent);
+    strBufPrintf(aStrBuf, ".");
+  } else {
+    strBufPrintf(aStrBuf, "dict:");
+  }
+  strBufPrintf(aStrBuf, aDict->name);
+}
+
+Boolean printDictionaryCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == DictionariesTag);
+  
+  DictObj* theDict = (DictObj*)aLoL;
+  
+  printDictionaryName(aStrBuf, theDict);
+  strBufPrintf(aStrBuf, " ");
+  
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print dictionaries]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[DictionariesTag]);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  DictObj* aNewDictionary = newDictionary(jInterp, "tests", NULL);
+  AssertPtrNotNull(aNewDictionary);
+  printLoL(aStrBuf, (JObj*)aNewDictionary);
+  AssertStrEquals(getCString(aStrBuf), "dict:tests ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerDictionaries]
+
+\startCHeader
+typedef struct dictionaries_class_struct {
+  JClass           super;
+  NewDictionary   *newDictionaryFunc;
+  GetSymbolEntry  *getSymbolEntryFunc;
+  GetSymbolEntry  *getSymbolEntryInChildFunc;
+  GetAsSymbol     *getAsSymbolFunc;
+  DeleteSymbol    *deleteSymbolFunc;
+  FindLUBSymbol   *findLUBSymbolFunc;
+  ListDefinitions *listDefinitionsFunc;  
+} DictionariesClass;
+
+\stopCHeader
+
+\startCCode
+static Boolean initializeDictionaries(
+  JoyLoLInterp *jInterp,
+  JClass       *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerDictionaries(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerDictionaries(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  DictionariesClass* theCoAlg
+    = joyLoLCalloc(1, DictionariesClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name                = DictionariesName;
+  theCoAlg->super.objectSize          = sizeof(DictObj);
+  theCoAlg->super.initializeFunc      = initializeDictionaries;
+  theCoAlg->super.registerFunc        = registerDictionaryWords;
+  theCoAlg->super.equalityFunc        = equalityDictionaryCoAlg;
+  theCoAlg->super.printFunc           = printDictionaryCoAlg;
+  theCoAlg->newDictionaryFunc         = newDictionaryImpl;
+  theCoAlg->getSymbolEntryFunc        = getSymbolEntryImpl;
+  theCoAlg->getSymbolEntryInChildFunc = getSymbolEntryInChildImpl;
+  theCoAlg->getAsSymbolFunc           = getAsSymbolImpl;
+  theCoAlg->deleteSymbolFunc          = deleteSymbolImpl;
+  theCoAlg->findLUBSymbolFunc         = findLUBSymbolImpl;
+  theCoAlg->listDefinitionsFunc       = listDefinitionsImpl;  
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == DictionariesTag);
+  assert(jInterp->coAlgs[tag]);
+   
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Dictionaries coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerDictionaries
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getDictionariesClass(jInterp));
+  DictionariesClass *coAlg = getDictionariesClass(jInterp);
+  registerDictionaries(jInterp);
+  AssertPtrNotNull(getDictionariesClass(jInterp));
+  AssertPtrEquals(getDictionariesClass(jInterp), coAlg);
+  AssertIntEquals(
+    getDictionariesClass(jInterp)->super.objectSize,
+    sizeof(DictObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

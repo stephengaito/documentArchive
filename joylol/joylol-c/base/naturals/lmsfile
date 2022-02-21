@@ -1,0 +1,59 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'naturals.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'words.tex',
+    'lua.tex',
+    'conclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'naturals',
+  },
+  cHeaderFiles = {
+    'joylol/naturals.h',
+    'joylol/naturals-private.h',
+  },
+  cCodeFiles = {
+    'naturals.c',
+  },
+  joylolCodeFiles = {
+  },
+  cCodeLibs = {
+    '-lgmp',
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+})
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/naturals.h',
+    'joylol/naturals-private.h',
+  },
+  cCodeFiles = {
+    'naturals.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+    '-lgmp',
+  },
+})

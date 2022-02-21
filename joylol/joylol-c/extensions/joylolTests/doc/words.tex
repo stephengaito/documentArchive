@@ -1,0 +1,1394 @@
+% A ConTeXt document [master document: joylolTests.tex]
+
+\section[title=Words]
+\setJoylolTracingOff\setJoylolVerboseOff
+
+\TODO{ Consider changing the defineContext and defineNaming syntax to be 
+similar to new define syntax; Fix dynamic definitions: defineTestsSetup, 
+defineTestsTeardown, defineTestSuiteSetup, defineTestSuiteTeardown, } 
+
+\startTestSuite[tests and assert naming scopes]
+
+We start by defining a naming scope to contain all of the Joylol test 
+associated words. This naming space is denoted \quote{tests} in the 
+\quote{globals} naming scope. The \quote{tests} naming scope's parent 
+naming scope is also \quote{globals}. 
+
+\startJoylolCode
+;; create a tests naming scope
+globals      ;; parent naming scope
+globals      ;; defining naming scope
+tests        ;; defined name of this new naming scope
+defineNaming ;; make the definition
+\stopJoylolCode
+
+We also create a naming scope to contain all of the assertion related 
+words. 
+
+\startJoylolCode
+;; create an assert naming scope
+tests        ;; parent naming scope
+globals      ;; defining naming scope
+assert       ;; defined name of this new naming scope
+defineNaming ;; make the definition
+\stopJoylolCode
+\stopTestSuite
+
+\startTestSuite[running all tests]
+
+The following figure is a summary of the word/switch pattern of 
+\type{runAllTests} word: 
+
+\externalfigure[runJoylolTestAll.pdf][width=10cm]
+
+\startJoylolCode
+(
+  runAllTests           ;; name of word
+  { true }              ;; pre condition
+  (                     ;; start of the runAllTests word
+    "running ALL TESTS" ;;
+    writeOutNL          ;; announce our presence
+\stopJoylolCode
+
+We start by localizing the running context's naming scope and then 
+defining the testsRunnerNS and testsMonitorNS naming scopes in the 
+localized naming scope. 
+
+\startJoylolCode
+    ;; localize the naming scope of the current context
+    allTestsLocals  ;; name of the localized naming scope
+    localizeNaming  ;; localize the naming scope
+\stopJoylolCode
+
+\startJoylolCode
+    ;; undefine any existing testsRunnerNS
+    ( testsRunnerNS )
+    thisNaming
+    undefine
+  
+    ;; create the testsRunnerNS
+    thisNaming    ;; define the parent's naming scope
+    thisNaming    ;; define in the localized naming scope
+    testsRunnerNS ;; name of the new naming scope
+    defineNaming  ;; create the new naming scope
+                  ;; to be used as the testsRunner's naming scope
+\stopJoylolCode
+
+\startJoylolCode
+    ;; undefine any existing testsMonitorNS
+    ( testsMonitorNS )
+    thisNaming
+    undefine
+  
+    ;; create the testsMonitorNS
+    thisNaming    ;; define the parent's naming scope
+    thisNaming    ;; define in the localized naming scope
+    testsMonitorNS;; name of the new naming scope
+    defineNaming  ;; create the new naming scope
+                  ;; to be used as the testsMonitor's naming scope
+\stopJoylolCode
+
+We now want to define default tests setup and teardown words in the 
+testsRunnerNS. 
+
+\startJoylolCode
+    (
+      testsSetup  ;; name of the new word
+      { true }    ;; pre condition
+      ()          ;; empty default setup actions
+      { true }    ;; post condition
+    ) 
+    testsRunnerNS ;; define in the testsRunnerNS
+    define        ;; define the testsSetup word
+\stopJoylolCode
+
+\startJoylolCode
+    (
+      testsTeardown ;; name of the new word
+      { true }    ;; pre condition
+      ()          ;; empty default teardown actions
+      { true }    ;; post condition
+    ) 
+    testsRunnerNS ;; define in the testsRunnerNS
+    define        ;; define the testsTeardown word
+\stopJoylolCode
+
+We now create the testsRunner context.
+
+\startJoylolCode
+    ;; undefine any existing testsRunner context
+    ( testsRunner )
+    thisNaming
+    undefine
+
+    ;; define the testsRunner context
+                  ;; testsRunner process (uses provided list of words)
+    ( tests.testsFinished )
+    append        ;; ensure we get the tests results
+                  ;; when all suites have been run
+    ()            ;; testsRunner data
+    testsRunnerNS ;; naming scope of the new context
+    thisNaming    ;; defined in the localized naming scope
+    testsRunner   ;; name of the new context
+    defineContext ;; define the new context
+\stopJoylolCode
+
+We now create the testsMonitor context.
+
+\startJoylolCode
+    ;; undefine any existing testsMonitor context
+    ( testsMonitor )
+    thisNaming
+    undefine
+
+    ;; define the testsMonitor context
+    ( interpret )   ;; begin the testsMonitor process stack
+    thisContext     ;; interpret thisContext onto data stack
+    append          ;; append the result
+    ( switchCtx )   ;;
+    append          ;; append the word switchCtx to the
+                    ;; testsMonitor's initial process stack
+  
+    (
+      0             ;; number of attempted suites
+      0             ;; number of failed suites
+      ()            ;; list of failure reports
+    )               ;; testsMonitor data
+  
+    testsMonitorNS  ;; naming scope of the new context
+    thisNaming      ;; defining naming scope
+    testsMonitor    ;; defined name of the new context
+    defineContext   ;; define the context
+\stopJoylolCode
+
+Finally we want to switch to the testsRunner context, however, we also 
+want to specify what actions to take when the testsMonitor context 
+switches context back to this context. We do this by placing our context 
+switch to testsRunner and any subsequent actions into a list and then we 
+interpret this list. 
+
+\startJoylolCode
+    ;; switch to the testsRunner context and run all of the tests
+    (
+      ;; switch to the testsRunner context
+      testsRunner ;; place the testsRunner context on the stack
+      switchCtx   ;; switch to the testsRunner context
+    
+      ;; when we are re-activated
+      "finished ALL TESTS"  ;;
+      writeOutNL            ;; say we are done
+    )
+    interpret     ;; place this list of actions onto
+                  ;; our process stack and do them
+  )
+  { true }        ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+We now define the \type{defineTestsSetup} and \type{defineTestsTeardown} 
+words. While defined in the tests naming scope, they will be run in the 
+testsRunner and its associated testsRunnerNS. 
+
+\startJoylolCode
+( 
+  defineTestsSetup ;; name of word
+  { true }         ;; pre condition
+  (
+    "defined tests setup"
+    writeOutNL     ;; tell everyone we have been run
+  
+                   ;; we use the provided definition
+    (
+      setupTests   ;; name of the new word
+      { true }     ;; pre condition
+      swap12D
+      { true }     ;; post condition
+    )
+    thisNaming     ;; defining naming scope
+    define
+  )
+  { true }         ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+\startJoylolCode
+(
+  defineTestsTeardown ;; name of word
+  { true }            ;; pre condition
+  (
+    "defined tests teardown"
+    writeOutNL        ;; tell everyone we have been run
+
+                      ;; we use the provided definition
+    ( 
+      teardownTests   ;; name of the new word
+      { true }        ;; pre condition
+      swap12D
+      { true }        ;; post condition
+    )
+    thisNaming        ;; defining naming scope
+    define
+  )
+  { true }            ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+Once a particular test suite has finished, we need summarize the results 
+and pass them to the tests runner. We do this with a pair of words one, 
+\type{suiteFinished}, run in the suiteRunner and the other, 
+\type{reportSuiteResults}, run in the suiteMonitor. 
+
+\startJoylolCode
+(
+  testsFinished  ;; name of word
+  { true }       ;; pre condition
+  (
+    ( tests.reportTestsResult )
+    testsMonitor
+    switchCtx
+  )
+  { true }       ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+\startJoylolCode
+(
+  reportTestsResult ;; name of word
+  { true }          ;; pre condition
+  (
+                    ;; there is nothing more to do
+                    ;; the testsMonitor already has
+                    ;; the context switch 
+  )
+  { true }          ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+\stopTestSuite
+
+\startTestSuite[running a test suite]
+
+The following figure is a summary of the word/switch pattern of 
+\type{runTestSuite} word: 
+
+\externalfigure[runJoylolTestSuite.pdf][width=10cm]
+
+\startJoylolCode
+(
+  runTestSuite
+  { true }                ;; pre condition
+  (                       ;; start of the runTestSuite word
+    "running test suite"  ;;
+    writeOutNL            ;; announce our presence
+\stopJoylolCode
+
+We are running in the testsRunner context so we already have a 
+\quote{localized} naming scope. So for the \type{runTestSuite} word we 
+only need to create the suiteRunnerNS and suiteMonitorNS naming scopes. 
+
+\startJoylolCode
+    ;; undefine any existing suiteRunnerNS
+    ( suiteRunnerNS )
+    thisNaming
+    undefine
+
+    ;; create the suiteRunnerNS
+    thisNaming    ;; define the parent's naming scope
+    thisNaming    ;; define in the localized naming scope
+    suiteRunnerNS ;; name of the new naming scope
+    defineNaming  ;; create the new naming scope
+                  ;; to be used as the suiteRunner's naming scope
+\stopJoylolCode
+
+\startJoylolCode
+    ;; undefine any existing suiteMonitorNS
+    ( suiteMonitorNS )
+    thisNaming
+    undefine
+
+    ;; create the suiteMonitorNS
+    thisNaming      ;; define the parent's naming scope
+    thisNaming      ;; define in the localized naming scope
+    suiteMonitorNS  ;; name of the new naming scope
+    defineNaming    ;; create the new naming scope
+                    ;; to be used as the suiteMonitor's naming scope
+\stopJoylolCode
+
+We now want to define the default suite setup and teardown words in the 
+suiteRunnerNS. 
+
+\startJoylolCode
+    (
+      suiteSetup  ;; name of the new word
+      { true }    ;; pre condition
+      ()          ;; empty default setup actions
+      { true }    ;; post condition
+    )
+    suiteRunnerNS ;; define in the suiteRunnerNS
+    define        ;; define the suiteSetup word
+\stopJoylolCode
+
+\startJoylolCode
+    (
+      suiteTeardown ;; name of the new word
+      { true } ;; pre condition
+      ()            ;; empty default teardown actions
+      { true } ;; post condition
+    )
+    suiteRunnerNS ;; define in the suiteRunnerNS
+    define        ;; define the suiteTeardown word
+\stopJoylolCode
+
+We now create the suiteRunner context.
+
+\startJoylolCode
+    ;; undefine any existing suiteRunner context
+    ( suiteRunner )
+    thisNaming
+    undefine
+
+    ;; define the suiteRunner context
+                ;; suiteRunner process (uses provided list of words)
+    ( tests.suiteFinished )
+    append        ;; ensure we get the suite results
+                  ;; at the end of the suite
+    ()            ;; suiteRunner data
+    suiteRunnerNS ;; naming scope of the new context
+    thisNaming    ;; defined in the localized naming scope
+    suiteRunner   ;; name of the new context
+    defineContext ;; define the new context
+\stopJoylolCode
+
+We now create the suiteMonitor context.
+
+\startJoylolCode
+    ;; undefine any existing suiteMonitor context
+    ( suiteMonitor )
+    thisNaming
+    undefine
+
+    ;; define the suiteMonitor context
+    ( interpret )   ;; begin the suiteMonitor process stack
+    thisContext     ;; interpret thisContext onto data stack
+    append          ;; append the result
+    ( switchCtx )   ;;
+    append          ;; append the word switchCtx to the 
+                    ;; suiteMonitor's initial process stack
+  
+    (
+      0             ;; number of attempted cases
+      0             ;; number of failed cases
+      ()            ;; list of failure reports
+    )               ;; suiteMonitor data
+  
+    suiteMonitorNS  ;; naming scope of the new context
+    thisNaming      ;; defining naming scope
+    suiteMonitor    ;; name of the new context
+    defineContext   ;; define the context
+\stopJoylolCode
+
+Finally we want to switch to the suiteRunner context, however, again, we 
+also want to specify what actions to take when the suiteMonitor context 
+switches back to this context. We do this by placing our context switch to 
+suiteRunner and any subsequent actions into a list and then we interpret 
+this list. 
+
+\startJoylolCode
+    ;; switch to the suiteRunner context and run the suite
+    (
+      ;; switch to the suiteRunner context
+      suiteRunner ;; place the suiteRunner context on the stack
+      switchCtx   ;; switch to the suiteRunner context
+    
+      ;; when we are re-activated
+      ;; ... HOW DO WE SWITCH BACK???!!
+    )
+    interpret
+  )
+  { true }        ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+We now define the \type{recordTestSutieDetails}, 
+\type{defineTestSuiteSetup}, and \type{defineTestSuiteTeardown} words. 
+
+\startJoylolCode
+(
+  recordTestSuiteDetails
+  { true } ;; pre condition
+  (
+    (
+      newLine
+      "-------------------------------------"
+      newLine
+      "jTS:"
+    )           ;; format a sign that we are running
+                ;; the test suite
+    prepend     ;; prepend this sign to the name of the suite
+    100         ;; limit the printLoL
+    swap12D     ;; put the lol and the depth limit 
+                ;; in the correct order
+    printLoL    ;; print it to a string
+    writeOutNL  ;; write out the string
+  )
+  { true }      ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+\startJoylolCode
+(
+  defineTestSuiteSetup
+  { true }        ;; pre condition
+  (
+    "defined test suite setup"
+    writeOutNL    ;; tell everyone we have been run
+
+                  ;; we use the provided definition
+    (
+      setupSuite  ;; name of the new word
+      { true }    ;; pre condition
+      swap12D
+      { true }    ;; post condition
+    )
+    thisNaming  ;; defining naming scope
+    define
+  )
+  { true } ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+\startJoylolCode
+(
+  defineTestSuiteTeardown
+  { true } ;; pre condition
+  (
+    "defined test suite teardown"
+    writeOutNL    ;; tell everyone we have been run
+
+    (
+      teardownSuite ;; name of the new word
+                    ;; we use the provided definition
+      { true }      ;; pre condition
+      swap12D
+      { true }      ;; post condition
+    )
+    thisNaming      ;; defining naming scope
+    define
+  )
+  { true }        ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+Once a particular test suite has finished, we need summarize the results 
+and pass them to the tests runner. We do this with a pair of words one, 
+\type{suiteFinished}, run in the suiteRunner and the other, 
+\type{reportSuiteResults}, run in the suiteMonitor. 
+
+\startJoylolCode
+(
+  suiteFinished
+  { true }   ;; pre condition
+  (
+    ( tests.reportSuiteResults )
+    suiteMonitor
+    switchCtx
+  )
+  { true } ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+\startJoylolCode
+( 
+  reportSuiteResults
+  { true }  ;; pre condition
+  (
+            ;; there is nothing more to do
+            ;; the suiteMonitor already has
+            ;; the context switch 
+  )
+  { true }  ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+\stopTestSuite
+
+\startTestSuite[runTestCase]
+
+Our next task, over the next following code fragments, is to define the 
+runTestCase word. This word takes a test case, as a list of the words to 
+be tested intermingled with assertions, and creates the caseMonitor and 
+caseRunner contexts which together run the test case provided. To be 
+completely re-entrant, the caseMonitor and caseRunner contexts are stored 
+in the running context's localized naming scope. 
+
+The following figure is a summary of the word/switch pattern of 
+\type{runTestCase} word: 
+
+\externalfigure[runJoylolTestCase.pdf][width=10cm]
+
+\startJoylolCode
+( 
+  runTestCase   ;; the name of the new word
+  { true }      ;; pre condition
+  (             ;; start of the runTestCase word
+\stopJoylolCode
+
+We are running in the suiteRunner context so we already have a 
+\quote{localized} naming scope. So for the \type{runTestCase} word we only 
+need to create the caseRunnerNS and caseMonitorNS naming scopes. 
+
+\startJoylolCode
+    ;; undefine any existing caseRunnerNS
+    ( caseRunnerNS )
+    thisNaming
+    undefine
+
+    ;; create the caseRunnerNS
+    thisNaming   ;; parent naming scope
+    thisNaming   ;; define in localized naming scope
+    caseRunnerNS ;; name of the new naming scope
+    defineNaming ;; create a new naming scope
+                 ;; to be used as the caseRunner's naming scope
+\stopJoylolCode
+
+\startJoylolCode
+    ;; undefine any existing caseMonitorNS
+    ( caseMonitorNS )
+    thisNaming
+    undefine
+
+    ;; create the caseMonitorNS
+    thisNaming    ;; parent naming scope
+    thisNaming    ;; define in the localized naming scope
+    caseMonitorNS ;; name of the new naming scope
+    defineNaming  ;; create a new naming scope
+                  ;; to be used as the caseMonitor's naming scope
+\stopJoylolCode
+
+At this point the test case's list of words and assertions are back on the 
+top of the stack. This list will be used as the caseRunner's initial 
+process stack. We can now add the initial data stack for the caseRunner 
+context, and then setup the new context's naming scope, the defining 
+naming scope and finally the name of the new context.
+
+\startJoylolCode
+    ;; undefine any existing caseRunner context
+    ( caseRunner )
+    thisNaming
+    undefine
+
+    ;; define the caseRunner context
+                  ;; caseRunner process (uses provided list of words)
+    ( tests.caseFinished )
+    append        ;; ensure we get the case results
+                  ;; at the end of the case
+    ()            ;; caseRunner data
+    caseRunnerNS  ;; the naming scope of the new context
+    thisNaming    ;; define in the localized naming scope
+    caseRunner    ;; name of the new context
+    defineContext ;; create and define the context
+\stopJoylolCode
+
+Now we create a caseMonitor context which will keep track of the test 
+results. The caseMonitor's initial process stack should contain the three 
+words, \type{interpret}, the current context, and \type{switchCtx} in this 
+order. When an assertion switches from the caseRunner's context to the 
+caseMonitor context the top of the caseRunner's stack is place onto the 
+top of the caseMonitor's data stack. The \type{interpret} word will then 
+place the words on the top of the caseMonitor's data stack onto the 
+caseMonitor's process stack to be interpreted. The assertion being 
+interpreted \emph{should} ensure it re-places the \type{interpret} word 
+back on the caseMonitor's process stack for use by the next assertion. 
+
+The last two words, the current context and \type{switchCtx}, as used by the 
+textMonitor interpreting the \type{results} word to know which context to 
+switch to with the summary results. 
+
+Since the \type{thisContext} word has to be interpreted in the calling 
+context, we have to \type{append} the result of interpreting the 
+\type{thisContext} word rather than just placing the \type{thisContext} 
+word directly on the caseMonitor's process stack. Once the 
+
+\startJoylolCode
+    ;; undefine any existing caseMonitor context
+    ( caseMonitor )
+    thisNaming
+    undefine
+
+    ;; define the caseMonitor context
+    ( interpret ) ;; begin the caseMonitor process stack
+    thisContext   ;; interpret thisContext 
+    append        ;; append the result of interpreting thisContext
+    ( switchCtx ) ;; 
+    append        ;; append the word switch to the
+                  ;; caseMonitor's initial process stack
+  
+    ( 
+      false       ;; should fail indicator
+      0           ;; number of attempted assertions
+      0           ;; number of failed assertions
+      ()          ;; list of failure reports
+    )             ;; caseMonitor data
+
+    caseMonitorNS ;; the naming scope of the new context
+    thisNaming    ;; defining naming scope
+    caseMonitor   ;; defined name of this new context
+    defineContext ;; create and define the context
+\stopJoylolCode
+
+Finally we switch to the caseRunner context.
+
+\startJoylolCode
+    ;; switch to the caseRunner context and run the assertions
+    caseRunner    ;; place the caseRunner context on the stack
+    switchCtx     ;; switch to the caseRunner context
+  
+  )               ;; end of the runTestCase definition
+  { true }        ;; post condition
+)
+tests             ;; define the new word in this naming scope
+define            ;; define the new runTestCase word
+\stopJoylolCode
+
+We now define the \type{recordTestCaseDetails} word.
+
+\startJoylolCode
+(
+  recordTestCaseDetails
+  { true }      ;; pre condition
+  (
+    "  jTC:"    ;; format a sign that we are running
+                ;; the test case
+    prepend     ;; prepend this sign to the name of the case
+    100         ;; limit the printLoL
+    swap12D     ;; put the lol and the depth limit
+                ;; in the correct order
+    printLoL    ;; print it to string
+    writeOutNL  ;; write out the string
+  )
+  { true }      ;; post condition
+)
+tests
+define
+\stopJoylolCode
+\stopTestSuite
+
+\startTestSuite[communicate case results]
+
+Once a particular test case has finished, we need summarize the results 
+and pass them to the suite runner. We do this with a pair of words one, 
+\type{caseFinished}, run in the caseRunner and the other, 
+\type{reportCaseResults}, run in the caseMonitor. 
+
+\startJoylolCode
+(
+  caseFinished
+  { true } ;; pre condition
+  (
+    ( tests.reportCaseResults )
+    caseMonitor
+    switchCtx
+  )
+  { true } ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+\startJoylolCode
+( 
+  reportCaseResults
+  { true } ;; pre condition
+  (
+    pop1D   ;; ignore the should fail boolean
+            ;; there is nothing more to do
+            ;; the caseMonitor already has
+            ;; the context swtich 
+  )
+  { true }  ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+\stopTestSuite
+
+\startTestSuite[assert.reportAssertion]
+
+In this section we develop the \type{reportAssertion} word in the 
+\type{assert} naming scope. This word takes the result of an individual 
+assertion, switches to the \type{caseMonitor} context and records it 
+before switching back to the \type{caseRunner} context. 
+
+The \type{reportAssertion} word assumes that any previous assertion has 
+left an assertion result list on the top of the caseRunner's data stack. 
+This assertion result list consists of true/false followed by a failure 
+report list (only if the assertion failed). 
+
+\startJoylolCode
+(
+  reportAssertion ;; the name of the new word
+  { true }        ;; pre condition
+  (               ;; start of the reportAssertion word
+                  ;; the assertion report is assumed to be on top
+    (
+      assert.recordAssertion  ;; the task to be done
+      caseRunner  ;; return to caseRunner
+      switchCtx   ;; perform the switch/return
+      interpret   ;; leave an initial interpret for the next switch/call
+    )
+    append
+    caseMonitor   ;; place the caseMonitor context on top of stack
+    switchCtx     ;; switch to the caseMonitor context
+                  ;; (the caseMonitor context will interpret to
+                  ;;  current top of the stack)
+  )               ;; end of the reportAssertion word
+  { true }        ;; post condition
+)
+assert          ;;define the new word in the assert naming scope
+define          ;; define the reportAssertion word
+\stopJoylolCode
+\stopTestSuite
+
+\startTestSuite[assert.recordAssertion]
+
+The \type{recordAssertion} word is run on the caseMonitor context. It 
+assumes that the top of the data stack is a true/false depending upon the 
+success/failure of the previous assertion. If the top of the stack is 
+false, then the \type{recordAssertion} word also expects a list containing 
+the assertion failure reasons as the second item on the stack. The 
+subsequent item on the stack is then the context to which to return so 
+that any further assertions can be run. Finally the last item on the stack 
+is the caseMonitor's record of assertion results. 
+
+\startJoylolCode
+(
+  recordAssertion
+  { true }    ;; pre condition
+  (
+    showStack ;; need to deal with shouldFail....
+    (
+      isTrue
+    )  ;; test
+    (
+      ;; the top of the stack is the caseMonitor's
+      ;; record of assertion results
+      extract
+      ;; the top of the stack is the number of attempts value
+      1 + ;; add one to the top of the stack
+      prepend
+      prepend
+      ;; the top of the stack is the
+      ;; updated record of assertion results
+    )  ;; then action ;; just update the number of attempted tests 
+    (
+      ;; the top of the stack is an assertion failure report list
+      ;; then comes the caseMonitor's record of assertion results
+      append
+      extract
+      ;; top    comes the number of attempts value
+      ;; second comes the number of failures value
+      ;; third  comes the collection of failure reports
+      ;; fourth comes the assertion failure report list
+      1 + ;; add one to the number of attempted
+      swap12D
+      1 + ;; add one to the number of failed
+      append
+      rollupD ;; put current record third
+      append  ;; append the assertion failure report to list or failures
+      append  ;; complete the record of assertion results
+      ;; top comes the updated record of assertion results
+    )  ;; else action ;; update everything
+    ifte
+  )
+  { true }   ;; post condition
+)
+assert
+define
+\stopJoylolCode
+\stopTestSuite
+
+\startTestSuite[assertShouldFail]
+
+The \type{assert.shouldFail} word wraps the interpretation of the body of 
+the should fail assertion in a pair of \type{tests.startShouldFail} and 
+\type{tests.stopShouldFail} words. The \type{startShouldFail} word ensures 
+the top of the caseMonitor data stack contains \type{true} so that any 
+failures are interpreted as successes. The \type{stopShouldFail} word 
+ensures that the top of the caseMonitor data stack contains a \type{false} 
+to ensure any failures are reported as failures. 
+
+We begin by defining the \type{tests.startShouldFail} word. It builds the 
+actions which will pop the top of the data stack and replaces it with a 
+\type{true} and then switch back to the current context. Having setup the 
+appropriate list of actions on the top of the current context's data 
+stack, the \type{startShouldFail} word then switches to the caseMonitor 
+context. The \type{switchCtx} word pops the top of the current context's 
+data stack and pushes it on the top of the caseMonitor's data stack. This 
+all assumes that the top of the caseMonitor's process stack is the 
+\type{interpret} word which will have the effect of interpreting the list 
+of actions copied over from the current context to the caseMonitor's data 
+stack. 
+
+\startJoylolCode
+(
+  startShouldFail
+  { true }        ;; pre condition
+  (
+    (
+      pop1D
+      true
+      dup
+    ) 
+    thisContext
+    append
+    ( switchCtx )
+    append
+    caseMonitor
+    switchCtx
+    pop1D
+  )
+  { true } ;; post condition
+)
+tests
+define 
+\stopJoylolCode 
+
+\startJoylolCode
+(
+  stopShouldFail
+  { true } ;; pre condition
+  (
+    (
+      pop1D
+      false
+      dup
+    )
+    thisContext
+    append
+    ( switchCtx )
+    append
+    caseMonitor
+    switchCtx
+    pop1D
+  )
+  { true } ;; post condition
+)
+tests
+define
+\stopJoylolCode
+
+The \type{assert.shouldFail} word now uses the 
+\type{tests.startShouldFail} and \type{tests.stopShouldFail} words to 
+bracket the interpretation of the actions found quoted on the current 
+context's data stack. 
+
+\startJoylolCode
+(
+  shouldFail
+  { true } ;; pre condition
+  (
+    tests.startShouldFail
+    interpret
+    tests.stopShouldFail
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[assert.shouldFail]
+\startJoylolTest
+( assert.fail ) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.fail]
+
+\startJoylolCode
+(
+  fail
+  { true } ;; pre condition
+  (
+    false
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[assert.fail should fail]
+\startJoylolTest
+( assert.fail ) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.succeed]
+\startJoylolCode
+( 
+  succeed
+  { true } ;; pre condition
+  (
+    true
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[assert.succeed should succeed]
+\startJoylolTest
+assert.succeed
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isBoolean]
+\startJoylolCode
+(
+  isBoolean
+  { true } ;; pre condition
+  (
+    isBoolean
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a boolean ]
+\startJoylolTest
+true
+assert.isBoolean
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is not a boolean]
+\startJoylolTest
+(
+  notABoolean
+  assert.isBoolean
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isTrue]
+
+\startJoylolCode
+(
+  isTrue
+  { true } ;; pre condition
+  (
+    isTrue
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is true]
+\startJoylolTest
+true
+assert.isTrue
+
+notABooleanButTrue
+assert.isTrue
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is not true]
+\startJoylolTest
+(
+  false
+  assert.isTrue 
+) assert.shouldFail
+(
+  ()
+  assert.isTrue
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isFalse]
+
+\startJoylolCode
+(
+  isFalse
+  { true } ;; pre condition
+  (
+    isFalse
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is false]
+\startJoylolTest
+false
+assert.isFalse
+
+()
+assert.isFalse
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is not false]
+\startJoylolTest
+(
+  true
+  assert.isFalse
+) assert.shouldFail
+(
+  notABooleanButTrue
+  assert.isFalse
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isNil]
+
+\startJoylolCode
+(
+  isNil
+  { true } ;; pre condition
+  (
+    isNil
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is nil]
+\startJoylolTest
+()
+assert.isNil
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is not nil]
+\startJoylolTest
+(
+  ( someThingNotNil )
+  assert.isNil
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+
+\stopTestSuite
+
+\startTestSuite[assert.isNotNil]
+
+\startJoylolCode
+(
+  isNotNil
+  { true } ;; pre condition
+  (
+    isNil
+    not
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is not nil]
+\startJoylolTest
+( this is a list )
+assert.isNotNil
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is nil]
+\startJoylolTest
+(
+  ( )
+  assert.isNotNil
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isAnAtom]
+
+\startJoylolCode
+(
+  isAnAtom
+  { true } ;; pre condition
+  (
+    isAnAtom
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is an atom]
+\startJoylolTest
+thisIsAnAtom
+assert.isAnAtom
+thisContext
+assert.isAnAtom
+123
+assert.isAnAtom
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should fail if an object is not an atom]
+\startJoylolTest
+(
+  ( this is a list )
+  assert.isAnAtom
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isAPair]
+
+\startJoylolCode
+(
+  isAPair
+  { true } ;; pre condition
+  (
+    isAPair
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a pair]
+\startJoylolTest
+( this is a list)
+assert.isAPair
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not a pair]
+\startJoylolTest
+(
+  true
+  assert.isAPair
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isANatural]
+
+\startJoylolCode
+(
+  isANatural
+  { true } ;; pre condition
+  (
+    isANatural
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a natural]
+\startJoylolTest
+1234
+assert.isANatural
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not a natural]
+\startJoylolTest
+(
+  aSymbol
+  assert.isANatural
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isASymbol]
+
+\startJoylolCode
+(
+  isASymbol
+  { true } ;; pre condition
+  (
+    isASymbol
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a symbol]
+\startJoylolTest
+aSymbol
+assert.isASymbol
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not a symbol]
+\startJoylolTest
+(
+  12345
+  assert.isASymbol
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isAContext]
+
+\startJoylolCode
+(
+  isAContext
+  { true } ;; pre condition
+  (
+    isAContext
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a context]
+\startJoylolTest
+thisContext
+assert.isAContext
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not a context]
+\startJoylolTest
+(
+  1234
+  assert.isAContext
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[assert.isADictionary]
+
+\startJoylolCode
+(
+  isADictionary
+  { true } ;; pre condition
+  (
+    isADictionary
+    assert.reportAssertion
+  )
+  { true } ;; post condition
+)
+assert
+define
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is a dictionary]
+\startJoylolTest
+thisNaming
+assert.isDictionary
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not a dictionary]
+\startJoylolTest
+(
+  1234
+  assert.isDictionary
+) assert.shouldFail
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+
+\starttyping
+\startTestSuite[assert.isADictNode]
+
+\startJoylolCode
+\stopJoylolCode
+
+\startTestCase[should succeed if an object is]
+\startJoylolTest
+\stopJoylolTest
+\stopTestCase
+
+\startTestCase[should succeed if an object is not]
+\startJoylolTest
+\stopJoylolTest
+\stopTestCase
+\stopTestSuite
+\stoptyping
+
+\setCHeaderStream{private}
+\startCHeader
+extern void registerJoylolTestWords(
+  JoyLoLInterp* jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void registerJoylolTestWords(
+  JoyLoLInterp* jInterp
+) {
+  assert(jInterp);
+
+}
+\stopCCode
+
+\startJoylolCode
+;; a final line
+\stopJoylolCode

@@ -1,0 +1,74 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'joylolTests.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.joylolTests'
+
+joylolTests.targets(lpTargets, {
+  testExecs = {
+    'allJoylolTests',
+  },
+  cHeaderFiles = {
+    'joylol/joylolTests.h',
+    'joylol/joylolTests-private.h',
+  },
+  cCodeFiles = {
+    'joylolTests.c',
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+})
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'joylolTests',
+  },
+  cHeaderFiles = {
+    'joylol/joylolTests.h',
+    'joylol/joylolTests-private.h',
+  },
+  cCodeFiles = {
+    'joylolTests.c',
+  },
+  joylolCodeFiles = {
+    'joylolTests-tests.joy',
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+})
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/joylolTests.h',
+    'joylol/joylolTests-private.h',
+  },
+  cCodeFiles = {
+    'joylolTests.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+})

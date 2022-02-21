@@ -1,0 +1,628 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=Evaluation]
+
+\startCCode
+static void traceAction(
+  ContextObj *aCtx,
+  Symbol     *action,
+  JObj       *aLoL
+) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  DEBUG(jInterp, "traceAction: %p [%s] %p\n",
+    aCtx, action, aLoL);
+  if (aLoL && jInterp->debug) {
+    assert(asType(aLoL));
+    DEBUG(jInterp, "traceAction(lol): %p %p\n",
+      aLoL, asType(aLoL));
+  }
+
+  StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+  strBufPrintf(aStrBuf, "%s: ", action);
+  printLoL(aStrBuf, aLoL);
+  strBufPrintf(aStrBuf, "\n");
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+}
+\stopCCode
+
+\startCHeader
+typedef void (EvalCommandInContext)(
+  ContextObj *aCtx,
+  JObj   *command
+);
+
+#define evalCommandInContext(aCtx, aCommand)      \
+  (                                               \
+    assert(aCtx),                                 \
+    assert(getContextsClass(aCtx->jInterp)        \
+      ->evalCommandInContextFunc),                \
+    (getContextsClass(aCtx->jInterp)              \
+      ->evalCommandInContextFunc(aCtx, aCommand)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+void evalCommandInContextImpl(
+  ContextObj *aCtx,
+  JObj   *command
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void evalCommandInContextImpl(
+  ContextObj *aCtx,
+  JObj       *command
+) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  //assert(command);
+  
+  DEBUG(jInterp, "evalCommandInContext > %p [%s] %p\n",
+    aCtx, aCtx->name, command);
+  //
+  // push this command onto the top of the process stack
+  //
+  pushCtxProcessImpl(aCtx, command);
+  //
+  while(aCtx->process) {
+    //
+    // ensure we have the most recent dictionary
+    //
+    DictObj *theDict = aCtx->dict;
+    assert(theDict);
+    
+    if (aCtx->tracingOn) {
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      strBufPrintf(aStrBuf,
+        "\n----------------------------------------------------\n"
+      );
+      strBufPrintf(aStrBuf,
+        "ctx: %s(%s)\n",
+        aCtx->name, theDict->name
+      );
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    //
+    // pop the next command off the process stack
+    //
+    command = popCtxProcessImpl(aCtx);
+    aCtx->command = command;
+    //assert(command);
+    //
+    if (isCFunction(command)) {
+      //
+      // if the command is a function.. call the function
+      //
+      if (isCtxCFunction(command)) {
+        assert(asCtxCFunc(command));
+        //
+        // this is a CTX CFunction
+        // (we allow it to change the current context
+        //  in addition to any changes of the data and process stacks
+        //  of either the old or new contexts)
+        //
+        if (aCtx->tracingOn) 
+          traceAction(aCtx, "calling(c-ctx)", command);
+        aCtx = (asCtxCFunc(command))(aCtx);
+        assert(aCtx);
+        //
+      } else {
+        assert(asCFunc(command));
+        //
+        // this is a normal CFunction
+        // (this ONLY makes changes to the data and process stacks)
+        //
+        if (aCtx->tracingOn) 
+          traceAction(aCtx, "calling(c)", command);
+        (asCFunc(command))(aCtx);
+        //
+      }
+    } else if (isAssertion(command)) {
+      //
+      // this is an assertion ...
+      //   ... so assert it 
+      //
+      if (aCtx->tracingOn) 
+        traceAction(aCtx, "asserting", command);
+      //
+      if (!evalAssertionInContextImpl(aCtx, (AssertionObj*)command)) {
+        //
+        // this assertion failed... 
+        //   ... so report it
+        //
+        pushNullCtxDataImpl(aCtx);
+        pushOnTopCtxDataImpl(aCtx, command);
+        raiseException(aCtx,
+          "assertion failed"
+        );
+      }
+    } else if (!isSymbol(command)) {
+      //
+      // if the command is not a Symbol ...
+      //  ...  push it onto the top of the data stack
+      //
+      if (aCtx->tracingOn)
+        traceAction(aCtx, "adding(nonSym)", command);
+      pushCtxDataImpl(aCtx, command);
+      //
+    } else {
+      //
+      // if the command is a symbol ...
+      //  ... look up the symbol's association in the dictionary
+      //
+      DictNodeObj* assoc = getSymbolEntry(theDict, asSymbol(command));
+      assert(assoc);
+      //
+      if (!assoc->value) {
+        //
+        // if the association is empty.. push this symbol onto the top
+        // of the data stack (re-evaluating this symbol would lead to an
+        // infinite loop)
+        //
+        if (aCtx->tracingOn)
+          traceAction(aCtx, "adding(noValue)", command);
+        pushCtxDataImpl(aCtx, command);
+        //
+      } else if (isPair(assoc->value)) {
+        //
+        // if the association is a LoL.. push this LoL onto the top of the
+        // process stack
+        //
+        if (aCtx->tracingOn) {
+          traceAction(aCtx, "calling(joylol)", command);
+          traceAction(aCtx, "evaluating", assoc->value);
+        }
+        prependListCtxProcess(aCtx,
+          copyLoL(jInterp, assoc->value));
+        //
+      } else if (isCFunction(assoc->value)) {
+        //
+        // if the association is a function.. call the function
+        //
+        if (isCtxCFunction(assoc->value)) {
+          assert(asCtxCFunc(assoc->value));
+          //
+          // this is a CTX CFunction
+          //
+          if (aCtx->tracingOn) 
+            traceAction(aCtx, "calling(c-ctx)", command);
+          aCtx = (asCtxCFunc(assoc->value))(aCtx);
+          assert(aCtx);
+          //
+        } else {
+          assert(asCFunc(assoc->value));
+          //
+          // this is a normal CFunction
+          //
+          if (aCtx->tracingOn)
+            traceAction(aCtx, "calling(c)", command);
+          (asCFunc(assoc->value))(aCtx);
+          //
+        }
+      } else {
+        //
+        // if the association is NOT a PairAtom or Function...
+        // ... push this new ATOM onto the top of the process stack
+        //
+        if (aCtx->tracingOn) {
+          traceAction(aCtx, "calling(joylol)", command);
+          traceAction(aCtx, "evaluating", assoc->value);
+        }
+        pushCtxProcessImpl(aCtx, assoc->value);
+        //
+      }
+    }
+    if (aCtx->tracingOn) {
+      DEBUG(jInterp, "evalCommandInContext -> tracing%s\n", "");
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      showCtxData(aCtx, aStrBuf);
+      showCtxProcess(aCtx, aStrBuf);
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
+      DEBUG(jInterp, "evalCommandInContext <- tracing%s\n", "");
+    }
+  } // aCtx->process is empty
+  DEBUG(jInterp, "evalCommandInContext < %p %p\n", aCtx, command);
+}
+\stopCCode
+
+\startCHeader
+typedef void (EvalContext)(
+  ContextObj *aCtx
+);
+
+#define evalContext(aCtx)                   \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->evalContextFunc),                   \
+    (getContextsClass(aCtx->jInterp)        \
+      ->evalContextFunc(aCtx))              \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+void evalContextImpl(
+  ContextObj *aCtx
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void evalContextImpl(
+  ContextObj *aCtx
+) {
+  popCtxProcessIntoImpl(aCtx, aCommand);
+  evalCommandInContext(aCtx, aCommand);
+}
+\stopCCode
+
+
+\startTestSuite[evalAssertionInContext]
+
+\startCHeader
+typedef Boolean (EvalAssertionInContext)(
+  ContextObj   *aCtx,
+  AssertionObj *anAssertion
+);
+
+#define evalAssertionInContext(aCtx, anAssertion)       \
+  (                                                     \
+    assert(aCtx),                                       \
+    assert(getContextsClass(aCtx->jInterp)              \
+      ->evalAssertionInContextFunc),                    \
+    (getContextsClass(aCtx->jInterp)                    \
+      ->evalAssertionInContextFunc(aCtx, anAssertion))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean evalAssertionInContextImpl(
+  ContextObj   *aCtx,
+  AssertionObj *anAssertion
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean evalAssertionInContextImpl(
+  ContextObj   *aCtx,
+  AssertionObj *anAssertion
+) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  DictObj *theDict = aCtx->dict;
+  assert(theDict);
+  
+  DEBUG(jInterp, "evalAssertionInContext > %p [%s] %p\n",
+    aCtx, aCtx->name, anAssertion);
+
+  char *metaDictName = calloc(10+strlen(theDict->name), sizeof(char));
+  assert(metaDictName);
+  strcat(metaDictName, "meta-");
+  strcat(metaDictName, theDict->name);
+  
+  DictObj *metaDict = newDictionary(
+    jInterp,
+    metaDictName,
+    theDict
+  );
+  
+  char *metaCtxName = calloc(10+strlen(aCtx->name), sizeof(char));
+  assert(metaCtxName);
+  strcat(metaCtxName, "meta-");
+  strcat(metaCtxName, aCtx->name);
+  
+  ContextObj *metaCtx = newContextImpl(
+    jInterp,
+    metaCtxName,
+    aCtx,
+    metaDict,
+    aCtx->data,
+    NULL
+  );
+  assert(metaCtx);
+  metaCtx->showStack = aCtx->showStack;
+  metaCtx->tracingOn = aCtx->tracingOn;
+  JObj *originalTop  = aCtx->data;
+  
+  Boolean assertionTrue = TRUE;
+
+  JObj *assertionList = asAssertion(anAssertion);
+  while(assertionList && !(metaCtx->exceptionRaised)) {
+    JObj *assertionTest = assertionList;
+    if (isPair(assertionList)) {
+      assertionTest = asCar(assertionList);
+      assertionList = asCdr(assertionList);
+    } else {
+      assertionList = NULL;
+    }
+
+    if (metaCtx->tracingOn)
+      traceAction(aCtx,
+        "\n-------------------------\nevalAssertion(test)",
+        assertionTest
+      );
+    prependListCtxProcess(metaCtx, assertionTest);
+    popCtxProcessIntoImpl(metaCtx, aCommand);
+    evalCommandInContextImpl(metaCtx, aCommand);
+    
+    if (metaCtx->data == originalTop) {
+      // our assertion has not returned any result value
+      pushNullCtxDataImpl(metaCtx);
+      pushOnTopCtxDataImpl(metaCtx, assertionTest);
+      raiseExceptionImpl(metaCtx,
+        "assertion has not returned any result value"
+        );
+      metaCtx->exceptionRaised = TRUE;
+      extractAP(metaCtx);
+    } else if ( !isPair(metaCtx->data) ) {
+      // our assertions have corrupted the data stack
+      pushNullCtxDataImpl(metaCtx);
+      pushOnTopCtxDataImpl(metaCtx, assertionTest);
+      raiseExceptionImpl(metaCtx,
+        "assertion has corrupted the data stack"
+        );      
+      metaCtx->exceptionRaised = TRUE;
+      extractAP(metaCtx);
+    } else if ( asCdr(metaCtx->data) != originalTop ) {
+      // our assertions have corrupted the original context's data stack
+      pushNullCtxDataImpl(metaCtx);
+      pushOnTopCtxDataImpl(metaCtx, assertionTest);
+      raiseExceptionImpl(metaCtx,
+        "assertion has returned too many values OR corrupted the data stack"
+        );
+      metaCtx->exceptionRaised = TRUE;
+      extractAP(metaCtx);
+    } else {
+      popCtxDataIntoImpl(metaCtx, assertionResult);
+      if (isFalse(assertionResult)) {
+        assertionTrue = FALSE;
+      }
+    }
+  }
+  
+  if (metaCtx->exceptionRaised) {
+    assertionTrue = FALSE;
+    reportException(metaCtx);
+  }
+  
+  if (metaDictName) free(metaDictName);
+  metaDictName = NULL;
+  
+  if (metaCtxName) free(metaCtxName);
+  metaCtxName = NULL;
+  
+  DEBUG(jInterp, "evalAssertionInContext < %p [%s] %p\n",
+    aCtx, aCtx->name, anAssertion);
+    
+  return assertionTrue;
+}
+\stopCCode
+
+\startTestCase[should evaluate assertions]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  ContextObj *rootCtx = jInterp->rootCtx;
+  AssertPtrNotNull(rootCtx);
+  DictObj *rootDict = rootCtx->dict;
+  AssertPtrNotNull(rootDict);
+  
+  JObj *trueBoolean      = newBoolean(jInterp, TRUE);
+  JObj *aTrueAssertion   = newAssertion(jInterp, trueBoolean);
+  JObj *falseBoolean     = newBoolean(jInterp, FALSE);
+  JObj *aFalseAssertion  = newAssertion(jInterp, falseBoolean);
+  JObj *isBooleanSym     = newSymbol(jInterp, "isBoolean", "CTest", 1);
+  JObj *dupSym           = newSymbol(jInterp, "dup1D", "CTest", 2);
+  JObj *complexBody      = concatLists(jInterp,
+    trueBoolean,
+    newPair(jInterp, 
+      concatLists(jInterp, dupSym, isBooleanSym),
+      NULL
+    )
+  );
+  JObj *complexAssertion = newAssertion(jInterp, complexBody);
+  
+  DictObj    *aDict = newDictionary(
+    jInterp,
+    "assertionCTestsDict",
+    rootDict
+  );
+  ContextObj* aCtx = newContext(
+    jInterp,
+    "assertionCTestsCtx",
+    NULL,
+    aDict,
+    NULL,
+    NULL
+  );
+  AssertPtrNotNull(aCtx);
+  //aCtx->showStack = TRUE;
+  //aCtx->tracingOn = TRUE;
+  //jInterp->debug  = TRUE;
+  pushCtxData(aCtx, falseBoolean);
+
+  Boolean result =
+    evalAssertionInContextImpl(aCtx, (AssertionObj*)aTrueAssertion);
+  AssertIntTrue(result);
+  
+  result =
+    evalAssertionInContextImpl(aCtx, (AssertionObj*)aFalseAssertion);
+  AssertIntFalse(result);
+
+  result =
+    evalAssertionInContextImpl(aCtx, (AssertionObj*)complexAssertion);
+//  AssertIntTrue(result);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startCHeader
+typedef void (EvalTextInContext)(
+  ContextObj *aCtx,
+  TextObj    *aText
+);
+
+#define evalTextInContext(aCtx, aText)      \
+  (                                         \
+    assert(aCtx),                           \
+    assert(getContextsClass(aCtx->jInterp)  \
+      ->evalTextInContextFunc),             \
+    (getContextsClass(aCtx->jInterp)        \
+      ->evalTextInContextFunc(aCtx, aText)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void evalTextInContextImpl(
+  ContextObj *aCtx,
+  TextObj    *aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void evalTextInContextImpl(
+  ContextObj *aCtx,
+  TextObj    *aText
+) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+
+  DEBUG(jInterp, "evalTextInContext > %p %p\n", aCtx, aText);
+  while(TRUE) {
+    JObj* aLoL = parseOneSymbol(aText);
+    if (aCtx->showStack) {
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      strBufPrintf(aStrBuf, "<");
+      if (aLoL && isSignal(aLoL) &&
+        asSignal(aLoL) == SIGNAL_END_OF_TEXT) {
+        strBufPrintf(aStrBuf, " {EOT}");
+      } else {
+        printLoL(aStrBuf, aLoL);
+      }
+      strBufPrintf(aStrBuf, "\n");
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    if (aLoL && isSignal(aLoL) &&
+      asSignal(aLoL) == SIGNAL_END_OF_TEXT) break;
+    evalCommandInContext(aCtx, aLoL);
+    if (aCtx->showStack) {
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      strBufPrintf(aStrBuf, ">");
+      printLoL(aStrBuf, aCtx->data);
+      strBufPrintf(aStrBuf, "\n");
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
+    }
+    if (aCtx->exceptionRaised) break;
+  }
+  reportException(aCtx);
+  DEBUG(jInterp, "evalTextInContext < %p %p\n", aCtx, aText);
+}
+\stopCCode
+
+\startCHeader
+typedef void (EvalArrayOfStringsInContext)(
+  ContextObj *aCtx,
+  Symbol     *someStrings[]
+);
+
+#define evalArrayOfStringsInContext(aCtx, someStrings)      \
+  (                                                         \
+    assert(aCtx),                                           \
+    assert(getContextsClass(aCtx->jInterp)                  \
+      ->evalArrayOfStringsInContextFunc),                   \
+    (getContextsClass(aCtx->jInterp)                        \
+      ->evalArrayOfStringsInContextFunc(aCtx, someStrings)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void evalArrayOfStringsInContextImpl(
+  ContextObj *aCtx,
+  Symbol     *someStrings[]
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void evalArrayOfStringsInContextImpl(
+  ContextObj *aCtx,
+  Symbol     *someStrings[]
+) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  DEBUG(aCtx->jInterp, "evalArrayOfStringsInContext > %p %p\n",
+    aCtx, someStrings);
+  assert(aCtx);
+  TextObj* stringText =
+    createTextFromArrayOfStrings(
+      aCtx->jInterp,
+      someStrings
+    );
+  evalTextInContext(aCtx, stringText);
+  freeText(stringText);
+  DEBUG(aCtx->jInterp, "evalArrayOfStringsInContext < %p %p\n",
+    aCtx, someStrings);
+}
+\stopCCode
+
+\startCHeader
+typedef void (EvalStringInContext)(
+  ContextObj *aCtx,
+  Symbol     *aString
+);
+
+#define evalStringInContext(aCtx, aString)      \
+  (                                             \
+    assert(aCtx),                               \
+    assert(getContextsClass(aCtx->jInterp)      \
+      ->evalStringInContextFunc),               \
+    (getContextsClass(aCtx->jInterp)            \
+      ->evalStringInContextFunc(aCtx, aString)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void evalStringInContextImpl(
+  ContextObj *aCtx,
+  Symbol     *aString
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void evalStringInContextImpl(
+  ContextObj *aCtx,
+  Symbol     *aString
+) {
+  assert(aCtx);
+  assert(aCtx->jInterp);
+  DEBUG(aCtx->jInterp, "evalStringInContext > %p [%s]\n", aCtx, aString);
+  assert(aCtx);
+  TextObj* stringText =
+    createTextFromString(
+      aCtx->jInterp,
+      aString
+    );
+  evalTextInContext(aCtx, stringText);
+  freeText(stringText);
+  DEBUG(aCtx->jInterp, "evalStringInContext < %p [%s]\n", aCtx, aString);
+}
+\stopCCode

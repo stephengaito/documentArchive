@@ -1,0 +1,22 @@
+% A ConTeXt document [master document: dictNodes.tex]
+
+\section[title=JoyLoL words]
+
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerDictNodeWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerDictNodeWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  return TRUE;
+}
+\stopCCode

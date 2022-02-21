@@ -1,0 +1,544 @@
+% A ConTeXt document [master document: texts.tex]
+
+\section[title=Code]
+
+\dependsOn[jInterps]
+\dependsOn[dictNodes]
+\dependsOn[symbols]
+
+\setCHeaderStream{public}
+\startCHeader
+struct text_object_struct;
+
+typedef void (NextLineFunc)(struct text_object_struct*);
+
+typedef struct text_object_struct {
+  JObj super;
+  //
+  // fields used by all backing types
+  //
+  size_t        completed;
+  Symbol       *fileName;
+  size_t        curLineNum;
+  JObj         *sym;
+  Symbol       *curLine;
+  Symbol       *curChar;
+  Symbol       *lastChar;
+  NextLineFunc *nextLine;
+  JoyLoLInterp *jInterp;
+  //
+  // array of strings specific fields
+  //
+  Symbol** textLines;
+  //
+  // external file specific fields
+  //
+  FILE* inputFile;
+  //
+  // readline specific fields
+  //
+  Symbol*  newPrompt;
+  Symbol*  continuePrompt;
+  Symbol*  curPrompt;
+  DictNodeObj* curNode;
+  Symbol*  curCompletionText;
+  size_t   curCompletionLen;
+} TextObj;
+\stopCHeader
+
+
+
+\startCCode
+// Texts are a collection of characters, which are used by the Parser
+// to extract successive symbols.
+//
+// Texts are created on one of three backing suppliers of characters:
+// 1. a fixed array of strings
+// 2. an external file
+// 3. a readline interaction with a user
+//
+// In all three cases, the Parser's nextSymbol method requests successive
+// **lines** of characters (deliminated by new-line-characters).
+//
+// It is critical, for correct interaction with the user via readline,
+// that the initial line is NOT obtained until actually requested by
+// the parser's nextSymbol method.
+//
+// It is also critical that once completed, none of the sources, get
+// asked for subsequent lines.
+//
+// When the text has been completed, the nextLine function ensures
+// that aText->curLine is NULL.
+\stopCCode
+
+\startCHeader
+typedef void (FreeText)(
+  TextObj *aText
+);
+
+#define freeText(aText)                   \
+  (                                       \
+    assert(aText),                        \
+    assert(getTextsClass(aText->jInterp)  \
+      ->freeTextFunc),                    \
+    (getTextsClass(aText->jInterp)        \
+      ->freeTextFunc(aText))              \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void freeTextImpl(
+  TextObj* aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void freeTextImpl(
+  TextObj* aText
+) {
+  if (!aText) return;
+
+  //free(aText);
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern void nextLineExit(TextObj* aText);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void nextLineExit(TextObj* aText) {
+  if (!aText) return; // there is nothing we can do!
+  aText->sym       = NULL;
+  aText->curLine   = NULL;
+  aText->curChar   = NULL;
+  aText->lastChar  = NULL;
+  aText->completed = TRUE;
+}
+\stopCCode
+
+/////////////////////////////////////////////////////////////////////////////
+// nextSymbol
+//
+
+\startCHeader
+typedef void (NextSymbol)(
+  TextObj *aText
+);
+
+#define nextSymbol(aText)                 \
+  (                                       \
+    assert(aText),                        \
+    assert(getTextsClass(aText->jInterp)  \
+      ->nextSymbolFunc),                  \
+    (getTextsClass(aText->jInterp)        \
+      ->nextSymbolFunc(aText))            \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void nextSymbolImpl(
+  TextObj* aText
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void nextSymbolImpl(
+  TextObj* aText
+) {
+  assert(aText);
+  assert(aText->jInterp);
+
+  DEBUG(aText->jInterp,
+    "->nextSymbol [%s]{%s}\n", aText->curLine, aText->curChar);
+  aText->sym = NULL;
+
+  // ensure we have a non-empty line
+  while ((!aText->completed) && (aText->curChar == aText->lastChar)) {
+    aText->nextLine(aText);
+  }
+  if (!aText->curLine) {
+    DEBUG(aText->jInterp, "<-nextSymbol End of Text %s\n","");
+    return; // we have exhausted this text
+  }
+
+  size_t  parsingNatural = TRUE;
+  Symbol* symStart       = aText->curChar;
+  Symbol* symEnd         = aText->curChar;
+  Symbol* lastChar       = aText->lastChar;
+  char    matchingQuote  = 0;
+  while (symStart == symEnd) {
+    while (symEnd < lastChar) {
+      if (matchingQuote) {
+        if (*symEnd == matchingQuote) break; // we have found our quote
+        //
+        // we are in the middle of a quote
+        //
+        symEnd++;
+        parsingNatural = FALSE;
+        //
+      } else if (*symEnd == '\"' || *symEnd == '\'') {
+        //
+        // the beginning of a quote
+        //
+        symStart++;
+        matchingQuote = *symEnd;
+        symEnd++;
+        //
+      } else if (*symEnd < 33) {
+        //
+        // white space
+        //
+        if (symStart != symEnd)  break; // we have found a symbol
+        //
+        // ignore whitespace (of any type)
+        //
+        symStart++;
+        symEnd++;
+        //
+      } else if (
+        *symEnd == '('  || *symEnd == ')'  ||
+        *symEnd == '['  || *symEnd == ']'  ||
+        *symEnd == '{'  || *symEnd == '}' ) {
+        //
+        // '(', ')', '<', '>', '[', ']'
+        //
+        if (symStart != symEnd) break; // we have found a symbol
+        //
+        // '(' ')' are symbols in their own right
+        //
+        parsingNatural = FALSE;
+        symEnd++;
+        break;
+        //
+      } else if ( *symEnd == ';') {
+        //
+        if (symStart != symEnd) break; // we have found a symbol
+        //
+        const char* symEndP1 = symEnd + 1;
+        if ( symEndP1 < lastChar && *symEndP1 == ';') {
+          //
+          // we have found the beginning of a single line comment
+          // ... so restart search for the next symbol on the next line
+          //
+          while (++symEnd < lastChar) {
+            if (*symEnd == '\n' || *symEnd == '\r') {
+              //
+              // we have found the end of this line
+              //
+              while (++symEnd < lastChar) {
+                if (*symEnd != '\n' && *symEnd != '\r') {
+                  //
+                  // we have found the beginning of the next line
+                  //
+                  break;
+                }
+              }
+              break;
+            }
+          }
+          // ensure that the comment and all line-ends are skipped
+          symStart = symEnd;
+        } else {
+          //
+          // ';' is a symbol in its own right
+          //
+          parsingNatural = FALSE;
+          symEnd++;
+          break;
+          //
+        }
+        //
+      } else {
+        //
+        // any other character is part of a symbol
+        //
+        // check to see if we are still parsing a natural
+        //
+        if ('0' <= *symEnd && *symEnd <= '9') {
+          // do nothing
+        } else {
+          parsingNatural = FALSE;
+        }
+        //
+        symEnd++;
+        //
+      }
+    }
+
+    if (symStart == symEnd) {
+      aText->nextLine(aText);
+      if (!aText->curLine) return; // no more symbols
+      symStart = aText->curChar;
+      symEnd   = aText->curChar;
+      lastChar = aText->lastChar;
+    }
+  }
+
+  char* aSymbol = strndup(symStart, symEnd - symStart); // TODO this thrashes memory ;-(
+  if (matchingQuote && symEnd < lastChar) symEnd++; // skip ending quote
+  aText->curChar = symEnd;
+  DEBUG(aText->jInterp, "--nextSymbol == [%s]\n", aSymbol);
+
+  // check to see if this is the exit or quit symbol ...
+  // ... and if so reset the nextLine function
+  if (strcmp(aSymbol, "exit") == 0 || strcmp(aSymbol, "quit") == 0) {
+    aText->nextLine = nextLineExit;
+  }
+
+  if (parsingNatural) {
+    DEBUG(aText->jInterp, "--nextSymbol == %s (natural)\n", aSymbol);
+    // we have parsed a natural... so create a new natural
+    //
+    aText->sym = newNatural(aText->jInterp, aSymbol);
+    //
+    DEBUG(aText->jInterp, "<-nextSymbol %s (natural)\n", aSymbol);
+  } else {
+    // we have parsed a symbol... so create a new symbol
+    //
+    if (strchr(aSymbol, '.')) {
+      aText->sym =
+        newSymbol(aText->jInterp, aSymbol,
+          aText->fileName, aText->curLineNum);
+    } else {
+      assert(aText->jInterp);
+      assert(aText->jInterp->rootCtx);
+      assert(aText->jInterp->rootCtx->dict);
+      DictNodeObj* aSym = getSymbolEntry(
+          aText->jInterp->rootCtx->dict,
+          aSymbol
+        );
+      assert(aSym);
+      if (aSym->value && isSymbol(aSym->value)) {
+        aText->sym = aSym->value;
+      } else {
+        aText->sym =
+          newSymbol(aText->jInterp, aSym->symbol,
+            aText->fileName, aText->curLineNum);
+      }
+    }
+    //
+    DEBUG(aText->jInterp, "<-nextSymbol [%s] (symbol)\n",
+      ((SymbolObj*)(aText->sym))->sym);
+  }
+  free(aSymbol);
+}
+\stopCCode
+
+\startCHeader
+typedef void (ReportError)(
+  TextObj *aText,
+  Symbol  *message
+);
+
+#define reportError(aText, message)       \
+  (                                       \
+    assert(aText),                        \
+    assert(getTextsClass(aText->jInterp)  \
+      ->reportErrorFunc),                 \
+    (getTextsClass(aText->jInterp)        \
+      ->reportErrorFunc(aText, message))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern void reportErrorImpl(
+  TextObj *aText,
+  Symbol  *message
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void reportErrorImpl(
+  TextObj *aText,
+  Symbol  *message
+) {
+  assert(aText);
+  JoyLoLInterp *jInterp = aText->jInterp;
+  assert(jInterp);
+  StringBufferObj *aStrBuf = 
+    newStringBuffer(jInterp->rootCtx);
+  strBufPrintf(aStrBuf, "\n\n%s\n", message);
+  if (aText->curLine) {
+    strBufPrintf(aStrBuf, "while parsing\n");
+    strBufPrintf(aStrBuf, "\t[%s]\n", aText->curLine);
+    strBufPrintf(aStrBuf,
+      "at character %zu\n\n", aText->curChar - aText->curLine);
+  } else {
+    strBufPrintf(aStrBuf, "at end of text\n\n");
+  }
+  jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+  strBufClose(aStrBuf);
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityTextsCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityTextsCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  assert(jInterp);
+  DEBUG(jInterp, "textsCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != TextsTag) return FALSE;
+  if (lolA != lolB) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing texts]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printStrTextsCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printStrTextsCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == TextsTag);
+
+  strBufPrintf(aStrBuf, "--texts-- ");
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print texts]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[TextsTag]);
+
+  TextObj* aNewText = createTextFromString(jInterp, "a string");
+  AssertPtrNotNull(aNewText);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printLoL(aStrBuf, (JObj*)aNewText);
+  AssertStrEquals(getCString(aStrBuf), "--texts-- ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerTexts]
+
+\startCHeader
+typedef struct texts_class_struct {
+  JClass                    super;
+  NextSymbol                   *nextSymbolFunc;
+  ReportError                  *reportErrorFunc;
+  FreeText                     *freeTextFunc;
+  CreateTextFromInputFile      *createTextFromInputFileFunc;
+  CreateTextFromString         *createTextFromStringFunc;
+  CreateTextFromArrayOfStrings *createTextFromArrayOfStringsFunc;
+} TextsClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializeTexts(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerTexts(
+  JoyLoLInterp *jInterp
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerTexts(
+  JoyLoLInterp *jInterp
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  TextsClass* theCoAlg = joyLoLCalloc(1, TextsClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name           = TextsName;
+  theCoAlg->super.objectSize     = sizeof(TextObj);
+  theCoAlg->super.initializeFunc = initializeTexts;
+  theCoAlg->super.registerFunc   = registerTextWords;
+  theCoAlg->super.equalityFunc   = equalityTextsCoAlg;
+  theCoAlg->super.printFunc      = printStrTextsCoAlg;
+  theCoAlg->nextSymbolFunc       = nextSymbolImpl;
+  theCoAlg->reportErrorFunc      = reportErrorImpl;
+  theCoAlg->freeTextFunc         = freeTextImpl;
+  theCoAlg->createTextFromInputFileFunc = 
+    createTextFromInputFileImpl;
+  theCoAlg->createTextFromStringFunc =
+    createTextFromStringImpl;
+  theCoAlg->createTextFromArrayOfStringsFunc =
+    createTextFromArrayOfStringsImpl;
+
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == TextsTag);
+  assert(jInterp->coAlgs[tag]);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Texts coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerTexts
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getTextsClass(jInterp));
+  TextsClass *coAlg = getTextsClass(jInterp);
+  AssertIntTrue(registerTexts(jInterp));
+  AssertPtrNotNull(getTextsClass(jInterp));
+  AssertPtrEquals(getTextsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getTextsClass(jInterp)->super.objectSize,
+    sizeof(TextObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

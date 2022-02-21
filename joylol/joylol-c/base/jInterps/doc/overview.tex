@@ -1,0 +1,333 @@
+% A ConTeXt document [master document: jInterps.tex]
+
+\section[title=Overview]
+
+The whole of the JoyLoL language is oriented around the concept of lists. 
+For \emph{pure} JoyLoL, all CoAlgebras are implemented directly as lists 
+of lists. \emph{The only things there are, in \emph{pure} JoyLoL, are 
+lists}. 
+
+For the \emph{impure} version of JoyLoL, provided in this release, we 
+permit the existence of CoAlgebras which are implemented using 
+computational structures related to the underlying computer architecture 
+upon which the JoyLoL interpreter is running. Potentially, impure versions 
+of JoyLoL might run faster. However the cost of greater performance is the 
+greater possibility that the underlying implementation might not be as 
+rigorously proven correct as a pure version of JoyLoL. Equally 
+importantly, \emph{impure} versions of JoyLoL, allow, \quote{a bear of 
+little brain}, like myself, to think in terms of higher level concepts 
+while programming the fundamental algorithms in the theory associated with 
+JoyLoL. 
+
+Since no general purpose computer processor is designed as a pure list 
+processor, \emph{any implementation} of JoyLoL (pure or impure) will of 
+necessity contain non-list code which is used to \emph{implement} lists. 
+The purpose of this CoAlgebraic extension is to provide as simple and 
+transparent an implementation of lists as possible. 
+
+In fact, \emph{this} (core) CoAlgebraic extension does not actually 
+implement lists. The implementation of lists is reserved for the 
+\type{Pairs} CoAlgebraic extension developed in a separate document. 
+
+This \type{CoAlgs} CoAlgebraic extension provides the infrastructure with 
+which to both organize the currently loaded collection of CoAlgebras, as 
+well as provide \type{JObj}s which represent individual instances 
+of any loaded CoAlgebra. Of particular importance is that these 
+\type{JObj}s are automatically garbage collected. 
+
+The CoAlgebras \quote{extension} provides the basis upon which the whole 
+of the JoyLoL implementation is built. It provides a first class 
+interface. 
+
+\setCHeaderStream{public}
+
+We begin our implementation by pre-defining the three most important 
+structures. We need to pre-define them here, since these three structures 
+are mutually recursive. 
+
+\startitemize
+
+\item A \type{JoyLoLInterp} represents the JoyLoL interpreter. It includes 
+the collection of all loaded CoAlgebraic extensions, as well as the object 
+memory. 
+
+\startCHeader 
+typedef struct joylol_interpreter_struct JoyLoLInterp;
+\stopCHeader 
+
+\item A \type{CoAlgebra} represents the standard (class) data and (class 
+or instance) methods associated with the implementation of a CoAlgebraic 
+extension. 
+
+\startCHeader
+typedef struct joylol_class_struct JClass;
+\stopCHeader
+
+\item A \type{JObj} represents a relatively opaque object to one of 
+many possible \emph{instances} of a CoAlgebra. 
+
+\startCHeader
+typedef struct joylol_object_struct JObj;
+\stopCHeader 
+\stopitemize
+
+The memory extension provides a first class JoyLoL implementation of 
+\quote{memory}. A memory block has:
+
+\startitemize
+
+\item a size
+
+\item an item size
+
+\item a next item
+
+\item a full indicator
+
+\stopitemize
+
+Things you can do with a memory block:
+
+\startitemize
+
+\item get a new item
+
+\item get a new block
+
+\stopitemize
+
+The lists extension is the core JoyLoL extension. It provides the core 
+lists of lists structures. It \emph{only} provides the most basic JoyLoL 
+expressions. It has no ability to preform any computation other than to 
+build up List of Lists structures. 
+
+I suggest we use [generational garbage 
+collection](http://wiki.c2.com/?GenerationalGarbageCollection) together 
+with immutable objects so that objects in more recent "heaps" can only 
+point to older "heaps" and not visa versa. This means that, if the 
+individual "heaps" are first class Lua objects, then we can use the 
+finalization of the heap object to ["stop and 
+copy"](http://wiki.c2.com/?StopAndCopy) live JoyLoL objects into older 
+heaps just before the newer heap is reclaimed by the Lua GC. Essentially 
+we are letting the Lua GC drive the JoyLoL GC. 
+
+\subsection[title=Required CoAlgebraic extensions]
+
+For any given (impure) implementation of a JoyLoL interpreter, there will 
+be a collection of CoAlgebraic extensions \emph{required} for the 
+interpreter to function. By listing this collection of required 
+extensions, we can give each one a unique and well known integer 
+identifier, which can be used in the running code to quickly verify the 
+class type of a given \type{JObj}. 
+
+Listed in the order in which they must be initialized, the required 
+extensions for this implementation are: 
+
+\setCHeaderStream{public}
+\startCHeader
+#define UnusedTag           0
+#define JInterpsTag         1
+#define DictionariesTag     2
+#define AssertionsTag       3
+#define BooleansTag         4
+#define CFunctionsTag       5
+#define CoAlgebrasTag       6
+#define ContextsTag         7
+#define CrossCompilersTag   8
+#define DictNodesTag        9
+#define FragmentsTag       10
+#define ImplementationsTag 11
+#define LoadersTag         12
+#define LuaFunctionsTag    13
+#define NaturalsTag        14
+#define PairsTag           15
+#define ParsersTag         16
+#define RulesTag           17
+#define SignalsTag         18
+#define StringBuffersTag   19
+#define SymbolsTag         20
+#define TemplatesTag       21
+#define TextsTag           22
+#define NumRequiredCoAlgs  23
+
+#define JInterpsName        "jInterps"        /*  1 */
+#define DictionariesName    "dictionaries"    /*  2 */
+#define AssertionsName      "assertions"      /*  3 */
+#define BooleansName        "booleans"        /*  4 */
+#define CFunctionsName      "cFunctions"      /*  5 */
+#define CoAlgebrasName      "coAlgebras"      /*  6 */
+#define ContextsName        "contexts"        /*  7 */
+#define CrossCompilersName  "crossCompilers"  /*  8 */
+#define DictNodesName       "dictNodes"       /*  9 */
+#define FragmentsName       "fragments"       /* 10 */
+#define ImplementationsName "implementations" /* 11 */
+#define LoadersName         "loaders"         /* 12 */
+#define LuaFunctionsName    "luaFunctions"    /* 13 */
+#define NaturalsName        "naturals"        /* 14 */
+#define PairsName           "pairs"           /* 15 */
+#define ParsersName         "parsers"         /* 16 */
+#define RulesName           "rules"           /* 17 */
+#define SignalsName         "signals"         /* 18 */
+#define StringBuffersName   "stringBuffers"   /* 19 */
+#define SymbolsName         "symbols"         /* 20 */
+#define TemplatesName       "templates"       /* 21 */
+#define TextsName           "texts"           /* 22 */
+\stopCHeader
+
+Since each CoAlgebraic extension can be developed separately, we need to 
+ensure there is a strict \emph{semantic} version control. We use the 
+\type{CoAlgVersion} structure to contain the corresponding Major, Minor, 
+and Patch version numbers for a given extension. Since our JoyLoL 
+interpreter might depend upon specific aspects of extension's the 
+\quote{Application Programming Interface} (API), our list of required 
+extensions, below, also contains the minimum required compatible version 
+of the extension. 
+
+\startCHeader
+// see: http://semver.org/
+//
+typedef struct coalg_version_struct {
+  size_t major;
+  size_t minor;
+  size_t patch;
+} CoAlgVersion;
+\stopCHeader
+
+When each CoAlgebraic extension is registered, its name is compared to the 
+following list of required extensions. If a match is found then the 
+corresponding (and well known) index is used to store a pointer to the 
+\type{CoAlgebra} structure for the given extension. If a match is found 
+the extension's current version is compared to the minimally required 
+version. The registration of the extension is only accepted if these 
+versions are compatible. 
+
+\setCHeaderStream{private}
+\startCHeader
+typedef struct required_objects_struct {
+  const char*  name;
+  size_t       tag;
+  CoAlgVersion version;
+} RequiredObjects;
+
+extern RequiredObjects requiredCoAlgs[];
+\stopCHeader
+\setCHeaderStream{public}
+
+\setCCodeStream{interpreter}
+\startCCode
+RequiredObjects requiredCoAlgs[] = {
+  { JInterpsName,        JInterpsTag,        {0, 1, 0 }}, //  1
+  { DictionariesName,    DictionariesTag,    {0, 1, 0 }}, //  2
+  { AssertionsName,      AssertionsTag,      {0, 1, 0 }}, //  3
+  { BooleansName,        BooleansTag,        {0, 1, 0 }}, //  4
+  { CFunctionsName,      CFunctionsTag,      {0, 1, 0 }}, //  5
+  { CoAlgebrasName,      CoAlgebrasTag,      {0, 1, 0 }}, //  6
+  { ContextsName,        ContextsTag,        {0, 1, 0 }}, //  7
+  { CrossCompilersName,  CrossCompilersTag,  {0, 1, 0 }}, //  8
+  { DictNodesName,       DictNodesTag,       {0, 1, 0 }}, //  9
+  { FragmentsName,       FragmentsTag,       {0, 1, 0 }}, // 10
+  { ImplementationsName, ImplementationsTag, {0, 1, 0 }}, // 11
+  { LoadersName,         LoadersTag,         {0, 1, 0 }}, // 12
+  { LuaFunctionsName,    LuaFunctionsTag,    {0, 1, 0 }}, // 13
+  { NaturalsName,        NaturalsTag,        {0, 1, 0 }}, // 14
+  { PairsName,           PairsTag,           {0, 1, 0 }}, // 15
+  { ParsersName,         ParsersTag,         {0, 1, 0 }}, // 16
+  { RulesName,           RulesTag,           {0, 1, 0 }}, // 17
+  { SignalsName,         SignalsTag,         {0, 1, 0 }}, // 18
+  { StringBuffersName,   StringBuffersTag,   {0, 1, 0 }}, // 19
+  { SymbolsName,         SymbolsTag,         {0, 1, 0 }}, // 20
+  { TemplatesName,       TemplatesTag,       {0, 1, 0 }}, // 21
+  { TextsName,           TextsTag,           {0, 1, 0 }}, // 22
+  { NULL,                0,                  {0, 0, 0 }}
+};
+\stopCCode
+
+\startLuaCode
+local joylol = { }
+
+-- load all required CoAlgebraic extensions -- creation phase
+
+joylol.jInterps        = require 'joylol.jInterps'        --  1
+joylol.dicionaries     = require 'joylol.dictionaries'    --  2
+joylol.assertions      = require 'joylol.assertions'      --  3
+joylol.booleans        = require 'joylol.booleans'        --  4
+joylol.cFunctions      = require 'joylol.cFunctions'      --  5
+joylol.coAlgebras      = require 'joylol.coAlgebras'      --  6
+joylol.contexts        = require 'joylol.contexts'        --  7
+joylol.crossCompilers  = require 'joylol.crossCompilers'  --  8
+joylol.dictNodes       = require 'joylol.dictNodes'       --  9
+joylol.fragments       = require 'joylol.fragments'       -- 10
+joylol.implementations = require 'joylol.implementations' -- 11
+joylol.loaders         = require 'joylol.loaders'         -- 12
+joylol.luaFunctions    = require 'joylol.luaFunctions'    -- 13
+joylol.naturals        = require 'joylol.naturals'        -- 14
+joylol.pairs           = require 'joylol.pairs'           -- 15
+joylol.parsers         = require 'joylol.parsers'         -- 16
+joylol.rules           = require 'joylol.rules'           -- 17
+joylol.signals         = require 'joylol.signals'         -- 18
+joylol.stringBuffers   = require 'joylol.stringBuffers'   -- 19
+joylol.symbols         = require 'joylol.symbols'         -- 20
+joylol.templates       = require 'joylol.templates'       -- 21
+joylol.texts           = require 'joylol.texts'           -- 22
+
+-- load all required CoAlgebraic extensions -- initialization phase
+
+joylol.jInterps.initializeAllRequired()
+
+\stopLuaCode
+
+\section[title=Required cross compilers]
+
+One of the key objectives of the JoyLoL interpreter is to ensure as much 
+as possible of its own code and the code of any of its extensions is 
+proven correct. While it is theoretically impossible to ever prove any 
+implementation of reality to be 100\percent correct, we can ensure that 
+those code fragements which can only be tests as opposed to proven 
+correct, is as small as possible.
+
+It is the \type{CrossCompiler} CoAlgebra which manages the process of 
+proving \emph{implemented} JoyLoL words are proven correct. The 
+\type{CrossCompiler} coalgebras do this by first verifying and then 
+assembling JoyLoL words from adequately tests code fragments in a 
+particular programming language. There is one \type{CrossCompiler} for 
+each programming language as embedded in a computer system. 
+
+For the current JoyLoL implementation, the required \type{CrossCompilers} are:
+
+\setCHeaderStream{public}
+\startCHeader
+#define UnusedCC                 0
+#define AnsicCC                  1
+#define AnsicLuaCC               2
+#define PureLuaCC                3
+#define NumRequiredCrossCompilers 4
+
+#define AnsicName     "ansic"     /*  1 */
+#define AnsicLuaName  "ansicLua"  /*  2 */
+#define PureLuaName   "pureLua"   /*  3 */
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern RequiredObjects requiredCompilers[];
+\stopCHeader
+\setCHeaderStream{public}
+
+\setCCodeStream{interpreter}
+\startCCode
+RequiredObjects requiredCompilers[] = {
+  { AnsicName,       AnsicCC,     {0, 1, 0 }}, //  1
+  { AnsicLuaName,    AnsicLuaCC,  {0, 1, 0 }}, //  2
+  { PureLuaName,     PureLuaCC,   {0, 1, 0 }}, //  3
+  { NULL,             0,          {0, 0, 0 }}
+};
+\stopCCode
+\section[title=Semi-standard typedefs]
+
+Finally we provide a number of semi-standard typdefs to provide a semantic 
+meaning to various typical variable uses. 
+
+\startCHeader
+typedef size_t     Boolean;
+typedef const char Symbol;
+\stopCHeader

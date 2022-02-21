@@ -1,0 +1,333 @@
+% A ConTeXt document [master document: naturals.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\diSimpComponent gitVersion-c
+
+\startCHeader
+#include <gmp.h>
+typedef mpz_t Natural;
+
+typedef struct natural_object_struct {
+  JObj super;
+  Natural  natural;
+} NaturalObj;
+
+#define asNatural(aObj) (((NaturalObj*)(aObj))->natural)
+\stopCHeader
+
+\startTestSuite[newNatural]
+
+\startCHeader
+typedef JObj *(NewNatural)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aNatural
+);
+
+#define newNatural(jInterp, aNatural)       \
+  (                                         \
+    assert(getNaturalsClass(jInterp)        \
+      ->newNaturalFunc),                    \
+    (getNaturalsClass(jInterp)              \
+      ->newNaturalFunc(jInterp, aNatural))  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* newNaturalImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aNatural
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* newNaturalImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aNatural
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  JObj* result = newObject(jInterp, NaturalsTag);
+  assert(result);
+  if (aNatural) {
+    long success = mpz_set_str(asNatural(result), aNatural, 0);
+    assert(success == 0);
+  } else mpz_init(asNatural(result));
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create some new naturals]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+
+  const char* testNum = "12345";
+  JObj* aNewNat = newNatural(jInterp, testNum);
+  AssertPtrNotNull(aNewNat);
+  AssertPtrNotNull(asType(aNewNat));
+  AssertIntEquals(asTag(aNewNat), NaturalsTag);
+  AssertIntTrue(isAtom(aNewNat));
+  AssertIntFalse(isPair(aNewNat));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[isNatural]
+
+\startCHeader
+#define isNatural(aLoL)             \
+  (                                 \
+    (                               \
+      (aLoL) &&                     \
+      asType(aLoL) &&               \
+      (asTag(aLoL) == NaturalsTag)  \
+    ) ?                             \
+      TRUE :                        \
+      FALSE                         \
+  )
+\stopCHeader
+
+\startTestCase[should return true if a natural]
+
+\startCTest
+  JObj *aNat = newNatural(jInterp, "12345");
+  AssertIntTrue(isNatural(aNat));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if not a symbol]
+\startCTest
+  AssertIntFalse(isNatural(NULL));
+  JObj *aObj = newObject(jInterp, BooleansTag);
+  AssertIntFalse(isNatural(aObj));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[asNaturalDbl]
+
+\startCHeader
+typedef double (AsNaturalDbl)(
+  JObj* aNatural
+);
+
+#define asNaturalDbl(jInterp, aNatural) \
+  (                                     \
+    assert(getNaturalsClass(jInterp)    \
+      ->asNaturalDblFunc),              \
+    (getNaturalsClass(jInterp)          \
+      ->asNaturalDblFunc(aNatural))      \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern double asNaturalDblImpl(
+  JObj* aNatural
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+double asNaturalDblImpl(
+  JObj* aNatural
+) {
+  double result = 0.0;
+  if (isNatural(aNatural)) {
+    result = mpz_get_d(asNatural(aNatural));
+  }
+  return result;
+}
+\stopCCode
+
+\startTestCase[should convert naturals to doubles]
+\startCTest
+  JObj *aNat = newNatural(jInterp, "12345");
+  AssertDblEquals(asNaturalDbl(jInterp, aNat), 12345.0, 0.0001);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[natural equality]
+
+\setCHeaderStream{private}
+\startCHeader
+Boolean equalityNatCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+
+\startCCode
+Boolean equalityNatCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "natCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA) != NaturalsTag) return FALSE;
+  if (mpz_cmp(asNatural(lolA), asNatural(lolB)) != 0) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should return true if naturals are equal]
+
+\startCTest
+  AssertIntTrue(equalityNatCoAlg(jInterp, NULL, NULL, 10));
+  JObj *natA = newNatural(jInterp, "12345");
+  JObj *natB = newNatural(jInterp, "12345");
+  AssertIntTrue(equalityNatCoAlg(jInterp, natA, natB, 10));
+\stopCTest
+\stopTestCase
+
+\startTestCase[should return false if symbols are not equal]
+
+\startCTest
+  JObj *natA = newNatural(jInterp, "12346");
+  JObj *natB = newNatural(jInterp, "12345");
+  AssertIntFalse(equalityNatCoAlg(jInterp, NULL, natB, 10));
+  AssertIntFalse(equalityNatCoAlg(jInterp, natA, NULL, 10));
+  AssertIntFalse(equalityNatCoAlg(jInterp, natA, natB, 10));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+
+\startTestSuite[printing symbols]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printNatCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printNatCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == NaturalsTag);
+
+  char* mpztoa;
+  mpztoa = NULL;
+  long numChars = gmp_asprintf(&mpztoa, "%Zd ", asNatural(aLoL));
+  assert(0 < numChars);
+  strBufPrintf(aStrBuf, mpztoa);
+  free(mpztoa);
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print symbols]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[NaturalsTag]);
+
+  const char* testNum = "12345 ";
+  JObj* aNewNat = newNatural(jInterp, testNum);
+  AssertPtrNotNull(aNewNat);
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  printNatCoAlg(aStrBuf, aNewNat, 10);
+  AssertStrEquals(getCString(aStrBuf), testNum);
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerSymbols]
+
+\startCHeader
+typedef struct naturals_class_struct {
+  JClass super;
+  NewNatural   *newNaturalFunc;
+  AsNaturalDbl *asNaturalDblFunc;
+} NaturalsClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializeNaturals(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerNaturals(JoyLoLInterp* jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerNaturals(JoyLoLInterp* jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  NaturalsClass* theCoAlg        = joyLoLCalloc(1, NaturalsClass);
+  theCoAlg->super.name           = NaturalsName;
+  theCoAlg->super.objectSize     = sizeof(NaturalObj);
+  theCoAlg->super.initializeFunc = initializeNaturals;
+  theCoAlg->super.registerFunc   = registerNaturalWords;
+  theCoAlg->super.equalityFunc   = equalityNatCoAlg;
+  theCoAlg->super.printFunc      = printNatCoAlg;
+  theCoAlg->newNaturalFunc       = newNaturalImpl;
+  theCoAlg->asNaturalDblFunc     = asNaturalDblImpl;
+
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // sanity check...
+  assert(tag == NaturalsTag);
+  assert(jInterp->coAlgs[tag]);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Naturals coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerSymbols
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getNaturalsClass(jInterp));
+  NaturalsClass *coAlg = getNaturalsClass(jInterp);
+  AssertIntTrue(registerNaturals(jInterp));
+  AssertPtrNotNull(getNaturalsClass(jInterp));
+  AssertPtrEquals(getNaturalsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getNaturalsClass(jInterp)->super.objectSize,
+    sizeof(NaturalObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

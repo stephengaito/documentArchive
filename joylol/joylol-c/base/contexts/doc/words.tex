@@ -1,0 +1,26 @@
+% A ConTeXt document [master document: contexts.tex]
+
+\section[title=JoyLoL words]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerContextWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerContextWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  initContextsAPControl(jInterp);
+  initContextAOOperators(jInterp);
+  initContextsAPSupport(jInterp);
+  
+  return TRUE;
+}
+\stopCCode
+

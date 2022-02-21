@@ -1,0 +1,58 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'crossCompilers.tex',
+  docFiles = {
+    'overview.tex',
+    'code.tex',
+    'ansic.tex',
+    'ansicLua.tex',
+    'pureLua.tex',
+    'lua.tex',
+    'words.tex',
+    'conclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.joyLoL'
+
+joylol.targets(lpTargets, {
+  coAlgs = {
+    'crossCompilers',
+  },
+  cHeaderFiles = {
+    'joylol/crossCompilers.h',
+    'joylol/crossCompilers-private.h',
+  },
+  cCodeFiles = {
+    'crossCompilers.c',
+  },
+  joylolCodeFiles = {
+  },
+  coAlgLibs = {
+    'jInterps',
+  },
+})
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/crossCompilers.h',
+    'joylol/crossCompilers-private.h',
+  },
+  cCodeFiles = {
+    'crossCompilers.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+})

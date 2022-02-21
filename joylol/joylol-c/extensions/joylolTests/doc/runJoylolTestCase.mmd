@@ -1,0 +1,42 @@
+sequenceDiagram
+  participant sr as suiteRunner (globals)
+  participant cr as caseRunner (caseRunner globals)
+  participant cm as caseMonitor (caseMonitor tests globals)
+
+  %% specify context switches
+  activate sr
+  sr  ->> sr : runTestCase
+  sr  ->> sr : defineNaming (caseRunner)
+  sr  ->> sr : defineNaming (caseMonitor)
+  sr  -X cr : defineContext (caseRunner)
+  sr  -X cm : defineContext (caseMonitor)
+  sr  ->> cr : switchCtx
+  deactivate sr
+  activate cr
+  loop assertions
+    cr ->> cr : assert.something
+    cr ->> cm : reportAssertion
+    deactivate cr
+    activate cm
+    cm ->> cm : recordAssertion
+    cm ->> cr : switchCtx
+    deactivate cm
+    activate cr
+    note over cr,cm :     ...
+    cr ->> cr : assert.somethingElse
+    cr ->> cm : reportAssertion
+    deactivate cr
+    activate cm
+    cm ->> cm : recordAssertion
+    cm ->> cr : switchCtx
+    deactivate cm
+    activate cr
+  end
+  cr ->> cm : results
+  deactivate cr
+  activate cm
+  cm ->> sr : results
+  deactivate cm
+  activate sr
+  deactivate sr
+

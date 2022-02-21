@@ -1,0 +1,57 @@
+% A ConTeXt document [master document: cFunctions.tex]
+
+\section[title=Lua interface]
+
+\diSimpComponent gitVersion-c
+
+\startCCode
+static int lua_cFunctions_getGitVersion (lua_State *lstate) {
+  const char* aKey   = lua_tostring(lstate, 1);
+  if (aKey) {
+    getGitVersionInto(gitVersionKeyValues, aKey, aValue);
+    lua_pushstring(lstate, aValue);
+  } else {
+    lua_pushstring(lstate, "no valid key provided");
+  }
+  return 1;
+}
+
+static const struct luaL_Reg lua_cFunctions [] = {
+  {"gitVersion", lua_cFunctions_getGitVersion},
+  {NULL, NULL}
+};
+
+int luaopen_joylol_cFunctions (lua_State *lstate) {
+  getJoyLoLInterpInto(lstate, jInterp);
+  registerCFunctions(jInterp);
+  luaL_newlib(lstate, lua_cFunctions);
+  return 1;
+}
+\stopCCode
+
+In some instances, such as the typical \type{CTest} program 
+\type{allCTests}, this Lua module (which can be \type{require}d as a 
+shared library) is actually statically linked into the executable. In 
+these cases we need the ability to mimic the standard Lua \type{require} 
+process. The following \type{requireStaticallyLinkedCFunctions} does just 
+this. 
+
+\startCHeader
+Boolean requireStaticallyLinkedCFunctions(
+  lua_State *lstate
+);
+\stopCHeader
+
+\startCCode
+Boolean requireStaticallyLinkedCFunctions(
+  lua_State *lstate
+) {
+  lua_getglobal(lstate, "package");
+  lua_getfield(lstate, -1, "loaded");
+  luaopen_joylol_cFunctions(lstate);
+  lua_setfield(lstate, -2, "joylol.cFunctions");
+  lua_setfield(lstate, -2, "loaded");
+  lua_pop(lstate, 1);
+  return TRUE;
+}
+\stopCCode

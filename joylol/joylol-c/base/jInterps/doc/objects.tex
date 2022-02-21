@@ -1,0 +1,449 @@
+% A ConTeXt document [master document: jInterps.tex]
+
+\section[title=JObjs]
+\setCHeaderStream{public}
+\setCCodeStream{objects}
+
+Since the implementation of any particular CoAlgebraic extension will of 
+necessity make use of instance specific data stored in a 
+\type{JObj}ect, we \emph{begin} by providing the implementation of 
+\type{JObj}. Together with any extension specific part, all of our 
+\type{JObj}s have the same three part base structure. 
+
+\subsection[title=Type part] The first (type) part is a \type{CoAlgebra*} 
+pointer to the data structure which represents the CoAlgebra for which the 
+\type{JObj} is an instance. This CoAlgebra pointer ensures that the 
+implementation code knows what the given instance, is an instance 
+\emph{for}, as well as what it can \emph{do}. 
+
+\subsection[title=Tag part] The second (tag) part is an unsigned integer 
+index into the \type{JoyLoLInterp}'s vector of registered 
+\type{CoAlgebra}s. While the tags of all the required \type{CoAlgebra}ic 
+extensions have been defined above and are, hence, \quote{well known}. 
+Tags for all non-required extensions are assigned as the extension is 
+registered with the interpreter. 
+
+\startCHeader
+#ifdef __LP64__
+typedef uint32_t TagType;
+#else
+typedef uint16_t TagType;
+#endif
+\stopCHeader
+
+\subsection[title=Flag part] The third (flag) part is a collection of bits 
+to provide useful meta-flags associated with a particula instance. At 
+least one of these meta-flags are reserved by the JoyLoL interpreter to 
+signal ongoing garbage collection. Since any object is potentially part of 
+a cyclic structure, these meta-flags ensure garbage collection does not 
+fall into infinite cycles. 
+
+All non-reserved meta-flags may be used by the implementation of a 
+CoAlgebra extension for its own internal purposes. Typically meta-flags 
+might be used to signal how to interpret the data stored in the third 
+(data) part of the object. For the \type{Naturals} CoAlgebraic extension, 
+a meta-flag will be used to signal that the object's data part is a 
+pointer to a Gnu Multi-precision integer, rather than to a double word 
+integer. This allows significant speed optimizations in the typical cases, 
+but allows for full data representations in rare but important cases. 
+
+All reserved meta-flags will be located in low order bits of the flag data 
+word. This ensures that any CoAlgebraic extension which makes use of 
+meta-flags can simply rotate the reserved flags off the end of the word 
+before making use of the non-reserved flags. In particular a CoAlgebraic 
+extension \emph{could} interpret its flags as an integer or pointer. Such 
+interpretations are private to each extension, and should \emph{not} be 
+relied upon by code which is not part of the code's own extension. 
+
+As \quote{global} meta-flags we reserve the following three 
+\emph{low-order} bits together with a Mask of all three bits and the 
+number of reserved bits to shift (left). 
+
+\startCHeader
+#define MARK_SWEEP_FLAG     0x1L
+#define RESERVED_FLAG_MASK  0x1L
+#define RESERVED_FLAG_SHIFT 1
+
+#ifdef __LP64__
+typedef uint32_t FlagsType;
+#else
+typedef uint16_t FlagsType;
+#endif
+\stopCHeader
+
+We can now define the \emph{base} \type{JObj} as:
+
+\startCHeader
+typedef struct joylol_object_struct {
+  JClass    *type;
+  TagType    tag;
+  FlagsType  flags; // an arbitrary collection of bits
+} JObj;
+
+#define asType(aLoL)  (((JObj*)(aLoL))->type)
+#define asTag(aLoL)   (((JObj*)(aLoL))->tag)
+#define asFlags(aLoL) (((JObj*)(aLoL))->flags)
+
+#define isFlagSet(aLoL, bitMask)        \
+  (((JObj*)(aLoL))->flags & (bitMask))
+
+#define isFlagClear(aLoL, bitMask)          \
+  ((~(((JObj*)(aLoL))->flags)) & (bitMask))
+
+#define checkObj(jInterp, theObj, theTag) \
+  (                                       \
+    assert(jInterp),                      \
+    assert(theObj),                       \
+    assert(theTag),                       \
+    assert((((JObj*)(theObj))->type) ==   \
+      ((jInterp)->coAlgs[theTag]))        \
+  )
+\stopCHeader
+
+\section[title=isAtom isPair]
+
+A common requirement is to determine whether or not a given 
+\type{JObj} is an \quote{atom} or a \quote{pair}. Quite simply we 
+define anything that is not an instance of \type{Pairs} an \quote{atom}.
+
+\startCHeader
+#define isAtom(anObject) \
+  ((anObject) && (asTag(anObject) != PairsTag))
+  
+#define isPair(anObject) \
+  ((anObject) && (asTag(anObject) == PairsTag))
+\stopCHeader
+
+\section[title=Object Memory]
+
+Since a JoyLoL interpreter is essentially a list processor, any JoyLoL 
+program will create (and orphan) a very large number of list \type{Pairs} 
+over the course of a computation. This means that we need to make the 
+allocation and eventual garbage collection of orphaned \type{JObjs} 
+as efficient as possible.
+
+We do this by defining a \type{ObjectMemory} as a pair of pointers. The 
+first pointer points to a linked list of free objects. The second pointer 
+points to a linked list of \type{ObjectBlock}s. 
+
+\startCHeader
+typedef struct object_block_struct ObjectBlock;
+
+//typedef struct object_memory_struct {
+//  JObj*    freeObjects;
+//  ObjectBlock* rootObjectBlock;
+//} ObjectMemory;
+
+typedef struct object_block_struct {
+  size_t       objectSize;
+  void*        block;
+  ObjectBlock* nextBlock;
+} ObjectBlock;
+\stopCHeader
+
+\startTestSuite[addObjectBlock]
+
+\setCHeaderStream{private}
+\startCHeader
+#define OBJECT_BLOCK_SIZE 1024
+
+extern void addObjectBlock(JClass *theClass);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void addObjectBlock(JClass* theClass) {
+  assert(theClass);
+  assert(theClass->jInterp);
+  
+  size_t objectSize = theClass->objectSize;
+
+  DEBUG(theClass->jInterp, "addObjectBlock > %p [%s] %zu %zu\n", 
+    theClass, theClass->name, objectSize, (size_t)OBJECT_BLOCK_SIZE);
+  
+  // obtain a new object block
+  ObjectBlock* aNewObjectBlock = 
+    (ObjectBlock*)calloc(1, sizeof(ObjectBlock));
+  assert( IS_MEM_ALIGNED(aNewObjectBlock) );
+
+  aNewObjectBlock->objectSize = objectSize;
+  aNewObjectBlock->nextBlock  = NULL;
+  
+  // integrate this new object block into the linked list of
+  // object blocks
+  if ( theClass->rootObjectBlock ) {
+    ObjectBlock *lastObjectBlock = theClass->rootObjectBlock;
+    while ( lastObjectBlock->nextBlock ) {
+      lastObjectBlock = lastObjectBlock->nextBlock;
+    }
+    assert(lastObjectBlock->nextBlock == NULL);
+    lastObjectBlock->nextBlock = aNewObjectBlock;
+  } else {
+    theClass->rootObjectBlock = aNewObjectBlock;
+  }
+  DEBUG(theClass->jInterp, "addObjectBlock = %p %p\n", 
+    theClass, aNewObjectBlock);
+
+  // make sure this object block has some JObjs
+  aNewObjectBlock->block = 
+    calloc(OBJECT_BLOCK_SIZE, objectSize);
+  assert( aNewObjectBlock->block );
+  assert( IS_MEM_ALIGNED(aNewObjectBlock->block) );
+  
+  // add these new JObjs to the free list
+  void* nextObject = aNewObjectBlock->block;
+  for (size_t i = 1 ; i < OBJECT_BLOCK_SIZE ; i++) {
+    assert( IS_MEM_ALIGNED(nextObject) );
+    *(void**)nextObject = nextObject + objectSize;
+    nextObject += objectSize;
+  }
+  *(void**)nextObject =
+    (void*)theClass->freeObjects;
+  theClass->freeObjects = aNewObjectBlock->block;
+  DEBUG(theClass->jInterp, "addObjectBlock < %p %p %p\n",
+    theClass, aNewObjectBlock, aNewObjectBlock->block);
+}
+\stopCCode
+
+\startTestCase[must add new object block]
+\startCTest
+  // create the first list block and make sure it is 
+  // properly integrated into linked list of list blocks
+
+  AssertPtrNotNull(jInterp);
+  JClass *theClass = jInterp->coAlgs[JInterpsTag];
+  AssertPtrNotNull(theClass);
+  
+  AssertPtrNull(theClass->rootObjectBlock);
+  AssertPtrNull(theClass->freeObjects);
+
+  addObjectBlock(theClass);
+  AssertPtrNotNull(theClass->rootObjectBlock);
+  AssertPtrNotNull(theClass->rootObjectBlock->block);
+  AssertPtrNull(theClass->rootObjectBlock->nextBlock);
+  AssertPtrNotNull(theClass->freeObjects);
+
+  // check to make sure freeObjects list is correctly linked
+  void* nextObject  = theClass->rootObjectBlock->block;
+  size_t objectSize = theClass->rootObjectBlock->objectSize;
+  AssertIntEquals(objectSize, theClass->objectSize);
+  
+  for ( size_t i = 1 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
+    AssertIntTrue(IS_MEM_ALIGNED(nextObject));
+    AssertIntZero(asTag(nextObject));
+    AssertIntZero(asFlags(nextObject));
+    AssertPtrEquals( asType(nextObject), nextObject + objectSize);
+  }
+  AssertPtrNull(*((void**)nextObject));
+  AssertPtrEquals(theClass->freeObjects,
+    theClass->rootObjectBlock->block);
+
+  // add another object block
+  void* oldFreeObjects = theClass->freeObjects;
+  addObjectBlock(theClass);
+  AssertPtrNotNull(theClass->rootObjectBlock->nextBlock);
+  AssertPtrNotNull(theClass->rootObjectBlock->nextBlock->block);
+  AssertPtrNull(theClass->rootObjectBlock->nextBlock->nextBlock);
+  AssertPtrNotNull(theClass->freeObjects);
+
+  // check to make sure freeObjects list is correctly linked
+  nextObject = theClass->rootObjectBlock->nextBlock->block;
+
+  for (size_t i = 1 ; i < OBJECT_BLOCK_SIZE ; i++, nextObject += objectSize ) {
+    AssertIntTrue(IS_MEM_ALIGNED(nextObject));
+    AssertIntZero(asTag(nextObject));
+    AssertIntZero(asFlags(nextObject));
+    AssertPtrEquals(asType(nextObject), nextObject + objectSize);
+  }
+  AssertPtrEquals(asType(nextObject), oldFreeObjects);
+  AssertPtrEquals(theClass->freeObjects,
+    theClass->rootObjectBlock->nextBlock->block);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\subsection[title=Garbage collection]
+
+Given that we explicitly implement memory pools for all fixed sized 
+structures, the highest churn will be in the creation and release of small 
+strings through interactions directly with the user and with the template 
+engine. Since all strings used by JoyLoL will be part of the 
+\type{Symbols} CoAlgebraic extension, we have complete control over the 
+use of pointers to strings. This suggests that we allocate all 
+\quote{small strings} using our own implementation of a collection of 
+string pools. This allows us to periodically compact under-utilized pools 
+which are highly fragmented by copying strings to either completely new 
+string pools or inside existing string pools. By having a series of string 
+pools we have the ability to provide the pools with a generational 
+structure so that \quote{older} pools would tend to fragment less. 
+
+However before we implement this strategy we should begin by instrumenting 
+the use of small strings so we can gain an understanding of the spectrum of 
+string sizes. 
+
+\quote{Large strings} will tend to be produced as the output of either the 
+user interaction or the template engine. We can reduce churn in these 
+large strings by ensuring the user interaction interface and template 
+engine either uses a list of strings (which the interface/engine 
+implicitly concatenates), or uses an explicit string buffer. Initially any 
+such string buffer can be based upon GNU Lib C's open_memstream interface, 
+though we could directly implement our own string buffers should that be 
+needed. 
+
+\setCHeaderStream{private}
+\startCHeader
+extern void collectGarbage(JClass *theClass);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+void collectGarbage(JClass *theClass) {
+  assert(theClass);
+  
+  DEBUG(theClass->jInterp, "collectGarbage %p\n", theClass);
+  //
+  // add a garbage collection mark-sweep here
+  //
+  // we will use a tri/quad colour mark-sweep algorithm
+  // similar to that used by LuaJIT v3.0
+  // see: http://wiki.luajit.org/New-Garbage-Collector
+  // see: https://en.wikipedia.org/wiki/Tracing_garbage_collection
+  // our "grey" list will be simply scanning a given 
+  // object block for currently grey markings... and
+  // we keep a pointer to the current object block and
+  // where in the block we last checked for grey markings.
+  // this means we can have an incremental mark/trace cycle
+  // which can be run in small increments in each call to eval.
+  //
+}
+\stopCCode
+
+\startTestSuite[newObject]
+
+To allocate a new \type{JObj} the first free object is taken from 
+the linked list of free objects. If there are no remaining free objects, 
+then we first attempt to collect any garbage and then if this fails to get 
+any new free objects, a new \type{ObjectBlock} is allocated together with 
+its collection of free objects. 
+
+\startCHeader
+#define newObject(jInterp, aTag)                              \
+  (                                                           \
+    assert(getJInterpClass(jInterp)->newObjectFunc),          \
+    (getJInterpClass(jInterp)->newObjectFunc)(jInterp, aTag)  \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern JObj* newObjectImpl(
+  JoyLoLInterp* jInterp,
+  TagType aTag
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+JObj* newObjectImpl(
+  JoyLoLInterp* jInterp,
+  TagType aTag
+) {
+  assert(jInterp);
+  DEBUG(jInterp, "newObjectImpl(start) %p %zu\n", jInterp, (size_t)aTag);
+  
+  assert(jInterp->coAlgs);
+  assert(aTag < jInterp->numCoAlgs);
+  JClass *theClass = jInterp->coAlgs[aTag];
+  assert(theClass);
+  assert(theClass->tag == aTag);
+
+  DEBUG(jInterp, "newObjectImpl freeObjects %p objectBlock %p\n",
+    theClass->freeObjects,
+    theClass->rootObjectBlock
+  ); 
+
+  // ensure there are some free objects
+  if ( ! theClass->freeObjects ) 
+    collectGarbage(theClass);
+  if ( ! theClass->freeObjects )
+    addObjectBlock(theClass);
+
+  assert(theClass->freeObjects);
+
+  JObj* aNewObject   = theClass->freeObjects;
+  theClass->freeObjects = (JObj*)(aNewObject->type);
+
+  asType(aNewObject)  = jInterp->coAlgs[aTag];
+  asTag(aNewObject)   = aTag;
+  asFlags(aNewObject) = 0;
+  
+  DEBUG(jInterp, "newObjectImpl(done) %p %zu\n", aNewObject, (size_t)aTag);
+  return aNewObject;
+}
+\stopCCode
+
+\startTestCase[Allocate one new JObj]
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  TagType aTag = JInterpsTag;
+  JClass *theClass = jInterp->coAlgs[aTag];
+  AssertPtrNotNull(theClass);
+  
+  // a block has already been assigned from the last test
+  // so we simply throw it away...
+  theClass->freeObjects = NULL;
+  theClass->rootObjectBlock = NULL;
+
+  // get one new object to ensure our lazily
+  // initialized object memory structures 
+  // are initialized...
+  JObj* aNewObject = newObject(jInterp, aTag);
+  
+  AssertPtrNotNull(theClass->freeObjects);
+  AssertPtrNotNull(theClass->rootObjectBlock);
+  AssertPtrNotNull(aNewObject);
+  AssertPtrNotNull(asType(aNewObject));
+  AssertPtrEquals(asType(aNewObject), theClass);
+  AssertIntEquals(asTag(aNewObject), aTag);
+  AssertIntZero(asFlags(aNewObject));
+  AssertPtrEquals(aNewObject,
+    theClass->rootObjectBlock->block);
+
+  // now get one more object to ensure
+  // we can properly deal with object blocks/memory
+  
+  JObj* oldFreeObjects =
+    theClass->freeObjects;
+  JObj* newfreeObjects = 
+    (JObj*)theClass->freeObjects->type;
+
+  aNewObject = newObject(jInterp, JInterpsTag);
+
+  AssertPtrNotNull(aNewObject);
+  AssertPtrNotNull(asType(aNewObject));
+  AssertPtrEquals(asType(aNewObject), jInterp->coAlgs[JInterpsTag]);
+  AssertIntEquals(asTag(aNewObject), JInterpsTag);
+  AssertIntZero(asFlags(aNewObject));
+  AssertPtrEquals(oldFreeObjects, aNewObject);
+  AssertPtrEquals(newfreeObjects, theClass->freeObjects);
+\stopCTest
+\stopTestCase
+
+\startTestCase[Allocate lots of new JObjs]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  JObj* aNewObject = NULL;
+  for ( size_t i = 0; i < 3*OBJECT_BLOCK_SIZE; i++ ) {
+    aNewObject = newObject(jInterp, JInterpsTag);
+  }
+  AssertPtrNotNull(aNewObject);
+  AssertPtrNotNull(asType(aNewObject));
+  AssertPtrEquals(asType(aNewObject), jInterp->coAlgs[JInterpsTag]);
+  AssertIntEquals(asTag(aNewObject), JInterpsTag);
+  AssertIntZero(asFlags(aNewObject));
+\stopCTest
+\stopTestCase
+\stopTestSuite

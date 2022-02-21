@@ -1,0 +1,259 @@
+% A ConTeXt document [master document: coreLua.tex]
+
+\section[title= Readline code]
+\setCHeaderStream{public}
+
+\startCCode
+// Texts are a collection of characters, which are used by the Parser
+// to extract successive symbols.
+//
+// Texts are created on one of three backing suppliers of characters:
+// 1. a single string
+// 2. a NULL terminated array of strings
+// 3. an external file
+// 4. a readline interaction with a user
+//
+// In all four cases, the Parser's nextSymbol method requests successive
+// **lines** of characters (deliminated by new-line-characters).
+//
+// It is critical, for correct interaction with the user via readline,
+// that the initial line is NOT obtained until actually requested by
+// the parser's nextSymbol method.
+//
+// It is also critical that once completed, none of the sources, get
+// asked for subsequent lines.
+//
+// When the text has been completed, the nextLine function ensures
+// that aText->curLine is NULL.
+\stopCCode
+
+\startCCode
+static void clearReadlinePrompt(TextObj* aText) {
+  aText->curPrompt = aText->newPrompt;
+}
+
+static void setReadlinePrompts(TextObj* aText,
+                        const char* newPrompt,
+                        const char* continuePrompt
+) {
+  if (newPrompt) aText->newPrompt = newPrompt;
+  else           aText->newPrompt = ">";
+
+  if (continuePrompt) aText->continuePrompt = continuePrompt;
+  else                aText->continuePrompt = ":";
+
+  clearReadlinePrompt(aText);
+}
+\stopCCode
+
+\startCCode
+static void saveReadlineHistory(TextObj* aText) {
+  write_history(".joyLoL-history");
+}
+\stopCCode
+
+\startCCode
+static void nextLineFromReadline(TextObj* aText) {
+  assert(aText);
+  assert(aText->jInterp);
+  DEBUG(aText->jInterp, "->nextLineFromReadline %s\n", "");
+  if (!aText) return; // there is nothing we can do!
+
+  if (aText->completed) {
+    // we have reached the end of the interaction with the user
+    aText->completed = TRUE;
+    aText->curLine   = NULL;
+    aText->curChar   = NULL;
+    aText->lastChar  = NULL;
+    return;
+  }
+
+  // readline returns alloc'ed memory so we free it here.
+  if (aText->curLine) free((void*)aText->curLine);
+
+  aText->curLine  = NULL;
+  aText->curChar  = NULL;
+  aText->lastChar = NULL;
+
+  aText->curLine = readline (aText->curPrompt);
+  aText->curLineNum++;
+  
+  if (!aText->curLine) {
+    aText->completed = TRUE;
+    return;
+  }
+
+  if (*aText->curLine) {
+    history_set_pos(0); // start at the beginning
+    if (0 <= history_search (aText->curLine, -1)) { // search backwards
+      remove_history(where_history());
+    } else if (0 <= history_search (aText->curLine, 1)) { // search forwards
+      remove_history(where_history());
+    }
+    history_set_pos(0);
+    add_history (aText->curLine);
+  }
+
+  aText->curChar  = aText->curLine;
+  aText->lastChar = aText->curChar + strlen(aText->curChar);
+
+  aText->curPrompt = aText->continuePrompt;
+}
+\stopCCode
+
+\startCCode
+static TextObj* currentReadLineText = NULL;
+\stopCCode
+
+\startCCode
+static char* dictionaryWalker(const char* text, int state) {
+  if (!currentReadLineText) return NULL;
+  
+  JoyLoLInterp *jInterp = currentReadLineText->jInterp;
+  assert(jInterp);
+  
+  if (!state) {
+
+    ContextObj *rootCtx = jInterp->rootCtx;
+    assert(rootCtx);
+
+    currentReadLineText->curNode =
+      findLUBSymbol(rootCtx->dict, text);
+    DEBUG(jInterp,
+          "dictionaryWalker-start %p\n",
+          currentReadLineText->curNode);
+  }
+  DictNodeObj* curNode = currentReadLineText->curNode;
+
+  if (!curNode) return NULL;
+
+  if (strncmp(curNode->symbol, text, strlen(text)) == 0) {
+    DEBUG(jInterp,
+          "dictionaryWalker %p {%s}[%s]\n",
+          curNode, text, curNode->symbol);
+    currentReadLineText->curNode = curNode->next;
+    return strdup(curNode->symbol);
+  }
+
+  currentReadLineText->curNode = NULL;
+  return NULL;
+}
+
+static char** dictionaryCompletion(const char* text, int start, int end) {
+ return rl_completion_matches(text, dictionaryWalker);
+}
+\stopCCode
+
+\startCCode
+static TextObj* createTextFromReadline(JoyLoLInterp *jInterp) {
+  
+  assert(jInterp);
+  DEBUG(jInterp, "createTextFromReadline %p\n", jInterp);
+  
+  TextObj* aText = (TextObj*)newObject(jInterp, TextsTag);
+  assert(aText);
+  //
+  // readline specific initializations
+  //
+  DEBUG(jInterp, "starting readline initialization %s\n", "");
+  using_history();
+  read_history(".joyLoL-history");
+  rl_readline_name = "joyLoL";
+  rl_attempted_completion_function = dictionaryCompletion;
+  setReadlinePrompts(aText, NULL, NULL);
+  aText->curNode = NULL;
+  aText->curCompletionText = NULL;
+  aText->curCompletionLen  = 0;
+  aText->nextLine = nextLineFromReadline;
+  //
+  // general initialization
+  //
+
+  aText->jInterp    = jInterp;
+  aText->completed  = FALSE;
+  aText->sym        = NULL;
+  aText->curLine    = NULL;
+  aText->curChar    = NULL;
+  aText->lastChar   = NULL;
+  //
+  aText->inputFile = NULL;
+  aText->fileName  = strdup("readline");
+  //
+  aText->textLines  = NULL;
+  aText->curLineNum = 0;
+
+  assert(!currentReadLineText); // there should not be more than one
+  currentReadLineText = aText;
+
+  return aText;
+}
+\stopCCode
+
+\startCHeader
+extern void runREPLInContext(
+  ContextObj* aCtx
+);
+\stopCHeader
+
+\startCCode
+void runREPLInContext(
+  ContextObj* aCtx
+) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  
+//  if (aCtx->verbose) {
+    getGitVersionInto(gitVersionKeyValues, "commitShortHash", commitHash);
+    getGitVersionInto(gitVersionKeyValues, "commitDate",      commitDate);
+    StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+    strBufPrintf(aStrBuf, "Welcome to JoyLoL v0.1 ( %s ; %s )\n",
+      commitHash,
+      commitDate
+    );
+    jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+    strBufClose(aStrBuf);
+//  }
+  aCtx->showStack = TRUE;
+  TextObj* aText = createTextFromReadline(jInterp);
+  assert(aText);
+  
+  while(TRUE) {
+    DEBUG(jInterp, "runREPLInContext %p reading\n", aCtx);
+    JObj* aLoL = parseOneSymbol(aText);
+    DEBUG(jInterp, "runREPLInContext %p read %p\n", aCtx, aLoL);
+    //
+    if (aLoL && isSignal(aLoL) &&
+      asSignal(aLoL) == SIGNAL_END_OF_TEXT) break;
+    //
+    evalCommandInContext(aCtx, aLoL);
+    assert(!aCtx->process);
+    //
+    if (aCtx->showStack) {
+      DEBUG(jInterp, "runREPLInContext %p printing data %p\n", aCtx, aCtx->data);
+      StringBufferObj *aStrBuf = newStringBuffer(aCtx);
+      strBufPrintf(aStrBuf, ">>");
+      printLoL(aStrBuf, aCtx->data);
+      strBufPrintf(aStrBuf, "\n");
+      jInterp->writeStdOut(jInterp, getCString(aStrBuf));
+      strBufClose(aStrBuf);
+      DEBUG(jInterp, "runREPLInContext %p printed data %p\n", aCtx, aCtx->data);
+    }
+    //
+    reportException(aCtx); // report last exception if raised
+  }
+  saveReadlineHistory(aText);
+  jInterp->writeStdOut(jInterp, "\n");
+  DEBUG(jInterp, "runREPLInContext %p COMPLETED\n", aCtx);
+}
+\stopCCode
+
+\starttyping
+static void showVersionsAP(Context* aCtx) {
+  fprintf(stdout, "\n");
+  reportMainVersions(stdout);
+  fprintf(stdout, "\n");
+  reportLibVersions(stdout);
+  fprintf(stdout, "\n");
+}
+\stoptyping

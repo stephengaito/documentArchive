@@ -1,0 +1,61 @@
+% A ConTeXt document [master document: coreTextadept.tex]
+
+\section[title=JoyLoL REPL]
+
+\setLuaCodeStream{repl}
+
+\startLuaCode
+-- A JoyLoL REPL
+
+-- Based upon Mitchell's Lua REPL
+-- see: https://foicica.com/wiki/lua-repl
+-- on: 2017-02-06
+
+local function newJoyLoLREPL()
+  buffer.new()._type = '[JoyLoL REPL]'
+  buffer:set_lexer('joylol')
+  buffer:set_text(';; JoyLoL REPL')
+  buffer:document_end()
+  buffer:new_line()
+  buffer:new_line()
+  buffer:set_save_point()
+end
+
+local function evaluateJoyLoLREPL()
+  local selStart = buffer.selection_start
+  local selEnd   = buffer.selection_end
+  local code
+  local lastLine
+  if selStart ~= selEnd then 
+    local startLine = buffer:line_from_position(selStart)
+    selStart = buffer:position_from_line(startLine)
+    local endLine   = buffer:line_from_position(selEnd)
+    if buffer.column[selEnd] > 0 then
+      selEnd = buffer:position_from_line(endLine+1)
+    end
+    code = buffer:text_range(selStart, selEnd)
+  else
+    code = buffer:get_cur_line()
+  end
+  
+  buffer:document_end()
+  buffer:new_line()
+  joylol.evalString(code)
+  buffer:new_line()
+  buffer:set_save_point()
+end
+
+keys.joylol = keys.joylol or { }
+keys.joylol['c>'] = newJoyLoLREPL
+keys.joylol['c\n'] = function()
+  if buffer._type ~= '[JoyLoL REPL]' then
+    -- propagate key event to next handler
+    return false
+  end
+  evaluateJoyLoLREPL()
+end
+
+-- add creation of a JoyLoL-REPL to context
+keys.context = keys.context or { }
+keys.context['c>'] = newJoyLoLREPL
+\stopLuaCode

@@ -1,0 +1,263 @@
+% A ConTeXt document [master document: fragments.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\startCHeader
+typedef struct fragment_object_struct {
+  JObj    super;
+  Symbol *name;
+  Symbol *body;
+} FragmentObj;
+\stopCHeader
+
+\startTestSuite[newFragment]
+
+\startCHeader
+typedef FragmentObj* (NewFragment)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aName,
+  Symbol       *aBody
+);
+
+#define newFragment(jInterp, aName, aBody)      \
+  (                                             \
+    assert(getFragmentsClass(jInterp)           \
+      ->newFragmentFunc),                       \
+    (getFragmentsClass(jInterp)                 \
+      ->newFragmentFunc(jInterp, aName, aBody)) \
+  )
+
+//#define asFragment(aLoL) (((aLoL)->flags) & BOOLEAN_FLAG_MASK)
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern FragmentObj* newFragmentImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aName,
+  Symbol       *aBody
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+FragmentObj* newFragmentImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aName,
+  Symbol       *aBody
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  FragmentObj *result =
+    (FragmentObj*)newObject(jInterp, FragmentsTag);
+  assert(result);
+  
+//  result->super.type  = jInterp->coAlgs[FragmentsTag];
+  result->name        = strdup(aName);
+  result->body        = strdup(aBody);
+ 
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new fragment]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  FragmentObj* aNewFragment =
+    newFragment(jInterp, "ansiC", "a fragment body");
+  AssertPtrNotNull(aNewFragment);
+  AssertPtrNotNull(asType(aNewFragment));
+  AssertIntEquals(asTag(aNewFragment), FragmentsTag);
+  AssertIntTrue(isAtom(aNewFragment));
+  AssertIntTrue(isFragment(aNewFragment));
+  AssertIntFalse(isPair(aNewFragment));
+\stopCTest
+\stopTestCase
+
+\startTestCase[print Fragment]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+
+  FragmentObj* aLoL =
+    newFragment(jInterp, "ansiC", "a fragment body");
+  AssertPtrNotNull(aLoL);
+  printLoL(aStrBuf, (JObj*)aLoL);
+  AssertStrEquals(getCString(aStrBuf), "fragment ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[isFragment]
+
+\startCHeader
+#define isFragment(aLoL)             \
+  (                                 \
+    (                               \
+      (aLoL) &&                     \
+      asType(aLoL) &&               \
+      (asTag(aLoL) == FragmentsTag)  \
+    ) ?                             \
+      TRUE :                        \
+      FALSE                         \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityFragmentCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityFragmentCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "fragmentCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != FragmentsTag) return FALSE;
+  if (lolA != lolB) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing fragments]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printFragmentCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printFragmentCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == FragmentsTag);
+
+  strBufPrintf(aStrBuf, "fragment ");
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print fragments]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[FragmentsTag]);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  FragmentObj* aNewFragment =
+    newFragment(jInterp, "ansiC", "a fragment body");
+  AssertPtrNotNull(aNewFragment);
+  printLoL(aStrBuf, (JObj*)aNewFragment);
+  AssertStrEquals(getCString(aStrBuf), "fragment ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerFragments]
+
+\startCHeader
+typedef struct fragments_class_struct {
+  JClass       super;
+  NewFragment      *newFragmentFunc;
+} FragmentsClass;
+
+\stopCHeader
+
+\startCCode
+static Boolean initializeFragments(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerFragments(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerFragments(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  FragmentsClass* theCoAlg
+    = joyLoLCalloc(1, FragmentsClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name           = FragmentsName;
+  theCoAlg->super.objectSize     = sizeof(FragmentObj);
+  theCoAlg->super.initializeFunc = initializeFragments;
+  theCoAlg->super.registerFunc   = registerFragmentWords;
+  theCoAlg->super.equalityFunc   = equalityFragmentCoAlg;
+  theCoAlg->super.printFunc      = printFragmentCoAlg;
+  theCoAlg->newFragmentFunc = newFragmentImpl;
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == FragmentsTag);
+  assert(jInterp->coAlgs[tag]);
+   
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Fragments coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerFragments
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getFragmentsClass(jInterp));
+  FragmentsClass *coAlg = getFragmentsClass(jInterp);
+  registerFragments(jInterp);
+  AssertPtrNotNull(getFragmentsClass(jInterp));
+  AssertPtrEquals(getFragmentsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getFragmentsClass(jInterp)->super.objectSize,
+    sizeof(FragmentObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

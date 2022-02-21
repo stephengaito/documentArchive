@@ -1,0 +1,33 @@
+;; Initial working example of how to use JoyLoL contexts
+;; to store information for later reuse
+
+;; create a tests naming scope
+globals      ;; parent naming scope
+globals      ;; defining naming scope
+tests        ;; defined name of this new naming scope
+defineNaming ;; make the definition
+
+( interpret ) ;; testStats process
+( 
+  0           ;; number of attempted tests
+  0           ;; number of failed tests
+  ()          ;; list of failure reports
+)             ;; testStats data
+tests         ;; the new context's naming scope
+tests         ;; defining naming scope
+testStats     ;; defined name of this new context
+defineContext ;; create and define the context
+
+clear
+showStack
+showStackOn
+showStackOff
+tracingOn
+tracingOff
+debugOn
+debugOff
+definitions
+
+tests
+definitionsIn
+

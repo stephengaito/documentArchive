@@ -1,0 +1,46 @@
+sequenceDiagram
+  participant m as joylol-main (globals)
+  participant sr as suiteRunner (suiteRunner globals)
+  participant sm as suiteMonitor (suiteMonitor tests globals)
+
+  %% specify context switches
+  activate m
+  m  ->> m : runTestSuite
+  m  ->> m : defineNaming (suiteRunner)
+  m  ->> m : defineNaming (suiteMonitor)
+  m  -X sr : defineContext (suiteRunner)
+  m  -X sm : defineContext (suiteMonitor)
+  m  ->> sr : switchCtx
+  deactivate m
+  activate sr
+  loop assertions
+    sr ->> sr : startTestCase
+    sr ->> sr : runTestCase
+    sr ->> sm : reportCaseResults
+    deactivate sr
+    activate sm
+    sm ->> sm : recordCaseResults
+    sm ->> sr : switchCtx
+    deactivate sm
+    activate sr
+    sr ->> sr : stopTestCase
+    note over sr,sm :     ...
+    sr ->> sr : startTestCase
+    sr ->> sr : runTestCase
+    sr ->> sm : reportCaseResults
+    deactivate sr
+    activate sm
+    sm ->> sm : recordCaseResults
+    sm ->> sr : switchCtx
+    deactivate sm
+    activate sr
+    sr ->> sr : stopTestCase
+  end
+  sr ->> sm : results
+  deactivate sr
+  activate sm
+  sm ->> m : results
+  deactivate sm
+  activate m
+  deactivate m
+

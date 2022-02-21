@@ -1,0 +1,224 @@
+% A ConTeXt document [master document: jInterps.tex]
+
+\section[title=Conclusions]
+
+\addDocumentDirectory{doc}
+
+\startLuaCode
+return joylol
+\stopLuaCode
+\createLuaCodeFile%
+  {default}%
+  {joylol.lua}%
+  {-- A Lua file}
+
+Before we actually we write out the \type{CoAlgs} C-header file, provide 
+some standard definitions, the most important of which deal with 
+memory allocation and alignment as well as a simple \type{DEBUG} system. 
+
+\prependCHeader{public}
+\startCHeader
+#include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
+#include <assert.h>
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+
+#ifndef JOYLOL_SYSTEM_CONFIG_PATH
+#define JOYLOL_SYSTEM_CONFIG_PATH "/usr/local/etc/joyLoL"
+#endif
+
+#ifndef JOYLOL_SYSTEM_COALG_PATH
+#define JOYLOL_SYSTEM_COALG_PATH "/usr/local/lib/joyLoL"
+#endif
+
+#ifndef JOYLOL_COALGS_INCREMENT
+#define JOYLOL_COALGS_INCREMENT 10
+#endif
+
+#ifndef JOYLOL_COMPILERS_INCREMENT
+#define JOYLOL_COMPILERS_INCREMENT 10
+#endif
+ 
+#ifndef NULL
+#define NULL (void*)0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifdef __LP64__
+#define MEM_ALIGNMENT ((size_t)0x7)
+#else
+#define MEM_ALIGNMENT ((size_t)0x3)
+#endif
+#define IS_MEM_ALIGNED(someMem) \
+  (!( ((size_t)(someMem)) & (MEM_ALIGNMENT) ))
+
+#define joyLoLCalloc(numItems, itemType) \
+  (itemType*)calloc((numItems), sizeof(itemType))
+
+#ifndef NDEBUG
+#include <stdio.h>
+#define setDebugging(jInterp, aBool)  \
+  assert(jInterp);                    \
+  jInterp->debug = aBool
+#define getDebuggingInto(jInterp, aVar) \
+  assert(jInterp);                      \
+  Boolean aVar = jInterp->debug
+#define DEBUG(jInterp, format, ... )              \
+  assert(jInterp);                                \
+  if (jInterp->debug) {                           \
+    char output[1000];                            \
+    memset(output, 0, 1000);                      \
+    snprintf(output, 999, format, __VA_ARGS__ );  \
+    jInterp->writeStdOut(jInterp, output);        \
+  }
+#else
+#define startDebugging(jInterp)
+#define stopDebuggging(jInterp)
+#define DEBUG(jInterp, format, ...)
+#endif
+\stopCHeader
+
+\CHeaderIncludeGuard{public}{JOYLOL_COALG_JINTERPS}
+\createCHeaderFile%
+  {public}%
+  {joylol/jInterps.h}%
+  {}
+
+\CHeaderIncludeGuard{private}{JOYLOL_COALG_JINTERPS_PRIVATE}
+\createCHeaderFile%
+  {private}%
+  {joylol/jInterps-private.h}%
+  {}
+
+\setCCodeStream{objects}
+\prependCCode{objects}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jInterps.h"
+#include "joylol/jInterps-private.h"
+\stopCCode
+
+\createCCodeFile%
+  {objects}%
+  {objects.c}%
+  {}
+
+\prependCCode{interpreter}
+\startCCode
+#include <stdlib.h>
+#include <assert.h>
+
+#include <joylol/jInterps.h>
+#include <joylol/cFunctions.h>
+#include <joylol/stringBuffers.h>
+#include <joylol/symbols.h>
+#include <joylol/texts.h>
+#include <joylol/assertions.h>
+#include <joylol/contexts.h>
+#include "joylol/crossCompilers.h"
+#include "joylol/jInterps-private.h"
+\stopCCode
+
+\createCCodeFile%
+  {interpreter}%
+  {interpreter.c}%
+  {}
+
+\setCCodeStream{words}
+\prependCCode{words}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jInterps.h"
+#include "joylol/jInterps-private.h"
+\stopCCode
+
+\createCCodeFile%
+  {words}%
+  {words.c}%
+  {}
+
+\setCCodeStream{lua}
+\prependCCode{lua}
+\startCCode
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "joylol/jInterps.h"
+#include "joylol/booleans.h"
+#include "joylol/naturals.h"
+#include "joylol/symbols.h"
+#include "joylol/stringBuffers.h"
+#include "joylol/pairs.h"
+#include "joylol/cFunctions.h"
+#include <joylol/assertions.h>
+#include "joylol/texts.h"
+#include "joylol/parsers.h"
+#include "joylol/contexts.h"
+#include "joylol/loaders.h"
+#include "joylol/jInterps-private.h"
+\stopCCode
+
+\createCCodeFile%
+  {lua}%
+  {lua.c}%
+  {}
+
+\addCTestInclude{<joylol/jInterps.h>}
+\addCTestInclude{<joylol/jInterps-private.h>}
+\addCTestInclude{<joylol/symbols.h>}
+\addCTestInclude{<joylol/stringBuffers.h>}
+\addCTestInclude{<joylol/crossCompilers.h>}
+\addCTestJoyLoLCallbacks{default}
+\CTestsSetup\
+\startCTest
+  addJoyLoLLuaPath(lstate);
+  requireStaticallyLinkedJInterps(lstate);
+  requireLuaModule(lstate, "joylol.symbols");
+  requireLuaModule(lstate, "joylol.stringBuffers");
+  
+  getJoyLoLInterpInto(lstate, jInterp);
+\stopCTest
+\createCTestFile%
+  {default}%
+  {allCTests.c}%
+  {}
+
+\addMainDocument{jInterps.tex}
+\addSubDocument{overview.tex} 
+\addSubDocument{objects.tex}
+\addSubDocument{interpreter.tex}
+%\addSubDocument{printer.tex}
+\addSubDocument{words.tex}
+\addSubDocument{luaInit.tex}
+\addSubDocument{luaInterface.tex}
+\addSubDocument{luaScript.tex}
+\addSubDocument{conclusion.tex} 
+\addConTeXtModuleDirectory{<HOME>/.joylol}
+
+\addCTestTargets{default}
+
+\addJoyLoLTargets{default}
+
+\compileLmsfile{default}
+
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+

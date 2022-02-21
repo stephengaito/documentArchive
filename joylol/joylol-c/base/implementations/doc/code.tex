@@ -1,0 +1,265 @@
+% A ConTeXt document [master document: implementations.tex]
+
+\section[title=Code]
+\setCHeaderStream{public}
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+
+\diSimpComponent gitVersion-c
+
+\startCHeader
+typedef struct implementation_object_struct {
+  JObj    super;
+  Symbol *name;
+  Symbol *body;
+} ImplementationObj;
+\stopCHeader
+
+\startTestSuite[newImplementation]
+
+\startCHeader
+typedef ImplementationObj* (NewImplementation)(
+  JoyLoLInterp *jInterp,
+  Symbol       *aName,
+  Symbol       *aBody
+);
+
+#define newImplementation(jInterp, aName, aBody)      \
+  (                                                   \
+    assert(getImplementationsClass(jInterp)           \
+      ->newImplementationFunc),                       \
+    (getImplementationsClass(jInterp)                 \
+      ->newImplementationFunc(jInterp, aName, aBody)) \
+  )
+
+//#define asImplementation(aLoL) (((aLoL)->flags) & BOOLEAN_FLAG_MASK)
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern ImplementationObj* newImplementationImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aName,
+  Symbol       *aBody
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+ImplementationObj* newImplementationImpl(
+  JoyLoLInterp *jInterp,
+  Symbol       *aName,
+  Symbol       *aBody
+) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  ImplementationObj *result =
+    (ImplementationObj*)newObject(jInterp, ImplementationsTag);
+  assert(result);
+  
+//  result->super.type  = jInterp->coAlgs[ImplementationsTag];
+  result->name        = strdup(aName);
+  result->body        = strdup(aBody);
+ 
+  return result;
+}
+\stopCCode
+
+\startTestCase[should create a new Implementation]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  ImplementationObj* aNewImplementation =
+    newImplementation(jInterp, "ansiC", "a implementation body");
+  AssertPtrNotNull(aNewImplementation);
+  AssertPtrNotNull(asType(aNewImplementation));
+  AssertIntEquals(asTag(aNewImplementation), ImplementationsTag);
+  AssertIntTrue(isAtom(aNewImplementation));
+  AssertIntTrue(isImplementation(aNewImplementation));
+  AssertIntFalse(isPair(aNewImplementation));
+\stopCTest
+\stopTestCase
+
+\startTestCase[print Implementation]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+
+  ImplementationObj* aLoL =
+    newImplementation(jInterp, "ansiC", "a implementation body");
+  AssertPtrNotNull(aLoL);
+  printLoL(aStrBuf, (JObj*)aLoL);
+  AssertStrEquals(getCString(aStrBuf), "implementation ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[isImplementation]
+
+\startCHeader
+#define isImplementation(aLoL)            \
+  (                                       \
+    (                                     \
+      (aLoL) &&                           \
+      asType(aLoL) &&                     \
+      (asTag(aLoL) == ImplementationsTag) \
+    ) ?                                   \
+      TRUE :                              \
+      FALSE                               \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityImplementationCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityImplementationCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "implementationCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA)  != ImplementationsTag) return FALSE;
+  if (lolA != lolB) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[printing implementations]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printImplementationCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printImplementationCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == ImplementationsTag);
+
+  strBufPrintf(aStrBuf, "implementation ");
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print implementations]
+
+\startCTest
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs[ImplementationsTag]);
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  ImplementationObj* aNewImplementation =
+    newImplementation(jInterp, "ansiC", "a implementation body");
+  AssertPtrNotNull(aNewImplementation);
+  printLoL(aStrBuf, (JObj*)aNewImplementation);
+  AssertStrEquals(getCString(aStrBuf), "implementation ");
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerImplementations]
+
+\startCHeader
+typedef struct implementations_class_struct {
+  JClass       super;
+  NewImplementation      *newImplementationFunc;
+} ImplementationsClass;
+
+\stopCHeader
+
+\startCCode
+static Boolean initializeImplementations(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerImplementations(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerImplementations(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  assert(jInterp->coAlgs);
+  
+  ImplementationsClass* theCoAlg
+    = joyLoLCalloc(1, ImplementationsClass);
+  assert(theCoAlg);
+  
+  theCoAlg->super.name           = ImplementationsName;
+  theCoAlg->super.objectSize     = sizeof(ImplementationObj);
+  theCoAlg->super.initializeFunc = initializeImplementations;
+  theCoAlg->super.registerFunc   = registerImplementationWords;
+  theCoAlg->super.equalityFunc   = equalityImplementationCoAlg;
+  theCoAlg->super.printFunc      = printImplementationCoAlg;
+  theCoAlg->newImplementationFunc = newImplementationImpl;
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+  
+  // do a sanity check...
+  assert(tag == ImplementationsTag);
+  assert(jInterp->coAlgs[tag]);
+   
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register the Implementations coAlg]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerImplementations
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getImplementationsClass(jInterp));
+  ImplementationsClass *coAlg = getImplementationsClass(jInterp);
+  registerImplementations(jInterp);
+  AssertPtrNotNull(getImplementationsClass(jInterp));
+  AssertPtrEquals(getImplementationsClass(jInterp), coAlg);
+  AssertIntEquals(
+    getImplementationsClass(jInterp)->super.objectSize,
+    sizeof(ImplementationObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

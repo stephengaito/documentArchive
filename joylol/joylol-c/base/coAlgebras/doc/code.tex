@@ -1,0 +1,240 @@
+% A ConTeXt document [master document: coAlgs.tex]
+
+\section[title=Code]
+
+\dependsOn[jInterps]
+%\dependsOn[context]
+%\dependsOn[boolean]
+\setCHeaderStream{public}
+
+\startCHeader
+typedef struct coAlgebra_object_struct CoAlgebraObj;
+
+typedef struct coAlgebra_object_struct {
+  JObj   super;
+  // ??
+} CoAlgebraObj;
+
+//#define asCFunc(aLoL) (((CFunctionObj*)(aLoL))->func)
+\stopCHeader
+
+\startTestSuite[newCoAlg]
+
+\startCHeader
+typedef CoAlgebraObj *(NewCoAlgebra)(
+  JoyLoLInterp *jInterp//,
+  //CFunction    *aFunc
+);
+
+#define newCoAlgebra(jInterp/*, aFunc*/)      \
+  (                                       \
+    assert(getCoAlgebrasClass(jInterp)    \
+      ->newCoAlgebraFunc),                \
+    (getCoAlgebrasClass(jInterp)          \
+      ->newCoAlgebraFunc(jInterp/*, aFunc*/)) \
+  )
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern CoAlgebraObj *newCoAlgebraImpl(
+  JoyLoLInterp *jInterp//,
+  //CFunction *aFunc
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+CoAlgebraObj *newCoAlgebraImpl(
+  JoyLoLInterp *jInterp//,
+  //CFunction *aFunc
+) {
+  assert(jInterp);
+  CoAlgebraObj* aNewCoAlgebra =
+    (CoAlgebraObj*)newObject(jInterp, CoAlgebrasTag);
+  assert(aNewCoAlgebra);
+  //aNewFunc->func  = aFunc;
+  return aNewCoAlgebra;
+}
+\stopCCode
+
+\startTestCase[should create a new CoAlgebra]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  CoAlgebraObj *aNewCoAlgebra = newCoAlgebra(jInterp);
+  AssertPtrNotNull(aNewCoAlgebra);
+  AssertPtrNotNull(aNewCoAlgebra->super.type);
+  AssertIntEquals(aNewCoAlgebra->super.tag, CoAlgebrasTag);
+  AssertIntTrue(isCoAlgebra((JObj*)aNewCoAlgebra));
+  AssertIntTrue(isAtom((JObj*)aNewCoAlgebra));
+  AssertIntFalse(isPair((JObj*)aNewCoAlgebra));
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startCHeader
+#define isCoAlgebra(aLoL)               \
+  (                                     \
+    (                                   \
+      (aLoL) &&                         \
+      asType(aLoL) &&                   \
+      (asTag(aLoL) == CoAlgebrasTag)    \
+    ) ?                                 \
+      TRUE :                            \
+      FALSE                             \
+  )
+
+\stopCHeader
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean equalityCoAlgebraCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean equalityCoAlgebraCoAlg(
+  JoyLoLInterp *jInterp,
+  JObj         *lolA,
+  JObj         *lolB,
+  size_t        timeToLive
+) {
+  DEBUG(jInterp, "coAlgebraCoAlg-equal a:%p b:%p\n", lolA, lolB);
+  if (!lolA && !lolB) return TRUE;
+  if (!lolA && lolB)  return FALSE;
+  if (lolA  && !lolB) return FALSE;
+  if (asType(lolA) != asType(lolB)) return FALSE;
+  if (!asType(lolA)) return FALSE;
+  if (asTag(lolA) != CoAlgebrasTag) return FALSE;
+  return TRUE;
+}
+\stopCCode
+
+\startTestSuite[print CoAlgebra]
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean printCoAlgebarCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean printCoAlgebraCoAlg(
+  StringBufferObj *aStrBuf,
+  JObj            *aLoL,
+  size_t           timeToLive
+) {
+  assert(aLoL);
+  assert(asTag(aLoL) == CoAlgebrasTag);
+
+  char ptoa[100];
+  sprintf(ptoa, "<CoAlgebra:%p> ", aLoL);
+  strBufPrintf(aStrBuf, ptoa);
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should print CoAlgebra]
+\startCTest
+  AssertPtrNotNull(jInterp);
+
+  char buffer[100];
+  buffer[0] = 0;
+
+  StringBufferObj *aStrBuf = newStringBuffer(jInterp->rootCtx);
+  AssertPtrNotNull(aStrBuf);
+  
+  JObj* aNewCoAlgebra = (JObj*)newCoAlgebra(jInterp);
+  AssertPtrNotNull(aNewCoAlgebra);
+  
+  sprintf((char*)&buffer, "<CoAlgebra:%p> ", aNewCoAlgebra);
+  
+  printLoL(aStrBuf, aNewCoAlgebra);
+  AssertStrEquals(getCString(aStrBuf), buffer);
+  strBufClose(aStrBuf);
+\stopCTest
+\stopTestCase
+\stopTestSuite
+
+\startTestSuite[registerCoAlgebras]
+
+\startCHeader
+typedef struct coAlgebras_class_struct {
+  JClass    super;
+  NewCoAlgebra *newCoAlgebraFunc;
+} CoAlgebrasClass;
+\stopCHeader
+
+\startCCode
+static Boolean initializeCoAlgebras(
+  JoyLoLInterp *jInterp,
+  JClass   *aJClass
+) {
+  assert(jInterp);
+  assert(aJClass);
+  return TRUE;
+}
+\stopCCode
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerCoAlgebras(JoyLoLInterp *jInterp);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerCoAlgebras(JoyLoLInterp *jInterp) {
+  assert(jInterp);
+  
+  CoAlgebrasClass* theCoAlg    =
+    joyLoLCalloc(1, CoAlgebrasClass);
+  theCoAlg->super.name           = CoAlgebrasName;
+  theCoAlg->super.objectSize     = sizeof(CoAlgebraObj);
+  theCoAlg->super.initializeFunc = initializeCoAlgebras;
+  theCoAlg->super.registerFunc   = registerCoAlgebraWords;
+  theCoAlg->super.equalityFunc   = equalityCoAlgebraCoAlg;
+  theCoAlg->super.printFunc      = printCoAlgebraCoAlg;
+  theCoAlg->newCoAlgebraFunc     = newCoAlgebraImpl;
+  
+  size_t tag =
+    registerJClass(jInterp, (JClass*)theCoAlg);
+
+  // do a sanity check...
+  assert(tag == CoAlgebrasTag);
+  assert(jInterp->coAlgs[tag]);
+
+  return TRUE;
+}
+\stopCCode
+
+\startTestCase[should register coAlgebras]
+
+\startCTest
+  // CTestsSetup has already created a jInterp
+  // and run registerCoAlgebras
+  
+  AssertPtrNotNull(jInterp);
+  AssertPtrNotNull(jInterp->coAlgs);
+  AssertPtrNotNull(getCoAlgebrasClass(jInterp));
+  CoAlgebrasClass *coAlg =
+    getCoAlgebrasClass(jInterp);
+  AssertIntTrue(registerCoAlgebras(jInterp));
+  AssertPtrNotNull(getCoAlgebrasClass(jInterp));
+  AssertPtrEquals(getCoAlgebrasClass(jInterp), coAlg);
+  AssertIntEquals(
+    getCoAlgebrasClass(jInterp)->super.objectSize,
+    sizeof(CoAlgebraObj)
+  )
+\stopCTest
+\stopTestCase
+\stopTestSuite

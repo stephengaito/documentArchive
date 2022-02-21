@@ -1,0 +1,58 @@
+% A ConTeXt document [master document: coreContext.tex]
+
+\chapter[title=Lua main]
+
+\prependLuaCode{default}
+
+\diSimpComponent gitVersion-lua
+
+\startLuaCode
+-- joylol interpreter embedded in ConTeXt
+
+-- Start by adding the standard joylol CoAlg locations to the Lua search 
+-- paths 
+
+texio.write_nl("----------JoyLoL options-----------")
+texio.write_nl(prettyPrint(options))
+texio.write_nl("-----------------------------------")
+
+local joylolPaths = {
+  options.userPath..'/?.lua',
+  options.localPath..'/?.lua',
+  options.systemPath..'/?.lua',
+  package.path
+}
+package.path = table.concat(joylolPaths, ';')
+
+local joylolCPaths = {
+  options.userPath..'/?.so',
+  options.localPath..'/?.so',
+  options.systemPath..'/?.so',
+  package.path
+}
+package.cpath = table.concat(joylolCPaths, ';')
+
+if options.verbose then print('loading [joylol.core.context]') end
+
+local hasJoylol, loadedJoylol = 
+  pcall(require, 'joylol.core.context')
+if not hasJoylol then
+  interfaces.writestatus("joyLoL", 
+    "Could NOT load ANSI-C joyLoL....")
+  error('Could NOT load ANSI-C JoyLoL')
+end
+thirddata.joylol = loadedJoylol
+
+if options.verbose then print('loaded [joylol.core.context]\n') end
+
+local joylol = thirddata.joylol
+
+joylol.setVerbose(options.verbose)
+joylol.setTracing(options.tracing)
+joylol.setDebugging(options.debug)
+
+if (options.configFile) then
+  joylol.loadFile(options.configFile)
+end
+
+\stopLuaCode

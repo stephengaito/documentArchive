@@ -1,0 +1,23 @@
+-- A Lua Make System file
+
+local joylolIncludePath = makePath{
+  os.getenv('HOME'),
+  '.joylol',
+  'include',
+  'joylol'
+}
+lfs.mkdir(joylolIncludePath)
+
+-- ensure the hash_map.h header is installed in the joylol include 
+-- directory 
+local joylolHashMapPath = makePath{
+  joylolIncludePath,
+  'hash_map.h'
+}
+tInsert(headerTargets, joylolHashMapPath)
+tInsert(installTargets, joylolHashMapPath)
+target({
+  target       = joylolHashMapPath,
+  dependencies = { 'hash_map.h' },
+  command      = 'install -T hash_map.h '..joylolHashMapPath
+})

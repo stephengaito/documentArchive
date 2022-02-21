@@ -1,0 +1,89 @@
+% A ConTeXt document [master document: coreContextOptions.tex]
+
+\chapter[title=Overview] 
+
+We document the options required \emph{before} loading JoyLoL. 
+
+\startLuaCode
+-- joylol loader options
+
+options.verbose    = false
+options.debug      = false
+options.configFile = 'config'
+options.userPath   = os.getenv('HOME')..'/.joylol'
+options.localPath  = '/usr/local/lib/joylol'
+options.systemPath = '/usr/lib/joylol'
+\stopLuaCode
+
+\diSimpComponent gitVersion-lua
+
+\startLuaCode
+options.gitVersion = gitVersion
+\stopLuaCode
+
+\startMkIVCode
+\def\joyLoLQuiet{
+  \directlua{
+    thirddata.joylol.options.verbose = false
+    thirddata.joylol.options.debug   = false
+    thirddata.joylol.options.tracing = false
+  }
+}
+
+\def\joyLoLVerbose{
+  \directlua{
+    thirddata.joylol.options.verbose = true
+  }
+}
+
+\def\joyLoLDebug{
+  \directlua{
+    thirddata.joylol.options.debug   = true
+  }
+}
+
+\def\joyLoLTrace{
+  \directlua{
+    thirddata.joylol.options.tracing = true
+  }
+}
+
+\def\joyLoLNoConfiguration{
+  \directlua{
+    thirddata.joylol.options.configFile = nil
+  }
+}
+
+\def\joyLoLConfigFile#1{
+  \directlua{
+    thirddata.joylol.options.configFile = '#1'
+  }
+}
+
+\def\joyLoLUserPath#1{
+  \directlua{
+    thirddata.joylol.options.userPath = '#1'
+  }
+}
+
+\def\joyLoLLocalPath#1{
+  \directlua{
+    thirddata.joylol.options.localPath = '#1'
+  }
+}
+\def\joyLoLSystemPath#1{
+  \directlua{
+    thirddata.joylol.options.systemPath = '#1'
+  }
+}
+\def\joyLoLLoadAnsic{
+  \directlua{
+    thirddata.joylol.options.minimalJoylol = false
+  }
+}
+\def\joyLoLLoadLua{
+  \directlua{
+    thirddata.joylol.options.minimalJoylol = true
+  }
+}
+\stopMkIVCode
