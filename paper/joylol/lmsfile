@@ -1,0 +1,21 @@
+-- A Lua Make System file
+
+-- for future use....
+-- require 'lms.release'
+-- release.targets{}
+
+require 'lms.contextDoc'
+
+createNewDocTarget('book', 'BookTargets')
+contextDoc.targets{
+  globalTargetVar = 'BookTargets',
+  mainDoc         = 'joyLoL.tex',
+  docDir          = 'doc'
+}
+
+contextDoc.targets{
+  mainDoc         = 'joyLoL.tex',
+  docDir          = 'doc'
+}
+
+recurseTargets{}

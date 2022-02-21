@@ -1,0 +1,26 @@
+% A ConTeXt document
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jPeg
+
+\usebtxdataset[jPegBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\chapter[title=jPeg]
+
+\declareJoyLoLCoAlg[jPeg]
+
+\diSimpComponent jPegOverview
+
+\diSimpComponent jPegCode
+
+\diSimpComponent jPegWords
+
+\diSimpComponent jPegLua
+
+\diSimpComponent jPegLMS
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

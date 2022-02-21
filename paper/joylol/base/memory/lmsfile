@@ -1,0 +1,13 @@
+-- A Lua Make System file
+
+if clearScreen then os.execute('reset') end
+
+require 'lms.contextDoc'
+
+contextDoc.targets{
+  mainDoc         = 'memory.tex',
+  docDir          = 'doc'
+}
+
+recurseTargets{}
+

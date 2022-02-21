@@ -1,0 +1,33 @@
+% A ConTeXt document [master document: joyLoL.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jUtils
+
+\usebtxdataset[jUtilsBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\part[title=JoyLoL Language Utilities]
+
+\addDocumentDirectory{doc}
+
+\diSimpComponent jUtilsOverview
+
+\diSimpComponent jUtilsCode
+
+%% Create the lms file
+\addMainDocument{jUtils.tex}
+\compileLmsfile{default}
+\prependLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\startLmsfile
+require 'lms.contextDoc'
+contextDoc.targets(lpTargets)
+\stopLmsfile
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

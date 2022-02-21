@@ -1,0 +1,133 @@
+% A ConTeXt document [master document: joylolCoAlg.tex]
+
+\chapter[title=JoyLoL words]
+
+\section{JoyLoL word environment}
+
+A JoyLoL word contains one or more sections of code, either JoyLoL, 
+ANSI-C or Lua, together with a collection of descriptors of the JoyLoL 
+\{pre, post\} \{data, process\} stacks. 
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\def\startJoyLoLWord[#1]{
+  \directlua{thirddata.joylolCoAlgs.newWord('#1')}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function newWord(wordName)
+  local curWord = setDefs(theCoAlg, 'curWord')
+  curWord.name = wordName
+  setDefs(curWord, 'code')
+end
+
+coAlgs.newWord = newWord
+\stopLuaCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\def\stopJoyLoLWord{
+  \directlua{thirddata.joylolCoAlgs.endWord()}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function endWord()
+  local curWord =
+    shouldExist(theCoAlg, 'curWord', {
+      '\\stopJoyLoLWord used outside of ',
+      '\\startJoyLoLWord environment'
+    })
+
+  texio.write_nl('---------joylol-word-------------')
+  texio.write_nl(lpPP(curWord))
+  texio.write_nl('---------joylol-word-------------')
+
+  local wordName = 
+    shouldExist(curWord, 'name',
+      'joylol word not named'
+    )
+  local codeVersions =
+    shouldExist(curWord, 'code',
+      'incorrectly setup joylol word'
+    )
+  
+  local numCodeVersions = 0
+  for implType, implBody in pairs(codeVersions) do
+--    joylol.crossCompilers.addImplementation(
+--      implType,
+--      wordName,
+--      implBody
+--    )
+    numCodeVersions = numCodeVersions + 1
+  end
+  if numCodeVersions < 1 then
+    error(tConcat({
+      'no \\startImplementation environment used ',
+      'inside a \\startJoyLoLWord environment'
+    }))
+  end
+end
+
+coAlgs.endWord = endWord
+\stopLuaCode
+
+\section[title=JoyLoL word implementation]
+
+\startMkIVCode
+\let\stopImplementation\relax
+
+\def\stopImplementationDone{
+  \directlua{thirddata.joylolCoAlgs.stopImplementation()}
+}
+
+\def\startImplementation[#1]{
+  \directlua{thirddata.joylolCoAlgs.startImplementation('#1')}
+  \buff_pickup{_implementation_buffer_}%
+    {startImplementation}{stopImplementation}%
+    {\relax}{\stopImplementationDone}\plusone%
+}
+\stopMkIVCode
+
+\startLuaCode
+local function startImplementation(implType)
+  local curWord =
+    shouldExist(theCoAlg, 'curWord', {
+      '\\startImplementation used outside of ',
+      '\\startJoyLoLWord environment'
+    })
+  curWord.curType = implType
+end
+
+coAlgs.startImplementation = startImplementation
+
+local function stopImplementation()
+  local curWord =
+    shouldExist(theCoAlg, 'curWord', {
+      '\\stopImplementation used outside of ',
+      '\\startJoyLoLWord environment'
+    })
+  local codeVersions = 
+    shouldExist(curWord, 'code',
+      'incorrectly setup joylol word - missing code'
+    )
+  local curType =
+    shouldExist(curWord, 'curType',
+      'incorrectly setup joylol word - missing curType'
+    )
+  local implBody =
+    buffers.getcontent('_implementation_buffer_'):gsub("\13", "\n")
+  codeVersions[curType] = implBody
+
+  tex.sprint("\\starttyping")
+  tex.print(implBody)
+  tex.sprint("\\stoptyping")
+end
+
+coAlgs.stopImplementation = stopImplementation
+\stopLuaCode

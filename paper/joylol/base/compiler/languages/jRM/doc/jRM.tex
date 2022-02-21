@@ -1,0 +1,33 @@
+% A ConTeXt document [master document: languages.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jRM
+
+\usebtxdataset[jRMBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\part[title=JoyLoL Register Machine (sub)Language]
+
+\addDocumentDirectory{doc}
+
+\diSimpComponent jRMOverview
+
+\diSimpComponent jRMCode
+
+%% Create the lms file
+\addMainDocument{jRM.tex}
+\compileLmsfile{default}
+\prependLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\startLmsfile
+require 'lms.contextDoc'
+contextDoc.targets(lpTargets)
+\stopLmsfile
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

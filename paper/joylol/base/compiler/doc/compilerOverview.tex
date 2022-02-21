@@ -1,0 +1,492 @@
+% A ConTeXt document [master document: joyLoL.tex ]
+
+\chapter[title=Compiler/Interpreter]
+
+\section[title=Overview]
+
+The \joylol\ compiler/interpreter is a fairly standard multi-component 
+compiler. However instead of compiling to machine code, it actually 
+transpiles core functions to ANSI-C and interprets non-core functions by 
+calling the core functions in order from the process stack. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\placefigure[here][fig:compiler]
+{A high-level structure of the \joylol\ compiler/interpreter} 
+\bgroup\startMPcode
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 8cm);
+label("Code text", (6.5cm,8.5cm));
+
+drawarrow (6.5cm, 8cm)  -- (6.5cm, 7cm);
+label.rt("Character stream", (6.5cm, 7.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 6cm);
+label("Parser", (6.5cm,6.5cm));
+
+drawarrow (6.5cm, 6cm)    -- (6.5cm, 5cm);
+label.rt("Abstract Syntax Tree (AST)", (6.5cm, 5.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 4cm);
+label("Verifier", (6.5cm,4.5cm));
+
+drawarrow (6.5cm, 4cm) -- (6.5cm, 3cm);
+label.rt("Abstract Syntax Tree (AST)", (6.5cm,3.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 2cm);
+label("Interpreter", (6.5cm,2.5cm));
+
+drawarrow (8cm, 2.75cm){dir 0} .. (11.5cm, 3.5cm) ..
+  (11.5cm, 7.5cm).. {dir 180}(8cm, 8.25cm);
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (1cm, 1cm);
+label("Input", (2.5cm,1.5cm));
+drawarrow (4cm, 1.75cm)  -- (5cm, 2.25cm);
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (9cm, 1cm);
+label("Output", (10.5cm,1.5cm));
+drawarrow (8cm, 2.25cm)  -- (9cm, 1.75cm);
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (1cm, 5cm);
+label("Symbol Table", (2.5cm,5.5cm));
+
+drawdblarrow (4cm, 5.75cm) -- (5cm, 6.5cm);
+drawdblarrow (4cm, 5.25cm) -- (5cm, 4.5cm);
+
+drawdblarrow (2.5cm, 5cm)  -- (5cm, 2.75cm);
+\stopMPcode\egroup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+As can be seen in figure \in[fig:compiler], the compiler/interpreter 
+consists of three main parts, a parser, a (correctness) verifier, and an 
+interpreter, each with additional sub-structure. 
+
+\startitemize[1]
+
+\item \bold{Parser}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\placefigure[here][fig:parser]
+{A high-level structure of the \joylol\ parser} 
+\bgroup\startMPcode
+input hatching.mp;
+picture dots; dots := dashpattern(on 0.1mm off 0.5mm);
+
+path parser;
+parser := (4.5cm, 15.2cm)  -- (13.5cm, 15.2cm) --
+          (13.5cm, 11.8cm) -- (4.5cm, 11.8cm)  -- cycle;
+draw image (
+  hatchfill parser
+    withcolor (45,2mm,-.5bp);
+) dashed dots withcolor darkgray;
+draw parser
+  withpen pencircle scaled 1mm
+  withcolor lightgray;
+label.llft("Parser", (13cm, 15cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 16cm);
+label("Code Text", (6.5cm,16.5cm));
+
+drawarrow (6.5cm, 16cm) -- (6.5cm, 15cm);
+label.rt("Character stream", (6.5cm, 15.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 14cm);
+label("Lexer", (6.5cm,14.5cm));
+
+drawarrow (6.5cm, 14cm) -- (6.5cm, 13cm);
+label.rt("Lexeme stream", (6.5cm, 13.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 12cm);
+label("Parser", (6.5cm,12.5cm));
+
+drawarrow (6.5cm, 12cm) -- (6.5cm, 11cm);
+label.rt("Abstract Syntax Tree (AST)", (6.5cm, 11.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 10cm);
+label("Verifier", (6.5cm,10.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (1cm, 13cm);
+label("Symbol Table", (2.5cm,13.5cm));
+
+drawdblarrow (4cm, 13.75cm) -- (5cm, 14.5cm);
+drawdblarrow (4cm, 13.25cm) -- (5cm, 12.5cm);
+
+drawdblarrow (2.5cm, 13cm)  -- (5cm, 10.5cm);
+\stopMPcode\egroup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+As can be seen in figure \in[fig:parser], the parser is composed of a 
+lexer, parser pair. Both the lexer and parser will use a push down 
+automata composed by a \joylol\ Parsing Expression Grammar, jPeg. Using a 
+push down automata means that, technically, the lexer is powerful enough 
+to directly parse \joylol\ code. We use a standard lexer, parser pair to 
+allow the lexer and parser's grammars to be kept simpler, both to 
+understand as well as to be more performant. 
+
+\startitemize[2]
+
+\item \bold{Lexer}
+
+The lexer extracts lexemes consisting of operators, identifiers, strings, 
+comments, and numbers, from the character stream. Each lexeme is either 
+categorized by or inserted into the symbol table. Any categorizations will 
+be used by the parser. 
+
+\item \bold{Parser}
+
+The parser builds an abstract syntax tree (AST) using the categorized 
+lexemes extracted by the lexer. 
+
+\stopitemize
+
+\item \bold{Verifier}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\placefigure[here][fig:verifier]
+{A high-level structure of the \joylol\ verifier} 
+\bgroup\startMPcode
+input hatching.mp;
+picture dots; dots := dashpattern(on 0.1mm off 0.5mm);
+
+path verifier;
+verifier := (4.5cm, 11.2cm) -- (13.5cm, 11.2cm) --
+            (13.5cm, 7.8cm) -- (4.5cm, 7.8cm)   -- cycle;
+draw image (
+  hatchfill verifier
+    withcolor (45,2mm,-.5bp);
+) dashed dots withcolor darkgray;
+draw verifier
+  withpen pencircle scaled 1mm
+  withcolor lightgray;
+label.llft("Verifier", (13cm, 11cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 12cm);
+label("Parser", (6.5cm,12.5cm));
+
+drawarrow (6.5cm, 12cm) -- (6.5cm, 11cm);
+label.rt("Abstract Syntax Tree (AST)", (6.5cm, 11.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 10cm);
+label("Type Inference", (6.5cm,10.5cm));
+
+drawarrow (6.5cm, 10cm) -- (6.5cm, 9cm);
+label.rt("Abstract Syntax Tree (AST)", (6.5cm, 9.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 8cm);
+label("Correctness", (6.5cm,8.75cm));
+label("Verifier", (6.5cm,8.25cm));
+
+drawarrow (6.5cm, 8cm)  -- (6.5cm, 7cm);
+label.rt("Abstract Syntax Tree (AST)", (6.5cm, 7.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 6cm);
+label("Interpreter", (6.5cm,6.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (1cm, 9cm);
+label("Symbol Table", (2.5cm,9.5cm));
+
+drawdblarrow (2.5cm, 10cm) -- (5cm, 12.5cm);
+
+drawdblarrow (4cm, 9.75cm) -- (5cm, 10.5cm);
+drawdblarrow (4cm, 9.25cm) -- (5cm, 8.5cm);
+
+drawdblarrow (2.5cm, 9cm)  -- (5cm, 6.5cm);
+\stopMPcode\egroup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+As can be seen in figure \in[fig:verifier], the verifier consists of a 
+type inferencer and a correctness verifier. 
+
+\startitemize[2]
+
+\item \bold{Type inferencer}
+
+The type inferencer ensures that all data on the stack as well as all 
+variables in the register machine code has a definite type. 
+
+\item \bold{Correctness verifier}
+
+The correctness verifier checks all implicit and explicit post conditions 
+imply the corresponding pre conditions conditions in both the \joylol\ and 
+register machine code. The invariants associated with each data type 
+contribute implicit pre and post conditions for each \joylol\ statement. 
+
+\stopitemize
+
+\item \bold{Interpreter}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\placefigure[here][fig:interpreter]
+{A high-level structure of the \joylol\ interpreter} 
+\bgroup\startMPcode
+input hatching.mp;
+picture dots; dots := dashpattern(on 0.1mm off 0.5mm);
+
+path interpreter;
+interpreter := (4.5cm, 7.2cm)  -- (13.5cm, 7.2cm) --
+               (13.5cm, 1.8cm) -- (4.5cm, 1.8cm)  -- cycle;
+draw image (
+  hatchfill interpreter
+    withcolor (45,2mm,-.5bp);
+) dashed dots withcolor darkgray;
+draw interpreter
+  withpen pencircle scaled 1mm
+  withcolor lightgray;
+label.llft("Interpreter", (13cm, 7cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 8cm);
+label("Verifier", (6.5cm,8.5cm));
+
+drawarrow (6.5cm, 8cm)  -- (6.5cm, 7cm);
+label.rt("Abstract Syntax Tree (AST)", (6.5cm, 7.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 6cm);
+label("Code Generator", (6.5cm,6.5cm));
+
+drawarrow (7cm, 6cm)    -- (10.5cm, 5cm);
+label.urt("(Restricted) ANSI-C code", (8.75cm, 5.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (9cm, 4cm);
+label("ANSI-C compiler", (10.5cm,4.5cm));
+
+drawarrow (10.5cm, 4cm) -- (7cm, 3cm);
+label.lrt("Dynamically linked library", (8.75cm,3.5cm));
+
+drawarrow (6.5cm, 6cm)  -- (6.5cm, 3cm);
+label.rt("Process stack", (6.5cm, 4.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (5cm, 2cm);
+label("Interpreter", (6.5cm,2.5cm));
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (1cm, 0.5cm);
+label("Input", (2.5cm,1cm));
+drawarrow (4cm, 1.25cm)  -- (5cm, 2.25cm);
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (9cm, 0.5cm);
+label("Output", (10.5cm,1cm));
+drawarrow (8cm, 2.25cm)  -- (9cm, 1.25cm);
+
+draw unitsquare xscaled 3cm yscaled 1cm shifted (1cm, 4cm);
+label("Symbol Table", (2.5cm,4.5cm));
+
+drawdblarrow (2.5cm, 5cm)  -- (5cm, 8.5cm);
+
+drawdblarrow (3cm, 5cm) -- (5cm, 6.5cm);
+drawdblarrow (3cm, 4cm) -- (5.5cm, 3cm);
+\stopMPcode\egroup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+As can be seen in figure \in[fig:interpreter], the interpreter consists of 
+the code generator, ANSI-C compiler and the \joylol\ interpreter. 
+
+\startitemize[2]
+
+\item \bold{Code generator}
+
+The code generator determines whether any particular code fragment will be 
+interpreted as a list of \joylol\ words, or as ANSI-C compiled code. If it 
+decides that a code fragment can be compiled as ANSI-C code, the code 
+generator assigns variables and optimizes the control flow graph to use 
+ANSI-C if-then-else or for statements as appropriate. 
+
+Code which will be interpreted as a list of \joylol\ words are placed 
+directly on the process stack using the entries in the symbol table. This 
+ensures that the interpreter does not usually need to query the symbol 
+table as it is interpreting. 
+
+\item \bold{ANSI-C compiler}
+
+The ANSI-C compiler compiles a restricted form of ANSI-C code generated by 
+the code generator. These restricted forms ensure that only (relatively) 
+well understood ANSI-C code is compiled, in order to maintain the 
+correctness of the over all code. We ensure that \quote{risky} C code is 
+not used in implementing \joylol. 
+
+While there are a large number of ANSI-C compilers that could be used in 
+any project, the typical compilers will be Gnu's gcc and LLVM's clang. If 
+LLVM's clang is used, it is potentially possible to dynamically compile 
+and load any resulting code. However, the whole system is designed to use 
+a completely external compiler in a multi-phased compilation. 
+
+\item\bold{Interpreter}
+
+The interpreter calls the individual \joylol\ words taken from the process 
+stack. Each call may alter either the data or process (or both) stacks as 
+the result of its action. 
+
+\stopitemize
+
+\stopitemize
+
+\section[title=Challenges]
+
+\subsection[title=Sublanguages]
+
+Since our \joylol\ language is actually best structured as a pair of 
+sublanguages, we need a way of \quote{switching} between these 
+sublanguages \emph{inside} a given \joylol\ text. Our overall strategy is 
+to construct the compiler as a sequence of co-routines, which each 
+consume, transform and the generate \quote{objects} along the sequence. To 
+deal with multiple sublanguages we need the ability to deal with a 
+\quote{sequence} of co-routines which does not have a \emph{linear} 
+topology. That is for some sections of the co-routine structure there will 
+be multiple paths. To deal with this we need multiplexer co-routine which 
+listens for a small collection of tokens and then chooses which 
+sub-sequence along which to send all subsequence tokens. Conversely we 
+need a reverse-multiplexer to fold tokens from multiple streams back into 
+one stream. The reverse-multiplexer will \quote{listen} on all of its 
+\quote{input} streams waiting for the next token\footnote{This 
+architecture seems to assume that we have an inherently sequential, 
+non-parallel, computational system with only one co-routine 
+\quote{running} at any one time.}. 
+
+A subsequent question now becomes, where do we locate the multiplexer and 
+reverse-multiplexer? For our purposes, locating the multiplexer depends 
+upon whether or not the sublanguages (as well as the multiplexer) can 
+share the \quote{lexer}\footnote{Note that, since the lexer will take care 
+of rather large structures such as quoted strings and comments, sharing 
+lexers \emph{means} that the sublanguages \emph{must} also share the 
+syntax of these \quote{large} structures.}. If they can all share the same 
+lexer then the multiplexer should be located between the single lexer and 
+the multiple parsers\footnote{Alternatively the composite parser includes 
+the multiplexer and sub-language parsers.}. 
+
+\subsection[title=Co-routines]
+
+Since co-routines will be an important way to structure complex 
+mathematical computational proofs, we need to ensure switching between 
+co-routines can be compiled into performant (ANSI-C) idioms. 
+
+\section[title=Syntax/Semantics]
+
+For the initial version of the syntax for both the JoyLoL Configuratoion 
+Language, and the JoyLoL Language itself, we make essential use of 
+Bertrand Meyer's definition of the early version of Eiffel contained in 
+\cite{meyer1992eiffelTheLanguage}. We will however make extensive chages 
+to suit a new purpose. Eiffel's essentiall use of \quote{programming by 
+contract} is however very close to one of our twin purposes for JoyLoL. 
+
+We structure the various parsers using ideas from Meyer's 
+\cite{meyer1990theoryProgrammingLanguages}. 
+
+\subsection[title=The JoyLoL Configuration Language] 
+
+\bold{Syntax} 
+
+\starttyping
+configuration = systemConfig 
+  defaults^0 
+  clusters^0 
+  externals^0 
+  generation
+  end ("--" "system" systemName)^0
+systemConfig = "system" systemName
+systemName   = name
+
+defaults = "default" optionClause (";" optionClause)^0
+options  = "option" optionClause (";" optionClause)^0
+optionClause = optionTag optionMark^0 targetList^0
+optionTag    = classTag + systemTag + freeTag
+classTag     = "assertion" + "debug" + "optimize" + "trace"
+systemTag    = "collect"
+freeTag      = name
+optionMark   = "(" optionValue")"
+optionValue  = standardValue + classValue + freeValue
+standardValue = "yes" + "no" + "all"
+classValue    = "require" + "ensure" + "invariant" + "loop" + "check"
+freeValue     = fileName + directoryName + name
+
+clusters = "cluster" clusterClause (";" clusterClause)^0
+clusterClause = clusterTag^0 directoryName clusterProperties^0
+clusterTag    = clusterName ":"
+clusterName   = name
+clusterProperties = use^0
+  include^0
+  exclude^0
+  nameAdaptation^0
+  defaults^0
+  options^0
+  visibility^0
+use = "use" fileName
+include = "include" fileList
+exclude = "exclude" fileList
+fileList = fileName (";" fileName)^0
+fileName = name
+
+nameAdaptation = "adapt" clusterAdaptationList
+clusterAdaptationList = clusterAdaptation (";" clusterAdaptation)^0
+clusterAdaptation = clusterIgnore + clusterRenameClause
+clusterIgnore = clusterName ":" "ignore"
+clusterRenameClause = clusterName ":" "rename" classRenameList
+classRenameList = classRenamePair ("," classRenamePair)^0
+classRenamePair = className "as" className
+className = name
+
+visiblity = "visible" classVisibility (";" classVisibility )^0
+classVisiblity = className visibilityAdaptation
+visibilityAdaptation = externalClassRename^0
+  creationRestriction^0
+  exportRestriction^0
+  externalFeatureRename^0
+  "end"
+externalClassRename = "as" name
+creationRestriction = "creation" featureName ("," featureName)^0
+exportRestriction = "export" featureName ("," featureName)^0
+externalFeatureRename = "rename" featureRenameList
+featureRenameList = featureRenamePair ("," featureRenamePair)^0
+featureRenamePair = featureName "as" name
+featureName = name
+
+externals = "external" languageContribution (";" languageContributions)^0
+languageContribution = language ":" fileList
+language = "JoyLoL" +
+  "C" + "C++" +
+  "Executable" + "SharedLibrary" + 
+  "Object" +
+  "Make" +
+  "ConTeXt" +
+  name
+
+generation = "generate" languageGeneration (";" languageGeneration)^0
+languageGeneration = language generateOption^0 ":" target
+generateOption = "(" generateOptionValue ")"
+generateOptionValue = "yes" + "no"
+target = directoryPath + fileName
+
+name = identifier + manifestString
+\stoptyping
+
+\subsection[title=The JoyLoL Language]
+
+\starttyping
+
+classDeclaration = 
+  indexing^0
+  classHeader
+  formalGenerics^0
+  obsolete^0
+  inheritance^0
+  creators^0
+  features^0
+  invariants^0
+  "end" ( "--" "class" className)^0
+  
+indexing = "indexing" indexList
+indexList = indexClause (";" indexClause)^0
+indexClause = indexID^0 indexTerms
+indexID = identifier ":"
+indexTerms = indexValue ("," indexValue)^0
+indexValue = identifier + manifestConstant
+
+classHeader = headerMark^0 "class" className
+headerMark = "deferred" + "expanded"
+className = identifier
+
+formalGenerics = "[" formalGenericList "]"
+formalGenericList = formalGeneric ("," formalGeneric )^0
+formalGeneric     = formalGenericName constraint^0
+formalGenericName = identifier
+constraint = "->" classType
+classType = className actualGenerics^0
+actualGenerics = 
+
+\stoptyping
+

@@ -1,0 +1,208 @@
+% A ConTeXt document [master document: joylolCoAlg.tex]
+
+\startchapter[title=Preamble]
+
+\prependMkIVCode{default}
+\startMkIVCode
+%D \module
+%D   [     file=t-joylol-coalg,
+%D      version=2017.05.10,
+%D        title=\CONTEXT\ User module,
+%D     subtitle=The JoyLoL CoAlgebraic Extensions \ConTeXt\ module,
+%D       author=Stephen Gaito,
+%D         date=\currentdate,
+%D    copyright=PerceptiSys Ltd (Stephen Gaito),
+%D        email=stephen@perceptisys.co.uk,
+%D      license=MIT License]
+
+%C Copyright (C) 2017 PerceptiSys Ltd (Stephen Gaito)
+%C
+%C Permission is hereby granted, free of charge, to any person obtaining a
+%C copy of this software and associated documentation files (the
+%C "Software"), to deal in the Software without restriction, including
+%C without limitation the rights to use, copy, modify, merge, publish,
+%C distribute, sublicense, and/or sell copies of the Software, and to
+%C permit persons to whom the Software is furnished to do so, subject to
+%C the following conditions:
+%C
+%C The above copyright notice and this permission notice shall be included
+%C in all copies or substantial portions of the Software.
+%C
+%C THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%C OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%C MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+%C IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+%C CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+%C TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+%C SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+% begin info
+%
+% title   : JoyLoL CoAlgebra definitions
+% comment : Provides structured document and code generation
+% status  : under development, mkiv only
+%
+% end info
+
+\unprotect
+
+\ctxloadluafile{t-joylol-coalg-config}
+\stopMkIVCode
+
+\startMkIVCode
+\protect \endinput
+\stopMkIVCode
+
+\prependLuaCode{default}
+\startLuaCode
+-- This is the lua code associated with t-joylol-coalg.mkiv
+
+if not modules then modules = { } end modules ['t-joylol-coalg'] = {
+    version   = 1.000,
+    comment   = "joylol coalgegraic extensions - lua",
+    author    = "PerceptiSys Ltd (Stephen Gaito)",
+    copyright = "PerceptiSys Ltd (Stephen Gaito)",
+    license   = "MIT License"
+}
+
+thirddata         = thirddata        or {}
+thirddata.joylol  = thirddata.joylol or {}
+
+local joylol      = thirddata.joylol
+
+thirddata.joylolCoAlgs = thirddata.joylolCoAlgs or {}
+local coAlgs      = thirddata.joylolCoAlgs
+coAlgs.theCoAlg   = {}
+local theCoAlg    = coAlgs.theCoAlg
+
+thirddata.literateProgs = thirddata.literateProgs or {}
+local litProgs    = thirddata.literateProgs
+litProgs.code     = litProgs.code or {}
+local code        = litProgs.code
+local setDefs     = litProgs.setDefs
+local shouldExist = litProgs.shouldExist
+local build       = setDefs(litProgs, 'build')
+
+local contests    = setDefs(thirddata, 'contests')
+local initStats   = contests.initStats
+local tests       = setDefs(contests, 'tests')
+                    setDefs(tests, 'suites')
+                    setDefs(tests, 'failures')
+local assert      = setDefs(contests, 'assert')
+                    setDefs(contests, 'testRunners')
+local expInfo     = setDefs(contests, 'expInfo')
+
+                         setDefs(tests, 'stats')
+tests.stats.joylol     = initStats()
+local joylolStats      = tests.stats.joylol
+local joylolAssertions = joylolStats.assertions
+
+local tInsert = table.insert
+local tConcat = table.concat
+local tRemove = table.remove
+local tSort   = table.sort
+local sFmt    = string.format
+local sMatch  = string.match
+local toStr   = tostring
+local mFloor  = math.floor
+local lpPP    = litProgs.prettyPrint
+
+--local pushData, pushProcess = joylol.pushData, joylol.pushProcess
+--local pushProcessQuoted = joylol.pushProcessQuoted
+--local popData, popProcess   = joylol.popData, joylol.popProcess
+--local newList, newDictionary = joylol.newList, joylol.newDictionary
+--local jEval = joylol.eval
+
+if joylol.core then
+  interfaces.writestatus(
+    "joyLoL",
+    joylol.core.context.gitVersion('commitDate')
+  )
+else
+  interfaces.writestatus(
+    "joyLoL",
+    "partially loaded"
+  )
+end
+
+interfaces.writestatus('joyLoLCoAlg', "loaded JoyLoL CoAlgs")
+\stopLuaCode
+
+\prependLuaTemplate{default}
+\startLuaTemplate
+if not modules then modules = { } end modules ['t-joylol-coalg-templates'] = {
+    version   = 1.000,
+    comment   = "JoyLoL CoAlgebraic extensions module - templates",
+    author    = "PerceptiSys Ltd (Stephen Gaito)",
+    copyright = "PerceptiSys Ltd (Stephen Gaito)",
+    license   = "MIT License"
+}
+
+thirddata              = thirddata              or {}
+thirddata.joylolCoAlgs = thirddata.joylolCoAlgs or {}
+
+local coAlgs     = thirddata.joylolCoAlgs
+
+local templates  = { }
+
+templates.cHeader = [=[
+This is the start of a cHeader template
+{{ lookupInDict 'coAlgName }}
+This is the end of a cHeader template
+]=]
+
+templates.cCode = [=[
+This is the start of a cCode template
+{{ lookupInDict 'coAlgName }}
+This is the end of the cCode template
+]=]
+
+templates.joyLoLCode = [=[
+This is the start of a joyLoLCode template
+{{ lookupInDict 'coAlgName }}
+This is the end of the joyLoLCode template
+]=]
+
+templates.luaCode = [=[
+-- A Lua file (automatically generated)
+{{ lookupInDict 'coAlgName }}
+This is the end of the luaCode template
+]=]
+
+local joyLoL = coAlgs.joyLoL
+local pushData, pushProcess = joyLoL.pushData, joyLoL.pushProcess
+local pushProcessQuoted = joyLoL.pushProcessQuoted
+local popData, popProcess   = joyLoL.popData, joyLoL.popProcess
+local newList, newDictionary = joyLoL.newList, joyLoL.newDictionary
+local jEval = joyLoL.eval
+
+-----------------------------------------------------------------------------
+-- NOTE the following uses raw JoyLoL code to load the templates into the 
+-- context provided. 
+
+-- To understand this code.... **think categorically**
+
+-- In JoyLoL a particular object in the category *is* the structure of the 
+-- data stack, while a particular arrow in the category *is* the process 
+-- stack.
+
+-- To understand what these arrows are doing... you read the JoyLoL code 
+-- in reverse order (from a 'jEval' up). 
+-----------------------------------------------------------------------------
+
+function coAlgs.loadTemplates(aCtx)
+  pushProcess(aCtx, 'addToDict')
+  for aKey, aValue in pairs(templates) do
+    pushProcess(aCtx, 'addToDict')
+    pushProcessQuoted(aCtx, aValue)
+    pushProcessQuoted(aCtx, aKey)
+  end
+  newDictionary(aCtx)
+  pushProcessQuoted(aCtx, 'templates')
+  jEval(aCtx)
+end
+
+interfaces.writestatus('joyLoLCoAlg', 'loaded JoyLoL CoAlg templates')
+\stopLuaTemplate
+
+\stopchapter

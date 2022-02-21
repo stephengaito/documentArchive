@@ -1,0 +1,159 @@
+% A ConTeXt document [master document: jPeg.tex]
+
+\section[title=Overview]
+
+We develop a \joylol\ Parsing Expression Grammar (jPeg) modelled upon the 
+virtual machine implementation of the Lua Parsing Expression Grammar 
+(LPeg). The Lua version upon which we base our implementation can be found 
+in \cite{ierusalimschy2008lpegArticle} and 
+\cite{medeirosIerusalimschy2008parsingMachinePEGs}. Particularly important 
+for our work are the extensive correctness proofs provided by 
+\cite{medeirosIerusalimschy2008parsingMachinePEGs}. 
+
+An important difference is that while LPeg's implementation is based upon 
+an interpreter specific to the LPeg virtual machine code, we will use 
+\joylol's interpreter directly. The backtracking stack used by LPeg is 
+replaced by a careful use of \joylol's process stack. By implementing jPeg 
+directly in \joylol, jPeg programs will benefit from any optimizations 
+provided by the \joylol\ compiler. 
+
+We begin by looking at the PEG description of Peg's grammar, taken from 
+\cite{ford2004parsingExpressiongGrammars}. 
+
+\starttyping
+# Hierarchical syntax
+Grammar    <- Spacing Definition+ EndOfFile
+Definition <- Identifier LEFTARROW Expression
+Expression <- Sequence (SLASH Sequence)*
+Sequence   <- Prefix*
+Prefix     <- (AND / NOT)? Suffix
+Suffix     <- Primary (QUESTION / STAR / PLUS)?
+Primary    <- Identifier !LEFTARROW
+             / OPEN Expression CLOSE
+             / Literal / Class / DOT
+
+# Lexical syntax
+Identifier <- IdentStart IdentCont* Spacing
+IdentStart <- [a-zA-Z_]
+IdentCont  <- IdentStart / [0-9]
+
+Literal    <- [’] (![’] Char)* [’] Spacing
+             / ["] (!["] Char)* ["] Spacing
+Class      <- ’[’ (!’]’ Range)* ’]’ Spacing
+Range      <- Char ’-’ Char / Char
+Char       <- ’\\’ [nrt’"\[\]\\]
+             / ’\\’ [0-2][0-7][0-7]
+             / ’\\’ [0-7][0-7]?
+             / !’\\’ .
+
+LEFTARROW  <- ’<-’ Spacing
+SLASH      <- ’/’ Spacing
+AND        <- ’&’ Spacing
+NOT        <- ’!’ Spacing
+QUESTION   <- ’?’ Spacing
+STAR       <- ’*’ Spacing
+PLUS       <- ’+’ Spacing
+OPEN       <- ’(’ Spacing
+CLOSE      <- ’)’ Spacing
+DOT        <- ’.’ Spacing
+
+Spacing    <- (Space / Comment)*
+Comment    <- ’#’ (!EndOfLine .)* EndOfLine
+Space      <- ’ ’ / ’\t’ / EndOfLine
+EndOfLine  <- ’\r\n’ / ’\n’ / ’\r’
+EndOfFile  <- !.
+\stoptyping
+
+We now look at the same PEG description of Peg's grammar, taken from 
+\cite{ierusalimschy2008lpegArticle}. 
+
+\starttyping
+pattern     <- grammar / simplepatt
+grammar     <- (nonterminal ’<-’ sp simplepatt)+
+simplepatt  <- alternative (’/’ sp alternative)*
+alternative <- ([!&]? sp suffix)+
+suffix      <- primary ([*+?] sp)*
+primary     <- 
+  ’(’ sp pattern ’)’ sp / ’.’ sp / literal /
+  charclass / nonterminal !’<-’
+literal     <- [’] (![’] .)* [’] sp
+charclass   <- ’[’ (!’]’ (. ’-’ . / .))* ’]’ sp
+nonterminal <- [a-zA-Z]+ sp
+sp          <- [ \t\n]*
+\stoptyping
+
+Translated into LPeg:
+
+\starttyping
+local lp = require 'lpeg';
+local P, S, R, V = lp.P, lp.S, lp.R, lp.V;
+
+local lpeg = P {
+  pattern     = V"grammar" + V"simplepatt" ;
+  grammar     = ( V"nonterminal" * S’<-’ * V"sp" * V"simplepatt" )^1 ;
+  simplepatt  = V"alternative" * ( S’/’ * V"sp" * V"alternative" )^0 ;
+  alternative = ( (S'!' + S"&")^-1 * V"sp" * V"suffix" )^1 ;
+  suffix      = V"primary" * ([*+?] * V"sp")^0 ;
+  primary     = 
+    S’(’ * V"sp" * V"pattern" * S’)’ * V"sp" +
+    S’.’ * V"sp" +
+    V"literal" +
+    V"charclass" +
+    V"nonterminal" * -S’<-’ ;
+  literal     = S"’" * (-S"’" * .)^0 * S"’" * V"sp" ;
+  charclass   = S’[’ * (-S']' * (. S’-’ . + .))^0 * S’]’ * V"sp" ;
+  nonterminal = R("az", "AZ")^1 * V"sp" ;
+  sp          = (S" " + S"\t" + S"\n")^0 ;
+};
+\stoptyping
+
+We need to implement the following \joylol\ words:
+
+\startitemize[1]
+
+\item \bold{\type{Fail}}
+
+\item \bold{\type{Commit}}
+
+\item \bold{\type{Choose}}
+
+\item \bold{\type{RepeatAtLeast}}
+
+\item \bold{\type{RepeatAtMost}}
+
+\item \bold{\type{Char}}
+
+\item \bold{\type{CharSet}}
+
+\item \bold{\type{Any}}
+
+\stopitemize
+
+\TODO{We have not covered \bold{\type{not}}, \bold{\type{and}}, 
+CharSet difference, captures, or actions on captures.} 
+
+As suggested in \cite{ierusalimschy2008lpegArticle} we might implement 
+captures using a \type{Capture} call with three distinct arguments:
+
+\startitemize[n]
+
+\item \type{begin n} where the actual capture begins $n$ characters before 
+the current character. This capture method should be called \emph{as soon 
+as} it is known that the current path will succeed. 
+
+\item \type{end} this marks the end of a capture
+
+\item \type{full n} this is the same as a \type{begin n} immediately 
+followed by an \type{end}. 
+
+\stopitemize 
+
+For all of the above \joylol\ words, the data stack must include both the 
+current text structure (which must include a indication of the current 
+character) as well as the current collection of captures.
+
+A compiler is a pipeline of co-routines. The parser might itself be a 
+pipeline of co-routines, one for the lexer, one for the ultimate parser, 
+but there could be numerous intermediary co-routines parsing more complex 
+syntactic structures. 
+

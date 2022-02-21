@@ -1,0 +1,26 @@
+% A ConTeXt document
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent parser
+
+\usebtxdataset[parserBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\chapter[title=Parser]
+
+\declareJoyLoLCoAlg[parser]
+
+\diSimpComponent parserOverview
+
+\diSimpComponent parserCode
+
+\diSimpComponent parserWords
+
+\diSimpComponent parserLua
+
+\diSimpComponent parserConclusion
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

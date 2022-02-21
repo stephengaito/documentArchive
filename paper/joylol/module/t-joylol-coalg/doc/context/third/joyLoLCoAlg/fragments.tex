@@ -1,0 +1,129 @@
+% A ConTeXt document [master document: joylolCoAlg.tex]
+
+\chapter[title=JoyLoL code fragments]
+
+\section{JoyLoL implementation fragment}
+
+\subsection{Examples}
+
+\subsection{Implementation: start}
+
+\startMkIVCode
+\def\startJoyLoLFragment[#1]{
+  \directlua{thirddata.joylolCoAlgs.newFragment('#1')}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function newFragment(fragmentName)
+  local curFragment = setDefs(theCoAlg, 'curFragment')
+  curFragment.name  = fragmentName
+  setDefs(curFragment, 'code')
+end
+
+coAlgs.newFragment = newFragment
+\stopLuaCode
+
+\subsection{Implementation: stop}
+
+\startMkIVCode
+\def\stopJoyLoLFragment{
+  \directlua{thirddata.joylolCoAlgs.endFragment()}
+}
+\stopMkIVCode
+
+\startLuaCode
+local function endFragment()
+  local curFragment =
+    shouldExist(theCoAlg, 'curFragment', {
+      '\\stopJoyLoLFragment used outside of ',
+      '\\startJoyLoLFragment environment'
+    })
+    
+  texio.write_nl('---------joylol-fragment-------------')
+  texio.write_nl(lpPP(curFragment))
+  texio.write_nl('---------joylol-fragment-------------')
+
+  local wordName = 
+    shouldExist(curFragment, 'name',
+      'joylol fragment not named'
+    )
+  local codeVersions =
+    shouldExist(curFragment, 'code',
+      'incorrectly setup joylol fragment'
+    )
+  
+  local numCodeVersions = 0
+  for fragmentType, fragmentBody in pairs(codeVersions) do
+--    joylol.crossCompilers.addFragment(
+--      fragmentType,
+--      wordName,
+--      fragmentBody
+--    )
+    numCodeVersions = numCodeVersions + 1
+  end
+  if numCodeVersions < 1 then
+    error(tConcat({
+      'no \\startFragment environment used ',
+      'inside a \\startJoyLoLFragment environment'
+    }))
+  end
+end
+
+coAlgs.endFragment = endFragment
+\stopLuaCode
+
+\section[title=fragment definition environment]
+
+\startMkIVCode
+\let\stopFragment\relax
+
+\def\stopFragmentDone{
+  \directlua{thirddata.joylolCoAlgs.stopFragment()}
+}
+
+\def\startFragment[#1]{
+  \directlua{thirddata.joylolCoAlgs.startFragment('#1')}
+  \buff_pickup{_fragment_buffer_}%
+    {startFragment}{stopFragment}%
+    {\relax}{\stopFragmentDone}\plusone%
+}
+\stopMkIVCode
+
+\startLuaCode
+local function startFragment(fragmentType)
+  local curFragment =
+    shouldExist(theCoAlg, 'curFragment', {
+      '\\startFragment used outside of ',
+      '\\startJoyLoLFragment environment'
+    })
+  curFragment.curType  = fragmentType
+end
+
+coAlgs.startFragment = startFragment
+
+local function stopFragment()
+  local curFragment  =
+    shouldExist(theCoAlg, 'curFragment', {
+      '\\stopFragment used outside of ',
+      '\\startJoyLoLFragment environment'
+    })
+  local codeVersions =
+    shouldExist(curFragment, 'code',
+      'incorrectly setup joylol fragment - missing code'
+    )
+  local curType =
+    shouldExist(curFragment, 'curType',
+      'incorrectly setup fragment - missing curType'
+    )
+  local fragmentBody =
+    buffers.getcontent('_fragment_buffer_'):gsub("\13", "\n")
+  codeVersions[curType] = fragmentBody
+
+  tex.sprint("\\starttyping")
+  tex.print(fragmentBody)
+  tex.sprint("\\stoptyping")
+end
+
+coAlgs.stopFragment = stopFragment
+\stopLuaCode

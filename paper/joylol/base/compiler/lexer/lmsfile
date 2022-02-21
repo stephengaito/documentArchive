@@ -1,0 +1,38 @@
+-- A Lua Make System file
+
+require 'lms.litProgs'
+
+lpTargets = litProgs.targets{
+  mainDoc  = 'lexer.tex',
+  docFiles = {
+    'lexerOverview.tex',
+    'lexerCode.tex',
+    'lexerLua.tex',
+    'lexerWords.tex',
+    'lexerConclusion.tex',
+  },
+  docDir    = 'doc',
+}
+
+require 'lms.contextDoc'
+contextDoc.targets(lpTargets)
+
+require 'lms.cTests'
+
+cTests.targets(lpTargets, {
+  testExecs = {
+    'allCTests',
+  },
+  cHeaderFiles = {
+    'joylol/lexer.h',
+    'joylol/lexer-private.h',
+  },
+  cCodeFiles = {
+    'booleans.c',
+  },
+  testLibDirs = {
+  },
+  testLibs = {
+    '<HOME>/.joylol/joylol/jInterps',
+  },
+})

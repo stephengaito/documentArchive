@@ -1,0 +1,26 @@
+% A ConTeXt document
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent avlNode
+
+\usebtxdataset[avlNodeBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\chapter[title=avlNode]
+
+\declareJoyLoLCoAlg[avlNode]
+
+\diSimpComponent avlNodeOverview
+
+%\diSimpComponent code
+
+\diSimpComponent avlNodeWords
+
+%\diSimpComponent lua
+
+%\diSimpComponent conclusion
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

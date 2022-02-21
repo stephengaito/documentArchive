@@ -1,0 +1,33 @@
+% A ConTeXt document [master document: joyLoL.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent jSExp
+
+\usebtxdataset[jSExpBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\part[title=JoyLoL S-Expression Language]
+
+\addDocumentDirectory{doc}
+
+\diSimpComponent jSExpOverview
+
+\diSimpComponent jSExpCode
+
+%% Create the lms file
+\addMainDocument{jSExp.tex}
+\compileLmsfile{default}
+\prependLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\startLmsfile
+require 'lms.contextDoc'
+contextDoc.targets(lpTargets)
+\stopLmsfile
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

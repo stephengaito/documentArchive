@@ -1,0 +1,416 @@
+% A ConTeXt document [master document: booleans.tex]
+
+\section[title=Words]
+
+\startJoyLoLWord[true]
+\startRule[true]
+\preDataStack
+  (
+    dataStack
+  )
+\postDataStack
+  (
+    TRUE
+    dataStack
+  )
+\stopRule
+
+\startImplementation[ansic]
+  (
+    (pushData true)
+  )
+\stopImplementation
+
+\stopJoyLoLWord
+
+\startJoyLoLWord[false]
+\startRule[false]
+\preDataStack
+  (
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+
+\startImplementation[ansic]
+  (
+    (pushData false)
+  )
+\stopImplementation
+
+\stopJoyLoLWord
+
+\startJoyLoLWord[isTrue]
+\startRule[isTrue-true]
+\preDataStack
+  (
+    true
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[isTrue-else]
+\preDataStack
+  (
+    (top)
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+
+\startImplementation[ansic]
+  (
+    (popData aBool)
+    (doIfte aBool
+      (pushData true)
+      (pushData false)
+    )
+  )
+\stopImplementation
+
+\stopJoyLoLWord
+
+\startJoyLoLWord[ifFalse]
+
+\startRule[ifFalse-false]
+\preDataStack
+  (
+    false
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[ifFalse-else]
+\preDataStack
+  (
+    (top)
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+
+\startImplementation[ansic]
+  (
+    (popData aBool)
+    (doIfte aBool
+      (pushData false)
+      (pushData true)
+    )
+  )
+\stopImplementation
+
+\stopJoyLoLWord
+
+\startJoyLoLWord[not]
+\startRule[not-true]
+\preDataStack
+  (
+    false
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[not-false]
+\preDataStack
+  (
+    true
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+
+\startImplementation[ansic]
+  (
+    (popData aBool)
+    (doIfte aBool
+      (pushData false)
+      (pushData true)
+    )
+  )
+\stopImplementation
+\stopJoyLoLWord
+
+\startJoyLoLWord[or]
+\startRule[or-true1]
+\preDataStack
+  (
+    true
+    (top2)
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[or-true2]
+\preDataStack
+  (
+    false
+    true
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[or-false]
+\preDataStack
+  (
+    false
+    false
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+
+\startImplementation[ansic]
+  (
+    (popData aBool1)
+    (popData aBool2)
+    (doIfte aBool1
+      (pushData true)
+      (doIfte aBool2
+        (pushData true)
+        (pushData false)
+      )
+    )
+  )
+\stopImplementation
+
+\stopJoyLoLWord
+
+\startJoyLoLWord[and]
+
+\startRule[and-true]
+\preDataStack
+  (
+    true
+    true
+    dataStack
+  )
+\postDataStack
+  (
+    true
+    dataStack
+  )
+\stopRule
+
+\startRule[and-false1]
+\preDataStack
+  (
+    false
+    (top2)
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+
+\startRule[and-false2]
+\preDataStack
+  (
+    true
+    false
+    dataStack
+  )
+\postDataStack
+  (
+    false
+    dataStack
+  )
+\stopRule
+
+\startImplementation[ansic]
+  (
+    (popData aBool1)
+    (popData aBool2)
+    (doIfte aBool1
+      (doIfte aBool2
+        (pushData true)
+        (pushData false)
+      )
+      (pushData false)
+    )
+  )
+\stopImplementation
+
+\stopJoyLoLWord
+
+\startJoyLoLWord[isBoolean]
+
+\startRule[isBoolean-true]
+\preDataStack
+  (
+    (top aType)
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preCondition
+  dup isTrue or isFalse  << WRONG!
+\postDataStack
+  (
+    (TRUE Boolean)
+    dataStack
+  )
+\postProcessStack
+  (
+    processStack
+  )
+\stopRule
+
+\startRule[isBoolean-false]
+\preDataStack
+  (
+    (top aType)
+    dataStack
+  )
+\preProcessStack
+  (
+    processStack
+  )
+\preCondition
+  (top isBoolean not)
+\postDataStack
+  (
+    (FALSE Boolean)
+    dataStack
+  )
+\postProcessStack
+  (
+    processStack
+  )
+\stopRule
+
+\startCCode
+static void isBooleanAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (isBoolean(top))
+    result = newBoolean(jInterp, TRUE);
+  else
+    result = newBoolean(jInterp, FALSE);
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+\stopJoyLoLWord
+
+\startJoyLoLWord[isTrue]
+\startCCode
+static void isTrueAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (isTrue(top)) {
+    result = newBoolean(jInterp, TRUE);
+  } else {
+    result = newBoolean(jInterp, FALSE);
+  }
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+\stopJoyLoLWord
+
+\startJoyLoLWord[isFalse]
+
+\startCCode
+static void isFalseAP(ContextObj* aCtx) {
+  assert(aCtx);
+  JoyLoLInterp *jInterp = aCtx->jInterp;
+  assert(jInterp);
+  popCtxDataInto(aCtx, top);
+  JObj* result = NULL;
+  if (isTrue(top)) {
+    result = newBoolean(jInterp, FALSE);
+  } else {
+    result = newBoolean(jInterp, TRUE);
+  }
+  pushCtxData(aCtx, result);
+}
+\stopCCode
+\stopJoyLoLWord
+
+\setCHeaderStream{private}
+\startCHeader
+extern Boolean registerBooleanWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+);
+\stopCHeader
+\setCHeaderStream{public}
+
+\startCCode
+Boolean registerBooleanWords(
+  JoyLoLInterp *jInterp,
+  JClass       *theCoAlg
+) {
+  assert(jInterp);
+  ContextObj *rootCtx = jInterp->rootCtx;
+  assert(rootCtx);
+  DictObj *dict = rootCtx->dict;
+  assert(dict);
+  
+  DictNodeObj* true  = getSymbolEntry(dict, "true");
+  true->value = newBoolean(jInterp, TRUE);
+
+  DictNodeObj* false = getSymbolEntry(dict, "false");
+  false->value = newBoolean(jInterp, FALSE);
+
+  extendJoyLoLInRoot(jInterp, "isBoolean", "", isBooleanAP, "");
+  extendJoyLoLInRoot(jInterp, "isTrue",    "", isTrueAP,    "");
+  extendJoyLoLInRoot(jInterp, "isFalse",   "", isFalseAP,   "");
+
+  return TRUE;
+}
+\stopCCode

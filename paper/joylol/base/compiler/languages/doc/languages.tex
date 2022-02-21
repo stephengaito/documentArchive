@@ -1,0 +1,40 @@
+% A ConTeXt document [master document: joyLoL.tex ]
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent languages
+
+\usebtxdataset[langugesBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\part[title=Language CoAlgebras]
+
+\addDocumentDirectory{doc}
+
+\diSimpComponent languagesOverview
+
+\diSimpComponent ../jCF/doc/jCF
+
+\diSimpComponent ../jCoAlg/doc/jCoAlg
+
+\diSimpComponent ../jRM/doc/jRM
+
+\diSimpComponent ../jSExp/doc/jSExp
+
+%% Create the lms file
+\addMainDocument{languages.tex}
+\compileLmsfile{default}
+\prependLmsfileCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\startLmsfile
+require 'lms.contextDoc'
+contextDoc.targets(lpTargets)
+recurseTargets{}
+\stopLmsfile
+\createLmsfileFile%
+  {default}%
+  {lmsfile}%
+  {-- A Lua Make System file}
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

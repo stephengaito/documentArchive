@@ -1,0 +1,26 @@
+% A ConTeXt document
+
+\usemodule[t-diSimp]
+
+\startDiSimpComponent lexer
+
+\usebtxdataset[lexerBib.lua]
+\diSimpEnvironment joyLoLConTeXtStartEnv
+
+\chapter[title=Lexer]
+
+\declareJoyLoLCoAlg[lexer]
+
+\diSimpComponent lexerOverview
+
+\diSimpComponent lexerCode
+
+\diSimpComponent lexerWords
+
+\diSimpComponent lexerLua
+
+\diSimpComponent lexerConclusion
+
+\diSimpEnvironment joyLoLConTeXtStopEnv
+
+\stopDiSimpComponent

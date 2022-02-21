@@ -1,0 +1,28 @@
+% A ConTeXt document [master document: jSExp.tex]
+
+\subsection[title=CoAlgebras]
+
+\startJoylolCode
+CoAlgebra WhiteSpace
+
+creation
+  parseWhiteSpace ;
+
+feature -- Abstract Syntax
+  
+feature -- Concrete Syntax
+  parseWhiteSpace(aCtx : Context) : WhiteSpace is
+    beginSExp
+      "beginSExp" P
+      ( ??? )
+      "endSExp" P 
+    endSExp -- parseWhiteSpace ;
+  
+endCoAlgebra -- CoAlgebra
+\stopJoylolCode
+\prependJoylolCodeCopyright{PerceptiSys Ltd (Stephen Gaito)}
+\createJoylolCodeFile%
+  {default}
+  {whiteSpace.joy}
+  {// A JoyLoL file}
+

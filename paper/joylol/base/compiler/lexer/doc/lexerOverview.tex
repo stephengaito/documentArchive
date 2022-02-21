@@ -1,0 +1,114 @@
+% A ConTeXt document [master document: lexer.tex]
+
+\section[title=Overview]
+
+The lexer extracts lexemes consisting of white space, operators, 
+identifiers, strings, comments, and numbers, from the character stream. 
+Each lexeme is either categorized by or inserted into the symbol table. 
+Any categorizations will be used by the parser. White space which is not 
+inside a string and comments are ignored.
+
+An LPeg grammar for our lexer is:
+
+\starttyping
+local lpeg = require 'lpeg';
+local P, S, V = lpeg.P, lpeg.S, lpeg.V;
+
+local lexer = P {
+  lexeme     = V"naturalNum" +
+               V"identifier" +
+               V"whiteSpace" ;
+  naturalNum = V"hexNumber" + V"decimalNum" ;
+  hexNumber  = S'0' * (S'x' + S'X') * R('09', 'af', 'AF', ',')^1 ;
+  decimalNum = R('19') * R('09')^0 ;
+  identifier = R('az', 'AZ') * ( R('az', 'AZ', '09', '_') )^0 ;
+  whiteSpace = (S' ' + S'\t' + S'\n')^0 ;
+};
+\stoptyping
+
+\TODO{Rework this to be UTF8 friendly.}
+
+Following \cite{ierusalimschy2008lpegArticle} this can be translated into 
+\joylol\ as: 
+
+\starttyping
+
+; lexeme (right associative)
+(
+  (
+    naturalNum
+    identifier
+    whiteSpace
+  )
+  Choose
+)
+'lexeme'
+define
+
+; naturalNum
+(
+  (
+    hexNumber
+    decimalNum
+  )
+  Choose
+)
+'naturalNum'
+define
+
+; hexNumber
+(
+  '0'
+  Char
+  ('x' 'X')
+  CharSet
+  (
+    ('09' 'af' 'AF' ',')
+    CharSet
+  ) 
+  1
+  RepeatAtLeast
+)
+'hexNumber'
+define
+
+; decimalNum
+(
+  ('19')
+  CharSet
+  (
+    ('09')
+    CharSet
+  )
+  0
+  RepeatAtLeast
+)
+'hexNumber'
+define
+
+; identifier
+(
+  ('az' 'AZ' '_')
+  CharSet
+  (
+    ('09' 'az' 'AZ' '_')
+    CharSet
+  )
+  0
+  RepeatAtLeast
+)
+'identifier'
+define
+
+; whitespace
+(
+  (
+    ( ' ' '\t' '\n')
+    CharSet
+  )
+  0
+  RepeatAtLeast
+)
+'whiteSpace'
+define
+\stoptyping

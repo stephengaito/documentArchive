@@ -1,0 +1,11 @@
+-- A Lua Make System file
+
+require 'lms.contextDoc'
+
+contextDoc.targets{
+  mainDoc         = 'compiler.tex',
+  docDir          = 'doc'
+}
+
+recurseTargets{}
+
