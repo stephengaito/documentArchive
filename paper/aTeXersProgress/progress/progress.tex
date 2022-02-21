@@ -1,0 +1,134 @@
+% A ConTeXt file
+
+\usemodule[joylol]
+
+\setupinteraction
+  [state=start,
+   color=green,
+   style=bold]
+% make chapter, section bookmarks visible when opening document
+\placebookmarks[chapter,section,subsection][chapter,section]
+\setupinteractionscreen[option=bookmark]
+
+\startcomponent atest-file
+
+%<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img 
+%alt="Creative Commons License" style="border-width:0" 
+%src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br /><span 
+%xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" 
+%property="dct:title" rel="dct:type">A TeXer's Progress</span> by <a 
+%xmlns:cc="http://creativecommons.org/ns#" 
+%href="https://github.com/stephengaito" property="cc:attributionName" 
+%rel="cc:attributionURL">Stephen Gaito</a> is licensed under a <a 
+%rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative 
+%Commons Attribution-ShareAlike 4.0 International License</a>.<br />Based on a 
+%work at <a xmlns:dct="http://purl.org/dc/terms/" 
+%href="https://github.com/stephengaito/aTeXersProgress" 
+%rel="dct:source">https://github.com/stephengaito/aTeXersProgress</a>. 
+
+%\starttext
+%\startdocument
+
+\doifmode{book}{\startfrontmatter}
+\placecontent
+
+\doifmode{book}{
+\stopfrontmatter
+\startbodymatter
+}
+
+\startsection[title={Introduction}]
+
+A TeXer's Progress is a personal attempt, of an existing \LaTeX\ user, to 
+understand how to write mathematical texts using \ConTeXt. We will produce 
+ten distinct documents. The first one, this document, will highlight the 
+important points of this journey. The second, and third documents will be a 
+mathematical exposition of the chaotic dynamics of the H\'enon, Lozi and 
+Two-shift maps, written in \LaTeX\ as a long article and a book. The fourth 
+and fifth documents will be the same mathematical exposition redone using 
+\ConTeXt, again in both a long article and a book format. Finally, each of 
+these previous documents will be provided in both PDF and XHTML formats. 
+
+\stopsection
+
+\startsection[title={Where to put things}]
+
+The first and most important problem to solve is where to put things. 
+\ConTeXt\ has four main types of files, those which define Projects, 
+Products, Components and Environments. This abundance of structure is very 
+well suited to writing large complex multi-book projects. However, for our 
+purposes we will only make use of Product, Component and Environment files. 
+
+Each article will consist of a couple of major sections, each of which will 
+be written in their own file. The main article will then correspond to a 
+\ConTeXt\ Product which specifies which sections make up the article. Each 
+major section will correspond to a \ConTeXt\ Component. Environments are used 
+to specify one or more article styles to be used by \ConTeXt\ when it 
+lays-out the whole article. 
+
+\ConTeXt's ability to manage complex documents is reflected in its ability to 
+manage files over multiple levels of directories. If a file, such as a 
+Project, Product or Environment file is not found in the "current directory", 
+\ConTeXt\ will search for this file in successive \emph{parent} directories 
+until the search stops at the root of the file-system. 
+
+For our purposes we will use a simple two level structure. We will place all 
+common files, such as the \ConTeXt\ Environment files, in the top level 
+directory. All of the Product and Component files for given article will be 
+placed in the same subdirectory. 
+
+\stopsection
+
+\startsection[title={A question of style}]
+
+The key idea behind both \LaTeX\ and \ConTeXt\ is that content and format 
+should be kept separate. A key difference between \LaTeX\ and \ConTeXt\ is 
+the degree of difficulty for a writer to make small format changes should 
+they be needed. \LaTeX\ hides most formatting parameters deeply inside class 
+files which are not meant to be altered by an average \LaTeX\ user. \ConTeXt, 
+on the other hand, provides a very simple default format and expects writers 
+to specify much more of the format decisions in \ConTeXt\ Environment files. 
+
+As we write we will develop a common collection of formats specified in 
+\ConTeXt\ Environment files located in the top level directory. One or more of 
+these environment files can then be used in each article. This provides a 
+useful separation between the content of the mathematical article and the 
+layout style of the article's format. It also allows the writer to provide 
+local modifications to suit their own needs. 
+
+\stopsection
+
+\startsection[title={Using Lua}]
+
+One of the most important benefits of \ConTeXt\ is the integration of Lua. 
+
+\stopsection
+
+\startsection[title={ToDo}]
+
+\startitemize
+  \item using Modules?
+  \item Citations/Bibliography
+  \item Titles/Author/License/GitVersion/Date
+  \item ...
+\stopitemize
+
+\stopsection
+
+\doifmode{book}{
+\stopbodymatter
+\startbackmatter
+}
+
+\startsection[title={Bibliography}]
+
+\placelistofpublications
+
+\stopsection
+
+\doifmode{book}{\stopbackmatter}
+
+%\stopdocument
+%\stoptext
+
+\stopcomponent
