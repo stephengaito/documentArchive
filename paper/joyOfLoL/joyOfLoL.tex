@@ -1,0 +1,453 @@
+% LaTeX source for the joyOfLoL document
+%
+
+\documentclass[a4paper,openany]{amsart}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{disitt}
+\usepackage{disitt-symbols}
+\usepackage{disitt-code}
+\usepackage[backend=biber,style=alphabetic,citestyle=alphabetic]{biblatex}
+\addbibresource{joyOfLoL.bib}
+\usepackage{mdframed}
+\newmdenv[linecolor=white,backgroundcolor=gray!10]{infobox}
+\newenvironment{myQuote}{\begin{quotation}}{\end{quotation}}
+\surroundwithmdframed[linecolor=white,backgroundcolor=gray!10]{myQuote}
+
+\begin{document}
+	
+\sloppy
+	
+\title[Joy of LoL]{The Joy of Laughing out Loud: Lists of Lists and Joy
+processes as a Computational Foundation for Mathematics}
+ \input{frontMatter}
+\subjclass[2010]{Primary unknown; Secondary unknown} %
+\keywords{Keyword one, keyword two etc.}%
+	
+\begin{abstract}
+We show that the collection of Lists of Lists and Joy processes form a
+Computational Foundation of Mathematics.
+\end{abstract} 
+\maketitle 
+\tableofcontents 
+	
+	
+\section{Introduction} For historical reasons, all current foundations of
+Mathematics are based upon first or higher order logic, or alternatively
+(logically interpreted) Type Theory. \TODO{what about category theory?} In order
+to provide a Computational Foundation of Mathematics we need to answer three
+primary questions:
+
+\begin{itemize}
+\item What is Mathematics?
+\item What constitutes a Foundation of Mathematics?
+\item What is a Computational Process?
+\end{itemize}
+
+\subsection{What is Mathematics?}
+
+Again, for historical reasons, Mathematics is currently identified with some
+super-set of a formulation of the axioms of the well-founded sets, such as ZFC.
+In particular it is assumed that Cantor's collection of Ordinals larger than
+$\omega$ and their well-ordering are \emph{required} to provide a credible
+formulation of real analysis as required for Mathematical Physics.
+
+While we assert that what is normally considered computation, augmented with
+something as powerful as the Axiom of Choice, can provide a Computational
+Foundation for what is currently considered Mathematics, we will argue that
+Computational \emph{processes} are more than sufficient to provide foundations
+for real analysis. 
+
+\TODO{fill in this gap: discuss Topos as a model of well-founded set theory.
+Discuss Coalgebras as a model of processes. See fingerPiece01}
+
+For the purposes of \emph{this paper} we will define Mathematics to be any fully
+algebraic pair of Topos which contain an \emph{implementation} of the Reals.
+
+\subsection{What constitutes a Foundation of Mathematics?}
+
+\TODO{Discuss organizational/structural, formal/existential,
+	ontological/material modes of foundation. See
+	\cite{marquis1995categoryFoundationsMath} as well as \cite{awodey2009a}. Are
+	these usefully seen as being in a linear adjoint chain?}
+
+Following Hatcher, \cite[section 2.5]{hatcher1982logicalFoundationsMath}, we posit the
+following list of criteria any Foundation of Mathematics must satisfy:
+
+\begin{enumerate}
+\item \textbf{A foundation of mathematics must be adequate for a reasonably large
+portion of mathematics.}
+	
+\noindent If we ``assume'' something as powerful as the Axiom of Choice, we will
+be able to recover the whole of current mathematical set theory (smaller than
+the first strongly inaccessible cardinal).
+	
+\item \textbf{A foundation must derive from some intuitively natural principles.}
+	
+\noindent The foundational (co-)data language \emph{is} the List of Lists. The
+only operations on this language are LISP's car, cdr, cons, together with
+failure and repetition.
+	
+\item \textbf{The basic principles and primitive (undefined) notions should be
+as economical as possible.}
+	
+\noindent See above.
+	
+\item \textbf{The foundation must be consistent.}
+	
+\noindent For a computational foundation, consistency is given since we are
+\emph{computing} the (standard) model of the formal theory. What is more
+important is that the formal theory is fully abstract, that is the denotation
+and operational semantics are equivalent, in logical terms, the formal theory is
+both sound and complete.
+	
+\item \textbf{The foundation should be expressed (or expressible) as a formal
+system.}
+	
+\noindent In computational terms, each formal system is a (programming) language
+complete with a syntax as well as denotational, operational and axiomatic
+semantics. Every such formal system \emph{must} have (at least) a denotational
+interpretation into the foundational (co-)data language.
+	
+\item \textbf{The construction of everyday mathematics in the system should be
+``natural'' and ``orderly''.}
+	
+\noindent With the proposed computational foundations of mathematics, there is a
+collection of formal theories each of which have (at least) an interpretation in
+the (co-)data language. Each of these formal theories should be tailored to the
+mathematical field in question, so by definition they should represent
+``natural'' and ``orderly'' systems in which to conduct mathematics in a given
+field.
+	
+\end{enumerate}
+
+\subsection{What is a Computational Process?}
+
+\subsection{Why Lists of Lists and Joy processes?}
+
+\section{Lists of Lists}
+
+\subsection{What is a List of Lists?} 
+
+\TODO{see \cite{awodey2009a} ``From Sets to Types to Categories to Sets''. see \cite{marquis1995categoryFoundationsMath}}
+
+In classical, logically defined, \textbf{set theory}, a set is a collection of
+``objects'' which are all ``observed'' to have the same \emph{logical}
+``property''. If we, like Frege, use any arbitrary logical predicate to
+``select'' the objects of a given set, we can all to easily fall into various
+logical paradoxes. To avoid these paradoxes we restrict the allowed predicates
+to those that satisfy one or more ``standard'' collections of axioms. These
+``standard'' collections of axioms are carefully crafted to avoid the known
+paradoxes, as well as provide ``useful'' mathematical ``constructions''. Of
+particular importance is that the axioms of set theory are constraining /
+defining the ``element'' relation, $a \in A$.
+
+\TODO{see \cite{awodeyCoquandVoevodsky2013homotopyTypeTheory} section 1.1 for a
+good introduction}
+
+In classical, \textbf{type theory}, a \emph{type} is a collection of ``objects''
+which are (``logically'') judged to be of a specific type, $a:A$.
+
+In classical, \textbf{category theory}, being structuralist, instead of sets or
+types having elements or objects (respectively), a collection of objects (with
+no internal structure) has a collection of relationships, ``arrows''. 
+
+In each case, we have an unspecified collection of ``things'' for which we can
+make observations.
+
+Literally, the lists of lists is the ``collection'' of ``things'' to which we
+can apply the basic joy operations to observe the ``thing's'' ``structure''. Being
+a finite being, computational or organic, we can only ever apply a finite number
+of operation/observations, but that does not mean that every list of lists is a
+finite structure. It only means that there are potentially lists of lists whose
+``full'' structure we can not explore in a finite number of
+operation/observations.
+
+For computer scientists, this is not a problematic concept. There are many
+computational processes whose ``usefulness'' is not captured in a finite number
+of steps. For example our ``operating systems'' (be they Windows, Mac, or Unix)
+would not be much use if they were limited in the number of cycles they could
+run. While we might turn them off, that is our external choice not an internal
+limitation of the operating system itself. So the computational concept of
+process is of a computational ``program'' with an potentially unlimited number
+of cycles. It usefulness to us is in the external observations we might make of
+the process's ongoing behaviour rather than any ``final'' answer it might
+``compute''.
+
+Similarly, a list of lists is a potentially infinite ``object'' to which any
+finite computation can only build or observer a finite portion of it.
+
+Given a collection of ``things'' we also need to understand when two potentially
+different ``things'' are really the same. Set theory declares two sets to be
+equal if they have the same collection of elements, that is if they are
+extensionally equal. For the lists of lists, we declare that two potentially
+distinct list of lists are equal if given the same collection of observations,
+they always give the same collection of ``answers''. This is an extensional
+concept of equality.
+
+\subsubsection{What are the Joy operations}
+
+\begin{itemize}
+
+	\item push () \TODO{similar to car in Lisp; similar to write in Turing machine}
+
+	\item pop  \TODO{same as cdr in Lisp; similar to erase in Turing machine}
+
+	\item dup  \TODO{similar to car in Lisp; similar to move right in Turing
+		machine; is this too powerful?}
+
+	\item cons \TODO{same as cons in Lisp; similar to move left in Turing machine}
+	
+	\item ifte \TODO{similar to cond in Lisp; similar to a Turing machine's ability
+		to choose its next state/action dependent upon its current state/tape-symbol;
+		should consider Lisp's cond instead; there are really \emph{two} cond's, one is
+		sequential, the other is parallel}
+
+\end{itemize}
+
+\section{Take two}
+	
+We will provide a triumvirate of a material, formal and structural theories,
+corresponding to classical set, type and category theories respectively. While
+the formal theory provides the syntaxtical foundational language, the material
+and structural theories provide the semantical models of the formal theory. The
+material theory provides ``coordinate-full'' / ``calculative'' models for
+specific computations, the structural theory provides ``invariant'' models with
+which to cleanly express the organizational aspects of the overall theory of
+compuation. Each type of model has its own strengths and weaknesses. This
+informal interpretation has been suggested by Awodey's comments, \cite[Section 5
+``Conclusions'']{awodey2009a}.
+
+We will essentially follow the \emph{spirit} but not the letter of the formal
+presentation of Type Theory provided by \cite[Appendix
+A.2]{awodeyCoquandVoevodsky2013homotopyTypeTheory}. Classical type theory is
+concerned with computing, via a form of Gentzen's Sequent Calculus, judgements
+of both the ``truth'' of existence of types and the ``truth'' of proofs that a
+given type is ``inhabited''. We \emph{instead} provide a Floyd-Hoare formal
+theory for a dialect of the Joy language whose stacks are lists of lists, which
+we denote JoyLoL. This Floyd-Hoare theory provides the rules required to
+formally prove the correctness of individual JoyLoL programs using a process
+similar to Gentzen's Natural Deduction. These formally proven programs provide
+the computations required to dually construct and/or observe portions of any
+given list of lists.
+
+The duality here, between construction and observation, is integral to our
+foundations of mathematics. It is essentially Cantor's distinction between
+\emph{sets} and \emph{absolutely infinite multiplicities} or formal set theory's
+\emph{proper classes}. This duality \emph{is} the distinction, in Computer
+Science, between \emph{data} and \emph{processes}. In Category theory, it is the
+distinction between Algebras and Co-Algebras. While Cantor and classical
+Set-Theory, developed to make Cantor's naive set theory rigorous, has no
+particularly good reasons for the distinction between set and class except to
+avoid various paradoxes, Computer Science and Category theory both have good
+computational reasons for this distinction. \TODO{provide refereneces such as
+``The search for Certainty''}
+
+The Floyd–Hoare formal theory for JoyLoL consists of a collection of rules which
+link pairs of observations. There is a rule for each JoyLoL program construct.
+There is also a collection of observation inference rules which allow a given
+collection of observations to be appropriately weakened or strengthened as
+required for a given correctness proof. A formal correctness proof of a JoyLoL
+program, consists of a ordered sequence of inter-twined observations and JoyLoL
+program constructs or observation inference rules. This sequence begins and ends
+with observations, which are called the pre-conditions and post-conditions
+respectively. In this sequence each JoyLoL program construct or observation
+inference rule instance are bracketed by observations which correspond, up to
+renaming of meta-variables, to that construct or inference rule's pre and post
+conditions.
+
+In terms of the material theory, the correctness proof asserts that the given
+JoyLoL program will correctly transform any list of lists which satisfies the
+pre-conditions into a list of lists which satisfies the post-condition. In terms
+of the structural theory, the correctness proof specifies a particular directed
+path of arrows in the category of Lists of Lists, between the objects denoted by
+the pre-condition and post-condition.
+
+Central to this formal theory are the structure and collection of the possible
+observations. Any observation is built as a sequence of selectors applied to a
+given List of Lists. Our basic selectors are $\text{id}$, $\text{car}$, and
+$\text{cdr}$. The result of a selector applied to a list of lists such as,
+$\rho$, is another list of lists. The denotations of any particular observation
+consists of four symbols. The first symbol is the meta-variable which informally
+denotes the list of lists which is the result of this observation. The second
+symbol denotes the expected structure of the resulting list of lists. The third
+symbol denotes the sequence of selectors. The last symbol is a meta-variable
+which denotes the list of lists to which the selectors are applied. The
+meta-variables are denoted by a collection of symbols for variables such as
+$x_0$, $x_1$, etc. We will also use the symbol ``$\underline{\ }$'' to denote
+any meta-variable of which we are not interested. The collection of symbols
+which denote the expected structure consists of ``$\emptyset$'', ``$()$'', and
+``$*$'', which denote the empty list of lists, the null list of
+lists, and any unspecified list of lists.
+
+Similar to Type theory as presented by,
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, we have the following three
+judgements:
+%
+\begin{center}
+ $ \Gamma \: \text{ctx}$ \qquad
+ $ \Gamma \vdash x : \sigma \rho $ \qquad 
+ $ \Gamma \vdash x = y $
+\end{center}
+%
+Informally, $\Gamma \: \text{ctx}$, is the judgement that the observations
+contained in the context, $\Gamma$, are valid about one or more list of lists.
+The judgement, $\Gamma \vdash x : \sigma \rho$ asserts that, in the context of
+$\Gamma$, the observation, $\sigma \rho$, consisting of the selector, $\sigma$,
+applied to the list of lists, $\rho$, is denoted by the meta-variable, $x$. The
+judgement, $\Gamma \vdash x = y$, asserts that, in the context of, $\Gamma$,
+that the two observations denoted by $x$ and $y$ respectively, are equal.
+
+Again, similar to type theory as presented by,
+\cite{awodeyCoquandVoevodsky2013homotopyTypeTheory}, we have inference rules of
+the form:
+%
+\begin{center}\begin{prooftree}
+\AxiomC{$\mathcal{J}_1$}
+\AxiomC{$\cdots$}
+\AxiomC{$\mathcal{J}_n$}
+\RightLabel{Name}
+\TrinaryInfC{$\mathcal{J}$}
+\end{prooftree}\end{center}
+
+Given the collection of selectors and expected structures, we have the following
+nine observations:
+%
+\vspace{1ex}\begin{center}\begin{tabular}{rccc}
+selector & list of lists    &    null list       &   non-existing \\
+id       & $x : * : id  : \rho$ & $x : ( ) : id  : \rho$ & $x : \emptyset : id  : \rho$ \\
+car      & $x : * : car : \rho$ & $x : ( ) : car : \rho$ & $x : \emptyset : car : \rho$ \\
+cdr      & $x : * : cdr : \rho$ & $x : ( ) : cdr : \rho$ & $x : \emptyset : cdr : \rho$
+\end{tabular}\end{center}\vspace{1ex}
+%
+where $\rho$ is meta variable denoting a list of lists, $\sigma$ is a meta
+variable denoting a list of lists selector sequence, and $x$ is a meta variable
+denoting the selected portion of the list of lists obtained by applying the
+selector, $\sigma$, to the list of lists, $\rho$. Each observations
+\emph{asserts} that the selected portion of the list of lists is itself a valid
+list of lists of the expected structure.
+
+\begin{prooftree}
+\AxiomC{$ x : * : \sigma : \rho $,}
+\AxiomC{$ y : * : \sigma' : x $}
+\RightLabel{sequential composition}
+\BinaryInfC{$ y : * : \sigma' \sigma : \rho $}
+\end{prooftree}
+
+Informally, the \emph{sequential composition} rule states that if we know that
+the selector, $\sigma$, applied to the list of lists, $\rho$, results in a list
+of lists, $x$, \emph{and} if the selector, $\sigma'$, applied to the list of
+lists, $x$, results in the list of lists, $y$, then the sequential composition
+of the selectors, $\sigma' \sigma$ (apply first $\sigma$ and then $\sigma'$),
+applied to $\rho$ results in the list of lists, $y$.
+
+\begin{prooftree}
+\AxiomC{$x : * : \text{id} : \rho$}
+\RightLabel{null list introduction}
+\UnaryInfC{$ \underline{\ } : () : \text{car} : \rho'$, \quad $ x : * : \text{cdr} : \rho'$}
+\end{prooftree}
+
+\begin{joyLoL}
+((x * (id) $\rho$ observe) assert)
+pushnull
+(( _ () (car) $\rho'$ observe) (x * (cdr) $\rho'$ observe) assert)
+\end{joyLoL}
+
+\begin{prooftree}
+\AxiomC{$ () : \text{car} : \rho$,}
+\AxiomC{$ x : \text{cdr} : \rho$}
+\RightLabel{null list elimination}
+\BinaryInfC{$ x : \text{id} : \rho'$}
+\end{prooftree}
+
+\begin{joyLoL}
+(assert (judgement () car \rho) (judgement x cdr \rho))
+popnull
+(assert (judgement x id \rho'))
+\end{joyLoL}
+
+\begin{prooftree}
+\AxiomC{$ x : \sigma : \rho$,}
+\AxiomC{$ IF ???? $}
+\RightLabel{if exists}
+\BinaryInfC{$ ???? $}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$ \emptyset : \sigma : \rho$,}
+\AxiomC{$ IF ???? $}
+\RightLabel{if does not exist}
+\BinaryInfC{$ ???? $}
+\end{prooftree}
+
+\section{examples}
+
+One of the key aspects of the JoyLoL language as opposed to standard programming
+languages is that list of lists can be infinite (process) objects and in
+particular, each ``element'' of any given list could itself be an infinite list.
+This means that, for example, Joy's dup operator is potentially too powerful if
+it is applied to a potential infinite process (rather than a finite data list).
+This is essentially related to the concept of action at a distance in Physics,
+what is the definition of ``locality'' and how powerful can a local action be? A
+key aspect of Turing's (and Gandy's) definition of computation, as essentially
+noted by G\"odel, is that computation is defined in as minimalistic a manner
+possible.
+
+Turing's machines were, as originally defined, special purpose computing agents,
+used to show that universal computers could be built which used ``data'' to
+define computation.
+
+Thinking structurally for the moment, we can see the objects and morphisms of a
+category as generalized ``data'' (though with a potentially infinite extent) and
+generalized ``computation'' (though with a potentially finite description). This
+is essentially the Harvard Architecture. That is the objects of the Category of
+Lists of Lists, are Lists of Lists while the morphisms are JoyLoL programs
+(which can ultimately be translated into a List of Lists).
+
+\begin{prooftree}
+\AxiomC{$x : * : car : \rho$}
+\AxiomC{$y : * : cdr : \rho$}
+\RightLabel{dup}
+\BinaryInfC{$x : * : car : \rho'$ \quad $x : * : cadr : \rho'$ \quad $y : * : cddr : \rho'$}
+\end{prooftree}
+
+Translated into JoyLoL we have
+%
+\begin{joyLoL}
+;; pre-condition
+((x * (car) rho-pre observe)
+ (y * (cdr) rho-pre observe) assert)
+dup
+;; post-condition
+((x * (car) rho-post observe)
+ (x * (car cdr) rho-post observe)
+ (y * (cdr cdr) rho-post observe) assert)
+\end{joyLoL}
+
+A key feature of JoyLoL is that it can only change objects in limited ways. In
+particular it can only add or remove one null list ``()'' per computational
+step. To be able to ``dup(licate)'' a potentially infinite complex list of
+lists, we have two related problems, firstly, where do we store the intermediate
+structure if we can not do it all at once, and secondly, if we must inter-twine
+temporary storage and final duplication of partial structures, how do we keep
+track of ``where we are'' in the overall computation? One option is to use yet
+another element on the stack as temporary storage, this would be a von Neumann
+or Princeton architecture. Such a strategy will, when we come to investigate
+space-time and computational traces, make ``tracing'' the identity of an
+``object'' much more difficult. Another option is to allow JoyLoL to have an
+explicitly Harvard architecture, where there is separate ``memory'' for both
+data and process logic, and the JoyLoL operators can manipulate either. In
+categorical terms, the ``data'' memory are the objects, while the ``process
+logic'' memories are the categorical morphisms.
+
+To this end we have the following JoyLoL operators:
+%
+\begin{joyLoL}
+pushNull, popNull
+selectCar, selectCdr
+\end{joyLoL}
+
+\printbibliography
+\end{document}
+
+
