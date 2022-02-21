@@ -1,0 +1,112 @@
+% A ConTeXt document [master document: programmingInJoyLoL.tex]
+
+\chapter[title=Preface] 
+
+The programming language, \type{JoyLoL} (the Joy of Lists of 
+Lists\footnote{Or alternatively, the Joy of Laughing out Loud}), is a 
+concatenative programming language based loosely upon Manfred von Thun's 
+programming language \type{Joy}, 
+\cite{vonThun1994mathematicalFoundations}, \cite{vonThun1994overview}. 
+Most programming languages, whether imperative, like \type{C}, \type{C++}, 
+\type{C#} or Java, or functional, like \type{Lisp}, \type{ML}, or 
+\type{Haskell}, depend upon the \emph{application} of functions to 
+arguments. In a concatenative programming language, all expressions behave 
+as functions, and the juxtaposition of expressions denotes function 
+composition. The \quote{space} of all computations of a concatenative 
+language has a natural a categorical structure which we will explicitly 
+exploit. 
+
+The JoyLoL language's primary goal is, in its most austere form, to be a 
+fixed point of the semantics functor. Being a fixed point of the semantic 
+functor, it is its own denotational, operational and axiomatic semantics. 
+This means that, in particular, it provides a sufficient foundation for 
+both computational theory, as well as, if granted transfinite 
+computational power equivalent to Vopěnka's principle, all of 
+conventional Mathematical discourse\footnote{Transfinite computational 
+power is equivalent to the Axiom of choice, \emph{so} any one who accepts 
+the Axiom of Choice must accept transfinite computational power, 
+conversely, any one who rejects transfinite computational power, must 
+reject the Axiom of Choice.}. 
+
+Unfortunately for any mere human, JoyLoL's most austere form, while very 
+easy for computers to parse, is very difficult for humans to understand. 
+This document will instead discuss programming in an augmented form of 
+JoyLoL (probably best called \type{JoyLoL++}). Eventually we will show 
+that this augmented form of JoyLoL is in fact a \quote{conservative 
+extension} of the austere form of JoyLoL. However, for this document, we 
+will simply assume that the two variants of JoyLoL are equivalent. 
+
+Another important goal of the JoyLoL language is to provide \quote{simple} 
+tools with which to \quote{program} the rather delicate extraction of 
+\quote{information} from the potentially infinitely complex structure of 
+processes. We make no assumption that the \quote{lists} that JoyLoL 
+manipulates are finite. Transfinite lists represent processes which might 
+not halt in (trans)finite \quote{time}. To facilitate this transfer of 
+information we explicitly implement co-operation of coroutines. 
+
+Coroutines in JoyLoL are implemented using the pair of concepts, Contexts 
+and Continuation Passing Style (CPS) of programming. The continuation 
+passing style of programming was originally developed to facilitate the 
+semantics of programming languages in general, 
+\cite{stracheyWadsworth1974continuations}, 
+\cite{milne1974semanticsImplementations}, 
+\cite{reynolds1974continuationSemantics}, 
+\cite{milneStrachey1976theoryProgrammingLanguageSemantics}, 
+\cite{stoy1981scottStracheyTheory}, 
+\cite{gordon1979denotationalDescriptionProgLangs} and of Scheme in 
+particular, \cite{sussmanSteele1975schemeInterpreter}\footnote{For a 
+history of the use of Continuation Passing Style (CPS) see, 
+\cite{reynolds1993continuationHistory}}. 
+
+In JoyLoL all words are executed in a particular \quote{local} context 
+which explicitly contains a pair of stacks, the data and process stacks, 
+as well as an explicit naming scope in the form of a look-up dictionary. 
+In JoyLoL the Continuation Passing Style of programming is represented in 
+the fact that any JoyLoL word may alter either stack\footnote{In fact any 
+word may alter either stack, the naming scope or the actual context 
+returned to the JoyLoL interpretor.}. Altering the data stack is roughly 
+equivalent to a normal programming language changing the \quote{state} of 
+the computer system. Altering the \emph{process} stack changes what the 
+JoyLoL interpreter \emph{does} next. This is typically \emph{not} 
+explicitly allowed in most programming languages. While this extreme 
+flexibility allows JoyLoL's semantics to be ultra simple, and facilitates 
+the use of co-operative coroutines, it makes understanding the effect of a 
+given program text considerably harder to understand for mere humans. 
+Dijkstra, \cite{dijkstra1968goToHarmful}, had very good reasons for making 
+the \quote{simple} remarks that: 
+
+\startblockquote
+My first remark is that, although the programmer's activity ends when he 
+has constructed a correct program, the process taking place under control 
+of his program is the true subject matter of his activity, for it is this 
+process that has to effectuate the desired effect, it is this process that 
+in its dynamic behaviour has to satisfy the desired specifications. Yet, 
+once the program has been made, the \quote{making} of the corresponding 
+process is delegated to the machine.
+\stopblockquote
+
+\startblockquote
+My second remark is that our intellectual powers are rather geared to 
+master static relations and that our powers to visualize processes 
+evolving in time are relatively poorly developed. For that reason we 
+should do (as wise programmers aware of our limitations) our utmost best 
+to shorten the conceptual gap between the static program and the dynamic 
+process, to make the correspondence between the program (spread out in 
+text space) and the process (spread out in time) as trivial as possible. 
+\stopblockquote
+
+While these observations are correct for programming over finite 
+structures, they are woefully restrictive when programming over 
+potentially non-halting processes. This makes the problem of programming 
+over processes both extremely difficult and equalling extremely 
+fascinating. Be warned: \quotation{\emph{Here be dragons}}. 
+
+If JoyLoL is potentially so hard to use, why use it? Two reasons, firstly 
+it should be no harder to use than first-order logic. Secondly, 
+mathematics is in a sense all about desiging new langauges in which to 
+\quote{program} computations. By being semantially transparent, JoyLoL 
+provides a unique language in which to write higher level, provably 
+correct programming langauges for, for example, group theory, vector 
+spaces, real and complex analysis, numerical analysis and mathematical 
+physics. 
+
