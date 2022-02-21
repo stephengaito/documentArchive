@@ -1,0 +1,231 @@
+;; A JoyLoL implementation of the Bottom-Up MergeSort algorithm 
+
+;; we begin with some helpful joylol words
+
+;;clear
+;;showStack
+
+;;showStackOn
+;;tracingOn
+;; debugOn
+
+;;showStackOff
+;;tracingOff
+;;debugOff
+
+;;definitions
+
+;;tests
+;;definitionsIn
+
+;; Now we look at the mergeSort algorithm
+
+(
+  mergeSort2Lists
+  { true }
+  ;; top is a sorted list
+  ;; second is a sorted list
+  ;; third is the currently merged sorted list
+  (
+    ( isNil )
+    (
+      pop1D
+      ( isNil )
+      (
+        pop1D
+        ;; return sorted list
+      )
+      (
+        append
+        ;; return sorted list
+      )
+      ifte
+    )
+    (
+      swap12D
+      ( isNil )
+      (
+        pop1D
+        append
+        ;; return sorted list
+      )
+      (
+        swap12D
+        popList
+        rollDown3D
+        swap34D
+        popList
+        swap23D
+        swap34D
+        (
+          <nat
+        )
+        (
+          ;; the first item is smaller than the second
+          swap23D
+          append
+          swap34D
+          rollUp3D
+          prepend
+          swap23D
+          swap12D
+        )
+        (
+          ;; the second item is smaller than the first
+          rollUp3D
+          append
+          rollUp3D
+          prepend
+          swap23D
+        )
+        ifte
+        mergeSort2Lists
+      )
+      ifte
+    )
+    ifte
+  )
+  { true }
+  ;; top is the sorted list formed by merging the initial two lists
+)
+globals
+define
+
+(
+  mergeSortRollUp
+  { true }
+  ;; top is an binary description of the powers of two structure 
+  ;;  of the stack of sorted lists
+  ;; second is a stack of sorted lists
+  (
+    ( isZero ) 
+    (
+      pop1D ;; remove the binary description
+    )
+    (
+      (
+        dup1D
+        2 %rev
+        isZero
+        swap12D
+        pop1D
+      )
+      (
+        swap12D
+        popList
+        swap12D
+        popList
+        swap12D
+        rollUp3D
+        ()
+        rollUp3D
+        mergeSort2Lists
+        wrap
+        prepend
+        swap12D
+        2 /rev
+        mergeSortRollUp
+      )
+      (
+        pop1D
+      )
+      ifte
+    )
+    ifte
+  )
+  { true }
+  ;; top is a shorter stack of sorted lists
+)
+globals
+define
+
+(
+  mergeSortRollUpAll
+  { true }
+  ;; a non-empty stack of sorted lists
+  (
+    popList
+    swap12D
+    ( isNil )
+    (
+      ;; we are done
+      pop1D
+      wrap
+    )
+    (
+      popList
+      swap23D
+      ()
+      swap13D
+      mergeSort2Lists
+      wrap
+      prepend
+      mergeSortRollUpAll
+    )
+    ifte
+  )
+  { true }
+  ;; a shorter stack of sorted lists
+)
+globals
+define
+
+(
+  mergeSortRecurse
+  { true }
+  (
+    swap13D ;; swap the unsorted list to the top
+    (
+      isNil
+    )
+    (
+      pop1D ;; remove the now empty unsorted list
+      pop2D ;; remove the now redundant count
+      mergeSortRollUpAll
+      popList
+      pop2D
+    )
+    (
+      popList    ;; pop the first item off the unsorted list
+      swap23D    ;; swap the unsorted list back into place
+      wrap       ;; wrap the item popped off the unsorted list
+      pushList   ;; place the ?? on to the sorted stack
+      rollDown3D ;; swap the sorted stack into the second place
+      dup1D      ;; duplicate the index
+      swap23D    ;; swap a copy of the index out of the way
+      mergeSortRollUp
+      swap12D    ;; swap the index back into place
+      1 + 
+      mergeSortRecurse
+    )
+    ifte
+  )
+  { true }
+)
+globals
+define
+
+(
+  mergeSort
+  { true } ;; precondition
+  ;; top is an unsorted list
+  (
+           ;; expects an unsorted list on top
+    ()     ;; empty sorted stack
+    1      ;; current index
+    mergeSortRecurse
+  )        ;; process stack
+  { true } ;; postcondition
+  ;; top is a sorted version of the initial list
+)
+globals
+define
+
+showStackOn
+tracingOn
+
+;; ( ( 4 5) (2 3) mergeSort2Lists ) i
+
+(( 3 7 4 10 8 15 9 2 5 6 12 1 20 11 18 16 17 14 13 19 ) mergeSort ) i
+
+

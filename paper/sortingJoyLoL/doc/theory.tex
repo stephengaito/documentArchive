@@ -1,0 +1,116 @@
+% A ConTeXt document [master document: sortingJoyLoL.tex]
+
+\chapter[title=Theory]
+
+How do we verify that a particular code fragment, such as an 
+implementation of the merge sort algorithm, actually computes what it 
+purports to compute? This is the most critical question if we are to 
+provide a rigorous \emph{computational} foundation for mathematics. 
+
+Fortunately, most of the hard work required to answer this question 
+already exists in one form or another. In the 1960's and 1970's, numerous 
+computer scientists attempted to answer this question. Their answer was in 
+the form of: 
+
+\startitemize
+
+\item {\bf Denotational semantics}
+
+\item {\bf Operational semantics}
+
+\item {\bf Axiomatic semantics}
+
+\stopitemize
+
+See \cite{winskel1993formalSemanticsProgrammingLanguages}, and 
+\cite{gunter1992semainticProgrammingLanguages}.
+
+Of course, denotational semantics and axiomatic semantics are effectively 
+based upon Tarski's work on formal concepts of Truth, 
+\cite{tarski1983truthFormalizedLanguages}, and Gentzen's work on both 
+Natural Deduction and Sequential Calculus, 
+\cite{gentzen1969collectedPapers}, all of which were conducted in the 
+1930's. 
+
+The syntax, semantics and computation of satisfaction will be taken from a 
+mixture of the more recent Dynamic Logic, 
+\cite{harelKozenTiuryn2000dynamicLogic}, and Modal $\mu$-Logic, 
+\cite{demriGorankoLange2016temporalLogics}. 
+
+\section[title=Syntax]
+
+Both Dynamic Logic and Modal $\mu$-Logic have been developed assuming an 
+external \emph{classical} logic, which includes the use of the \quote{law 
+of the excluded middle}, and the axiom of choice. While ultimately both of 
+these principles will be valid in various sub-sections of computational 
+theory, we will not assume their validity until we have proven them valid. 
+Hence we will develop an intuitionistic and constructive logic, based upon 
+the type theory of Martin-L\"of, \cite{martinLofSambin1984typeTh}. 
+
+The effect of this upon our syntax is that we can not depend upon De 
+Morgan's laws to supply the duals of any of the operators we define. So 
+our syntax is more explicit. 
+
+In fact we need to consider the syntax of two languages, \joylolZero\ and 
+\joylol. The syntax of \joylolZero\ is particularly simple, it consists of 
+lists of the characters \quote{(} and \quote{)}. Formally the syntax of 
+\joylolZero\ is an LL(1) context free language with the following 
+Backus-Naur Form (BNF): 
+
+\def\bnfProd{:\,:\,=}
+
+\startformula\startmathalignment
+\NC \text{<listOfLists>}
+  \NC \text{ ::= \quote{(} <listOfLists> \quote{)} <listOfLists> 
+    \| \quote{} }
+  \NR
+\stopmathalignment\stopformula
+
+\noindent where \quote{} denotes the empty string.
+
+The syntax of \joylol\ is only slightly more complex. It is designed to be 
+slightly easier for a human to work with, as it adds quoted strings, 
+single line comments, numbers, and symbols. It is based upon the ASCII 
+character set, and is described with the following BNF extended with IEEE 
+POSIX Extended Regular Expressions (ERE):
+
+\startformula\startmathalignment
+\NC \text{<whiteSpace>}
+  \NC \text{ ::= [\textbackslash x00-\textbackslash x20]+} \NR
+\NC \text{<singleLineComment>}
+  \NC \text{ ::= \quote{;} [^\textbackslash nl\textbackslash cr]* } \NR
+\NC \text{<naturalNumber>}
+  \NC \text{ ::= [1-9][0-9]*} \NR
+\NC \text{<sQuotedString>}
+  \NC \text{ ::= \quote{'} [^']* \quote{'}} \NR
+\NC \text{<dQuotedString>}
+  \NC \text{ ::= \quote{"} [^"]* \quote{"}} \NR
+\NC \text{<symbol>}
+  \NC \text{ ::= [^\textbackslash x00-\textbackslash x20;'"]+} \NR
+\NC \text{<abLoL>}
+  \NC \text{ ::= \quote{<} <listOfLists> \quote{>}} \NR
+\NC \text{<cbLoL>}
+  \NC \text{ ::= \quote{\{} <listOfLists> \quote{\}}} \NR
+\NC \text{<rbLoL>}
+  \NC \text{ ::= \quote{(} <listOfLists> \quote{)}} \NR
+\NC \text{<sbLoL>}
+  \NC \text{ ::= \quote{[} <listOfLists> \quote{]}} \NR
+\NC \text{<listOfLists>}
+  \NC \text{ ::= <abLoL> <listOfLists> } \NR
+\NC \NC \text{ \quad \| <cbLoL> <listofLists> } \NR
+\NC \NC \text{ \quad \| <rbLoL> <listofLists> } \NR
+\NC \NC \text{ \quad \| <sbLoL> <listofLists> } \NR
+\NC \NC \text{ \quad \| <naturalNumber> } \NR
+\NC \NC \text{ \quad \| <sQuotedString> } \NR
+\NC \NC \text{ \quad \| <dQuotedString> } \NR
+\NC \NC \text{ \quad \| <symbol> } \NR
+\NC \NC \text{ \quad \| \quote{} } \NR
+\stopmathalignment\stopformula
+
+\noindent where <whiteSpace> and <singleLineComments> (as defined above) 
+are ignored and may occur anywhere in a <listOfLists>.
+
+\section[title=Semantics]
+
+\section[title=Satisfaction]
+

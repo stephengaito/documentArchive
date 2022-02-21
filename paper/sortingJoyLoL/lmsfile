@@ -1,0 +1,20 @@
+-- A Lua Make System file
+
+require 'lms.contextDoc'
+
+contextDoc.targets{
+  mainDoc  = 'sortingJoyLoL.tex',
+  docFiles = {
+    'preface.tex',
+    'introduction.tex',
+    'theory.tex',
+    'baseTypes.tex',
+    'factorial.tex',
+    'mergeSort.tex',
+    'quickSort.tex',
+    'heapSort.tex',
+    'avlSort.tex',
+  },
+  docDir    = 'doc',
+}
+
