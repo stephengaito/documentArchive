@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# This bash script installs the goIPyJoyLoL kernel for the local user
+
+KERNEL_NAME=goIPyJoyLoL
+SOURCE_KERNEL_DIR=$KERNEL_NAME
+INSTALL_KERNEL_DIR=$HOME/.local/share/jupyter/kernels/$KERNEL_NAME
+
+# go get -d -u github.com/stephengaito/goIPythonKernelToolkit/kernels/$KERNEL_NAME
+
+pushd $SOURCE_KERNEL_DIR
+echo go install
+go install
+popd
+
+mkdir -p $INSTALL_KERNEL_DIR
+cp $SOURCE_KERNEL_DIR/kernel/* $INSTALL_KERNEL_DIR
+pushd $INSTALL_KERNEL_DIR
+chmod u+w ./kernel.json
+sed "s|$KERNEL_NAME|$(go env GOBIN)/$KERNEL_NAME|" < kernel.json.in > kernel.json
+popd
+
