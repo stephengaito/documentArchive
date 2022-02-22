@@ -1,0 +1,35 @@
+# This is an example FandianPF settings YAML file
+#
+# This YAML file provides a collection of global application settings 
+# which will be set using the Sinatra set command in the 
+# Padrino.configure_apps block in config/apps.rb
+
+# Sequel database settings
+#
+# Example settings are: 
+#
+# A MySQL connection:
+# sequelProductionURI: mysql://user:password@localhost/the_database_name
+#
+# A Postgres connection:
+# sequelProductionURI: postgres://user:password@localhost/the_database_name
+#
+# An Sqlite3 connection
+# sequelProductionURI: sqlite:///./db/fandianpf_production.sqlite
+#
+# Note that sqlite URIs should have an empty host:port and if the path 
+# begins with '/./' then the path is remapped relative to the absolute 
+# path of the current working directory.  (Sqlite URIs should start 
+# with 'sqlite:///' )
+#
+# For more detail note that we use
+#
+#  [Sequel's URI syntax](http://sequel.rubyforge.org/rdoc/files/doc/opening_databases_rdoc.html) 
+#
+# See also the various adaptors at
+#
+#  [Sequel's development area](http://sequel.rubyforge.org/development.html)
+# 
+sequelProductionURI:  sqlite:///./db/fandianpf_prod.sqlite
+sequelTestURI:        sqlite:///./db/fandianpf_test.sqlite
+sequelDevelopmentURI: sqlite:///./db/fandianpf_dev.sqlite

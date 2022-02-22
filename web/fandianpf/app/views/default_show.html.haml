@@ -1,0 +1,3 @@
+.post{ timeStamp: @jsonContent[:timeStamp], db_id: @jsonContent[:id]}
+  - @jsonContent[:jsonObject].each_pair do | jsonKey, jsonObject |
+    %div{ field: jsonKey }= jsonObject

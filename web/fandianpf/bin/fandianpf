@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+# This ruby script automates the running of the FandianPF server.
+
+# Deal with the command line options
+#
+require File.expand_path('../../lib/fandianpf/utils/options.rb', __FILE__);
+
+Fandianpf::Utils::Options.parseCommandLineArguments();
+
+require File.expand_path("../../config/boot.rb", __FILE__);
+
+Padrino.run!(Fandianpf::Utils::Options.getOptions);

@@ -1,0 +1,9 @@
+---
+:orm: sequel
+:test: cucumber
+:mock: none
+:script: jquery
+:renderer: haml
+:stylesheet: sass
+:namespace: Fandianpf
+:migration_format: number
